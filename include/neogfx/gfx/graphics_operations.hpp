@@ -247,7 +247,7 @@ namespace neogfx
         struct draw_glyph
         {
             vec3 point;
-            glyph glyph;
+            glyph_ex glyph;
             text_appearance appearance;
         };
 

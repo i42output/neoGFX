@@ -204,20 +204,20 @@ namespace neogfx
             tag_data iContents;
         };
         typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
-        class paragraph_positioned_glyph : public glyph
+        class paragraph_positioned_glyph : public glyph_ex
         {
         public:
-            using glyph::glyph;
+            using glyph_ex::glyph_ex;
             paragraph_positioned_glyph(double aX) : x(aX)
             {
             }
-            paragraph_positioned_glyph(const glyph& aOther) : glyph(aOther), x(0.0)
+            paragraph_positioned_glyph(const glyph_ex& aOther) : glyph_ex(aOther), x(0.0)
             {
             }
         public:
-            paragraph_positioned_glyph& operator=(const glyph& aOther)
+            paragraph_positioned_glyph& operator=(const glyph_ex& aOther)
             {
-                glyph::operator=(aOther);
+                glyph_ex::operator=(aOther);
                 x = 0.0;
                 return *this;
             }

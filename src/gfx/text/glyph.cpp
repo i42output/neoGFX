@@ -31,7 +31,7 @@ namespace neogfx
         throw cached_font_not_found();
     }
 
-    const font& glyph_font_cache::glyph_font(const glyph& aGlyph) const
+    const font& glyph_font_cache::glyph_font(const glyph_ex& aGlyph) const
     {
         cache_glyph_font(aGlyph.font_id());
         auto existing = cache().find(aGlyph.font_id());
@@ -125,7 +125,7 @@ namespace neogfx
         return container::back();
     }
 
-    void glyph_text::push_back(const glyph& aGlyph)
+    void glyph_text::push_back(const glyph_ex& aGlyph)
     {
         container::push_back(aGlyph);
         iExtents = std::nullopt;

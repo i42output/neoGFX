@@ -979,7 +979,7 @@ namespace neogfx
         typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
         typedef std::vector<line_t> lines_t;
         lines_t lines;
-        std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
+        std::array<glyph_ex, 2> delimeters = { glyph_ex{ text_category::Whitespace, '\r' }, glyph_ex{ text_category::Whitespace, '\n' } };
         neolib::tokens(result.glyphText.cbegin(), result.glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
         vec3 pos;
         dimension maxLineWidth = 0.0;
@@ -1060,12 +1060,12 @@ namespace neogfx
         return result;
     }
 
-    void graphics_context::draw_glyph(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
     {
         draw_glyph(aPoint.to_vec3(), aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
     {
         try
         {
@@ -1086,12 +1086,12 @@ namespace neogfx
         }
     }
 
-    void graphics_context::draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_underline(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
     {
         draw_glyph_underline(aPoint.to_vec3(), aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
     {
         auto const& font = aGlyph.font();
         auto const descender = font.descender();

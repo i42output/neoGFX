@@ -125,7 +125,7 @@ namespace neogfx
         void update_handle(void* aHandle) override;
         void* aux_handle() const override;
         glyph_index_t glyph_index(char32_t aCodePoint) const override;
-        i_glyph_texture& glyph_texture(const glyph& aGlyph) const override;
+        i_glyph_texture& glyph_texture(const glyph_ex& aGlyph) const override;
     private:
         void set_metrics();
     private:

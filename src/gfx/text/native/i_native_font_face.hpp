@@ -28,7 +28,7 @@ namespace neogfx
 {
     class i_native_font;
 
-    class glyph;
+    class glyph_ex;
     class i_glyph_texture;
 
     class i_native_font_face : public neolib::i_reference_counted
@@ -66,6 +66,6 @@ namespace neogfx
         virtual void update_handle(void* aHandle) = 0;
         virtual void* aux_handle() const = 0;
         virtual glyph_index_t glyph_index(char32_t aCodePoint) const = 0;
-        virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const = 0;
+        virtual i_glyph_texture& glyph_texture(const glyph_ex& aGlyph) const = 0;
     };
 }

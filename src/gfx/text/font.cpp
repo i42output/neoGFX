@@ -571,7 +571,7 @@ namespace neogfx
         return native_font_face().fixed_size(aFixedSizeIndex);
     }
 
-    const i_glyph_texture& font::glyph_texture(const glyph& aGlyph) const
+    const i_glyph_texture& font::glyph_texture(const glyph_ex& aGlyph) const
     {
         return native_font_face().glyph_texture(aGlyph);
     }

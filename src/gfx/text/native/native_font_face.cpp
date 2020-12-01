@@ -277,7 +277,7 @@ namespace neogfx
         }
     }
          
-    i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const
+    i_glyph_texture& native_font_face::glyph_texture(const glyph_ex& aGlyph) const
     {
         auto existingGlyph = iGlyphs.find(aGlyph.value());
         if (existingGlyph != iGlyphs.end())
@@ -309,7 +309,7 @@ namespace neogfx
             if (!inHere)
             {
                 neolib::scoped_flag sf{ inHere };
-                glyph invalid = aGlyph;
+                glyph_ex invalid = aGlyph;
                 auto const replacementGlyph = FT_Get_Char_Index(iHandle, 0xFFFD);
                 if (replacementGlyph != 0)
                 {

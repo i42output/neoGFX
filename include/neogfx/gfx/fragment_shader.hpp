@@ -164,7 +164,7 @@ namespace neogfx
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         void clear_glyph() override;
-        void set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph) override;
+        void set_first_glyph(const i_rendering_context& aContext, const glyph_ex& aGlyph) override;
     private:
         cache_uniform(uGlyphRenderTargetExtents)
         cache_uniform(uGlyphGuiCoordinates)

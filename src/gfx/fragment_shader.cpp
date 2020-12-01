@@ -569,7 +569,7 @@ namespace neogfx
         uGlyphEnabled = false;
     }
 
-    void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph& aGlyph)
+    void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph_ex& aGlyph)
     {
         enable();
         bool subpixelRender = aGlyph.subpixel() && aGlyph.glyph_texture().subpixel();

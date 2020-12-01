@@ -84,78 +84,77 @@ namespace neogfx
         bool operator!=(const character_type& aRhs) const { return !(*this == aRhs); }
     };
 
-    class glyph;
+    class glyph_ex;
 
     class i_glyph_font_cache
     {
     public:
         virtual const font& glyph_font() const = 0;
-        virtual const font& glyph_font(const glyph& aGlyph) const = 0;
+        virtual const font& glyph_font(const glyph_ex& aGlyph) const = 0;
         virtual void cache_glyph_font(font_id aFontId) const = 0;
         virtual void cache_glyph_font(const font& aFont) const = 0;
     };
 
-    // todo: abstract glyph (maybe -- are all members trivial?)
-    class glyph
+    struct glyph
     {
-    public:
-        struct no_font_specified : std::logic_error { no_font_specified() : std::logic_error("neogfx::glyph::no_font_specified") {} };
-    public:
         enum flags_e : uint8_t
         {
             Underline = 0x01,
             Subpixel = 0x02,
             Mnemonic = 0x04
         };
-    public:
         typedef uint32_t value_type;
         typedef std::pair<uint32_t, uint32_t> source_type;
+
+        character_type type;
+        value_type value;
+        flags_e flags;
+        source_type source;
+        neogfx::font_id font;
+        basic_size<float> advance;
+        basic_size<float> offset;
+        mutable basic_size<float> extents;
+    };
+
+    class glyph_ex : public glyph
+    {
     public:
-        glyph() :
-            iType{},
-            iValue{},
-            iFlags{},
-            iSource{}, 
-            iFont{},
-            iAdvance{}, 
-            iOffset{}
+        struct no_font_specified : std::logic_error { no_font_specified() : std::logic_error("neogfx::glyph_ex::no_font_specified") {} };
+    public:
+        glyph_ex() :
+            glyph{}
         {
         }
-        glyph(const character_type& aType, value_type aValue, source_type aSource, i_glyph_font_cache& aFontCache, neogfx::font& aFont, size aAdvance, size aOffset) :
-            iType{ aType.category, aType.direction }, 
-            iValue{ aValue }, 
-            iFlags{}, 
-            iSource{ aSource }, 
-            iFont{ aFont.id() },
-            iAdvance{ aAdvance },
-            iOffset{ aOffset }
+        glyph_ex(const character_type& aType, value_type aValue, source_type aSource, i_glyph_font_cache& aFontCache, neogfx::font& aFont, size aAdvance, size aOffset) :
+            glyph
+            {
+                { aType.category, aType.direction }, 
+                aValue, 
+                {}, 
+                aSource, 
+                aFont.id(),
+                aAdvance,
+                aOffset 
+            }
         {
             aFontCache.cache_glyph_font(aFont);
         }
-        glyph(const character_type& aType, value_type aValue) :
-            iType{ aType.category, aType.direction }, 
-            iValue{ aValue }, 
-            iFlags{}, 
-            iSource{}, 
-            iFont{},
-            iAdvance{}, 
-            iOffset{}
+        glyph_ex(const character_type& aType, value_type aValue) :
+            glyph
+            {
+                { aType.category, aType.direction },
+                aValue,
+            }
         {
         }
-        glyph(const glyph& aOther) :
-            iType{ aOther.iType },
-            iValue{ aOther.iValue },
-            iFlags{ aOther.iFlags },
-            iSource{ aOther.iSource },
-            iFont{ aOther.iFont },
-            iAdvance{ aOther.iAdvance },
-            iOffset{ aOther.iOffset }
+        glyph_ex(const glyph_ex& aOther) :
+            glyph{ aOther }        
         {
         }
     public:
-        bool operator==(const glyph& aRhs) const 
+        bool operator==(const glyph_ex& aRhs) const 
         { 
-            return iType.category == aRhs.iType.category && iValue == aRhs.iValue; 
+            return glyph::type.category == aRhs.glyph::type.category && glyph::value == aRhs.glyph::value; 
         }
     public:
         bool has_font() const
@@ -188,11 +187,11 @@ namespace neogfx
         }
         text_category category() const 
         { 
-            return iType.category; 
+            return glyph::type.category; 
         }
         text_direction direction() const 
         { 
-            return iType.direction; 
+            return glyph::type.direction; 
         }
     public:
         bool left_to_right() const 
@@ -205,31 +204,31 @@ namespace neogfx
         }
         bool category_has_no_direction() const 
         { 
-            return iType.category != text_category::LTR && iType.category != text_category::RTL; 
+            return glyph::type.category != text_category::LTR && glyph::type.category != text_category::RTL; 
         }
         void set_category(text_category aCategory) 
         { 
-            iType.category = aCategory; 
+            glyph::type.category = aCategory; 
         }
         void set_direction(text_direction aDirection) 
         { 
-            iType.direction = aDirection; 
+            glyph::type.direction = aDirection; 
         }
         value_type value() const 
         { 
-            return iValue; 
+            return glyph::value; 
         }
         void set_value(value_type aValue) 
         { 
-            iValue = aValue; 
+            glyph::value = aValue; 
         }
         const source_type& source() const 
         { 
-            return iSource; 
+            return glyph::source; 
         }
         void set_source(const source_type aSource) 
         { 
-            iSource = aSource; 
+            glyph::source = aSource; 
         }
         bool font_specified() const
         {
@@ -237,7 +236,7 @@ namespace neogfx
         }
         neogfx::font_id font_id() const
         {
-            return iFont;
+            return glyph::font;
         }
         neogfx::font font() const
         {
@@ -253,7 +252,7 @@ namespace neogfx
         }
         void set_font(neogfx::font_id aFont)
         {
-            iFont = aFont;
+            glyph::font = aFont;
         }
         void set_font(const neogfx::font& aFont, i_glyph_font_cache& aFontCache)
         {
@@ -262,24 +261,24 @@ namespace neogfx
         }
         size advance(bool aRoundUp = true) const 
         { 
-            return aRoundUp ? (iAdvance + basic_size<float>{0.5f, 0.5f}).floor() : iAdvance; 
+            return aRoundUp ? (glyph::advance + basic_size<float>{0.5f, 0.5f}).floor() : glyph::advance;
         }
         void set_advance(const size& aAdvance) 
         { 
-            iAdvance = aAdvance; 
+            glyph::advance = aAdvance; 
         }
         size offset() const 
         { 
-            return (iOffset + basic_size<float>{0.5f, 0.5f}).floor(); 
+            return (glyph::offset + basic_size<float>{0.5f, 0.5f}).floor(); 
         }
         void set_offset(const size& aOffset) 
         { 
-            iOffset = aOffset; 
+            glyph::offset = aOffset; 
         }
         size extents(const i_glyph_font_cache& aFontCache) const
         {
-            if (iExtents != basic_size<float>{})
-                return iExtents;
+            if (glyph::extents != basic_size<float>{})
+                return glyph::extents;
             if (!has_font_glyph())
                 return extents();
             else
@@ -287,55 +286,55 @@ namespace neogfx
         }
         size extents(optional_font const& aFont = {}) const
         {
-            if (iExtents == basic_size<float>{})
+            if (glyph::extents == basic_size<float>{})
             {
                 auto const& ourFont = (aFont ? aFont : font_specified() ? font() : optional_font{});
                 if (has_font_glyph())
-                    iExtents = size{ static_cast<float>(offset().cx + glyph_texture(*ourFont).placement().x + glyph_texture(*ourFont).texture().extents().cx), ourFont->height() };
+                    glyph::extents = size{ static_cast<float>(offset().cx + glyph_texture(*ourFont).placement().x + glyph_texture(*ourFont).texture().extents().cx), ourFont->height() };
                 else
-                    iExtents = size{ advance().cx, ourFont && !is_emoji() ? ourFont->height() : advance().cx };
+                    glyph::extents = size{ advance().cx, ourFont && !is_emoji() ? ourFont->height() : advance().cx };
             }
-            return iExtents;
+            return glyph::extents;
         }
         void set_extents(size& aExtents)
         {
-            iExtents = aExtents;
+            glyph::extents = aExtents;
         }
         flags_e flags() const
         { 
-            return iFlags; 
+            return glyph::flags; 
         }
         void set_flags(flags_e aFlags) 
         { 
-            iFlags = aFlags; 
+            glyph::flags = aFlags;
         }
         bool underline() const 
         { 
-            return (iFlags & Underline) == Underline; 
+            return (glyph::flags & Underline) == Underline;
         }
         void set_underline(bool aUnderline) 
         { 
-            iFlags = static_cast<flags_e>(aUnderline ? iFlags | Underline : iFlags & ~Underline); 
+            glyph::flags = static_cast<flags_e>(aUnderline ? glyph::flags | Underline : glyph::flags & ~Underline);
         }
         bool subpixel() const 
         { 
-            return (iFlags & Subpixel) == Subpixel; 
+            return (glyph::flags & Subpixel) == Subpixel;
         }
         void set_subpixel(bool aSubpixel) 
         { 
-            iFlags = static_cast<flags_e>(aSubpixel ? iFlags | Subpixel : iFlags & ~Subpixel); 
+            glyph::flags = static_cast<flags_e>(aSubpixel ? glyph::flags | Subpixel : glyph::flags & ~Subpixel);
         }
         bool mnemonic() const 
         { 
-            return (iFlags & Mnemonic) == Mnemonic; 
+            return (glyph::flags & Mnemonic) == Mnemonic;
         }
         void set_mnemonic(bool aMnemonic) 
         { 
-            iFlags = static_cast<flags_e>(aMnemonic ? iFlags | Mnemonic : iFlags & ~Mnemonic); 
+            glyph::flags = static_cast<flags_e>(aMnemonic ? glyph::flags | Mnemonic : glyph::flags & ~Mnemonic);
         }
         void kerning_adjust(float aAdjust) 
         { 
-            iAdvance.cx += aAdjust; 
+            glyph::advance.cx += aAdjust; 
         }
         const i_glyph_texture& glyph_texture() const
         {
@@ -349,15 +348,6 @@ namespace neogfx
         {
             return aFont.glyph_texture(*this);
         }
-    private:
-        character_type iType;
-        value_type iValue;
-        flags_e iFlags;
-        source_type iSource;
-        neogfx::font_id iFont;
-        basic_size<float> iAdvance;
-        basic_size<float> iOffset;
-        mutable basic_size<float> iExtents;
     };
 
     constexpr std::size_t SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT = 16;
@@ -371,7 +361,7 @@ namespace neogfx
         struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_font_cache::cached_font_not_found") {} };
     public:
         const font& glyph_font() const override;
-        const font& glyph_font(const glyph& aGlyph) const override;
+        const font& glyph_font(const glyph_ex& aGlyph) const override;
         void cache_glyph_font(font_id aFontId) const override;
         void cache_glyph_font(const font& aFont) const override;
     public:
@@ -383,11 +373,11 @@ namespace neogfx
     };
 
     // todo: abstract glyph_text
-    class glyph_text : public glyph_font_cache, private neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
+    class glyph_text : public glyph_font_cache, private neolib::vecarray<glyph_ex, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>
     {
     private:
         static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
-        typedef neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1> container;
+        typedef neolib::vecarray<glyph_ex, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1> container;
     public:
         using container::size_type;
         using container::difference_type;
@@ -423,7 +413,7 @@ namespace neogfx
             iExtents = std::nullopt;
             return result;
         }
-        void push_back(const glyph& aGlyph);
+        void push_back(const glyph_ex& aGlyph);
         void clear();
     public:
         bool operator==(const glyph_text& aOther) const;

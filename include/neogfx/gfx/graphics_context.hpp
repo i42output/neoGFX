@@ -160,10 +160,10 @@ namespace neogfx
         void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const override;
         void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
         void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const override;
-        void draw_glyph(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
-        void draw_glyph(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
-        void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
-        void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph_underline(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const override;
+        void draw_glyph_underline(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const override;
         char mnemonic() const override;
         bool mnemonic_set() const override;
         void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const override;

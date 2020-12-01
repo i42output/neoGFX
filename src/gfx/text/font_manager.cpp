@@ -161,7 +161,7 @@ namespace neogfx
         struct cluster
         {
             std::string::size_type from;
-            glyph::flags_e flags;
+            glyph_ex::flags_e flags;
         };
         typedef std::vector<cluster> cluster_map_t;
         typedef std::tuple<const char32_t*, const char32_t*, text_direction, bool, hb_script_t> glyph_run;
@@ -674,7 +674,7 @@ namespace neogfx
                     size{ font.height(), 0.0 };
                 result.emplace_back(textDirections[startCluster],
                     shapes.glyph_info(j).codepoint,
-                    glyph::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
+                    glyph_ex::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
                     result,
                     font,
                     advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0));
@@ -750,7 +750,7 @@ namespace neogfx
                     {
                         auto g = *i;
                         g.set_value(service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height()));
-                        g.set_source(glyph::source_type{ g.source().first, g.source().first + static_cast<uint32_t>(sequence.size()) });
+                        g.set_source(glyph_ex::source_type{ g.source().first, g.source().first + static_cast<uint32_t>(sequence.size()) });
                         emojiResult.push_back(g);
                         i = j - 1;
                     }
@@ -758,7 +758,7 @@ namespace neogfx
                         emojiResult.push_back(*i);
                     if (absorbNext)
                     {
-                        emojiResult.back().set_source(glyph::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + static_cast<uint32_t>(sequence.size()) + 1u });
+                        emojiResult.back().set_source(glyph_ex::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + static_cast<uint32_t>(sequence.size()) + 1u });
                         ++i;
                     }
                 }

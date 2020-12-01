@@ -28,7 +28,7 @@
 namespace neogfx
 {
     class i_native_font_face;
-    class glyph;
+    class glyph_ex;
     class i_glyph_texture;
 
     enum class font_style : uint32_t
@@ -207,7 +207,7 @@ namespace neogfx
         uint32_t num_fixed_sizes() const;
         point_size fixed_size(uint32_t aFixedSizeIndex) const;
     public:
-        const i_glyph_texture& glyph_texture(const glyph& aGlyph) const;
+        const i_glyph_texture& glyph_texture(const glyph_ex& aGlyph) const;
     public:
         bool operator==(const font& aRhs) const;
         bool operator!=(const font& aRhs) const;
