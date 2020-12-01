@@ -1106,9 +1106,14 @@ namespace neogfx
 
     char graphics_context::mnemonic() const
     {
-        if (mnemonics_shown())
+        if (mnemonic_set())
             return iMnemonic->second;
         return '&';
+    }
+
+    bool graphics_context::mnemonic_set() const
+    {
+        return iMnemonic != std::nullopt;
     }
 
     void graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix) const

@@ -165,6 +165,7 @@ namespace neogfx
         void draw_glyph_underline(const point& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
         void draw_glyph_underline(const vec3& aPoint, const glyph& aGlyph, const text_appearance& aAppearance) const override;
         char mnemonic() const override;
+        bool mnemonic_set() const override;
         void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const override;
         void unset_mnemonic() const override;
         bool mnemonics_shown() const override;
