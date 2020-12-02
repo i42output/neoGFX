@@ -32,21 +32,15 @@ namespace neogfx::DesignStudio
     class widget_caddy : public widget<>
     {
     public:
-        enum class mode
-        {
-            None,
-            Drag,
-            Edit
-        };
-    public:
-        widget_caddy(i_project& aProject, i_widget& aParent, const point& aPosition) :
+        widget_caddy(i_project& aProject, i_element& aElement, i_widget& aParent, const point& aPosition) :
             widget{ aParent },
             iProject{ aProject },
-            iMode{ mode::None },
+            iElement{ aElement },
+            iItem{ aElement.layout_item() },
             iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
             {    
                 aAnimator.again();
-                if (iMode != mode::None)
+                if (has_element() && element().mode() != element_mode::None || element().is_selected())
                     update(); 
             }, 20 }
         {
@@ -57,46 +51,42 @@ namespace neogfx::DesignStudio
                 aChild.set_ignore_mouse_events(true);
                 aChild.set_ignore_non_client_mouse_events(true);
             });
+            iSink += element().mode_changed([&]()
+            {
+                update();
+            });
+            iSink += element().selection_changed([&]()
+            {
+                update();
+            });
+            if (item().is_widget())
+                add(item().as_widget());
         }
         ~widget_caddy()
         {
         }
     public:
-        void set_item(i_ref_ptr<i_layout_item> const& aItem)
+        bool has_element() const
         {
-            if (aItem->is_widget())
-            {
-                add(aItem->as_widget());
-                iItem = aItem;
-            }
-            layout_items();
+            return iElement.valid();
         }
-        void set_element(i_element& aElement)
+        i_element& element() const
         {
-            iElement = aElement;
-            set_item(aElement.layout_item());
-            iSink += aElement.selection_changed([&]()
-            {
-                set_mode(aElement.is_selected() ? mode::Edit : mode::None);
-            });
+            return *iElement;
         }
-        void set_mode(mode aMode)
+        i_layout_item& item() const
         {
-            iMode = aMode;
-            update();
+            return *iItem;
         }
     public:
         size minimum_size(optional_size const& aAvailableSpace = {}) const override
         {
             size result = widget::minimum_size(aAvailableSpace);
-            if (iItem)
-            {
-                result = iItem->minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
-                if (result.cx != 0.0)
-                    result.cx += padding().size().cx;
-                if (result.cy != 0.0)
-                    result.cy += padding().size().cy;
-            }
+            result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+            if (result.cx != 0.0)
+                result.cx += padding().size().cx;
+            if (result.cy != 0.0)
+                result.cy += padding().size().cy;
             return result;
         }
     protected:
@@ -112,36 +102,36 @@ namespace neogfx::DesignStudio
         void layout_items(bool aDefer = false) override
         {
             widget::layout_items(aDefer);
-            if (iItem->is_widget())
+            if (item().is_widget())
             {
-                iItem->as_widget().move(client_rect(false).top_left());
-                iItem->as_widget().resize(client_rect(false).extents());
+                item().as_widget().move(client_rect(false).top_left());
+                item().as_widget().resize(client_rect(false).extents());
             }
         }
     protected:
         int32_t layer() const override
         {
-            switch (iMode)
+            switch (element().mode())
             {
-            case mode::None:
+            case element_mode::None:
             default:
                 return 0;
-            case mode::Drag:
+            case element_mode::Drag:
                 return -1;
-            case mode::Edit:
+            case element_mode::Edit:
                 return 1;
             }
         }
     protected:
         int32_t render_layer() const override
         {
-            switch (iMode)
+            switch (element().mode())
             {
-            case mode::None:
+            case element_mode::None:
             default:
                 return 0;
-            case mode::Drag:
-            case mode::Edit:
+            case element_mode::Drag:
+            case element_mode::Edit:
                 return 1;
             }
         }
@@ -150,36 +140,34 @@ namespace neogfx::DesignStudio
             widget::paint_non_client_after(aGc);
             if (opacity() == 1.0)
             {
-                switch (iMode)
+                auto draw_selected_rect = [&]()
                 {
-                case mode::None:
+                    auto const cr = client_rect(false);
+                    aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
+                    aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
+                    aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
+                    aGc.line_stipple_off();
+                };
+                switch (element().mode())
+                {
+                case element_mode::None:
                 default:
+                    if (element().is_selected())
+                        draw_selected_rect();
                     break;
-                case mode::Drag:
-                    {
-                        auto const cr = client_rect(false);
-                        aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
-                        aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
-                        aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
-                        aGc.line_stipple_off();
-                    }
+                case element_mode::Drag:
+                    draw_selected_rect();
                     break;
-                case mode::Edit:
-                    {
-                        auto const cr = client_rect(false);
-                        aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
-                        aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
-                        aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
-                        aGc.line_stipple_off();
-                        aGc.draw_rect(resizer_part_rect(cardinal::NorthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::North, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::NorthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::East, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::SouthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::South, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::SouthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
-                        aGc.draw_rect(resizer_part_rect(cardinal::West, false), color::NavyBlue, color::White.with_alpha(0.75));
-                    }
+                case element_mode::Edit:
+                    draw_selected_rect();
+                    aGc.draw_rect(resizer_part_rect(cardinal::NorthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::North, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::NorthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::East, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::SouthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::South, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::SouthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
+                    aGc.draw_rect(resizer_part_rect(cardinal::West, false), color::NavyBlue, color::White.with_alpha(0.75));
                     break;
                 }
             }
@@ -192,21 +180,20 @@ namespace neogfx::DesignStudio
         void focus_gained(focus_reason aFocusReason) override
         {
             widget::focus_gained(aFocusReason);
-            set_mode(mode::Edit);
-            if (iElement)
-                iElement->select();
+            element().set_mode(element_mode::Edit);
+            if (aFocusReason != focus_reason::ClickClient && aFocusReason != focus_reason::ClickNonClient)
+                element().select();
         }
         void focus_lost(focus_reason aFocusReason) override
         {
             widget::focus_lost(aFocusReason);
-            set_mode(mode::None);
-            if (iElement)
-                iElement->select(false);
+            element().set_mode(element_mode::None);
+            element().select(false);
         }
     protected:
         bool ignore_mouse_events() const override
         {
-            if (iMode == mode::Drag)
+            if (element().mode() == element_mode::Drag)
                 return true;
             return widget::ignore_mouse_events();
         }
@@ -215,10 +202,13 @@ namespace neogfx::DesignStudio
             widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
-                auto part = (aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_CTRL ? resize_part_at(aPosition) : cardinal::Center;
+                bool toggleSelect = ((aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE);
+                auto part = toggleSelect ? cardinal::Center : resize_part_at(aPosition);
                 if (!part)
                     part = cardinal::Center;
-                iResizerDrag.emplace(std::make_pair(*part, aPosition - resizer_part_rect(*part).center()));
+                element().select(toggleSelect ? !element().is_selected() : true, !toggleSelect);
+                if (element().is_selected())
+                    iResizerDrag.emplace(std::make_pair(*part, aPosition - resizer_part_rect(*part).center()));
             }
         }
         void mouse_button_released(mouse_button aButton, const point& aPosition) override
@@ -255,8 +245,7 @@ namespace neogfx::DesignStudio
                 });
                 actionDelete.triggered([&]()
                 {
-                    if (iElement)
-                        iProject.remove_element(*iElement);
+                    iProject.remove_element(*iElement);
                     parent().remove(*this);
                 });
                 menu.menu().add_action(actionSendToBack);
@@ -339,7 +328,7 @@ namespace neogfx::DesignStudio
         }
         neogfx::mouse_cursor mouse_cursor() const override
         {
-            auto part = !service<i_keyboard>().is_key_pressed(scan_code_e::ScanCode_LCTRL) && !service<i_keyboard>().is_key_pressed(scan_code_e::ScanCode_LCTRL) ?
+            auto part = (service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) == key_modifiers_e::KeyModifier_NONE ?
                 resize_part_at(root().mouse_position() - origin()) : cardinal::Center;
             if (part)
                 switch (*part)
@@ -430,7 +419,6 @@ namespace neogfx::DesignStudio
     private:
         sink iSink;
         i_project& iProject;
-        mode iMode;
         weak_ref_ptr<i_element> iElement;
         weak_ref_ptr<i_layout_item> iItem;
         neolib::callback_timer iAnimator;

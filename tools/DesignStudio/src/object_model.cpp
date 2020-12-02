@@ -74,9 +74,9 @@ namespace neogfx::DesignStudio
                 {
                     auto const index = from_item_model_index(item_model().find_item(&aElement));
                     if (aElement.is_selected())
-                        iSelectionModel.select(index, ng::item_selection_operation::ClearAndSelectRowAsCurrent);
+                        iSelectionModel.select(index, ng::item_selection_operation::SelectRowAsCurrent);
                     else if (iSelectionModel.has_current_index() && iSelectionModel.current_index().row() == index.row())
-                        iSelectionModel.select(index, ng::item_selection_operation::ClearAsCurrent);
+                        iSelectionModel.select(index, ng::item_selection_operation::DeselectRow);
                 });
             }); 
             iSink2 += aProject.element_removed([update_model](i_element&) 

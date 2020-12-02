@@ -222,15 +222,36 @@ namespace neogfx::DesignStudio
         auto& objectTree = iObjects.docked_widget<ng::table_view>();
         objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         objectTree.set_selection_model(iObjectSelectionModel);
+        iObjectSelectionModel.set_mode(ng::item_selection_mode::ExtendedSelection);
         objectTree.set_presentation_model(iObjectPresentationModel);
         objectTree.column_header().set_expand_last_column(true);
-        objectTree.selection_model().current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index&)
+        iObjectSelectionModel.current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /*aPreviousIndex*/)
         {
             if (aCurrentIndex)
             {
-                auto const modelIndex = iObjectPresentationModel.to_item_model_index(*aCurrentIndex);
-                auto& element = *iObjectModel.item(modelIndex);
-                element.select();
+                auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
+                if (element.is_selected())
+                    element.set_mode(element_mode::Edit);
+            }
+        });
+        iObjectSelectionModel.selection_changed([&](const ng::item_selection& aCurrentSelection, const ng::item_selection& aPreviousSelection)
+        {
+            static bool inHere;
+            if (inHere)
+                return;
+            neolib::scoped_flag sf{ inHere };
+            for (auto row = row_begin(aCurrentSelection); row != row_end(aCurrentSelection); ++row)
+            {
+                auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*row));
+                element.select(true, false);
+            }
+            for (auto row = row_begin(aPreviousSelection); row != row_end(aPreviousSelection); ++row)
+            {
+                if (!contains(aCurrentSelection, *row))
+                {
+                    auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*row));
+                    element.select(false, false);
+                }
             }
         });
 

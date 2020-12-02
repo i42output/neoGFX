@@ -365,7 +365,7 @@ namespace neogfx
             auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells)
             {
                 bool const clear = (aOperation & item_selection_operation::Clear) == item_selection_operation::Clear;
-                bool const rowCurrentlySelected = (presentation_model().cell_meta(aIndex.with_column(0u)).selection & item_cell_selection_flags::Selected) ==
+                bool const rowCurrentlySelected = aIndex.row() < presentation_model().rows() && (presentation_model().cell_meta(aIndex.with_column(0u)).selection & item_cell_selection_flags::Selected) ==
                     item_cell_selection_flags::Selected;
                 bool const select = (aOperation & item_selection_operation::Select) == item_selection_operation::Select ||
                     ((aOperation & item_selection_operation::Toggle) == item_selection_operation::Toggle && !rowCurrentlySelected);

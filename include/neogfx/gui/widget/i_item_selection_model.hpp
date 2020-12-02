@@ -105,6 +105,23 @@ namespace neogfx
 
     using item_selection = neolib::i_map<item_presentation_model_index, selection_area>;
 
+    inline bool contains(item_selection const& aSelection, item_presentation_model_index aIndex)
+    {
+        for (auto const& part : aSelection)
+        {
+            auto const& area = part.second();
+            if (aIndex.row() >= area.topLeft.row() && aIndex.row() <= area.bottomRight.row() &&
+                aIndex.column() >= area.topLeft.column() && aIndex.column() <= area.bottomRight.column())
+                return true;
+        }
+        return false;
+    }
+
+    // todo: column
+    struct row {};
+    struct cell {};
+
+    template <typename Type>
     class selection_iterator
     {
         friend class i_item_selection_model;
@@ -119,7 +136,6 @@ namespace neogfx
             iSelection{ nullptr }, iIterator {}
         {
         }
-    private:
         selection_iterator(item_selection const& aSelection, item_selection::const_iterator aPosition) :
             iSelection{ &aSelection }, iIterator{ aPosition }
         {
@@ -154,15 +170,27 @@ namespace neogfx
     public:
         selection_iterator& operator++()
         {
-            index() += item_presentation_model_index{ 0, 1 };
-            if (index().column() > iIterator->second().bottomRight.column())
+            if constexpr (std::is_same_v<Type, row>)
             {
-                index().set_column(iIterator->second().topLeft.column());
                 index() += item_presentation_model_index{ 1, 0 };
                 if (index().row() > iIterator->second().bottomRight.row())
                 {
                     ++iterator();
                     index() = {};
+                }
+            }
+            else if constexpr (std::is_same_v<Type, cell>)
+            {
+                index() += item_presentation_model_index{ 0, 1 };
+                if (index().column() > iIterator->second().bottomRight.column())
+                {
+                    index().set_column(iIterator->second().topLeft.column());
+                    index() += item_presentation_model_index{ 1, 0 };
+                    if (index().row() > iIterator->second().bottomRight.row())
+                    {
+                        ++iterator();
+                        index() = {};
+                    }
                 }
             }
             return *this;
@@ -203,6 +231,29 @@ namespace neogfx
         item_selection::const_iterator iIterator;
         mutable std::optional<item_presentation_model_index> iIndex;
     };
+
+    using row_selection_iterator = selection_iterator<row>;
+    using cell_selection_iterator = selection_iterator<cell>;
+
+    inline row_selection_iterator row_begin(item_selection const& aSelection)
+    {
+        return row_selection_iterator{ aSelection, aSelection.begin() };
+    }
+
+    inline row_selection_iterator row_end(item_selection const& aSelection)
+    {
+        return row_selection_iterator{ aSelection, aSelection.end() };
+    }
+    
+    inline cell_selection_iterator cell_begin(item_selection const& aSelection)
+    {
+        return cell_selection_iterator{ aSelection, aSelection.begin() };
+    }
+    
+    inline cell_selection_iterator cell_end(item_selection const& aSelection)
+    {
+        return cell_selection_iterator{ aSelection, aSelection.end() };
+    }
 
     class i_item_selection_model : public i_reference_counted, public i_property_owner
     {
@@ -277,13 +328,29 @@ namespace neogfx
         {
             select(aIndex, item_selection_operation::Clear);
         }
-        selection_iterator begin() const
+        row_selection_iterator row_begin() const
         {
-            return selection_iterator{ selection(), selection().begin() };
+            return row_selection_iterator{ selection(), selection().begin() };
         }
-        selection_iterator end() const
+        row_selection_iterator row_end() const
         {
-            return selection_iterator{ selection(), selection().end() };
+            return row_selection_iterator{ selection(), selection().end() };
+        }
+        cell_selection_iterator cell_begin() const
+        {
+            return cell_selection_iterator{ selection(), selection().begin() };
+        }
+        cell_selection_iterator cell_end() const
+        {
+            return cell_selection_iterator{ selection(), selection().end() };
+        }
+        cell_selection_iterator begin() const
+        {
+            return cell_begin();
+        }
+        cell_selection_iterator end() const
+        {
+            return cell_end();
         }
     };
 }

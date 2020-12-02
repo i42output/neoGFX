@@ -237,12 +237,22 @@ namespace neogfx
         key_modifiers_e keyboard::modifiers() const
         {
             key_modifiers_e modifiers = KeyModifier_NONE;
-            if (GetAsyncKeyState(VK_SHIFT) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SHIFT);
-            if (GetAsyncKeyState(VK_CONTROL) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CTRL);
-            if (GetAsyncKeyState(VK_MENU) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_ALT);
+            if (GetAsyncKeyState(VK_LSHIFT) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LSHIFT);
+            if (GetAsyncKeyState(VK_RSHIFT) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RSHIFT);
+            if (GetAsyncKeyState(VK_LCONTROL) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LCTRL);
+            if (GetAsyncKeyState(VK_RCONTROL) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RCTRL);
+            if (GetAsyncKeyState(VK_LMENU) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LALT);
+            if (GetAsyncKeyState(VK_RMENU) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RALT);
+            if (GetAsyncKeyState(VK_LWIN) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LGUI);
+            if (GetAsyncKeyState(VK_RWIN) >> 1)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RGUI);
             return modifiers;
         }
 

@@ -49,9 +49,17 @@ namespace neogfx::DesignStudio
 
     class i_element_library;
 
+    enum class element_mode
+    {
+        None,
+        Drag,
+        Edit
+    };
+
     class i_element : public i_reference_counted
     {
     public:
+        declare_event(mode_changed)
         declare_event(selection_changed)
     public:
         typedef i_element abstract_type;
@@ -78,8 +86,10 @@ namespace neogfx::DesignStudio
     public:
         virtual void layout_item(i_ref_ptr<i_layout_item>& aItem) const = 0;
     public:
+        virtual element_mode mode() const = 0;
+        virtual void set_mode(element_mode aMode) = 0;
         virtual bool is_selected() const = 0;
-        virtual void select(bool aSelected = true) = 0;
+        virtual void select(bool aSelected = true, bool aDeselectRest = true) = 0;
     public:
         children_t::const_iterator begin() const { return children().begin(); }
         children_t::iterator begin() { return children().begin(); }

@@ -75,6 +75,7 @@ namespace neogfx::DesignStudio
         typedef element<Base> self_type;
         typedef neolib::reference_counted<Base> base_type;
     public:
+        define_declared_event(ModeChanged, mode_changed)
         define_declared_event(SelectionChanged, selection_changed)
     public:
         using i_element::no_parent;
@@ -208,16 +209,36 @@ namespace neogfx::DesignStudio
             aItem = iLayoutItem;
         }
     public:
+        element_mode mode() const override
+        {
+            return iMode;
+        }
+        void set_mode(element_mode aMode) override
+        {
+            if (iMode != aMode)
+            {
+                iMode = aMode;
+                if (mode() == element_mode::Edit)
+                {
+                    root().visit([&](i_element& aElement)
+                    {
+                        if (&aElement != this && aElement.mode() == element_mode::Edit)
+                            aElement.set_mode(element_mode::None);
+                    });
+                }
+                ModeChanged.trigger();
+            }
+        }
         bool is_selected() const override
         {
             return iSelected;
         }
-        void select(bool aSelected = true) override
+        void select(bool aSelected = true, bool aDeselectRest = true) override
         {
             if (iSelected != aSelected)
             {
                 iSelected = aSelected;
-                if (is_selected() && has_parent())
+                if (is_selected() && has_parent() && aDeselectRest)
                 {
                     root().visit([&](i_element& aElement)
                     {
@@ -238,6 +259,7 @@ namespace neogfx::DesignStudio
         neolib::string iId;
         children_t iChildren;
         mutable ref_ptr<i_layout_item> iLayoutItem;
+        element_mode iMode = element_mode::None;
         bool iSelected = false;
     };
 }
