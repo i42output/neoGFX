@@ -422,7 +422,7 @@ namespace neogfx
     void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (!drag_drop_active() && capturing() && aButton == mouse_button::Left && item_display_rect().contains(aPosition))
+        if (!drag_drop_active() && capturing() && aButton == mouse_button::Left && item_display_rect(true).contains(aPosition))
         {
             auto item = item_at(aPosition);
             if (item != std::nullopt)
@@ -443,7 +443,7 @@ namespace neogfx
                 if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
                     (presentation_model().cell_editable_when_focused(*item)))
                     edit(*item);
-            }            
+            }
             if (capturing())
             {
                 if (!iClickedCheckBox)
@@ -469,12 +469,14 @@ namespace neogfx
                     update(cell_rect(*iClickedCheckBox, cell_part::Background));
             }
         }
+        else if (capturing())
+            release_capture();
     }
 
     void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
-        if (aButton == mouse_button::Left && item_display_rect().contains(aPosition))
+        if (aButton == mouse_button::Left && item_display_rect(true).contains(aPosition))
         {
             auto item = item_at(aPosition);
             if (item != std::nullopt)
@@ -1005,7 +1007,7 @@ namespace neogfx
             auto cellFont = presentation_model().cell_font(newIndex);
             textEdit.set_default_style(text_edit::style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
             textEdit.set_text(presentation_model().cell_to_string(newIndex));
-            textEdit.Focus([this, newIndex](neogfx::focus_event fe)
+            textEdit.Focus([this, newIndex](neogfx::focus_event fe, neogfx::focus_reason)
             {
                 if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
                     end_edit(true);
@@ -1326,7 +1328,7 @@ namespace neogfx
 
     optional_item_presentation_model_index item_view::item_at(const point& aPosition, bool aIncludeEntireRow) const
     {
-        if (model().rows() == 0)
+        if (model().rows() == 0 || !item_display_rect(true).contains(aPosition) && !capturing())
             return optional_item_presentation_model_index{};
         size const cellSpacing = presentation_model().cell_spacing(*this);
         point const adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right() - size{ 1.0, 1.0 } );

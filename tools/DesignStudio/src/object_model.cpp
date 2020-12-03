@@ -70,12 +70,18 @@ namespace neogfx::DesignStudio
             { 
                 // todo: something more granular
                 update_model(); 
+                iSink2 += aElement.mode_changed([&]()
+                {
+                    auto const index = from_item_model_index(item_model().find_item(&aElement));
+                    if (aElement.mode() == element_mode::Edit)
+                        iSelectionModel.set_current_index(index);
+                });
                 iSink2 += aElement.selection_changed([&]()
                 {
                     auto const index = from_item_model_index(item_model().find_item(&aElement));
                     if (aElement.is_selected())
-                        iSelectionModel.select(index, ng::item_selection_operation::SelectRowAsCurrent);
-                    else if (iSelectionModel.has_current_index() && iSelectionModel.current_index().row() == index.row())
+                        iSelectionModel.select(index, ng::item_selection_operation::SelectRow);
+                    else
                         iSelectionModel.select(index, ng::item_selection_operation::DeselectRow);
                 });
             }); 

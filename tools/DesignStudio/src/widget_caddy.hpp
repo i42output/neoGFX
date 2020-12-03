@@ -21,6 +21,7 @@
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/app/action.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
@@ -40,7 +41,7 @@ namespace neogfx::DesignStudio
             iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
             {    
                 aAnimator.again();
-                if (has_element() && element().mode() != element_mode::None || element().is_selected())
+                if (has_element() && (element().mode() != element_mode::None || element().is_selected()))
                     update(); 
             }, 20 }
         {
@@ -143,6 +144,8 @@ namespace neogfx::DesignStudio
                 auto draw_selected_rect = [&]()
                 {
                     auto const cr = client_rect(false);
+                    if (element().is_selected())
+                        aGc.fill_rect(cr, service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(0.5));
                     aGc.draw_rect(cr, pen{ color::White.with_alpha(0.75), 2.0 });
                     aGc.line_stipple_on(2.0, 0xCCCC, (7.0 - std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() / 100 % 8));
                     aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
@@ -181,14 +184,11 @@ namespace neogfx::DesignStudio
         {
             widget::focus_gained(aFocusReason);
             element().set_mode(element_mode::Edit);
-            if (aFocusReason != focus_reason::ClickClient && aFocusReason != focus_reason::ClickNonClient)
-                element().select();
         }
         void focus_lost(focus_reason aFocusReason) override
         {
             widget::focus_lost(aFocusReason);
             element().set_mode(element_mode::None);
-            element().select(false);
         }
     protected:
         bool ignore_mouse_events() const override
@@ -202,7 +202,7 @@ namespace neogfx::DesignStudio
             widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
-                bool toggleSelect = ((aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE);
+                bool const toggleSelect = ((aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE);
                 auto part = toggleSelect ? cardinal::Center : resize_part_at(aPosition);
                 if (!part)
                     part = cardinal::Center;
@@ -328,7 +328,7 @@ namespace neogfx::DesignStudio
         }
         neogfx::mouse_cursor mouse_cursor() const override
         {
-            auto part = (service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) == key_modifiers_e::KeyModifier_NONE ?
+            auto const part = (service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) == key_modifiers_e::KeyModifier_NONE ?
                 resize_part_at(root().mouse_position() - origin()) : cardinal::Center;
             if (part)
                 switch (*part)

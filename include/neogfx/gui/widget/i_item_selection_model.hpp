@@ -47,6 +47,7 @@ namespace neogfx
         Row                         = 0x0100,
         Column                      = 0x0200,
         CurrentIndex                = 0x1000,
+        Queued                      = 0x4000,
         Internal                    = 0x8000,
 
         SelectRow                   = Select | Row,
@@ -81,14 +82,28 @@ namespace neogfx
         RowBelow
     };
 
+    inline item_selection_operation& operator|=(item_selection_operation& aLhs, item_selection_operation aRhs)
+    {
+        aLhs = static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return aLhs;
+    }
+
+    inline item_selection_operation& operator&=(item_selection_operation& aLhs, item_selection_operation aRhs)
+    {
+        aLhs = static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return aLhs;
+    }
+
     inline item_selection_operation operator|(item_selection_operation aLhs, item_selection_operation aRhs)
     {
-        return static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        aLhs |= aRhs;
+        return aLhs;
     }
 
     inline item_selection_operation operator&(item_selection_operation aLhs, item_selection_operation aRhs)
     {
-        return static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+        aLhs &= aRhs;
+        return aLhs;
     }
 
     inline item_selection_operation operator~(item_selection_operation aLhs)
@@ -176,7 +191,7 @@ namespace neogfx
                 if (index().row() > iIterator->second().bottomRight.row())
                 {
                     ++iterator();
-                    index() = {};
+                    iIndex = std::nullopt;
                 }
             }
             else if constexpr (std::is_same_v<Type, cell>)
@@ -189,7 +204,7 @@ namespace neogfx
                     if (index().row() > iIterator->second().bottomRight.row())
                     {
                         ++iterator();
-                        index() = {};
+                        iIndex = std::nullopt;
                     }
                 }
             }

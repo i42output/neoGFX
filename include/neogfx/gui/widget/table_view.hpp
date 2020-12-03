@@ -43,7 +43,7 @@ namespace neogfx
         void presentation_model_changed() override;
         void selection_model_changed() override;
     protected:
-        rect item_display_rect() const override;
+        rect item_display_rect(bool aIntersectItemArea = false) const override;
         size total_item_area(i_units_context const& aUnitsContext) const override;
         dimension column_width(uint32_t aColumn) const override;
     protected:

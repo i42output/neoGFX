@@ -47,7 +47,7 @@ namespace neogfx
         define_declared_event(Mouse, mouse_event, const neogfx::mouse_event&)
         define_declared_event(NonClientMouse, non_client_mouse_event, const neogfx::non_client_mouse_event&)
         define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
-        define_declared_event(Focus, focus_event, neogfx::focus_event)
+        define_declared_event(Focus, focus_event, neogfx::focus_event, focus_reason)
     public:
         using typename base_type::no_device_metrics;
         using typename base_type::no_parent;

@@ -53,7 +53,7 @@ namespace neogfx
         declare_event(mouse_event, const neogfx::mouse_event&)
         declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
         declare_event(keyboard_event, const neogfx::keyboard_event&)
-        declare_event(focus_event, neogfx::focus_event)
+        declare_event(focus_event, neogfx::focus_event, focus_reason)
     public:
         typedef i_widget abstract_type;
         typedef neolib::i_vector<i_ref_ptr<i_widget>> widget_list;

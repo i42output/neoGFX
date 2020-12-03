@@ -225,13 +225,17 @@ namespace neogfx::DesignStudio
         iObjectSelectionModel.set_mode(ng::item_selection_mode::ExtendedSelection);
         objectTree.set_presentation_model(iObjectPresentationModel);
         objectTree.column_header().set_expand_last_column(true);
-        iObjectSelectionModel.current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /*aPreviousIndex*/)
+        iObjectSelectionModel.current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
         {
             if (aCurrentIndex)
             {
                 auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
-                if (element.is_selected())
-                    element.set_mode(element_mode::Edit);
+                element.set_mode(element_mode::Edit);
+            }
+            else if (aPreviousIndex)
+            {
+                auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
+                element.set_mode(element_mode::None);
             }
         });
         iObjectSelectionModel.selection_changed([&](const ng::item_selection& aCurrentSelection, const ng::item_selection& aPreviousSelection)
@@ -253,6 +257,12 @@ namespace neogfx::DesignStudio
                     element.select(false, false);
                 }
             }
+        });
+
+        iWorkspace.view_stack().Focus([&](ng::focus_event aEvent, ng::focus_reason aReason) 
+        {
+            if (aEvent == ng::focus_event::FocusGained && aReason == ng::focus_reason::ClickClient && iProjectManager.project_active())
+                iProjectManager.active_project().root().select(false, true);
         });
 
         iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc) { paint_workspace(aGc); });

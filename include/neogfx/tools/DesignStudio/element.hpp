@@ -197,7 +197,7 @@ namespace neogfx::DesignStudio
                 if constexpr (std::is_base_of_v<i_widget, Type>)
                 {
                     if constexpr (std::is_constructible_v<Type, neolib::i_string&>)
-                        iLayoutItem = make_ref<Type>(to_symbol_name(iType.to_std_string(), naming_convention::UpperCamelCase, named_entity::LocalVariable));
+                        iLayoutItem = make_ref<Type>(iId.to_std_string());
                     else if constexpr (std::is_default_constructible_v<Type>)
                         iLayoutItem = make_ref<Type>();
                     else
@@ -238,15 +238,15 @@ namespace neogfx::DesignStudio
             if (iSelected != aSelected)
             {
                 iSelected = aSelected;
-                if (is_selected() && has_parent() && aDeselectRest)
-                {
-                    root().visit([&](i_element& aElement)
-                    {
-                        if (&aElement != this && aElement.is_selected())
-                            aElement.select(false);
-                    });
-                }
                 SelectionChanged.trigger();
+            }
+            if (aDeselectRest)
+            {
+                root().visit([&](i_element& aElement)
+                {
+                    if (&aElement != this && aElement.is_selected())
+                        aElement.select(false, false);
+                });
             }
         }
     public:

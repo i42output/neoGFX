@@ -42,12 +42,15 @@ namespace neogfx
         typedef Alloc allocator_type;
     private:
         using concrete_item_selection = neolib::map<item_presentation_model_index, selection_area, std::less<item_presentation_model_index>, allocator_type>;
+        typedef std::deque<std::pair<item_presentation_model_index, item_selection_operation>> operation_queue_t;
     public:
         basic_item_selection_model(item_selection_mode aMode = item_selection_mode::SingleSelection) :
             iModel{ nullptr },
             iMode{ aMode },
             iSorting{ false },
-            iFiltering{ false }
+            iFiltering{ false },
+            iNotifying{ false },
+            iInQueue{ false }
         {
             set_alive();
         }
@@ -55,7 +58,9 @@ namespace neogfx
             iModel{ nullptr },
             iMode{ aMode },
             iSorting{ false },
-            iFiltering{ false }
+            iFiltering{ false },
+            iNotifying{ false },
+            iInQueue{ false }
         {
             set_presentation_model(aModel);
             set_alive();
@@ -331,6 +336,13 @@ namespace neogfx
         {
             if (aOperation == item_selection_operation::None)
                 return;
+            if (iNotifying && (aOperation & item_selection_operation::Queued) != item_selection_operation::Queued)
+                aOperation |= item_selection_operation::Queued;
+            if ((aOperation & item_selection_operation::Queued) == item_selection_operation::Queued)
+            {
+                iOperationQueue.push_back(std::make_pair(aIndex, aOperation));
+                return;
+            }
             if ((aOperation & item_selection_operation::CurrentIndex) == item_selection_operation::CurrentIndex)
             {
                 if ((aOperation & item_selection_operation::Select) == item_selection_operation::Select)
@@ -345,21 +357,28 @@ namespace neogfx
             {
                 if (aSelection.empty())
                     return aSelection.end();
-                auto existing = aSelection.lower_bound(aIndex.with_column(0u));
-                if (existing == aSelection.end())
-                    existing = std::prev(existing);
-                if (existing->second().topLeft.row() <= aIndex.row() &&
-                    existing->second().bottomRight.row() >= aIndex.row())
-                    return existing;
+                auto iterExisting = aSelection.lower_bound(aIndex.with_column(0u));
+                if (iterExisting == aSelection.end())
+                    iterExisting = std::prev(iterExisting);
+                if (iterExisting != aSelection.begin())
+                {
+                    auto previous = std::prev(iterExisting);
+                    if (previous->second().topLeft.row() <= aIndex.row() &&
+                        previous->second().bottomRight.row() >= aIndex.row())
+                        return previous;
+                }
+                if (iterExisting->second().topLeft.row() <= aIndex.row() &&
+                    iterExisting->second().bottomRight.row() >= aIndex.row())
+                    return iterExisting;
                 return aSelection.end();
             };
             static auto find_adjacent = [](item_presentation_model_index const& aIndex, concrete_item_selection& aSelection)
             {
                 if (aSelection.empty())
                     return aSelection.end();
-                auto existing = find(aIndex.with_row(aIndex.row() - 1u), aSelection);
-                if (existing != aSelection.end())
-                    return existing;
+                auto iterExisting = find(aIndex.with_row(aIndex.row() - 1u), aSelection);
+                if (iterExisting != aSelection.end())
+                    return iterExisting;
                 return find(aIndex.with_row(aIndex.row() + 1u), aSelection);
             };
             auto update = [&, this](concrete_item_selection& aSelection, bool aUpdateCells)
@@ -390,17 +409,18 @@ namespace neogfx
                 {
                     if (find(aIndex, aSelection) == aSelection.end())
                     {
-                        auto adjacent = find_adjacent(aIndex, aSelection);
-                        if (adjacent == aSelection.end())
+                        auto iterAdjacent = find_adjacent(aIndex, aSelection);
+                        if (iterAdjacent == aSelection.end())
                             aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), aIndex.with_column(presentation_model().columns() - 1u) });
                         else
                         {
-                            if (adjacent->second().bottomRight.row() == aIndex.row() - 1u)
-                                adjacent->second().bottomRight = aIndex.with_column(presentation_model().columns() - 1u);
+                            auto& adjacent = *iterAdjacent;
+                            if (adjacent.second().bottomRight.row() == aIndex.row() - 1u)
+                                adjacent.second().bottomRight = aIndex.with_column(presentation_model().columns() - 1u);
                             else
                             {
-                                aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), adjacent->second().bottomRight });
-                                aSelection.erase(adjacent);
+                                aSelection.emplace(aIndex.with_column(0u), selection_area{ aIndex.with_column(0u), adjacent.second().bottomRight });
+                                aSelection.erase(iterAdjacent);
                             }
                         }
                     }
@@ -415,30 +435,36 @@ namespace neogfx
                         for (auto& cellIndex : *this)
                             if (cellIndex.row() == aIndex.row())
                                 presentation_model().cell_meta(cellIndex).selection &= ~item_cell_selection_flags::Selected;
-                    auto existing = find(aIndex, aSelection);
-                    if (existing != aSelection.end())
+                    auto iterExisting = find(aIndex, aSelection);
+                    if (iterExisting != aSelection.end())
                     {
-                        if (existing->second().topLeft.row() == existing->second().bottomRight.row())
-                            aSelection.erase(existing);
-                        else if (existing->second().topLeft.row() == aIndex.row())
+                        auto& existing = *iterExisting;
+                        if (existing.second().topLeft.row() == existing.second().bottomRight.row())
+                            aSelection.erase(iterExisting);
+                        else if (existing.second().topLeft.row() == aIndex.row())
                         {
-                            aSelection.emplace(aIndex.with_row(aIndex.row() + 1u).with_column(0u), selection_area{ aIndex.with_row(aIndex.row() + 1u).with_column(0u), existing->second().bottomRight });
-                            aSelection.erase(existing);
+                            aSelection.emplace(aIndex.with_row(aIndex.row() + 1u).with_column(0u), selection_area{ aIndex.with_row(aIndex.row() + 1u).with_column(0u), existing.second().bottomRight });
+                            aSelection.erase(iterExisting);
                         }
-                        else if (existing->second().bottomRight.row() == aIndex.row())
-                            existing->second().bottomRight.set_row(aIndex.row() - 1u);
+                        else if (existing.second().bottomRight.row() == aIndex.row())
+                            existing.second().bottomRight.set_row(aIndex.row() - 1u);
                         else
                         {
-                            aSelection.emplace(aIndex.with_row(aIndex.row() + 1u).with_column(0u), selection_area{ aIndex.with_row(aIndex.row() + 1u).with_column(0u), existing->second().bottomRight });
-                            existing->second().bottomRight.set_row(aIndex.row() - 1u);
+                            aSelection.emplace(aIndex.with_row(aIndex.row() + 1u).with_column(0u), selection_area{ aIndex.with_row(aIndex.row() + 1u).with_column(0u), existing.second().bottomRight });
+                            existing.second().bottomRight.set_row(aIndex.row() - 1u);
                         }
                     }
                 }
             };
             update(iSelection, true);
             if ((aOperation & item_selection_operation::Internal) != item_selection_operation::Internal)
+            {
+                neolib::scoped_flag sf{ iNotifying };
                 SelectionChanged.trigger(iSelection, iPreviousSelection);
+            }
             update(iPreviousSelection, false);
+            if ((aOperation & item_selection_operation::Internal) != item_selection_operation::Internal)
+                process_queue();
         }
     public:
         bool sorting() const override
@@ -481,6 +507,18 @@ namespace neogfx
                     if ((presentation_model().cell_meta(item_presentation_model_index{ row, column }).selection & item_cell_selection_flags::Selected) == item_cell_selection_flags::Selected)
                         select(item_presentation_model_index{ row, column }, item_selection_operation::Select | item_selection_operation::Internal);
         }
+        void process_queue()
+        {
+            if (iInQueue)
+                return;
+            neolib::scoped_flag sf{ iInQueue };
+            while (!iOperationQueue.empty())
+            {
+                auto next = iOperationQueue.front();
+                iOperationQueue.pop_front();
+                select(next.first, next.second & ~item_selection_operation::Queued);
+            }
+        }
     private:
         i_item_presentation_model* iModel;
         item_selection_mode iMode;
@@ -490,6 +528,9 @@ namespace neogfx
         concrete_item_selection iSelection;
         bool iSorting;
         bool iFiltering;
+        bool iNotifying;
+        bool iInQueue;
+        operation_queue_t iOperationQueue;
         sink iSink;
     };
 

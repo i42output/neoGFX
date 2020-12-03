@@ -105,12 +105,15 @@ namespace neogfx
     {
     }
 
-    rect table_view::item_display_rect() const
+    rect table_view::item_display_rect(bool aIntersectItemArea) const
     {
-        auto clientRect = client_rect(false);
-        return rect(
+        auto const clientRect = client_rect(false);
+        rect result{
             clientRect.top_left() + point{ 0.0, column_header().visible() ? column_header().extents().cy : 0.0 },
-            size{ std::min(clientRect.width(), column_header().total_width()), clientRect.height() - (column_header().visible() ? column_header().extents().cy : 0.0) });
+            size{ std::min(clientRect.width(), column_header().total_width()), clientRect.height() - (column_header().visible() ? column_header().extents().cy : 0.0) } };
+        if (aIntersectItemArea)
+            result.extents().cy = std::min(result.extents().cy, total_item_area(*this).cy);
+        return result;
     }
 
     size table_view::total_item_area(i_units_context const& aUnitsContext) const

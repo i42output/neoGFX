@@ -1745,17 +1745,17 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::focus_gained(focus_reason)
+    void widget<Interface>::focus_gained(focus_reason aReason)
     {
         update(true);
-        Focus.trigger(focus_event::FocusGained);
+        Focus.trigger(focus_event::FocusGained, aReason);
     }
 
     template <typename Interface>
-    void widget<Interface>::focus_lost(focus_reason)
+    void widget<Interface>::focus_lost(focus_reason aReason)
     {
         update(true);
-        Focus.trigger(focus_event::FocusLost);
+        Focus.trigger(focus_event::FocusLost, aReason);
     }
 
     template <typename Interface>

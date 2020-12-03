@@ -141,10 +141,13 @@ namespace neogfx
         mouse_wheel horizontalSense = mouse_wheel::Horizontal;
         if (service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT))
             std::swap(verticalSense, horizontalSense);
+        auto const maxSteps = 6.0; // todo: configurable
+        auto const maxDeltaY = std::max(vertical_scrollbar().page() - vertical_scrollbar().step(), vertical_scrollbar().step());
+        auto const maxDeltaX = std::max(horizontal_scrollbar().page() - horizontal_scrollbar().step(), horizontal_scrollbar().step());
         if ((aWheel & verticalSense) != mouse_wheel::None && vertical_scrollbar().visible())
-            handledVertical = vertical_scrollbar().set_position(vertical_scrollbar().position() + (((verticalSense == mouse_wheel::Vertical ? aDelta.dy : aDelta.dx) >= 0.0 ? -6.0 : 6.0) * vertical_scrollbar().step()));
+            handledVertical = vertical_scrollbar().set_position(vertical_scrollbar().position() + std::min(std::max(((verticalSense == mouse_wheel::Vertical ? aDelta.dy : aDelta.dx) >= 0.0 ? -maxSteps : maxSteps) * vertical_scrollbar().step(), -maxDeltaY), maxDeltaY));
         if ((aWheel & horizontalSense) != mouse_wheel::None && horizontal_scrollbar().visible())
-            handledHorizontal = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (((horizontalSense == mouse_wheel::Horizontal ? aDelta.dx : aDelta.dy) >= 0.0 ? -6.0 : 6.0) * horizontal_scrollbar().step()));
+            handledHorizontal = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + std::min(std::max(((horizontalSense == mouse_wheel::Horizontal ? aDelta.dx : aDelta.dx) >= 0.0 ? -maxSteps : maxSteps) * horizontal_scrollbar().step(), -maxDeltaX), maxDeltaX));
         mouse_wheel passOn = static_cast<mouse_wheel>(
             aWheel & ((handledVertical ? ~verticalSense : verticalSense) | (handledHorizontal ? ~horizontalSense : horizontalSense)));
         if (passOn != mouse_wheel::None)

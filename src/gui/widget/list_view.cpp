@@ -94,9 +94,12 @@ namespace neogfx
     {
     }
 
-    rect list_view::item_display_rect() const
+    rect list_view::item_display_rect(bool aIntersectItemArea) const
     {
-        return client_rect(false);
+        auto result = client_rect(false);
+        if (aIntersectItemArea)
+            result.extents().cy = std::min(result.extents().cy, total_item_area(*this).cy);
+        return result;
     }
 
     size list_view::total_item_area(i_units_context const& aUnitsContext) const
