@@ -84,6 +84,7 @@ namespace neogfx::DesignStudio
         virtual void add_child(i_element& aChild) = 0;
         virtual void remove_child(i_element& aChild) = 0;
     public:
+        virtual bool has_layout_item() const = 0;
         virtual void layout_item(i_ref_ptr<i_layout_item>& aItem) const = 0;
     public:
         virtual element_mode mode() const = 0;

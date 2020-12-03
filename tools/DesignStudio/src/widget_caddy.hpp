@@ -60,6 +60,11 @@ namespace neogfx::DesignStudio
             {
                 update();
             });
+            iSink += iProject.element_removed([&](i_element& aElement)
+            {
+                if (&aElement == iElement)
+                    parent().remove(*this);
+            });
             if (item().is_widget())
                 add(item().as_widget());
         }
@@ -217,6 +222,8 @@ namespace neogfx::DesignStudio
             iResizerDrag = {};
             if (aButton == mouse_button::Right)
             {
+                if (!iElement->is_selected())
+                    iElement->select(true);
                 context_menu menu{ *this, root().mouse_position() + root().window_position() };
                 action actionSendToBack{ "Send To Back"_t };
                 action actionBringToFont{ "Bring To Front"_t };
@@ -245,8 +252,18 @@ namespace neogfx::DesignStudio
                 });
                 actionDelete.triggered([&]()
                 {
-                    iProject.remove_element(*iElement);
-                    parent().remove(*this);
+                    thread_local std::vector<weak_ref_ptr<i_element>> tToDelete;
+                    iProject.root().visit([&](i_element& aElement)
+                    {
+                        if (aElement.is_selected())
+                            tToDelete.push_back(aElement);
+                    });
+                    for (auto& e : tToDelete)
+                    {
+                        if (e.valid())
+                            iProject.remove_element(*e);
+                    }
+                    tToDelete.clear();
                 });
                 menu.menu().add_action(actionSendToBack);
                 menu.menu().add_action(actionBringToFont);

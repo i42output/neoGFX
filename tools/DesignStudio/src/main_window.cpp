@@ -259,13 +259,70 @@ namespace neogfx::DesignStudio
             }
         });
 
-        iWorkspace.view_stack().Focus([&](ng::focus_event aEvent, ng::focus_reason aReason) 
-        {
-            if (aEvent == ng::focus_event::FocusGained && aReason == ng::focus_reason::ClickClient && iProjectManager.project_active())
-                iProjectManager.active_project().root().select(false, true);
+        thread_local std::optional<point> tMouseSelectorAnchor;
+        thread_local std::optional<point> tMouseSelectorMousePos;
+
+        iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc) 
+        { 
+            paint_workspace(aGc); 
         });
 
-        iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc) { paint_workspace(aGc); });
+        iWorkspace.view_stack().Painted([&](ng::i_graphics_context& aGc)
+        {
+            if (tMouseSelectorAnchor)
+            {
+                aGc.draw_rect(rect{ tMouseSelectorAnchor->min(*tMouseSelectorMousePos), tMouseSelectorAnchor->max(*tMouseSelectorMousePos) },
+                    service<i_app>().current_style().palette().color(color_role::Selection), service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(0.25));
+            }
+        });
+
+        iWorkspace.view_stack().Mouse([&](ng::mouse_event const& aEvent)
+        {
+            if (!iProjectManager.project_active())
+                return;
+            auto const eventPos = aEvent.position() - iWorkspace.view_stack().origin();
+            switch (aEvent.type())
+            {
+            case mouse_event_type::ButtonClicked:
+                if (aEvent.is_left_button())
+                {
+                    iProjectManager.active_project().root().select(false, true);
+                    iWorkspace.view_stack().set_capture();
+                    tMouseSelectorAnchor = eventPos;
+                    tMouseSelectorMousePos = eventPos;
+                    iWorkspace.view_stack().update();
+                }
+                break;
+            case mouse_event_type::Moved:
+                if (tMouseSelectorAnchor)
+                {
+                    tMouseSelectorMousePos = eventPos;
+                    iProjectManager.active_project().root().visit([&](i_element& aElement)
+                    {
+                        if (aElement.has_layout_item() && aElement.layout_item()->is_widget())
+                        {
+                            auto& elementWidget = aElement.layout_item()->as_widget();
+                            if (rect{ tMouseSelectorAnchor->min(*tMouseSelectorMousePos), tMouseSelectorAnchor->max(*tMouseSelectorMousePos) }.contains(
+                                iWorkspace.view_stack().to_client_coordinates(elementWidget.to_window_coordinates(elementWidget.client_rect())).center()))
+                                aElement.select(true, false);
+                            else
+                                aElement.select(false, false);
+                        }
+                    });
+                    iWorkspace.view_stack().update();
+                }
+                break;
+            case mouse_event_type::ButtonReleased:
+                if (aEvent.is_left_button() && tMouseSelectorAnchor)
+                {
+                    iWorkspace.view_stack().release_capture();
+                    tMouseSelectorAnchor = std::nullopt;
+                    tMouseSelectorMousePos = std::nullopt;
+                    iWorkspace.view_stack().update();
+                }
+                break;
+            }
+        });
 
         auto update_ui = [&]()
         {

@@ -190,6 +190,10 @@ namespace neogfx::DesignStudio
                 children().erase(existing);
         }
     public:
+        bool has_layout_item() const override
+        {
+            return iLayoutItem != nullptr;
+        }
         void layout_item(i_ref_ptr<i_layout_item>& aItem) const override
         {
             if (!iLayoutItem)
