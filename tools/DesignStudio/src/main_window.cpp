@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include <neogfx/tools/DesignStudio/context_menu.hpp>
 #include "main_window.hpp"
 
 namespace neogfx::DesignStudio
@@ -259,6 +260,25 @@ namespace neogfx::DesignStudio
             }
         });
 
+        objectTree.cell_context_menu([&](item_presentation_model_index const& aIndex)
+        {
+            auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(aIndex));
+            display_element_context_menu(objectTree, element);
+        });
+
+        objectTree.Focus([&](neogfx::focus_event aEvent, focus_reason aReason)
+        {
+            if (aEvent == neogfx::focus_event::FocusGained)
+            {
+                service<i_clipboard>().activate(*this);
+            }
+            else if (aEvent == neogfx::focus_event::FocusLost &&
+                service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+            {
+                service<i_clipboard>().deactivate(*this);
+            }
+        });
+
         thread_local std::optional<point> tMouseSelectorAnchor;
         thread_local std::optional<point> tMouseSelectorMousePos;
 
@@ -302,6 +322,7 @@ namespace neogfx::DesignStudio
                 if (aEvent.is_left_button())
                 {
                     iProjectManager.active_project().root().select(false, true);
+                    iProjectManager.active_project().root().visit([&](i_element& aElement) { aElement.set_mode(element_mode::None); });
                     tMouseSelectorAnchor = eventPos;
                     tMouseSelectorMousePos = eventPos;
                     iWorkspace.view_stack().update();

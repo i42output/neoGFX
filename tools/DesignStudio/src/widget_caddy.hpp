@@ -28,6 +28,7 @@
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
+#include <neogfx/tools/DesignStudio/context_menu.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -241,37 +242,7 @@ namespace neogfx::DesignStudio
             {
                 if (!iElement->is_selected())
                     iElement->select(true);
-                context_menu menu{ *this, root().mouse_position() + root().window_position() };
-                action actionSendToBack{ "Send To Back"_t };
-                action actionBringToFont{ "Bring To Front"_t };
-                auto& actionCut = service<i_app>().action_cut();
-                auto& actionCopy = service<i_app>().action_copy();
-                auto& actionPaste = service<i_app>().action_paste();
-                auto& actionDelete = service<i_app>().action_delete();
-                auto& actionSelectAll = service<i_app>().action_select_all();
-                if (&*parent().children().back() == this)
-                    actionSendToBack.disable();
-                if (&*parent().children().front() == this)
-                    actionBringToFont.disable();
-                actionSendToBack.triggered([&]()
-                {
-                    send_to_back();
-                    parent().children().front()->set_focus();
-                });
-                actionBringToFont.triggered([&]()
-                {
-                    bring_to_front();
-                });
-                menu.menu().add_action(actionSendToBack);
-                menu.menu().add_action(actionBringToFont);
-                menu.menu().add_separator();
-                menu.menu().add_action(actionCut);
-                menu.menu().add_action(actionCopy);
-                menu.menu().add_action(actionPaste);
-                menu.menu().add_action(actionDelete);
-                menu.menu().add_separator();
-                menu.menu().add_action(actionSelectAll);
-                menu.exec();
+                display_element_context_menu(*this, *iElement);
             }
         }
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override

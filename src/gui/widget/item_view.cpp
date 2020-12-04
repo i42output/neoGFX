@@ -422,55 +422,67 @@ namespace neogfx
     void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (!drag_drop_active() && capturing() && aButton == mouse_button::Left && item_display_rect(true).contains(aPosition))
+        if (aButton == mouse_button::Left)
+        {
+            if (!drag_drop_active() && capturing() && item_display_rect(true).contains(aPosition))
+            {
+                auto item = item_at(aPosition);
+                if (item != std::nullopt)
+                {
+                    if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
+                    {
+                        end_edit(true);
+                        if (presentation_model().toggle_expanded(*item))
+                            return;
+                    }
+                    if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
+                        iClickedCheckBox = item;
+                    bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                    select(*item, aKeyModifiers);
+                    bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                    if (itemWasCurrent && itemIsCurrent)
+                        iClickedItem = item;
+                    if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
+                        (presentation_model().cell_editable_when_focused(*item)))
+                        edit(*item);
+                }
+                if (capturing())
+                {
+                    if (!iClickedCheckBox)
+                    {
+                        if (!drag_drop_enabled())
+                        {
+                            iMouseTracker.emplace(service<i_async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
+                            {
+                                aTimer.again();
+                                auto const pos = root().mouse_position() - origin();
+                                auto const item = item_at(pos);
+                                if (item != std::nullopt)
+                                {
+                                    if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                                        select(*item, item_selection_operation::None);
+                                    else
+                                        select(*item);
+                                }
+                            }, 20);
+                        }
+                    }
+                    else
+                        update(cell_rect(*iClickedCheckBox, cell_part::Background));
+                }
+            }
+            else if (capturing())
+                release_capture();
+        }
+        else if (aButton == mouse_button::Right)
         {
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
-                if (item->column() == 0 && model().is_tree() && cell_rect(*item, cell_part::TreeExpander).contains(aPosition))
-                {
-                    end_edit(true);
-                    if (presentation_model().toggle_expanded(*item))
-                        return;
-                }
-                if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
-                    iClickedCheckBox = item;
-                bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                 select(*item, aKeyModifiers);
-                bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if (itemWasCurrent && itemIsCurrent)
-                    iClickedItem = item;
-                if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
-                    (presentation_model().cell_editable_when_focused(*item)))
-                    edit(*item);
-            }
-            if (capturing())
-            {
-                if (!iClickedCheckBox)
-                {
-                    if (!drag_drop_enabled())
-                    {
-                        iMouseTracker.emplace(service<i_async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
-                        {
-                            aTimer.again();
-                            auto const pos = root().mouse_position() - origin();
-                            auto const item = item_at(pos);
-                            if (item != std::nullopt)
-                            {
-                                if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
-                                    select(*item, item_selection_operation::None);
-                                else
-                                    select(*item);
-                            }
-                        }, 20);
-                    }
-                }
-                else
-                    update(cell_rect(*iClickedCheckBox, cell_part::Background));
+                CellContextMenu.trigger(*item);
             }
         }
-        else if (capturing())
-            release_capture();
     }
 
     void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
