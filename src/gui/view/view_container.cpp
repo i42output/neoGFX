@@ -30,6 +30,12 @@ namespace neogfx
         iLayout.set_padding(neogfx::padding{});
     }
 
+    focus_policy view_stack::focus_policy() const
+    {
+        return neogfx::focus_policy::StrongFocus;
+    }
+
+
     view_container::view_container(i_widget& aParent, view_container_style aStyle) :
         widget{ aParent }, iStyle(aStyle), iLayout0{ *this }, iTabContainer{ *this }, iLayout1{ iLayout0 }, iViewStack{ iLayout1, *this }
     {

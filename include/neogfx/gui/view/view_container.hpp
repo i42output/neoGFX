@@ -39,6 +39,8 @@ namespace neogfx
     public:
         void add_view(i_view& aView);
         void remove_view(i_view& aView);
+    protected:
+        neogfx::focus_policy focus_policy() const override;
     private:
         stack_layout iLayout;
         i_view_container& iParent;

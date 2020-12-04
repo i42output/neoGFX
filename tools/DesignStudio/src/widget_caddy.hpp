@@ -202,6 +202,17 @@ namespace neogfx::DesignStudio
                 service<i_clipboard>().deactivate(*this);
         }
     protected:
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override
+        {
+            widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            if (aScanCode == ScanCode_ESCAPE)
+            {
+                element().root().select(false, true);
+                return true;
+            }
+            return false;
+        }
+    protected:
         bool ignore_mouse_events() const override
         {
             if (element().mode() == element_mode::Drag)

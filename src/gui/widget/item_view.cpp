@@ -1012,7 +1012,7 @@ namespace neogfx
                 if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))
                     end_edit(true);
             });
-            textEdit.Keyboard([this, &textEdit, newIndex](neogfx::keyboard_event ke)
+            textEdit.Keyboard([this, &textEdit, newIndex](neogfx::keyboard_event const& ke)
             {
                 if (ke.type() == neogfx::keyboard_event_type::KeyPressed && ke.scan_code() == ScanCode_ESCAPE && textEdit.cursor().position() == textEdit.cursor().anchor())
                     end_edit(false);

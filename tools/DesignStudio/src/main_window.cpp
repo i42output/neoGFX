@@ -279,11 +279,17 @@ namespace neogfx::DesignStudio
         iWorkspace.view_stack().Focus([&](neogfx::focus_event aEvent, focus_reason aReason)
         {
             if (aEvent == neogfx::focus_event::FocusGained)
+            {
                 service<i_clipboard>().activate(*this);
-            else if (aEvent == neogfx::focus_event::FocusGained)
-                if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
-                    service<i_clipboard>().deactivate(*this);
+            }
+            else if (aEvent == neogfx::focus_event::FocusLost &&
+                service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+            {
+                service<i_clipboard>().deactivate(*this);
+            }
         });
+
+        iWorkspace.view_stack().set_focus();
 
         iWorkspace.view_stack().Mouse([&](ng::mouse_event const& aEvent)
         {
@@ -296,7 +302,6 @@ namespace neogfx::DesignStudio
                 if (aEvent.is_left_button())
                 {
                     iProjectManager.active_project().root().select(false, true);
-                    iWorkspace.view_stack().set_capture();
                     tMouseSelectorAnchor = eventPos;
                     tMouseSelectorMousePos = eventPos;
                     iWorkspace.view_stack().update();
@@ -324,13 +329,34 @@ namespace neogfx::DesignStudio
             case mouse_event_type::ButtonReleased:
                 if (aEvent.is_left_button() && tMouseSelectorAnchor)
                 {
-                    iWorkspace.view_stack().release_capture();
                     tMouseSelectorAnchor = std::nullopt;
                     tMouseSelectorMousePos = std::nullopt;
                     iWorkspace.view_stack().update();
                 }
+                else if (aEvent.is_right_button())
+                {
+                    context_menu menu{ *this, root().mouse_position() + root().window_position() };
+                    auto& actionCut = service<i_app>().action_cut();
+                    auto& actionCopy = service<i_app>().action_copy();
+                    auto& actionPaste = service<i_app>().action_paste();
+                    auto& actionDelete = service<i_app>().action_delete();
+                    auto& actionSelectAll = service<i_app>().action_select_all();
+                    menu.menu().add_action(actionCut);
+                    menu.menu().add_action(actionCopy);
+                    menu.menu().add_action(actionPaste);
+                    menu.menu().add_action(actionDelete);
+                    menu.menu().add_separator();
+                    menu.menu().add_action(actionSelectAll);
+                    menu.exec();
+                }
                 break;
             }
+        });
+
+        iWorkspace.view_stack().Keyboard([&](const ng::keyboard_event& aEvent)
+        {
+            if (aEvent.type() == ng::keyboard_event_type::KeyPressed && aEvent.scan_code() == ScanCode_ESCAPE && iProjectManager.project_active())
+                iProjectManager.active_project().root().select(false, true);
         });
 
         auto update_ui = [&]()
@@ -420,10 +446,10 @@ namespace neogfx::DesignStudio
 
     bool main_window_ex::can_delete_selected() const
     {
-        if (!project_manager().project_active())
+        if (!iProjectManager.project_active())
             return false;
         bool someSelected = false;
-        project_manager().active_project().root().visit([&](i_element& aElement)
+        iProjectManager.active_project().root().visit([&](i_element& aElement)
         {
             if (aElement.is_selected())
                 someSelected = true;
@@ -433,9 +459,9 @@ namespace neogfx::DesignStudio
 
     bool main_window_ex::can_select_all() const
     {
-        if (!project_manager().project_active())
+        if (!iProjectManager.project_active())
             return false;
-        return !project_manager().active_project().root().children().empty();
+        return !iProjectManager.active_project().root().children().empty();
     }
 
     void main_window_ex::undo(i_clipboard& aClipboard)
@@ -465,10 +491,10 @@ namespace neogfx::DesignStudio
 
     void main_window_ex::delete_selected()
     {
-        if (!project_manager().project_active())
+        if (!iProjectManager.project_active())
             return;
         thread_local std::vector<weak_ref_ptr<i_element>> tToDelete;
-        project_manager().active_project().root().visit([&](i_element& aElement)
+        iProjectManager.active_project().root().visit([&](i_element& aElement)
         {
             if (aElement.is_selected())
                 tToDelete.push_back(aElement);
@@ -476,16 +502,16 @@ namespace neogfx::DesignStudio
         for (auto& e : tToDelete)
         {
             if (e.valid())
-                project_manager().active_project().remove_element(*e);
+                iProjectManager.active_project().remove_element(*e);
         }
         tToDelete.clear();
     }
 
     void main_window_ex::select_all()
     {
-        if (!project_manager().project_active())
+        if (!iProjectManager.project_active())
             return;
-        project_manager().active_project().root().visit([&](i_element& aElement)
+        iProjectManager.active_project().root().visit([&](i_element& aElement)
         {
             if (aElement.has_layout_item())
                 aElement.select(true, false);
