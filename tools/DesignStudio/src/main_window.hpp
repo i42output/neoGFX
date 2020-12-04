@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/core/css.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
+#include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
@@ -39,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::DesignStudio
 {
-    class main_window_ex : public main_window
+    class main_window_ex : public main_window, private i_clipboard_sink
     {
     public:
         neolib::i_setting& autoscaleDocks;
@@ -60,6 +61,21 @@ namespace neogfx::DesignStudio
         main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager);
     protected:
         void close() override;
+    protected:
+        bool can_undo() const override;
+        bool can_redo() const override;
+        bool can_cut() const override;
+        bool can_copy() const override;
+        bool can_paste() const override;
+        bool can_delete_selected() const override;
+        bool can_select_all() const override;
+        void undo(i_clipboard& aClipboard) override;
+        void redo(i_clipboard& aClipboard) override;
+        void cut(i_clipboard& aClipboard) override;
+        void copy(i_clipboard& aClipboard) override;
+        void paste(i_clipboard& aClipboard) override;
+        void delete_selected() override;
+        void select_all() override;
     private:
         void paint_workspace(ng::i_graphics_context& aGc);
     private:

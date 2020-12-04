@@ -276,6 +276,15 @@ namespace neogfx::DesignStudio
             }
         });
 
+        iWorkspace.view_stack().Focus([&](neogfx::focus_event aEvent, focus_reason aReason)
+        {
+            if (aEvent == neogfx::focus_event::FocusGained)
+                service<i_clipboard>().activate(*this);
+            else if (aEvent == neogfx::focus_event::FocusGained)
+                if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+                    service<i_clipboard>().deactivate(*this);
+        });
+
         iWorkspace.view_stack().Mouse([&](ng::mouse_event const& aEvent)
         {
             if (!iProjectManager.project_active())
@@ -377,6 +386,110 @@ namespace neogfx::DesignStudio
         if (iProjectManager.project_active())
             iProjectManager.close_project(iProjectManager.active_project());
         main_window::close();
+    }
+
+    bool main_window_ex::can_undo() const
+    {
+        // todo
+        return false;
+    }
+
+    bool main_window_ex::can_redo() const
+    {
+        // todo
+        return false;
+    }
+
+    bool main_window_ex::can_cut() const
+    {
+        // todo
+        return false;
+    }
+
+    bool main_window_ex::can_copy() const
+    {
+        // todo
+        return false;
+    }
+
+    bool main_window_ex::can_paste() const
+    {
+        // todo
+        return false;
+    }
+
+    bool main_window_ex::can_delete_selected() const
+    {
+        if (!project_manager().project_active())
+            return false;
+        bool someSelected = false;
+        project_manager().active_project().root().visit([&](i_element& aElement)
+        {
+            if (aElement.is_selected())
+                someSelected = true;
+        });
+        return someSelected;
+    }
+
+    bool main_window_ex::can_select_all() const
+    {
+        if (!project_manager().project_active())
+            return false;
+        return !project_manager().active_project().root().children().empty();
+    }
+
+    void main_window_ex::undo(i_clipboard& aClipboard)
+    {
+        // todo
+    }
+
+    void main_window_ex::redo(i_clipboard& aClipboard)
+    {
+        // todo
+    }
+
+    void main_window_ex::cut(i_clipboard& aClipboard)
+    {
+        // todo
+    }
+
+    void main_window_ex::copy(i_clipboard& aClipboard)
+    {
+        // todo
+    }
+
+    void main_window_ex::paste(i_clipboard& aClipboard)
+    {
+        // todo
+    }
+
+    void main_window_ex::delete_selected()
+    {
+        if (!project_manager().project_active())
+            return;
+        thread_local std::vector<weak_ref_ptr<i_element>> tToDelete;
+        project_manager().active_project().root().visit([&](i_element& aElement)
+        {
+            if (aElement.is_selected())
+                tToDelete.push_back(aElement);
+        });
+        for (auto& e : tToDelete)
+        {
+            if (e.valid())
+                project_manager().active_project().remove_element(*e);
+        }
+        tToDelete.clear();
+    }
+
+    void main_window_ex::select_all()
+    {
+        if (!project_manager().project_active())
+            return;
+        project_manager().active_project().root().visit([&](i_element& aElement)
+        {
+            if (aElement.has_layout_item())
+                aElement.select(true, false);
+        });
     }
 
     void main_window_ex::paint_workspace(ng::i_graphics_context& aGc)

@@ -1,4 +1,4 @@
-// widget_caddy.hpp
+    // widget_caddy.hpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -22,6 +22,7 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
@@ -30,7 +31,7 @@
 
 namespace neogfx::DesignStudio
 {
-    class widget_caddy : public widget<>
+    class widget_caddy : public widget<>, private i_clipboard_sink
     {
     public:
         widget_caddy(i_project& aProject, i_element& aElement, i_widget& aParent, const point& aPosition) :
@@ -70,6 +71,8 @@ namespace neogfx::DesignStudio
         }
         ~widget_caddy()
         {
+            if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+                service<i_clipboard>().deactivate(*this);
         }
     public:
         bool has_element() const
@@ -189,11 +192,14 @@ namespace neogfx::DesignStudio
         {
             widget::focus_gained(aFocusReason);
             element().set_mode(element_mode::Edit);
+            service<i_clipboard>().activate(*this);
         }
         void focus_lost(focus_reason aFocusReason) override
         {
             widget::focus_lost(aFocusReason);
             element().set_mode(element_mode::None);
+            if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+                service<i_clipboard>().deactivate(*this);
         }
     protected:
         bool ignore_mouse_events() const override
@@ -227,16 +233,11 @@ namespace neogfx::DesignStudio
                 context_menu menu{ *this, root().mouse_position() + root().window_position() };
                 action actionSendToBack{ "Send To Back"_t };
                 action actionBringToFont{ "Bring To Front"_t };
-                action actionCut{ "Cut"_t, ":/neogfx/resources/icons/cut.png" };
-                action actionCopy{ "Copy"_t, ":/neogfx/resources/icons/copy.png" };
-                action actionPaste{ "Paste"_t, ":/neogfx/resources/icons/paste.png" };
-                action actionDelete{ "Delete"_t };
-                action actionSelectAll{ "Select All"_t };
-                actionCut.set_shortcut("Ctrl+X");
-                actionCopy.set_shortcut("Ctrl+C");
-                actionPaste.set_shortcut("Ctrl+V");
-                actionDelete.set_shortcut("Del");
-                actionSelectAll.set_shortcut("Ctrl+A");
+                auto& actionCut = service<i_app>().action_cut();
+                auto& actionCopy = service<i_app>().action_copy();
+                auto& actionPaste = service<i_app>().action_paste();
+                auto& actionDelete = service<i_app>().action_delete();
+                auto& actionSelectAll = service<i_app>().action_select_all();
                 if (&*parent().children().back() == this)
                     actionSendToBack.disable();
                 if (&*parent().children().front() == this)
@@ -249,21 +250,6 @@ namespace neogfx::DesignStudio
                 actionBringToFont.triggered([&]()
                 {
                     bring_to_front();
-                });
-                actionDelete.triggered([&]()
-                {
-                    thread_local std::vector<weak_ref_ptr<i_element>> tToDelete;
-                    iProject.root().visit([&](i_element& aElement)
-                    {
-                        if (aElement.is_selected())
-                            tToDelete.push_back(aElement);
-                    });
-                    for (auto& e : tToDelete)
-                    {
-                        if (e.valid())
-                            iProject.remove_element(*e);
-                    }
-                    tToDelete.clear();
                 });
                 menu.menu().add_action(actionSendToBack);
                 menu.menu().add_action(actionBringToFont);
@@ -432,6 +418,89 @@ namespace neogfx::DesignStudio
             if (aForHitTest && aPart != cardinal::Center)
                 result.inflate(result.extents() / 2.0);
             return result;
+        }
+    protected:
+        bool can_undo() const override
+        {
+            // todo
+            return false;
+        }
+        bool can_redo() const override
+        {
+            // todo
+            return false;
+        }
+        bool can_cut() const override
+        {
+            // todo
+            return false;
+        }
+        bool can_copy() const override
+        {
+            // todo
+            return false;
+        }
+        bool can_paste() const override
+        {
+            // todo
+            return false;
+        }
+        bool can_delete_selected() const override
+        {
+            bool someSelected = false;
+            iProject.root().visit([&](i_element& aElement)
+            {
+                if (aElement.is_selected())
+                    someSelected = true;
+            });
+            return someSelected;
+        }
+        bool can_select_all() const override
+        {
+            return true;
+        }
+        void undo(i_clipboard& aClipboard) override
+        {
+            // todo
+        }
+        void redo(i_clipboard& aClipboard) override
+        {
+            // todo
+        }
+        void cut(i_clipboard& aClipboard) override
+        {
+            // todo
+        }
+        void copy(i_clipboard& aClipboard) override
+        {
+            // todo
+        }
+        void paste(i_clipboard& aClipboard) override
+        {
+            // todo
+        }
+        void delete_selected() override
+        {
+            thread_local std::vector<weak_ref_ptr<i_element>> tToDelete;
+            iProject.root().visit([&](i_element& aElement)
+            {
+                if (aElement.is_selected())
+                    tToDelete.push_back(aElement);
+            });
+            for (auto& e : tToDelete)
+            {
+                if (e.valid())
+                    iProject.remove_element(*e);
+            }
+            tToDelete.clear();
+        }
+        void select_all() override
+        {
+            iProject.root().visit([&](i_element& aElement)
+            {
+                if (aElement.has_layout_item())
+                    aElement.select(true, false);
+            });
         }
     private:
         sink iSink;
