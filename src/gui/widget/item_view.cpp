@@ -479,7 +479,8 @@ namespace neogfx
             auto item = item_at(aPosition);
             if (item != std::nullopt)
             {
-                select(*item, aKeyModifiers);
+                if (!selection_model().is_selected(*item))
+                    select(*item, aKeyModifiers);
                 CellContextMenu.trigger(*item);
             }
         }
