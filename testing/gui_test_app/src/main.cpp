@@ -5,6 +5,7 @@
 #include <neolib/core/random.hpp>
 #include <neolib/task/thread_pool.hpp>
 #include <neolib/app/i_power.hpp>
+#include <neogfx/neogfx.hpp>
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>
@@ -221,11 +222,13 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout);
 
 void signal_handler(int signal)
 {
-       if (signal == SIGABRT) {
-        std::cerr << "SIGABRT received\n";
+    if (signal == SIGABRT) 
+    {
+        ng::service<ng::debug::logger>() << "SIGABRT received" << ng::endl;
     }
-    else {
-        std::cerr << "Unexpected signal " << signal << " received\n";
+    else 
+    {
+        ng::service<ng::debug::logger>() << "Unexpected signal " << signal << " received" << ng::endl;
     }
     std::_Exit(EXIT_FAILURE);
 }
@@ -248,7 +251,7 @@ int main(int argc, char* argv[])
     auto previous_handler = std::signal(SIGABRT, signal_handler);
     if (previous_handler == SIG_ERR) 
     {
-        std::cerr << "SIGABRT handler setup failed\n";
+        ng::service<ng::debug::logger>() << "SIGABRT handler setup failed" << ng::endl;
         return EXIT_FAILURE;
     }
 
@@ -1392,14 +1395,14 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         app.halt();
-        std::cerr << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
+        ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with exception: " << e.what() << ng::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
         std::exit(EXIT_FAILURE);
     }
     catch (...)
     {
         app.halt();
-        std::cerr << "neogfx::app::exec: terminating with unknown exception" << std::endl;
+        ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with unknown exception" << ng::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
         std::exit(EXIT_FAILURE);
     }

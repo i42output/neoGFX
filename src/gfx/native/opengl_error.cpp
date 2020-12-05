@@ -66,7 +66,7 @@ GLenum glCheckError(const char* file, unsigned int line)
         std::string errorMessage = "An internal OpenGL call failed in " +
             fileString.substr(fileString.find_last_of("\\/") + 1) + " (" + neolib::uint32_to_string<char>(line) + ") : " +
             error;            
-        std::cerr << "neogfx (OpenGL): " << errorMessage << std::endl;
+        neogfx::service<neogfx::debug::logger>() << "neogfx (OpenGL): " << errorMessage << neogfx::endl;
         throw neogfx::opengl_error(errorMessage);
     }
 

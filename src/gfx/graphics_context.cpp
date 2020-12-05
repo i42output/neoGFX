@@ -1081,7 +1081,7 @@ namespace neogfx
             if (!sReported)
             {
                 sReported = true;
-                std::cerr << "neogfx: FreeType error in draw_glyph(): " << fe.what() << ", ignoring further errors." << std::endl;
+                service<debug::logger>() << "neogfx: FreeType error in draw_glyph(): " << fe.what() << ", ignoring further errors." << endl;
             }
         }
     }

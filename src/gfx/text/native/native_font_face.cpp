@@ -290,7 +290,7 @@ namespace neogfx
             }
             catch (freetype_error fe)
             {
-                std::cerr << "neogfx: warning: Cannot load font glyph" << std::endl;
+                service<debug::logger>() << "neogfx: warning: Cannot load font glyph" << endl;
                 throw freetype_load_glyph_error(fe.what());
             }
             try
@@ -299,7 +299,7 @@ namespace neogfx
             }
             catch (freetype_error fe)
             {
-                std::cerr << "neogfx: warning: Cannot render font glyph" << std::endl;
+                service<debug::logger>() << "neogfx: warning: Cannot render font glyph" << endl;
                 throw freetype_render_glyph_error(fe.what());
             }
         }

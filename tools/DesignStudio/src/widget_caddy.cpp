@@ -201,7 +201,8 @@ namespace neogfx::DesignStudio
     void widget_caddy::focus_lost(focus_reason aFocusReason)
     {
         widget::focus_lost(aFocusReason);
-        element().set_mode(element_mode::None);
+        if (has_element())
+            element().set_mode(element_mode::None);
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
     }

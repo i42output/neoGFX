@@ -120,16 +120,16 @@ namespace neogfx
             std::runtime_error{ "neoGFX: Functionality not yet implemented" + (aDetail.empty() ? "" : " (" + aDetail + ")") } {}
     };
 
-#ifdef NEOGFX_DEBUG
     class i_layout_item;
     class i_widget;
     namespace debug
     {
+#ifdef NEOGFX_DEBUG
         extern void* item;
         extern i_layout_item* layoutItem;
         extern i_widget* renderItem;
         extern bool renderGeometryText; // todo: make a debug logger category
+#endif // NEOGFX_DEBUG
         typedef neolib::logger::logger<9999> logger;
     }
-#endif // NEOGFX_DEBUG
 }
