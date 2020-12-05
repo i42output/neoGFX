@@ -32,6 +32,14 @@
 
 namespace neogfx::DesignStudio
 {
+    class i_element_caddy : public i_widget
+    {
+    public:
+        virtual void start_drag(cardinal aPart, point const& aPosition) = 0;
+        virtual void drag(point const& aPosition, bool aIgnoreConstraints) = 0;
+        virtual void end_drag() = 0;
+    };
+
     enum class element_group : uint32_t
     {
         Unknown,
@@ -67,6 +75,7 @@ namespace neogfx::DesignStudio
         typedef neolib::i_vector<i_ref_ptr<i_element>> children_t;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::DesignStudio::i_element::no_parent" } {} };
+        struct no_caddy : std::logic_error { no_caddy() : std::logic_error{ "neogfx::DesignStudio::i_element::no_caddy" } {} };
     public:
         virtual i_element_library const& library() const = 0;
         virtual element_group group() const = 0;
@@ -84,6 +93,9 @@ namespace neogfx::DesignStudio
         virtual void add_child(i_element& aChild) = 0;
         virtual void remove_child(i_element& aChild) = 0;
     public:
+        virtual bool has_caddy() const = 0;
+        virtual i_element_caddy& caddy() const = 0;
+        virtual void set_caddy(i_element_caddy& aCaddy) = 0;
         virtual bool has_layout_item() const = 0;
         virtual void layout_item(i_ref_ptr<i_layout_item>& aItem) const = 0;
     public:

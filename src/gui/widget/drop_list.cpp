@@ -60,7 +60,7 @@ namespace neogfx
 
     void drop_list_view::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        bool wasCapturing = capturing();
+        bool const wasCapturing = capturing();
         list_view::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Left && wasCapturing)
         {

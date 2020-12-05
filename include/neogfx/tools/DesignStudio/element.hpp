@@ -78,7 +78,8 @@ namespace neogfx::DesignStudio
         define_declared_event(ModeChanged, mode_changed)
         define_declared_event(SelectionChanged, selection_changed)
     public:
-        using i_element::no_parent;
+        using typename i_element::no_parent;
+        using typename i_element::no_caddy;
     public:
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
@@ -190,6 +191,20 @@ namespace neogfx::DesignStudio
                 children().erase(existing);
         }
     public:
+        bool has_caddy() const override
+        {
+            return iCaddy != nullptr;
+        }
+        i_element_caddy& caddy() const override
+        {
+            if (has_caddy())
+                return *iCaddy;
+            throw no_caddy();
+        }
+        void set_caddy(i_element_caddy& aCaddy) override
+        {
+            iCaddy = aCaddy;
+        }
         bool has_layout_item() const override
         {
             return iLayoutItem != nullptr;
@@ -263,6 +278,7 @@ namespace neogfx::DesignStudio
         neolib::string iId;
         children_t iChildren;
         mutable ref_ptr<i_layout_item> iLayoutItem;
+        ref_ptr<i_element_caddy> iCaddy;
         element_mode iMode = element_mode::None;
         bool iSelected = false;
     };
