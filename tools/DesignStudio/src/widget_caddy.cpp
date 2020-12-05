@@ -233,7 +233,7 @@ namespace neogfx::DesignStudio
             auto part = toggleSelect ? cardinal::Center : resize_part_at(aPosition);
             if (!part)
                 part = cardinal::Center;
-            element().select(toggleSelect ? !element().is_selected() : true, false);
+            element().select(toggleSelect ? !element().is_selected() : true, !toggleSelect && element().root().selected_child_count() <= 1);
             if (element().is_selected())
             {
                 if (part == cardinal::Center)
@@ -253,7 +253,6 @@ namespace neogfx::DesignStudio
     void widget_caddy::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         bool const wasCapturing = capturing();
-        bool const wasDragged = iDragInfo != std::nullopt && iDragInfo->wasDragged;
         widget::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Left && wasCapturing)
         {
@@ -262,9 +261,6 @@ namespace neogfx::DesignStudio
                 if (aElement.is_selected() && aElement.has_caddy())
                     aElement.caddy().end_drag();
             });
-            bool const toggleSelect = ((service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE);
-            if (!wasDragged)
-                element().select(element().is_selected(), !toggleSelect);
         }
         else if (aButton == mouse_button::Right)
         {

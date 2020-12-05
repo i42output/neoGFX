@@ -109,11 +109,24 @@ namespace neogfx::DesignStudio
         children_t::const_iterator end() const { return children().end(); }
         children_t::iterator end() { return children().end(); }
     public:
+        std::size_t selected_child_count() const
+        {
+            std::size_t result = 0;
+            for (auto& child : children())
+                child->visit([&](i_element& aChild) { if (aChild.is_selected()) ++result; });
+            return result;
+        }
         void visit(std::function<void(i_element&)> aVisitor)
         {
             aVisitor(*this);
             for (auto& child : children())
                 child->visit(aVisitor);
+        }
+        void reverse_visit(std::function<void(i_element&)> aVisitor)
+        {
+            for (auto iterChild = children().rbegin(); iterChild != children().rend(); ++iterChild)
+                (*iterChild)->visit(aVisitor);
+            aVisitor(*this);
         }
     public:
         ref_ptr<i_layout_item> layout_item()

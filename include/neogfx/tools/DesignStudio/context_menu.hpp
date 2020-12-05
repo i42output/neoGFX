@@ -48,13 +48,28 @@ namespace neogfx::DesignStudio
             actionSendToBack.triggered([&]()
             {
                 // todo: change order in element model
-                caddyWidget.send_to_back();
-                caddyWidget.parent().children().front()->set_focus();
+                aElement.root().visit([&](i_element& aElement)
+                {
+                    if (aElement.is_selected())
+                    {
+                        if (aElement.has_caddy())
+                            aElement.caddy().send_to_back();
+                    }
+                });
+                if (aElement.has_caddy())
+                    aElement.caddy().children().front()->set_focus();
             });
             actionBringToFont.triggered([&]()
             {
                 // todo: change order in element model
-                caddyWidget.bring_to_front();
+                aElement.root().reverse_visit([&](i_element& aElement)
+                {
+                    if (aElement.is_selected())
+                    {
+                        if (aElement.has_caddy())
+                            aElement.caddy().bring_to_front();
+                    }
+                });
             });
             menu.menu().add_action(actionSendToBack);
             menu.menu().add_action(actionBringToFont);
