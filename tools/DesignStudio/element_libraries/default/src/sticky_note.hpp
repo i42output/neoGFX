@@ -31,10 +31,10 @@ namespace neogfx::DesignStudio
     public:
         sticky_note()
         {
-            std::random_device rd;
-            std::mt19937 g(rd());
-            std::uniform_real_distribution<> dis(0.0, 360.0);
-            set_background_color(color::from_hsl(dis(g), 1.0, 0.9));
+            thread_local std::random_device tEntropy;
+            thread_local std::mt19937 tGenerator(tEntropy());
+            thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
+            set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
         }
     protected:
