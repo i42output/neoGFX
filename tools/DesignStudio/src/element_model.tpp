@@ -58,6 +58,8 @@ namespace neogfx::DesignStudio
                 aTarget.as_widget().add(widgetCaddy);
                 widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
                 iSelectedElement->set_mode(element_mode::None);
+                if (iSelectedElement->group() == element_group::Workflow)
+                    widgetCaddy->bring_to_front();
             }
             iSelectedElement = {};
         });
