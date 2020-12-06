@@ -26,26 +26,26 @@
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/i_project_manager.hpp>
-#include "element_model.hpp"
 
 namespace neogfx::DesignStudio
 {
-    typedef ng::basic_item_tree_model<std::variant<ds::element_group, element_tool_t>> toolbox_model;
+    typedef std::pair<ds::i_element_library*, ng::string> element_tool_t;
 
-    extern template class element_presentation_model<toolbox_model>;
-
-    class toolbox_presentation_model : public element_presentation_model<toolbox_model>
+    template <typename Model>
+    class element_presentation_model : public ng::basic_item_presentation_model<Model>
     {
-        typedef element_presentation_model base_type;
+        typedef ng::basic_item_presentation_model<Model> base_type;
     public:
-        toolbox_presentation_model(i_project_manager& aProjectManager);
+        element_presentation_model(i_project_manager& aProjectManager);
     public:
+        ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
-    public:
-        ng::texture projectTexture;
-        ng::texture codeTexture;
-        ng::texture userInterfaceTexture;
+        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override;
+    private:
+        string generate_id(const string& aToolName);
+    private:
+        sink iSink;
+        ref_ptr<i_element> iSelectedElement;
+        std::map<std::string, uint32_t> iIdCounters;
     };
-
-    void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel);
 }

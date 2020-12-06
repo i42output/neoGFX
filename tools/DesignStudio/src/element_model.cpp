@@ -1,4 +1,4 @@
-// workflow.hpp
+// element_model.cpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -15,18 +15,15 @@
   
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
-#pragma once
-
-#include <neogfx/neogfx.hpp>
+#include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+#include "element_model.tpp"
+#include "toolbox_model.hpp"
+#include "workflow_model.hpp"
 
 namespace neogfx::DesignStudio
 {
-    enum class workflow_tool : uint32_t
-    {
-        Unknown,
-        CppIde,
-        StickyNote
-    };
+    template class element_presentation_model<toolbox_model>;
+    template class element_presentation_model<workflow_model>;
 }

@@ -57,6 +57,9 @@
     <ClCompile Include="..\..\..\src\widget_caddy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\element_model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\resources\win32\DesignStudio.rc">
@@ -149,5 +152,13 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\context_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\element_model.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\element_model.tpp">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

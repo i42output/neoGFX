@@ -195,6 +195,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\element_model.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -274,6 +275,7 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element_library_plugin.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\widget.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\workflow.hpp" />
+    <ClInclude Include="..\..\..\src\element_model.hpp" />
     <ClInclude Include="..\..\..\src\main_window.hpp" />
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
     <ClInclude Include="..\..\..\src\object_model.hpp" />
@@ -295,6 +297,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\element_model.tpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

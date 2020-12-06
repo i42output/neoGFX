@@ -1,4 +1,4 @@
-// toolbox_model.cpp
+// element_model.cpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -17,8 +17,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/tools/DesignStudio/symbol.hpp>
 #include "widget_caddy.hpp"
@@ -28,77 +26,9 @@
 
 namespace neogfx::DesignStudio
 {
-    toolbox_presentation_model::toolbox_presentation_model(i_project_manager& aProjectManager)
+    toolbox_presentation_model::toolbox_presentation_model(i_project_manager& aProjectManager) : 
+        base_type{ aProjectManager }
     {
-        iSink = DraggingItem([&](i_drag_drop_item const& aItem)
-        {
-            auto const& item = item_model().item(to_item_model_index(aItem.index()));
-            if (std::holds_alternative<ds::tool_t>(item))
-            {
-                auto const& tool = std::get<ds::tool_t>(item);
-                auto& project = aProjectManager.active_project();
-                iSelectedElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
-                iSelectedElement->set_mode(element_mode::Drag);
-            }
-            if (iSelectedElement)
-            {
-                auto& project = aProjectManager.active_project();
-                auto widgetCaddy = make_ref<widget_caddy>(project, *iSelectedElement, aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
-                auto const idealSize = widgetCaddy->minimum_size();
-                widgetCaddy->resize(idealSize);
-                widgetCaddy->move((aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
-                aItem.source().set_drag_drop_widget(widgetCaddy);
-            }
-        });
-        iSink += ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
-        {
-            ref_ptr<widget_caddy> widgetCaddy = aItem.source().drag_drop_widget();
-            if (widgetCaddy)
-            {
-                auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
-                aTarget.as_widget().add(widgetCaddy);
-                widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
-                iSelectedElement->set_mode(element_mode::None);
-            }
-            iSelectedElement = {};
-        });
-        iSink += DraggingItemCancelled([&](i_drag_drop_item const& aItem)
-        {
-            if (iSelectedElement)
-            {
-                auto& project = aProjectManager.active_project();
-                project.remove_element(*iSelectedElement);
-                iSelectedElement = {};
-            }
-        });
-    }
-
-    ng::optional_size toolbox_presentation_model::cell_image_size(const ng::item_presentation_model_index& aIndex) const
-    {
-        auto const& tool = item_model().item(to_item_model_index(aIndex));
-        if (std::holds_alternative<ds::element_group>(tool))
-        {
-            switch (std::get<ds::element_group>(tool))
-            {
-            case ds::element_group::Project:
-            case ds::element_group::Code:
-            case ds::element_group::UserInterface:
-                return ng::size{ 24.0_dip, 24.0_dip };
-            case ds::element_group::Script:
-            case ds::element_group::App:
-            case ds::element_group::Menu:
-            case ds::element_group::Action:
-            case ds::element_group::Widget:
-            case ds::element_group::Layout:
-                return {};
-            default:
-                return {};
-            }
-        }
-        else
-        {
-            return ng::size{ 24.0_dip, 24.0_dip };
-        }
     }
 
     ng::optional_texture toolbox_presentation_model::cell_image(const ng::item_presentation_model_index& aIndex) const
@@ -114,38 +44,14 @@ namespace neogfx::DesignStudio
                 return userInterfaceTexture;
             case ds::element_group::Code:
                 return codeTexture;
-            case ds::element_group::Script:
-            case ds::element_group::Node:
-            case ds::element_group::App:
-            case ds::element_group::Menu:
-            case ds::element_group::Action:
-            case ds::element_group::Widget:
-            case ds::element_group::Layout:
-                return {};
             default:
-                return {};
+                return base_type::cell_image(aIndex);
             }
         }
         else
         {
-            auto const& t = std::get<tool_t>(item_model().item(to_item_model_index(aIndex)));
-            return t.first->element_icon(t.second);
+            return base_type::cell_image(aIndex);
         }
-    }
-
-    ng::item_cell_flags toolbox_presentation_model::cell_flags(ng::item_presentation_model_index const& aIndex) const
-    {
-        auto result = base_type::cell_flags(aIndex);
-        auto const& tool = item_model().item(to_item_model_index(aIndex));
-        if (std::holds_alternative<ds::tool_t>(tool))
-            result |= ng::item_cell_flags::Draggable;
-        return result;
-    }
-
-    string toolbox_presentation_model::generate_id(const string& aToolName)
-    {
-        // todo: use configured naming convention
-        return to_symbol_name(aToolName + std::to_string(++iIdCounters[aToolName]), naming_convention::LowerCamelCase, named_entity::LocalVariable);
     }
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel)
@@ -193,25 +99,27 @@ namespace neogfx::DesignStudio
                         aPresentationModel.userInterfaceTexture = elementLibrary->element_icon("user_interface"_s);
                         break;
                     case ds::element_group::Script:
-                        aModel.append_item(toolboxCode, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxCode, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::Node:
-                        aModel.append_item(toolboxCode, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxCode, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::App:
-                        aModel.append_item(toolboxApp, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxApp, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::Menu:
-                        aModel.append_item(toolboxMenu, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxMenu, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::Action:
-                        aModel.append_item(toolboxAction, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxAction, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::Widget:
-                        aModel.append_item(toolboxWidget, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxWidget, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::Layout:
-                        aModel.append_item(toolboxLayout, ds::tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        aModel.append_item(toolboxLayout, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    case ds::element_group::Workflow:
                         break;
                     }
         }

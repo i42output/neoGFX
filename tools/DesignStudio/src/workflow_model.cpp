@@ -25,64 +25,44 @@
 
 namespace neogfx::DesignStudio
 {
-    workflow_presentation_model::workflow_presentation_model() :
-        cppIdeTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/cpp.png" }, ng::color::Khaki) },
-        stickyNoteTexture{ ng::colored_icon(ng::image{ ":/neogfx/DesignStudio/resources/note.png" }, ng::color::Khaki) }
+    workflow_presentation_model::workflow_presentation_model(i_project_manager& aProjectManager) : 
+        base_type{ aProjectManager }
     {
-        DraggingItemRenderInfo([&](ng::i_drag_drop_item const& aItem, bool& aCanRender, size& aRenderExtents)
+    }
+
+    void populate_workflow_model(workflow_model& aModel, workflow_presentation_model& aPresentationModel)
+    {
+        auto stringify_tool = [](const ng::i_string& aInput) -> std::string
         {
-            switch (item_model().item(to_item_model_index(aItem.index())))
+            std::string result;
+            auto bits = neolib::tokens(aInput.to_std_string(), "_"s);
+            for (auto const& bit : bits)
             {
-            case ds::workflow_tool::StickyNote:
-                aCanRender = true;
-                aRenderExtents = size{ 256.0_dip, 256.0_dip };
-                break;
-            default:
-                aCanRender = false;
-                break;
+                if (!result.empty())
+                    result += ' ';
+                result += std::toupper(bit[0]);
+                result += bit.substr(1);
             }
-        });
-        DraggingItemRender([&](ng::i_drag_drop_item const& aItem, i_graphics_context& aGc, point const& aPosition)
-        {
-            switch (item_model().item(to_item_model_index(aItem.index())))
-            {
-            case ds::workflow_tool::StickyNote:
-                // todo
-                aGc.fill_rect(rect{ point{}, size{256.0_dip, 256.0_dip } }.with_centerd_origin() + aPosition, ng::color::PapayaWhip);
-                break;
-            default:
-                break;
-            }
-        });
-    }
+            return result;
+        };
 
-    ng::optional_size workflow_presentation_model::cell_image_size(ng::item_presentation_model_index const& aIndex) const
-    {
-        return ng::size{ 32.0_dip, 32.0_dip };
-    }
-
-    ng::optional_texture workflow_presentation_model::cell_image(ng::item_presentation_model_index const& aIndex) const
-    {
-        switch (item_model().item(to_item_model_index(aIndex)))
+        for (auto const& plugin : ng::service<ng::i_app>().plugin_manager().plugins())
         {
-        case ds::workflow_tool::CppIde:
-            return cppIdeTexture;
-        case ds::workflow_tool::StickyNote:
-            return stickyNoteTexture;
-        default:
-            return {};
+            ng::ref_ptr<ds::i_element_library> elementLibrary;
+            plugin->discover(elementLibrary);
+            if (elementLibrary)
+                for (auto const& tool : elementLibrary->elements_ordered())
+                    switch (elementLibrary->element_group(tool))
+                    {
+                    case ds::element_group::Workflow:
+                        aModel.insert_item(aModel.end(), ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
+                        break;
+                    default:
+                        break;
+                    }
         }
-    }
 
-    ng::item_cell_flags workflow_presentation_model::cell_flags(ng::item_presentation_model_index const& aIndex) const
-    {
-        auto result = base_type::cell_flags(aIndex);
-        switch (item_model().item(to_item_model_index(aIndex)))
-        {
-        case ds::workflow_tool::StickyNote:
-            result |= ng::item_cell_flags::Draggable;
-            break;
-        }
-        return result;
+        aPresentationModel.set_item_model(aModel);
+        aPresentationModel.set_column_read_only(0u);
     }
 }

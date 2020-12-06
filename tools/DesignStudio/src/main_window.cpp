@@ -51,6 +51,7 @@ namespace neogfx::DesignStudio
         iBackgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } },
         iBackgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } },
         iToolboxPresentationModel{ aProjectManager },
+        iWorkflowPresentationModel{ aProjectManager },
         iObjectPresentationModel{ aProjectManager, iObjectSelectionModel }
     {
         // todo: decompose this ctor body into smaller member initialization functions...
@@ -203,9 +204,7 @@ namespace neogfx::DesignStudio
         toolboxTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
         toolboxTree.set_focus_policy(ng::focus_policy::TabFocus);
 
-        auto workflowCppIde = iWorkflowModel.insert_item(iWorkflowModel.end(), workflow_tool::CppIde, "Build");
-        auto workflowNote = iWorkflowModel.insert_item(iWorkflowModel.end(), workflow_tool::StickyNote, "Sticky");
-
+        populate_workflow_model(iWorkflowModel, iWorkflowPresentationModel);
         iWorkflowPresentationModel.set_item_model(iWorkflowModel);
         iWorkflowPresentationModel.set_column_read_only(0u);
         auto& workflowTree = iWorkflow.docked_widget<ng::list_view>();

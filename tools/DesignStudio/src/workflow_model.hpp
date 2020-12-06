@@ -22,23 +22,21 @@
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
-#include <neogfx/tools/DesignStudio/workflow.hpp>
+#include <neogfx/tools/DesignStudio/i_project_manager.hpp>
+#include "element_model.hpp"
 
 namespace neogfx::DesignStudio
 {
-    typedef ng::basic_item_model<ds::workflow_tool> workflow_model; // todo
+    typedef ng::basic_item_model<std::variant<ds::element_group, element_tool_t>> workflow_model;
 
-    class workflow_presentation_model : public ng::basic_item_presentation_model<workflow_model>
+    extern template class element_presentation_model<workflow_model>;
+
+    class workflow_presentation_model : public element_presentation_model<workflow_model>
     {
-        typedef ng::basic_item_presentation_model<workflow_model> base_type;
+        typedef element_presentation_model<workflow_model> base_type;
     public:
-        workflow_presentation_model();
-    public:
-        ng::optional_size cell_image_size(ng::item_presentation_model_index const& aIndex) const override;
-        ng::optional_texture cell_image(ng::item_presentation_model_index const& aIndex) const override;
-        ng::item_cell_flags cell_flags(ng::item_presentation_model_index const& aIndex) const override;
-    public:
-        ng::texture cppIdeTexture;
-        ng::texture stickyNoteTexture;
+        workflow_presentation_model(i_project_manager& aProjectManager);
     };
+
+    void populate_workflow_model(workflow_model& aModel, workflow_presentation_model& aPresentationModel);
 }

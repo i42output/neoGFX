@@ -52,7 +52,8 @@ namespace neogfx::DesignStudio
         Menu,
         Action,
         Widget,
-        Layout
+        Layout,
+        Workflow
     };
 
     class i_element_library;

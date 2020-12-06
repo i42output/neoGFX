@@ -3,13 +3,17 @@
 
     resource: {
         file: resources/project.png
+
         file: resources/app.png
         file: resources/gamepad.png
+
         file: resources/ui.png
         file: resources/logic.png
         file: resources/script.png
         file: resources/scripttext.png
+
         file: resources/node.png
+
         file: resources/action.png
         file: resources/canvas.png
         file: resources/widget.png
@@ -43,5 +47,8 @@
         file: resources/spacer.png
         file: resources/verticalspacer.png
         file: resources/horizontalspacer.png
+
+        file: resources/note.png
+        file: resources/cpp.png
     }
 }

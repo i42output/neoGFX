@@ -67,6 +67,8 @@ namespace neogfx::DesignStudio
         iElementsOrdered
     {
         { "project" },
+        { "build" },
+        { "sticky" },
         { "code" },
         { "script" },
         { "node" },
@@ -152,6 +154,8 @@ namespace neogfx::DesignStudio
 
     struct script {}; // todo
     struct node {}; // todo
+    struct build {}; // todo
+    struct note {}; // todo
 
     void default_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
@@ -160,6 +164,8 @@ namespace neogfx::DesignStudio
             #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId }; } },
             #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId }; } },
             MAKE_ELEMENT_FACTORY_FUNCTION(user_interface)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(build, build)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(sticky, note)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(MVC_app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(dialog_app, app)
@@ -220,6 +226,8 @@ namespace neogfx::DesignStudio
         static const std::map<std::string, DesignStudio::element_group> sElementGroups =
         {
             { "project", DesignStudio::element_group::Project },
+            { "build", DesignStudio::element_group::Workflow },
+            { "sticky", DesignStudio::element_group::Workflow },
             { "code", DesignStudio::element_group::Code },
             { "script", DesignStudio::element_group::Script },
             { "node", DesignStudio::element_group::Node },
@@ -286,6 +294,20 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/project.png" }, color::Coral);
+                }
+            },
+            {
+                "build",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/cpp.png" }, color::Khaki);
+                }
+            },
+            {
+                "sticky",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/note.png" }, color::Khaki);
                 }
             },
             {
