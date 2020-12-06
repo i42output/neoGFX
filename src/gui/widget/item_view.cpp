@@ -471,7 +471,7 @@ namespace neogfx
                         update(cell_rect(*iClickedCheckBox, cell_part::Background));
                 }
             }
-            else if (capturing())
+            else if (capturing() && client_rect().contains(aPosition))
                 release_capture();
         }
         else if (aButton == mouse_button::Right)
