@@ -139,8 +139,6 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace) const override;
-    protected:
-        bool transparent_background() const override;
     private:
         vertical_layout iLayout;
     };
@@ -151,6 +149,7 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         iLayout.set_padding(neogfx::padding{});
+        set_background_opacity(1.0);
     }
 
     bool window::client::is_managing_layout() const
@@ -169,11 +168,6 @@ namespace neogfx
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         else
             return service<i_app>().current_style().padding(padding_role::Window).size();
-    }
-
-    bool window::client::transparent_background() const
-    {
-        return true;
     }
 
     window::window(window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
@@ -1051,6 +1045,8 @@ namespace neogfx
             resize(native_surface().surface_size());
         else
             layout_items(true);
+
+        set_background_opacity(1.0);
 
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {

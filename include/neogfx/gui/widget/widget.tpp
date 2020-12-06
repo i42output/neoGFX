@@ -1264,16 +1264,10 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::transparent_background() const
-    {
-        return !is_root();
-    }
-
-    template <typename Interface>
     void widget<Interface>::paint_non_client(i_graphics_context& aGc) const
     {
-        if (has_background_color() || !transparent_background())
-            aGc.fill_rect(update_rect(), background_color());
+        if (as_widget().has_background_color() || !as_widget().background_is_transparent())
+            aGc.fill_rect(update_rect(), as_widget().background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0));
     }
 
     template <typename Interface>
@@ -1371,15 +1365,27 @@ namespace neogfx
     }
 
     template <typename Interface>
-    double widget<Interface>::transparency() const
+    bool widget<Interface>::has_background_opacity() const
     {
-        return 1.0 - opacity();
+        return BackgroundOpacity != std::nullopt;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_transparency(double aTransparency)
+    double widget<Interface>::background_opacity() const
     {
-        set_opacity(1.0 - aTransparency);
+        if (has_background_opacity())
+            return *BackgroundOpacity.value();
+        return 0.0;
+    }
+
+    template <typename Interface>
+    void widget<Interface>::set_background_opacity(double aOpacity)
+    {
+        if (BackgroundOpacity != aOpacity)
+        {
+            BackgroundOpacity = aOpacity;
+            update(true);
+        }
     }
 
     template <typename Interface>
@@ -1436,9 +1442,9 @@ namespace neogfx
     color widget<Interface>::container_background_color() const
     {
         const i_widget* w = this;
-        while (w->transparent_background() && w->has_parent())
+        while (w->background_is_transparent() && w->has_parent())
             w = &w->parent();
-        if (!w->transparent_background() && w->has_background_color())
+        if (!w->background_is_transparent() && w->has_background_color())
             return w->background_color();
         else
             return service<i_app>().current_style().palette().color(color_role::Theme);
@@ -1761,7 +1767,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::ignore_mouse_events() const
     {
-        return IgnoreMouseEvents;
+        return IgnoreMouseEvents || (has_parent() && parent().ignore_mouse_events());
     }
 
     template <typename Interface>
@@ -1773,7 +1779,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::ignore_non_client_mouse_events() const
     {
-        return IgnoreNonClientMouseEvents;
+        return IgnoreNonClientMouseEvents || (has_parent() && parent().ignore_non_client_mouse_events());
     }
 
     template <typename Interface>

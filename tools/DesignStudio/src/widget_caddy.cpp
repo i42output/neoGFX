@@ -257,6 +257,14 @@ namespace neogfx::DesignStudio
         widget::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Left && wasCapturing)
         {
+            if (iDragInfo && !iDragInfo->wasDragged)
+            {
+                if (element().group() == element_group::Workflow && element().has_widget())
+                {
+                    element().select(false, false);
+                    element().widget().set_focus();
+                }
+            }
             iElement->root().visit([&](i_element& aElement)
             {
                 if (aElement.is_selected() && aElement.has_caddy())

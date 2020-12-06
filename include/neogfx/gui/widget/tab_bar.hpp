@@ -44,8 +44,6 @@ namespace neogfx
     public:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        bool transparent_background() const override;
-    public:
         bool has_tabs() const override;
         uint32_t tab_count() const override;
         tab_index index_of(const i_tab& aTab) const override;

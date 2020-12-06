@@ -90,12 +90,6 @@ namespace neogfx
     }
 
     template <typename T>
-    bool basic_spin_box<T>::transparent_background() const
-    {
-        return false;
-    }
-
-    template <typename T>
     color basic_spin_box<T>::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
@@ -193,6 +187,9 @@ namespace neogfx
     void basic_spin_box<T>::init()
     {
         set_padding(neogfx::padding{});
+
+        set_background_opacity(1.0);
+
         iPrimaryLayout.set_padding(neogfx::padding{});
         iPrimaryLayout.set_spacing(dip(INTERNAL_SPACING));
         iSecondaryLayout.set_padding(neogfx::padding{});

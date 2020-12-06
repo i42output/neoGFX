@@ -42,6 +42,8 @@ namespace neogfx
         set_padding(neogfx::padding{});
         layout().set_padding(neogfx::padding{});
 
+        set_background_opacity(1.0);
+
         iTitle.set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         iTitle.set_alignment(alignment::Left | alignment::VCenter);
 
@@ -98,11 +100,6 @@ namespace neogfx
     widget_type tool_title_bar::widget_type() const
     {
         return neogfx::widget_type::NonClient;
-    }
-
-    bool tool_title_bar::transparent_background() const
-    {
-        return false;
     }
 
     color  tool_title_bar::palette_color(color_role aColorRole) const

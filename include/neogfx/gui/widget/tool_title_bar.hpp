@@ -49,8 +49,6 @@ namespace neogfx
     protected:
         neogfx::widget_type widget_type() const override;
     protected:
-        bool transparent_background() const override;
-    protected:
         color palette_color(color_role aColorRole) const override;
     protected:
         neogfx::focus_policy focus_policy() const override;

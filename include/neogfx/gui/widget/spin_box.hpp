@@ -72,7 +72,6 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
-        bool transparent_background() const override;
         color palette_color(color_role aColorRole) const override;
     protected:
         color frame_color() const override;

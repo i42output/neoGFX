@@ -31,6 +31,7 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         update_placement();
+        set_background_opacity(1.0);
     }
 
     tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
@@ -38,6 +39,7 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         update_placement();
+        set_background_opacity(1.0);
     }
 
     tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
@@ -45,6 +47,7 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         update_placement();
+        set_background_opacity(1.0);
     }
 
     tab_container_style tab_bar::style() const
@@ -68,11 +71,6 @@ namespace neogfx
         if (aAvailableSpace != std::nullopt)
             result = result.min(*aAvailableSpace);
         return result;
-    }
-
-    bool tab_bar::transparent_background() const
-    {
-        return true;
     }
 
     bool tab_bar::has_tabs() const

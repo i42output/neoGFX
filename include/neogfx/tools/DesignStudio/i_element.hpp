@@ -130,11 +130,19 @@ namespace neogfx::DesignStudio
             aVisitor(*this);
         }
     public:
-        ref_ptr<i_layout_item> layout_item()
+        ref_ptr<i_layout_item> layout_item() const
         {
             ref_ptr<i_layout_item> item;
             layout_item(item);
             return item;
+        }
+        bool has_widget() const
+        {
+            return has_layout_item() && layout_item()->is_widget();
+        }
+        i_widget& widget() const
+        {
+            return layout_item()->as_widget();
         }
     };
 }

@@ -45,7 +45,6 @@ namespace neogfx
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        bool transparent_background() const override;
         void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
         color palette_color(color_role aColorRole) const override;

@@ -461,6 +461,7 @@ namespace neogfx
                 image_widget().set_padding(neogfx::padding{});
                 text_widget().set_padding(neogfx::padding{});
                 iImage.hide();
+                set_background_opacity(1.0);
             }
         public:
             void accept(i_drop_list_input_widget::i_visitor& aVisitor) override
@@ -523,10 +524,6 @@ namespace neogfx
                 iEditor.set_text(aText);
             }
         protected:
-            bool transparent_background() const override
-            {
-                return false;
-            }
             color palette_color(color_role aColorRole) const override
             {
                 if (has_palette_color(aColorRole))

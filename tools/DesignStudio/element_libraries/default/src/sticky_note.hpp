@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <random>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/widget/text_edit.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -36,14 +37,66 @@ namespace neogfx::DesignStudio
             thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
             set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
+            auto defaultItem = make_ref<text_edit>(*this, text_edit::MultiLine, frame_style::NoFrame);
+            defaultItem->set_focus_policy(defaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
+            defaultItem->set_background_opacity(0.0);
+            defaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)
+            {
+                if (aEvent == neogfx::focus_event::FocusGained)
+                {
+                    set_ignore_mouse_events(false);
+                    set_ignore_non_client_mouse_events(false);
+                }
+                else if (aEvent == neogfx::focus_event::FocusLost)
+                {
+                    set_ignore_mouse_events(true);
+                    set_ignore_non_client_mouse_events(true);
+                }
+            });
+            iDefaultItem = defaultItem;
+            add(defaultItem);
         }
     protected:
-        void paint(i_graphics_context& aGc) const
+        neogfx::padding padding() const override
+        {
+            if (has_padding())
+                return widget::padding();
+            auto result = widget::padding();
+            result.top = 16.0_dip;
+            return result;
+        }
+        void layout_items(bool aDefer = false) override
+        {
+            widget::layout_items(aDefer);
+            if (iDefaultItem != nullptr)
+            {
+                iDefaultItem->move(client_rect(false).top_left());
+                iDefaultItem->resize(client_rect(false).extents());
+            }
+        }
+    protected:
+        void focus_gained(focus_reason) override
+        {
+            if (iDefaultItem)
+                iDefaultItem->set_focus();
+        }
+    protected:
+        void paint(i_graphics_context& aGc) const override
         {
             base_type::paint(aGc);
             auto cr = client_rect(true);
-            cr.cy = 8.0_dip;
-            aGc.fill_rect(cr, color::Black.with_alpha(0.125));
+            cr.cy = padding().top;
+            aGc.fill_rect(cr, background_color().with_lightness(0.85));
         }
+    protected:
+        const i_widget& get_widget_at(const point& aPosition) const override
+        {
+            auto& result = base_type::get_widget_at(aPosition);
+            if (&result == this)
+                return parent();
+            return result;
+        }
+    private:
+        ref_ptr<i_widget> iDefaultItem;
     };
 }

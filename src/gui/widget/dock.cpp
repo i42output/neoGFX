@@ -134,11 +134,6 @@ namespace neogfx
         return base_type::part_active(aPart);
     }
 
-    bool dock::transparent_background() const
-    {
-        return false;
-    }
-
     color dock::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
@@ -169,6 +164,7 @@ namespace neogfx
         set_padding(neogfx::padding{ 1.5_mm });
         layout().set_padding(neogfx::padding{}, false);
         layout().set_spacing(padding().top_left().to_vec2(), false);
+        set_background_opacity(1.0);
         update_layout();
     }
 }

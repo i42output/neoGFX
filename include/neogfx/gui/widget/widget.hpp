@@ -196,15 +196,15 @@ namespace neogfx
         rect default_clip_rect(bool aIncludeNonClient = false) const override;
         bool ready_to_render() const override;
         void render(i_graphics_context& aGc) const override;
-        bool transparent_background() const override;
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;
         void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
         double opacity() const override;
         void set_opacity(double aOpacity) override;
-        double transparency() const override;
-        void set_transparency(double aTransparency) override;
+        bool has_background_opacity() const override;
+        double background_opacity() const override;
+        void set_background_opacity(double aOpacity) override;
         bool has_palette() const override;
         const i_palette& palette() const override;
         void set_palette(const i_palette& aPalette) override;
@@ -336,6 +336,7 @@ namespace neogfx
         define_property(property_category::other_appearance, bool, Enabled, enabled, true)
         define_property(property_category::other, neogfx::focus_policy, FocusPolicy, focus_policy, neogfx::focus_policy::NoFocus)
         define_property(property_category::other_appearance, double, Opacity, opacity, 1.0)
+        define_property(property_category::other_appearance, std::optional<double>, BackgroundOpacity, background_opacity)
         define_property(property_category::other_appearance, std::optional<neogfx::palette>, Palette, palette)
         define_property(property_category::font, optional_font_role, FontRole, font_role)
         define_property(property_category::font, optional_font, Font, font)

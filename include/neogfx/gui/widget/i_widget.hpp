@@ -157,15 +157,15 @@ namespace neogfx
         virtual rect default_clip_rect(bool aIncludeNonClient = false) const = 0;
         virtual bool ready_to_render() const = 0;
         virtual void render(i_graphics_context& aGc) const = 0;
-        virtual bool transparent_background() const = 0;
         virtual void paint_non_client(i_graphics_context& aGc) const = 0;
         virtual void paint_non_client_after(i_graphics_context& aGc) const = 0;
         virtual void paint(i_graphics_context& aGc) const = 0;
     public:
         virtual double opacity() const = 0;
         virtual void set_opacity(double aOpacity) = 0;
-        virtual double transparency() const = 0;
-        virtual void set_transparency(double aTransparency) = 0;
+        virtual bool has_background_opacity() const = 0;
+        virtual double background_opacity() const = 0;
+        virtual void set_background_opacity(double aOpacity) = 0;
         virtual bool has_palette() const = 0;
         virtual const i_palette& palette() const = 0;
         virtual void set_palette(const i_palette& aPalette) = 0;
@@ -350,6 +350,26 @@ namespace neogfx
             return enable(false);
         }
      public:
+         double transparency() const
+         {
+             return 1.0 - opacity();
+         }
+         void set_transparency(double aTransparency)
+         {
+             set_opacity(1.0 - aTransparency);
+         }
+         double background_transparency() const
+         {
+             return 1.0 - background_opacity();
+         }
+         void set_background_transparency(double aTransparency)
+         {
+             set_background_opacity(1.0 - aTransparency);
+         }
+         bool background_is_transparent() const
+         {
+             return background_opacity() == 0.0;
+         }
          bool has_background_color() const
          {
              return has_palette_color(color_role::Background);

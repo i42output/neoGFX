@@ -50,61 +50,73 @@ namespace neogfx
         framed_widget(Args&&... aArgs) :
             base_type{ std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ 1.0 }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_widget& aParent, Args&&... aArgs) :
             base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ 1.0 }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_layout& aLayout, Args&&... aArgs) :
             base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ 1.0 }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(dimension aLineWidth, Args&&... aArgs) :
             base_type{ std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ aLineWidth }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_widget& aParent, dimension aLineWidth, Args&&... aArgs) :
             base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ aLineWidth }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_layout& aLayout, dimension aLineWidth, Args&&... aArgs) :
             base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ frame_style::SolidFrame }, iLineWidth{ aLineWidth }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(frame_style aStyle, Args&&... aArgs) :
             base_type{ std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ 1.0 }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_widget& aParent, frame_style aStyle, Args&&... aArgs) :
             base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ 1.0 }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_layout& aLayout, frame_style aStyle, Args&&... aArgs) :
             base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ 1.0 }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(frame_style aStyle, dimension aLineWidth, Args&&... aArgs) :
             base_type{ std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ aLineWidth }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_widget& aParent, frame_style aStyle, dimension aLineWidth, Args&&... aArgs) :
             base_type{ aParent, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ aLineWidth }
         {
+            base_type::set_background_opacity(1.0);
         }
         template <typename... Args>
         framed_widget(i_layout& aLayout, frame_style aStyle, dimension aLineWidth, Args&&... aArgs) :
             base_type{ aLayout, std::forward<Args>(aArgs)... }, iStyle{ aStyle }, iLineWidth{ aLineWidth }
         {
+            base_type::set_background_opacity(1.0);
         }
     public:
         using base_type::as_widget;
@@ -140,10 +152,6 @@ namespace neogfx
             return result;
         }
     public:
-        bool transparent_background() const override
-        {
-            return false;
-        }
         void paint_non_client(i_graphics_context& aGc) const override
         {
             base_type::paint_non_client(aGc);
