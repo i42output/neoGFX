@@ -269,8 +269,6 @@ namespace neogfx::DesignStudio
             }
         }
     public:
-
-    public:
         const i_element_library& iLibrary;
         i_element* iParent;
         element_group iGroup;

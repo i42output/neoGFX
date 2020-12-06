@@ -44,6 +44,7 @@ namespace neogfx::DesignStudio
                     case element_group::Menu:
                     case element_group::Widget:
                     case element_group::Layout:
+                    case element_group::Workflow:
                     {
                         auto node = aElement.group() != element_group::Project ?
                             item_model().append_item(aPosition, &aElement, aElement.id().to_std_string()) :

@@ -57,6 +57,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/utility.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
+#include "sticky_note.hpp"
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
@@ -68,7 +69,7 @@ namespace neogfx::DesignStudio
     {
         { "project" },
         { "build" },
-        { "sticky" },
+        { "sticky_note" },
         { "code" },
         { "script" },
         { "node" },
@@ -155,18 +156,17 @@ namespace neogfx::DesignStudio
     struct script {}; // todo
     struct node {}; // todo
     struct build {}; // todo
-    struct note {}; // todo
 
     void default_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
-        static const std::map<std::string, std::function<i_element*(i_element&, const neolib::i_string&)>> sFactoryMethods =
+        static const std::map<std::string, std::function<i_element*(i_element&, const neolib::i_string&, const neolib::i_string&)>> sFactoryMethods =
         {
-            #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId }; } },
-            #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId }; } },
+            #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId, element_group(aElementType) }; } },
+            #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId, element_group(aElementType) }; } },
             MAKE_ELEMENT_FACTORY_FUNCTION(user_interface)
-            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(build, build)
-            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(sticky, note)
-            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(app, app)
+            MAKE_ELEMENT_FACTORY_FUNCTION(build)
+            MAKE_ELEMENT_FACTORY_FUNCTION(sticky_note)
+            MAKE_ELEMENT_FACTORY_FUNCTION(app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(MVC_app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(dialog_app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2D_game, app)
@@ -215,7 +215,7 @@ namespace neogfx::DesignStudio
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
         {
-            aResult.reset((method->second)(aParent, aElementId));
+            aResult.reset((method->second)(aParent, aElementType, aElementId));
             return;
         }
         throw unknown_element_type();
@@ -227,7 +227,7 @@ namespace neogfx::DesignStudio
         {
             { "project", DesignStudio::element_group::Project },
             { "build", DesignStudio::element_group::Workflow },
-            { "sticky", DesignStudio::element_group::Workflow },
+            { "sticky_note", DesignStudio::element_group::Workflow },
             { "code", DesignStudio::element_group::Code },
             { "script", DesignStudio::element_group::Script },
             { "node", DesignStudio::element_group::Node },
@@ -304,7 +304,7 @@ namespace neogfx::DesignStudio
                 }
             },
             {
-                "sticky",
+                "sticky_note",
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/note.png" }, color::Khaki);
