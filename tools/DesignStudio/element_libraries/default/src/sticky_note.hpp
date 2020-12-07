@@ -28,6 +28,17 @@
 
 namespace neogfx::DesignStudio
 {
+    class sticky_note_text : public text_edit
+    {
+    public:
+        using text_edit::text_edit;
+    protected:
+        color scrollbar_color(const i_scrollbar&) const override
+        {
+            return effective_background_color();
+        }
+    };
+
     class sticky_note : public widget<>
     {
         typedef widget<> base_type;
@@ -39,7 +50,7 @@ namespace neogfx::DesignStudio
             thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
             set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
-            auto defaultItem = make_ref<text_edit>(*this, text_edit::MultiLine, frame_style::NoFrame);
+            auto defaultItem = make_ref<sticky_note_text>(*this, text_edit::MultiLine, frame_style::NoFrame);
             defaultItem->set_focus_policy(defaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
             defaultItem->set_background_opacity(0.0);
             defaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)
@@ -47,12 +58,10 @@ namespace neogfx::DesignStudio
                 if (aEvent == neogfx::focus_event::FocusGained)
                 {
                     set_ignore_mouse_events(false);
-                    set_ignore_non_client_mouse_events(false);
                 }
                 else if (aEvent == neogfx::focus_event::FocusLost)
                 {
                     set_ignore_mouse_events(true);
-                    set_ignore_non_client_mouse_events(true);
                 }
             });
             defaultItem->ContextMenu([&](i_menu& aMenu)

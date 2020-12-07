@@ -48,7 +48,6 @@ namespace neogfx::DesignStudio
         iSink = ChildAdded([&](i_widget& aChild)
         {
             aChild.set_ignore_mouse_events(true);
-            aChild.set_ignore_non_client_mouse_events(true);
         });
         iSink += element().mode_changed([&]()
         {

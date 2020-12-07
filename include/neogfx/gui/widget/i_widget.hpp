@@ -373,7 +373,7 @@ namespace neogfx
          color effective_background_color() const
          {
              i_widget const* w = this;
-             while (w->background_is_transparent() && w->has_parent())
+             while (!w->has_background_color() && w->background_is_transparent() && w->has_parent())
                  w = &w->parent();
              return w->background_color();
          }
