@@ -530,7 +530,7 @@ namespace neogfx
     }
 
     template <typename T>
-    i_rendering_engine::pixel_format_t opengl_texture<T>::pixel_format() const
+    pixel_format_t opengl_texture<T>::pixel_format() const
     {
         return 0;
     }

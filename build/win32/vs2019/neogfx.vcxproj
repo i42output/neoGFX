@@ -551,6 +551,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_native_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\i_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window.hpp" />
@@ -567,6 +568,7 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\i_hid_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_hid_devices.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_keyboard.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_native_surface.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\i_surface_window.hpp" />
@@ -601,11 +603,9 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp" />
-    <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
-    <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_directinput_controller.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_display.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_game_controllers.hpp" />

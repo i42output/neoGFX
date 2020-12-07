@@ -34,7 +34,7 @@
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
-#include "../gui/window/native/i_native_window.hpp"
+#include <neogfx/gui/window/i_native_window.hpp>
 
 template<> neolib::i_async_task& services::start_service<neolib::i_async_task>()
 {

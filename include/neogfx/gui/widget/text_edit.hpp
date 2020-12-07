@@ -39,6 +39,7 @@ namespace neogfx
         define_event(TextFilter, text_filter, std::string const&, bool&)
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)
+        define_event(ContextMenu, context_menu, i_menu&)
     private:
         typedef text_edit property_context_type;
     public:
@@ -616,7 +617,7 @@ namespace neogfx
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         neolib::callback_timer iAnimator;
         std::optional<neolib::callback_timer> iDragger;
-        std::unique_ptr<context_menu> iMenu;
+        std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;
         bool iOutOfMemory;

@@ -39,12 +39,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\hid\native\i_native_surface.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\window\native\i_native_window.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -1096,6 +1090,12 @@
       <Filter>Source Files\native\windows</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\font_widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\hid\i_native_surface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_native_window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

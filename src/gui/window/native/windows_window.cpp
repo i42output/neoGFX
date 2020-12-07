@@ -425,7 +425,7 @@ namespace neogfx
             return iHdc;
         }
 
-        i_rendering_engine::pixel_format_t window::pixel_format() const
+        pixel_format_t window::pixel_format() const
         {
             if (iPixelFormat == std::nullopt)
                 iPixelFormat = service<i_rendering_engine>().set_pixel_format(*this);

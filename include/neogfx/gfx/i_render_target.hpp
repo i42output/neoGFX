@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/primitives.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
 
 namespace neogfx
 {
@@ -34,6 +33,8 @@ namespace neogfx
         Surface,
         Texture
     };
+
+    typedef int pixel_format_t; // todo: enum?
 
     class i_render_target : public i_device_metrics
     {
@@ -51,7 +52,7 @@ namespace neogfx
         virtual render_target_type target_type() const = 0;
         virtual void* target_handle() const = 0;
         virtual void* target_device_handle() const = 0;
-        virtual i_rendering_engine::pixel_format_t pixel_format() const = 0;
+        virtual pixel_format_t pixel_format() const = 0;
         virtual const i_texture& target_texture() const = 0;
         virtual size target_extents() const = 0;
     public:

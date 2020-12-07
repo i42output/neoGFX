@@ -79,7 +79,7 @@ namespace neogfx
         public:
             void* target_handle() const override;
             void* target_device_handle() const override;
-            i_rendering_engine::pixel_format_t pixel_format() const override;
+            pixel_format_t pixel_format() const override;
         public:
             void activate_target() const override;
         public:
@@ -145,7 +145,7 @@ namespace neogfx
             HWND iHandle;
             HDC iHdc;
             mutable bool iFirstActivation = true;
-            mutable std::optional<i_rendering_engine::pixel_format_t> iPixelFormat;
+            mutable std::optional<pixel_format_t> iPixelFormat;
             static window* sNewWindow;
             mutable optional_point iPosition;
             mutable optional_size iExtents;

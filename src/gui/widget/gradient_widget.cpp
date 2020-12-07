@@ -25,7 +25,7 @@
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/gui/widget/menu.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
-#include "../../hid/native/i_native_surface.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
 
 namespace neogfx
 {

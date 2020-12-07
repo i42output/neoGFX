@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/file/file.hpp>
-#include "../../hid/native/i_native_surface.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
 #include "windows_drag_drop.hpp"
 
 #include <WinUser.h>

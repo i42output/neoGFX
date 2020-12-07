@@ -196,6 +196,8 @@ namespace neogfx::DesignStudio
         widget::focus_gained(aFocusReason);
         element().set_mode(element_mode::Edit);
         service<i_clipboard>().activate(*this);
+        if (element().group() == element_group::Workflow)
+            bring_to_front();
     }
 
     void widget_caddy::focus_lost(focus_reason aFocusReason)

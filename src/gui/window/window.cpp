@@ -27,7 +27,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
-#include "native/i_native_window.hpp"
+#include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/window/window.hpp>
 
@@ -274,14 +274,15 @@ namespace neogfx
             iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
             iSurfaceWindow = std::make_unique<surface_window_proxy>(
                 *this,
-                [&](i_surface_window& aProxy)
+                [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
             {
-                return service<i_rendering_engine>().create_window(
+                service<i_rendering_engine>().create_window(
                     service<i_surface_manager>(),
                     aProxy,
                     *aPlacement.video_mode(),
                     title_text(),
-                    style());
+                    style(),
+                    aNewWindow);
             });
         }
         else if (!is_nested())
@@ -300,13 +301,17 @@ namespace neogfx
                 if (!has_parent_window(false))
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
-                        [&](i_surface_window& aProxy)
-                { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
+                        [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
+                        { 
+                            service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style(), aNewWindow); 
+                        });
                 else
                     iSurfaceWindow = std::make_unique<surface_window_proxy>(
                         *this,
-                        [&](i_surface_window& aProxy)
-                { return service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent_window().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style()); });
+                        [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
+                        { 
+                            service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent_window().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style(), aNewWindow); 
+                        });
                 break;
             case window_state::Iconized:
                 // todo

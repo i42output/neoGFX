@@ -21,7 +21,7 @@
 #include <neolib/core/string_utils.hpp>
 #include "native/i_native_texture.hpp"
 #include "text/native/native_font_face.hpp"
-#include "../hid/native/i_native_surface.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>

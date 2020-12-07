@@ -22,24 +22,25 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/surface_window_proxy.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
+#include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_nest.hpp>
 #include <neogfx/gui/widget/i_nested_window.hpp>
-#include "../gui/window/native/i_native_window.hpp"
-#include "native/i_native_surface.hpp"
+#include <neogfx/gui/window/i_native_window.hpp>
+#include <neogfx/hid/i_native_surface.hpp>
 
 namespace neogfx
 {
-    surface_window_proxy::surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator) :
+    surface_window_proxy::surface_window_proxy(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator) :
         iWindow{ aWindow }, 
         iRenderingEngine{ service<i_rendering_engine>() },
-        iNativeWindow{ aNativeWindowCreator(*this) },
         iNativeWindowClosing{ false },
         iClosing{ false },
         iClosed{ false },
         iCapturingWidget{ nullptr },
         iClickedWidget{ nullptr }
     {
+        aNativeWindowCreator(*this, iNativeWindow);
         iNativeSurfaceDestroyed.emplace(*iNativeWindow);
         service<i_surface_manager>().add_surface(*this);
         set_alive();

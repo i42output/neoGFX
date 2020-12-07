@@ -21,8 +21,10 @@
 
 #include <neogfx/neogfx.hpp>
 #include <random>
+#include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
+#include <neogfx/gui/dialog/color_dialog.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -52,6 +54,30 @@ namespace neogfx::DesignStudio
                     set_ignore_mouse_events(true);
                     set_ignore_non_client_mouse_events(true);
                 }
+            });
+            defaultItem->ContextMenu([&](i_menu& aMenu)
+            {
+                auto noteColor = std::make_shared<action>("Sticky Note Color...");
+                auto fontFormat = std::make_shared<action>("Font...");
+                auto paragraphFormat = std::make_shared<action>("Paragraph...");
+                paragraphFormat->disable(); // todo
+                noteColor->Triggered([&]()
+                {
+                    auto oldColor = background_color();
+                    color_dialog colorPicker{ *this, background_color() };
+                    colorPicker.SelectionChanged([&]()
+                    {
+                        set_background_color(colorPicker.selected_color());
+                    });
+                    if (colorPicker.exec() == ng::dialog_result::Accepted)
+                        set_background_color(colorPicker.selected_color());
+                    else
+                        set_background_color(oldColor);
+                });
+                aMenu.add_action(noteColor);
+                aMenu.add_action(fontFormat);
+                aMenu.add_action(paragraphFormat);
+                aMenu.add_separator();
             });
             iDefaultItem = defaultItem;
             add(defaultItem);

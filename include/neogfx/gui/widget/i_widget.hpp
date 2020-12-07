@@ -370,6 +370,13 @@ namespace neogfx
          {
              return background_opacity() == 0.0;
          }
+         color effective_background_color() const
+         {
+             i_widget const* w = this;
+             while (w->background_is_transparent() && w->has_parent())
+                 w = &w->parent();
+             return w->background_color();
+         }
          bool has_background_color() const
          {
              return has_palette_color(color_role::Background);

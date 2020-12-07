@@ -23,8 +23,8 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/hid/i_native_surface.hpp>
 #include <neogfx/gui/window/window_events.hpp>
-#include "../../../hid/native/i_native_surface.hpp"
 
 namespace neogfx
 {
@@ -38,6 +38,8 @@ namespace neogfx
         declare_event(filter, native_event&)
     public:
         struct no_current_event : std::logic_error { no_current_event() : std::logic_error("neogfx::i_native_window::no_current_event") {} };
+    public:
+        typedef i_native_window abstract_type;
     public:
         virtual ~i_native_window() = default;
     public:

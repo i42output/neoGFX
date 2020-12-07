@@ -19,7 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
-#include "i_native_surface.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
 #include "windows_mouse.hpp"
 
 namespace neogfx

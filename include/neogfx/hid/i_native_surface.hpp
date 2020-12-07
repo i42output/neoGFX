@@ -32,12 +32,14 @@ namespace neogfx
     class i_rendering_context;
     class i_widget;
 
-    class i_native_surface : public i_render_target, public i_property_owner
+    class i_native_surface : public i_render_target, public i_property_owner, public i_reference_counted
     {
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_surface::no_parent") {} };
         struct context_mismatch : std::logic_error { context_mismatch() : std::logic_error("neogfx::i_native_surface::context_mismatch") {} };
         struct no_invalidated_area : std::logic_error { no_invalidated_area() : std::logic_error("neogfx::i_native_surface::no_invalidated_area") {} };
+    public:
+        typedef i_native_surface abstract_type;
     public:
         virtual ~i_native_surface() = default;
     public:

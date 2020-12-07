@@ -436,7 +436,8 @@ namespace neogfx
         iDragger = std::nullopt;
         if (aButton == mouse_button::Right)
         {
-            iMenu = std::make_unique<context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
+            iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
+            ContextMenu.trigger(iMenu->menu());
             iMenu->menu().add_action(service<i_app>().action_undo());
             iMenu->menu().add_action(service<i_app>().action_redo());
             iMenu->menu().add_separator();

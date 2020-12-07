@@ -90,7 +90,7 @@ namespace neogfx
         render_target_type target_type() const override;
         void* target_handle() const override;
         void* target_device_handle() const override;
-        i_rendering_engine::pixel_format_t pixel_format() const override;
+        pixel_format_t pixel_format() const override;
         const i_texture& target_texture() const override;
         size target_extents() const override;
     public:

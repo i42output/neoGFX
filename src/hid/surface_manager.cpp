@@ -24,8 +24,8 @@
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
-#include "native/i_native_surface.hpp"
-#include "../gui/window/native/i_native_window.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
 
 template <> neogfx::i_surface_manager& services::start_service<neogfx::i_surface_manager>() 
 { 

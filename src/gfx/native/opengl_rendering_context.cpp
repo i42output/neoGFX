@@ -31,7 +31,7 @@
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
-#include "../../hid/native/i_native_surface.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
 #include "i_native_texture.hpp"
 #include "../text/native/i_native_font_face.hpp"
 #include "opengl_rendering_context.hpp"

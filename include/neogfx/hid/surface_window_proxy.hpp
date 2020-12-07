@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/object.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 
 namespace neogfx
@@ -35,7 +36,7 @@ namespace neogfx
         define_declared_event(Closing, closing)
         define_declared_event(Closed, closed)
     public:
-        surface_window_proxy(i_window& aWindow, std::function<std::unique_ptr<i_native_window>(i_surface_window&)> aNativeWindowCreator);
+        surface_window_proxy(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator);
         ~surface_window_proxy();
     public:
         dimension horizontal_dpi() const override;
@@ -154,7 +155,7 @@ namespace neogfx
         std::optional<destroyed_flag> iNativeSurfaceDestroyed;
         i_window& iWindow;
         i_rendering_engine& iRenderingEngine;
-        std::unique_ptr<i_native_window> iNativeWindow;
+        ref_ptr<i_native_window> iNativeWindow;
         bool iNativeWindowClosing;
         bool iClosing;
         bool iClosed;

@@ -23,14 +23,14 @@
 #include <neolib/core/variant.hpp>
 #include <neolib/task/timer.hpp>
 #include <neogfx/core/object.hpp>
-#include "i_native_window.hpp"
+#include <neogfx/gui/window/i_native_window.hpp>
 
 namespace neogfx
 {
     class i_rendering_engine;
     class i_surface_manager;
 
-    class native_window : public object<i_native_window>
+    class native_window : public reference_counted<object<i_native_window>>
     {
     public:
         define_declared_event(TargetActivating, target_activating)
