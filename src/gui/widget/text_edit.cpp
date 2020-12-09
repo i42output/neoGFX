@@ -1876,7 +1876,7 @@ namespace neogfx
                 {
                 case 1:
                 case 3:
-                    if (!showVerticalScrollbar && pos.y >= availableHeight)
+                    if (!vertical_scrollbar().visible() && !showVerticalScrollbar && pos.y >= availableHeight)
                     {
                         showVerticalScrollbar = true;
                         availableWidth -= vertical_scrollbar().width();
@@ -1886,7 +1886,7 @@ namespace neogfx
                         next_pass();
                     break;
                 case 2:
-                    if (!showHorizontalScrollbar && iTextExtents.cx > availableWidth)
+                    if (!horizontal_scrollbar().visible() && !showHorizontalScrollbar && iTextExtents.cx > availableWidth)
                     {
                         showHorizontalScrollbar = true;
                         availableHeight -= horizontal_scrollbar().width();

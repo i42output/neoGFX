@@ -94,8 +94,6 @@ namespace neogfx
         double surface_transparency() const override;
         void set_surface_transparency(double aTransparency) override;
     public:
-        void debug(bool aEnableDebug) override;
-    public:
         bool has_clicked_widget() const override;
         i_widget& clicked_widget() const override;
         bool has_capturing_widget() const override;
@@ -105,7 +103,7 @@ namespace neogfx
         void non_client_set_capture(i_widget& aWidget) override;
         void non_client_release_capture(i_widget& aWidget) override;
     private:
-        bool current_event_is_non_client() const override;
+        mouse_event_location current_mouse_event_location() const override;
         bool is_closing() const override;
         bool native_window_can_close() const override;
         void native_window_closing() override;

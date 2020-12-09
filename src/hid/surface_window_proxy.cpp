@@ -339,11 +339,6 @@ namespace neogfx
         native_window().set_transparency(aTransparency);
     }
 
-    void surface_window_proxy::debug(bool aEnableDebug)
-    {
-        native_window().debug::layoutItem(aEnableDebug);
-    }
-
     bool surface_window_proxy::has_clicked_widget() const
     {
         return iClickedWidget != nullptr;
@@ -412,9 +407,16 @@ namespace neogfx
         as_widget().mouse_entered(as_window().mouse_position());
     }
 
-    bool surface_window_proxy::current_event_is_non_client() const
+    mouse_event_location surface_window_proxy::current_mouse_event_location() const
     {
-        return native_window().has_current_event() && std::holds_alternative<neogfx::non_client_mouse_event>(native_window().current_event());
+        if (native_window().has_current_event())
+        {
+            if (std::holds_alternative<neogfx::mouse_event>(native_window().current_event()))
+                return mouse_event_location::Client;
+            else if (std::holds_alternative<neogfx::non_client_mouse_event>(native_window().current_event()))
+                return mouse_event_location::NonClient;
+        }
+        return mouse_event_location::None;
     }
 
     bool surface_window_proxy::is_closing() const

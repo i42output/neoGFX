@@ -214,7 +214,7 @@ namespace neogfx
         virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents) = 0;
         virtual bool ignore_non_client_mouse_events() const = 0;
         virtual void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) = 0;
-        virtual bool mouse_event_is_non_client() const = 0;
+        virtual neogfx::mouse_event_location mouse_event_location() const = 0;
         virtual void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
@@ -350,81 +350,94 @@ namespace neogfx
             return enable(false);
         }
      public:
-         double transparency() const
-         {
-             return 1.0 - opacity();
-         }
-         void set_transparency(double aTransparency)
-         {
-             set_opacity(1.0 - aTransparency);
-         }
-         double background_transparency() const
-         {
-             return 1.0 - background_opacity();
-         }
-         void set_background_transparency(double aTransparency)
-         {
-             set_background_opacity(1.0 - aTransparency);
-         }
-         bool background_is_transparent() const
-         {
-             return background_opacity() == 0.0;
-         }
-         color effective_background_color() const
-         {
-             i_widget const* w = this;
-             while (!w->has_background_color() && w->background_is_transparent() && w->has_parent())
-                 w = &w->parent();
-             return w->background_color();
-         }
-         bool has_background_color() const
-         {
-             return has_palette_color(color_role::Background);
-         }
-         color background_color() const
-         {
-             return palette_color(color_role::Background);
-         }
-         void set_background_color(const optional_color& aBackgroundColor = optional_color{})
-         {
-             set_palette_color(color_role::Background, aBackgroundColor);
-         }
-         bool has_foreground_color() const
-         {
-             return has_palette_color(color_role::Foreground);
-         }
-         color foreground_color() const
-         {
-             return palette_color(color_role::Foreground);
-         }
-         void set_foreground_color(const optional_color& aForegroundColor = optional_color{})
-         {
-             set_palette_color(color_role::Foreground, aForegroundColor);
-         }
-         bool has_base_color() const
-         {
-             return has_palette_color(color_role::Base);
-         }
-         color base_color() const
-         {
-             return palette_color(color_role::Base);
-         }
-         void set_base_color(const optional_color& aBaseColor = optional_color{})
-         {
-             set_palette_color(color_role::Base, aBaseColor);
-         }
-         bool has_alternate_base_color() const
-         {
-             return has_palette_color(color_role::AlternateBase);
-         }
-         color alternate_base_color() const
-         {
-             return palette_color(color_role::AlternateBase);
-         }
-         void set_alternate_base_color(const optional_color& aAlternateBaseColor = optional_color{})
-         {
-             set_palette_color(color_role::AlternateBase, aAlternateBaseColor);
-         }
+        double transparency() const
+        {
+            return 1.0 - opacity();
+        }
+        void set_transparency(double aTransparency)
+        {
+            set_opacity(1.0 - aTransparency);
+        }
+        double background_transparency() const
+        {
+            return 1.0 - background_opacity();
+        }
+        void set_background_transparency(double aTransparency)
+        {
+            set_background_opacity(1.0 - aTransparency);
+        }
+        bool background_is_transparent() const
+        {
+            return background_opacity() == 0.0;
+        }
+        color effective_background_color() const
+        {
+            i_widget const* w = this;
+            while (!w->has_background_color() && w->background_is_transparent() && w->has_parent())
+                w = &w->parent();
+            return w->background_color();
+        }
+        bool has_background_color() const
+        {
+            return has_palette_color(color_role::Background);
+        }
+        color background_color() const
+        {
+            return palette_color(color_role::Background);
+        }
+        void set_background_color(const optional_color& aBackgroundColor = optional_color{})
+        {
+            set_palette_color(color_role::Background, aBackgroundColor);
+        }
+        bool has_foreground_color() const
+        {
+            return has_palette_color(color_role::Foreground);
+        }
+        color foreground_color() const
+        {
+            return palette_color(color_role::Foreground);
+        }
+        void set_foreground_color(const optional_color& aForegroundColor = optional_color{})
+        {
+            set_palette_color(color_role::Foreground, aForegroundColor);
+        }
+        bool has_base_color() const
+        {
+            return has_palette_color(color_role::Base);
+        }
+        color base_color() const
+        {
+            return palette_color(color_role::Base);
+        }
+        void set_base_color(const optional_color& aBaseColor = optional_color{})
+        {
+            set_palette_color(color_role::Base, aBaseColor);
+        }
+        bool has_alternate_base_color() const
+        {
+            return has_palette_color(color_role::AlternateBase);
+        }
+        color alternate_base_color() const
+        {
+            return palette_color(color_role::AlternateBase);
+        }
+        void set_alternate_base_color(const optional_color& aAlternateBaseColor = optional_color{})
+        {
+            set_palette_color(color_role::AlternateBase, aAlternateBaseColor);
+        }
+    public:
+        bool handling_mouse_event() const
+        {
+            return mouse_event_location() != neogfx::mouse_event_location::None;
+        }
+        bool mouse_event_is_client() const
+        {
+            return mouse_event_location() == neogfx::mouse_event_location::Client;
+        }
+        bool mouse_event_is_non_client() const
+        {
+            return mouse_event_location() == neogfx::mouse_event_location::NonClient;
+        }
     };
 
     // todo: make being a layout manager a property?

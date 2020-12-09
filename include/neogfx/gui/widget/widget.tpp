@@ -1634,7 +1634,7 @@ namespace neogfx
             switch (aReason)
             {
             case capture_reason::MouseEvent:
-                if (!mouse_event_is_non_client())
+                if (!as_widget().mouse_event_is_non_client())
                     surface().as_surface_window().set_capture(*this);
                 else
                     surface().as_surface_window().non_client_set_capture(*this);
@@ -1655,7 +1655,7 @@ namespace neogfx
         switch (aReason)
         {
         case capture_reason::MouseEvent:
-            if (!mouse_event_is_non_client())
+            if (!as_widget().mouse_event_is_non_client())
                 surface().as_surface_window().release_capture(*this);
             else
                 surface().as_surface_window().non_client_release_capture(*this);
@@ -1789,12 +1789,12 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::mouse_event_is_non_client() const
+    mouse_event_location widget<Interface>::mouse_event_location() const
     {
-        if (!has_root() || !root().has_native_surface() || !surface().as_surface_window().current_event_is_non_client())
-            return false;
+        if (has_root() && root().has_native_surface())
+            return surface().as_surface_window().current_mouse_event_location();
         else
-            return true;
+            return neogfx::mouse_event_location::None;
     }
 
     template <typename Interface>
@@ -1921,9 +1921,19 @@ namespace neogfx
         if (client_rect().contains(aPosition))
         {
             const i_widget* w = &get_widget_at(aPosition);
-            while (w != this && (w->effectively_hidden() || (w->effectively_disabled() && !aForHitTest) || (!mouse_event_is_non_client() && w->ignore_mouse_events()) || (mouse_event_is_non_client() && w->ignore_non_client_mouse_events())))
+            for (; w != this ; w = &w->parent()) 
             {
-                w = &w->parent();
+                if (w->effectively_hidden() || (w->effectively_disabled() && !aForHitTest))
+                    continue;
+                if (!w->ignore_mouse_events() && mouse_event_location() != neogfx::mouse_event_location::NonClient)
+                    break;
+                if (!w->ignore_non_client_mouse_events() && mouse_event_location() == neogfx::mouse_event_location::NonClient)
+                    break;
+                if (mouse_event_location() != neogfx::mouse_event_location::NonClient &&
+                    w->ignore_mouse_events() && !w->ignore_non_client_mouse_events() &&
+                    w->non_client_rect().contains(aPosition) &&
+                    !w->client_rect(false).contains(aPosition - w->origin()))
+                    break;
             }
             return *w;
         }

@@ -23,6 +23,7 @@
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
+#include <neogfx/gui/window/window_events.hpp>
 
 namespace neogfx
 {
@@ -52,7 +53,7 @@ namespace neogfx
         virtual void non_client_set_capture(i_widget& aWidget) = 0;
         virtual void non_client_release_capture(i_widget& aWidget) = 0;
     public:
-        virtual bool current_event_is_non_client() const = 0;
+        virtual mouse_event_location current_mouse_event_location() const = 0;
         virtual bool is_closing() const = 0;
         virtual bool native_window_can_close() const = 0;
         virtual void native_window_closing() = 0;

@@ -85,6 +85,7 @@ namespace neogfx
 
     enum class mouse_event_location
     {
+        None,
         Client,
         NonClient
     };

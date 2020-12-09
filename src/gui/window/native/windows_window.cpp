@@ -166,7 +166,9 @@ namespace neogfx
             case widget_part::NowhereError:
                 return HTERROR;
             case widget_part::VerticalScrollbar:
+                return HTVSCROLL;
             case widget_part::HorizontalScrollbar:
+                return HTHSCROLL;
             case widget_part::Client:
             case widget_part::NonClient:
             case widget_part::NonClientOther:
@@ -1263,6 +1265,7 @@ namespace neogfx
                         ::UpdateWindow(hwnd);
                     }
                 }
+                result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_ENTERSIZEMOVE:
                 ::SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
