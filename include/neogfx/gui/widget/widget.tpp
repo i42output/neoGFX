@@ -1877,6 +1877,10 @@ namespace neogfx
                 return mouse_system_cursor::SizeNESW;
             case widget_part::GrowBox:
                 return mouse_system_cursor::SizeNWSE;
+            case widget_part::VerticalScrollbar:
+                return mouse_system_cursor::Arrow;
+            case widget_part::HorizontalScrollbar:
+                return mouse_system_cursor::Arrow;
             }
         }
         if (has_parent())
@@ -1918,7 +1922,7 @@ namespace neogfx
             if (outerRect.contains(aPosition) && !innerRect.contains(aPosition))
                 return *this;
         }
-        if (client_rect().contains(aPosition))
+        if (non_client_rect().contains(aPosition))
         {
             const i_widget* w = &get_widget_at(aPosition);
             for (; w != this ; w = &w->parent()) 
