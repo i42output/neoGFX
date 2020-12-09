@@ -40,15 +40,16 @@ namespace neogfx
         class non_client_item : public WidgetType
         {
         public:
-            using WidgetType::WidgetType;
+            template <typename... Args>
+            non_client_item(Args&&... aArgs) : 
+                WidgetType{ std::forward<Args>(aArgs)... }
+            {
+                WidgetType::set_ignore_non_client_mouse_events(false);
+            }
         public:
             widget_part hit_test(const point&) const override
             {
                 return widget_part{ WidgetType::root().as_widget(), WidgetPart };
-            }
-            bool ignore_non_client_mouse_events() const override
-            {
-                return false;
             }
         };
     private:

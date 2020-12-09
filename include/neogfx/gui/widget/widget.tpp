@@ -1765,9 +1765,9 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::ignore_mouse_events() const
+    bool widget<Interface>::ignore_mouse_events(bool aConsiderAncestors) const
     {
-        return IgnoreMouseEvents || (has_parent() && parent().ignore_mouse_events());
+        return IgnoreMouseEvents || (aConsiderAncestors && (has_parent() && parent().ignore_mouse_events()));
     }
 
     template <typename Interface>
@@ -1777,9 +1777,9 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::ignore_non_client_mouse_events() const
+    bool widget<Interface>::ignore_non_client_mouse_events(bool aConsiderAncestors) const
     {
-        return IgnoreNonClientMouseEvents || (has_parent() && parent().ignore_non_client_mouse_events());
+        return IgnoreNonClientMouseEvents || (aConsiderAncestors && (has_parent() && parent().ignore_non_client_mouse_events()));
     }
 
     template <typename Interface>
@@ -1930,7 +1930,7 @@ namespace neogfx
                 if (!w->ignore_non_client_mouse_events() && mouse_event_location() == neogfx::mouse_event_location::NonClient)
                     break;
                 if (mouse_event_location() != neogfx::mouse_event_location::NonClient &&
-                    w->ignore_mouse_events() && !w->ignore_non_client_mouse_events() &&
+                    w->ignore_mouse_events() && !w->ignore_non_client_mouse_events(false) &&
                     w->non_client_rect().contains(aPosition) &&
                     !w->client_rect(false).contains(aPosition - w->origin()))
                     break;

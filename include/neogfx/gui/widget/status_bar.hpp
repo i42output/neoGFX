@@ -81,7 +81,6 @@ namespace neogfx
             neogfx::size_policy size_policy() const override;
         public:
             widget_part hit_test(const point& aPosition) const override;
-            bool ignore_non_client_mouse_events() const override;
         };
     public:
         struct style_conflict : std::runtime_error { style_conflict() : std::runtime_error("neogfx::status_bar::style_conflict") {} };

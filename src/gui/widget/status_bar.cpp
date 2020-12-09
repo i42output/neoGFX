@@ -107,6 +107,7 @@ namespace neogfx
         image_widget{ aLayout }
     {
         set_ignore_mouse_events(false);
+        set_ignore_non_client_mouse_events(false);
         set_placement(cardinal::SouthEast);
     }
 
@@ -118,11 +119,6 @@ namespace neogfx
     widget_part status_bar::size_grip_widget::hit_test(const point&) const
     {
         return widget_part{ root().as_widget(), widget_part::BorderBottomRight };
-    }
-
-    bool status_bar::size_grip_widget::ignore_non_client_mouse_events() const
-    {
-        return false;
     }
 
     status_bar::status_bar(i_standard_layout_container& aContainer, style aStyle) :

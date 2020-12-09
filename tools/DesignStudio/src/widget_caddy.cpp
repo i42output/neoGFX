@@ -219,11 +219,11 @@ namespace neogfx::DesignStudio
         return false;
     }
 
-    bool widget_caddy::ignore_mouse_events() const
+    bool widget_caddy::ignore_mouse_events(bool aConsiderAncestors) const
     {
         if (element().mode() == element_mode::Drag)
             return true;
-        return widget::ignore_mouse_events();
+        return widget::ignore_mouse_events(aConsiderAncestors);
     }
 
     void widget_caddy::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

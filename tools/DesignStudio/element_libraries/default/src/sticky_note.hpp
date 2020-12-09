@@ -51,6 +51,7 @@ namespace neogfx::DesignStudio
             set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
             auto defaultItem = make_ref<sticky_note_text>(*this, text_edit::MultiLine, frame_style::NoFrame);
+            defaultItem->set_ignore_non_client_mouse_events(false);
             defaultItem->set_focus_policy(defaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
             defaultItem->set_background_opacity(0.0);
             defaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)

@@ -69,7 +69,7 @@ namespace neogfx::DesignStudio
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     protected:
-        bool ignore_mouse_events() const override;
+        bool ignore_mouse_events(bool aConsiderAncestors = true) const override;
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;

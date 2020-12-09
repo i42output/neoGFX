@@ -249,9 +249,9 @@ namespace neogfx
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
     public:
-        bool ignore_mouse_events() const override;
+        bool ignore_mouse_events(bool aConsiderAncestors = true) const override;
         void set_ignore_mouse_events(bool aIgnoreMouseEvents) override;
-        bool ignore_non_client_mouse_events() const override;
+        bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const override;
         void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) override;
         neogfx::mouse_event_location mouse_event_location() const override;
         void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;

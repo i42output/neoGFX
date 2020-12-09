@@ -210,9 +210,9 @@ namespace neogfx
         virtual void focus_gained(focus_reason aFocusReason) = 0;
         virtual void focus_lost(focus_reason aFocusReason) = 0;
     public:
-        virtual bool ignore_mouse_events() const = 0;
+        virtual bool ignore_mouse_events(bool aConsiderAncestors = true) const = 0;
         virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents) = 0;
-        virtual bool ignore_non_client_mouse_events() const = 0;
+        virtual bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const = 0;
         virtual void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) = 0;
         virtual neogfx::mouse_event_location mouse_event_location() const = 0;
         virtual void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
