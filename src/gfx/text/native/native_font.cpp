@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <boost/filesystem.hpp>
 #include <neolib/core/string_ci.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include "native_font.hpp"
 #include "native_font_face.hpp"
 

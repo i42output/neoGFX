@@ -26,7 +26,6 @@
 #include <neolib/core/string_ci.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
-#include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/text/font.hpp>
 
 namespace neogfx
@@ -384,130 +383,41 @@ namespace neogfx
         typedef i_glyph_text::size_type size_type;
         typedef i_glyph_text::difference_type difference_type;
     public:
-        struct no_content : std::logic_error { no_content() : std::logic_error{ "neogfx::glyph_text::no_content" } {} };
+        glyph_text();
+        glyph_text(i_glyph_text& aContents);
+        glyph_text(glyph_text const& aOther);
     public:
-        glyph_text() :
-            iContents{ nullptr }
-        {
-        }
-        glyph_text(i_glyph_text& aContents) :
-            iContents{ aContents }
-        {
-        }
-        glyph_text(glyph_text const& aOther) :
-            iContents{ aOther.iContents }
-        {
-        }
+        glyph_text operator=(const glyph_text& aOther);
     public:
-        glyph_text operator=(const glyph_text& aOther)
-        {
-            iContents = aOther.iContents;
-            return *this;
-        }
+        bool has_content() const;
+        i_glyph_text& content() const;
     public:
-        bool has_content() const
-        {
-            return iContents != nullptr;
-        }
-        i_glyph_text& content() const
-        {
-            if (has_content())
-                return *iContents;
-            throw no_content();
-        }
+        const font& glyph_font() const;
+        const font& glyph_font(const_reference aGlyph) const;
+        const i_glyph_texture& glyph_texture(const_reference aGlyph) const;
     public:
-        const font& glyph_font() const
-        {
-            return content().glyph_font();
-        }
-        const font& glyph_font(const_reference aGlyph) const
-        {
-            return content().glyph_font(aGlyph);
-        }
-        const i_glyph_texture& glyph_texture(const_reference aGlyph) const
-        {
-            return content().glyph_texture(aGlyph);
-        }
+        bool empty() const;
+        size_type size() const;
+        void clear();
     public:
-        bool empty() const
-        {
-            return !has_content() || content().empty();
-        }
-        size_type size() const
-        {
-            return has_content() ? content().size() : 0;
-        }
-        void clear()
-        {
-            if (has_content())
-                content().clear();
-        }
+        neogfx::size extents() const;
+        neogfx::size extents(const_reference aGlyph) const;
+        neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const;
     public:
-        neogfx::size extents() const
-        {
-            return content().extents();
-        }
-        neogfx::size extents(const_reference aGlyph) const
-        {
-            return content().extents(aGlyph);
-        }
-        neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const
-        {
-            return content().extents(aBegin, aEnd, aEndIsLineEnd);
-        }
+        void set_extents(const neogfx::size& aExtents);
+        std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const;
     public:
-        void set_extents(const neogfx::size& aExtents)
-        {
-            content().set_extents(aExtents);
-        }
-        std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const
-        {
-            return content().word_break(aBegin, aFrom);
-        }
+        const_reference back() const;
+        reference back();
     public:
-        const_reference back() const
-        {
-            return *std::prev(content().cend());
-        }
-        reference back()
-        {
-            return *std::prev(content().end());
-        }
-    public:
-        const_iterator cbegin() const
-        {
-            if (has_content())
-                return content().cbegin();
-            return nullptr;
-        }
-        const_iterator cend() const
-        {
-            if (has_content())
-                return content().cend();
-            return nullptr;
-        }
-        const_iterator begin() const
-        {
-            return cbegin();
-        }
-        const_iterator end() const
-        {
-            return cend();
-        }
-        iterator begin()
-        {
-            if (has_content())
-                return content().begin();
-            return nullptr;
-        }
-        iterator end()
-        {
-            if (has_content())
-                return content().end();
-            return nullptr;
-        }
+        const_iterator cbegin() const;
+        const_iterator cend() const;
+        const_iterator begin() const;
+        const_iterator end() const;
+        iterator begin();
+        iterator end();
     private:
-        ref_ptr<i_glyph_text> iContents;
+        mutable ref_ptr<i_glyph_text> iContent;
     };
 
     template <typename Iter>
@@ -538,12 +448,37 @@ namespace neogfx
 
     class i_graphics_context;
 
+    class i_font_selector
+    {
+    public:
+        virtual ~i_font_selector() = default;
+    public:
+        virtual font select_font(std::size_t CharacterPos) const = 0;
+    };
+
+    class font_selector : public i_font_selector
+    {
+        typedef std::function<font(std::size_t)> function_type;
+    public:
+        explicit font_selector(function_type const& aSelectorFunction) :
+            iSelectorFunction{ aSelectorFunction }
+        {
+        }
+    public:
+        font select_font(std::size_t CharacterPos) const override
+        {
+            return iSelectorFunction(CharacterPos);
+        }
+    private:
+        function_type iSelectorFunction;
+    };
+
     class i_glyph_text_factory
     {
     public:
         virtual ~i_glyph_text_factory() = default;
     public:
-        // todo: use abstract glyph_text
+        virtual glyph_text create_empty_glyph_text() = 0;
         virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) = 0;
         virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) = 0;
     public:

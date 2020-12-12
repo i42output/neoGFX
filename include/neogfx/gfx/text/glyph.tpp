@@ -21,14 +21,15 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 
 namespace neogfx
 {
     template <typename Container, typename ConstIterator, typename Iterator>
     const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::font_cache::glyph_font() const
     {
-        if (!cache().empty())
-            return cache().begin()->second.second;
+        if (!iCache.empty())
+            return iCache.begin()->second.second;
         throw cached_font_not_found();
     }
 
@@ -36,8 +37,8 @@ namespace neogfx
     const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::font_cache::glyph_font(const_reference aGlyph) const
     {
         cache_glyph_font(aGlyph.font);
-        auto existing = cache().find(aGlyph.font);
-        if (existing != cache().end())
+        auto existing = iCache.find(aGlyph.font);
+        if (existing != iCache.end())
             return existing->second.second;
         throw cached_font_not_found();
     }

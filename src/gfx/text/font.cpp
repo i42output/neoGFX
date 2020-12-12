@@ -24,6 +24,7 @@
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include "native/i_native_font.hpp"
 
 namespace neogfx

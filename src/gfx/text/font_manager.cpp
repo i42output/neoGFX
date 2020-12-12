@@ -167,6 +167,7 @@ namespace neogfx
         typedef std::tuple<const char32_t*, const char32_t*, text_direction, bool, hb_script_t> glyph_run;
         typedef std::vector<glyph_run> run_list;
     public:
+        glyph_text create_empty_glyph_text() override;
         glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) override;
         glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) override;
     private:
@@ -374,6 +375,11 @@ namespace neogfx
         glyphs_list iGlyphsList;
         result_type iResults;
     };
+
+    glyph_text glyph_text_factory::create_empty_glyph_text()
+    {
+        return *make_ref<glyph_text_content>();
+    }
 
     glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector)
     {

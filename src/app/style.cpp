@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/file/json.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/style.hpp>
 
