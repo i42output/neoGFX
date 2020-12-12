@@ -1641,6 +1641,9 @@
     <None Include="..\..\..\include\neogfx\gui\widget\button.tpp">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="..\..\..\include\neogfx\gfx\text\glyph.tpp">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\src\resources\gamecontrollerdb.txt">

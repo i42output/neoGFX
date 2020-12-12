@@ -92,6 +92,24 @@ namespace neogfx
             return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
         }
 
+        bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs)
+        {
+            // ensure emoji cannot allow subpixel and non-subpixel glyphs in same batch
+            if (is_emoji(lhs) != is_emoji(rhs))
+                return false;
+            // are both emoji?
+            if (is_emoji(lhs))
+                return true;
+            // neither are emoji...
+            if (subpixel(lhs) != subpixel(rhs))
+                return false;
+            const i_glyph_texture& leftGlyphTexture = lhsText.glyph_texture(lhs);
+            const i_glyph_texture& rightGlyphTexture = rhsText.glyph_texture(rhs);
+            if (leftGlyphTexture.subpixel() != rightGlyphTexture.subpixel())
+                return false;
+            return true;
+        };
+
         bool batchable(const operation& aLeft, const operation& aRight)
         {
             if (aLeft.index() != aRight.index())
@@ -129,21 +147,8 @@ namespace neogfx
             }
             case operation_type::DrawGlyph:
             {
-                auto& left = static_variant_cast<const draw_glyph&>(aLeft);
-                auto& right = static_variant_cast<const draw_glyph&>(aRight);
-                // ensure emoji cannot allow subpixel and non-subpixel glyphs in same batch
-                if (left.glyph.is_emoji() != right.glyph.is_emoji())
-                    return false;
-                // are both emoji?
-                if (left.glyph.is_emoji())
-                    return true;
-                // neither are emoji...
-                if (left.glyph.subpixel() != right.glyph.subpixel())
-                    return false;
-                const i_glyph_texture& leftGlyphTexture = left.glyph.glyph_texture();
-                const i_glyph_texture& rightGlyphTexture = right.glyph.glyph_texture();
-                if (leftGlyphTexture.subpixel() != rightGlyphTexture.subpixel())
-                    return false;
+                auto& left = static_variant_cast<const draw_glyphs&>(aLeft);
+                auto& right = static_variant_cast<const draw_glyphs&>(aRight);
                 if (!batchable(left.appearance.ink(), right.appearance.ink()))
                     return false;
                 if (!batchable(left.appearance.paper(), right.appearance.paper()))

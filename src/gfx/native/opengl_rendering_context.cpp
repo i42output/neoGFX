@@ -1504,6 +1504,36 @@ namespace neogfx
 
     void opengl_rendering_context::draw_glyphs(const graphics_operation::batch& aDrawGlyphOps)
     {
+        thread_local std::vector<draw_glyph> drawGlyphCache;
+        drawGlyphCache.clear();
+
+        for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+        {
+            auto& drawOp = static_variant_cast<const graphics_operation::draw_glyphs&>(*op);
+            vec3 pos = drawOp.point;
+            for (auto g = drawOp.begin; g != drawOp.end; ++g)
+            {
+                auto& glyph = *g;
+                drawGlyphCache.emplace_back(pos, &drawOp.glyphText.content(), &glyph, &drawOp.appearance);
+                pos.x += advance(glyph).cx;
+            }
+        }
+
+        auto start = drawGlyphCache.begin();
+        for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
+        {
+            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph, *next->glyph))
+            {
+                draw_glyphs(&*start, &*next);
+                start = next;
+            }
+        }
+        if (start != drawGlyphCache.end())
+            draw_glyphs(&*start, std::next(&*std::prev(drawGlyphCache.end())));
+    }
+
+    void opengl_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
+    {
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
@@ -1532,18 +1562,20 @@ namespace neogfx
             switch (pass)
             {
             case 1: // Paper (glyph background) and emoji
-                for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+                for (auto op = aBegin; op != aEnd; ++op)
                 {
-                    auto& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+                    auto& drawOp = *op;
+                    auto& glyphText = *drawOp.glyphText;
+                    auto& glyph = *drawOp.glyph;
 
-                    if (!drawOp.glyph.is_whitespace() && !drawOp.glyph.is_emoji())
+                    if (!is_whitespace(glyph) && !is_emoji(glyph))
                         ++normalGlyphCount;
 
-                    if (drawOp.appearance.effect() != std::nullopt &&
-                        (drawOp.appearance.effect()->type() == text_effect_type::Glow || drawOp.appearance.effect()->type() == text_effect_type::Shadow))
+                    if (drawOp.appearance->effect() != std::nullopt &&
+                        (drawOp.appearance->effect()->type() == text_effect_type::Glow || drawOp.appearance->effect()->type() == text_effect_type::Shadow))
                     {
-                        font const& glyphFont = drawOp.glyph.font();
-                        rect const glyphRect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } };
+                        font const& glyphFont = glyphText.glyph_font(glyph);
+                        rect const glyphRect{ point{ drawOp.point }, size{ advance(glyph).cx, glyphFont.height() } };
 
                         if (!filterRegion)
                             filterRegion.emplace(glyphRect);
@@ -1551,10 +1583,10 @@ namespace neogfx
                             filterRegion->combine(glyphRect);
                     }
 
-                    if (drawOp.appearance.paper() != std::nullopt)
+                    if (drawOp.appearance->paper() != std::nullopt)
                     {
-                        font const& glyphFont = drawOp.glyph.font();
-                        rect const glyphRect{ point{ drawOp.point }, size{ drawOp.glyph.advance().cx, glyphFont.height() } };
+                        font const& glyphFont = glyphText.glyph_font(glyph);
+                        rect const glyphRect{ point{ drawOp.point }, size{ advance(glyph).cx, glyphFont.height() } };
 
                         auto const& mesh = to_ecs_component(
                             glyphRect,
@@ -1565,32 +1597,32 @@ namespace neogfx
                         meshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
-                                    std::holds_alternative<color>(*drawOp.appearance.paper()) ?
-                                        to_ecs_component(std::get<color>(*drawOp.appearance.paper())) : std::optional<game::color>{},
-                                    std::holds_alternative<gradient>(*drawOp.appearance.paper()) ?
-                                        to_ecs_component(std::get<gradient>(*drawOp.appearance.paper())) : std::optional<game::gradient>{} } });
+                                    std::holds_alternative<color>(*drawOp.appearance->paper()) ?
+                                        to_ecs_component(std::get<color>(*drawOp.appearance->paper())) : std::optional<game::color>{},
+                                    std::holds_alternative<gradient>(*drawOp.appearance->paper()) ?
+                                        to_ecs_component(std::get<gradient>(*drawOp.appearance->paper())) : std::optional<game::gradient>{} } });
                     }
 
-                    if (drawOp.glyph.is_emoji())
+                    if (is_emoji(glyph))
                     {
-                        font const& glyphFont = drawOp.glyph.font();
+                        font const& glyphFont = glyphText.glyph_font(glyph);
 
                         auto const& mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
                             to_ecs_component(
                                 rect{
                                     point{ drawOp.point },
-                                    size{ drawOp.glyph.advance().cx, glyphFont.height() } },
-                                mesh_type::Triangles,
-                                drawOp.point.z) :
-                            to_ecs_component(
-                                game_rect{
-                                    point{ drawOp.point },
-                                    size{ drawOp.glyph.advance().cx, glyphFont.height() } },
-                                mesh_type::Triangles,
-                                drawOp.point.z);
+                                    size{ advance(glyph).cx, glyphFont.height() } },
+                                    mesh_type::Triangles,
+                                    drawOp.point.z) :
+                                    to_ecs_component(
+                                        game_rect{
+                                            point{ drawOp.point },
+                                            size{ advance(glyph).cx, glyphFont.height() } },
+                                            mesh_type::Triangles,
+                                            drawOp.point.z);
 
                         auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
-                        auto const& emojiTexture = emojiAtlas.emoji_texture(drawOp.glyph.value()).as_sub_texture();
+                        auto const& emojiTexture = emojiAtlas.emoji_texture(glyph.value).as_sub_texture();
                         meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                         meshRenderers.push_back(game::mesh_renderer{ game::material{ {}, {}, {}, to_ecs_component(emojiTexture) } });
                     }
@@ -1604,34 +1636,39 @@ namespace neogfx
                     if (pass == 2 && filterRegion)
                     {
                         std::optional<scoped_filter<blur_filter>> filter;
-                        for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+                        for (auto op = aBegin; op != aEnd; ++op)
                         {
-                            auto const& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+                            auto& drawOp = *op;
+                            auto& glyphText = *drawOp.glyphText;
+                            auto& glyph = *drawOp.glyph;
 
-                            if (drawOp.glyph.is_whitespace() || drawOp.glyph.is_emoji())
+                            if (is_whitespace(glyph) || is_emoji(glyph))
                                 continue;
 
                             if (!filter)
-                                filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance.effect()->width() });
+                                filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width() });
 
                             filter->front_buffer().draw_glyph(
-                                drawOp.point + drawOp.appearance.effect()->offset(),
-                                drawOp.glyph,
-                                drawOp.appearance.effect()->color());
+                                drawOp.point + drawOp.appearance->effect()->offset(),
+                                glyphText,
+                                glyph,
+                                drawOp.appearance->effect()->color());
                         }
                         continue;
                     }
                     
-                    for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
+                    for (auto op = aBegin; op != aEnd; ++op)
                     {
-                        auto const& drawOp = static_variant_cast<const graphics_operation::draw_glyph&>(*op);
+                        auto& drawOp = *op;
+                        auto& glyphText = *drawOp.glyphText;
+                        auto& glyph = *drawOp.glyph;
 
-                        if (drawOp.glyph.is_whitespace() || drawOp.glyph.is_emoji())
+                        if (is_whitespace(glyph) || is_emoji(glyph))
                             continue;
 
-                        auto const& glyphTexture = drawOp.glyph.glyph_texture();
+                        auto const& glyphTexture = glyphText.glyph_texture(glyph);
 
-                        bool const renderEffects = !drawOp.appearance.only_calculate_effect() && drawOp.appearance.effect();
+                        bool const renderEffects = !drawOp.appearance->only_calculate_effect() && drawOp.appearance->effect();
                         if (!renderEffects && pass == 2)
                             continue;
 
@@ -1639,12 +1676,12 @@ namespace neogfx
                         if (updateGlyphShader)
                         {
                             updateGlyphShader = false;
-                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, drawOp.glyph);
+                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyph);
                         }
 
-                        bool const subpixelRender = drawOp.glyph.subpixel() && glyphTexture.subpixel();
+                        bool const subpixelRender = subpixel(glyph) && glyphTexture.subpixel();
 
-                        auto const& glyphFont = drawOp.glyph.font();
+                        auto const& glyphFont = glyphText.glyph_font(glyph);
 
                         vec3 const glyphOrigin{
                             drawOp.point.x + glyphTexture.placement().x,
@@ -1655,9 +1692,9 @@ namespace neogfx
 
                         if (pass == 2)
                         {
-                            auto const scanlineOffsets = (drawOp.appearance.effect()->type() == text_effect_type::Outline ? static_cast<uint32_t>(drawOp.appearance.effect()->width()) * 2u + 1u : 1u);
+                            auto const scanlineOffsets = (drawOp.appearance->effect()->type() == text_effect_type::Outline ? static_cast<uint32_t>(drawOp.appearance->effect()->width()) * 2u + 1u : 1u);
                             auto const offsets = scanlineOffsets * scanlineOffsets;
-                            point const offsetOrigin = drawOp.appearance.effect()->offset();
+                            point const offsetOrigin = drawOp.appearance->effect()->offset();
                             for (uint32_t offset = 0; offset < offsets; ++offset)
                             {
                                 rect const outputRect = {
@@ -1667,17 +1704,17 @@ namespace neogfx
                                     to_ecs_component(
                                         outputRect,
                                         mesh_type::Triangles,
-                                        drawOp.point.z) : 
+                                        drawOp.point.z) :
                                     to_ecs_component(
                                         game_rect{ outputRect },
                                         mesh_type::Triangles,
                                         drawOp.point.z);
                                 meshFilters.push_back(game::mesh_filter{ {}, mesh });
-                                if (std::holds_alternative<color>(drawOp.appearance.effect()->color()))
+                                if (std::holds_alternative<color>(drawOp.appearance->effect()->color()))
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
-                                            game::material{ 
-                                                to_ecs_component(static_variant_cast<const color&>(drawOp.appearance.effect()->color())),
+                                            game::material{
+                                                to_ecs_component(static_variant_cast<const color&>(drawOp.appearance->effect()->color())),
                                                 {},
                                                 {},
                                                 to_ecs_component(glyphTexture.texture()),
@@ -1686,16 +1723,16 @@ namespace neogfx
                                             {},
                                             0,
                                             {}, subpixelRender });
-                                else if (std::holds_alternative<gradient>(drawOp.appearance.effect()->color()))
+                                else if (std::holds_alternative<gradient>(drawOp.appearance->effect()->color()))
                                 {
-                                    gradient g = static_variant_cast<const gradient&>(drawOp.appearance.effect()->color());
-                                    if (g.bounding_box() == std::nullopt)
-                                        g.set_bounding_box(outputRect);
+                                    neogfx::gradient gradient = static_variant_cast<const neogfx::gradient&>(drawOp.appearance->effect()->color());
+                                    if (gradient.bounding_box() == std::nullopt)
+                                        gradient.set_bounding_box(outputRect);
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
                                             game::material{
                                                 {},
-                                                to_ecs_component(g),
+                                                to_ecs_component(gradient),
                                                 {},
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
@@ -1707,8 +1744,8 @@ namespace neogfx
                                 else
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
-                                            game::material{ 
-                                                {}, 
+                                            game::material{
+                                                {},
                                                 {},
                                                 {},
                                                 to_ecs_component(glyphTexture.texture()),
@@ -1726,54 +1763,54 @@ namespace neogfx
                                 to_ecs_component(
                                     outputRect,
                                     mesh_type::Triangles,
-                                    drawOp.point.z) : 
+                                    drawOp.point.z) :
                                 to_ecs_component(
                                     game_rect{ outputRect },
                                     mesh_type::Triangles,
                                     drawOp.point.z);
                             meshFilters.push_back(game::mesh_filter{ {}, mesh });
-                            if (std::holds_alternative<color>(drawOp.appearance.ink()))
+                            if (std::holds_alternative<color>(drawOp.appearance->ink()))
                                 meshRenderers.push_back(
                                     game::mesh_renderer{
-                                        game::material{ 
-                                            to_ecs_component(static_variant_cast<const color&>(drawOp.appearance.ink())),
+                                        game::material{
+                                            to_ecs_component(static_variant_cast<const color&>(drawOp.appearance->ink())),
                                             {},
                                             {},
                                             to_ecs_component(glyphTexture.texture()),
                                             shader_effect::Ignore
                                         },
-                                        {}, 
+                                        {},
                                         0,
                                         {}, subpixelRender });
-                            else if (std::holds_alternative<gradient>(drawOp.appearance.ink()))
+                            else if (std::holds_alternative<gradient>(drawOp.appearance->ink()))
                             {
-                                gradient g = static_variant_cast<const gradient&>(drawOp.appearance.ink());
-                                if (g.bounding_box() == std::nullopt)
-                                    g.set_bounding_box(outputRect);
+                                neogfx::gradient gradient = static_variant_cast<const neogfx::gradient&>(drawOp.appearance->ink());
+                                if (gradient.bounding_box() == std::nullopt)
+                                    gradient.set_bounding_box(outputRect);
                                 meshRenderers.push_back(
-                                game::mesh_renderer{
-                                    game::material{
+                                    game::mesh_renderer{
+                                        game::material{
+                                            {},
+                                            to_ecs_component(gradient),
+                                            {},
+                                            to_ecs_component(glyphTexture.texture()),
+                                            shader_effect::Ignore
+                                        },
                                         {},
-                                        to_ecs_component(g),
-                                        {},
-                                        to_ecs_component(glyphTexture.texture()),
-                                        shader_effect::Ignore
-                                    },
-                                    {}, 
-                                    0,
-                                    {}, subpixelRender });
+                                        0,
+                                        {}, subpixelRender });
                             }
                             else
                                 meshRenderers.push_back(
                                     game::mesh_renderer{
-                                        game::material{ 
-                                            {}, 
+                                        game::material{
+                                            {},
                                             {},
                                             {},
                                             to_ecs_component(glyphTexture.texture()),
                                             shader_effect::Ignore
                                         },
-                                        {}, 
+                                        {},
                                         {},
                                         {}, subpixelRender });
                         }

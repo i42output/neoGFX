@@ -244,10 +244,12 @@ namespace neogfx
             brush fill;
         };
 
-        struct draw_glyph
+        struct draw_glyphs
         {
             vec3 point;
-            glyph_ex glyph;
+            glyph_text glyphText;
+            glyph_text::const_iterator begin;
+            glyph_text::const_iterator end;
             text_appearance appearance;
         };
 
@@ -297,7 +299,7 @@ namespace neogfx
             fill_arc,
             fill_path,
             fill_shape,
-            draw_glyph,
+            draw_glyphs,
             draw_mesh
         > operation;
 
@@ -348,6 +350,7 @@ namespace neogfx
         std::string to_string(operation_type aOpType);
 
         bool batchable(const operation& aLeft, const operation& aRight);
+        bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs);
 
         typedef std::vector<operation> queue;
         typedef std::pair<operation const*, operation const*> batch;

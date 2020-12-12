@@ -569,16 +569,16 @@ namespace neogfx
         uGlyphEnabled = false;
     }
 
-    void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph_ex& aGlyph)
+    void standard_glyph_shader::set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph& aGlyph)
     {
         enable();
-        bool subpixelRender = aGlyph.subpixel() && aGlyph.glyph_texture().subpixel();
+        bool subpixelRender = subpixel(aGlyph) && aText.glyph_texture(aGlyph).subpixel();
         if (subpixelRender)
             aContext.render_target().target_texture().bind(7);
         uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<int32_t>();
         uGlyphGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
         uGlyphRenderOutput = sampler2DMS{ 7 };
-        uGlyphSubpixel = aGlyph.glyph_texture().subpixel();
+        uGlyphSubpixel = aText.glyph_texture(aGlyph).subpixel();
         uGlyphSubpixelFormat = subpixelRender ? aContext.subpixel_format() : subpixel_format::None;
         uGlyphEnabled = true;
     }

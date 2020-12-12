@@ -195,10 +195,10 @@ namespace neogfx
         virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const = 0;
         virtual void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
         virtual void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_glyph(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_underline(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_underline(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph_underline(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_glyph_underline(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
         virtual char mnemonic() const = 0;
         virtual bool mnemonic_set() const = 0;
         virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const = 0;
@@ -222,8 +222,8 @@ namespace neogfx
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aGc.draw_glyph(pos + iterGlyph->offset().to_vec3(), *iterGlyph, aAppearance);
-            pos.x += iterGlyph->advance().cx;
+            aGc.draw_glyph(pos + offset(*iterGlyph).to_vec3(), aGlyphText, *iterGlyph, aAppearance);
+            pos.x += advance(*iterGlyph).cx;
         }
     }
 

@@ -161,7 +161,7 @@ namespace neogfx
         struct cluster
         {
             std::string::size_type from;
-            glyph_ex::flags_e flags;
+            glyph::flags_e flags;
         };
         typedef std::vector<cluster> cluster_map_t;
         typedef std::tuple<const char32_t*, const char32_t*, text_direction, bool, hb_script_t> glyph_run;
@@ -174,8 +174,6 @@ namespace neogfx
         std::vector<character_type> iTextDirections;
         std::u32string iCodePointsBuffer;
         run_list iRuns;
-        glyph_text iGlyphTextResult;
-        glyph_text iGlyphTextResult2;
     };
 
     class glyph_shapes
@@ -400,8 +398,8 @@ namespace neogfx
 
     glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char32_t const*  aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
     {
-        auto& result = iGlyphTextResult;
-        result.clear();
+        auto refResult = make_ref<glyph_text_content>();
+        auto& result = *refResult;
 
         if (aUtf32End == aUtf32Begin)
             return result;
@@ -668,37 +666,38 @@ namespace neogfx
                         font = font.has_fallback() ? font.fallback() : selectedFont;
                 }
                 if (j > 0 && !result.empty())
-                    result.back().kerning_adjust(static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
+                    kerning_adjust(result.back(), static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
                 size advance = textDirections[startCluster].category != text_category::Emoji ?
                     size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
                     size{ font.height(), 0.0 };
-                result.emplace_back(textDirections[startCluster],
+                result.emplace_back(
+                    textDirections[startCluster],
                     shapes.glyph_info(j).codepoint,
-                    glyph_ex::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
-                    result,
-                    font,
+                    glyph::flags_e{},
+                    glyph::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
+                    font.id(),
                     advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0));
-                if (result.back().category() == text_category::Whitespace)
-                    result.back().set_value(aUtf32Begin[startCluster]);
-                else if (result.back().category() == text_category::Emoji)
-                    result.back().set_value(emojiAtlas.emoji(aUtf32Begin[startCluster], font.height()));
+                if (category(result.back()) == text_category::Whitespace)
+                    result.back().value = aUtf32Begin[startCluster];
+                else if (category(result.back()) == text_category::Emoji)
+                    result.back().value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
                 if ((aFontSelector.select_font(startCluster).style() & font_style::Underline) == font_style::Underline)
-                    result.back().set_underline(true);
+                    set_underline(result.back(), true);
                 if (aContext.is_subpixel_rendering_on() && !font.is_bitmap_font())
-                    result.back().set_subpixel(true);
+                    set_subpixel(result.back(), true);
                 if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
-                    result.back().set_mnemonic(true);
-                if (result.back().category() != text_category::Whitespace && result.back().category() != text_category::Emoji)
+                    set_mnemonic(result.back(), true);
+                if (category(result.back()) != text_category::Whitespace && category(result.back()) != text_category::Emoji)
                 {
                     auto& glyph = result.back();
-                    if (glyph.advance() != advance.ceil())
+                    if (neogfx::advance(glyph) != advance.ceil())
                     {
                         const i_glyph_texture& glyphTexture = aFontSelector.select_font(startCluster).native_font_face().glyph_texture(glyph);
-                        auto visibleAdvance = std::ceil(glyph.offset().cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
+                        auto visibleAdvance = std::ceil(offset(glyph).cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
                         if (visibleAdvance > advance.cx)
                         {
                             advance.cx = visibleAdvance;
-                            glyph.set_advance(advance);
+                            glyph.advance = advance;
                         }
                     }
                 }
@@ -706,25 +705,25 @@ namespace neogfx
         }
         if (hasEmojis)
         {
-            auto& emojiResult = iGlyphTextResult2;
-            emojiResult.clear();
+            auto refEmojiResult = make_ref<glyph_text_content>();
+            auto& emojiResult = *refEmojiResult;
             for (auto i = result.begin(); i != result.end(); ++i)
             {
-                auto cluster = i->source().first;
+                auto cluster = i->source.first;
                 auto chStart = aUtf32Begin[cluster];
-                if (i->category() == text_category::Emoji)
+                if (category(*i) == text_category::Emoji)
                 {
-                    if (!emojiResult.empty() && emojiResult.back().is_emoji() && emojiResult.back().source() == i->source())
+                    if (!emojiResult.empty() && is_emoji(emojiResult.back()) && emojiResult.back().source == i->source)
                     {
                         // probable variant selector fubar'd by harfbuzz
-                        auto s = emojiResult.back().source();
+                        auto s = emojiResult.back().source;
                         if (s.second < codePointCount && get_text_category(service<i_font_manager>().emoji_atlas(), aUtf32Begin[s.second]) == text_category::Control)
                         {
                             ++s.first;
                             ++s.second;
-                            i->set_source(s);
-                            i->set_category(text_category::Control);
-                            i->set_advance(size{});
+                            i->source = s;
+                            set_category(*i, text_category::Control);
+                            i->advance = size{};
                         }
                     }
                     std::u32string sequence;
@@ -749,8 +748,8 @@ namespace neogfx
                     if (sequence.size() > 1 && service<i_font_manager>().emoji_atlas().is_emoji(sequence))
                     {
                         auto g = *i;
-                        g.set_value(service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height()));
-                        g.set_source(glyph_ex::source_type{ g.source().first, g.source().first + static_cast<uint32_t>(sequence.size()) });
+                        g.value = service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height());
+                        g.source = glyph::source_type{ g.source.first, g.source.first + static_cast<uint32_t>(sequence.size()) };
                         emojiResult.push_back(g);
                         i = j - 1;
                     }
@@ -758,16 +757,16 @@ namespace neogfx
                         emojiResult.push_back(*i);
                     if (absorbNext)
                     {
-                        emojiResult.back().set_source(glyph_ex::source_type{ emojiResult.back().source().first, emojiResult.back().source().first + static_cast<uint32_t>(sequence.size()) + 1u });
+                        emojiResult.back().source = glyph::source_type{ emojiResult.back().source.first, emojiResult.back().source.first + static_cast<uint32_t>(sequence.size()) + 1u };
                         ++i;
                     }
                 }
                 else
                     emojiResult.push_back(*i);
             }
-            return std::move(emojiResult);
+            return emojiResult;
         }
-        return std::move(result);
+        return result;
     }
 
     font_manager::font_manager() :

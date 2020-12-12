@@ -631,7 +631,16 @@ namespace neogfx
 
     void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const
     {
-        neogfx::draw_glyph_text(*this, aPoint, aText, aTextBegin, aTextEnd, aAppearance);
+        auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, aAppearance });
+        vec3 pos = aPoint;
+        for (auto g = aTextBegin; g != aTextEnd; ++g)
+        {
+            auto& glyph = *g;
+            if (underline(glyph) || (mnemonics_shown() && neogfx::mnemonic(glyph)))
+                draw_glyph_underline(pos, aText, glyph, aAppearance);
+            pos.x += advance(glyph).cx;
+        }
     }
 
     void graphics_context::draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
@@ -979,7 +988,7 @@ namespace neogfx
         typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
         typedef std::vector<line_t> lines_t;
         lines_t lines;
-        std::array<glyph_ex, 2> delimeters = { glyph_ex{ text_category::Whitespace, '\r' }, glyph_ex{ text_category::Whitespace, '\n' } };
+        std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
         neolib::tokens(result.glyphText.cbegin(), result.glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
         vec3 pos;
         dimension maxLineWidth = 0.0;
@@ -1004,7 +1013,7 @@ namespace neogfx
                 while (next != line.second)
                 {
                     bool gotLine = false;
-                    if (lineWidth + next->extents(result.glyphText).cx > maxWidth)
+                    if (lineWidth + result.glyphText.extents(*next).cx > maxWidth)
                     {
                         if (next != lineStart)
                         {
@@ -1014,26 +1023,26 @@ namespace neogfx
                             next = wordBreak.second;
                             if (lineEnd == next)
                             {
-                                while (lineEnd != line.second && (lineEnd + 1)->source() == wordBreak.first->source())
+                                while (lineEnd != line.second && (lineEnd + 1)->source == wordBreak.first->source)
                                     ++lineEnd;
                                 next = lineEnd;
                             }
                         }
                         else
                         {
-                            lineWidth += next->advance().cx;
+                            lineWidth += advance(*next).cx;
                             ++next;
                         }
                         gotLine = true;
                     }
                     else
                     {
-                        lineWidth += next->advance().cx;
+                        lineWidth += advance(*next).cx;
                         ++next;
                     }
                     if (gotLine || next == line.second)
                     {
-                        lineWidth += (std::prev(next)->extents(result.glyphText).cx - std::prev(next)->advance().cx);
+                        lineWidth += (result.glyphText.extents(*std::prev(next)).cx - advance(*std::prev(next)).cx);
                         vec3 linePos = pos;
                         result.lines.push_back(multiline_glyph_text::line{ linePos, result.glyphText.extents(lineStart, lineEnd).to_vec2(), std::distance(result.glyphText.cbegin(), lineStart), std::distance(result.glyphText.cbegin(), lineEnd) });
                         maxLineWidth = std::max(maxLineWidth, lineWidth);
@@ -1060,47 +1069,34 @@ namespace neogfx
         return result;
     }
 
-    void graphics_context::draw_glyph(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
-        draw_glyph(aPoint.to_vec3(), aGlyph, aAppearance);
+        draw_glyph(aPoint.to_vec3(), aText, aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
-        try
-        {
-            auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-            native_context().enqueue(graphics_operation::draw_glyph{ adjustedPos, aGlyph, aAppearance });
-            if (aGlyph.underline() || (mnemonics_shown() && aGlyph.mnemonic()))
-                draw_glyph_underline(aPoint, aGlyph, aAppearance);
-        }
-        catch (const freetype_error& fe)
-        {
-            // do nothing except report error
-            thread_local bool sReported;
-            if (!sReported)
-            {
-                sReported = true;
-                service<debug::logger>() << "neogfx: FreeType error in draw_glyph(): " << fe.what() << ", ignoring further errors." << endl;
-            }
-        }
+        auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyph, std::next(&aGlyph), aAppearance });
+        if (underline(aGlyph) || (mnemonics_shown() && neogfx::mnemonic(aGlyph)))
+            draw_glyph_underline(aPoint, aText, aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph_underline(const point& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_underline(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
-        draw_glyph_underline(aPoint.to_vec3(), aGlyph, aAppearance);
+        draw_glyph_underline(aPoint.to_vec3(), aText, aGlyph, aAppearance);
     }
 
-    void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph_ex& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
-        auto const& font = aGlyph.font();
+        auto const& font = aText.glyph_font(aGlyph);
         auto const descender = font.descender();
         auto const underlinePosition = font.native_font_face().underline_position(); 
         auto const dy = descender - underlinePosition;
         auto const yLine = logical_coordinates().is_gui_orientation() ? font.height() - 1 + dy : -dy;
         draw_line(
             aPoint + vec3{ 0.0, yLine },
-            aPoint + vec3{ mnemonics_shown() && aGlyph.mnemonic() ? aGlyph.extents(font).cx : aGlyph.advance().cx, yLine },
+            aPoint + vec3{ mnemonics_shown() && neogfx::mnemonic(aGlyph) ? aText.extents(aGlyph).cx : advance(aGlyph).cx, yLine },
             pen{ aAppearance.ink(), font.native_font_face().underline_thickness() });
     }
 

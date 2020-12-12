@@ -205,20 +205,20 @@ namespace neogfx
             tag_data iContents;
         };
         typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
-        class paragraph_positioned_glyph : public glyph_ex
+        class paragraph_positioned_glyph : public glyph
         {
         public:
-            using glyph_ex::glyph_ex;
+            using glyph::glyph;
             paragraph_positioned_glyph(double aX) : x(aX)
             {
             }
-            paragraph_positioned_glyph(const glyph_ex& aOther) : glyph_ex(aOther), x(0.0)
+            paragraph_positioned_glyph(const glyph& aOther) : glyph(aOther), x(0.0)
             {
             }
         public:
-            paragraph_positioned_glyph& operator=(const glyph_ex& aOther)
+            paragraph_positioned_glyph& operator=(const glyph& aOther)
             {
-                glyph_ex::operator=(aOther);
+                glyph::operator=(aOther);
                 x = 0.0;
                 return *this;
             }
@@ -231,17 +231,7 @@ namespace neogfx
             double x = 0.0;
         };
         typedef neolib::segmented_array<paragraph_positioned_glyph, 256> glyph_container_type;
-        class document_glyphs : public glyph_font_cache, public glyph_container_type
-        {
-        public:
-            using glyph_container_type::glyph_container_type;
-        public:
-            void clear()
-            {
-                glyph_font_cache::clear();
-                glyph_container_type::clear();
-            }
-        };
+        typedef basic_glyph_text_content<glyph_container_type> document_glyphs;
         class glyph_paragraph;
         class glyph_paragraph_index
         {
@@ -362,17 +352,13 @@ namespace neogfx
                 if (iHeights.empty())
                 {
                     dimension previousHeight = 0.0;
-                    auto textStartIndex = text_start_index();
                     auto glyphsStartIndex = start_index();
                     auto glyphsEndIndex = end_index();
                     auto iterGlyph = start();
                     for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
                     {
                         auto const& glyph = *(iterGlyph++);
-                        auto const& tag = parent().iText.tag(parent().iText.begin() + textStartIndex + glyph.source().first);
-                        auto const& style = std::holds_alternative<style_list::const_iterator>(tag.style()) ? *static_variant_cast<style_list::const_iterator>(tag.style()) : parent().default_style();
-                        auto& glyphFont = style.font() != std::nullopt ? *style.font() : parent().font();
-                        dimension cy = glyph.extents(glyphFont).cy;
+                        dimension cy = parent().iGlyphs.extents(glyph).cy;
                         if (i == glyphsStartIndex || cy != previousHeight)
                         {
                             iHeights[i] = cy;
@@ -628,4 +614,6 @@ namespace neogfx
         define_property(property_category::other, std::string, PasswordMask, password_mask)
         define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)
     };
+
+    extern template class basic_glyph_text_content<text_edit::glyph_container_type>;
 }

@@ -277,16 +277,16 @@ namespace neogfx
         }
     }
          
-    i_glyph_texture& native_font_face::glyph_texture(const glyph_ex& aGlyph) const
+    i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const
     {
-        auto existingGlyph = iGlyphs.find(aGlyph.value());
+        auto existingGlyph = iGlyphs.find(aGlyph.value);
         if (existingGlyph != iGlyphs.end())
             return existingGlyph->second;
         try
         {
             try
             {
-                freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value(), FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value, FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
             }
             catch (freetype_error fe)
             {
@@ -309,11 +309,11 @@ namespace neogfx
             if (!inHere)
             {
                 neolib::scoped_flag sf{ inHere };
-                glyph_ex invalid = aGlyph;
+                glyph invalid = aGlyph;
                 auto const replacementGlyph = FT_Get_Char_Index(iHandle, 0xFFFD);
                 if (replacementGlyph != 0)
                 {
-                    invalid.set_value(replacementGlyph);
+                    invalid.value = replacementGlyph;
                     return glyph_texture(aGlyph);
                 }
             }
@@ -347,7 +347,7 @@ namespace neogfx
             1.0, texture_sampling::Normal, pixelMode != glyph_pixel_mode::Mono ? texture_data_format::SubPixel : texture_data_format::Red);
 
         rect glyphRect{ subTexture.atlas_location() };
-        i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value(),
+        i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value,
             neogfx::glyph_texture{
                 subTexture,
                 useSubpixelFiltering,

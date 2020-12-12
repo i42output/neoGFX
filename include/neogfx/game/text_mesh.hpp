@@ -148,10 +148,10 @@ namespace neogfx::game
                         for (auto i = line.begin; i < line.end; ++i)
                         {
                             auto const& glyph = *std::next(glyphText.glyphText.begin(), i);
-                            if (!glyph.is_whitespace())
+                            if (!is_whitespace(glyph))
                             {
-                                auto const& glyphFont = glyph.font(glyphText.glyphText);
-                                auto const& glyphTexture = glyph.glyph_texture(glyphText.glyphText);
+                                auto const& glyphFont = glyphText.glyphText.glyph_font(glyph);
+                                auto const& glyphTexture = glyphText.glyphText.glyph_texture(glyph);
                                 vec3 glyphOrigin(
                                     pos.x + glyphTexture.placement().x,
                                     aGc.logical_coordinates().is_game_orientation() ?
@@ -161,7 +161,7 @@ namespace neogfx::game
                                 add_patch(*mf.mesh, mr, rect{ glyphOrigin, glyphTexture.texture().extents() }, 0.0, glyphTexture.texture());
                                 mr.patches.back().material = material{ aMaterial.color, aMaterial.gradient, aMaterial.sharedTexture, mr.patches.back().material.texture, aMaterial.shaderEffect };
                             }
-                            pos.x += glyph.advance().cx;
+                            pos.x += advance(glyph).cx;
                         }
                     };
                     switch(aData.textEffect)
