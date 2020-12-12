@@ -70,9 +70,10 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    basic_glyph_text_content<Container, ConstIterator, Iterator>::basic_glyph_text_content() :
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::basic_glyph_text_content(font const& aFont) :
         container_type{}
     {
+        cache_glyph_font(aFont.id());
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -234,20 +235,16 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents(const_reference aGlyph) const
     {
-        if (aGlyph.extents != basic_size<float>{})
-            return aGlyph.extents;
-        if (!has_font_glyph(aGlyph))
-            return aGlyph.extents;
-        else if (aGlyph.extents == basic_size<float>{})
+        if (aGlyph.extents == basic_size<float>{})
         {
             auto const& glyphFont = glyph_font(aGlyph);
-            if (has_font_glyph(aGlyph))
+            if (!has_font_glyph(aGlyph))
+                aGlyph.extents = neogfx::size{ advance(aGlyph).cx, !is_emoji(aGlyph) ? glyphFont.height() : advance(aGlyph).cx };
+            else
             {
                 auto const& glyphTexture = glyph_texture(aGlyph);
                 aGlyph.extents = neogfx::size{ static_cast<float>(offset(aGlyph).cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx), glyphFont.height() };
             }
-            else
-                aGlyph.extents = neogfx::size{ advance(aGlyph).cx, !is_emoji(aGlyph) ? glyphFont.height() : advance(aGlyph).cx };
         }
         return aGlyph.extents;
     }
@@ -256,7 +253,7 @@ namespace neogfx
     size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd) const
     {
         if (aBegin == aEnd)
-            return neogfx::size{ 0.0, 0.0 };
+            return neogfx::size{ 0.0, glyph_font().height() };
         neogfx::size result;
         for (basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator i = aBegin; i != aEnd; ++i)
         {

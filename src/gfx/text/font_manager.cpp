@@ -167,7 +167,7 @@ namespace neogfx
         typedef std::tuple<const char32_t*, const char32_t*, text_direction, bool, hb_script_t> glyph_run;
         typedef std::vector<glyph_run> run_list;
     public:
-        glyph_text create_empty_glyph_text() override;
+        glyph_text create_glyph_text(font const& aFont) override;
         glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) override;
         glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) override;
     private:
@@ -376,9 +376,9 @@ namespace neogfx
         result_type iResults;
     };
 
-    glyph_text glyph_text_factory::create_empty_glyph_text()
+    glyph_text glyph_text_factory::create_glyph_text(font const& aFont)
     {
-        return *make_ref<glyph_text_content>();
+        return *make_ref<glyph_text_content>(aFont);
     }
 
     glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector)
@@ -394,7 +394,7 @@ namespace neogfx
         });
 
         if (codePoints.empty())
-            return {};
+            return aFontSelector.select_font(0);
 
         return to_glyph_text(aContext, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
         {
@@ -404,7 +404,7 @@ namespace neogfx
 
     glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char32_t const*  aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
     {
-        auto refResult = make_ref<glyph_text_content>();
+        auto refResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
         auto& result = *refResult;
 
         if (aUtf32End == aUtf32Begin)
@@ -711,7 +711,7 @@ namespace neogfx
         }
         if (hasEmojis)
         {
-            auto refEmojiResult = make_ref<glyph_text_content>();
+            auto refEmojiResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
             auto& emojiResult = *refEmojiResult;
             for (auto i = result.begin(); i != result.end(); ++i)
             {

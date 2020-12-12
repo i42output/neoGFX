@@ -329,11 +329,11 @@ namespace neogfx
             }
             document_glyphs::const_iterator start() const
             {
-                return parent().iGlyphs.begin() + start_index();
+                return parent().glyphs().begin() + start_index();
             }
             document_glyphs::iterator start()
             {
-                return parent().iGlyphs.begin() + start_index();
+                return parent().glyphs().begin() + start_index();
             }
             document_glyphs::size_type end_index() const
             {
@@ -341,11 +341,11 @@ namespace neogfx
             }
             document_glyphs::const_iterator end() const
             {
-                return parent().iGlyphs.begin() + end_index();
+                return parent().glyphs().begin() + end_index();
             }
             document_glyphs::iterator end()
             {
-                return parent().iGlyphs.begin() + end_index();
+                return parent().glyphs().begin() + end_index();
             }
             dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
             {
@@ -358,7 +358,7 @@ namespace neogfx
                     for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
                     {
                         auto const& glyph = *(iterGlyph++);
-                        dimension cy = parent().iGlyphs.extents(glyph).cy;
+                        dimension cy = parent().glyphs().extents(glyph).cy;
                         if (i == glyphsStartIndex || cy != previousHeight)
                         {
                             iHeights[i] = cy;
@@ -368,10 +368,10 @@ namespace neogfx
                     iHeights[end_index()] = 0.0;
                 }
                 dimension result = 0.0;
-                auto start = iHeights.lower_bound(aStart - parent().iGlyphs.begin());
-                if (start != iHeights.begin() && aStart < parent().iGlyphs.begin() + start->first)
+                auto start = iHeights.lower_bound(aStart - parent().glyphs().begin());
+                if (start != iHeights.begin() && aStart < parent().glyphs().begin() + start->first)
                     --start;
-                auto stop = iHeights.lower_bound(aEnd - parent().iGlyphs.begin());
+                auto stop = iHeights.lower_bound(aEnd - parent().glyphs().begin());
                 if (start == stop && stop != iHeights.end())
                     ++stop;
                 for (auto i = start; i != stop; ++i)
@@ -548,6 +548,8 @@ namespace neogfx
         void set_cursor_glyph_position(position_type aGlyphPosition, bool aMoveAnchor = true);
     private:
         void init();
+        document_glyphs const& glyphs() const;
+        document_glyphs& glyphs();
         std::size_t do_insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
@@ -580,7 +582,7 @@ namespace neogfx
         document_text iPreviousText;
         document_text iText;
         mutable std::optional<std::string> iUtf8TextCache;
-        document_glyphs iGlyphs;
+        mutable std::optional<document_glyphs> iGlyphs;
         glyph_paragraphs iGlyphParagraphs;
         glyph_columns iGlyphColumns;
         size iTextExtents;

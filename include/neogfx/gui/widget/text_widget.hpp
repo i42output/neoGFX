@@ -90,7 +90,7 @@ namespace neogfx
         const neogfx::glyph_text& glyph_text() const;
     private:
         std::string iText;
-        mutable neogfx::glyph_text iGlyphText;
+        mutable std::optional<neogfx::glyph_text> iGlyphText;
         mutable optional_size iTextExtent;
         size_hint iSizeHint;
         mutable optional_size iSizeHintExtent;

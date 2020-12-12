@@ -137,7 +137,7 @@ namespace neogfx
         widget::set_font(aFont);
         iTextExtent = std::nullopt;
         iSizeHintExtent = std::nullopt;
-        iGlyphText = neogfx::glyph_text{};
+        iGlyphText = std::nullopt;
     }
 
     bool text_widget::visible() const
@@ -159,7 +159,7 @@ namespace neogfx
             size oldSize = minimum_size();
             iText = aText;
             iTextExtent = std::nullopt;
-            iGlyphText = neogfx::glyph_text{};
+            iGlyphText = std::nullopt;
             TextChanged.trigger();
             if (oldSize != minimum_size())
             {
@@ -323,7 +323,7 @@ namespace neogfx
         {
             iTextExtent = std::nullopt;
             iSizeHintExtent = std::nullopt;
-            iGlyphText = neogfx::glyph_text{};
+            iGlyphText = std::nullopt;
             if (has_parent_layout())
                 parent_layout().invalidate();
             update();
@@ -338,12 +338,12 @@ namespace neogfx
 
     const neogfx::glyph_text& text_widget::glyph_text() const
     {
-        if (iGlyphText.empty())
+        if (iGlyphText == std::nullopt)
         {
             graphics_context gc{ *this, graphics_context::type::Unattached };
             scoped_mnemonics sm(gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
             iGlyphText = gc.to_glyph_text(iText, font());
         }
-        return iGlyphText;
+        return *iGlyphText;
     }
 }

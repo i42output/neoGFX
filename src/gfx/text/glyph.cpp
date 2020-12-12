@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/glyph.tpp>
 
@@ -27,8 +28,8 @@ namespace neogfx
 {
     template class basic_glyph_text_content<neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph const*, glyph*>;
 
-    glyph_text::glyph_text() :
-        iContent{ nullptr }
+    glyph_text::glyph_text(font const& aFont) :
+        iContent{ service<i_font_manager>().glyph_text_factory().create_glyph_text(aFont).content() }
     {
     }
 
@@ -48,15 +49,8 @@ namespace neogfx
         return *this;
     }
 
-    bool glyph_text::has_content() const
-    {
-        return iContent != nullptr;
-    }
-
     i_glyph_text& glyph_text::content() const
     {
-        if (!has_content())
-            iContent = service<i_font_manager>().glyph_text_factory().create_empty_glyph_text().content();
         return *iContent;
     }
 
@@ -77,24 +71,21 @@ namespace neogfx
 
     bool glyph_text::empty() const
     {
-        return !has_content() || content().empty();
+        return content().empty();
     }
 
     glyph_text::size_type glyph_text::size() const
     {
-        return has_content() ? content().size() : 0;
+        return content().size();
     }
 
     void glyph_text::clear()
     {
-        if (has_content())
-            content().clear();
+        content().clear();
     }
 
     size glyph_text::extents() const
     {
-        if (empty())
-            return neogfx::size{};
         return content().extents();
     }
 
@@ -130,16 +121,12 @@ namespace neogfx
 
     glyph_text::const_iterator glyph_text::cbegin() const
     {
-        if (has_content())
-            return content().cbegin();
-        return nullptr;
+        return content().cbegin();
     }
 
     glyph_text::const_iterator glyph_text::cend() const
     {
-        if (has_content())
-            return content().cend();
-        return nullptr;
+        return content().cend();
     }
 
     glyph_text::const_iterator glyph_text::begin() const
@@ -154,15 +141,11 @@ namespace neogfx
 
     glyph_text::iterator glyph_text::begin()
     {
-        if (has_content())
-            return content().begin();
-        return nullptr;
+        return content().begin();
     }
 
     glyph_text::iterator glyph_text::end()
     {
-        if (has_content())
-            return content().end();
-        return nullptr;
+        return content().end();
     }
 }

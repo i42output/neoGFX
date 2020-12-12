@@ -309,7 +309,8 @@ namespace neogfx
             mutable cache iCache;
         };
     public:
-        basic_glyph_text_content();
+        basic_glyph_text_content() = delete;
+        basic_glyph_text_content(font const& aFont);
         template <typename Iter>
         basic_glyph_text_content(Iter aBegin, Iter aEnd) :
             base_type{ aBegin, aEnd }
@@ -383,13 +384,13 @@ namespace neogfx
         typedef i_glyph_text::size_type size_type;
         typedef i_glyph_text::difference_type difference_type;
     public:
-        glyph_text();
+        glyph_text() = delete;
+        glyph_text(font const& aFont);
         glyph_text(i_glyph_text& aContents);
         glyph_text(glyph_text const& aOther);
     public:
         glyph_text operator=(const glyph_text& aOther);
     public:
-        bool has_content() const;
         i_glyph_text& content() const;
     public:
         const font& glyph_font() const;
@@ -478,7 +479,7 @@ namespace neogfx
     public:
         virtual ~i_glyph_text_factory() = default;
     public:
-        virtual glyph_text create_empty_glyph_text() = 0;
+        virtual glyph_text create_glyph_text(font const& aFont) = 0;
         virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) = 0;
         virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) = 0;
     public:

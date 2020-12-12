@@ -1352,7 +1352,7 @@ int main(int argc, char* argv[])
                 }
             }
             thread_local std::string currentInfoText;
-            thread_local ng::glyph_text infoGlyphText;
+            thread_local std::optional<ng::glyph_text> infoGlyphText;
             bool const mouseOver = window.pageInstancing.client_rect().contains(window.pageInstancing.root().mouse_position() - window.pageInstancing.origin());
             if (mouseOver)
             {
@@ -1363,7 +1363,7 @@ int main(int argc, char* argv[])
                     currentInfoText = newInfoText.str();
                     infoGlyphText = aGc.to_glyph_text(currentInfoText, infoFont);
                 }
-                aGc.draw_multiline_glyph_text(ng::point{ 32.0, 32.0 }, infoGlyphText, 0.0, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+                aGc.draw_multiline_glyph_text(ng::point{ 32.0, 32.0 }, *infoGlyphText, 0.0, ng::text_appearance{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             }
         });
 

@@ -1519,8 +1519,12 @@ namespace neogfx
             }
         }
 
+        if (drawGlyphCache.empty())
+            return;
+
         auto start = drawGlyphCache.begin();
-        for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
+        auto next = start;
+        while (++next != drawGlyphCache.end())
         {
             if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph, *next->glyph))
             {
