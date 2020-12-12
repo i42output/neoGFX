@@ -1849,8 +1849,6 @@ namespace neogfx
                             }
                         }
                         pos.y += height;
-                        if (height == 0.0)
-                            std::cerr << "foo";
                         iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
                         lineStart = next;
                         if (lineStart != paragraphEnd)

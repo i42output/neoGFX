@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <neolib/core/thread_local.hpp>
 #include <neolib/app/i_power.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -1504,7 +1505,10 @@ namespace neogfx
 
     void opengl_rendering_context::draw_glyphs(const graphics_operation::batch& aDrawGlyphOps)
     {
-        thread_local std::vector<draw_glyph> drawGlyphCache;
+        thread_local neolib::variable_stack<std::vector<draw_glyph>> glyphCacheStack;
+        neolib::variable_stack_context<std::vector<draw_glyph>> context{ glyphCacheStack };
+
+        auto& drawGlyphCache = glyphCacheStack.current();
         drawGlyphCache.clear();
 
         for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
@@ -1523,8 +1527,7 @@ namespace neogfx
             return;
 
         auto start = drawGlyphCache.begin();
-        auto next = start;
-        while (++next != drawGlyphCache.end())
+        for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
         {
             if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph, *next->glyph))
             {
