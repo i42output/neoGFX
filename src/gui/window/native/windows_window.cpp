@@ -1456,9 +1456,7 @@ namespace neogfx
         void window::display()
         {
             if (rendering_engine().double_buffering())
-            {
                 ::SwapBuffers(static_cast<HDC>(iHdc));
-            }
             else
                 glCheck(glDrawBuffer(GL_FRONT));
         }

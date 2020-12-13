@@ -112,7 +112,7 @@ namespace neogfx
 
     bool program_options::double_buffering() const
     {
-        return options().count("double") == 1;
+        return options().count("single") == 0;
     }
 
     bool program_options::turbo() const
