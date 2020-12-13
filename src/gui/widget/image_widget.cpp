@@ -26,42 +26,42 @@ namespace neogfx
     image_widget::image_widget(const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
         iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
     {
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
     image_widget::image_widget(const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
         iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
     {
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
     image_widget::image_widget(i_widget& aParent, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aParent }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
     {
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
     image_widget::image_widget(i_widget& aParent, const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aParent }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
     {
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
     image_widget::image_widget(i_layout& aLayout, const i_texture& aTexture, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aLayout }, iTexture{ aTexture }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
     {
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
     image_widget::image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio, cardinal aPlacement) :
         widget{ aLayout }, iTexture{ aImage }, iAspectRatio{ aAspectRatio }, iPlacement{ aPlacement }, iDpiAutoScale{ false }
     {
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 

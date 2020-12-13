@@ -48,8 +48,8 @@ namespace neogfx
         button(aText), iBox(*this)
     {
         set_checkable(aCheckable);
-        set_padding(neogfx::padding(0.0));
-        layout().set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
+        layout().set_padding(neogfx::padding{ 0.0 });
         layout().add_spacer();
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
@@ -58,8 +58,8 @@ namespace neogfx
         button(aParent, aText), iBox(*this)
     {
         set_checkable(aCheckable);
-        set_padding(neogfx::padding(0.0));
-        layout().set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
+        layout().set_padding(neogfx::padding{ 0.0 });
         layout().add_spacer();
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
@@ -68,8 +68,8 @@ namespace neogfx
         button(aLayout, aText), iBox(*this)
     {
         set_checkable(aCheckable);
-        set_padding(neogfx::padding(0.0));
-        layout().set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
+        layout().set_padding(neogfx::padding{ 0.0 });
         layout().add_spacer();
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }

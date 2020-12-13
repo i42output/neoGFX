@@ -94,6 +94,8 @@ namespace neogfx::DesignStudio
         virtual void add_child(i_element& aChild) = 0;
         virtual void remove_child(i_element& aChild) = 0;
     public:
+        virtual void create_default_children() = 0;
+    public:
         virtual bool has_caddy() const = 0;
         virtual i_element_caddy& caddy() const = 0;
         virtual void set_caddy(i_element_caddy& aCaddy) = 0;
@@ -110,6 +112,10 @@ namespace neogfx::DesignStudio
         children_t::const_iterator end() const { return children().end(); }
         children_t::iterator end() { return children().end(); }
     public:
+        bool is_root() const
+        {
+            return !has_parent();
+        }
         std::size_t selected_child_count() const
         {
             std::size_t result = 0;
@@ -145,4 +151,10 @@ namespace neogfx::DesignStudio
             return layout_item()->as_widget();
         }
     };
+
+    template <typename Type>
+    inline void create_default_children(i_element& aParent)
+    {
+        // specialize
+    }
 }

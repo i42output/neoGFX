@@ -142,6 +142,7 @@ namespace neogfx::DesignStudio
     {
         auto result = manager().library(aType).create_element(aParent, aType, aElementId);
         ElementAdded.trigger(*result);
+        result->create_default_children();
         return *result;
     }
 

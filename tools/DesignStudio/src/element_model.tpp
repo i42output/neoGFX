@@ -29,8 +29,27 @@ namespace neogfx::DesignStudio
     template <typename Model>
     element_presentation_model<Model>::element_presentation_model(i_project_manager& aProjectManager)
     {
-        iSink = base_type::DraggingItem([&](i_drag_drop_item const& aItem)
+        iSink = aProjectManager.project_added([&](i_project& aProject)
         {
+            iSink += aProject.element_added([&](i_element& aElement)
+            {
+                if (aElement.parent().is_root() && iDragDropItem)
+                {
+                    auto const& item = base_type::item_model().item(base_type::to_item_model_index(iDragDropItem->index()));
+                    if (std::holds_alternative<ds::element_tool_t>(item))
+                    {
+                        auto widgetCaddy = make_ref<widget_caddy>(aProject, aElement, iDragDropItem->source().drag_drop_event_monitor().root().as_widget(), point{});
+                        auto const idealSize = widgetCaddy->minimum_size();
+                        widgetCaddy->resize(idealSize);
+                        widgetCaddy->move((iDragDropItem->source().drag_drop_tracking_position() + iDragDropItem->source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
+                        iDragDropItem->source().set_drag_drop_widget(widgetCaddy);
+                    }
+                }
+            });
+        });
+        iSink += base_type::DraggingItem([&](i_drag_drop_item const& aItem)
+        {
+            iDragDropItem = &aItem;
             auto const& item = base_type::item_model().item(base_type::to_item_model_index(aItem.index()));
             if (std::holds_alternative<ds::element_tool_t>(item))
             {
@@ -38,15 +57,6 @@ namespace neogfx::DesignStudio
                 auto& project = aProjectManager.active_project();
                 iSelectedElement = project.create_element(project.root(), tool.second, generate_id(tool.second));
                 iSelectedElement->set_mode(element_mode::Drag);
-            }
-            if (iSelectedElement)
-            {
-                auto& project = aProjectManager.active_project();
-                auto widgetCaddy = make_ref<widget_caddy>(project, *iSelectedElement, aItem.source().drag_drop_event_monitor().root().as_widget(), point{});
-                auto const idealSize = widgetCaddy->minimum_size();
-                widgetCaddy->resize(idealSize);
-                widgetCaddy->move((aItem.source().drag_drop_tracking_position() + aItem.source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
-                aItem.source().set_drag_drop_widget(widgetCaddy);
             }
         });
         iSink += base_type::ItemDropped([&](i_drag_drop_item const& aItem, i_drag_drop_target& aTarget)
@@ -61,6 +71,7 @@ namespace neogfx::DesignStudio
                 if (iSelectedElement->group() == element_group::Workflow)
                     widgetCaddy->bring_to_front();
             }
+            iDragDropItem = nullptr;
             iSelectedElement = {};
         });
         iSink += base_type::DraggingItemCancelled([&](i_drag_drop_item const& aItem)
@@ -69,6 +80,7 @@ namespace neogfx::DesignStudio
             {
                 auto& project = aProjectManager.active_project();
                 project.remove_element(*iSelectedElement);
+                iDragDropItem = nullptr;
                 iSelectedElement = {};
             }
         });

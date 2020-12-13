@@ -191,6 +191,11 @@ namespace neogfx::DesignStudio
                 children().erase(existing);
         }
     public:
+        void create_default_children() override
+        {
+            DesignStudio::create_default_children<Type>(*this);
+        }
+    public:
         bool has_caddy() const override
         {
             return iCaddy != nullptr;
@@ -268,7 +273,7 @@ namespace neogfx::DesignStudio
                 });
             }
         }
-    public:
+    private:
         const i_element_library& iLibrary;
         i_element* iParent;
         element_group iGroup;

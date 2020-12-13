@@ -27,7 +27,7 @@ namespace neogfx
     radio_button::disc::disc(radio_button& aParent)
     {
         aParent.layout().add_at(0, *this);
-        set_padding(neogfx::padding(0.0));
+        set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
     }
 
