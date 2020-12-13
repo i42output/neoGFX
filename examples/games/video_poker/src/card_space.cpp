@@ -132,8 +132,9 @@ namespace video_poker
         iCard{ nullptr }
     {
         set_size_policy(neogfx::size_constraint::ExpandingUniform);
-        iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
         set_ignore_mouse_events(true);
+        iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
+        iHoldButton.set_consider_ancestors_for_mouse_events(false);
         iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);
         iHoldButton.set_base_color(neogfx::color::Black);
         iHoldButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });

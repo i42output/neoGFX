@@ -210,6 +210,8 @@ namespace neogfx
         virtual void focus_gained(focus_reason aFocusReason) = 0;
         virtual void focus_lost(focus_reason aFocusReason) = 0;
     public:
+        virtual bool consider_ancestors_for_mouse_events() const = 0;
+        virtual void set_consider_ancestors_for_mouse_events(bool aConsiderAncestors = true) = 0;
         virtual bool ignore_mouse_events(bool aConsiderAncestors = true) const = 0;
         virtual void set_ignore_mouse_events(bool aIgnoreMouseEvents) = 0;
         virtual bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const = 0;

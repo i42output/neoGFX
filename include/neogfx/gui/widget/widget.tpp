@@ -1765,9 +1765,22 @@ namespace neogfx
     }
 
     template <typename Interface>
+    bool widget<Interface>::consider_ancestors_for_mouse_events() const
+    {
+        return ConsiderAncestorsForMouseEvents;
+    }
+
+    template <typename Interface>
+    void widget<Interface>::set_consider_ancestors_for_mouse_events(bool aConsiderAncestors)
+    {
+        ConsiderAncestorsForMouseEvents = aConsiderAncestors;
+    }
+
+    template <typename Interface>
     bool widget<Interface>::ignore_mouse_events(bool aConsiderAncestors) const
     {
-        return IgnoreMouseEvents || (aConsiderAncestors && (has_parent() && parent().ignore_mouse_events()));
+        return IgnoreMouseEvents || (aConsiderAncestors && consider_ancestors_for_mouse_events() && 
+            has_parent() && parent().ignore_mouse_events());
     }
 
     template <typename Interface>
@@ -1779,7 +1792,8 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::ignore_non_client_mouse_events(bool aConsiderAncestors) const
     {
-        return IgnoreNonClientMouseEvents || (aConsiderAncestors && (has_parent() && parent().ignore_non_client_mouse_events()));
+        return IgnoreNonClientMouseEvents || (aConsiderAncestors && consider_ancestors_for_mouse_events() &&
+            has_parent() && parent().ignore_non_client_mouse_events());
     }
 
     template <typename Interface>

@@ -249,6 +249,8 @@ namespace neogfx
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
     public:
+        bool consider_ancestors_for_mouse_events() const override;
+        void set_consider_ancestors_for_mouse_events(bool aConsiderAncestors = true) override;
         bool ignore_mouse_events(bool aConsiderAncestors = true) const override;
         void set_ignore_mouse_events(bool aIgnoreMouseEvents) override;
         bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const override;
@@ -340,6 +342,7 @@ namespace neogfx
         define_property(property_category::other_appearance, std::optional<neogfx::palette>, Palette, palette)
         define_property(property_category::font, optional_font_role, FontRole, font_role)
         define_property(property_category::font, optional_font, Font, font)
+        define_property(property_category::other, bool, ConsiderAncestorsForMouseEvents, consider_ancestors_for_mouse_events, true)
         define_property(property_category::other, bool, IgnoreMouseEvents, ignore_mouse_events, false)
         define_property(property_category::other, bool, IgnoreNonClientMouseEvents, ignore_non_client_mouse_events, true)
    };
