@@ -34,7 +34,7 @@ namespace neogfx
         return sLanguageCodes;
     }
 
-    translation_context::translation_context(std::string const& aContext)
+    translation_context::translation_context(string const& aContext)
     {
         context_stack().push_back(aContext);
     }
@@ -44,36 +44,36 @@ namespace neogfx
         context_stack().pop_back();
     }
 
-    std::string const& translation_context::context()
+    string const& translation_context::context()
     {
         if (!context_stack().empty())
             return context_stack().back();
-        static const std::string sDefaultContext;
+        static const string sDefaultContext;
         return sDefaultContext;
     }
 
-    std::vector<std::string>& translation_context::context_stack()
+    std::vector<string>& translation_context::context_stack()
     {
-        static std::vector<std::string> sContextStack;
+        static std::vector<string> sContextStack;
         return sContextStack;
     }
 
-    std::string operator "" _t(const char* aTranslatableString, std::size_t aStringLength)
+    string operator "" _t(const char* aTranslatableString, std::size_t aStringLength)
     {
-        return translate(std::string{ aTranslatableString, aStringLength });
+        return translate(string{ aTranslatableString, aStringLength });
     }
 
-    std::string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength)
+    string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength)
     {
-        return translate(std::string{ reinterpret_cast<const char*>(aTranslatableString), aStringLength });
+        return translate(string{ reinterpret_cast<const char*>(aTranslatableString), aStringLength });
     }
 
-    std::string const& translate(std::string const& aTranslatableString)
+    i_string const& translate(string const& aTranslatableString)
     {
         return translate(aTranslatableString, translation_context::context());
     }
 
-    std::string const& translate(std::string const& aTranslatableString, std::string const& aContext)
+    i_string const& translate(string const& aTranslatableString, string const& aContext)
     {
         return service<i_app>().translate(aTranslatableString, aContext);
     }

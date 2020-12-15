@@ -66,7 +66,7 @@ namespace neogfx
     protected:
         bool help_active() const override;
         neogfx::help_type help_type() const override;
-        std::string help_text() const override;
+        i_string const& help_text() const override;
     public:
         point sub_menu_position() const;
     private:

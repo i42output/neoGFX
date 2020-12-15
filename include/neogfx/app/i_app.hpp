@@ -91,7 +91,7 @@ namespace neogfx
         virtual i_style& change_style(std::string const& aStyleName) = 0;
         virtual i_style& register_style(const i_style& aStyle) = 0;
     public:
-        virtual std::string const& translate(std::string const& aTranslatableString, std::string const& aContext = std::string{}) const = 0;
+        virtual i_string const& translate(i_string const& aTranslatableString, i_string const& aContext = string{}) const = 0;
     public:
         virtual i_action& action_file_new() = 0;
         virtual i_action& action_file_open() = 0;

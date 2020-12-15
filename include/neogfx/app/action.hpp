@@ -38,15 +38,15 @@ namespace neogfx
         define_declared_event(Changed, changed)
     public:
         action();
-        action(std::string const& aText);
-        action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
-        action(std::string const& aText, const i_texture& aImage);
-        action(std::string const& aText, const i_image& aImage);
+        action(string const& aText);
+        action(string const& aText, string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
+        action(string const& aText, const i_texture& aImage);
+        action(string const& aText, const i_image& aImage);
         action(i_action_container& aContainer);
-        action(i_action_container& aContainer, std::string const& aText);
-        action(i_action_container& aContainer, std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
-        action(i_action_container& aContainer, std::string const& aText, const i_texture& aImage);
-        action(i_action_container& aContainer, std::string const& aText, const i_image& aImage);
+        action(i_action_container& aContainer, string const& aText);
+        action(i_action_container& aContainer, string const& aText, string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
+        action(i_action_container& aContainer, string const& aText, const i_texture& aImage);
+        action(i_action_container& aContainer, string const& aText, const i_image& aImage);
     public:
         bool is_enabled() const override;
         bool is_disabled() const override;
@@ -55,11 +55,11 @@ namespace neogfx
         bool is_unchecked() const override;
         uint32_t group() const override;
         bool is_separator() const override;
-        std::string text() const override;
-        std::string menu_text() const override;
-        std::string button_text() const override;
-        std::string tool_tip_text() const override;
-        std::string help_text() const override;
+        i_string const& text() const override;
+        i_string const& menu_text() const override;
+        i_string const& button_text() const override;
+        i_string const& tool_tip_text() const override;
+        i_string const& help_text() const override;
         const i_texture& image() const override;
         const i_texture& checked_image() const override;
         const optional_key_sequence& shortcut() const override;
@@ -68,19 +68,24 @@ namespace neogfx
         action& set_checked(bool aChecked) override;
         action& set_group(uint32_t aGroup) override;
         action& set_separator(bool aIsSeparator) override;
-        action& set_text(const optional_text& aText = optional_text()) override;
-        action& set_menu_text(const optional_text& aMenuText = optional_text()) override;
-        action& set_button_text(const optional_text& aButtonText = optional_text()) override;
-        action& set_tool_tip_text(const optional_text& aToolTipText = optional_text()) override;
-        action& set_help_text(const optional_text& aHelpText = optional_text()) override;
-        action& set_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) override;
-        action& set_image(const i_image& aImage) override;
+        action& set_text(i_optional<i_string> const& aText = optional_text()) override;
+        action& set_menu_text(i_optional<i_string> const& aMenuText = optional_text()) override;
+        action& set_button_text(i_optional<i_string> const& aButtonText = optional_text()) override;
+        action& set_tool_tip_text(i_optional<i_string> const& aToolTipText = optional_text()) override;
+        action& set_help_text(i_optional<i_string> const& aHelpText = optional_text()) override;
         action& set_image(const i_texture& aTexture) override;
-        action& set_checked_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) override;
-        action& set_checked_image(const i_image& aImage) override;
         action& set_checked_image(const i_texture& aTexture) override;
         action& set_shortcut(const optional_key_sequence& aShortcut) override;
-        action& set_shortcut(std::string const& aShortcut) override;
+        action& set_shortcut(i_string const& aShortcut) override;
+    public:
+        using i_action::set_text;
+        using i_action::set_menu_text;
+        using i_action::set_button_text;
+        using i_action::set_tool_tip_text;
+        using i_action::set_help_text;
+        using i_action::set_image;
+        using i_action::set_checked_image;
+        using i_action::set_shortcut;
     private:
         bool iEnabled;
         bool iCheckable;
@@ -93,7 +98,7 @@ namespace neogfx
         optional_text iToolTipText;
         optional_text iHelpText;
         texture iImage;
-        texture iCheckedTexture;
+        texture iCheckedImage;
         optional_key_sequence iShortcut;
     };
 

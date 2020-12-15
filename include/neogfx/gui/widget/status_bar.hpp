@@ -89,7 +89,7 @@ namespace neogfx
         status_bar(i_standard_layout_container& aContainer, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
     public:
         bool have_message() const;
-        std::string message() const;
+        i_string const& message() const;
         void set_message(std::string const& aMessage);
         void clear_message();
         void add_normal_widget(i_widget& aWidget);
@@ -122,7 +122,7 @@ namespace neogfx
     private:
         sink iSink;
         style iStyle;
-        std::optional<std::string> iMessage;
+        std::optional<string> iMessage;
         horizontal_layout iLayout;
         stack_layout iNormalLayout;
         horizontal_layout iMessageLayout;

@@ -69,6 +69,7 @@ namespace neogfx
     using neolib::abstract_t;
 
     using neolib::optional;
+    using neolib::i_optional;
 
     using neolib::variant;
     using neolib::none;
@@ -85,6 +86,8 @@ namespace neogfx
     using neolib::string;
     using neolib::to_string;
     using namespace neolib::string_literals;
+
+    string const empty_string;
 
     using neolib::uuid;
 

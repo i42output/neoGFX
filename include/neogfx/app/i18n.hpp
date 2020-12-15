@@ -23,23 +23,26 @@
 
 namespace neogfx
 {
+    using neolib::i_string;
+    using neolib::string;
+
     class translation_context
     {
     public:
-        translation_context(std::string const& aContext);
+        translation_context(string const& aContext);
         ~translation_context();
     public:
-        static std::string const& context();
+        static string const& context();
     private:
-        static std::vector<std::string>& context_stack();
+        static std::vector<string>& context_stack();
     };
 
-    std::string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
-    std::string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
+    string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
+    string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
 
-    std::string const& translate(std::string const& aTranslatableString);
+    i_string const& translate(string const& aTranslatableString);
 
-    std::string const& translate(std::string const& aTranslatableString, std::string const& aContext);
+    i_string const& translate(string const& aTranslatableString, string const& aContext);
 }
 
 using neogfx::operator "" _t;

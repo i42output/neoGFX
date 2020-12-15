@@ -23,8 +23,8 @@
 #include <optional>
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/keyboard.hpp>
-#include <neogfx/gfx/i_texture.hpp>
-#include <neogfx/gfx/i_image.hpp>
+#include <neogfx/gfx/texture.hpp>
+#include <neogfx/gfx/image.hpp>
 
 namespace neogfx
 {
@@ -39,7 +39,7 @@ namespace neogfx
         declare_event(unchecked)
         declare_event(changed)
     public:
-        typedef std::optional<std::string> optional_text;
+        typedef optional<string> optional_text;
     public:
         virtual bool is_enabled() const = 0;
         virtual bool is_disabled() const = 0;
@@ -48,11 +48,11 @@ namespace neogfx
         virtual bool is_unchecked() const = 0;
         virtual uint32_t group() const = 0;
         virtual bool is_separator() const = 0;
-        virtual std::string text() const = 0;
-        virtual std::string menu_text() const = 0;
-        virtual std::string button_text() const = 0;
-        virtual std::string tool_tip_text() const = 0;
-        virtual std::string help_text() const = 0;
+        virtual i_string const& text() const = 0;
+        virtual i_string const& menu_text() const = 0;
+        virtual i_string const& button_text() const = 0;
+        virtual i_string const& tool_tip_text() const = 0;
+        virtual i_string const& help_text() const = 0;
         virtual const i_texture& image() const = 0;
         virtual const i_texture& checked_image() const = 0;
         virtual const optional_key_sequence& shortcut() const = 0;
@@ -61,19 +61,15 @@ namespace neogfx
         virtual i_action& set_checked(bool aChecked) = 0;
         virtual i_action& set_group(uint32_t aGroup) = 0;
         virtual i_action& set_separator(bool aIsSeparator) = 0;
-        virtual i_action& set_text(const optional_text& aText = optional_text()) = 0;
-        virtual i_action& set_menu_text(const optional_text& aMenuText = optional_text()) = 0;
-        virtual i_action& set_button_text(const optional_text& aButtonText = optional_text()) = 0;
-        virtual i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text()) = 0;
-        virtual i_action& set_help_text(const optional_text& aHelpText = optional_text()) = 0;
-        virtual i_action& set_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) = 0;
-        virtual i_action& set_image(const i_image& aImage) = 0;
+        virtual i_action& set_text(i_optional<i_string> const& aText) = 0;
+        virtual i_action& set_menu_text(i_optional<i_string> const& aMenuText) = 0;
+        virtual i_action& set_button_text(i_optional<i_string> const& aButtonText) = 0;
+        virtual i_action& set_tool_tip_text(i_optional<i_string> const& aToolTipText) = 0;
+        virtual i_action& set_help_text(i_optional<i_string> const& aHelpText) = 0;
         virtual i_action& set_image(const i_texture& aTexture) = 0;
-        virtual i_action& set_checked_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled) = 0;
-        virtual i_action& set_checked_image(const i_image& aImage) = 0;
         virtual i_action& set_checked_image(const i_texture& aTexture) = 0;
         virtual i_action& set_shortcut(const optional_key_sequence& aShortcut) = 0;
-        virtual i_action& set_shortcut(std::string const& aShortcut) = 0;
+        virtual i_action& set_shortcut(i_string const& aShortcut) = 0;
     public:
         i_action& enable(bool aEnabled = true)
         {
@@ -97,6 +93,46 @@ namespace neogfx
                 return uncheck();
             else
                 return check();
+        }
+        i_action& set_text(const optional_text& aText = optional_text{})
+        {
+            return set_text(to_abstract(aText));
+        }
+        i_action& set_menu_text(const optional_text& aMenuText = optional_text{})
+        {
+            return set_menu_text(to_abstract(aMenuText));
+        }
+        i_action& set_button_text(const optional_text& aButtonText = optional_text{})
+        {
+            return set_button_text(to_abstract(aButtonText));
+        }
+        i_action& set_tool_tip_text(const optional_text& aToolTipText = optional_text{})
+        {
+            return set_tool_tip_text(to_abstract(aToolTipText));
+        }
+        i_action& set_help_text(const optional_text& aHelpText = optional_text{})
+        {
+            return set_help_text(to_abstract(aHelpText));
+        }
+        i_action& set_image(string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
+        {
+            return set_image(texture{ neogfx::image{aUri, aDpiScaleFactor, aSampling} });
+        }
+        i_action& set_image(const i_image& aImage)
+        {
+            return set_image(texture{ aImage });
+        }
+        i_action& set_checked_image(string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
+        {
+            return set_checked_image(texture{ neogfx::image{ aUri, aDpiScaleFactor, aSampling } });
+        }
+        i_action& set_checked_image(const i_image& aImage)
+        {
+            return set_checked_image(texture{ aImage });
+        }
+        i_action& set_shortcut(string const& aShortcut)
+        {
+            return set_shortcut(to_abstract(aShortcut));
         }
     };
 

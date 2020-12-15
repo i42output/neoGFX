@@ -28,22 +28,22 @@ namespace neogfx
     {
     }
 
-    action::action(std::string const& aText) :
+    action::action(string const& aText) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }
     {
     }
 
-    action::action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    action::action(string const& aText, string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
     {
     }
 
-    action::action(std::string const& aText, const i_texture& aImage) :
+    action::action(string const& aText, const i_texture& aImage) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
 
-    action::action(std::string const& aText, const i_image& aImage) :
+    action::action(string const& aText, const i_image& aImage) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
@@ -54,25 +54,25 @@ namespace neogfx
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, std::string const& aText) :
+    action::action(i_action_container& aContainer, string const& aText) :
         action{ aText }
     {
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
+    action::action(i_action_container& aContainer, string const& aText, string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         action{ aText, aImageUri, aDpiScaleFactor, aSampling }
     {
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, std::string const& aText, const i_texture& aImage) :
+    action::action(i_action_container& aContainer, string const& aText, const i_texture& aImage) :
         action{ aText, aImage }
     {
         aContainer.add_action(*this);
     }
 
-    action::action(i_action_container& aContainer, std::string const& aText, const i_image& aImage) :
+    action::action(i_action_container& aContainer, string const& aText, const i_image& aImage) :
         action{ aText, aImage }
     {
         aContainer.add_action(*this);
@@ -113,7 +113,7 @@ namespace neogfx
         return iSeparator;
     }
 
-    std::string action::text() const
+    i_string const& action::text() const
     {
         if (iText != std::nullopt)
             return *iText;
@@ -122,10 +122,10 @@ namespace neogfx
         else if (iButtonText != std::nullopt)
             return *iButtonText;
         else
-            return std::string();
+            return empty_string;;
     }
 
-    std::string action::menu_text() const
+    i_string const& action::menu_text() const
     {
         if (iMenuText != std::nullopt)
             return *iMenuText;
@@ -134,10 +134,10 @@ namespace neogfx
         else if (iButtonText != std::nullopt)
             return *iButtonText;
         else
-            return std::string();
+            return empty_string;;
     }
 
-    std::string action::button_text() const
+    i_string const& action::button_text() const
     {
         if (iButtonText != std::nullopt)
             return *iButtonText;
@@ -146,10 +146,10 @@ namespace neogfx
         else if (iMenuText != std::nullopt)
             return *iMenuText;
         else
-            return std::string();
+            return empty_string;;
     }
 
-    std::string action::tool_tip_text() const
+    i_string const& action::tool_tip_text() const
     {
         if (iToolTipText != std::nullopt)
             return *iToolTipText;
@@ -160,10 +160,10 @@ namespace neogfx
         else if (iButtonText != std::nullopt)
             return *iButtonText;
         else
-            return std::string();
+            return empty_string;;
     }
 
-    std::string action::help_text() const
+    i_string const& action::help_text() const
     {
         if (iHelpText != std::nullopt)
             return *iToolTipText;
@@ -176,7 +176,7 @@ namespace neogfx
         else if (iButtonText != std::nullopt)
             return *iButtonText;
         else
-            return std::string();
+            return empty_string;;
     }
 
     const i_texture& action::image() const
@@ -186,8 +186,8 @@ namespace neogfx
 
     const i_texture& action::checked_image() const
     {
-        if (!iCheckedTexture.is_empty())
-            return iCheckedTexture;
+        if (!iCheckedImage.is_empty())
+            return iCheckedImage;
         return image();
     }
 
@@ -252,7 +252,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_text(const optional_text& aText)
+    action& action::set_text(i_optional<i_string> const& aText)
     {
         if (iText != aText)
         {
@@ -264,7 +264,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_menu_text(const optional_text& aMenuText)
+    action& action::set_menu_text(i_optional<i_string> const& aMenuText)
     {
         if (iMenuText != aMenuText)
         {
@@ -276,7 +276,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_button_text(const optional_text& aButtonText)
+    action& action::set_button_text(i_optional<i_string> const& aButtonText)
     {
         if (iButtonText != aButtonText)
         {
@@ -288,7 +288,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_tool_tip_text(const optional_text& aToolTipText)
+    action& action::set_tool_tip_text(i_optional<i_string> const& aToolTipText)
     {
         if (iToolTipText != aToolTipText)
         {
@@ -300,7 +300,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_help_text(const optional_text& aHelpText)
+    action& action::set_help_text(i_optional<i_string> const& aHelpText)
     {
         if (iHelpText != aHelpText)
         {
@@ -309,18 +309,6 @@ namespace neogfx
                 iSeparator = false;
             Changed.trigger();
         }
-        return *this;
-    }
-
-    action& action::set_image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
-    {
-        set_image(neogfx::image{ aUri, aDpiScaleFactor, aSampling });
-        return *this;
-    }
-
-    action& action::set_image(const i_image& aImage)
-    {
-        set_image(texture(aImage));
         return *this;
     }
 
@@ -333,22 +321,10 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_checked_image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling)
-    {
-        set_checked_image(neogfx::image{ aUri, aDpiScaleFactor, aSampling });
-        return *this;
-    }
-
-    action& action::set_checked_image(const i_image& aImage)
-    {
-        set_checked_image(texture(aImage));
-        return *this;
-    }
-
     action& action::set_checked_image(const i_texture& aTexture)
     {
-        iCheckedTexture = aTexture;
-        if (!iCheckedTexture.is_empty() && iSeparator)
+        iCheckedImage = aTexture;
+        if (!iCheckedImage.is_empty() && iSeparator)
             iSeparator = false;
         Changed.trigger();
         return *this;
@@ -366,7 +342,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_shortcut(std::string const& aShortcut)
+    action& action::set_shortcut(i_string const& aShortcut)
     {
         return set_shortcut(key_sequence{ aShortcut });
     }

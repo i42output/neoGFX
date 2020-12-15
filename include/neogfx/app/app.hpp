@@ -109,7 +109,7 @@ namespace neogfx
         i_style& change_style(std::string const& aStyleName) override;
         i_style& register_style(const i_style& aStyle) override;
     public:
-        std::string const& translate(std::string const& aTranslatableString, std::string const& aContext = std::string{}) const override;
+        i_string const& translate(i_string const& aTranslatableString, i_string const& aContext = string{}) const override;
     public:
         i_action& action_file_new() override;
         i_action& action_file_open() override;

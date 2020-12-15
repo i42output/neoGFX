@@ -255,12 +255,12 @@ namespace neogfx
         return neogfx::help_type::Action;
     }
 
-    std::string menu_item_widget::help_text() const
+    i_string const& menu_item_widget::help_text() const
     {
         if (help_active())
             return menu_item().action().help_text();
         else
-            return "";
+            return empty_string;
     }
 
     point menu_item_widget::sub_menu_position() const

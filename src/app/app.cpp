@@ -447,7 +447,7 @@ namespace neogfx
         return newStyle->second;
     }
 
-    std::string const& app::translate(std::string const& aTranslatableString, std::string const& aContext) const
+    i_string const& app::translate(i_string const& aTranslatableString, i_string const& aContext) const
     {
         // todo: i18n
         return aTranslatableString;

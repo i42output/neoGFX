@@ -36,7 +36,7 @@ namespace neogfx
     public:
         virtual bool help_active() const = 0;
         virtual neogfx::help_type help_type() const = 0;
-        virtual std::string help_text() const = 0;
+        virtual i_string const& help_text() const = 0;
     };
 
     class i_help

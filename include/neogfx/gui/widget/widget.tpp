@@ -775,7 +775,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::high_dpi() const
     {
-        return has_root() && root().has_surface() ? 
+        return device_metrics_available() ?
             root().surface().ppi() >= 150.0 : 
             service<i_surface_manager>().display().metrics().ppi() >= 150.0;
     }
@@ -783,7 +783,7 @@ namespace neogfx
     template <typename Interface>
     dimension widget<Interface>::dpi_scale_factor() const
     {
-        return has_root() && root().has_surface() ?
+        return device_metrics_available() ?
             default_dpi_scale_factor(root().surface().ppi()) :
             service<i_app>().default_dpi_scale_factor();
     }

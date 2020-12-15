@@ -145,7 +145,7 @@ namespace neogfx
         return iMessage != std::nullopt || service<i_app>().help().help_active();
     }
 
-    std::string status_bar::message() const
+    i_string const& status_bar::message() const
     {
         if (service<i_app>().help().help_active())
             return service<i_app>().help().active_help().help_text();
