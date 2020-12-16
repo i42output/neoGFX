@@ -64,12 +64,12 @@ namespace neogfx
 
     void hsl_color::set_saturation(double aSaturation)
     {
-        iSaturation = aSaturation;
+        iSaturation = std::min(std::max(aSaturation, 0.0), 1.0);
     }
 
     void hsl_color::set_lightness(double aLightness)
     {
-        iLightness = aLightness;
+        iLightness = std::min(std::max(aLightness, 0.0), 1.0);
     }
 
     void hsl_color::set_alpha(double aAlpha)
@@ -113,6 +113,16 @@ namespace neogfx
         result.iLightness += delta;
         result.iLightness = std::min(std::max(result.iLightness, 0.0), 1.0);
         return result;
+    }
+
+    hsl_color hsl_color::shade(double aDelta) const
+    {
+        return lightness() >= 0.5 ? with_lightness(lightness() - aDelta) : with_lightness(lightness() + aDelta);
+    }
+
+    hsl_color hsl_color::unshade(double aDelta) const
+    {
+        return shade(-aDelta);
     }
 
     void hsl_color::to_rgb(scalar& aRed, scalar& aGreen, scalar& aBlue, scalar& aAlpha) const

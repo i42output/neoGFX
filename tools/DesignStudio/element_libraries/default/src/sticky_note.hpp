@@ -25,6 +25,7 @@
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
+#include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -43,7 +44,7 @@ namespace neogfx::DesignStudio
     {
         typedef widget<> base_type;
     public:
-        sticky_note()
+        sticky_note(i_element const& aElement)
         {
             thread_local std::random_device tEntropy;
             thread_local std::mt19937 tGenerator(tEntropy());
@@ -54,7 +55,7 @@ namespace neogfx::DesignStudio
             defaultItem->set_ignore_non_client_mouse_events(false);
             defaultItem->set_focus_policy(defaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
             defaultItem->set_background_opacity(0.0);
-            defaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)
+            iSink = defaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)
             {
                 if (aEvent == neogfx::focus_event::FocusGained)
                 {
@@ -65,12 +66,9 @@ namespace neogfx::DesignStudio
                     set_ignore_mouse_events(true);
                 }
             });
-            defaultItem->ContextMenu([&](i_menu& aMenu)
+            iSink += aElement.context_menu([&](i_menu& aMenu)
             {
                 auto noteColor = std::make_shared<action>("Sticky Note Color...");
-                auto fontFormat = std::make_shared<action>("Font...");
-                auto paragraphFormat = std::make_shared<action>("Paragraph...");
-                paragraphFormat->disable(); // todo
                 noteColor->Triggered([&]()
                 {
                     auto oldColor = background_color();
@@ -85,6 +83,14 @@ namespace neogfx::DesignStudio
                         set_background_color(oldColor);
                 });
                 aMenu.add_action(noteColor);
+                aMenu.add_separator();
+            });
+            iSink += defaultItem->ContextMenu([&](i_menu& aMenu)
+            {
+                aElement.context_menu().trigger(aMenu);
+                auto fontFormat = std::make_shared<action>("Font...");
+                auto paragraphFormat = std::make_shared<action>("Paragraph...");
+                paragraphFormat->disable(); // todo
                 aMenu.add_action(fontFormat);
                 aMenu.add_action(paragraphFormat);
                 aMenu.add_separator();
@@ -122,7 +128,7 @@ namespace neogfx::DesignStudio
             base_type::paint(aGc);
             auto cr = client_rect(true);
             cr.cy = padding().top;
-            aGc.fill_rect(cr, background_color().with_lightness(0.85));
+            aGc.fill_rect(cr, background_color().to_hsl().shade(0.05).to_rgb<color>());
         }
     protected:
         const i_widget& get_widget_at(const point& aPosition) const override
@@ -134,5 +140,6 @@ namespace neogfx::DesignStudio
         }
     private:
         ref_ptr<i_widget> iDefaultItem;
+        sink iSink;
     };
 }

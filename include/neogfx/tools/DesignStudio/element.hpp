@@ -77,6 +77,7 @@ namespace neogfx::DesignStudio
     public:
         define_declared_event(ModeChanged, mode_changed)
         define_declared_event(SelectionChanged, selection_changed)
+        define_declared_event(ContextMenu, context_menu, i_menu&)
     public:
         using typename i_element::no_parent;
         using typename i_element::no_caddy;
@@ -220,7 +221,9 @@ namespace neogfx::DesignStudio
             {
                 if constexpr (std::is_base_of_v<i_widget, Type>)
                 {
-                    if constexpr (std::is_constructible_v<Type, neolib::i_string&>)
+                    if constexpr (std::is_constructible_v<Type, i_element const&>)
+                        iLayoutItem = make_ref<Type>(*this);
+                    else if constexpr (std::is_constructible_v<Type, neolib::i_string const&>)
                         iLayoutItem = make_ref<Type>(iId.to_std_string());
                     else if constexpr (std::is_default_constructible_v<Type>)
                         iLayoutItem = make_ref<Type>();

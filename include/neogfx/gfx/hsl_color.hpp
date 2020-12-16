@@ -51,6 +51,8 @@ namespace neogfx
         hsl_color with_lightness(double aNewLightness) const;
         hsl_color lighter(double aDelta) const;
         hsl_color lighter(double aCoeffecient, double aDelta) const;
+        hsl_color shade(double aDelta) const;
+        hsl_color unshade(double aDelta) const;
         void to_rgb(scalar& aRed, scalar& aGreen, scalar& aBlue, scalar& aAlpha) const;
         template <typename RgbColor>
         typename RgbColor::return_type to_rgb() const

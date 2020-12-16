@@ -28,6 +28,7 @@
 #include <neolib/task/i_event.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element_component.hpp>
 
 namespace neogfx::DesignStudio
@@ -70,6 +71,7 @@ namespace neogfx::DesignStudio
     public:
         declare_event(mode_changed)
         declare_event(selection_changed)
+        declare_event(context_menu, i_menu&)
     public:
         typedef i_element abstract_type;
     public:

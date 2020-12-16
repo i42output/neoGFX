@@ -31,6 +31,7 @@ namespace neogfx::DesignStudio
     inline void display_element_context_menu(i_widget& aParent, i_element& aElement)
     {
         context_menu menu{ aParent, aParent.root().mouse_position() + aParent.root().window_position() };
+        aElement.context_menu().trigger(menu.menu());
         action actionSendToBack{ "Send To Back"_t };
         action actionBringToFont{ "Bring To Front"_t };
         auto& actionCut = service<i_app>().action_cut();

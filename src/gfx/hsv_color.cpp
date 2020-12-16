@@ -69,12 +69,12 @@ namespace neogfx
 
     void hsv_color::set_saturation(double aSaturation)
     {
-        iSaturation = aSaturation;
+        iSaturation = std::min(std::max(aSaturation, 0.0), 1.0);
     }
 
     void hsv_color::set_value(double aValue)
     {
-        iValue = aValue;
+        iValue = std::min(std::max(aValue, 0.0), 1.0);
     }
 
     void hsv_color::set_brightness(double aBrightness)
