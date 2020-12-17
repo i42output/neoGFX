@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <random>
 #include <neogfx/app/action.hpp>
+#include <neogfx/app/file_dialog.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
@@ -40,9 +41,9 @@ namespace neogfx::DesignStudio
         }
     };
 
-    class sticky_note : public widget<>
+    class sticky_note : public image_widget
     {
-        typedef widget<> base_type;
+        typedef image_widget base_type;
     public:
         sticky_note(i_element const& aElement)
         {
@@ -69,6 +70,7 @@ namespace neogfx::DesignStudio
             iSink += aElement.context_menu([&](i_menu& aMenu)
             {
                 auto noteColor = std::make_shared<action>("Sticky Note Color...");
+                auto noteBackground = std::make_shared<action>("Sticky Note Background...");
                 noteColor->Triggered([&]()
                 {
                     auto oldColor = background_color();
@@ -82,7 +84,14 @@ namespace neogfx::DesignStudio
                     else
                         set_background_color(oldColor);
                 });
+                noteBackground->Triggered([&]()
+                {
+                    auto imageFile = open_file_dialog(*this, file_dialog_spec{ "Open Image", {}, { "*.png" }, "Image Files" });
+                    if (imageFile)
+                        set_image(neogfx::image{ "file:///"_s + (*imageFile)[0] });
+                });
                 aMenu.add_action(noteColor);
+                aMenu.add_action(noteBackground);
                 aMenu.add_separator();
             });
             iSink += defaultItem->ContextMenu([&](i_menu& aMenu)
