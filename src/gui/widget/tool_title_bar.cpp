@@ -102,10 +102,10 @@ namespace neogfx
         return neogfx::widget_type::NonClient;
     }
 
-    color  tool_title_bar::palette_color(color_role aColorRole) const
+    color tool_title_bar::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
-            return  widget::palette_color(aColorRole);
+            return widget::palette_color(aColorRole);
         if (aColorRole == color_role::Background)
         {
             if (!iStateActive)
@@ -113,10 +113,17 @@ namespace neogfx
             else
                 return service<i_app>().current_style().palette().color(color_role::Selection);
         }
-        return  widget::palette_color(aColorRole);
+        else if (aColorRole == color_role::Text)
+        {
+            if (!iStateActive)
+                return service<i_app>().current_style().palette().color(color_role::Text);
+            else
+                return service<i_app>().current_style().palette().color(color_role::SelectedText);
+        }
+        return widget::palette_color(aColorRole);
     }
 
-    neogfx::focus_policy tool_title_bar::focus_policy() const
+    focus_policy tool_title_bar::focus_policy() const
     {
         return neogfx::focus_policy::ClickFocus;
     }
@@ -130,7 +137,7 @@ namespace neogfx
 
     void tool_title_bar::update_textures()
     {
-        auto ink = service<i_app>().current_style().palette().color(color_role::Text);
+        auto ink = palette_color(color_role::Text);
         auto paper = background_color();
         static std::string const sCloseTexturePattern
         {

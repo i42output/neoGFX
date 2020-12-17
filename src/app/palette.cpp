@@ -41,6 +41,7 @@ namespace neogfx
         iAlternateBaseColor{ aOther.maybe_color(color_role::AlternateBase) },
         iTextColor{ aOther.maybe_color(color_role::Text) },
         iSelectionColor{ aOther.maybe_color(color_role::Selection) },
+        iSelectedTextColor{ aOther.maybe_color(color_role::SelectedText) },
         iHoverColor{ aOther.maybe_color(color_role::Hover) },
         iPrimaryAccentColor{ aOther.maybe_color(color_role::PrimaryAccent) },
         iSecondaryAccentColor{ aOther.maybe_color(color_role::SecondaryAccent) },
@@ -80,6 +81,7 @@ namespace neogfx
             iAlternateBaseColor = aOther.maybe_color(color_role::AlternateBase);
             iTextColor = aOther.maybe_color(color_role::Text);
             iSelectionColor = aOther.maybe_color(color_role::Selection);
+            iSelectedTextColor = aOther.maybe_color(color_role::SelectedText);
             iHoverColor = aOther.maybe_color(color_role::Hover);
             iPrimaryAccentColor = aOther.maybe_color(color_role::PrimaryAccent);
             iSecondaryAccentColor = aOther.maybe_color(color_role::SecondaryAccent);
@@ -104,6 +106,7 @@ namespace neogfx
             iAlternateBaseColor == aOther.maybe_color(color_role::AlternateBase) &&
             iTextColor == aOther.maybe_color(color_role::Text) &&
             iSelectionColor == aOther.maybe_color(color_role::Selection) &&
+            iSelectedTextColor == aOther.maybe_color(color_role::SelectedText) &&
             iHoverColor == aOther.maybe_color(color_role::Hover) &&
             iPrimaryAccentColor == aOther.maybe_color(color_role::PrimaryAccent) &&
             iSecondaryAccentColor == aOther.maybe_color(color_role::SecondaryAccent) &&
@@ -133,6 +136,8 @@ namespace neogfx
             return iTextColor != std::nullopt;
         case color_role::Selection:
             return iSelectionColor != std::nullopt;
+        case color_role::SelectedText:
+            return iSelectedTextColor != std::nullopt;
         case color_role::Hover:
             return iHoverColor != std::nullopt;
         case color_role::PrimaryAccent:
@@ -181,12 +186,7 @@ namespace neogfx
             if (has_color(color_role::Text))
                 return *iTextColor;
             else
-            {
-                if (color(color_role::Theme).to_hsv().value() < 0.6)
-                    return color::White;
-                else
-                    return color::Black;
-            }
+                return color(color_role::Theme).to_hsl().lightness() < 0.6 ? color::White : color::Black;
         case color_role::Selection:
             if (has_color(color_role::Selection))
                 return *iSelectionColor;
@@ -194,6 +194,13 @@ namespace neogfx
                 return proxy().color(color_role::Selection);
             else
                 return neogfx::color{ 0x2A, 0x82, 0xDA };
+        case color_role::SelectedText:
+            if (has_color(color_role::SelectedText))
+                return *iSelectedTextColor;
+            else if (has_proxy())
+                return proxy().color(color_role::SelectedText);
+            else
+                return color(color_role::Selection).to_hsl().lightness() < 0.6 ? color::White : color::Black;
         case color_role::Hover:
             if (has_color(color_role::Hover))
                 return *iHoverColor;
@@ -213,12 +220,7 @@ namespace neogfx
             if (has_color(color_role::Void))
                 return *iVoidColor;
             else
-            {
-                if (color(color_role::Theme).to_hsl().lightness() < 0.6)
-                    return color::Black;
-                else
-                    return color::White;
-            }
+                return color(color_role::Theme).to_hsl().lightness() < 0.6 ? color::Black : color::White;
         default:
             if (has_proxy())
                 return proxy().color(aRole);
@@ -245,6 +247,8 @@ namespace neogfx
             return iTextColor;
         case color_role::Selection:
             return iSelectionColor;
+        case color_role::SelectedText:
+            return iSelectedTextColor;
         case color_role::Hover:
             return iHoverColor;
         case color_role::PrimaryAccent:
@@ -283,6 +287,9 @@ namespace neogfx
             break;
         case color_role::Selection:
             iSelectionColor = aColor;
+            break;
+        case color_role::SelectedText:
+            iSelectedTextColor = aColor;
             break;
         case color_role::Hover:
             iHoverColor = aColor;

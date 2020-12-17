@@ -290,9 +290,7 @@ namespace neogfx
                         service<i_app>().current_style().palette().color(presentation_model().alternating_row_color() ? row % 2 == 0 ? color_role::Base : color_role::AlternateBase : color_role::Base);
                 optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Text);
                 if (!textColor)
-                    textColor = selection_model().is_selected(itemIndex) ? 
-                        cellBackgroundColor->dark() ? color::White : color::Black :
-                        service<i_app>().current_style().palette().color(color_role::Text);
+                    textColor = service<i_app>().current_style().palette().color(selection_model().is_selected(itemIndex) ? color_role::SelectedText : color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
