@@ -88,6 +88,8 @@ namespace neogfx
         virtual void show() = 0;
         virtual void hide() = 0;
         virtual bool visible() const = 0;
+        virtual bool auto_hide() const = 0;
+        virtual void set_auto_hide(bool aAutoHide) = 0;
         virtual value_type position() const = 0;
         virtual bool set_position(value_type aPosition, const optional_easing& aTransition = {}, double aTransitionDuration = 0.5) = 0;
         virtual value_type minimum() const = 0;

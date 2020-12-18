@@ -50,6 +50,8 @@ namespace neogfx
         void show() override;
         void hide() override;
         bool visible() const override;
+        bool auto_hide() const override;
+        void set_auto_hide(bool aAutoHide) override;
         value_type position() const override;
         bool set_position(value_type aPosition, const optional_easing& aTransition = {}, double aTransitionDuration = 0.5) override;
         value_type minimum() const override;
@@ -98,6 +100,7 @@ namespace neogfx
         scrollbar_style iStyle;
         bool iIntegerPositions;
         bool iVisible;
+        bool iAutoHide;
         value_type iMinimum;
         value_type iMaximum;
         value_type iStep;

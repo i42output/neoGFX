@@ -89,110 +89,7 @@ namespace neogfx
     {
         if (iTexture.is_empty())
             return;
-        scoped_units su{ *this, units::Pixels };
-        auto imageExtents = iTexture.extents();
-        if (iDpiAutoScale)
-            imageExtents *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
-        rect placementRect{ point{}, imageExtents };
-        if (iAspectRatio == aspect_ratio::Stretch)
-        {
-            placementRect.cx = client_rect().width();
-            placementRect.cy = client_rect().height();
-        }
-        else if (placementRect.width() >= placementRect.height())
-        {
-            switch (iAspectRatio)
-            {
-            case aspect_ratio::Ignore:
-                if (placementRect.width() > client_rect().width())
-                    placementRect.cx = client_rect().width();
-                if (placementRect.height() > client_rect().height())
-                    placementRect.cy = client_rect().height();
-                break;
-            case aspect_ratio::Keep:
-                if (placementRect.width() > client_rect().width())
-                {
-                    placementRect.cx = client_rect().width();
-                    placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
-                }
-                if (placementRect.height() > client_rect().height())
-                {
-                    placementRect.cy = client_rect().height();
-                    placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
-                }
-                break;
-            case aspect_ratio::KeepExpanding:
-                if (placementRect.height() != client_rect().height())
-                {
-                    placementRect.cy = client_rect().height();
-                    placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
-                }
-                break;
-            }
-        }
-        else
-        {
-            switch (iAspectRatio)
-            {
-            case aspect_ratio::Ignore:
-                if (placementRect.width() > client_rect().width())
-                    placementRect.cx = client_rect().width();
-                if (placementRect.height() > client_rect().height())
-                    placementRect.cy = client_rect().height();
-                break;
-            case aspect_ratio::Keep:
-                if (placementRect.height() > client_rect().height())
-                {
-                    placementRect.cy = client_rect().height();
-                    placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
-                }
-                if (placementRect.width() > client_rect().width())
-                {
-                    placementRect.cx = client_rect().width();
-                    placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
-                }
-                break;
-            case aspect_ratio::KeepExpanding:
-                if (placementRect.width() != client_rect().width())
-                {
-                    placementRect.cx = client_rect().width();
-                    placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
-                }
-                break;
-            }
-        }
-        switch (iPlacement)
-        {
-        case cardinal::NorthWest:
-            placementRect.position() = point{};
-            break;
-        case cardinal::North:
-            placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, 0.0 };
-            break;
-        case cardinal::NorthEast:
-            placementRect.position() = point{ client_rect().width() - placementRect.width(), 0.0 };
-            break;
-        case cardinal::West:
-            placementRect.position() = point{ 0.0, (client_rect().height() - placementRect.cy) / 2.0 };
-            break;
-        case cardinal::Center:
-            placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, (client_rect().height() - placementRect.cy) / 2.0 };
-            break;
-        case cardinal::East:
-            placementRect.position() = point{ client_rect().width() - placementRect.width(), (client_rect().height() - placementRect.cy) / 2.0 };
-            break;
-        case cardinal::SouthWest:
-            placementRect.position() = point{ 0.0, client_rect().height() - placementRect.height() };
-            break;
-        case cardinal::South:
-            placementRect.position() = point{ (client_rect().width() - placementRect.cx) / 2.0, client_rect().height() - placementRect.height() };
-            break;
-        case cardinal::SouthEast:
-            placementRect.position() = point{ client_rect().width() - placementRect.width(), client_rect().height() - placementRect.height() };
-            break;
-        }
-        placementRect = floor_rasterized(placementRect);
-        aGc.draw_texture(placementRect, iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor ? shader_effect::Colorize : shader_effect::None);
+        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor ? shader_effect::Colorize : shader_effect::None);
     }
 
     const texture& image_widget::image() const
@@ -255,5 +152,113 @@ namespace neogfx
             iDpiAutoScale = aDpiAutoScale;
             update();
         }
+    }
+
+    rect image_widget::placement_rect() const
+    {
+        scoped_units su{ *this, units::Pixels };
+        auto imageExtents = iTexture.extents();
+        if (iDpiAutoScale)
+            imageExtents *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
+        rect placementRect{ point{}, imageExtents };
+        auto const clientRect = client_rect();
+        if (iAspectRatio == aspect_ratio::Stretch)
+        {
+            placementRect.cx = clientRect.width();
+            placementRect.cy = clientRect.height();
+        }
+        else if (placementRect.width() >= placementRect.height())
+        {
+            switch (iAspectRatio)
+            {
+            case aspect_ratio::Ignore:
+                if (placementRect.width() > clientRect.width())
+                    placementRect.cx = clientRect.width();
+                if (placementRect.height() > clientRect.height())
+                    placementRect.cy = clientRect.height();
+                break;
+            case aspect_ratio::Keep:
+                if (placementRect.width() > clientRect.width())
+                {
+                    placementRect.cx = clientRect.width();
+                    placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
+                }
+                if (placementRect.height() > clientRect.height())
+                {
+                    placementRect.cy = clientRect.height();
+                    placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
+                }
+                break;
+            case aspect_ratio::KeepExpanding:
+                if (placementRect.height() != clientRect.height())
+                {
+                    placementRect.cy = clientRect.height();
+                    placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
+                }
+                break;
+            }
+        }
+        else
+        {
+            switch (iAspectRatio)
+            {
+            case aspect_ratio::Ignore:
+                if (placementRect.width() > clientRect.width())
+                    placementRect.cx = clientRect.width();
+                if (placementRect.height() > clientRect.height())
+                    placementRect.cy = clientRect.height();
+                break;
+            case aspect_ratio::Keep:
+                if (placementRect.height() > clientRect.height())
+                {
+                    placementRect.cy = clientRect.height();
+                    placementRect.cx = placementRect.cy * imageExtents.cx / imageExtents.cy;
+                }
+                if (placementRect.width() > clientRect.width())
+                {
+                    placementRect.cx = clientRect.width();
+                    placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
+                }
+                break;
+            case aspect_ratio::KeepExpanding:
+                if (placementRect.width() != clientRect.width())
+                {
+                    placementRect.cx = clientRect.width();
+                    placementRect.cy = placementRect.cx * imageExtents.cy / imageExtents.cx;
+                }
+                break;
+            }
+        }
+        switch (iPlacement)
+        {
+        case cardinal::NorthWest:
+            placementRect.position() = point{};
+            break;
+        case cardinal::North:
+            placementRect.position() = point{ (clientRect.width() - placementRect.cx) / 2.0, 0.0 };
+            break;
+        case cardinal::NorthEast:
+            placementRect.position() = point{ clientRect.width() - placementRect.width(), 0.0 };
+            break;
+        case cardinal::West:
+            placementRect.position() = point{ 0.0, (clientRect.height() - placementRect.cy) / 2.0 };
+            break;
+        case cardinal::Center:
+            placementRect.position() = point{ (clientRect.width() - placementRect.cx) / 2.0, (clientRect.height() - placementRect.cy) / 2.0 };
+            break;
+        case cardinal::East:
+            placementRect.position() = point{ clientRect.width() - placementRect.width(), (clientRect.height() - placementRect.cy) / 2.0 };
+            break;
+        case cardinal::SouthWest:
+            placementRect.position() = point{ 0.0, clientRect.height() - placementRect.height() };
+            break;
+        case cardinal::South:
+            placementRect.position() = point{ (clientRect.width() - placementRect.cx) / 2.0, clientRect.height() - placementRect.height() };
+            break;
+        case cardinal::SouthEast:
+            placementRect.position() = point{ clientRect.width() - placementRect.width(), clientRect.height() - placementRect.height() };
+            break;
+        }
+        return floor_rasterized(placementRect);
     }
 }

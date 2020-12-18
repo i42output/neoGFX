@@ -52,6 +52,8 @@ namespace neogfx
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio);
         void set_placement(cardinal aPlacement);
         void set_dpi_auto_scale(bool aDpiAutoScale);
+    public:
+        rect placement_rect() const;
     private:
         texture iTexture;
         optional_color iColor;

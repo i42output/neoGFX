@@ -104,9 +104,13 @@ namespace neogfx
     template <typename Base>
     widget_part scrollable_widget<Base>::part(const point& aPosition) const
     {
-        if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None)
+        if (vertical_scrollbar().visible() && 
+            (vertical_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None) ||
+            (vertical_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition)))
             return widget_part{ *this, widget_part::VerticalScrollbar };
-        else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None)
+        else if (horizontal_scrollbar().visible() &&
+            (horizontal_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None) ||
+            (horizontal_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition)))
             return widget_part{ *this, widget_part::HorizontalScrollbar };
         else
             return base_type::part(aPosition);

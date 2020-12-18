@@ -26,18 +26,19 @@
 namespace neogfx
 {
     scrollbar::scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle, bool aIntegerPositions) :
-        iContainer(aContainer), 
-        iType(aType), 
-        iStyle(aStyle),
-        iIntegerPositions(aIntegerPositions),
-        iVisible(false),
-        iMinimum(0.0),
-        iMaximum(0.0),
-        iStep(1.0),
-        iPage(0.0),
-        iClickedElement(scrollbar_element::None),
-        iHoverElement(scrollbar_element::None),
-        iPaused(false)
+        iContainer{ aContainer },
+        iType{ aType },
+        iStyle{ aStyle },
+        iIntegerPositions{ aIntegerPositions },
+        iVisible{ false },
+        iAutoHide{ false },
+        iMinimum{ 0.0 },
+        iMaximum{ 0.0 },
+        iStep{ 1.0 },
+        iPage{ 0.0 },
+        iClickedElement{ scrollbar_element::None },
+        iHoverElement{ scrollbar_element::None },
+        iPaused{ false }
     {
         Position.changed_from_to([this](const value_type& aFrom, const value_type& aTo)
         {
@@ -89,6 +90,20 @@ namespace neogfx
     bool scrollbar::visible() const
     {
         return iVisible;
+    }
+
+    bool scrollbar::auto_hide() const
+    {
+        return iAutoHide;
+    }
+
+    void scrollbar::set_auto_hide(bool aAutoHide)
+    {
+        if (iAutoHide != aAutoHide)
+        {
+            iAutoHide = aAutoHide;
+            iContainer.as_widget().update(true);
+        }
     }
 
     scrollbar::value_type scrollbar::position() const

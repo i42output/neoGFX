@@ -47,12 +47,15 @@ namespace neogfx::DesignStudio
     public:
         sticky_note(i_element const& aElement)
         {
+            set_padding(neogfx::padding{ 0.0, 16.0_dip, 0.0, 0.0 });
             thread_local std::random_device tEntropy;
             thread_local std::mt19937 tGenerator(tEntropy());
             thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
             set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
             auto defaultItem = make_ref<sticky_note_text>(*this, text_edit::MultiLine, frame_style::NoFrame);
+            defaultItem->vertical_scrollbar().set_auto_hide(true);
+            defaultItem->horizontal_scrollbar().set_auto_hide(true);
             defaultItem->set_ignore_non_client_mouse_events(false);
             defaultItem->set_focus_policy(defaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
             defaultItem->set_background_opacity(0.0);
@@ -88,7 +91,13 @@ namespace neogfx::DesignStudio
                 {
                     auto imageFile = open_file_dialog(*this, file_dialog_spec{ "Open Image", {}, { "*.png" }, "Image Files" });
                     if (imageFile)
+                    {
                         set_image(neogfx::image{ "file:///"_s + (*imageFile)[0] });
+                        auto const placementRect = placement_rect();
+                        parent().move(parent().position() + (placementRect.top_left() - client_rect(false).top_left()));
+                        parent().set_extents(parent().minimum_size().max(parent().extents() + (placementRect.extents() - extents())));
+                        layout_items();
+                    }
                 });
                 aMenu.add_action(noteColor);
                 aMenu.add_action(noteBackground);
@@ -108,21 +117,14 @@ namespace neogfx::DesignStudio
             add(defaultItem);
         }
     protected:
-        neogfx::padding padding() const override
-        {
-            if (has_padding())
-                return widget::padding();
-            auto result = widget::padding();
-            result.top = 16.0_dip;
-            return result;
-        }
         void layout_items(bool aDefer = false) override
         {
             widget::layout_items(aDefer);
             if (iDefaultItem != nullptr)
             {
-                iDefaultItem->move(client_rect(false).top_left());
-                iDefaultItem->resize(client_rect(false).extents());
+                auto const placementRect = (image().is_empty() ? client_rect(false) : placement_rect().deflate(padding()));
+                iDefaultItem->move(placementRect.top_left());
+                iDefaultItem->resize(placementRect.extents());
             }
         }
     protected:
@@ -135,9 +137,27 @@ namespace neogfx::DesignStudio
         void paint(i_graphics_context& aGc) const override
         {
             base_type::paint(aGc);
-            auto cr = client_rect(true);
-            cr.cy = padding().top;
-            aGc.fill_rect(cr, background_color().to_hsl().shade(0.05).to_rgb<color>());
+            auto placementRect = image().is_empty() ? client_rect() : placement_rect();
+            placementRect.cy = padding().top;
+            if (image().is_empty())
+                aGc.fill_rect(placementRect, background_color().to_hsl().shade(0.05).to_rgb<color>());
+            else
+                aGc.fill_rect(placementRect, color::Black.with_alpha(0x80));
+        }
+    protected:
+        bool has_background_opacity() const override
+        {
+            return image().is_empty() ? base_type::has_background_opacity() : true;
+        }
+        double background_opacity() const override
+        {
+            return image().is_empty() ? base_type::background_opacity() : 0.0;
+        }
+        color palette_color(color_role aColorRole) const override
+        {
+            if (aColorRole != color_role::Background || image().is_empty())
+                return base_type::palette_color(aColorRole);
+            return color::Black.shaded(0x20);
         }
     protected:
         const i_widget& get_widget_at(const point& aPosition) const override
