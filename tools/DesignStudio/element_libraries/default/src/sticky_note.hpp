@@ -26,6 +26,7 @@
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
+#include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
@@ -116,6 +117,19 @@ namespace neogfx::DesignStudio
                 aElement.context_menu().trigger(aMenu);
                 auto fontFormat = std::make_shared<action>("Font...");
                 auto paragraphFormat = std::make_shared<action>("Paragraph...");
+                fontFormat->Triggered([&]()
+                {
+                    neogfx::font oldFont = iDefaultItem->font();
+                    font_dialog fontPicker(*this, oldFont);
+                    fontPicker.SelectionChanged([&]()
+                    {
+                        iDefaultItem->set_font(fontPicker.selected_font());
+                    });
+                    if (fontPicker.exec() == dialog_result::Accepted)
+                        iDefaultItem->set_font(fontPicker.selected_font());
+                    else
+                        iDefaultItem->set_font(oldFont);
+                });
                 paragraphFormat->disable(); // todo
                 aMenu.add_action(fontFormat);
                 aMenu.add_action(paragraphFormat);
