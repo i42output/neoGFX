@@ -409,7 +409,8 @@ namespace neogfx
         framed_scrollable_widget::focus_lost(aFocusReason);
         if (destroyed)
             return;
-        service<i_clipboard>().deactivate(*this);
+        if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+            service<i_clipboard>().deactivate(*this);
         if (iType == SingleLine)
             cursor().set_position(iText.size());
         update();

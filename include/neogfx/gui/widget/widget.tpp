@@ -1943,6 +1943,8 @@ namespace neogfx
             {
                 if (w->effectively_hidden() || (w->effectively_disabled() && !aForHitTest))
                     continue;
+                if (w->part(aPosition - w->origin()).part == widget_part::Nowhere)
+                    continue;
                 if (!w->ignore_mouse_events() && mouse_event_location() != neogfx::mouse_event_location::NonClient)
                     break;
                 if (!w->ignore_non_client_mouse_events() && mouse_event_location() == neogfx::mouse_event_location::NonClient)

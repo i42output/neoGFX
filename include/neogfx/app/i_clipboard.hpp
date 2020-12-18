@@ -46,6 +46,25 @@ namespace neogfx
         virtual void select_all() = 0;
     };
 
+    class default_clipboard_sink : public i_clipboard_sink
+    {
+    public:
+        bool can_undo() const override { return false; }
+        bool can_redo() const override { return false; }
+        bool can_cut() const override { return false; }
+        bool can_copy() const override { return false; }
+        bool can_paste() const override { return false; }
+        bool can_delete_selected() const override { return false; }
+        bool can_select_all() const override { return false; }
+        void undo(i_clipboard& aClipboard) override {}
+        void redo(i_clipboard& aClipboard) override {}
+        void cut(i_clipboard& aClipboard) override {}
+        void copy(i_clipboard& aClipboard) override {}
+        void paste(i_clipboard& aClipboard) override {}
+        void delete_selected() override {}
+        void select_all() override {}
+    };
+
     class i_clipboard : public i_service
     {
     public:

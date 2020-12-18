@@ -41,7 +41,7 @@ namespace neogfx::DesignStudio
         }
     };
 
-    class sticky_note : public image_widget
+    class sticky_note : public image_widget, private default_clipboard_sink
     {
         typedef image_widget base_type;
     public:
@@ -53,13 +53,13 @@ namespace neogfx::DesignStudio
             thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
             set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
-            auto defaultItem = make_ref<sticky_note_text>(*this, text_edit::MultiLine, frame_style::NoFrame);
-            defaultItem->vertical_scrollbar().set_auto_hide(true);
-            defaultItem->horizontal_scrollbar().set_auto_hide(true);
-            defaultItem->set_ignore_non_client_mouse_events(false);
-            defaultItem->set_focus_policy(defaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
-            defaultItem->set_background_opacity(0.0);
-            iSink = defaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)
+            iDefaultItem = make_ref<sticky_note_text>(*this, text_edit::MultiLine, frame_style::NoFrame);
+            iDefaultItem->vertical_scrollbar().set_auto_hide(true);
+            iDefaultItem->horizontal_scrollbar().set_auto_hide(true);
+            iDefaultItem->set_ignore_non_client_mouse_events(false);
+            iDefaultItem->set_focus_policy(iDefaultItem->focus_policy() | neogfx::focus_policy::ConsumeTabKey);
+            iDefaultItem->set_background_opacity(0.0);
+            iSink = iDefaultItem->Focus([&](neogfx::focus_event aEvent, focus_reason)
             {
                 if (aEvent == neogfx::focus_event::FocusGained)
                 {
@@ -68,7 +68,21 @@ namespace neogfx::DesignStudio
                 else if (aEvent == neogfx::focus_event::FocusLost)
                 {
                     set_ignore_mouse_events(true);
+                    if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
+                        service<i_clipboard>().deactivate(*this);
                 }
+            });
+            iSink += ImageChanged([&]()
+            {
+                auto const placementRect = placement_rect();
+                parent().move(parent().position() + (placementRect.top_left() - client_rect(false).top_left()));
+                parent().set_extents(parent().minimum_size().max(parent().extents() + (placementRect.extents() - extents())));
+                layout_items();
+            });
+            iSink += service<i_clipboard>().sink_activated([&]()
+            {
+                if (&service<i_clipboard>().active_sink() == &*iDefaultItem)
+                    service<i_clipboard>().activate(*this);
             });
             iSink += aElement.context_menu([&](i_menu& aMenu)
             {
@@ -91,19 +105,13 @@ namespace neogfx::DesignStudio
                 {
                     auto imageFile = open_file_dialog(*this, file_dialog_spec{ "Open Image", {}, { "*.png" }, "Image Files" });
                     if (imageFile)
-                    {
                         set_image(neogfx::image{ "file:///"_s + (*imageFile)[0] });
-                        auto const placementRect = placement_rect();
-                        parent().move(parent().position() + (placementRect.top_left() - client_rect(false).top_left()));
-                        parent().set_extents(parent().minimum_size().max(parent().extents() + (placementRect.extents() - extents())));
-                        layout_items();
-                    }
                 });
                 aMenu.add_action(noteColor);
                 aMenu.add_action(noteBackground);
                 aMenu.add_separator();
             });
-            iSink += defaultItem->ContextMenu([&](i_menu& aMenu)
+            iSink += iDefaultItem->ContextMenu([&](i_menu& aMenu)
             {
                 aElement.context_menu().trigger(aMenu);
                 auto fontFormat = std::make_shared<action>("Font...");
@@ -113,13 +121,19 @@ namespace neogfx::DesignStudio
                 aMenu.add_action(paragraphFormat);
                 aMenu.add_separator();
             });
-            iDefaultItem = defaultItem;
-            add(defaultItem);
+            add(iDefaultItem);
+        }
+    protected:
+        widget_part part(const point& aPosition) const override
+        {
+            if (!image().is_empty() && !placement_rect().contains(aPosition))
+                return { *this, widget_part::Nowhere };
+            return base_type::part(aPosition);
         }
     protected:
         void layout_items(bool aDefer = false) override
         {
-            widget::layout_items(aDefer);
+            base_type::layout_items(aDefer);
             if (iDefaultItem != nullptr)
             {
                 auto const placementRect = (image().is_empty() ? client_rect(false) : placement_rect().deflate(padding()));
@@ -167,8 +181,68 @@ namespace neogfx::DesignStudio
                 return parent();
             return result;
         }
+    protected:
+        bool can_undo() const override
+        {
+            return iDefaultItem->can_undo();
+        }
+        bool can_redo() const override
+        {
+            return iDefaultItem->can_redo();
+        }
+        bool can_cut() const override
+        {
+            return iDefaultItem->can_cut();
+        }
+        bool can_copy() const override
+        {
+            return iDefaultItem->can_copy();
+        }
+        bool can_paste() const override
+        {
+            return service<i_clipboard>().has_image() || iDefaultItem->can_paste();
+        }
+        bool can_delete_selected() const override
+        {
+            return iDefaultItem->can_delete_selected();
+        }
+        bool can_select_all() const override
+        {
+            return iDefaultItem->can_delete_selected();
+        }
+        void undo(i_clipboard& aClipboard) override
+        {
+            iDefaultItem->undo(aClipboard);
+        }
+        void redo(i_clipboard& aClipboard) override
+        {
+            iDefaultItem->redo(aClipboard);
+        }
+        void cut(i_clipboard& aClipboard) override
+        {
+            iDefaultItem->cut(aClipboard);
+        }
+        void copy(i_clipboard& aClipboard) override
+        {
+            iDefaultItem->copy(aClipboard);
+        }
+        void paste(i_clipboard& aClipboard) override
+        {
+            if (aClipboard.has_image())
+                set_image(aClipboard.image());
+            else if (aClipboard.has_text())
+                iDefaultItem->set_text(aClipboard.text());
+        }
+        void delete_selected() override
+        {
+            iDefaultItem->delete_selected();
+        }
+        void select_all() override
+        {
+            iDefaultItem->select_all();
+        }
     private:
-        ref_ptr<i_widget> iDefaultItem;
+        ref_ptr<sticky_note_text> iDefaultItem;
         sink iSink;
     };
 }
