@@ -106,11 +106,11 @@ namespace neogfx
     {
         if (vertical_scrollbar().visible() && 
             (vertical_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None) ||
-            (vertical_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition)))
+            (vertical_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition + as_widget().origin())))
             return widget_part{ *this, widget_part::VerticalScrollbar };
         else if (horizontal_scrollbar().visible() &&
             (horizontal_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None) ||
-            (horizontal_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition)))
+            (horizontal_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition + as_widget().origin())))
             return widget_part{ *this, widget_part::HorizontalScrollbar };
         else
             return base_type::part(aPosition);
