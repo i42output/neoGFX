@@ -52,6 +52,7 @@ namespace neogfx
         bool visible() const override;
         bool auto_hide() const override;
         void set_auto_hide(bool aAutoHide) override;
+        bool auto_hidden() const override;
         value_type position() const override;
         bool set_position(value_type aPosition, const optional_easing& aTransition = {}, double aTransitionDuration = 0.5) override;
         value_type minimum() const override;

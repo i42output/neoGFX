@@ -106,6 +106,13 @@ namespace neogfx
         }
     }
 
+    bool scrollbar::auto_hidden() const
+    {
+        return (auto_hide() && clicked_element() == scrollbar_element::None &&
+            ((style() != scrollbar_style::Normal && hovering_element() == scrollbar_element::None) ||
+             (style() == scrollbar_style::Normal && !container().scrollbar_geometry(*this).contains(container().as_widget().root().mouse_position()))));
+    }
+
     scrollbar::value_type scrollbar::position() const
     {
         auto result = Position.value();

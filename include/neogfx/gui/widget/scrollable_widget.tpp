@@ -120,17 +120,19 @@ namespace neogfx
     void scrollable_widget<Base>::paint_non_client_after(i_graphics_context& aGc) const
     {
         base_type::paint_non_client_after(aGc);
-        if (vertical_scrollbar().visible())
+        if (vertical_scrollbar().visible() && !vertical_scrollbar().auto_hidden())
             vertical_scrollbar().render(aGc);
-        if (horizontal_scrollbar().visible())
+        if (horizontal_scrollbar().visible() && !horizontal_scrollbar().auto_hidden())
             horizontal_scrollbar().render(aGc);
-        if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
+        if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && 
+            !vertical_scrollbar().auto_hidden() && !horizontal_scrollbar().auto_hidden() &&
+            vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
         {
             point const oldOrigin = aGc.origin();
             aGc.set_origin(point{});
             auto const spareSquare = rect{
-                    point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(iVerticalScrollbar).bottom() },
-                    size{ scrollbar_geometry(iVerticalScrollbar).width(), scrollbar_geometry(horizontal_scrollbar()).height() } };
+                    point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(vertical_scrollbar()).bottom() },
+                    size{ scrollbar_geometry(vertical_scrollbar()).width(), scrollbar_geometry(horizontal_scrollbar()).height() } };
             aGc.fill_rect(spareSquare, scrollbar_color(vertical_scrollbar()));
             aGc.set_origin(oldOrigin);
         }
