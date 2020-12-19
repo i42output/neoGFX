@@ -168,6 +168,18 @@ namespace neogfx
         iLayout5{ iLayout3 },
         iSizeLabel{ iLayout5, "Size:" },
         iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iEffects{ client_layout() },
+        iLayoutEffects{ iEffects, neogfx::alignment::Top },
+        iInkBox{ iLayoutEffects, "Ink" },
+        iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color" },
+        iInkGradient{ iInkBox.item_layout(), "Gradient" },
+        iPaperBox{ iLayoutEffects, "Paper" },
+        iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color" },
+        iPaperGradient{ iPaperBox.item_layout(), "Gradient" },
+        iTextEffectsBox{ iLayoutEffects, "Text Effects" },
+        iTextEffectsOutline{ iTextEffectsBox.item_layout(), "Outline" },
+        iTextEffectsShadow{ iTextEffectsBox.item_layout(), "Shadow" },
+        iTextEffectsGlow{ iTextEffectsBox.item_layout(), "Glow" },
         iSampleBox{ iLayout2, "Sample" },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -176,6 +188,11 @@ namespace neogfx
 
     font_dialog::~font_dialog()
     {
+    }
+
+    void font_dialog::enable_text_effects()
+    {
+        iEffects.show();
     }
 
     font font_dialog::current_font() const
@@ -206,7 +223,14 @@ namespace neogfx
 
     void font_dialog::init()
     {
-        button_box().option_layout().add(make_ref<push_button>("Subpixel Rendering..."_t)).clicked([this]()
+        iEffects.hide();
+
+        iPaperBox.set_checkable(true, true);
+        iTextEffectsBox.set_checkable(true, true);
+
+        auto subpixelRendering = make_ref<push_button>("Subpixel Rendering..."_t);
+        subpixelRendering->enable(false);
+        button_box().option_layout().add(subpixelRendering).clicked([this]()
         {
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });

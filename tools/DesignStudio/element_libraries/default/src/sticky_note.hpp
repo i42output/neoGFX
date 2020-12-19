@@ -121,6 +121,7 @@ namespace neogfx::DesignStudio
                 {
                     neogfx::font oldFont = iDefaultItem->font();
                     font_dialog fontPicker(*this, oldFont);
+                    fontPicker.enable_text_effects();
                     fontPicker.SelectionChanged([&]()
                     {
                         iDefaultItem->set_font(fontPicker.selected_font());

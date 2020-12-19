@@ -24,6 +24,9 @@
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
+#include <neogfx/gui/widget/radio_button.hpp>
+#include <neogfx/gui/widget/check_box.hpp>
+#include <neogfx/gui/widget/gradient_widget.hpp>
 
 namespace neogfx
 {
@@ -36,6 +39,7 @@ namespace neogfx
         font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});
         ~font_dialog();
     public:
+        void enable_text_effects();
         neogfx::font current_font() const;
         neogfx::font selected_font() const;
         void select_font(const neogfx::font& aFont);
@@ -61,6 +65,18 @@ namespace neogfx
         vertical_layout iLayout5;
         label iSizeLabel;
         drop_list iSizePicker;
+        widget<> iEffects;
+        horizontal_layout iLayoutEffects;
+        group_box iInkBox;
+        radio_button iInkColor;
+        radio_button iInkGradient;
+        group_box iPaperBox;
+        radio_button iPaperColor;
+        radio_button iPaperGradient;
+        group_box iTextEffectsBox;
+        radio_button iTextEffectsOutline;
+        radio_button iTextEffectsShadow;
+        radio_button iTextEffectsGlow;
         group_box iSampleBox;
         text_widget iSample;
     };

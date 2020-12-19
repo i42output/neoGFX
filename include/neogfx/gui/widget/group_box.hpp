@@ -34,6 +34,19 @@ namespace neogfx
     private:
         typedef std::unique_ptr<neogfx::label> label_ptr;
         typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
+        class item_container : public widget<>
+        {
+        public:
+            item_container(group_box& aParent);
+        protected:
+            void paint(i_graphics_context& aGc) const override;
+        protected:
+            color palette_color(color_role aColorRole) const override;
+        private:
+            group_box& iParent;
+        };
+    private:
+        static constexpr scalar DEFAULT_PADDING = 5.0;
     public:
         struct not_checkable : std::logic_error { not_checkable() : std::logic_error("neogfx::group_box::not_checkable") {} };
     public:
@@ -44,7 +57,7 @@ namespace neogfx
         std::string const& text() const;
         void set_text(std::string const& aText);
         bool is_checkable() const;
-        void set_checkable(bool aCheckable);
+        void set_checkable(bool aCheckable, bool aUpdateItemsEnabledState = false);
         const neogfx::label& label() const;
         neogfx::label& label();
         bool has_check_box() const;
@@ -63,8 +76,6 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
-        void paint(i_graphics_context& aGc) const override;
-    public:
         color palette_color(color_role aColorRole) const override;
     public:
         virtual bool has_border_color() const;
@@ -77,9 +88,12 @@ namespace neogfx
         virtual void set_fill_opacity(double aFillOpacity);
     private:
         void init();
+        void update_widgets();
     private:
         vertical_layout iLayout;
+        horizontal_layout iTitleLayout;
         neolib::variant<label_ptr, check_box_ptr> iTitle;
+        item_container iItemContainer;
         ref_ptr<i_layout> iItemLayout;
         define_property(property_category::color, optional_color, BorderColor, border_color)
         define_property(property_category::color, optional_color, FillColor, fill_color)
