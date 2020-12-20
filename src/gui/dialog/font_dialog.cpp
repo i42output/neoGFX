@@ -248,38 +248,16 @@ namespace neogfx
         iInkBox.set_checkable(true, true);
         iPaperBox.set_checkable(true, true);
         iTextEffectsBox.set_checkable(true, true);
-        if (iSelectedAppearance)
-        {
-            if (iSelectedAppearance->ink() != neolib::none)
-            {
-                iInkBox.check_box().check();
-                if (std::holds_alternative<color>(iSelectedAppearance->ink()))
-                    iInkColor.check();
-                else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
-                    iInkGradient.check();
-            }
-            if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
-            {
-                iPaperBox.check_box().check();
-                if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
-                    iPaperColor.check();
-                else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
-                    iPaperGradient.check();
-            }
-            if (iSelectedAppearance->effect())
-                iTextEffectsBox.check_box().check();
-        }
-        iSink += iInkBox.check_box().Checked([&]() { update_widgets(); });
-        iSink += iInkBox.check_box().Unchecked([&]() { update_widgets(); });
-        iSink += iPaperBox.check_box().Checked([&]() { update_widgets(); });
-        iSink += iPaperBox.check_box().Unchecked([&]() { update_widgets(); });
-        iSink += iTextEffectsBox.check_box().Checked([&]() { update_widgets(); });
-        iSink += iTextEffectsBox.check_box().Unchecked([&]() { update_widgets(); });
-        iSink += iInkColor.Checked([&]() { update_widgets(); });
-        iSink += iInkGradient.Checked([&]() { update_widgets(); });
-        iSink += iPaperColor.Checked([&]() { update_widgets(); });
-        iSink += iPaperGradient.Checked([&]() { update_widgets(); });
-        update_widgets();
+        iSink += iInkBox.check_box().Checked([&]() { update_selected_appearance(iInkBox); });
+        iSink += iInkBox.check_box().Unchecked([&]() { update_selected_appearance(iInkBox); });
+        iSink += iPaperBox.check_box().Checked([&]() { update_selected_appearance(iPaperBox); });
+        iSink += iPaperBox.check_box().Unchecked([&]() { update_selected_appearance(iPaperBox); });
+        iSink += iTextEffectsBox.check_box().Checked([&]() { update_selected_appearance(iTextEffectsBox); });
+        iSink += iTextEffectsBox.check_box().Unchecked([&]() { update_selected_appearance(iTextEffectsBox); });
+        iSink += iInkColor.Checked([&]() { update_selected_appearance(iInkColor); });
+        iSink += iInkGradient.Checked([&]() { update_selected_appearance(iInkGradient); });
+        iSink += iPaperColor.Checked([&]() { update_selected_appearance(iPaperColor); });
+        iSink += iPaperGradient.Checked([&]() { update_selected_appearance(iPaperGradient); });
 
         if (iSelectedAppearance)
         {
@@ -419,84 +397,100 @@ namespace neogfx
         if (!iSelectedAppearance || iUpdating)
             return;
         neolib::scoped_flag sf{ iUpdating };
-        if (std::holds_alternative<color_widget>(iInk))
+        auto oldSelection = iSelectedAppearance;
+        if (iSelectedAppearance && &aUpdatingWidget == this)
+        {
+            if (iSelectedAppearance->ink() != neolib::none)
+            {
+                iInkBox.check_box().check();
+                if (std::holds_alternative<color>(iSelectedAppearance->ink()))
+                    iInkColor.check();
+                else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
+                    iInkGradient.check();
+            }
+            if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
+            {
+                iPaperBox.check_box().check();
+                if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
+                    iPaperColor.check();
+                else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
+                    iPaperGradient.check();
+            }
+            if (iSelectedAppearance->effect())
+                iTextEffectsBox.check_box().check();
+        }
+        if (iInkBox.check_box().is_checked())
+        {
+            if (iInkColor.is_checked())
+            {
+                if (iSelectedAppearance->ink() == neolib::none)
+                    iSelectedAppearance->set_ink(iDefaultInk ? *iDefaultInk : service<i_app>().current_style().palette().color(color_role::Text));
+                else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
+                    iSelectedAppearance->set_ink(std::get<gradient>(iSelectedAppearance->ink()).color_at(0.0));
+            }
+            else if (iInkGradient.is_checked())
+            {
+                if (iSelectedAppearance->ink() == neolib::none)
+                    iSelectedAppearance->set_ink(gradient{ iDefaultInk ? *iDefaultInk : service<i_app>().current_style().palette().color(color_role::Text) });
+                else if (std::holds_alternative<color>(iSelectedAppearance->ink()))
+                    iSelectedAppearance->set_ink(gradient{ std::get<color>(iSelectedAppearance->ink()) });
+            }
+        }
+        else
+            iSelectedAppearance->set_ink(neolib::none);
+        if (iPaperBox.check_box().is_checked())
+        {
+            if (iPaperColor.is_checked())
+            {
+                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                    iSelectedAppearance->set_paper(iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background));
+                else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
+                    iSelectedAppearance->set_paper(std::get<gradient>(*iSelectedAppearance->paper()).color_at(0.0));
+            }
+            else if (iPaperGradient.is_checked())
+            {
+                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                    iSelectedAppearance->set_paper(gradient{ iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background) });
+                else if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
+                    iSelectedAppearance->set_paper(gradient{ std::get<color>(*iSelectedAppearance->paper()) });
+            }
+        }
+        else
+            iSelectedAppearance->set_paper(std::nullopt);
+        
+        if (std::holds_alternative<color_widget>(iInk) && &std::get<color_widget>(iInk) == &aUpdatingWidget)
         {
             if (iSelectedAppearance->ink() != std::get<color_widget>(iInk).color())
-            {
                 iSelectedAppearance->set_ink(std::get<color_widget>(iInk).color());
-                SelectionChanged.trigger();
-            }
         }
-        else if (std::holds_alternative<gradient_widget>(iInk))
+        else if (std::holds_alternative<gradient_widget>(iInk) && &std::get<gradient_widget>(iInk) == &aUpdatingWidget)
         {
             if (iSelectedAppearance->ink() != std::get<gradient_widget>(iInk).gradient())
-            {
                 iSelectedAppearance->set_ink(std::get<gradient_widget>(iInk).gradient());
-                SelectionChanged.trigger();
-            }
         }
-        if (std::holds_alternative<color_widget>(iPaper))
+        if (std::holds_alternative<color_widget>(iPaper) && &std::get<color_widget>(iPaper) == &aUpdatingWidget)
         {
             if (iSelectedAppearance->paper() != std::get<color_widget>(iPaper).color())
-            {
                 iSelectedAppearance->set_paper(std::get<color_widget>(iPaper).color());
-                SelectionChanged.trigger();
-            }
         }
-        else if (std::holds_alternative<gradient_widget>(iPaper))
+        else if (std::holds_alternative<gradient_widget>(iPaper) && &std::get<gradient_widget>(iPaper) == &aUpdatingWidget)
         {
             if (iSelectedAppearance->paper() != std::get<gradient_widget>(iPaper).gradient())
-            {
                 iSelectedAppearance->set_paper(std::get<gradient_widget>(iPaper).gradient());
-                SelectionChanged.trigger();
-            }
         }
+        
         iSample.set_text_appearance(iSelectedAppearance);
+        
+        if (iSelectedAppearance != oldSelection)
+            SelectionChanged.trigger();
+
+        update_widgets();
     }
     
     void font_dialog::update_widgets()
     {
-        auto oldSelection = iSelectedAppearance;
         if (iSelectedAppearance)
         {
-            if (iInkBox.check_box().is_checked())
-            {
-                if (iInkColor.is_checked())
-                {
-                    if (iSelectedAppearance->ink() == neolib::none)
-                        iSelectedAppearance->set_ink(iDefaultInk ? *iDefaultInk : service<i_app>().current_style().palette().color(color_role::Text));
-                    else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
-                        iSelectedAppearance->set_ink(std::get<gradient>(iSelectedAppearance->ink()).color_at(0.0));
-                }
-                else if (iInkGradient.is_checked())
-                {
-                    if (iSelectedAppearance->ink() == neolib::none)
-                        iSelectedAppearance->set_ink(gradient{ iDefaultInk ? *iDefaultInk : service<i_app>().current_style().palette().color(color_role::Text) });
-                    else if (std::holds_alternative<color>(iSelectedAppearance->ink()))
-                        iSelectedAppearance->set_ink(gradient{ std::get<color>(iSelectedAppearance->ink()) });
-                }
-            }
-            else
-                iSelectedAppearance->set_ink(neolib::none);
-            if (iPaperBox.check_box().is_checked())
-            {
-                if (iPaperColor.is_checked())
-                {
-                    if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
-                        iSelectedAppearance->set_paper(iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background));
-                    else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
-                        iSelectedAppearance->set_paper(std::get<gradient>(*iSelectedAppearance->paper()).color_at(0.0));
-                }
-                else if (iPaperGradient.is_checked())
-                {
-                    if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
-                        iSelectedAppearance->set_paper(gradient{ iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background) });
-                    else if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
-                        iSelectedAppearance->set_paper(gradient{ std::get<color>(*iSelectedAppearance->paper()) });
-                }
-            }
-            else
-                iSelectedAppearance->set_paper(std::nullopt);
             if (iSelectedAppearance->ink() != neolib::none)
             {
                 iInkBox.check_box().check();
@@ -562,7 +556,5 @@ namespace neogfx
             else
                 iPaperBox.check_box().uncheck();
         }
-        if (iSelectedAppearance != oldSelection)
-            SelectionChanged.trigger();
     }
 }
