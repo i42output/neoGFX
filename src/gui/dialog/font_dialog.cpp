@@ -457,7 +457,10 @@ namespace neogfx
             }
         }
         else
+        {
             iSelectedAppearance->set_ink(neolib::none);
+            iInk = neolib::none;
+        }
         if (iPaperBox.check_box().is_checked())
         {
             if (iPaperColor.is_checked())
@@ -476,7 +479,10 @@ namespace neogfx
             }
         }
         else
+        {
             iSelectedAppearance->set_paper(std::nullopt);
+            iPaper = neolib::none;
+        }
         
         if (std::holds_alternative<color_widget>(iInk) && &std::get<color_widget>(iInk) == &aUpdatingWidget)
         {
