@@ -48,8 +48,8 @@ namespace neogfx
     public:
         struct no_fallback : std::logic_error { no_fallback() : std::logic_error("neogfx::i_fallback_font_info::no_fallback") {} };
     public:
-        virtual bool has_fallback_for(std::string const& aFontFamilyName) const = 0;
-        virtual std::string const& fallback_for(std::string const& aFontFamilyName) const = 0;
+        virtual bool has_fallback_for(i_string const& aFontFamilyName) const = 0;
+        virtual i_string const& fallback_for(i_string const& aFontFamilyName) const = 0;
     };
 
     class i_font_manager : public neolib::i_small_cookie_consumer, public i_service
@@ -68,23 +68,23 @@ namespace neogfx
         virtual i_native_font_face& create_default_font(const i_device_resolution& aDevice) = 0;
         virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const = 0;
         virtual i_native_font_face& create_fallback_font(const i_native_font_face& aExistingFont) = 0;
-        virtual i_native_font_face& create_font(std::string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& create_font(std::string const& aFamilyName, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& create_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& create_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(const font_info& aInfo, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& create_font(i_native_font& aFont, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual bool is_font_file(std::string const& aFileName) const = 0;
-        virtual i_native_font_face& load_font_from_file(std::string const& aFileName, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_file(std::string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_file(std::string const& aFileName, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& create_font(i_native_font& aFont, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        virtual bool is_font_file(i_string const& aFileName) const = 0;
+        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
     public:
         virtual uint32_t font_family_count() const = 0;
-        virtual std::string font_family(uint32_t aFamilyIndex) const = 0;
+        virtual i_string const& font_family(uint32_t aFamilyIndex) const = 0;
         virtual uint32_t font_style_count(uint32_t aFamilyIndex) const = 0;
-        virtual std::string font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const = 0;
+        virtual i_string const& font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const = 0;
     private:
         virtual font_id allocate_font_id() = 0;
     public:
@@ -100,10 +100,10 @@ namespace neogfx
         bool has_font(std::string const& aFamily, std::string const& aStyle) const
         {
             for (uint32_t familyIndex = 0; familyIndex < font_family_count(); ++familyIndex)
-                if (font_family(familyIndex) == aFamily)
+                if (font_family(familyIndex).to_std_string_view() == aFamily)
                 {
                     for (uint32_t styleIndex = 0; styleIndex < font_style_count(familyIndex); ++styleIndex)
-                        if (font_style(familyIndex, styleIndex) == aStyle)
+                        if (font_style(familyIndex, styleIndex).to_std_string_view() == aStyle)
                             return true;
                     return false;
                 }

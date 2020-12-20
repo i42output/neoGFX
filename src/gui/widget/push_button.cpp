@@ -412,9 +412,7 @@ namespace neogfx
             faceColor.shade(0x40);
         auto animationColor = (enabled() && entered() && perform_hover_animation()) || !finished_animation() ? 
             gradient(faceColor, effective_hover_color()).at(static_cast<coordinate>(aAnimationFrame), 0, static_cast<coordinate>(kMaxAnimationFrame)) : faceColor;
-        if (disabled())
-            animationColor.unshade(0x14);
-        else if (is_checked())
+        if (is_checked())
             animationColor.unshade(0x0A);
         return animationColor;
     }

@@ -101,6 +101,11 @@ namespace neogfx
         return iTextEffect;
     }
 
+    text_appearance text_edit::style::as_text_appearance() const
+    {
+        return text_appearance{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() };
+    }
+
     void text_edit::style::set_font(optional_font const& aFont)
     {
         iFont = aFont;
@@ -132,6 +137,15 @@ namespace neogfx
     void text_edit::style::set_text_effect(const optional_text_effect& aEffect)
     {
         iTextEffect = aEffect;
+        if (iParent)
+            iParent->update();
+    }
+
+    void text_edit::style::set_from_text_appearance(const text_appearance& aAppearance)
+    {
+        iGlyphColor = aAppearance.ink();
+        iPaperColor = aAppearance.paper() ? *aAppearance.paper() : neolib::none;
+        iTextEffect = aAppearance.effect();
         if (iParent)
             iParent->update();
     }

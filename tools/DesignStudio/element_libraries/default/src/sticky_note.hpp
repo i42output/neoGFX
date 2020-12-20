@@ -119,17 +119,30 @@ namespace neogfx::DesignStudio
                 auto paragraphFormat = std::make_shared<action>("Paragraph...");
                 fontFormat->Triggered([&]()
                 {
-                    neogfx::font oldFont = iDefaultItem->font();
-                    font_dialog fontPicker(*this, oldFont);
-                    fontPicker.enable_text_effects();
+                    font_dialog fontPicker{ *this, iDefaultItem->font(), iDefaultItem->default_style().as_text_appearance() };
+                    fontPicker.set_default_ink(iDefaultItem->default_text_color());
+                    fontPicker.set_default_paper(iDefaultItem->effective_background_color());
                     fontPicker.SelectionChanged([&]()
                     {
                         iDefaultItem->set_font(fontPicker.selected_font());
+                        auto s = iDefaultItem->default_style();
+                        s.set_from_text_appearance(*fontPicker.selected_appearance());
+                        iDefaultItem->set_default_style(s);
                     });
                     if (fontPicker.exec() == dialog_result::Accepted)
+                    {
                         iDefaultItem->set_font(fontPicker.selected_font());
+                        auto s = iDefaultItem->default_style();
+                        s.set_from_text_appearance(*fontPicker.selected_appearance());
+                        iDefaultItem->set_default_style(s);
+                    }
                     else
-                        iDefaultItem->set_font(oldFont);
+                    {
+                        iDefaultItem->set_font(fontPicker.current_font());
+                        auto s = iDefaultItem->default_style();
+                        s.set_from_text_appearance(*fontPicker.current_appearance());
+                        iDefaultItem->set_default_style(s);
+                    }
                 });
                 paragraphFormat->disable(); // todo
                 aMenu.add_action(fontFormat);

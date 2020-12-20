@@ -109,7 +109,7 @@ namespace neogfx
         typedef double point_size;
     private:
         typedef std::optional<font_style> optional_style;
-        typedef std::optional<std::string> optional_style_name;
+        typedef std::optional<string> optional_style_name;
     private:
         class instance;
     public:
@@ -123,11 +123,11 @@ namespace neogfx
     private:
         font_info(std::string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
     public:
-        virtual std::string const& family_name() const;
+        virtual i_string const& family_name() const;
         virtual bool style_available() const;
         virtual font_style style() const;
         virtual bool style_name_available() const;
-        virtual std::string const& style_name() const;
+        virtual i_string const& style_name() const;
         virtual bool underline() const;
         virtual void set_underline(bool aUnderline);
         virtual font_weight weight() const;
@@ -194,9 +194,9 @@ namespace neogfx
         font fallback() const;
         // operations
     public:
-        std::string const& family_name() const override;
+        i_string const& family_name() const override;
         font_style style() const override;
-        std::string const& style_name() const override;
+        i_string const& style_name() const override;
         point_size size() const override;
         dimension height() const;
         dimension descender() const;

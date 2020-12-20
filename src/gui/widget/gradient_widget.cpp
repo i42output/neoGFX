@@ -219,11 +219,14 @@ namespace neogfx
         draw_alpha_background(aGc, rectContents, dip(ALPHA_PATTERN_SIZE));
         neogfx::gradient selection = gradient();
         selection.set_direction(gradient_direction::Horizontal);
-        aGc.fill_rect(rectContents, selection);
+        if (effectively_enabled())
+            aGc.fill_rect(rectContents, selection);
         rectContents.inflate(size{ dip(BORDER_THICKNESS) });
         aGc.draw_rect(rectContents, pen(frameColor.mid(background_color()), dip(BORDER_THICKNESS)));
         rectContents.inflate(size{ dip(BORDER_THICKNESS) });
         aGc.draw_rect(rectContents, pen(frameColor, dip(BORDER_THICKNESS)));
+        if (effectively_disabled())
+            return;
         if (iCurrentColorStop != std::nullopt)
         {
             auto const r = color_stop_rect(**iCurrentColorStop);

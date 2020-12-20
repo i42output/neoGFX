@@ -132,6 +132,23 @@ namespace neogfx
             return *this;
         }
     public:
+        bool operator==(const text_color& aOther) const
+        {
+            return static_cast<const color_or_gradient&>(*this) == static_cast<const color_or_gradient&>(aOther);
+        }
+        bool operator!=(const text_color& aOther) const
+        {
+            return static_cast<const color_or_gradient&>(*this) != static_cast<const color_or_gradient&>(aOther);
+        }
+        bool operator==(const neolib::none_t&) const
+        {
+            return static_cast<const color_or_gradient&>(*this) == neolib::none;
+        }
+        bool operator!=(const neolib::none_t&) const
+        {
+            return static_cast<const color_or_gradient&>(*this) != neolib::none;
+        }
+    public:
         color::component alpha() const
         {
             if (std::holds_alternative<color>(*this))
@@ -284,7 +301,7 @@ namespace neogfx
         struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
     public:
         template <typename InkType, typename PaperType>
-        text_appearance(const InkType& aInk, const PaperType& aPaper, const optional_text_effect& aEffect) :
+        text_appearance(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
             iEffect{ aEffect },
@@ -292,7 +309,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(const InkType& aInk, const PaperType& aPaper, const text_effect& aEffect) :
+        text_appearance(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
             iEffect{ aEffect },
@@ -300,68 +317,80 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(const InkType& aInk, const optional_text_effect& aEffect) :
+        text_appearance(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false }
         {
         }
         template <typename InkType>
-        text_appearance(const InkType& aInk, const text_effect& aEffect) :
+        text_appearance(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false }
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(const InkType& aInk, const PaperType& aPaper) :
+        text_appearance(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
             iOnlyCalculateEffect{ false }
         {
         }
         template <typename InkType>
-        text_appearance(const InkType& aInk) :
+        text_appearance(InkType const& aInk) :
             iInk{ aInk },
             iOnlyCalculateEffect{ false }
         {
         }
     public:
-        bool operator==(const text_appearance& aRhs) const
+        bool operator==(text_appearance const& aRhs) const
         {
             return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iEffect == aRhs.iEffect;
         }
-        bool operator!=(const text_appearance& aRhs) const
+        bool operator!=(text_appearance const& aRhs) const
         {
             return !(*this == aRhs);
         }
     public:
-        const text_color& ink() const
+        text_color const& ink() const
         {
             return iInk;
         }
-        const optional_text_color& paper() const
+        void set_ink(text_color const& aInk)
+        {
+            iInk = aInk;
+        }
+        optional_text_color const& paper() const
         {
             return iPaper;
         }
-        const optional_text_effect& effect() const
+        void set_paper(optional_text_color const& aPaper)
+        {
+            iPaper = aPaper;
+        }
+        optional_text_effect const& effect() const
         {
             return iEffect;
+        }
+        void set_effect(optional_text_effect const& aEffect)
+        {
+            iEffect = aEffect;
         }
         bool only_calculate_effect() const
         {
             return iOnlyCalculateEffect;
         }
     public:
-        text_appearance with_ink(const text_color& aInk) const
+        text_appearance with_ink(text_color const& aInk) const
         {
             return text_appearance{ aInk, iPaper, iEffect };
         }
-        text_appearance with_paper(const optional_text_color& aPaper) const
+        text_appearance with_paper(optional_text_color const& aPaper) const
         {
             return text_appearance{ iInk, aPaper, iEffect };
         }
-        text_appearance with_effect(const optional_text_effect& aEffect) const
+        text_appearance with_effect(optional_text_effect const& aEffect) const
         {
             return text_appearance{ iInk, iPaper, aEffect };
         }

@@ -93,7 +93,7 @@ namespace neogfx
                         std::optional<uint32_t> matchingStyle;
                         for (uint32_t s = 0; s < styleCount; ++s)
                         {
-                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
+                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s).to_std_string());
                             if (existingStyle && *existingStyle == fm.font_style(fontFamilyIndex, s))
                                 matchingStyle = s;
                         }
@@ -226,7 +226,7 @@ namespace neogfx
         auto& fm = service<i_font_manager>();
 
         for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
-            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
+            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi).to_std_string());
 
         update_selected_font(*this);
     }

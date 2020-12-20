@@ -50,7 +50,7 @@ namespace neogfx
     {
     }
 
-    std::string const& native_font::family_name() const
+    i_string const& native_font::family_name() const
     {
         return iFamilyName;
     }
@@ -71,7 +71,7 @@ namespace neogfx
         return std::next(iStyleMap.begin(), aStyleIndex)->first.first;
     }
 
-    std::string const& native_font::style_name(uint32_t aStyleIndex) const
+    i_string const& native_font::style_name(uint32_t aStyleIndex) const
     {
         return std::next(iStyleMap.begin(), aStyleIndex)->first.second;
     }
@@ -106,7 +106,7 @@ namespace neogfx
         aResult = create_face(faceIndex, faceStyle, aSize, aDevice);
     }
 
-    void native_font::create_face(std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult)
+    void native_font::create_face(i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
         style_map::value_type* foundStyle = 0;
         for (auto& s : iStyleMap)

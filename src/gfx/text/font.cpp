@@ -112,7 +112,7 @@ namespace neogfx
     public:
         instance& operator=(const instance& aOther);
     private:
-        std::string iFamilyName;
+        string iFamilyName;
         optional_style iStyle;
         optional_style_name iStyleName;
         bool iUnderline;
@@ -215,7 +215,7 @@ namespace neogfx
         return *this;
     }
 
-    std::string const& font_info::family_name() const
+    i_string const& font_info::family_name() const
     {
         return iInstance->iFamilyName;
     }
@@ -238,7 +238,7 @@ namespace neogfx
         return iInstance->iStyleName != std::nullopt;
     }
 
-    std::string const& font_info::style_name() const
+    i_string const& font_info::style_name() const
     {
         if (style_name_available())
             return *iInstance->iStyleName;
@@ -405,13 +405,13 @@ namespace neogfx
 
     font::font(std::string const& aFamilyName, font_style aStyle, point_size aSize) :
         font_info{ aFamilyName, aStyle, aSize }, 
-        iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aFamilyName, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics())) }
+        iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(string{ aFamilyName }, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics())) }
     {
     }
 
     font::font(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize) :
         font_info{ aFamilyName, aStyleName, aSize }, 
-        iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aFamilyName, aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics())) }
+        iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(string{ aFamilyName }, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics())) }
     {
     }
 
@@ -435,7 +435,7 @@ namespace neogfx
 
     font::font(const font& aOther, std::string const& aStyleName, point_size aSize) :
         font_info{ aOther.native_font_face().family_name(), aStyleName, aSize },
-        iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aOther.iInstance->native_font_face().native_font(), aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics())) }
+        iInstance{ std::make_shared<instance>(service<i_font_manager>().create_font(aOther.iInstance->native_font_face().native_font(), string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics())) }
     {
     }
 
@@ -453,17 +453,17 @@ namespace neogfx
 
     font font::load_from_file(std::string const& aFileName)
     {
-        return font{ service<i_font_manager>().load_font_from_file(aFileName, service<i_rendering_engine>().default_screen_metrics()) };
+        return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, service<i_rendering_engine>().default_screen_metrics()) };
     }
 
     font font::load_from_file(std::string const& aFileName, font_style aStyle, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_file(aFileName, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }
     
     font font::load_from_file(std::string const& aFileName, std::string const& aStyleName, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_file(aFileName, aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }
 
     font font::load_from_memory(const void* aData, std::size_t aSizeInBytes)
@@ -478,7 +478,7 @@ namespace neogfx
 
     font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, aStyleName, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }
 
     font::~font()
@@ -510,7 +510,7 @@ namespace neogfx
         return iInstance->fallback_font();
     }
 
-    std::string const& font::family_name() const
+    i_string const& font::family_name() const
     {
         return native_font_face().family_name();
     }
@@ -520,7 +520,7 @@ namespace neogfx
         return static_cast<font_style>(native_font_face().style() | (underline() ? font_style::Underline : font_style{}));
     }
 
-    std::string const& font::style_name() const
+    i_string const& font::style_name() const
     {
         return native_font_face().style_name();
     }

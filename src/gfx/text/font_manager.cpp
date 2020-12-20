@@ -132,19 +132,19 @@ namespace neogfx
         }
     }
 
-    fallback_font_info::fallback_font_info(std::vector<std::string> aFallbackFontFamilies) :
+    fallback_font_info::fallback_font_info(std::vector<string> aFallbackFontFamilies) :
         iFallbackFontFamilies(std::move(aFallbackFontFamilies))
     {
     }
 
-    bool fallback_font_info::has_fallback_for(std::string const& aFontFamilyName) const
+    bool fallback_font_info::has_fallback_for(i_string const& aFontFamilyName) const
     {
         if (iFallbackFontFamilies.empty())
             return false;
         return std::find(iFallbackFontFamilies.begin(), iFallbackFontFamilies.end(), aFontFamilyName) != std::prev(iFallbackFontFamilies.end());
     }
 
-    std::string const& fallback_font_info::fallback_for(std::string const& aFontFamilyName) const
+    i_string const& fallback_font_info::fallback_for(i_string const& aFontFamilyName) const
     {
         auto f = std::find(iFallbackFontFamilies.begin(), iFallbackFontFamilies.end(), aFontFamilyName);
         if (f == iFallbackFontFamilies.end())
@@ -794,10 +794,10 @@ namespace neogfx
                     continue;
                 try
                 {
-                    if (is_font_file(file->path().string()))
+                    if (is_font_file(string{ file->path().string() }))
                     {
                         auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string());
-                        iFontFamilies[neolib::make_ci_string(font->family_name())].push_back(font);
+                        iFontFamilies[font->family_name()].push_back(font);
                     }
                 }
                 catch (native_font::failed_to_load_font&)
@@ -871,12 +871,12 @@ namespace neogfx
         return fallbackFont;
     }
 
-    i_native_font_face& font_manager::create_font(std::string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::create_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
     {
         return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, aDevice));
     }
 
-    i_native_font_face& font_manager::create_font(std::string const& aFamilyName, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::create_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
         return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, aDevice));
     }
@@ -894,12 +894,12 @@ namespace neogfx
         return add_font(aFont.create_face(aStyle, aSize, aDevice));
     }
 
-    i_native_font_face& font_manager::create_font(i_native_font& aFont, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::create_font(i_native_font& aFont, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
         return add_font(aFont.create_face(aStyleName, aSize, aDevice));
     }
 
-    bool font_manager::is_font_file(std::string const& aFileName) const
+    bool font_manager::is_font_file(i_string const& aFileName) const
     {
         FT_Face face;
         FT_Error error = FT_New_Face(iFontLib, aFileName.c_str(), 0, &face);
@@ -909,14 +909,14 @@ namespace neogfx
         return true;
     }
 
-    i_native_font_face& font_manager::load_font_from_file(std::string const& aFileName, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
         (void)aFileName;
         (void)aDevice;
     }
 
-    i_native_font_face& font_manager::load_font_from_file(std::string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
         (void)aFileName;
@@ -925,7 +925,7 @@ namespace neogfx
         (void)aDevice;
     }
 
-    i_native_font_face& font_manager::load_font_from_file(std::string const& aFileName, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
         (void)aFileName;
@@ -952,7 +952,7 @@ namespace neogfx
         (void)aDevice;
     }
 
-    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
         (void)aData;
@@ -967,10 +967,10 @@ namespace neogfx
         return static_cast<uint32_t>(iFontFamilies.size());
     }
 
-    std::string font_manager::font_family(uint32_t aFamilyIndex) const
+    i_string const& font_manager::font_family(uint32_t aFamilyIndex) const
     {
         if (aFamilyIndex < font_family_count())
-            return neolib::make_string(std::next(iFontFamilies.begin(), aFamilyIndex)->first);
+            return std::next(iFontFamilies.begin(), aFamilyIndex)->first;
         throw bad_font_family_index();
     }
 
@@ -986,7 +986,7 @@ namespace neogfx
         throw bad_font_family_index();
     }
 
-    std::string font_manager::font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
+    i_string const& font_manager::font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
     {
         if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
         {
@@ -1050,18 +1050,18 @@ namespace neogfx
         return font_from_id(aId).native_font_face().use_count();
     }
 
-    i_native_font& font_manager::find_font(std::string const& aFamilyName, std::string const& aStyleName, font::point_size aSize)
+    i_native_font& font_manager::find_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize)
     {
-        auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
+        auto family = iFontFamilies.find(aFamilyName);
         if (family == iFontFamilies.end())
-            family = iFontFamilies.find(neolib::make_ci_string(default_system_font_info(system_font_role::Widget).family_name()));
+            family = iFontFamilies.find(default_system_font_info(system_font_role::Widget).family_name());
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
         std::multimap<uint32_t, native_font_list::iterator> matches;
         for (auto& f : family->second)
         {
             for (uint32_t s = 0; s < f->style_count(); ++s)
-                if (neolib::make_ci_string(f->style_name(s)) == neolib::make_ci_string(aStyleName))
+                if (neolib::ci_equal_to{}(f->style_name(s), aStyleName))
                     return *f;
         }
         return find_best_font(aFamilyName, font_style::Normal, aSize);
@@ -1085,11 +1085,11 @@ namespace neogfx
         }
     }
 
-    i_native_font& font_manager::find_best_font(std::string const& aFamilyName, neogfx::font_style aStyle, font::point_size)
+    i_native_font& font_manager::find_best_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size)
     {
-        auto family = iFontFamilies.find(neolib::make_ci_string(aFamilyName));
+        auto family = iFontFamilies.find(aFamilyName);
         if (family == iFontFamilies.end())
-            family = iFontFamilies.find(neolib::make_ci_string(default_system_font_info(system_font_role::Widget).family_name()));
+            family = iFontFamilies.find(default_system_font_info(system_font_role::Widget).family_name());
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
         std::optional<std::pair<std::pair<uint32_t, font_weight>, i_native_font*>> bestNormalFont;

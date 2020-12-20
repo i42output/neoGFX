@@ -122,8 +122,8 @@ namespace neogfx
             break;
         }
         auto appearance = text_appearance();
-        if (effectively_disabled())
-            appearance = appearance.with_alpha(static_cast<color::component>(appearance.ink().alpha() * 0.25));
+        if (appearance.ink() == neolib::none)
+            appearance.set_ink(text_color());
         if (appearance.effect() != std::nullopt)
             textPosition += size{ appearance.effect()->width() };
         if (multi_line())

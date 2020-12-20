@@ -103,10 +103,10 @@ namespace neogfx
     public:
         font_id id() const override;
         i_native_font& native_font() override;
-        std::string const& family_name() const override;
+        i_string const& family_name() const override;
         font_style style() const override;
         font::point_size size() const override;
-        std::string const& style_name() const override;
+        i_string const& style_name() const override;
         dimension horizontal_dpi() const override;
         dimension vertical_dpi() const override;
         dimension height() const override;
@@ -132,7 +132,7 @@ namespace neogfx
         font_id iId;
         i_native_font& iFont;
         font_style iStyle;
-        std::string iStyleName;
+        string iStyleName;
         font::point_size iSize;
         neogfx::size iPixelDensityDpi;
         FT_Face iHandle;

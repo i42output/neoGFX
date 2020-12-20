@@ -26,6 +26,8 @@
 
 namespace neogfx
 {
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize);
+
     namespace
     {
         class picker_presentation_model : public item_presentation_model
@@ -90,7 +92,7 @@ namespace neogfx
                         std::optional<uint32_t> matchingStyle;
                         for (uint32_t s = 0; s < styleCount; ++s)
                         {
-                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
+                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s).to_std_string());
                             if (existingStyle && *existingStyle == fm.font_style(fontFamilyIndex, s))
                                 matchingStyle = s;
                         }
@@ -128,11 +130,13 @@ namespace neogfx
         };
     }
 
-    font_dialog::font_dialog(const neogfx::font& aCurrentFont) :
+    font_dialog::font_dialog(const neogfx::font& aCurrentFont, std::optional<text_appearance> const& aCurrentAppearance) :
         dialog{ "Select Font", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
+        iCurrentAppearance{ aCurrentAppearance },
+        iSelectedAppearance{ aCurrentAppearance },
         iLayout0{ client_layout() },
         iLayout1{ iLayout0 },
         iFamilyLabel{ iLayout1, "Family:" },
@@ -151,11 +155,13 @@ namespace neogfx
         init();
     }
 
-    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont) :
+    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, std::optional<text_appearance> const& aCurrentAppearance) :
         dialog{ aParent, "Select Font", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
+        iCurrentAppearance{ aCurrentAppearance },
+        iSelectedAppearance{ aCurrentAppearance },
         iLayout0{ client_layout() },
         iLayout1{ iLayout0 },
         iFamilyLabel{ iLayout1, "Family:" },
@@ -190,11 +196,6 @@ namespace neogfx
     {
     }
 
-    void font_dialog::enable_text_effects()
-    {
-        iEffects.show();
-    }
-
     font font_dialog::current_font() const
     {
         return iCurrentFont;
@@ -204,11 +205,31 @@ namespace neogfx
     {
         return iSelectedFont;
     }
+
+    std::optional<text_appearance> const& font_dialog::current_appearance() const
+    {
+        return iCurrentAppearance;
+    }
+
+    std::optional<text_appearance> const& font_dialog::selected_appearance() const
+    {
+        return iSelectedAppearance;
+    }
     
     void font_dialog::select_font(const neogfx::font& aFont)
     {
         iSelectedFont = aFont;
         update_selected_font(*this);
+    }
+
+    void font_dialog::set_default_ink(const std::optional<color>& aColor)
+    {
+        iDefaultInk = aColor;
+    }
+
+    void font_dialog::set_default_paper(const std::optional<color>& aColor)
+    {
+        iDefaultPaper = aColor;
     }
 
     size font_dialog::minimum_size(optional_size const& aAvailableSpace) const
@@ -223,10 +244,51 @@ namespace neogfx
 
     void font_dialog::init()
     {
-        iEffects.hide();
-
+        iEffects.show(iSelectedAppearance != std::nullopt);
+        iInkBox.set_checkable(true, true);
         iPaperBox.set_checkable(true, true);
         iTextEffectsBox.set_checkable(true, true);
+        if (iSelectedAppearance)
+        {
+            if (iSelectedAppearance->ink() != neolib::none)
+            {
+                iInkBox.check_box().check();
+                if (std::holds_alternative<color>(iSelectedAppearance->ink()))
+                    iInkColor.check();
+                else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
+                    iInkGradient.check();
+            }
+            if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
+            {
+                iPaperBox.check_box().check();
+                if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
+                    iPaperColor.check();
+                else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
+                    iPaperGradient.check();
+            }
+            if (iSelectedAppearance->effect())
+                iTextEffectsBox.check_box().check();
+        }
+        iSink += iInkBox.check_box().Checked([&]() { update_widgets(); });
+        iSink += iInkBox.check_box().Unchecked([&]() { update_widgets(); });
+        iSink += iPaperBox.check_box().Checked([&]() { update_widgets(); });
+        iSink += iPaperBox.check_box().Unchecked([&]() { update_widgets(); });
+        iSink += iTextEffectsBox.check_box().Checked([&]() { update_widgets(); });
+        iSink += iTextEffectsBox.check_box().Unchecked([&]() { update_widgets(); });
+        iSink += iInkColor.Checked([&]() { update_widgets(); });
+        iSink += iInkGradient.Checked([&]() { update_widgets(); });
+        iSink += iPaperColor.Checked([&]() { update_widgets(); });
+        iSink += iPaperGradient.Checked([&]() { update_widgets(); });
+        update_widgets();
+
+        if (iSelectedAppearance)
+        {
+            iSink += iSample.Painting([&](i_graphics_context& aGc)
+            {
+                scoped_opacity so{ aGc, 0.25 };
+                draw_alpha_background(aGc, iSample.client_rect(), dpi_scale(4.0));
+            });
+        }
 
         auto subpixelRendering = make_ref<push_button>("Subpixel Rendering..."_t);
         subpixelRendering->enable(false);
@@ -288,10 +350,11 @@ namespace neogfx
         auto& fm = service<i_font_manager>();
 
         for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
-            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
+            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi).to_std_string());
 
         center_on_parent();
         update_selected_font(*this);
+        update_selected_appearance(*this);
         set_ready_to_render(true);
     }
 
@@ -348,6 +411,158 @@ namespace neogfx
             iSizePicker.selection_model().clear_current_index();
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
+            SelectionChanged.trigger();
+    }
+
+    void font_dialog::update_selected_appearance(i_widget const& aUpdatingWidget)
+    {
+        if (!iSelectedAppearance || iUpdating)
+            return;
+        neolib::scoped_flag sf{ iUpdating };
+        if (std::holds_alternative<color_widget>(iInk))
+        {
+            if (iSelectedAppearance->ink() != std::get<color_widget>(iInk).color())
+            {
+                iSelectedAppearance->set_ink(std::get<color_widget>(iInk).color());
+                SelectionChanged.trigger();
+            }
+        }
+        else if (std::holds_alternative<gradient_widget>(iInk))
+        {
+            if (iSelectedAppearance->ink() != std::get<gradient_widget>(iInk).gradient())
+            {
+                iSelectedAppearance->set_ink(std::get<gradient_widget>(iInk).gradient());
+                SelectionChanged.trigger();
+            }
+        }
+        if (std::holds_alternative<color_widget>(iPaper))
+        {
+            if (iSelectedAppearance->paper() != std::get<color_widget>(iPaper).color())
+            {
+                iSelectedAppearance->set_paper(std::get<color_widget>(iPaper).color());
+                SelectionChanged.trigger();
+            }
+        }
+        else if (std::holds_alternative<gradient_widget>(iPaper))
+        {
+            if (iSelectedAppearance->paper() != std::get<gradient_widget>(iPaper).gradient())
+            {
+                iSelectedAppearance->set_paper(std::get<gradient_widget>(iPaper).gradient());
+                SelectionChanged.trigger();
+            }
+        }
+        iSample.set_text_appearance(iSelectedAppearance);
+    }
+    
+    void font_dialog::update_widgets()
+    {
+        auto oldSelection = iSelectedAppearance;
+        if (iSelectedAppearance)
+        {
+            if (iInkBox.check_box().is_checked())
+            {
+                if (iInkColor.is_checked())
+                {
+                    if (iSelectedAppearance->ink() == neolib::none)
+                        iSelectedAppearance->set_ink(iDefaultInk ? *iDefaultInk : service<i_app>().current_style().palette().color(color_role::Text));
+                    else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
+                        iSelectedAppearance->set_ink(std::get<gradient>(iSelectedAppearance->ink()).color_at(0.0));
+                }
+                else if (iInkGradient.is_checked())
+                {
+                    if (iSelectedAppearance->ink() == neolib::none)
+                        iSelectedAppearance->set_ink(gradient{ iDefaultInk ? *iDefaultInk : service<i_app>().current_style().palette().color(color_role::Text) });
+                    else if (std::holds_alternative<color>(iSelectedAppearance->ink()))
+                        iSelectedAppearance->set_ink(gradient{ std::get<color>(iSelectedAppearance->ink()) });
+                }
+            }
+            else
+                iSelectedAppearance->set_ink(neolib::none);
+            if (iPaperBox.check_box().is_checked())
+            {
+                if (iPaperColor.is_checked())
+                {
+                    if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                        iSelectedAppearance->set_paper(iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background));
+                    else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
+                        iSelectedAppearance->set_paper(std::get<gradient>(*iSelectedAppearance->paper()).color_at(0.0));
+                }
+                else if (iPaperGradient.is_checked())
+                {
+                    if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                        iSelectedAppearance->set_paper(gradient{ iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background) });
+                    else if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
+                        iSelectedAppearance->set_paper(gradient{ std::get<color>(*iSelectedAppearance->paper()) });
+                }
+            }
+            else
+                iSelectedAppearance->set_paper(std::nullopt);
+            if (iSelectedAppearance->ink() != neolib::none)
+            {
+                iInkBox.check_box().check();
+                if (std::holds_alternative<color>(iSelectedAppearance->ink()))
+                {
+                    iInkColor.check();
+                    if (!std::holds_alternative<color_widget>(iInk))
+                    {
+                        iInk.emplace<color_widget>(iInkBox.item_layout());
+                        iSink += std::get<color_widget>(iInk).ColorChanged([&]()
+                        {
+                            update_selected_appearance(std::get<color_widget>(iInk));
+                        });
+                    }
+                    std::get<color_widget>(iInk).set_color(std::get<color>(iSelectedAppearance->ink()));
+                }
+                else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
+                {
+                    iInkGradient.check();
+                    if (!std::holds_alternative<gradient_widget>(iInk))
+                    {
+                        iInk.emplace<gradient_widget>(iInkBox.item_layout());
+                        iSink += std::get<gradient_widget>(iInk).GradientChanged([&]()
+                        {
+                            update_selected_appearance(std::get<gradient_widget>(iInk));
+                        });
+                    }
+                    std::get<gradient_widget>(iInk).set_gradient(std::get<gradient>(iSelectedAppearance->ink()));
+                }
+            }
+            else
+                iInkBox.check_box().uncheck();
+            if (iSelectedAppearance->paper())
+            {
+                iPaperBox.check_box().check();
+                if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
+                {
+                    iPaperColor.check();
+                    if (!std::holds_alternative<color_widget>(iPaper))
+                    {
+                        iPaper.emplace<color_widget>(iPaperBox.item_layout());
+                        iSink += std::get<color_widget>(iPaper).ColorChanged([&]()
+                        {
+                            update_selected_appearance(std::get<color_widget>(iPaper));
+                        });
+                    }
+                    std::get<color_widget>(iPaper).set_color(std::get<color>(*iSelectedAppearance->paper()));
+                }
+                else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
+                {
+                    iPaperGradient.check();
+                    if (!std::holds_alternative<gradient_widget>(iPaper))
+                    {
+                        iPaper.emplace<gradient_widget>(iPaperBox.item_layout());
+                        iSink += std::get<gradient_widget>(iPaper).GradientChanged([&]()
+                        {
+                            update_selected_appearance(std::get<gradient_widget>(iPaper));
+                        });
+                    }
+                    std::get<gradient_widget>(iPaper).set_gradient(std::get<gradient>(*iSelectedAppearance->paper()));
+                }
+            }
+            else
+                iPaperBox.check_box().uncheck();
+        }
+        if (iSelectedAppearance != oldSelection)
             SelectionChanged.trigger();
     }
 }

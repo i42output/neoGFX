@@ -126,7 +126,7 @@ namespace video_poker
         iAddCredit.image_widget().set_minimum_size(neogfx::size{64.0_dip, 64.0_dip});
         iAddCredit.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
         iAddCredit.set_weight(neogfx::size{ 0.0 });
-        auto set_bet_button_apperance = [](neogfx::push_button& aButton)
+        auto set_bet_button_appearance = [](neogfx::push_button& aButton)
         {
             aButton.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
             aButton.set_weight(neogfx::size{ 0.0 });
@@ -135,10 +135,10 @@ namespace video_poker
             aButton.text_widget().set_text_color(neogfx::color::Black);
             aButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });
         };
-        set_bet_button_apperance(iBetMinus);
-        set_bet_button_apperance(iBetPlus);
-        set_bet_button_apperance(iBetMax);
-        set_bet_button_apperance(iDeal);
+        set_bet_button_appearance(iBetMinus);
+        set_bet_button_appearance(iBetPlus);
+        set_bet_button_appearance(iBetMax);
+        set_bet_button_appearance(iDeal);
         neogfx::layout_as_same_size(iAddCredit, iBetMinus);
         iLabelCredits.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
         iLabelCredits.text_widget().set_text_appearance(shiny_text(neogfx::color::Yellow));

@@ -1174,7 +1174,7 @@ namespace neogfx
         aGc.set_origin(origin());
 
         scoped_snap_to_pixel snap{ aGc };
-        scoped_opacity sc{ aGc, opacity() };
+        scoped_opacity sc{ aGc, effectively_enabled() ? opacity() : opacity() * 0.75 };
 
         {
             scoped_scissor scissor(aGc, nonClientClipRect);

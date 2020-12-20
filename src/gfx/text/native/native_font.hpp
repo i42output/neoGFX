@@ -37,7 +37,7 @@ namespace neogfx
         typedef std::pair<const void*, std::size_t> memory_block_type;
     private:
         typedef neolib::variant<filename_type, memory_block_type> source_type;
-        typedef std::map<std::pair<font_style, std::string>, FT_Long> style_map;
+        typedef std::map<std::pair<font_style, string>, FT_Long> style_map;
         typedef std::map<std::tuple<FT_Long, font::point_size, size>, ref_ptr<i_native_font_face>> face_map;
     public:
         struct failed_to_load_font : std::runtime_error { failed_to_load_font() : std::runtime_error("neogfx::native_font::failed_to_load_font") {} };
@@ -47,13 +47,13 @@ namespace neogfx
         native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes);
         ~native_font();
     public:
-        std::string const& family_name() const override;
+        i_string const& family_name() const override;
         bool has_style(font_style aStyle) const override;
         uint32_t style_count() const override;
         font_style style(uint32_t aStyleIndex) const override;
-        std::string const& style_name(uint32_t aStyleIndex) const override;
+        i_string const& style_name(uint32_t aStyleIndex) const override;
         void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
-        void create_face(std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
+        void create_face(i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
     private:
         void register_face(FT_Long aFaceIndex);
         FT_Face open_face(FT_Long aFaceIndex);
@@ -63,7 +63,7 @@ namespace neogfx
         FT_Library iFontLib;
         source_type iSource;
         std::vector<unsigned char> iCache;
-        std::string iFamilyName;
+        string iFamilyName;
         FT_Long iFaceCount;
         style_map iStyleMap;
         face_map iFaces;

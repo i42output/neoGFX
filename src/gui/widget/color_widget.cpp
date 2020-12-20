@@ -73,9 +73,13 @@ namespace neogfx
         return size{ 24.0_dip, 24.0_dip };
     }
 
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize);
+
     void color_widget::paint(i_graphics_context& aGc) const
     {
-        aGc.fill_rect(client_rect(), iColor);
+        draw_alpha_background(aGc, client_rect(), 4.0);
+        if (effectively_enabled())
+            aGc.fill_rect(client_rect(), iColor);
     }
 
     void color_widget::init()

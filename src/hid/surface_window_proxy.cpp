@@ -777,10 +777,12 @@ namespace neogfx
             as_widget().sys_text_input(aText);
     }
 
-    neogfx::mouse_cursor surface_window_proxy::native_window_mouse_cursor() const
+    mouse_cursor surface_window_proxy::native_window_mouse_cursor() const
     {
         auto const mousePosition = as_window().mouse_position();
         const i_widget& widgetUnderMouse = (!has_capturing_widget() ? widget_for_mouse_event(mousePosition, true) : capturing_widget());
+        if (widgetUnderMouse.effectively_disabled())
+            return mouse_system_cursor::Arrow;
         return widgetUnderMouse.mouse_cursor();
     }
 

@@ -21,11 +21,13 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/font.hpp>
+#include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/radio_button.hpp>
 #include <neogfx/gui/widget/check_box.hpp>
+#include <neogfx/gui/widget/color_widget.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
 
 namespace neogfx
@@ -35,24 +37,33 @@ namespace neogfx
     public:
         define_event(SelectionChanged, selection_changed)
     public:
-        font_dialog(const neogfx::font& aCurrentFont = neogfx::font{});
-        font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{});
+        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, std::optional<text_appearance> const& aCurrentAppearance = {});
+        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, std::optional<text_appearance> const& aCurrentAppearance = {});
         ~font_dialog();
     public:
-        void enable_text_effects();
         neogfx::font current_font() const;
         neogfx::font selected_font() const;
-        void select_font(const neogfx::font& aFont);
+        std::optional<text_appearance> const& current_appearance() const;
+        std::optional<text_appearance> const& selected_appearance() const;
+        void select_font(neogfx::font const& aFont);
+        void set_default_ink(const std::optional<color>& aColor);
+        void set_default_paper(const std::optional<color>& aColor);
     protected:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     private:
         void init();
-        void update_selected_font(const i_widget& aUpdatingWidget);
+        void update_selected_font(i_widget const& aUpdatingWidget);
+        void update_selected_appearance(i_widget const& aUpdatingWidget);
+        void update_widgets();
     private:
         sink iSink;
         bool iUpdating;
         neogfx::font iCurrentFont;
         neogfx::font iSelectedFont;
+        std::optional<text_appearance> iCurrentAppearance;
+        std::optional<text_appearance> iSelectedAppearance;
+        std::optional<color> iDefaultInk;
+        std::optional<color> iDefaultPaper;
         horizontal_layout iLayout0;
         vertical_layout iLayout1;
         label iFamilyLabel;
@@ -70,9 +81,11 @@ namespace neogfx
         group_box iInkBox;
         radio_button iInkColor;
         radio_button iInkGradient;
+        neolib::variant<color_widget, gradient_widget> iInk;
         group_box iPaperBox;
         radio_button iPaperColor;
         radio_button iPaperGradient;
+        neolib::variant<color_widget, gradient_widget> iPaper;
         group_box iTextEffectsBox;
         radio_button iTextEffectsOutline;
         radio_button iTextEffectsShadow;
