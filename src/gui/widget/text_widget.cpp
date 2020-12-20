@@ -252,8 +252,11 @@ namespace neogfx
 
     void text_widget::set_text_appearance(const optional_text_appearance& aTextAppearance)
     {
-        iTextAppearance = aTextAppearance;
-        update();
+        if (iTextAppearance != aTextAppearance)
+        {
+            iTextAppearance = aTextAppearance;
+            update();
+        }
     }
 
     size text_widget::text_extent() const
@@ -277,8 +280,6 @@ namespace neogfx
             iTextExtent = gc.glyph_text_extent(glyph_text());
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
-        if (has_text_appearance() && text_appearance().effect() != std::nullopt)
-            *iTextExtent += size{ text_appearance().effect().value().width() * 2.0 };
         return *iTextExtent;
     }
 
