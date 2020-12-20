@@ -29,6 +29,7 @@
 #include <neogfx/gui/widget/check_box.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
+#include <neogfx/gui/widget/slider_box.hpp>
 
 namespace neogfx
 {
@@ -95,6 +96,17 @@ namespace neogfx
         radio_button iTextEffectColor;
         radio_button iTextEffectGradient;
         neolib::variant<color_widget, gradient_widget> iTextEffectInk;
+        struct text_effect_width
+        {
+            group_box box;
+            slider_box slider;
+            text_effect_width(font_dialog& aParent) :
+                box{ aParent.iTextEffectBox.item_layout(), "Width"_t },
+                slider{ box.with_item_layout<vertical_layout>() }
+            {
+            }
+        };
+        std::optional<text_effect_width> iTextEffectWidth;
         group_box iSampleBox;
         text_widget iSample;
     };

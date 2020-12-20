@@ -124,8 +124,6 @@ namespace neogfx
         auto appearance = text_appearance();
         if (appearance.ink() == neolib::none)
             appearance.set_ink(text_color());
-        if (appearance.effect() != std::nullopt)
-            textPosition += size{ appearance.effect()->width() };
         if (multi_line())
             aGc.draw_multiline_glyph_text(textPosition, glyph_text(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal);
         else

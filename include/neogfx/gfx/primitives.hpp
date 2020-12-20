@@ -216,6 +216,10 @@ namespace neogfx
         {
             return iType;
         }
+        void set_type(text_effect_type aType)
+        {
+            iType = aType;
+        }
         text_color color() const
         {
             if (iColor != neolib::none)
@@ -227,6 +231,10 @@ namespace neogfx
             default:
                 return color::White;
             }
+        }
+        void set_color(text_color const& aColor)
+        {
+            iColor = aColor;
         }
         dimension width() const
         {
@@ -243,6 +251,10 @@ namespace neogfx
             case text_effect_type::Shadow:
                 return 4.0;
             }
+        }
+        void set_width(optional_dimension const& aWidth)
+        {
+            iWidth = aWidth;
         }
         vec3 offset() const
         {
@@ -370,6 +382,10 @@ namespace neogfx
             iPaper = aPaper;
         }
         optional_text_effect const& effect() const
+        {
+            return iEffect;
+        }
+        optional_text_effect& effect()
         {
             return iEffect;
         }
