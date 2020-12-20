@@ -77,7 +77,7 @@ namespace neogfx
         label iSizeLabel;
         drop_list iSizePicker;
         widget<> iEffects;
-        horizontal_layout iLayoutEffects;
+        horizontal_layout iLayoutAppearance;
         group_box iInkBox;
         radio_button iInkColor;
         radio_button iInkGradient;
@@ -86,10 +86,15 @@ namespace neogfx
         radio_button iPaperColor;
         radio_button iPaperGradient;
         neolib::variant<color_widget, gradient_widget> iPaper;
-        group_box iTextEffectsBox;
-        radio_button iTextEffectsOutline;
-        radio_button iTextEffectsShadow;
-        radio_button iTextEffectsGlow;
+        group_box iTextEffectBox;
+        group_box iTextEffectTypeBox;
+        radio_button iTextEffectOutline;
+        radio_button iTextEffectShadow;
+        radio_button iTextEffectGlow;
+        group_box iTextEffectInkBox;
+        radio_button iTextEffectColor;
+        radio_button iTextEffectGradient;
+        neolib::variant<color_widget, gradient_widget> iTextEffectInk;
         group_box iSampleBox;
         text_widget iSample;
     };
