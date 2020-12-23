@@ -168,27 +168,28 @@ namespace neogfx
         virtual sRGB_color color_at(scalar aPos, scalar aStart, scalar aEnd) const = 0;
         virtual sRGB_color::view_component alpha_at(scalar aPos) const = 0;
         virtual sRGB_color::view_component alpha_at(scalar aPos, scalar aStart, scalar aEnd) const = 0;
-        virtual void reverse() = 0;
-        virtual void set_alpha(sRGB_color::view_component aAlpha) = 0;
-        virtual void set_combined_alpha(sRGB_color::view_component aAlpha) = 0;
+        virtual i_gradient& reverse() = 0;
+        virtual i_gradient& set_alpha(sRGB_color::view_component aAlpha) = 0;
+        virtual i_gradient& set_combined_alpha(sRGB_color::view_component aAlpha) = 0;
         virtual gradient_direction direction() const = 0;
-        virtual void set_direction(gradient_direction aDirection) = 0;
+        virtual i_gradient& set_direction(gradient_direction aDirection) = 0;
         virtual gradient_orientation orientation() const = 0;
-        virtual void set_orientation(gradient_orientation aOrientation) = 0;
+        virtual i_gradient& set_orientation(gradient_orientation aOrientation) = 0;
         virtual gradient_shape shape() const = 0;
-        virtual void set_shape(gradient_shape aShape) = 0;
+        virtual i_gradient& set_shape(gradient_shape aShape) = 0;
         virtual gradient_size size() const = 0;
-        virtual void set_size(gradient_size aSize) = 0;
+        virtual i_gradient& set_size(gradient_size aSize) = 0;
         virtual const optional_vec2& exponents() const = 0;
-        virtual void set_exponents(const optional_vec2& aExponents) = 0;
+        virtual i_gradient& set_exponents(const optional_vec2& aExponents) = 0;
         virtual const optional_point& center() const = 0;
-        virtual void set_center(const optional_point& aCenter) = 0;
+        virtual i_gradient& set_center(const optional_point& aCenter) = 0;
         virtual const std::optional<gradient_tile>& tile() const = 0;
-        virtual void set_tile(const std::optional<gradient_tile>& aTile) = 0;
+        virtual i_gradient& set_tile(const std::optional<gradient_tile>& aTile) = 0;
         virtual scalar smoothness() const = 0;
-        virtual void set_smoothness(scalar aSmoothness) = 0;
+        virtual i_gradient& set_smoothness(scalar aSmoothness) = 0;
         virtual const optional_rect& bounding_box() const = 0;
-        virtual void set_bounding_box(const optional_rect& aBoundingBox) = 0;
+        virtual i_gradient& set_bounding_box(const optional_rect& aBoundingBox) = 0;
+        virtual i_gradient& set_bounding_box_if_none(const optional_rect& aBoundingBox) = 0;
         // shader
     public:
         virtual const i_gradient_sampler& colors() const = 0;
@@ -306,12 +307,6 @@ namespace neogfx
         {
             auto result = clone();
             result->set_smoothness(aSmoothness);
-            return result;
-        }
-        neolib::ref_ptr<i_gradient> with_bounding_box(const optional_rect& aBoundingBox) const
-        {
-            auto result = clone();
-            result->set_bounding_box(aBoundingBox);
             return result;
         }
     public:

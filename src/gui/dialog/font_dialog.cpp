@@ -697,7 +697,7 @@ namespace neogfx
                         update_selected_appearance(iTextEffectWidth->slider);
                     });
                     iTextEffectWidth->slider.set_minimum(1);
-                    iTextEffectWidth->slider.set_maximum(10);
+                    iTextEffectWidth->slider.set_maximum(16);
                     iTextEffectWidth->slider.set_step(1);
                 }
                 iTextEffectWidth->slider.set_value(static_cast<int32_t>(iSelectedAppearance->effect()->width()));

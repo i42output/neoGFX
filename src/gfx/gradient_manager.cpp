@@ -361,7 +361,7 @@ namespace neogfx
         {
             return alpha_at(normalized_position(aPos, aStart, aEnd));
         }
-        void reverse() override
+        i_gradient& reverse() override
         {
             auto reversedGradient = *this;
             std::reverse(reversedGradient.color_stops().begin(), reversedGradient.color_stops().end());
@@ -371,23 +371,26 @@ namespace neogfx
             for (auto& s : reversedGradient.alpha_stops())
                 s.first() = 1.0 - s.first();
             *this = reversedGradient;
+            return *this;
         }
-        void set_alpha(sRGB_color::view_component aAlpha) override
+        i_gradient& set_alpha(sRGB_color::view_component aAlpha) override
         {
             alpha_stops() = alpha_stop_list{ alpha_stop{0.0, aAlpha}, alpha_stop{1.0, aAlpha} };
             for (auto& stop : color_stops())
                 stop.second().set_alpha(255);
+            return *this;
         }
-        void set_combined_alpha(sRGB_color::view_component aAlpha) override
+        i_gradient& set_combined_alpha(sRGB_color::view_component aAlpha) override
         {
             for (auto& stop : alpha_stops())
                 stop.second() = static_cast<sRGB_color::view_component>((stop.second() / 255.0 * aAlpha / 255.0) * 255.0);
+            return *this;
         }
         gradient_direction direction() const override
         {
             return iDirection;
         }
-        void set_direction(gradient_direction aDirection) override
+        i_gradient& set_direction(gradient_direction aDirection) override
         {
             iDirection = aDirection;
             if (iDirection != gradient_direction::Diagonal)
@@ -397,74 +400,89 @@ namespace neogfx
                 iExponents = optional_vec2{};
                 iCenter = optional_point{};
             }
+            return *this;
         }
         gradient_orientation orientation() const override
         {
             return iOrientation;
         }
-        void set_orientation(gradient_orientation aOrientation) override
+        i_gradient& set_orientation(gradient_orientation aOrientation) override
         {
             iOrientation = aOrientation;
+            return *this;
         }
         gradient_shape shape() const override
         {
             return iShape;
         }
-        void set_shape(gradient_shape aShape) override
+        i_gradient& set_shape(gradient_shape aShape) override
         {
             iShape = aShape;
+            return *this;
         }
         gradient_size size() const override
         {
             return iSize;
         }
-        void set_size(gradient_size aSize) override
+        i_gradient& set_size(gradient_size aSize) override
         {
             iSize = aSize;
+            return *this;
         }
         const optional_vec2& exponents() const override
         {
             return iExponents;
         }
-        void set_exponents(const optional_vec2& aExponents) override
+        i_gradient& set_exponents(const optional_vec2& aExponents) override
         {
             iExponents = aExponents;
             if (iExponents != optional_vec2{})
                 iExponents = iExponents->max(vec2{ 0.0, 0.0 });
+            return *this;
         }
         const optional_point& center() const override
         {
             return iCenter;
         }
-        void set_center(const optional_point& aCenter) override
+        i_gradient& set_center(const optional_point& aCenter) override
         {
             iCenter = aCenter;
             if (iCenter != optional_point{})
                 iCenter = iCenter->min(point{ 1.0, 1.0 }).max(point{ -1.0, -1.0 });
+            return *this;
         }
         const std::optional<gradient_tile>& tile() const override
         {
             return iTile;
         }
-        void set_tile(const std::optional<gradient_tile>& aTile) override
+        i_gradient& set_tile(const std::optional<gradient_tile>& aTile) override
         {
             iTile = aTile;
+            return *this;
         }
         scalar smoothness() const override
         {
             return iSmoothness;
         }
-        void set_smoothness(scalar aSmoothness) override
+        i_gradient& set_smoothness(scalar aSmoothness) override
         {
             iSmoothness = aSmoothness;
+            return *this;
         }
         const optional_rect& bounding_box() const override
         {
             return iBoundingBox;
         }
-        void set_bounding_box(const optional_rect& aBoundingBox) override
+        i_gradient& set_bounding_box(const optional_rect& aBoundingBox) override
         {
             iBoundingBox = aBoundingBox;
+            return *this;
+        }
+        i_gradient& set_bounding_box_if_none(const optional_rect& aBoundingBox) override
+        {
+            if (iBoundingBox != std::nullopt)
+                iBoundingBox = aBoundingBox;
+            return *this;
         }
         // shader
     public:

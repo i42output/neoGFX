@@ -85,6 +85,23 @@ namespace neogfx
             return game::material{ game::color{} };
     }
 
+    inline shader_effect to_ecs_component(text_effect_type aEffectType)
+    {
+        switch (aEffectType)
+        {
+        case text_effect_type::None:
+            return shader_effect::None;
+        case text_effect_type::Outline:
+            return shader_effect::None;
+        case text_effect_type::Glow:
+            return shader_effect::ColorizeSpot;
+        case text_effect_type::Shadow:
+            return shader_effect::ColorizeSpot;
+        default:
+            return shader_effect::None;
+        }
+    }
+
     inline game::material to_ecs_component(const brush& aBrush)
     {
         if (std::holds_alternative<color>(aBrush))

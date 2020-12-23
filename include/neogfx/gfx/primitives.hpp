@@ -317,7 +317,8 @@ namespace neogfx
             iInk{ aInk },
             iPaper{ aPaper },
             iEffect{ aEffect },
-            iOnlyCalculateEffect{ false }
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
         {
         }
         template <typename InkType, typename PaperType>
@@ -325,34 +326,39 @@ namespace neogfx
             iInk{ aInk },
             iPaper{ aPaper },
             iEffect{ aEffect },
-            iOnlyCalculateEffect{ false }
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
         {
         }
         template <typename InkType>
         text_appearance(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iEffect{ aEffect },
-            iOnlyCalculateEffect{ false }
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
         {
         }
         template <typename InkType>
         text_appearance(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
             iEffect{ aEffect },
-            iOnlyCalculateEffect{ false }
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
         {
         }
         template <typename InkType, typename PaperType>
         text_appearance(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
-            iOnlyCalculateEffect{ false }
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
         {
         }
         template <typename InkType>
         text_appearance(InkType const& aInk) :
             iInk{ aInk },
-            iOnlyCalculateEffect{ false }
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
         {
         }
     public:
@@ -397,6 +403,10 @@ namespace neogfx
         {
             return iOnlyCalculateEffect;
         }
+        bool being_filtered() const
+        {
+            return iBeingFiltered;
+        }
     public:
         text_appearance with_ink(text_color const& aInk) const
         {
@@ -424,11 +434,18 @@ namespace neogfx
             copy.iOnlyCalculateEffect = true;
             return copy;
         }
+        text_appearance as_being_filtered() const
+        {
+            auto copy = *this;
+            copy.iBeingFiltered = true;
+            return copy;
+        }
     private:
         text_color iInk;
         optional_text_color iPaper;
         optional_text_effect iEffect;
         bool iOnlyCalculateEffect;
+        bool iBeingFiltered;
     };
 
     typedef std::optional<text_appearance> optional_text_appearance;

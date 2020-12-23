@@ -31,6 +31,7 @@ namespace neogfx
     {
         // types
     public:
+        typedef basic_gradient<Sharing> self_type;
         typedef i_gradient abstract_type;
         typedef neolib::pair<scalar, sRGB_color> color_stop;
         typedef neolib::pair<scalar, sRGB_color::view_component> alpha_stop;
@@ -86,27 +87,43 @@ namespace neogfx
         sRGB_color color_at(scalar aPos, scalar aStart, scalar aEnd) const override;
         sRGB_color::view_component alpha_at(scalar aPos) const override;
         sRGB_color::view_component alpha_at(scalar aPos, scalar aStart, scalar aEnd) const override;
-        void reverse() override;
-        void set_alpha(sRGB_color::view_component aAlpha) override;
-        void set_combined_alpha(sRGB_color::view_component aAlpha) override;
+        self_type& reverse() override;
+        self_type& set_alpha(sRGB_color::view_component aAlpha) override;
+        self_type& set_combined_alpha(sRGB_color::view_component aAlpha) override;
         gradient_direction direction() const override;
-        void set_direction(gradient_direction aDirection) override;
+        self_type& set_direction(gradient_direction aDirection) override;
         gradient_orientation orientation() const override;
-        void set_orientation(gradient_orientation aOrientation) override;
+        self_type& set_orientation(gradient_orientation aOrientation) override;
         gradient_shape shape() const override;
-        void set_shape(gradient_shape aShape) override;
+        self_type& set_shape(gradient_shape aShape) override;
         gradient_size size() const override;
-        void set_size(gradient_size aSize) override;
+        self_type& set_size(gradient_size aSize) override;
         const optional_vec2& exponents() const override;
-        void set_exponents(const optional_vec2 & aExponents) override;
+        self_type& set_exponents(const optional_vec2 & aExponents) override;
         const optional_point& center() const override;
-        void set_center(const optional_point & aCenter) override;
+        self_type& set_center(const optional_point & aCenter) override;
         const std::optional<gradient_tile>& tile() const override;
-        void set_tile(const std::optional<gradient_tile>& aTile) override;
+        self_type& set_tile(const std::optional<gradient_tile>& aTile) override;
         scalar smoothness() const override;
-        void set_smoothness(scalar aSmoothness) override;
+        self_type& set_smoothness(scalar aSmoothness) override;
         const optional_rect& bounding_box() const override;
-        void set_bounding_box(const optional_rect& aBoundingBox) override;
+        self_type& set_bounding_box(const optional_rect& aBoundingBox) override;
+        self_type& set_bounding_box_if_none(const optional_rect& aBoundingBox) override;
+        // helpers
+    public:
+        self_type with_bounding_box(const optional_rect& aBoundingBox) const
+        {
+            auto result = *this;
+            result.set_bounding_box(aBoundingBox);
+            return result;
+        }
+        self_type with_bounding_box_if_none(const optional_rect& aBoundingBox) const
+        {
+            auto result = *this;
+            if (result.bounding_box() == std::nullopt)
+                result.set_bounding_box(aBoundingBox);
+            return result;
+        }
         // shader
     public:
         const i_gradient_sampler& colors() const override;

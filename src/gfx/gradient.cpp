@@ -277,21 +277,24 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::reverse()
+    basic_gradient<Sharing>& basic_gradient<Sharing>::reverse()
     {
         object().reverse();
+        return *this;
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_alpha(sRGB_color::view_component aAlpha)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_alpha(sRGB_color::view_component aAlpha)
     {
         object().set_alpha(aAlpha);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_combined_alpha(sRGB_color::view_component aAlpha)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_combined_alpha(sRGB_color::view_component aAlpha)
     {
         object().set_combined_alpha(aAlpha);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -301,9 +304,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_direction(gradient_direction aDirection)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_direction(gradient_direction aDirection)
     {
         object().set_direction(aDirection);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -313,9 +317,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_orientation(gradient_orientation aOrientation)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_orientation(gradient_orientation aOrientation)
     {
         object().set_orientation(aOrientation);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -325,9 +330,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_shape(gradient_shape aShape)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_shape(gradient_shape aShape)
     {
         object().set_shape(aShape);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -337,9 +343,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_size(gradient_size aSize)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_size(gradient_size aSize)
     {
         object().set_size(aSize);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -349,9 +356,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_exponents(const optional_vec2& aExponents)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_exponents(const optional_vec2& aExponents)
     {
         object().set_exponents(aExponents);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -361,9 +369,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_center(const optional_point& aCenter)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_center(const optional_point& aCenter)
     {
         object().set_center(aCenter);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -373,9 +382,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_tile(const std::optional<gradient_tile>& aTile)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_tile(const std::optional<gradient_tile>& aTile)
     {
         object().set_tile(aTile);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -385,9 +395,10 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_smoothness(scalar aSmoothness)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_smoothness(scalar aSmoothness)
     {
         object().set_smoothness(aSmoothness);
+        return *this;
     }
 
     template <gradient_sharing Sharing>
@@ -401,9 +412,18 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    void basic_gradient<Sharing>::set_bounding_box(const optional_rect& aBoundingBox)
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_bounding_box(const optional_rect& aBoundingBox)
     {
         iBoundingBox = aBoundingBox;
+        return *this;
+    }
+
+    template <gradient_sharing Sharing>
+    basic_gradient<Sharing>& basic_gradient<Sharing>::set_bounding_box_if_none(const optional_rect& aBoundingBox)
+    {
+        if (iBoundingBox == std::nullopt)
+            iBoundingBox = aBoundingBox;
+        return *this;
     }
 
     template <gradient_sharing Sharing>
