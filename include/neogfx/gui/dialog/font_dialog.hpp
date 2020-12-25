@@ -82,6 +82,7 @@ namespace neogfx
         group_box iInkBox;
         radio_button iInkColor;
         radio_button iInkGradient;
+        check_box iInkEmoji;
         neolib::variant<color_widget, gradient_widget> iInk;
         group_box iPaperBox;
         radio_button iPaperColor;
@@ -95,6 +96,7 @@ namespace neogfx
         group_box iTextEffectInkBox;
         radio_button iTextEffectColor;
         radio_button iTextEffectGradient;
+        check_box iTextEffectEmoji;
         neolib::variant<color_widget, gradient_widget> iTextEffectInk;
         struct text_effect_width
         {

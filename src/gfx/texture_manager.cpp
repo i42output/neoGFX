@@ -104,7 +104,8 @@ namespace neogfx
             auto& texture = *i;
             if (texture.first()->type() != texture_type::Texture)
                 continue;
-            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri())
+            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri() &&
+                aImage.sampling() == texture.first()->sampling())
                 return i;
         }
         return textures().end();
@@ -117,7 +118,8 @@ namespace neogfx
             auto& texture = *i;
             if (texture.first()->type() != texture_type::Texture)
                 continue;
-            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri())
+            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri() &&
+                aImage.sampling() == texture.first()->sampling())
                 return i;
         }
         return textures().end();

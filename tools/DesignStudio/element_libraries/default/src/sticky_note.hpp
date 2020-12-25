@@ -106,7 +106,7 @@ namespace neogfx::DesignStudio
                 {
                     auto imageFile = open_file_dialog(*this, file_dialog_spec{ "Open Image", {}, { "*.png" }, "Image Files" });
                     if (imageFile)
-                        set_image(neogfx::image{ "file:///"_s + (*imageFile)[0] });
+                        set_image(neogfx::image{ "file:///"_s + (*imageFile)[0], 1.0, texture_sampling::Normal });
                 });
                 aMenu.add_action(noteColor);
                 aMenu.add_action(noteBackground);
@@ -257,9 +257,9 @@ namespace neogfx::DesignStudio
         void paste(i_clipboard& aClipboard) override
         {
             if (aClipboard.has_image())
-                set_image(aClipboard.image());
+                set_image(neogfx::image{ aClipboard.image(), texture_sampling::Normal });
             else if (aClipboard.has_text())
-                iDefaultItem->set_text(aClipboard.text());
+                iDefaultItem->paste(aClipboard);
         }
         void delete_selected() override
         {

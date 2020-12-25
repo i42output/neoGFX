@@ -116,6 +116,19 @@ namespace neogfx
         }
     }
 
+    image::image(image const& aOther) :
+        iResource{ aOther.iResource },
+        iUri{ aOther.iUri },
+        iError{ aOther.iError },
+        iDpiScaleFactor{ aOther.iDpiScaleFactor },
+        iColorSpace{ aOther.iColorSpace },
+        iColorFormat{ aOther.iColorFormat },
+        iData{ aOther.iData },
+        iSampling{ aOther.iSampling },
+        iSize{ aOther.iSize }
+    {
+    }
+
     image::image(image&& aOther) :
         iResource{ std::move(aOther.iResource) },
         iUri{ std::move(aOther.iUri) },
@@ -127,6 +140,18 @@ namespace neogfx
         iSampling{ std::move(aOther.iSampling) },
         iSize{ std::move(aOther.iSize) }
     {
+    }
+
+    image::image(image const& aOther, texture_sampling aSampling) :
+        image{ aOther }
+    {
+        iSampling = aSampling;
+    }
+
+    image::image(image&& aOther, texture_sampling aSampling) :
+        image{ std::move(aOther) }
+    {
+        iSampling = aSampling;
     }
 
     image::~image()

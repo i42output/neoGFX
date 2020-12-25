@@ -1631,6 +1631,9 @@ namespace neogfx
                         if (!renderEffects)
                             continue;
 
+                        if (is_emoji(glyph) && drawOp.appearance->effect()->ignore_emoji())
+                            continue;
+
                         if (!filter)
                             filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width() });
 
@@ -1670,16 +1673,21 @@ namespace neogfx
                     auto const& emojiTexture = emojiAtlas.emoji_texture(glyph.value).as_sub_texture();
                     meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                        drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+                        (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) : 
+                        (drawOp.appearance->effect()->ignore_emoji() ? neolib::none : drawOp.appearance->effect()->color());
                     meshRenderers.push_back(game::mesh_renderer
                         {
                             game::material
                             {
                                 std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
                                 std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(outputRect)) : std::optional<game::gradient>{},
-                                {}, to_ecs_component(emojiTexture),
-                                !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                                    shader_effect::None : to_ecs_component(drawOp.appearance->effect()->type())
+                                {}, 
+                                to_ecs_component(emojiTexture),
+                                !drawOp.appearance->being_filtered() ?
+                                    drawOp.appearance->ignore_emoji() ? 
+                                        shader_effect::None : shader_effect::Colorize : 
+                                    !drawOp.appearance->effect() || drawOp.appearance->effect()->ignore_emoji() ?
+                                        shader_effect::None : to_ecs_component(drawOp.appearance->effect()->type())
                             }
                         });
                 }

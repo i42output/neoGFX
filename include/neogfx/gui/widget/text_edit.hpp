@@ -69,6 +69,7 @@ namespace neogfx
             const color_or_gradient& glyph_color() const;
             const color_or_gradient& text_color() const;
             const color_or_gradient& paper_color() const;
+            bool ignore_emoji() const;
             const optional_text_effect& text_effect() const;
             text_appearance as_text_appearance() const;
             void set_font(optional_font const& aFont = optional_font{});
@@ -90,6 +91,7 @@ namespace neogfx
             color_or_gradient iGlyphColor;
             color_or_gradient iTextColor;
             color_or_gradient iPaperColor;
+            bool iIgnoreEmoji;
             optional_text_effect iTextEffect;
         };
         typedef std::set<style> style_list;

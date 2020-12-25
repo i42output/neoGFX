@@ -182,8 +182,8 @@ namespace neogfx
         typedef double auxiliary_parameter;
         typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
-        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}) :
-            iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }
+        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, bool aIgnoreEmoji = false) :
+            iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iIgnoreEmoji{ aIgnoreEmoji }
         {
         }
     public:
@@ -196,12 +196,13 @@ namespace neogfx
             iWidth = aOther.iWidth;
             iOffset = aOther.iOffset;
             iAux1 = aOther.iAux1;
+            iIgnoreEmoji = aOther.iIgnoreEmoji;
             return *this;
         }
     public:
         bool operator==(const text_effect& aOther) const
         {
-            return iType == aOther.iType && iColor == aOther.iColor && iWidth == aOther.iWidth && iOffset == aOther.iOffset && iAux1 == aOther.iAux1;
+            return iType == aOther.iType && iColor == aOther.iColor && iWidth == aOther.iWidth && iOffset == aOther.iOffset && iAux1 == aOther.iAux1 && iIgnoreEmoji == aOther.iIgnoreEmoji;
         }
         bool operator!=(const text_effect& aOther) const
         {
@@ -209,7 +210,7 @@ namespace neogfx
         }
         bool operator<(const text_effect& aRhs) const
         {
-            return std::tie(iType, iColor, iWidth, iOffset, iAux1) < std::tie(aRhs.iType, aRhs.iColor, aRhs.iWidth, aRhs.iOffset, aRhs.iAux1);
+            return std::tie(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) < std::tie(aRhs.iType, aRhs.iColor, aRhs.iWidth, aRhs.iOffset, aRhs.iAux1, aRhs.iIgnoreEmoji);
         }
     public:
         text_effect_type type() const
@@ -289,9 +290,17 @@ namespace neogfx
                 return 1.0;
             }
         }
+        bool ignore_emoji() const
+        {
+            return iIgnoreEmoji;
+        }
+        void set_ignore_emoji(bool aIgnore)
+        {
+            iIgnoreEmoji = aIgnore;
+        }
         text_effect with_alpha(color::component aAlpha) const
         {
-            return text_effect{ iType, iColor.with_alpha(aAlpha), iWidth, iOffset, iAux1 };
+            return text_effect{ iType, iColor.with_alpha(aAlpha), iWidth, iOffset, iAux1, iIgnoreEmoji };
         }
         text_effect with_alpha(double aAlpha) const
         {
@@ -303,6 +312,7 @@ namespace neogfx
         optional_dimension iWidth;
         optional_vec3 iOffset;
         optional_auxiliary_parameter iAux1;
+        bool iIgnoreEmoji;
     };
     typedef std::optional<text_effect> optional_text_effect;
 
@@ -312,10 +322,26 @@ namespace neogfx
         struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
         struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
     public:
+        text_appearance() :
+            iIgnoreEmoji{ true },
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
+        {
+        }
+        text_appearance(text_appearance const& aOther) :
+            iInk{ aOther.iInk },
+            iPaper{ aOther.iPaper },
+            iIgnoreEmoji{ aOther.iIgnoreEmoji },
+            iEffect{ aOther.iEffect },
+            iOnlyCalculateEffect{ aOther.iOnlyCalculateEffect },
+            iBeingFiltered{ aOther.iBeingFiltered }
+        {
+        }
         template <typename InkType, typename PaperType>
         text_appearance(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
+            iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -325,6 +351,7 @@ namespace neogfx
         text_appearance(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
+            iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -333,6 +360,7 @@ namespace neogfx
         template <typename InkType>
         text_appearance(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
+            iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -341,6 +369,7 @@ namespace neogfx
         template <typename InkType>
         text_appearance(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
+            iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -350,6 +379,7 @@ namespace neogfx
         text_appearance(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
+            iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
         {
@@ -357,6 +387,7 @@ namespace neogfx
         template <typename InkType>
         text_appearance(InkType const& aInk) :
             iInk{ aInk },
+            iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
         {
@@ -364,7 +395,7 @@ namespace neogfx
     public:
         bool operator==(text_appearance const& aRhs) const
         {
-            return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iEffect == aRhs.iEffect;
+            return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iIgnoreEmoji == aRhs.iIgnoreEmoji && iEffect == aRhs.iEffect;
         }
         bool operator!=(text_appearance const& aRhs) const
         {
@@ -386,6 +417,14 @@ namespace neogfx
         void set_paper(optional_text_color const& aPaper)
         {
             iPaper = aPaper;
+        }
+        bool ignore_emoji() const
+        {
+            return iIgnoreEmoji;
+        }
+        void set_ignore_emoji(bool aIgnore)
+        {
+            iIgnoreEmoji = aIgnore;
         }
         optional_text_effect const& effect() const
         {
@@ -410,19 +449,32 @@ namespace neogfx
     public:
         text_appearance with_ink(text_color const& aInk) const
         {
-            return text_appearance{ aInk, iPaper, iEffect };
+            return text_appearance{ aInk, iPaper, iEffect }.with_emoji_ignored(ignore_emoji());
         }
         text_appearance with_paper(optional_text_color const& aPaper) const
         {
-            return text_appearance{ iInk, aPaper, iEffect };
+            return text_appearance{ iInk, aPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+        }
+        text_appearance with_emoji_ignored(bool aIgnored) const
+        {
+            auto result = *this;
+            result.set_ignore_emoji(aIgnored);
+            return result;
         }
         text_appearance with_effect(optional_text_effect const& aEffect) const
         {
-            return text_appearance{ iInk, iPaper, aEffect };
+            return text_appearance{ iInk, iPaper, aEffect }.with_emoji_ignored(ignore_emoji());
         }
         text_appearance with_alpha(color::component aAlpha) const
         {
-            return text_appearance{ iInk.with_alpha(aAlpha), iPaper != std::nullopt ? optional_text_color{ iPaper->with_alpha(aAlpha) } : optional_text_color{}, iEffect != std::nullopt ? iEffect->with_alpha(aAlpha) : optional_text_effect{} };
+            return text_appearance{ 
+                iInk.with_alpha(aAlpha), 
+                iPaper != std::nullopt ? 
+                    optional_text_color{ iPaper->with_alpha(aAlpha) } : 
+                    optional_text_color{}, 
+                iEffect != std::nullopt ? 
+                    iEffect->with_alpha(aAlpha) : 
+                    optional_text_effect{} }.with_emoji_ignored(ignore_emoji());
         }
         text_appearance with_alpha(double aAlpha) const
         {
@@ -443,6 +495,7 @@ namespace neogfx
     private:
         text_color iInk;
         optional_text_color iPaper;
+        bool iIgnoreEmoji;
         optional_text_effect iEffect;
         bool iOnlyCalculateEffect;
         bool iBeingFiltered;

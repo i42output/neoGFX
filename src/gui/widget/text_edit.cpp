@@ -35,7 +35,8 @@ namespace neogfx
 
     text_edit::style::style() :
         iParent{ nullptr },
-        iUseCount{ 0 }
+        iUseCount{ 0 },
+        iIgnoreEmoji{ true }
     {
     }
         
@@ -49,6 +50,7 @@ namespace neogfx
         iFont{ aFont },
         iTextColor{ aTextColor },
         iPaperColor{ aPaperColor },
+        iIgnoreEmoji{ true },
         iTextEffect{ aTextEffect }
     {
     }
@@ -61,6 +63,7 @@ namespace neogfx
         iFont{ aOther.iFont },
         iTextColor{ aOther.iTextColor },
         iPaperColor{ aOther.iPaperColor },
+        iIgnoreEmoji{ true },
         iTextEffect{ aOther.iTextEffect }
     {
     }
@@ -96,6 +99,11 @@ namespace neogfx
         return iPaperColor;
     }
 
+    bool text_edit::style::ignore_emoji() const
+    {
+        return iIgnoreEmoji;
+    }
+
     const optional_text_effect& text_edit::style::text_effect() const
     {
         return iTextEffect;
@@ -103,7 +111,7 @@ namespace neogfx
 
     text_appearance text_edit::style::as_text_appearance() const
     {
-        return text_appearance{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() };
+        return text_appearance{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
     }
 
     void text_edit::style::set_font(optional_font const& aFont)
@@ -145,6 +153,7 @@ namespace neogfx
     {
         iGlyphColor = aAppearance.ink();
         iPaperColor = aAppearance.paper() ? *aAppearance.paper() : neolib::none;
+        iIgnoreEmoji = aAppearance.ignore_emoji();
         iTextEffect = aAppearance.effect();
         if (iParent)
             iParent->update();
@@ -158,6 +167,7 @@ namespace neogfx
             iTextColor = aOverridingStyle.text_color();
         if (aOverridingStyle.paper_color() != neolib::none)
             iPaperColor = aOverridingStyle.paper_color();
+        iIgnoreEmoji = aOverridingStyle.ignore_emoji();
         if (aOverridingStyle.text_effect() != std::nullopt)
             iTextEffect = aOverridingStyle.text_effect();
         if (iParent)
@@ -500,7 +510,10 @@ namespace neogfx
 
     neogfx::mouse_cursor text_edit::mouse_cursor() const
     {
-        return client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt ? mouse_system_cursor::IBeam : framed_scrollable_widget::mouse_cursor();
+        if (client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt)
+            return mouse_system_cursor::IBeam;
+        else
+            return framed_scrollable_widget::mouse_cursor();
     }
 
     bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -2016,7 +2029,7 @@ namespace neogfx
                     text_appearance{
                         glyphColor,
                         style.paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.paper_color() } } : optional_text_color{},
-                        style.text_effect() } :
+                        style.text_effect() }.with_emoji_ignored(style.ignore_emoji()) :
                     text_appearance{
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };

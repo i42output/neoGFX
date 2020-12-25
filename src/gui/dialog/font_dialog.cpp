@@ -154,6 +154,7 @@ namespace neogfx
         iInkBox{ iLayoutAppearance, "Ink"_t },
         iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iInkGradient{ iInkBox.item_layout(), "Gradient"_t },
+        iInkEmoji{ iInkBox.item_layout(), "+Emoji"_t },
         iPaperBox{ iLayoutAppearance, "Paper"_t },
         iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color"_t },
         iPaperGradient{ iPaperBox.item_layout(), "Gradient"_t },
@@ -165,6 +166,7 @@ namespace neogfx
         iTextEffectInkBox{ iTextEffectBox.item_layout(), "Ink"_t },
         iTextEffectColor{ iTextEffectInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iTextEffectGradient{ iTextEffectInkBox.item_layout(), "Gradient"_t },
+        iTextEffectEmoji{ iTextEffectInkBox.item_layout(), "+Emoji"_t },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -195,6 +197,7 @@ namespace neogfx
         iInkBox{ iLayoutAppearance, "Ink"_t },
         iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iInkGradient{ iInkBox.item_layout(), "Gradient"_t },
+        iInkEmoji{ iInkBox.item_layout(), "+Emoji"_t },
         iPaperBox{ iLayoutAppearance, "Paper"_t },
         iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color"_t },
         iPaperGradient{ iPaperBox.item_layout(), "Gradient"_t },
@@ -206,6 +209,7 @@ namespace neogfx
         iTextEffectInkBox{ iTextEffectBox.item_layout(), "Ink"_t },
         iTextEffectColor{ iTextEffectInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iTextEffectGradient{ iTextEffectInkBox.item_layout(), "Gradient"_t },
+        iTextEffectEmoji{ iTextEffectInkBox.item_layout(), "+Emoji"_t },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -276,6 +280,7 @@ namespace neogfx
         iSink += iTextEffectBox.check_box().Unchecked([&]() { update_selected_appearance(iTextEffectBox); });
         iSink += iInkColor.Checked([&]() { update_selected_appearance(iInkColor); });
         iSink += iInkGradient.Checked([&]() { update_selected_appearance(iInkGradient); });
+        iSink += iInkEmoji.Toggled([&]() { update_selected_appearance(iInkEmoji); });
         iSink += iPaperColor.Checked([&]() { update_selected_appearance(iPaperColor); });
         iSink += iPaperGradient.Checked([&]() { update_selected_appearance(iPaperGradient); });
         iSink += iTextEffectOutline.Checked([&]() { update_selected_appearance(iTextEffectOutline); });
@@ -283,6 +288,7 @@ namespace neogfx
         iSink += iTextEffectGlow.Checked([&]() { update_selected_appearance(iTextEffectGlow); });
         iSink += iTextEffectColor.Checked([&]() { update_selected_appearance(iTextEffectColor); });
         iSink += iTextEffectGradient.Checked([&]() { update_selected_appearance(iTextEffectGradient); });
+        iSink += iTextEffectEmoji.Toggled([&]() { update_selected_appearance(iTextEffectEmoji); });
 
         if (iSelectedAppearance)
         {
@@ -441,6 +447,7 @@ namespace neogfx
                 else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
                     iPaperGradient.check();
             }
+            iInkEmoji.set_checked(!iSelectedAppearance->ignore_emoji());
             if (iSelectedAppearance->effect())
             {
                 iTextEffectBox.check_box().check();
@@ -460,6 +467,7 @@ namespace neogfx
                     iTextEffectColor.check();
                 else if (std::holds_alternative<gradient>(iSelectedAppearance->effect()->color()))
                     iTextEffectGradient.check();
+                iTextEffectEmoji.set_checked(!iSelectedAppearance->effect()->ignore_emoji());
             }
         }
         if (iInkBox.check_box().is_checked())
@@ -478,10 +486,12 @@ namespace neogfx
                 else if (std::holds_alternative<color>(iSelectedAppearance->ink()))
                     iSelectedAppearance->set_ink(gradient{ std::get<color>(iSelectedAppearance->ink()) });
             }
+            iSelectedAppearance->set_ignore_emoji(iInkEmoji.is_unchecked());
         }
         else
         {
             iSelectedAppearance->set_ink(neolib::none);
+            iSelectedAppearance->set_ignore_emoji(true);
             iInk = neolib::none;
         }
         if (iPaperBox.check_box().is_checked())
@@ -540,6 +550,7 @@ namespace neogfx
                 else if (std::holds_alternative<color>(iSelectedAppearance->effect()->color()))
                     iSelectedAppearance->effect()->set_color(gradient{ std::get<color>(iSelectedAppearance->effect()->color()) });
             }
+            iSelectedAppearance->effect()->set_ignore_emoji(iTextEffectEmoji.is_unchecked());
         }
         else
         {
@@ -558,6 +569,8 @@ namespace neogfx
             if (iSelectedAppearance->ink() != std::get<gradient_widget>(iInk).gradient())
                 iSelectedAppearance->set_ink(std::get<gradient_widget>(iInk).gradient());
         }
+        if (&iInkEmoji == &aUpdatingWidget)
+            iSelectedAppearance->set_ignore_emoji(iInkEmoji.is_unchecked());
         if (std::holds_alternative<color_widget>(iPaper) && &std::get<color_widget>(iPaper) == &aUpdatingWidget)
         {
             if (iSelectedAppearance->paper() != std::get<color_widget>(iPaper).color())
@@ -583,6 +596,8 @@ namespace neogfx
             if (iSelectedAppearance->effect()->width() != iTextEffectWidth->slider.value())
                 iSelectedAppearance->effect()->set_width(iTextEffectWidth->slider.value());
         }
+        if (&iTextEffectEmoji == &aUpdatingWidget)
+            iSelectedAppearance->effect()->set_ignore_emoji(iTextEffectEmoji.is_unchecked());
 
         iSample.set_text_appearance(iSelectedAppearance);
         
@@ -625,6 +640,7 @@ namespace neogfx
                     }
                     std::get<gradient_widget>(iInk).set_gradient(std::get<gradient>(iSelectedAppearance->ink()));
                 }
+                iInkEmoji.set_checked(!iSelectedAppearance->ignore_emoji());
             }
             else
                 iInkBox.check_box().uncheck();
@@ -701,6 +717,7 @@ namespace neogfx
                     iTextEffectWidth->slider.set_step(1);
                 }
                 iTextEffectWidth->slider.set_value(static_cast<int32_t>(iSelectedAppearance->effect()->width()));
+                iTextEffectEmoji.set_checked(!iSelectedAppearance->effect()->ignore_emoji());
             }
             else
                 iTextEffectBox.check_box().uncheck();

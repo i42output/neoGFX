@@ -38,7 +38,7 @@ namespace neogfx::DesignStudio
         iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
         {    
             aAnimator.again();
-            if (has_element() && (element().mode() != element_mode::None || element().is_selected()))
+            if (has_element() && (element().mode() != element_mode::None || element().is_selected() || entered()))
                 update(); 
         }, 20 }
     {
@@ -160,18 +160,8 @@ namespace neogfx::DesignStudio
                 aGc.draw_rect(cr, pen{ color::Black.with_alpha(0.75), 2.0 });
                 aGc.line_stipple_off();
             };
-            switch (element().mode())
+            auto draw_resizer_rects = [&]()
             {
-            case element_mode::None:
-            default:
-                if (element().is_selected())
-                    draw_selected_rect();
-                break;
-            case element_mode::Drag:
-                draw_selected_rect();
-                break;
-            case element_mode::Edit:
-                draw_selected_rect();
                 aGc.draw_rect(resizer_part_rect(cardinal::NorthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
                 aGc.draw_rect(resizer_part_rect(cardinal::North, false), color::NavyBlue, color::White.with_alpha(0.75));
                 aGc.draw_rect(resizer_part_rect(cardinal::NorthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
@@ -180,6 +170,22 @@ namespace neogfx::DesignStudio
                 aGc.draw_rect(resizer_part_rect(cardinal::South, false), color::NavyBlue, color::White.with_alpha(0.75));
                 aGc.draw_rect(resizer_part_rect(cardinal::SouthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
                 aGc.draw_rect(resizer_part_rect(cardinal::West, false), color::NavyBlue, color::White.with_alpha(0.75));
+            };
+            switch (element().mode())
+            {
+            case element_mode::None:
+            default:
+                if (element().is_selected() || entered())
+                    draw_selected_rect();
+                if (entered())
+                    draw_resizer_rects();
+                break;
+            case element_mode::Drag:
+                draw_selected_rect();
+                break;
+            case element_mode::Edit:
+                draw_selected_rect();
+                draw_resizer_rects();
                 break;
             }
         }
@@ -258,7 +264,7 @@ namespace neogfx::DesignStudio
         widget::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Left && wasCapturing)
         {
-            if (iDragInfo && !iDragInfo->wasDragged)
+            if (iDragInfo && !iDragInfo->wasDragged && iDragInfo->part == cardinal::Center)
             {
                 if (element().group() == element_group::Workflow && element().has_widget())
                 {
@@ -297,6 +303,16 @@ namespace neogfx::DesignStudio
             else
                 drag(aPosition, ignoreConstraints);
         }
+    }
+
+    void widget_caddy::mouse_entered(const point& aPosition)
+    {
+        update();
+    }
+
+    void widget_caddy::mouse_left()
+    {
+        update();
     }
 
     mouse_cursor widget_caddy::mouse_cursor() const
