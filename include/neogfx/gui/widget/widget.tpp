@@ -1953,7 +1953,7 @@ namespace neogfx
                     break;
                 if (location != neogfx::mouse_event_location::NonClient &&
                     w->ignore_mouse_events() && !w->ignore_non_client_mouse_events(false) &&
-                    w->non_client_rect().contains(aPosition) &&
+                    w->non_client_rect().deflated(w->padding()).contains(aPosition) &&
                     !w->client_rect(false).contains(aPosition - w->origin()))
                     break;
             }

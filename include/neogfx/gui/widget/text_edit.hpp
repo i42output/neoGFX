@@ -498,8 +498,12 @@ namespace neogfx
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
         const style& default_style() const;
-        void set_default_style(const style& aDefaultStyle, bool aPersist = false);
+        void set_default_style(style const& aDefaultStyle, bool aPersist = false);
         color default_text_color() const;
+    public:
+        style current_style() const;
+        void apply_style(style const& aStyle);
+        void apply_style(position_type aStart, position_type aEnd, style const& aStyle);
     public:
         void clear();
         std::string const& text() const;
@@ -546,6 +550,7 @@ namespace neogfx
             document_glyphs::const_iterator lineEnd;
             point pos;
         };
+        std::pair<glyph_columns::const_iterator, glyph_lines::const_iterator> glyph_column_line(position_type aGlyphPosition) const;
         position_info glyph_position(position_type aGlyphPosition, bool aForCursor = false) const;
         position_type cursor_glyph_position() const;
         position_type cursor_glyph_anchor() const;

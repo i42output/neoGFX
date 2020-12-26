@@ -1095,6 +1095,34 @@ namespace neogfx
             return service<i_app>().current_style().palette().default_text_color_for_widget(*this);
     }
 
+    text_edit::style text_edit::current_style() const
+    {
+        if (cursor().position() == cursor().anchor())
+            return default_style();
+        else
+        {
+            auto const g = to_glyph(std::next(iText.begin(), cursor().position()));
+            return glyph_style(g, *glyph_column_line(g - glyphs().begin()).first);
+        }
+    }
+
+    void text_edit::apply_style(style const& aStyle)
+    {
+        if (cursor().position() == cursor().anchor())
+            set_default_style(aStyle);
+        else
+            apply_style(std::min(cursor().anchor(), cursor().position()), std::max(cursor().anchor(), cursor().position()), aStyle);
+    }
+
+    void text_edit::apply_style(position_type aStart, position_type aEnd, style const& aStyle)
+    {
+        // todo: optimize this (by changing style in-place)
+        std::u32string part;
+        part.assign(iText.begin() + aStart, iText.begin() + aEnd);
+        delete_text(aStart, aEnd);
+        insert_text(aStart, neolib::utf32_to_utf8(part), aStyle);
+    }
+
     neogfx::cursor& text_edit::cursor() const
     {
         return iCursor;
@@ -1144,7 +1172,7 @@ namespace neogfx
         return 0;
     }
 
-    text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
+    std::pair<text_edit::glyph_columns::const_iterator, text_edit::glyph_lines::const_iterator> text_edit::glyph_column_line(position_type aGlyphPosition) const
     {
         auto column = iGlyphColumns.begin();
         glyph_lines::const_iterator line;
@@ -1157,6 +1185,14 @@ namespace neogfx
         }
         if (column == iGlyphColumns.end())
             --column;
+        return std::make_pair(column, line);
+    }
+
+    text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
+    {
+        auto const columnLine = glyph_column_line(aGlyphPosition);
+        auto column = columnLine.first;
+        auto line = columnLine.second;
         auto const& columnRectSansPadding = column_rect(column - iGlyphColumns.begin());
         auto& lines = column->lines();
         if (line != lines.begin())
