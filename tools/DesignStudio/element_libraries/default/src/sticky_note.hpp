@@ -34,7 +34,16 @@ namespace neogfx::DesignStudio
     class sticky_note_text : public text_edit
     {
     public:
-        using text_edit::text_edit;
+        template <typename... Args>
+        sticky_note_text(Args&&... aArgs) : 
+            text_edit{ std::forward<Args>(aArgs)... }
+        {
+        }
+    protected:
+        neogfx::padding padding() const override
+        {
+            return neogfx::padding{};
+        }
     protected:
         color scrollbar_color(const i_scrollbar&) const override
         {
@@ -48,7 +57,7 @@ namespace neogfx::DesignStudio
     public:
         sticky_note(i_element const& aElement)
         {
-            set_padding(neogfx::padding{ 0.0, 16.0_dip, 0.0, 0.0 });
+            set_padding(neogfx::padding{ 2.0_dip, 18.0_dip, 2.0_dip, 2.0_dip });
             thread_local std::random_device tEntropy;
             thread_local std::mt19937 tGenerator(tEntropy());
             thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
@@ -154,9 +163,9 @@ namespace neogfx::DesignStudio
     protected:
         widget_part part(const point& aPosition) const override
         {
-            if (!image().is_empty() && !placement_rect().contains(aPosition))
-                return { *this, widget_part::Nowhere };
-            return base_type::part(aPosition);
+            auto result = !image().is_empty() && !placement_rect().contains(aPosition) ?
+                widget_part{ *this, widget_part::Nowhere } : base_type::part(aPosition);
+            return result;
         }
     protected:
         void layout_items(bool aDefer = false) override
@@ -180,7 +189,7 @@ namespace neogfx::DesignStudio
         {
             base_type::paint(aGc);
             auto placementRect = image().is_empty() ? client_rect() : placement_rect();
-            placementRect.cy = padding().top;
+            placementRect.cy = padding().top - padding().left;
             if (image().is_empty())
                 aGc.fill_rect(placementRect, background_color().to_hsl().shade(0.05).to_rgb<color>());
             else

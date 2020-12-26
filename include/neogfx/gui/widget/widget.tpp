@@ -1929,15 +1929,17 @@ namespace neogfx
     template <typename Interface>
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
+        const i_widget* result = nullptr;
         if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
         {
             auto const outerRect = to_client_coordinates(non_client_rect());
             auto const innerRect = outerRect.deflated(root().border());
             if (outerRect.contains(aPosition) && !innerRect.contains(aPosition))
-                return *this;
+                result = this;
         }
-        if (non_client_rect().contains(aPosition))
+        if (!result && non_client_rect().contains(aPosition))
         {
+            auto const location = mouse_event_location();
             const i_widget* w = &get_widget_at(aPosition);
             for (; w != this ; w = &w->parent()) 
             {
@@ -1945,20 +1947,21 @@ namespace neogfx
                     continue;
                 if (w->part(aPosition - w->origin()).part == widget_part::Nowhere)
                     continue;
-                if (!w->ignore_mouse_events() && mouse_event_location() != neogfx::mouse_event_location::NonClient)
+                if (!w->ignore_mouse_events() && location != neogfx::mouse_event_location::NonClient)
                     break;
-                if (!w->ignore_non_client_mouse_events() && mouse_event_location() == neogfx::mouse_event_location::NonClient)
+                if (!w->ignore_non_client_mouse_events() && location == neogfx::mouse_event_location::NonClient)
                     break;
-                if (mouse_event_location() != neogfx::mouse_event_location::NonClient &&
+                if (location != neogfx::mouse_event_location::NonClient &&
                     w->ignore_mouse_events() && !w->ignore_non_client_mouse_events(false) &&
                     w->non_client_rect().contains(aPosition) &&
                     !w->client_rect(false).contains(aPosition - w->origin()))
                     break;
             }
-            return *w;
+            result = w;
         }
-        else
-            return *this;
+        else if (!result)
+            result = this;
+        return *result;
     }
 
     template <typename Interface>

@@ -89,8 +89,7 @@ namespace neogfx::DesignStudio
 
     size widget_caddy::minimum_size(optional_size const& aAvailableSpace) const
     {
-        size result = widget::minimum_size(aAvailableSpace);
-        result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+        size result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
         if (result.cx != 0.0)
             result.cx += padding().size().cx;
         if (result.cy != 0.0)
