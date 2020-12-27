@@ -61,6 +61,7 @@ namespace neogfx
         iParent{ &aParent },
         iUseCount{ 0 },
         iFont{ aOther.iFont },
+        iGlyphColor{ aOther.iGlyphColor },
         iTextColor{ aOther.iTextColor },
         iPaperColor{ aOther.iPaperColor },
         iIgnoreEmoji{ true },
@@ -114,55 +115,73 @@ namespace neogfx
         return text_appearance{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
     }
 
-    void text_edit::style::set_font(optional_font const& aFont)
+    text_edit::style& text_edit::style::set_font(optional_font const& aFont)
     {
         iFont = aFont;
         if (iParent)
             iParent->update();
+        return *this;
     }
 
-    void text_edit::style::set_glyph_color(const color_or_gradient& aColor)
+    text_edit::style& text_edit::style::set_font_if_none(neogfx::font const& aFont)
+    {
+        if (iFont == std::nullopt)
+            iFont = aFont;
+        if (iParent)
+            iParent->update();
+        return *this;
+    }
+
+    text_edit::style& text_edit::style::set_glyph_color(const color_or_gradient& aColor)
     {
         iGlyphColor = aColor;
         if (iParent)
             iParent->update();
+        return *this;
     }
 
-    void text_edit::style::set_text_color(const color_or_gradient& aColor)
+    text_edit::style& text_edit::style::set_text_color(const color_or_gradient& aColor)
     {
         iTextColor = aColor;
         if (iParent)
             iParent->update();
+        return *this;
     }
 
-    void text_edit::style::set_paper_color(const color_or_gradient& aColor)
+    text_edit::style& text_edit::style::set_paper_color(const color_or_gradient& aColor)
     {
         iPaperColor = aColor;
         if (iParent)
             iParent->update();
+        return *this;
     }
 
-    void text_edit::style::set_text_effect(const optional_text_effect& aEffect)
+    text_edit::style& text_edit::style::set_text_effect(const optional_text_effect& aEffect)
     {
         iTextEffect = aEffect;
         if (iParent)
             iParent->update();
+        return *this;
     }
 
-    void text_edit::style::set_from_text_appearance(const text_appearance& aAppearance)
+    text_edit::style& text_edit::style::set_from_text_appearance(const text_appearance& aAppearance)
     {
         iGlyphColor = aAppearance.ink();
+        iTextColor = neolib::none; // todo
         iPaperColor = aAppearance.paper() ? *aAppearance.paper() : neolib::none;
         iIgnoreEmoji = aAppearance.ignore_emoji();
         iTextEffect = aAppearance.effect();
         if (iParent)
             iParent->update();
+        return *this;
     }
 
     text_edit::style& text_edit::style::merge(const style& aOverridingStyle)
     {
         if (aOverridingStyle.font() != std::nullopt)
             iFont = aOverridingStyle.font();
+        if (aOverridingStyle.glyph_color() != neolib::none)
+            iGlyphColor = aOverridingStyle.glyph_color();
         if (aOverridingStyle.text_color() != neolib::none)
             iTextColor = aOverridingStyle.text_color();
         if (aOverridingStyle.paper_color() != neolib::none)
@@ -177,7 +196,7 @@ namespace neogfx
 
     bool text_edit::style::operator==(const style& aRhs) const
     {
-        return std::tie(iFont, iTextColor, iPaperColor, iTextEffect) == std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
+        return std::tie(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) == std::tie(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
     }
 
     bool text_edit::style::operator!=(const style& aRhs) const
@@ -187,7 +206,7 @@ namespace neogfx
 
     bool text_edit::style::operator<(const style& aRhs) const
     {
-        return std::tie(iFont, iTextColor, iPaperColor, iTextEffect) < std::tie(aRhs.iFont, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
+        return std::tie(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) < std::tie(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
     }
 
     class text_edit::multiple_text_changes
@@ -1098,11 +1117,11 @@ namespace neogfx
     text_edit::style text_edit::current_style() const
     {
         if (cursor().position() == cursor().anchor())
-            return default_style();
+            return style{ default_style() }.set_font_if_none(font());
         else
         {
-            auto const g = to_glyph(std::next(iText.begin(), cursor().position()));
-            return glyph_style(g, *glyph_column_line(g - glyphs().begin()).first);
+            auto const g = to_glyph(std::next(iText.begin(), cursor().anchor()));
+            return glyph_style(g, *glyph_column_line(g - glyphs().begin()).first).set_font_if_none(g != glyphs().end() ? glyphs().glyph_font(*g) : font());
         }
     }
 
@@ -1728,7 +1747,7 @@ namespace neogfx
         auto paragraphStart = iText.begin();
         auto iterColumn = iGlyphColumns.begin();
         neolib::vecarray<std::u32string::size_type, 16, -1> columnDelimiters;
-        auto fs = [this, paragraphStart, &columnDelimiters](std::u32string::size_type aSourceIndex)
+        auto fs = [this, &paragraphStart, &columnDelimiters](std::u32string::size_type aSourceIndex)
         {
             auto const& tagStyle = iText.tag(paragraphStart + aSourceIndex).style();
             std::size_t indexColumn = std::lower_bound(columnDelimiters.begin(), columnDelimiters.end(), aSourceIndex) - columnDelimiters.begin();

@@ -1582,7 +1582,7 @@ namespace neogfx
                         (drawOp.appearance->effect()->type() == text_effect_type::Glow || drawOp.appearance->effect()->type() == text_effect_type::Shadow))
                     {
                         font const& glyphFont = glyphText.glyph_font(glyph);
-                        rect const glyphRect{ point{ drawOp.point }, size{ advance(glyph).cx, glyphFont.height() } };
+                        rect const glyphRect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
 
                         if (!filterRegion)
                             filterRegion.emplace(glyphRect);
@@ -1593,7 +1593,7 @@ namespace neogfx
                     if (drawOp.appearance->paper() != std::nullopt)
                     {
                         font const& glyphFont = glyphText.glyph_font(glyph);
-                        rect const glyphRect{ point{ drawOp.point }, size{ advance(glyph).cx, glyphFont.height() } };
+                        rect const glyphRect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
 
                         auto const& mesh = to_ecs_component(
                             glyphRect,
@@ -1657,7 +1657,7 @@ namespace neogfx
 
                     font const& glyphFont = glyphText.glyph_font(glyph);
 
-                    rect const outputRect = { point{ drawOp.point }, size{ advance(glyph).cx, glyphFont.height() } };
+                    rect const outputRect = { point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
 
                     auto const& mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
                         to_ecs_component(
@@ -1718,12 +1718,14 @@ namespace neogfx
 
                         auto const& glyphFont = glyphText.glyph_font(glyph);
 
-                        vec3 const glyphOrigin{
+                        auto glyphOrigin2D = point{
                             drawOp.point.x + glyphTexture.placement().x,
                             logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
                                 drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
-                            drawOp.point.z };
+                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy
+                        } + glyph.offset.as<scalar>();
+
+                        vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
 
                         if (pass == 4)
                         {

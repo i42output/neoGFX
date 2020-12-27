@@ -100,7 +100,7 @@ namespace neogfx
         source_type source;
         font_id font;
         basic_size<float> advance;
-        basic_size<float> offset;
+        basic_point<float> offset;
         mutable basic_size<float> extents;
     };
 
@@ -179,9 +179,9 @@ namespace neogfx
         return aRoundUp ? (g.advance + basic_size<float>{0.5f, 0.5f}).floor() : g.advance;
     }
     
-    inline size offset(glyph const& g)
+    inline point offset(glyph const& g)
     { 
-        return (g.offset + basic_size<float>{0.5f, 0.5f}).floor(); 
+        return (g.offset + basic_point<float>{0.5f, 0.5f}).floor(); 
     }
 
     inline bool underline(glyph const& g)
@@ -222,7 +222,7 @@ namespace neogfx
     template <typename GlyphT, typename ConstIterator = GlyphT const*, typename Iterator = GlyphT*>
     class i_basic_glyph_text : public i_reference_counted
     {
-        typedef i_basic_glyph_text<GlyphT> self_type;
+        typedef i_basic_glyph_text<GlyphT, ConstIterator, Iterator> self_type;
     public:
         typedef self_type abstract_type;
     public:
@@ -253,6 +253,7 @@ namespace neogfx
         virtual neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const = 0;
     public:
         virtual void set_extents(const neogfx::size& aExtents) = 0;
+        virtual self_type& bottom_justify() = 0;
         virtual std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const = 0;
     public:
         virtual const_iterator cbegin() const = 0;
@@ -355,6 +356,7 @@ namespace neogfx
         neogfx::size extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd = true) const override;
     public:
         void set_extents(const neogfx::size& aExtents) override;
+        self_type& bottom_justify() override;
         std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const override;
     public:
         const font& glyph_font() const override;

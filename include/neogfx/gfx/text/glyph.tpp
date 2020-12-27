@@ -243,7 +243,7 @@ namespace neogfx
             else
             {
                 auto const& glyphTexture = glyph_texture(aGlyph);
-                aGlyph.extents = neogfx::size{ static_cast<float>(offset(aGlyph).cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx), glyphFont.height() };
+                aGlyph.extents = neogfx::size{ static_cast<float>(offset(aGlyph).x + glyphTexture.placement().x + glyphTexture.texture().extents().cx), glyphFont.height() };
             }
         }
         return aGlyph.extents;
@@ -273,6 +273,17 @@ namespace neogfx
     void basic_glyph_text_content<Container, ConstIterator, Iterator>::set_extents(const neogfx::size& aExtents)
     {
         iExtents = aExtents;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    typename basic_glyph_text_content<Container, ConstIterator, Iterator>::self_type& basic_glyph_text_content<Container, ConstIterator, Iterator>::bottom_justify()
+    {
+        float yMax = 0.0f;
+        for (auto& g : *this)
+            yMax = std::max(g.extents.cy + static_cast<float>(glyph_font(g).descender()), yMax);
+        for (auto& g : *this)
+            g.offset.y += (yMax - (g.extents.cy + static_cast<float>(glyph_font(g).descender())));
+        return *this;
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>

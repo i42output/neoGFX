@@ -72,12 +72,13 @@ namespace neogfx
             bool ignore_emoji() const;
             const optional_text_effect& text_effect() const;
             text_appearance as_text_appearance() const;
-            void set_font(optional_font const& aFont = optional_font{});
-            void set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
-            void set_text_color(const color_or_gradient& aColor = color_or_gradient{});
-            void set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
-            void set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
-            void set_from_text_appearance(const text_appearance& aAppearance);
+            style& set_font(optional_font const& aFont = optional_font{});
+            style& set_font_if_none(neogfx::font const& aFont);
+            style& set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
+            style& set_text_color(const color_or_gradient& aColor = color_or_gradient{});
+            style& set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
+            style& set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
+            style& set_from_text_appearance(const text_appearance& aAppearance);
         public:
             style& merge(const style& aOverridingStyle);
         public:

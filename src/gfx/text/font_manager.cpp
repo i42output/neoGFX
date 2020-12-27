@@ -682,7 +682,8 @@ namespace neogfx
                     glyph::flags_e{},
                     glyph::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
                     font.id(),
-                    advance, size(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0));
+                    advance, point(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0),
+                    size{advance.cx, font.height()});
                 if (category(result.back()) == text_category::Whitespace)
                     result.back().value = aUtf32Begin[startCluster];
                 else if (category(result.back()) == text_category::Emoji)
@@ -699,7 +700,7 @@ namespace neogfx
                     if (neogfx::advance(glyph) != advance.ceil())
                     {
                         const i_glyph_texture& glyphTexture = aFontSelector.select_font(startCluster).native_font_face().glyph_texture(glyph);
-                        auto visibleAdvance = std::ceil(offset(glyph).cx + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
+                        auto visibleAdvance = std::ceil(offset(glyph).x + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
                         if (visibleAdvance > advance.cx)
                         {
                             advance.cx = visibleAdvance;
@@ -770,9 +771,9 @@ namespace neogfx
                 else
                     emojiResult.push_back(*i);
             }
-            return emojiResult;
+            return emojiResult.bottom_justify();
         }
-        return result;
+        return result.bottom_justify();
     }
 
     font_manager::font_manager() :

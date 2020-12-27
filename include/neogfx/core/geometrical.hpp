@@ -133,6 +133,12 @@ namespace neogfx
         basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
         basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy }; }
         basic_delta with_dy(coordinate_type dy) const { return basic_delta{ dx, dy }; }
+    public:
+        template <typename T>
+        basic_delta<T> as() const
+        {
+            return *this;
+        }
         // attributes
     public:
         coordinate_type dx;
@@ -230,6 +236,12 @@ namespace neogfx
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
         basic_size with_cx(dimension_type d) const { return basic_size{ d, cy }; }
         basic_size with_cy(dimension_type d) const { return basic_size{ cx, d }; }
+    public:
+        template <typename T>
+        basic_size<T> as() const
+        {
+            return *this;
+        }
     private:
         void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx == max_dimension()) || (rhs.cy != 0.0 && cy == max_dimension())) throw bad_size(); }
         // helpers
@@ -364,6 +376,11 @@ namespace neogfx
         basic_point max_min(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::min(y, other.y) }; }
         basic_point with_x(coordinate_type x) const { return basic_point{ x, y }; }
         basic_point with_y(coordinate_type y) const { return basic_point{ x, y }; }
+        template <typename T>
+        basic_point<T> as() const
+        {
+            return *this;
+        }
         // attributes
     public:
         coordinate_type x;
