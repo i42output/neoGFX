@@ -48,6 +48,11 @@ namespace neogfx
         ItalicUnderline = Italic | Underline
     };
 
+    inline constexpr font_style operator~(font_style aLhs)
+    {
+        return static_cast<font_style>(~static_cast<uint32_t>(aLhs));
+    }
+
     inline constexpr font_style operator|(font_style aLhs, font_style aRhs)
     {
         return static_cast<font_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));

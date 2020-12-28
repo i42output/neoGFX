@@ -38,7 +38,7 @@ namespace neogfx
     private:
         typedef neolib::variant<filename_type, memory_block_type> source_type;
         typedef std::map<std::pair<font_style, string>, FT_Long> style_map;
-        typedef std::map<std::tuple<FT_Long, font::point_size, size>, ref_ptr<i_native_font_face>> face_map;
+        typedef std::map<std::tuple<FT_Long, font_style, font::point_size, size>, ref_ptr<i_native_font_face>> face_map;
     public:
         struct failed_to_load_font : std::runtime_error { failed_to_load_font() : std::runtime_error("neogfx::native_font::failed_to_load_font") {} };
         struct no_matching_style_found : std::runtime_error { no_matching_style_found() : std::runtime_error("neogfx::native_font::no_matching_style_found") {} };

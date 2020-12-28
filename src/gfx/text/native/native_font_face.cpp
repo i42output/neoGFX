@@ -413,13 +413,14 @@ namespace neogfx
 
     void native_font_face::set_metrics()
     {
+        auto const size = ((style() & (font_style::Superscript | font_style::Subscript)) == font_style::Invalid) ? iSize : iSize * 0.58;
         if (!is_bitmap_font())
         {
-            freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(iSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+            freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(size * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
         }
         else
         {
-            auto requestedSize = iSize * iPixelDensityDpi.cy / 72.0;
+            auto requestedSize = size * iPixelDensityDpi.cy / 72.0;
             auto availableSize = iHandle->available_sizes[0].size / 64.0;
             FT_Int strikeIndex = 0;
             for (FT_Int si = 0; si < iHandle->num_fixed_sizes; ++si)

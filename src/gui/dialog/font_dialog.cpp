@@ -287,6 +287,8 @@ namespace neogfx
         iPaperBox.set_checkable(true, true);
         iAdvancedEffectsBox.set_checkable(true, true);
         iSink += iUnderline.Toggled([&]() { update_selected_font(iUnderline); });
+        iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); update_selected_font(iSuperscript); }});
+        iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); update_selected_font(iSuperscript); }});
         iSink += iInkBox.check_box().Checked([&]() { update_selected_appearance(iInkBox); });
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_appearance(iInkBox); });
         iSink += iPaperBox.check_box().Checked([&]() { update_selected_appearance(iPaperBox); });
@@ -435,6 +437,27 @@ namespace neogfx
         else
             iSizePicker.selection_model().clear_current_index();
         iSelectedFont.set_underline(iUnderline.is_checked());
+        auto desiredStyle = iSelectedFont.style();
+        if (iSuperscript.is_checked())
+        {
+            desiredStyle = (desiredStyle | font_style::Superscript) & ~font_style::Subscript;
+            if (iBelowAscenderLine.is_checked())
+                desiredStyle |= font_style::BelowAscenderLine;
+            else
+                desiredStyle &= ~font_style::BelowAscenderLine;
+        }
+        else if (iSubscript.is_checked())
+        {
+            desiredStyle = (desiredStyle | font_style::Subscript) & ~font_style::Superscript;
+            if (iBelowAscenderLine.is_checked())
+                desiredStyle |= font_style::AboveBaseline;
+            else
+                desiredStyle &= ~font_style::AboveBaseline;
+        }
+        else
+            desiredStyle &= ~(font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline);
+        if (iSelectedFont.style() != desiredStyle)
+            iSelectedFont = neogfx::font{ iSelectedFont, desiredStyle, iSelectedFont.size() };
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
             SelectionChanged.trigger();

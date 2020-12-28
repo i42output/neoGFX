@@ -102,7 +102,7 @@ namespace neogfx
         if (matches.empty())
             throw no_matching_style_found();
         FT_Long faceIndex = matches.rbegin()->second->second;
-        font_style faceStyle = matches.rbegin()->second->first.first;
+        font_style faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript|font_style::Subscript|font_style::BelowAscenderLine|font_style::AboveBaseline)));
         aResult = create_face(faceIndex, faceStyle, aSize, aDevice);
     }
 
@@ -199,7 +199,7 @@ namespace neogfx
 
     ref_ptr<i_native_font_face> native_font::create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        auto existingFace = iFaces.find(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())));
+        auto existingFace = iFaces.find(std::make_tuple(aFaceIndex, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())));
         if (existingFace != iFaces.end())
             return existingFace->second;
         FT_Face newFreetypeFace = open_face(aFaceIndex);
@@ -207,7 +207,7 @@ namespace neogfx
         {
             auto newFontId = service<i_font_manager>().allocate_font_id();
             auto newFace = make_ref<native_font_face>(newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFreetypeFace);
-            iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), newFace)).first;
+            iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), newFace)).first;
             return newFace;
         }
         catch (...)
