@@ -415,8 +415,6 @@ namespace neogfx
                 iSizePicker.selection_model().set_current_index(*size);
             iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
         }
-        else if (&aUpdatingWidget == &iUnderline)
-            iSelectedFont.set_underline(iUnderline.is_checked());
         else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
         {
             auto fontFamilyIndex = iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row();
@@ -436,6 +434,7 @@ namespace neogfx
             iSizePicker.selection_model().set_current_index(*fontSizeIndex);
         else
             iSizePicker.selection_model().clear_current_index();
+        iSelectedFont.set_underline(iUnderline.is_checked());
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
             SelectionChanged.trigger();

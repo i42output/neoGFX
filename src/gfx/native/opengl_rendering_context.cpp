@@ -1796,24 +1796,53 @@ namespace neogfx
                 }
                 break;
             case 6: // adornments
-                for (auto op = aBegin; op != aEnd; ++op)
                 {
-                    auto& drawOp = *op;
-                    auto& glyphText = *drawOp.glyphText;
-                    auto& glyph = *drawOp.glyph;
-                    auto const& glyphFont = glyphText.glyph_font(glyph);
-                    auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                        drawOp.appearance->ink() : drawOp.appearance->effect()->color();
-                    if (underline(glyph) || (drawOp.showMnemonics && neogfx::mnemonic(glyph)))
+                    struct y_underline_metrics
                     {
-                        auto const descender = glyphFont.descender();
-                        auto const underlinePosition = glyphFont.native_font_face().underline_position();
-                        auto const dy = descender - underlinePosition;
-                        auto const yLine = logical_coordinates().is_gui_orientation() ? glyphFont.height() - 1 + dy : -dy;
-                        draw_line(
-                            drawOp.point + vec3{ 0.0, yLine },
-                            drawOp.point + vec3{ drawOp.showMnemonics && neogfx::mnemonic(glyph) ? glyphText.extents(glyph).cx : advance(glyph).cx, yLine },
-                            pen{ ink, glyphFont.native_font_face().underline_thickness() });
+                        scalar ypos;
+                        scalar yUnderline;
+                        scalar cyUnderline;
+                    };
+                    thread_local std::vector<y_underline_metrics> yUnderlineMetrics;
+                    yUnderlineMetrics.clear();
+                    for (int32_t adornmentPass = 1; adornmentPass <=2; ++adornmentPass)
+                    {
+                        auto yUnderlineMetricsIter = yUnderlineMetrics.begin();
+                        for (auto op = aBegin; op != aEnd; ++op)
+                        {
+                            auto& drawOp = *op;
+                            auto& glyphText = *drawOp.glyphText;
+                            auto& glyph = *drawOp.glyph;
+                            auto const& glyphFont = glyphText.glyph_font(glyph);
+                            auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
+                                drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+                            if (underline(glyph) || (drawOp.showMnemonics && neogfx::mnemonic(glyph)))
+                            {
+                                if (adornmentPass == 1)
+                                {
+                                    auto const descender = glyphFont.descender();
+                                    auto const underlinePosition = glyphFont.native_font_face().underline_position();
+                                    auto const dy = descender - underlinePosition;
+                                    auto const yLine = (logical_coordinates().is_gui_orientation() ? glyphFont.height() - 1 + dy : -dy) + glyph.offset.as<scalar>().y;
+                                    if (yUnderlineMetrics.empty() || yUnderlineMetrics.back().ypos != drawOp.point.y)
+                                        yUnderlineMetrics.emplace_back(drawOp.point.y, yLine + drawOp.point.y, glyphFont.native_font_face().underline_thickness());
+                                    else
+                                    {
+                                        yUnderlineMetrics.back().yUnderline = std::max(yLine + drawOp.point.y, yUnderlineMetrics.back().yUnderline);
+                                        yUnderlineMetrics.back().cyUnderline = std::max(glyphFont.native_font_face().underline_thickness(), yUnderlineMetrics.back().cyUnderline);
+                                    }
+                                }
+                                else
+                                {
+                                    if (yUnderlineMetricsIter->ypos != drawOp.point.y)
+                                        ++yUnderlineMetricsIter;
+                                    draw_line(
+                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline },
+                                        vec3{ drawOp.point.x + (drawOp.showMnemonics && neogfx::mnemonic(glyph) ? glyphText.extents(glyph).cx : advance(glyph).cx), yUnderlineMetricsIter->yUnderline },
+                                        pen{ ink, yUnderlineMetricsIter->cyUnderline });
+                                }
+                            }
+                        }
                     }
                 }
                 break;
