@@ -181,6 +181,7 @@ namespace neogfx
             i_glyph_text* glyphText;
             glyph const* glyph;
             text_appearance const* appearance;
+            bool showMnemonics;
         };
         struct mesh_drawable
         {

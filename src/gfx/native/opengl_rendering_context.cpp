@@ -1518,7 +1518,7 @@ namespace neogfx
             for (auto g = drawOp.begin; g != drawOp.end; ++g)
             {
                 auto& glyph = *g;
-                drawGlyphCache.emplace_back(pos, &drawOp.glyphText.content(), &glyph, &drawOp.appearance);
+                drawGlyphCache.emplace_back(pos, &drawOp.glyphText.content(), &glyph, &drawOp.appearance, drawOp.showMnemonics );
                 pos.x += advance(glyph).cx;
             }
         }
@@ -1564,7 +1564,7 @@ namespace neogfx
 
         optional_rect filterRegion;
 
-        for (int32_t pass = 1; pass <= 5; ++pass)
+        for (int32_t pass = 1; pass <= 6; ++pass)
         {
             switch (pass)
             {
@@ -1794,6 +1794,29 @@ namespace neogfx
                                 {}, subpixelRender });
                     }
                 }
+                break;
+            case 6: // adornments
+                for (auto op = aBegin; op != aEnd; ++op)
+                {
+                    auto& drawOp = *op;
+                    auto& glyphText = *drawOp.glyphText;
+                    auto& glyph = *drawOp.glyph;
+                    auto const& glyphFont = glyphText.glyph_font(glyph);
+                    auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
+                        drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+                    if (underline(glyph) || (drawOp.showMnemonics && neogfx::mnemonic(glyph)))
+                    {
+                        auto const descender = glyphFont.descender();
+                        auto const underlinePosition = glyphFont.native_font_face().underline_position();
+                        auto const dy = descender - underlinePosition;
+                        auto const yLine = logical_coordinates().is_gui_orientation() ? glyphFont.height() - 1 + dy : -dy;
+                        draw_line(
+                            drawOp.point + vec3{ 0.0, yLine },
+                            drawOp.point + vec3{ drawOp.showMnemonics && neogfx::mnemonic(glyph) ? glyphText.extents(glyph).cx : advance(glyph).cx, yLine },
+                            pen{ ink, glyphFont.native_font_face().underline_thickness() });
+                    }
+                }
+                break;
             }
             draw();
         }

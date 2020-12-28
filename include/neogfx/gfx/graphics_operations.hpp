@@ -251,6 +251,7 @@ namespace neogfx
             glyph_text::const_iterator begin;
             glyph_text::const_iterator end;
             text_appearance appearance;
+            bool showMnemonics;
         };
 
         struct draw_mesh

@@ -634,15 +634,7 @@ namespace neogfx
         if (aTextBegin == aTextEnd)
             return;
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, aAppearance });
-        vec3 pos = aPoint;
-        for (auto g = aTextBegin; g != aTextEnd; ++g)
-        {
-            auto& glyph = *g;
-            if (underline(glyph) || (mnemonics_shown() && neogfx::mnemonic(glyph)))
-                draw_glyph_underline(pos, aText, glyph, aAppearance);
-            pos.x += advance(glyph).cx;
-        }
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, aAppearance, mnemonics_shown() });
     }
 
     void graphics_context::draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
@@ -1079,27 +1071,7 @@ namespace neogfx
     void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyph, std::next(&aGlyph), aAppearance });
-        if (underline(aGlyph) || (mnemonics_shown() && neogfx::mnemonic(aGlyph)))
-            draw_glyph_underline(aPoint, aText, aGlyph, aAppearance);
-    }
-
-    void graphics_context::draw_glyph_underline(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
-    {
-        draw_glyph_underline(aPoint.to_vec3(), aText, aGlyph, aAppearance);
-    }
-
-    void graphics_context::draw_glyph_underline(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
-    {
-        auto const& font = aText.glyph_font(aGlyph);
-        auto const descender = font.descender();
-        auto const underlinePosition = font.native_font_face().underline_position(); 
-        auto const dy = descender - underlinePosition;
-        auto const yLine = logical_coordinates().is_gui_orientation() ? font.height() - 1 + dy : -dy;
-        draw_line(
-            aPoint + vec3{ 0.0, yLine },
-            aPoint + vec3{ mnemonics_shown() && neogfx::mnemonic(aGlyph) ? aText.extents(aGlyph).cx : advance(aGlyph).cx, yLine },
-            pen{ aAppearance.ink(), font.native_font_face().underline_thickness() });
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyph, std::next(&aGlyph), aAppearance, mnemonics_shown() });
     }
 
     char graphics_context::mnemonic() const
