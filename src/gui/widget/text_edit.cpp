@@ -2139,21 +2139,20 @@ namespace neogfx
         auto cursorGlyphIndex = cursor_glyph_position();
         auto cursorPos = glyph_position(cursorGlyphIndex, true);
         dimension glyphHeight = 0.0;
-        dimension lineHeight = 0.0;
+        scalar yOffset = 0.0;
         if (cursorPos.glyph != glyphs().end() && cursorPos.lineStart != cursorPos.lineEnd)
         {
             auto iterGlyph = cursorPos.glyph < cursorPos.lineEnd ? cursorPos.glyph : cursorPos.glyph - 1;
             auto const& glyph = *iterGlyph;
-            auto const& glyphFont = glyphs().glyph_font(glyph);
-            glyphHeight = glyphFont.height();
-            lineHeight = cursorPos.line->extents.cy;
+            glyphHeight = glyph.extents.cy;
+            yOffset = glyph.offset.as<scalar>().y;
         }
         else if (cursorPos.line != cursorPos.column->lines().end())
-            glyphHeight = lineHeight = cursorPos.line->extents.cy;
+            glyphHeight = cursorPos.line->extents.cy;
         else
-            glyphHeight = lineHeight = font().height();
+            glyphHeight = font().height();
         auto const columnRectSansPadding = column_rect(column_index(*cursorPos.column));
-        rect cursorRect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ 0.0, lineHeight - glyphHeight },
+        rect cursorRect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ 0.0, yOffset },
             size{ cursor().width(), glyphHeight } };
         if (cursorRect.right() > columnRectSansPadding.right())
             cursorRect.x += (columnRectSansPadding.right() - cursorRect.right());
