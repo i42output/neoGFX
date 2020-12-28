@@ -39,6 +39,7 @@ v1.20   | Q4, 2022      | macOS support
 
 # Implementation Progress
 
+![](http://neogfx.org/temp/select_font.png?id=1)
 ![](http://neogfx.org/temp/lol.png?id=1)
 ![](http://neogfx.org/temp/glyphgradients1.png?id=2)
 ![](http://neogfx.org/temp/glyphgradients2.png?id=1)
