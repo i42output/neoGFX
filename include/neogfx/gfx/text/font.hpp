@@ -38,6 +38,10 @@ namespace neogfx
         Italic = 0x02,
         Bold = 0x04,
         Underline = 0x08,
+        Superscript = 0x10,
+        Subscript = 0x20,
+        BelowAscenderLine = 0x40,
+        AboveBaseline = 0x40,
         BoldItalic = Bold | Italic,
         BoldItalicUnderline = Bold | Italic | Underline,
         BoldUnderline = Bold | Underline,
@@ -71,6 +75,10 @@ declare_enum_string(neogfx::font_style, Normal)
 declare_enum_string(neogfx::font_style, Italic)
 declare_enum_string(neogfx::font_style, Bold)
 declare_enum_string(neogfx::font_style, Underline)
+declare_enum_string(neogfx::font_style, Superscript)
+declare_enum_string(neogfx::font_style, Subscript)
+declare_enum_string(neogfx::font_style, BelowAscenderLine)
+declare_enum_string(neogfx::font_style, AboveBaseline)
 declare_enum_string(neogfx::font_style, BoldItalic)
 declare_enum_string(neogfx::font_style, BoldItalicUnderline)
 declare_enum_string(neogfx::font_style, BoldUnderline)

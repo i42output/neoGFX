@@ -688,8 +688,12 @@ namespace neogfx
                     result.back().value = aUtf32Begin[startCluster];
                 else if (category(result.back()) == text_category::Emoji)
                     result.back().value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
-                if ((aFontSelector.select_font(startCluster).style() & font_style::Underline) == font_style::Underline)
+                if ((selectedFont.style() & font_style::Underline) == font_style::Underline)
                     set_underline(result.back(), true);
+                if ((selectedFont.style() & font_style::Superscript) == font_style::Superscript)
+                    set_superscript(result.back(), true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
+                if ((selectedFont.style() & font_style::Subscript) == font_style::Subscript)
+                    set_subscript(result.back(), true, (selectedFont.style() & font_style::AboveBaseline) == font_style::AboveBaseline);
                 if (aContext.is_subpixel_rendering_on() && !font.is_bitmap_font())
                     set_subpixel(result.back(), true);
                 if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
@@ -699,7 +703,7 @@ namespace neogfx
                     auto& glyph = result.back();
                     if (neogfx::advance(glyph) != advance.ceil())
                     {
-                        const i_glyph_texture& glyphTexture = aFontSelector.select_font(startCluster).native_font_face().glyph_texture(glyph);
+                        const i_glyph_texture& glyphTexture = font.native_font_face().glyph_texture(glyph);
                         auto visibleAdvance = std::ceil(offset(glyph).x + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
                         if (visibleAdvance > advance.cx)
                         {

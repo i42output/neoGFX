@@ -149,8 +149,14 @@ namespace neogfx
         iLayout5{ iLayout3 },
         iSizeLabel{ iLayout5, "Size:"_t },
         iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iEffects{ client_layout() },
-        iLayoutAppearance{ iEffects, neogfx::alignment::Top },
+        iLayoutEffects{ client_layout(), neogfx::alignment::Top },
+        iEffectsBox{ iLayoutEffects, "Effects"_t, },
+        iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
+        iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
+        iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
+        iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
+        iAppearanceContainer{ iLayoutEffects },
+        iLayoutAppearance{ iAppearanceContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutAppearance, "Ink"_t },
         iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iInkGradient{ iInkBox.item_layout(), "Gradient"_t },
@@ -158,15 +164,15 @@ namespace neogfx
         iPaperBox{ iLayoutAppearance, "Paper"_t },
         iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color"_t },
         iPaperGradient{ iPaperBox.item_layout(), "Gradient"_t },
-        iTextEffectBox{ iLayoutAppearance, "Text Effect"_t },
-        iTextEffectTypeBox{ iTextEffectBox.with_item_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
-        iTextEffectOutline{ iTextEffectTypeBox.with_item_layout<vertical_layout>(), "Outline"_t },
-        iTextEffectShadow{ iTextEffectTypeBox.item_layout(), "Shadow"_t },
-        iTextEffectGlow{ iTextEffectTypeBox.item_layout(), "Glow"_t },
-        iTextEffectInkBox{ iTextEffectBox.item_layout(), "Ink"_t },
-        iTextEffectColor{ iTextEffectInkBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iTextEffectGradient{ iTextEffectInkBox.item_layout(), "Gradient"_t },
-        iTextEffectEmoji{ iTextEffectInkBox.item_layout(), "+Emoji"_t },
+        iAdvancedEffectsBox{ iLayoutAppearance, "Advanced Effects"_t },
+        iAdvancedEffectsTypeBox{ iAdvancedEffectsBox.with_item_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
+        iAdvancedEffectsOutline{ iAdvancedEffectsTypeBox.with_item_layout<vertical_layout>(), "Outline"_t },
+        iAdvancedEffectsShadow{ iAdvancedEffectsTypeBox.item_layout(), "Shadow"_t },
+        iAdvancedEffectsGlow{ iAdvancedEffectsTypeBox.item_layout(), "Glow"_t },
+        iAdvancedEffectsInkBox{ iAdvancedEffectsBox.item_layout(), "Ink"_t },
+        iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_item_layout<vertical_layout>(), "Color"_t },
+        iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.item_layout(), "Gradient"_t },
+        iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.item_layout(), "+Emoji"_t },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -192,8 +198,14 @@ namespace neogfx
         iLayout5{ iLayout3 },
         iSizeLabel{ iLayout5, "Size:"_t },
         iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
-        iEffects{ client_layout() },
-        iLayoutAppearance{ iEffects, neogfx::alignment::Top },
+        iLayoutEffects{ client_layout(), neogfx::alignment::Top },
+        iEffectsBox{ iLayoutEffects, "Effects"_t, },
+        iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
+        iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
+        iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
+        iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
+        iAppearanceContainer{ iLayoutEffects },
+        iLayoutAppearance{ iAppearanceContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutAppearance, "Ink"_t },
         iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iInkGradient{ iInkBox.item_layout(), "Gradient"_t },
@@ -201,15 +213,15 @@ namespace neogfx
         iPaperBox{ iLayoutAppearance, "Paper"_t },
         iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color"_t },
         iPaperGradient{ iPaperBox.item_layout(), "Gradient"_t },
-        iTextEffectBox{ iLayoutAppearance, "Text Effect"_t },
-        iTextEffectTypeBox{ iTextEffectBox.with_item_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
-        iTextEffectOutline{ iTextEffectTypeBox.with_item_layout<vertical_layout>(), "Outline"_t },
-        iTextEffectShadow{ iTextEffectTypeBox.item_layout(), "Shadow"_t },
-        iTextEffectGlow{ iTextEffectTypeBox.item_layout(), "Glow"_t },
-        iTextEffectInkBox{ iTextEffectBox.item_layout(), "Ink"_t },
-        iTextEffectColor{ iTextEffectInkBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iTextEffectGradient{ iTextEffectInkBox.item_layout(), "Gradient"_t },
-        iTextEffectEmoji{ iTextEffectInkBox.item_layout(), "+Emoji"_t },
+        iAdvancedEffectsBox{ iLayoutAppearance, "Advanced Effects"_t },
+        iAdvancedEffectsTypeBox{ iAdvancedEffectsBox.with_item_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
+        iAdvancedEffectsOutline{ iAdvancedEffectsTypeBox.with_item_layout<vertical_layout>(), "Outline"_t },
+        iAdvancedEffectsShadow{ iAdvancedEffectsTypeBox.item_layout(), "Shadow"_t },
+        iAdvancedEffectsGlow{ iAdvancedEffectsTypeBox.item_layout(), "Glow"_t },
+        iAdvancedEffectsInkBox{ iAdvancedEffectsBox.item_layout(), "Ink"_t },
+        iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_item_layout<vertical_layout>(), "Color"_t },
+        iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.item_layout(), "Gradient"_t },
+        iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.item_layout(), "+Emoji"_t },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -268,27 +280,30 @@ namespace neogfx
 
     void font_dialog::init()
     {
-        iEffects.show(iSelectedAppearance != std::nullopt);
+        iAppearanceContainer.set_padding(neogfx::padding{});
+        iLayoutAppearance.set_padding(neogfx::padding{});
+        iAppearanceContainer.show(iSelectedAppearance != std::nullopt);
         iInkBox.set_checkable(true, true);
         iPaperBox.set_checkable(true, true);
-        iTextEffectBox.set_checkable(true, true);
+        iAdvancedEffectsBox.set_checkable(true, true);
+        iSink += iUnderline.Toggled([&]() { update_selected_font(iUnderline); });
         iSink += iInkBox.check_box().Checked([&]() { update_selected_appearance(iInkBox); });
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_appearance(iInkBox); });
         iSink += iPaperBox.check_box().Checked([&]() { update_selected_appearance(iPaperBox); });
         iSink += iPaperBox.check_box().Unchecked([&]() { update_selected_appearance(iPaperBox); });
-        iSink += iTextEffectBox.check_box().Checked([&]() { update_selected_appearance(iTextEffectBox); });
-        iSink += iTextEffectBox.check_box().Unchecked([&]() { update_selected_appearance(iTextEffectBox); });
+        iSink += iAdvancedEffectsBox.check_box().Checked([&]() { update_selected_appearance(iAdvancedEffectsBox); });
+        iSink += iAdvancedEffectsBox.check_box().Unchecked([&]() { update_selected_appearance(iAdvancedEffectsBox); });
         iSink += iInkColor.Checked([&]() { update_selected_appearance(iInkColor); });
         iSink += iInkGradient.Checked([&]() { update_selected_appearance(iInkGradient); });
         iSink += iInkEmoji.Toggled([&]() { update_selected_appearance(iInkEmoji); });
         iSink += iPaperColor.Checked([&]() { update_selected_appearance(iPaperColor); });
         iSink += iPaperGradient.Checked([&]() { update_selected_appearance(iPaperGradient); });
-        iSink += iTextEffectOutline.Checked([&]() { update_selected_appearance(iTextEffectOutline); });
-        iSink += iTextEffectShadow.Checked([&]() { update_selected_appearance(iTextEffectShadow); });
-        iSink += iTextEffectGlow.Checked([&]() { update_selected_appearance(iTextEffectGlow); });
-        iSink += iTextEffectColor.Checked([&]() { update_selected_appearance(iTextEffectColor); });
-        iSink += iTextEffectGradient.Checked([&]() { update_selected_appearance(iTextEffectGradient); });
-        iSink += iTextEffectEmoji.Toggled([&]() { update_selected_appearance(iTextEffectEmoji); });
+        iSink += iAdvancedEffectsOutline.Checked([&]() { update_selected_appearance(iAdvancedEffectsOutline); });
+        iSink += iAdvancedEffectsShadow.Checked([&]() { update_selected_appearance(iAdvancedEffectsShadow); });
+        iSink += iAdvancedEffectsGlow.Checked([&]() { update_selected_appearance(iAdvancedEffectsGlow); });
+        iSink += iAdvancedEffectsColor.Checked([&]() { update_selected_appearance(iAdvancedEffectsColor); });
+        iSink += iAdvancedEffectsGradient.Checked([&]() { update_selected_appearance(iAdvancedEffectsGradient); });
+        iSink += iAdvancedEffectsEmoji.Toggled([&]() { update_selected_appearance(iAdvancedEffectsEmoji); });
 
         if (iSelectedAppearance)
         {
@@ -388,6 +403,7 @@ namespace neogfx
         }
         if (&aUpdatingWidget == this)
         {
+            iUnderline.set_checked(iSelectedFont.underline());
             auto family = iFamilyPicker.presentation_model().find_item(iSelectedFont.family_name());
             if (family != std::nullopt)
                 iFamilyPicker.selection_model().set_current_index(*family);
@@ -399,6 +415,8 @@ namespace neogfx
                 iSizePicker.selection_model().set_current_index(*size);
             iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
         }
+        else if (&aUpdatingWidget == &iUnderline)
+            iSelectedFont.set_underline(iUnderline.is_checked());
         else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
         {
             auto fontFamilyIndex = iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row();
@@ -428,48 +446,52 @@ namespace neogfx
         if (!iSelectedAppearance || iUpdating)
             return;
         neolib::scoped_flag sf{ iUpdating };
-        auto oldSelection = iSelectedAppearance;
-        if (iSelectedAppearance && &aUpdatingWidget == this)
+        auto oldSelectedAppearance = iSelectedAppearance;
+        if (&aUpdatingWidget == this)
         {
-            if (iSelectedAppearance->ink() != neolib::none)
+            if (iSelectedAppearance)
             {
-                iInkBox.check_box().check();
-                if (std::holds_alternative<color>(iSelectedAppearance->ink()))
-                    iInkColor.check();
-                else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
-                    iInkGradient.check();
-            }
-            if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
-            {
-                iPaperBox.check_box().check();
-                if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
-                    iPaperColor.check();
-                else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
-                    iPaperGradient.check();
-            }
-            iInkEmoji.set_checked(!iSelectedAppearance->ignore_emoji());
-            if (iSelectedAppearance->effect())
-            {
-                iTextEffectBox.check_box().check();
-                switch (iSelectedAppearance->effect()->type())
+                if (iSelectedAppearance->ink() != neolib::none)
                 {
-                case text_effect_type::Outline:
-                    iTextEffectOutline.check();
-                    break;
-                case text_effect_type::Shadow:
-                    iTextEffectShadow.check();
-                    break;
-                case text_effect_type::Glow:
-                    iTextEffectGlow.check();
-                    break;
+                    iInkBox.check_box().check();
+                    if (std::holds_alternative<color>(iSelectedAppearance->ink()))
+                        iInkColor.check();
+                    else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
+                        iInkGradient.check();
                 }
-                if (std::holds_alternative<color>(iSelectedAppearance->effect()->color()))
-                    iTextEffectColor.check();
-                else if (std::holds_alternative<gradient>(iSelectedAppearance->effect()->color()))
-                    iTextEffectGradient.check();
-                iTextEffectEmoji.set_checked(!iSelectedAppearance->effect()->ignore_emoji());
+                if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
+                {
+                    iPaperBox.check_box().check();
+                    if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
+                        iPaperColor.check();
+                    else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
+                        iPaperGradient.check();
+                }
+                iInkEmoji.set_checked(!iSelectedAppearance->ignore_emoji());
+                if (iSelectedAppearance->effect())
+                {
+                    iAdvancedEffectsBox.check_box().check();
+                    switch (iSelectedAppearance->effect()->type())
+                    {
+                    case text_effect_type::Outline:
+                        iAdvancedEffectsOutline.check();
+                        break;
+                    case text_effect_type::Shadow:
+                        iAdvancedEffectsShadow.check();
+                        break;
+                    case text_effect_type::Glow:
+                        iAdvancedEffectsGlow.check();
+                        break;
+                    }
+                    if (std::holds_alternative<color>(iSelectedAppearance->effect()->color()))
+                        iAdvancedEffectsColor.check();
+                    else if (std::holds_alternative<gradient>(iSelectedAppearance->effect()->color()))
+                        iAdvancedEffectsGradient.check();
+                    iAdvancedEffectsEmoji.set_checked(!iSelectedAppearance->effect()->ignore_emoji());
+                }
             }
         }
+        iSelectedFont.set_underline(iUnderline.is_checked());
         if (iInkBox.check_box().is_checked())
         {
             if (iInkColor.is_checked())
@@ -516,47 +538,47 @@ namespace neogfx
             iSelectedAppearance->set_paper(std::nullopt);
             iPaper = neolib::none;
         }
-        if (iTextEffectBox.check_box().is_checked())
+        if (iAdvancedEffectsBox.check_box().is_checked())
         {
             if (iSelectedAppearance->effect() == std::nullopt)
             {
-                if (iTextEffectOutline.is_checked())
+                if (iAdvancedEffectsOutline.is_checked())
                     iSelectedAppearance->effect().emplace(text_effect_type::Outline, neolib::none);
-                else if (iTextEffectShadow.is_checked())
+                else if (iAdvancedEffectsShadow.is_checked())
                     iSelectedAppearance->effect().emplace(text_effect_type::Shadow, neolib::none);
-                else if (iTextEffectGlow.is_checked())
+                else if (iAdvancedEffectsGlow.is_checked())
                     iSelectedAppearance->effect().emplace(text_effect_type::Glow, neolib::none);
             }
             else
             {
-                if (iTextEffectOutline.is_checked())
+                if (iAdvancedEffectsOutline.is_checked())
                     iSelectedAppearance->effect()->set_type(text_effect_type::Outline);
-                else if (iTextEffectShadow.is_checked())
+                else if (iAdvancedEffectsShadow.is_checked())
                     iSelectedAppearance->effect()->set_type(text_effect_type::Shadow);
-                else if (iTextEffectGlow.is_checked())
+                else if (iAdvancedEffectsGlow.is_checked())
                     iSelectedAppearance->effect()->set_type(text_effect_type::Glow);
             }
-            if (iTextEffectColor.is_checked())
+            if (iAdvancedEffectsColor.is_checked())
             {
                 if (iSelectedAppearance->effect()->color() == neolib::none)
                     iSelectedAppearance->effect()->set_color(iDefaultInk ? iDefaultInk->shade(0x40) : service<i_app>().current_style().palette().color(color_role::Text).shade(0x40));
                 else if (std::holds_alternative<gradient>(iSelectedAppearance->effect()->color()))
                     iSelectedAppearance->effect()->set_color(std::get<gradient>(iSelectedAppearance->effect()->color()).color_at(0.0));
             }
-            else if (iTextEffectGradient.is_checked())
+            else if (iAdvancedEffectsGradient.is_checked())
             {
                 if (iSelectedAppearance->effect()->color() == neolib::none)
                     iSelectedAppearance->effect()->set_color(gradient{ iDefaultInk ? iDefaultInk->shade(0x40) : service<i_app>().current_style().palette().color(color_role::Text).shade(0x40) });
                 else if (std::holds_alternative<color>(iSelectedAppearance->effect()->color()))
                     iSelectedAppearance->effect()->set_color(gradient{ std::get<color>(iSelectedAppearance->effect()->color()) });
             }
-            iSelectedAppearance->effect()->set_ignore_emoji(iTextEffectEmoji.is_unchecked());
+            iSelectedAppearance->effect()->set_ignore_emoji(iAdvancedEffectsEmoji.is_unchecked());
         }
         else
         {
             iSelectedAppearance->set_effect(std::nullopt);
-            iTextEffectInk = neolib::none;
-            iTextEffectWidth = std::nullopt;
+            iAdvancedEffectsInk = neolib::none;
+            iAdvancedEffectsWidth = std::nullopt;
         }
 
         if (std::holds_alternative<color_widget>(iInk) && &std::get<color_widget>(iInk) == &aUpdatingWidget)
@@ -581,27 +603,27 @@ namespace neogfx
             if (iSelectedAppearance->paper() != std::get<gradient_widget>(iPaper).gradient())
                 iSelectedAppearance->set_paper(std::get<gradient_widget>(iPaper).gradient());
         }
-        if (std::holds_alternative<color_widget>(iTextEffectInk) && &std::get<color_widget>(iTextEffectInk) == &aUpdatingWidget)
+        if (std::holds_alternative<color_widget>(iAdvancedEffectsInk) && &std::get<color_widget>(iAdvancedEffectsInk) == &aUpdatingWidget)
         {
-            if (iSelectedAppearance->effect()->color() != std::get<color_widget>(iTextEffectInk).color())
-                iSelectedAppearance->effect()->set_color(std::get<color_widget>(iTextEffectInk).color());
+            if (iSelectedAppearance->effect()->color() != std::get<color_widget>(iAdvancedEffectsInk).color())
+                iSelectedAppearance->effect()->set_color(std::get<color_widget>(iAdvancedEffectsInk).color());
         }
-        else if (std::holds_alternative<gradient_widget>(iTextEffectInk) && &std::get<gradient_widget>(iTextEffectInk) == &aUpdatingWidget)
+        else if (std::holds_alternative<gradient_widget>(iAdvancedEffectsInk) && &std::get<gradient_widget>(iAdvancedEffectsInk) == &aUpdatingWidget)
         {
-            if (iSelectedAppearance->effect()->color() != std::get<gradient_widget>(iTextEffectInk).gradient())
-                iSelectedAppearance->effect()->set_color(std::get<gradient_widget>(iTextEffectInk).gradient());
+            if (iSelectedAppearance->effect()->color() != std::get<gradient_widget>(iAdvancedEffectsInk).gradient())
+                iSelectedAppearance->effect()->set_color(std::get<gradient_widget>(iAdvancedEffectsInk).gradient());
         }
-        if (iTextEffectWidth != std::nullopt && &iTextEffectWidth->slider == &aUpdatingWidget)
+        if (iAdvancedEffectsWidth != std::nullopt && &iAdvancedEffectsWidth->slider == &aUpdatingWidget)
         {
-            if (iSelectedAppearance->effect()->width() != iTextEffectWidth->slider.value())
-                iSelectedAppearance->effect()->set_width(iTextEffectWidth->slider.value());
+            if (iSelectedAppearance->effect()->width() != iAdvancedEffectsWidth->slider.value())
+                iSelectedAppearance->effect()->set_width(iAdvancedEffectsWidth->slider.value());
         }
-        if (&iTextEffectEmoji == &aUpdatingWidget)
-            iSelectedAppearance->effect()->set_ignore_emoji(iTextEffectEmoji.is_unchecked());
+        if (&iAdvancedEffectsEmoji == &aUpdatingWidget)
+            iSelectedAppearance->effect()->set_ignore_emoji(iAdvancedEffectsEmoji.is_unchecked());
 
         iSample.set_text_appearance(iSelectedAppearance);
         
-        if (iSelectedAppearance != oldSelection)
+        if (iSelectedAppearance != oldSelectedAppearance)
             SelectionChanged.trigger();
 
         update_widgets();
@@ -678,49 +700,49 @@ namespace neogfx
                 iPaperBox.check_box().uncheck();
             if (iSelectedAppearance->effect() != std::nullopt)
             {
-                iTextEffectBox.check_box().check();
+                iAdvancedEffectsBox.check_box().check();
                 if (std::holds_alternative<color>(iSelectedAppearance->effect()->color()))
                 {
-                    iTextEffectColor.check();
-                    if (!std::holds_alternative<color_widget>(iTextEffectInk))
+                    iAdvancedEffectsColor.check();
+                    if (!std::holds_alternative<color_widget>(iAdvancedEffectsInk))
                     {
-                        iTextEffectInk.emplace<color_widget>(iTextEffectInkBox.item_layout());
-                        iSink += std::get<color_widget>(iTextEffectInk).ColorChanged([&]()
+                        iAdvancedEffectsInk.emplace<color_widget>(iAdvancedEffectsInkBox.item_layout());
+                        iSink += std::get<color_widget>(iAdvancedEffectsInk).ColorChanged([&]()
                         {
-                            update_selected_appearance(std::get<color_widget>(iTextEffectInk));
+                            update_selected_appearance(std::get<color_widget>(iAdvancedEffectsInk));
                         });
                     }
-                    std::get<color_widget>(iTextEffectInk).set_color(std::get<color>(iSelectedAppearance->effect()->color()));
+                    std::get<color_widget>(iAdvancedEffectsInk).set_color(std::get<color>(iSelectedAppearance->effect()->color()));
                 }
                 else if (std::holds_alternative<gradient>(iSelectedAppearance->effect()->color()))
                 {
-                    iTextEffectGradient.check();
-                    if (!std::holds_alternative<gradient_widget>(iTextEffectInk))
+                    iAdvancedEffectsGradient.check();
+                    if (!std::holds_alternative<gradient_widget>(iAdvancedEffectsInk))
                     {
-                        iTextEffectInk.emplace<gradient_widget>(iTextEffectInkBox.item_layout());
-                        iSink += std::get<gradient_widget>(iTextEffectInk).GradientChanged([&]()
+                        iAdvancedEffectsInk.emplace<gradient_widget>(iAdvancedEffectsInkBox.item_layout());
+                        iSink += std::get<gradient_widget>(iAdvancedEffectsInk).GradientChanged([&]()
                         {
-                            update_selected_appearance(std::get<gradient_widget>(iTextEffectInk));
+                            update_selected_appearance(std::get<gradient_widget>(iAdvancedEffectsInk));
                         });
                     }
-                    std::get<gradient_widget>(iTextEffectInk).set_gradient(std::get<gradient>(iSelectedAppearance->effect()->color()));
+                    std::get<gradient_widget>(iAdvancedEffectsInk).set_gradient(std::get<gradient>(iSelectedAppearance->effect()->color()));
                 }
-                if (iTextEffectWidth == std::nullopt)
+                if (iAdvancedEffectsWidth == std::nullopt)
                 {
-                    iTextEffectWidth.emplace(*this);
-                    iSink += iTextEffectWidth->slider.ValueChanged([&]()
+                    iAdvancedEffectsWidth.emplace(*this);
+                    iSink += iAdvancedEffectsWidth->slider.ValueChanged([&]()
                     {
-                        update_selected_appearance(iTextEffectWidth->slider);
+                        update_selected_appearance(iAdvancedEffectsWidth->slider);
                     });
-                    iTextEffectWidth->slider.set_minimum(1);
-                    iTextEffectWidth->slider.set_maximum(16);
-                    iTextEffectWidth->slider.set_step(1);
+                    iAdvancedEffectsWidth->slider.set_minimum(1);
+                    iAdvancedEffectsWidth->slider.set_maximum(16);
+                    iAdvancedEffectsWidth->slider.set_step(1);
                 }
-                iTextEffectWidth->slider.set_value(static_cast<int32_t>(iSelectedAppearance->effect()->width()));
-                iTextEffectEmoji.set_checked(!iSelectedAppearance->effect()->ignore_emoji());
+                iAdvancedEffectsWidth->slider.set_value(static_cast<int32_t>(iSelectedAppearance->effect()->width()));
+                iAdvancedEffectsEmoji.set_checked(!iSelectedAppearance->effect()->ignore_emoji());
             }
             else
-                iTextEffectBox.check_box().uncheck();
+                iAdvancedEffectsBox.check_box().uncheck();
         }
     }
 }

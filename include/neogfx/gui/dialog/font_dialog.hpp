@@ -77,7 +77,13 @@ namespace neogfx
         vertical_layout iLayout5;
         label iSizeLabel;
         drop_list iSizePicker;
-        widget<> iEffects;
+        horizontal_layout iLayoutEffects;
+        group_box iEffectsBox;
+        check_box iUnderline;
+        check_box iSuperscript;
+        check_box iSubscript;
+        check_box iBelowAscenderLine;
+        widget<> iAppearanceContainer;
         horizontal_layout iLayoutAppearance;
         group_box iInkBox;
         radio_button iInkColor;
@@ -88,27 +94,27 @@ namespace neogfx
         radio_button iPaperColor;
         radio_button iPaperGradient;
         neolib::variant<color_widget, gradient_widget> iPaper;
-        group_box iTextEffectBox;
-        group_box iTextEffectTypeBox;
-        radio_button iTextEffectOutline;
-        radio_button iTextEffectShadow;
-        radio_button iTextEffectGlow;
-        group_box iTextEffectInkBox;
-        radio_button iTextEffectColor;
-        radio_button iTextEffectGradient;
-        check_box iTextEffectEmoji;
-        neolib::variant<color_widget, gradient_widget> iTextEffectInk;
+        group_box iAdvancedEffectsBox;
+        group_box iAdvancedEffectsTypeBox;
+        radio_button iAdvancedEffectsOutline;
+        radio_button iAdvancedEffectsShadow;
+        radio_button iAdvancedEffectsGlow;
+        group_box iAdvancedEffectsInkBox;
+        radio_button iAdvancedEffectsColor;
+        radio_button iAdvancedEffectsGradient;
+        check_box iAdvancedEffectsEmoji;
+        neolib::variant<color_widget, gradient_widget> iAdvancedEffectsInk;
         struct text_effect_width
         {
             group_box box;
             slider_box slider;
             text_effect_width(font_dialog& aParent) :
-                box{ aParent.iTextEffectBox.item_layout(), "Width"_t },
+                box{ aParent.iAdvancedEffectsBox.item_layout(), "Width"_t },
                 slider{ box.with_item_layout<vertical_layout>() }
             {
             }
         };
-        std::optional<text_effect_width> iTextEffectWidth;
+        std::optional<text_effect_width> iAdvancedEffectsWidth;
         group_box iSampleBox;
         text_widget iSample;
     };

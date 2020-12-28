@@ -87,9 +87,13 @@ namespace neogfx
     {
         enum flags_e : uint8_t
         {
-            Underline = 0x01,
-            Subpixel = 0x02,
-            Mnemonic = 0x04
+            Underline           = 0x01,
+            Superscript         = 0x02,
+            Subscript           = 0x04,
+            BelowAscenderLine   = 0x08,
+            AboveBaseline       = 0x08,
+            Mnemonic            = 0x40,
+            Subpixel            = 0x80,
         };
         typedef uint32_t value_type;
         typedef std::pair<uint32_t, uint32_t> source_type;
@@ -194,6 +198,38 @@ namespace neogfx
         g.flags = static_cast<glyph::flags_e>(aUnderline ? g.flags | glyph::Underline : g.flags & ~glyph::Underline);
     }
     
+    inline bool superscript(glyph const& g)
+    {
+        return (g.flags & glyph::Superscript) == glyph::Superscript;
+    }
+
+    inline bool below_ascender_line(glyph const& g)
+    {
+        return (g.flags & glyph::BelowAscenderLine) == glyph::BelowAscenderLine;
+    }
+
+    inline void set_superscript(glyph& g, bool aSuperscript, bool aBelowAscenderLine = false)
+    {
+        g.flags = static_cast<glyph::flags_e>(aSuperscript ? g.flags | glyph::Superscript : g.flags & ~glyph::Superscript);
+        g.flags = static_cast<glyph::flags_e>(aBelowAscenderLine ? g.flags | glyph::BelowAscenderLine : g.flags & ~glyph::BelowAscenderLine);
+    }
+
+    inline bool subscript(glyph const& g)
+    {
+        return (g.flags & glyph::Subscript) == glyph::Subscript;
+    }
+
+    inline bool above_baseline(glyph const& g)
+    {
+        return (g.flags & glyph::AboveBaseline) == glyph::AboveBaseline;
+    }
+
+    inline void set_subscript(glyph& g, bool aSubscript, bool aAboveBaseline = false)
+    {
+        g.flags = static_cast<glyph::flags_e>(aSubscript ? g.flags | glyph::Subscript : g.flags & ~glyph::Subscript);
+        g.flags = static_cast<glyph::flags_e>(aAboveBaseline ? g.flags | glyph::AboveBaseline : g.flags & ~glyph::AboveBaseline);
+    }
+
     inline bool subpixel(glyph const& g)
     { 
         return (g.flags & glyph::Subpixel) == glyph::Subpixel;
