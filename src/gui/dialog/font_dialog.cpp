@@ -289,6 +289,7 @@ namespace neogfx
         iSink += iUnderline.Toggled([&]() { update_selected_font(iUnderline); });
         iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); update_selected_font(iSuperscript); }});
         iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); update_selected_font(iSuperscript); }});
+        iSink += iBelowAscenderLine.Toggled([&]() { update_selected_font(iBelowAscenderLine); });
         iSink += iInkBox.check_box().Checked([&]() { update_selected_appearance(iInkBox); });
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_appearance(iInkBox); });
         iSink += iPaperBox.check_box().Checked([&]() { update_selected_appearance(iPaperBox); });
@@ -406,6 +407,9 @@ namespace neogfx
         if (&aUpdatingWidget == this)
         {
             iUnderline.set_checked(iSelectedFont.underline());
+            iSuperscript.set_checked((iSelectedFont.style() & font_style::Superscript) == font_style::Superscript);
+            iSubscript.set_checked((iSelectedFont.style() & font_style::Subscript) == font_style::Subscript);
+            iBelowAscenderLine.set_checked((iSelectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
             auto family = iFamilyPicker.presentation_model().find_item(iSelectedFont.family_name());
             if (family != std::nullopt)
                 iFamilyPicker.selection_model().set_current_index(*family);

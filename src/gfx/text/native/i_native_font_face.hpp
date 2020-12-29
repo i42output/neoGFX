@@ -51,6 +51,7 @@ namespace neogfx
         virtual dimension horizontal_dpi() const = 0;
         virtual dimension vertical_dpi() const = 0;
         virtual dimension height() const = 0;
+        virtual dimension ascender() const = 0;
         virtual dimension descender() const = 0;
         virtual dimension underline_position() const = 0;
         virtual dimension underline_thickness() const = 0;

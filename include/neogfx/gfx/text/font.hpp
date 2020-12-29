@@ -212,6 +212,7 @@ namespace neogfx
         i_string const& style_name() const override;
         point_size size() const override;
         dimension height() const;
+        dimension ascender() const;
         dimension descender() const;
         dimension line_spacing() const;
         using font_info::kerning;

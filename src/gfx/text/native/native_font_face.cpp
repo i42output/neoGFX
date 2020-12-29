@@ -139,6 +139,11 @@ namespace neogfx
         return iHandle->size->metrics.height / 64.0;
     }
 
+    dimension native_font_face::ascender() const
+    {
+        return iHandle->size->metrics.ascender / 64.0;
+    }
+
     dimension native_font_face::descender() const
     {
         return iHandle->size->metrics.descender / 64.0;

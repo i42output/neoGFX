@@ -282,7 +282,24 @@ namespace neogfx
         for (auto& g : *this)
             yMax = std::max(g.extents.cy + static_cast<float>(glyph_font(g).descender()), yMax);
         for (auto& g : *this)
-            g.offset.y += (yMax - (g.extents.cy + static_cast<float>(glyph_font(g).descender())));
+        {
+            auto const& gf = glyph_font(g);
+            g.offset.y += (yMax - (g.extents.cy + static_cast<float>(gf.descender())));
+            if ((g.flags & glyph::Superscript) == glyph::Superscript)
+            {
+                if ((g.flags & glyph::BelowAscenderLine) == glyph::BelowAscenderLine)
+                    g.offset.y -= std::ceil(static_cast<float>(gf.ascender() / 0.58 - g.extents.cy - -gf.descender()));
+                else
+                    g.offset.y -= std::ceil(static_cast<float>(gf.ascender() / 0.58 - g.extents.cy - -gf.descender() + (g.extents.cy - gf.ascender() - -gf.descender()) / 0.58));
+            }
+            else if ((g.flags & glyph::Subscript) == glyph::Subscript)
+            {
+                if ((g.flags & glyph::AboveBaseline) == glyph::AboveBaseline)
+                    g.offset.y += 0.0f; // exposition only
+                else
+                    g.offset.y += std::ceil(-static_cast<float>(gf.descender() / 0.58));
+            }
+        }
         return *this;
     }
 

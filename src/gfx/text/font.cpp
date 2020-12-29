@@ -535,6 +535,11 @@ namespace neogfx
         return native_font_face().height();
     }
 
+    dimension font::ascender() const
+    {
+        return native_font_face().ascender();
+    }
+
     dimension font::descender() const
     {
         return native_font_face().descender();

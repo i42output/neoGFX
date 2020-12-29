@@ -110,6 +110,7 @@ namespace neogfx
         dimension horizontal_dpi() const override;
         dimension vertical_dpi() const override;
         dimension height() const override;
+        dimension ascender() const override;
         dimension descender() const override;
         dimension underline_position() const override;
         dimension underline_thickness() const override;
