@@ -39,7 +39,7 @@ namespace neogfx
         iCloseButton{ iLayout, push_button_style::TitleBar },
         iStateActive{ false }
     {
-        set_padding(neogfx::padding{});
+        set_padding(neogfx::padding{2.0_dip});
         layout().set_padding(neogfx::padding{});
 
         set_background_opacity(1.0);

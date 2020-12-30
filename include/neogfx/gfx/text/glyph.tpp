@@ -259,7 +259,7 @@ namespace neogfx
         {
             auto const& g = *i;
             result.cx += advance(g).cx;
-            result.cy = std::max(result.cy, extents(g).cy);
+            result.cy = std::max(result.cy, extents(g).cy + std::abs(g.offset.y));
         }
         if (aEndIsLineEnd)
         {
@@ -285,19 +285,31 @@ namespace neogfx
         {
             auto const& gf = glyph_font(g);
             g.offset.y += (yMax - (g.extents.cy + static_cast<float>(gf.descender())));
-            if ((g.flags & glyph::Superscript) == glyph::Superscript)
+            if ((g.flags & (glyph::Superscript | glyph::Subscript)) != glyph::Default)
             {
-                if ((g.flags & glyph::BelowAscenderLine) == glyph::BelowAscenderLine)
-                    g.offset.y -= std::ceil(static_cast<float>(gf.ascender() / 0.58 - g.extents.cy - -gf.descender()));
-                else
-                    g.offset.y -= std::ceil(static_cast<float>(gf.ascender() / 0.58 - g.extents.cy - -gf.descender() + (g.extents.cy - gf.ascender() - -gf.descender()) / 0.58));
-            }
-            else if ((g.flags & glyph::Subscript) == glyph::Subscript)
-            {
-                if ((g.flags & glyph::AboveBaseline) == glyph::AboveBaseline)
-                    g.offset.y += 0.0f; // exposition only
-                else
-                    g.offset.y += std::ceil(-static_cast<float>(gf.descender() / 0.58));
+                scalar const ascender = gf.ascender();
+                scalar const descender = gf.descender();
+                scalar const cy = ascender - descender;
+                scalar const dyLarge = cy / 0.58 * 0.33; // todo: make configurable attributes
+                scalar const dySmall = dyLarge * 0.5; // todo: make configurable attributes
+                if ((g.flags & glyph::Superscript) == glyph::Superscript)
+                {
+                    auto const belowAscenderDelta = static_cast<float>(dySmall);
+                    auto const aboveAscenderDelta = static_cast<float>(dyLarge);
+                    if ((g.flags & glyph::BelowAscenderLine) == glyph::BelowAscenderLine)
+                        g.offset.y -= std::ceil(belowAscenderDelta);
+                    else
+                        g.offset.y -= std::ceil(aboveAscenderDelta);
+                }
+                else if ((g.flags & glyph::Subscript) == glyph::Subscript)
+                {
+                    auto const aboveBaselineDelta = 0.0f;
+                    auto const belowBaselineDelta = static_cast<float>(dyLarge);
+                    if ((g.flags & glyph::AboveBaseline) == glyph::AboveBaseline)
+                        g.offset.y += aboveBaselineDelta;
+                    else
+                        g.offset.y += belowBaselineDelta;
+                }
             }
         }
         return *this;

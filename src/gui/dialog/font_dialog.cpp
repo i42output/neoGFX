@@ -287,8 +287,8 @@ namespace neogfx
         iPaperBox.set_checkable(true, true);
         iAdvancedEffectsBox.set_checkable(true, true);
         iSink += iUnderline.Toggled([&]() { update_selected_font(iUnderline); });
-        iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); update_selected_font(iSuperscript); }});
-        iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); update_selected_font(iSuperscript); }});
+        iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); } update_selected_font(iSuperscript); });
+        iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); } update_selected_font(iSubscript); });
         iSink += iBelowAscenderLine.Toggled([&]() { update_selected_font(iBelowAscenderLine); });
         iSink += iInkBox.check_box().Checked([&]() { update_selected_appearance(iInkBox); });
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_appearance(iInkBox); });

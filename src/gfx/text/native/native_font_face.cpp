@@ -136,17 +136,17 @@ namespace neogfx
 
     dimension native_font_face::height() const
     {
-        return iHandle->size->metrics.height / 64.0;
+        return iMetrics->height / 64.0;
     }
 
     dimension native_font_face::ascender() const
     {
-        return iHandle->size->metrics.ascender / 64.0;
+        return iMetrics->ascender / 64.0;
     }
 
     dimension native_font_face::descender() const
     {
-        return iHandle->size->metrics.descender / 64.0;
+        return iMetrics->descender / 64.0;
     }
 
     dimension native_font_face::underline_position() const
@@ -439,6 +439,8 @@ namespace neogfx
             }
             freetypeCheck(FT_Select_Size(iHandle, strikeIndex));
         }
+        if (iMetrics == std::nullopt)
+            iMetrics.emplace(iHandle->size->metrics);
         for (const FT_CharMap* cm = iHandle->charmaps; cm != iHandle->charmaps + iHandle->num_charmaps; ++cm)
         {
             if ((**cm).encoding == FT_ENCODING_UNICODE)

@@ -87,6 +87,7 @@ namespace neogfx
     {
         enum flags_e : uint8_t
         {
+            Default             = 0x00,
             Underline           = 0x01,
             Superscript         = 0x02,
             Subscript           = 0x04,
