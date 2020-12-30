@@ -304,7 +304,7 @@ namespace neogfx
                 else if ((g.flags & glyph::Subscript) == glyph::Subscript)
                 {
                     auto const aboveBaselineDelta = 0.0f;
-                    auto const belowBaselineDelta = static_cast<float>(dyLarge);
+                    auto const belowBaselineDelta = static_cast<float>(dyLarge + descender / 0.58);
                     if ((g.flags & glyph::AboveBaseline) == glyph::AboveBaseline)
                         g.offset.y += aboveBaselineDelta;
                     else
