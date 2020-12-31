@@ -505,6 +505,7 @@ namespace neogfx
         style current_style() const;
         void apply_style(style const& aStyle);
         void apply_style(position_type aStart, position_type aEnd, style const& aStyle);
+        style next_style() const;
     public:
         void clear();
         std::string const& text() const;
@@ -584,6 +585,7 @@ namespace neogfx
         sink iSink;
         type_e iType;
         style iDefaultStyle;
+        mutable std::optional<style> iNextStyle;
         bool iPersistDefaultStyle;
         font_info iDefaultFont;
         mutable neogfx::cursor iCursor;

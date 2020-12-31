@@ -544,7 +544,7 @@ namespace neogfx
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
-                insert_text("\t", current_style());
+                insert_text("\t", next_style());
                 cursor().set_position(cursor().position() + 1);
             }
             break;
@@ -553,7 +553,7 @@ namespace neogfx
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
-                insert_text("\n", current_style());
+                insert_text("\n", next_style());
                 cursor().set_position(cursor().position() + 1);
             }
             else
@@ -665,7 +665,7 @@ namespace neogfx
         }
         multiple_text_changes mtc{ *this };
         delete_any_selection();
-        insert_text(aText, current_style(), true);
+        insert_text(aText, next_style(), true);
         return true;
     }
 
@@ -826,7 +826,7 @@ namespace neogfx
             multiple_text_changes mtc{ *this };
             if (cursor().position() != cursor().anchor())
                 delete_selected();
-            auto len = insert_text(aClipboard.text(), current_style());
+            auto len = insert_text(aClipboard.text(), next_style());
             cursor().set_position(cursor().position() + len);
         }
     }
@@ -1128,7 +1128,10 @@ namespace neogfx
     void text_edit::apply_style(style const& aStyle)
     {
         if (cursor().position() == cursor().anchor())
+        {
             set_default_style(aStyle);
+            iNextStyle = aStyle;
+        }
         else
             apply_style(std::min(cursor().anchor(), cursor().position()), std::max(cursor().anchor(), cursor().position()), aStyle);
     }
@@ -1140,6 +1143,17 @@ namespace neogfx
         part.assign(iText.begin() + aStart, iText.begin() + aEnd);
         delete_text(aStart, aEnd);
         insert_text(aStart, neolib::utf32_to_utf8(part), aStyle);
+    }
+
+    text_edit::style text_edit::next_style() const
+    {
+        if (iNextStyle != std::nullopt)
+        {
+            auto nextStyle = *iNextStyle;
+            iNextStyle = std::nullopt;
+            return nextStyle;
+        }
+        return current_style();
     }
 
     neogfx::cursor& text_edit::cursor() const
@@ -1610,6 +1624,7 @@ namespace neogfx
         cursor().set_width(2.0);
         iSink += cursor().PositionChanged([this]()
         {
+            iNextStyle = std::nullopt;
             iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
             make_cursor_visible();
             update();
