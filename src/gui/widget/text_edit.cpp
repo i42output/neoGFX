@@ -544,7 +544,7 @@ namespace neogfx
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
-                insert_text("\t");
+                insert_text("\t", current_style());
                 cursor().set_position(cursor().position() + 1);
             }
             break;
@@ -553,7 +553,7 @@ namespace neogfx
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
-                insert_text("\n");
+                insert_text("\n", current_style());
                 cursor().set_position(cursor().position() + 1);
             }
             else
@@ -665,7 +665,7 @@ namespace neogfx
         }
         multiple_text_changes mtc{ *this };
         delete_any_selection();
-        insert_text(aText, true);
+        insert_text(aText, current_style(), true);
         return true;
     }
 
@@ -826,7 +826,7 @@ namespace neogfx
             multiple_text_changes mtc{ *this };
             if (cursor().position() != cursor().anchor())
                 delete_selected();
-            auto len = insert_text(aClipboard.text());
+            auto len = insert_text(aClipboard.text(), current_style());
             cursor().set_position(cursor().position() + len);
         }
     }
@@ -1116,13 +1116,13 @@ namespace neogfx
 
     text_edit::style text_edit::current_style() const
     {
-        if (cursor().position() == cursor().anchor())
+        if (iText.empty())
             return style{ default_style() }.set_font_if_none(font());
-        else
-        {
-            auto const g = to_glyph(std::next(iText.begin(), cursor().anchor()));
-            return glyph_style(g, *glyph_column_line(g - glyphs().begin()).first).set_font_if_none(g != glyphs().end() ? glyphs().glyph_font(*g) : font());
-        }
+        auto t = std::next(iText.begin(), cursor().anchor());
+        if (t != iText.begin() && cursor().position() == cursor().anchor())
+            t = std::prev(t);
+        auto const g = to_glyph(t);
+        return glyph_style(g, *glyph_column_line(g - glyphs().begin()).first).set_font_if_none(g != glyphs().end() ? glyphs().glyph_font(*g) : font());
     }
 
     void text_edit::apply_style(style const& aStyle)
