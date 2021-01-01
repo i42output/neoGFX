@@ -96,16 +96,16 @@ namespace neogfx::nrc
             if (iTextColor)
             {
                 if (std::holds_alternative<color>(*iTextColor))
-                    emit("   %1%DefaultStyle.set_text_color(color{ %2% });\n", id(), std::get<color>(*iTextColor));
+                    emit("   %1%DefaultStyle.character().set_text_color(color{ %2% });\n", id(), std::get<color>(*iTextColor));
                 else
-                    emit("   %1%DefaultStyle.set_text_color(gradient{ %2% });\n", id(), std::get<gradient>(*iTextColor));
+                    emit("   %1%DefaultStyle.character().set_text_color(gradient{ %2% });\n", id(), std::get<gradient>(*iTextColor));
             }
             if (iPaperColor)
             {
                 if (std::holds_alternative<color>(*iPaperColor))
-                    emit("   %1%DefaultStyle.set_paper_color(color{ %2% });\n", id(), std::get<color>(*iPaperColor));
+                    emit("   %1%DefaultStyle.character().set_paper_color(color{ %2% });\n", id(), std::get<color>(*iPaperColor));
                 else
-                    emit("   %1%DefaultStyle.set_paper_color(gradient{ %2% });\n", id(), std::get<gradient>(*iPaperColor));
+                    emit("   %1%DefaultStyle.character().set_paper_color(gradient{ %2% });\n", id(), std::get<gradient>(*iPaperColor));
             }
             if (iTextColor || iPaperColor)
                 emit("   %1%.set_default_style(%1%DefaultStyle);\n", id());

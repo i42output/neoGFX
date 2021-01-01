@@ -225,7 +225,7 @@ namespace neogfx
 
         auto hint_updater = [this]()
         { 
-            hint().set_font(input_box().default_style().font());
+            hint().set_font(input_box().default_style().character().font());
             hint().set_text_color(input_box().default_text_color().with_alpha(0.5));
             hint().show(input_box().text().empty());
         };

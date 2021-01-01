@@ -49,21 +49,16 @@ namespace neogfx
             MultiLine
         };
         typedef std::optional<std::string> optional_password_mask;
-        class style
+        class character_style
         {
         public:
-            style();
-            style(
+            character_style();
+            character_style(character_style const& aOther);
+            character_style(
                 optional_font const& aFont,
                 const color_or_gradient& aTextColor = color_or_gradient{},
                 const color_or_gradient& aPaperColor = color_or_gradient{},
                 const optional_text_effect& aTextEffect = optional_text_effect{});
-            style(
-                text_edit& aParent,
-                const style& aOther);
-        public:
-            void add_ref() const;
-            void release() const;
         public:
             optional_font const& font() const;
             const color_or_gradient& glyph_color() const;
@@ -72,28 +67,49 @@ namespace neogfx
             bool ignore_emoji() const;
             const optional_text_effect& text_effect() const;
             text_appearance as_text_appearance() const;
-            style& set_font(optional_font const& aFont = optional_font{});
-            style& set_font_if_none(neogfx::font const& aFont);
-            style& set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
-            style& set_text_color(const color_or_gradient& aColor = color_or_gradient{});
-            style& set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
-            style& set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
-            style& set_from_text_appearance(const text_appearance& aAppearance);
+            character_style& set_font(optional_font const& aFont = optional_font{});
+            character_style& set_font_if_none(neogfx::font const& aFont);
+            character_style& set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
+            character_style& set_text_color(const color_or_gradient& aColor = color_or_gradient{});
+            character_style& set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
+            character_style& set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
+            character_style& set_from_text_appearance(const text_appearance& aAppearance);
         public:
-            style& merge(const style& aOverridingStyle);
+            character_style& merge(const character_style& aRhs);
         public:
-            bool operator==(const style& aRhs) const;
-            bool operator!=(const style& aRhs) const;
-            bool operator<(const style& aRhs) const;
+            bool operator==(const character_style& aRhs) const;
+            bool operator!=(const character_style& aRhs) const;
+            bool operator<(const character_style& aRhs) const;
         private:
-            text_edit* iParent;
-            mutable uint32_t iUseCount;
             optional_font iFont;
             color_or_gradient iGlyphColor;
             color_or_gradient iTextColor;
             color_or_gradient iPaperColor;
             bool iIgnoreEmoji;
             optional_text_effect iTextEffect;
+        };
+        class style
+        {
+        public:
+            style();
+            style(character_style const& aCharacter);
+            style(text_edit& aParent, const style& aOther);
+        public:
+            void add_ref() const;
+            void release() const;
+        public:
+            style& merge(const style& aOverridingStyle);
+        public:
+            bool operator==(const style& aRhs) const;
+            bool operator!=(const style& aRhs) const;
+            bool operator<(const style& aRhs) const;
+        public:
+            character_style const& character() const;
+            character_style& character();
+        private:
+			text_edit* iParent;
+            mutable uint32_t iUseCount;
+            character_style iCharacter;
         };
         typedef std::set<style> style_list;
         class column_info

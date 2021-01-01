@@ -123,28 +123,28 @@ namespace neogfx::DesignStudio
                 auto paragraphFormat = std::make_shared<action>("Paragraph...");
                 fontFormat->Triggered([&]()
                 {
-                    font_dialog fontPicker{ *this, *iDefaultItem->current_style().font(), iDefaultItem->current_style().as_text_appearance() };
+                    font_dialog fontPicker{ *this, *iDefaultItem->current_style().character().font(), iDefaultItem->current_style().character().as_text_appearance() };
                     fontPicker.set_default_ink(iDefaultItem->default_text_color());
                     fontPicker.set_default_paper(iDefaultItem->effective_background_color());
                     fontPicker.SelectionChanged([&]()
                     {
                         auto s = iDefaultItem->current_style();
-                        s.set_font(fontPicker.selected_font());
-                        s.set_from_text_appearance(*fontPicker.selected_appearance());
+                        s.character().set_font(fontPicker.selected_font());
+                        s.character().set_from_text_appearance(*fontPicker.selected_appearance());
                         iDefaultItem->apply_style(s);
                     });
                     if (fontPicker.exec() == dialog_result::Accepted)
                     {
                         auto s = iDefaultItem->current_style();
-                        s.set_font(fontPicker.selected_font());
-                        s.set_from_text_appearance(*fontPicker.selected_appearance());
+                        s.character().set_font(fontPicker.selected_font());
+                        s.character().set_from_text_appearance(*fontPicker.selected_appearance());
                         iDefaultItem->apply_style(s);
                     }
                     else
                     {
                         auto s = iDefaultItem->current_style();
-                        s.set_font(fontPicker.current_font());
-                        s.set_from_text_appearance(*fontPicker.current_appearance());
+                        s.character().set_font(fontPicker.current_font());
+                        s.character().set_from_text_appearance(*fontPicker.current_appearance());
                         iDefaultItem->apply_style(s);
                     }
                 });

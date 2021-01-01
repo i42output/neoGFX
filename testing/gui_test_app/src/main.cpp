@@ -198,14 +198,14 @@ public:
             ng::service<ng::i_app>().change_style("Keypad").
                 palette().set_color(ng::color_role::Theme, aNumber != 9 ? ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 } : ng::color::LightGoldenrod);
             if (aNumber == 9)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::optional_font{}, ng::gradient{ ng::color::DarkGoldenrod, ng::color::LightGoldenrodYellow, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} });
+                iTextEdit.set_default_style(ng::text_edit::character_style{ ng::optional_font{}, ng::gradient{ ng::color::DarkGoldenrod, ng::color::LightGoldenrodYellow, ng::gradient_direction::Horizontal }, ng::color_or_gradient{} });
             else if (aNumber == 8)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::color::White });
+                iTextEdit.set_default_style(ng::text_edit::character_style{ ng::font{"SnareDrum One NBP", "Regular", 60.0}, ng::color::White });
             else if (aNumber == 0)
-                iTextEdit.set_default_style(ng::text_edit::style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::color::White });
+                iTextEdit.set_default_style(ng::text_edit::character_style{ ng::font{"SnareDrum Two NBP", "Regular", 60.0}, ng::color::White });
             else
                 iTextEdit.set_default_style(
-                    ng::text_edit::style{
+                    ng::text_edit::character_style{
                         ng::optional_font{},
                         ng::gradient{
                             ng::color{ aNumber & 1 ? 64 : 0, aNumber & 2 ? 64 : 0, aNumber & 4 ? 64 : 0 }.lighter(0x40),
@@ -393,25 +393,25 @@ int main(int argc, char* argv[])
             auto s2 = window.textEditEditor.default_style();
             if (!window.editOutline.is_checked())
             {
-                s.set_glyph_color(window.gradientWidget.gradient());
-                s2.set_glyph_color(window.gradientWidget.gradient());
+                s.character().set_glyph_color(window.gradientWidget.gradient());
+                s2.character().set_glyph_color(window.gradientWidget.gradient());
                 if (window.editGlow.is_checked())
                 {
-                    s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
-                    s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                    s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                    s2.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
                 }
                 else if (window.editShadow.is_checked())
                 {
-                    s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
-                    s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                    s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+                    s2.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, window.gradientWidget.gradient(), window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
                 }
             }
             else
             {
-                s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, window.gradientWidget.gradient() });
-                s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, window.gradientWidget.gradient() });
+                s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, window.gradientWidget.gradient() });
+                s2.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, window.gradientWidget.gradient() });
             }
-            s2.set_paper_color(ng::color_or_gradient{});
+            s2.character().set_paper_color(ng::color_or_gradient{});
             window.textEdit.set_default_style(s);
             window.textEditEditor.set_default_style(s2);
         });
@@ -562,7 +562,7 @@ int main(int argc, char* argv[])
             window.gradientWidget.GradientChanged([&]()
             {
                 auto cs = window.textEdit.column(2);
-                cs.set_style(ng::text_edit::style{ ng::optional_font{}, ng::color_or_gradient{}, ng::color_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
+                cs.set_style(ng::text_edit::character_style{ ng::optional_font{}, ng::color_or_gradient{}, ng::color_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
                 window.textEdit.set_column(2, cs);
             }, window.textEdit);
         });
@@ -591,18 +591,18 @@ int main(int argc, char* argv[])
         window.editNormal.checked([&]()
         {
             auto s = window.textEdit.default_style();
-            s.set_text_effect(ng::optional_text_effect{});
+            s.character().set_text_effect(ng::optional_text_effect{});
             window.textEdit.set_default_style(s);
         });
         window.editOutline.checked([&]()
         {
             window.effectWidthSlider.set_value(1);
             auto s = window.textEdit.default_style();
-            s.set_text_color(app.current_style().palette().color(ng::color_role::Text).light() ? ng::color::Black : ng::color::White);
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().color(ng::color_role::Text) });
+            s.character().set_text_color(app.current_style().palette().color(ng::color_role::Text).light() ? ng::color::Black : ng::color::White);
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, app.current_style().palette().color(ng::color_role::Text) });
             window.textEdit.set_default_style(s);
             auto s2 = window.textEditEditor.default_style();
-            s2.set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::color::White });
+            s2.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Outline, ng::color::White });
             window.textEditEditor.set_default_style(s2);
         });
         window.editGlow.checked([&]()
@@ -610,19 +610,19 @@ int main(int argc, char* argv[])
             window.effectWidthSlider.set_value(5);
             window.effectAux1Slider.set_value(1);
             auto s = window.textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEdit.set_default_style(s);
             s = window.textEditEditor.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEditEditor.set_default_style(s);
         });
         window.effectWidthSlider.ValueChanged([&]()
         {
             auto s = window.textEdit.default_style();
-            auto& textEffect = s.text_effect();
+            auto& textEffect = s.character().text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ window.editGlow.is_checked() ? ng::text_effect_type::Glow : window.editShadow.is_checked() ? ng::text_effect_type::Shadow : ng::text_effect_type::Outline, textEffect->color(), window.effectWidthSlider.value(), {}, textEffect->aux1() });
+            s.character().set_text_effect(ng::text_effect{ window.editGlow.is_checked() ? ng::text_effect_type::Glow : window.editShadow.is_checked() ? ng::text_effect_type::Shadow : ng::text_effect_type::Outline, textEffect->color(), window.effectWidthSlider.value(), {}, textEffect->aux1() });
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
@@ -632,10 +632,10 @@ int main(int argc, char* argv[])
         {
             window.editGlow.check();
             auto s = window.textEdit.default_style();
-            auto& textEffect = s.text_effect();
+            auto& textEffect = s.character().text_effect();
             if (textEffect == std::nullopt)
                 return;
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), {}, window.effectAux1Slider.value() });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, textEffect->color(), textEffect->width(), {}, window.effectAux1Slider.value() });
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
@@ -644,7 +644,7 @@ int main(int argc, char* argv[])
         window.editShadow.checked([&]()
         {
             auto s = window.textEdit.default_style();
-            s.set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, {} });
+            s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Shadow, {} });
             window.textEdit.set_default_style(s);
         });
         window.radioSliderFont.checked([&window, &app]()
@@ -727,10 +727,10 @@ int main(int argc, char* argv[])
             {
                 sInk = colorPicker.selected_color();
                 auto s = window.textEdit.default_style();
-                s.set_glyph_color(sInk);
+                s.character().set_glyph_color(sInk);
                 window.textEdit.set_default_style(s);
                 auto s2 = window.textField1.input_box().default_style();
-                s2.set_glyph_color(sInk);
+                s2.character().set_glyph_color(sInk);
                 window.textField1.input_box().set_default_style(s2);
                 window.textField2.input_box().set_default_style(s2);
             }
@@ -1176,12 +1176,12 @@ int main(int argc, char* argv[])
 
         window.buttonStyle1.clicked([&window]()
         {
-            window.textEditEditor.set_default_style(ng::text_edit::style{ ng::optional_font(), ng::gradient(ng::color::Red, ng::color::White, ng::gradient_direction::Horizontal), ng::color_or_gradient() });
+            window.textEditEditor.set_default_style(ng::text_edit::character_style{ ng::optional_font(), ng::gradient(ng::color::Red, ng::color::White, ng::gradient_direction::Horizontal), ng::color_or_gradient() });
         });
 
         window.buttonStyle2.clicked([&window]()
         {
-            window.textEditEditor.set_default_style(ng::text_edit::style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::color::White });
+            window.textEditEditor.set_default_style(ng::text_edit::character_style{ ng::font("SnareDrum One NBP", "Regular", 60.0), ng::color::White });
         });
 
         window.canvasInstancing.set_logical_coordinate_system(ng::logical_coordinate_system::AutomaticGui);

@@ -1016,7 +1016,7 @@ namespace neogfx
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
             auto cellFont = presentation_model().cell_font(newIndex);
-            textEdit.set_default_style(text_edit::style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
+            textEdit.set_default_style(text_edit::character_style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
             textEdit.set_text(presentation_model().cell_to_string(newIndex));
             textEdit.Focus([this, newIndex](neogfx::focus_event fe, neogfx::focus_reason)
             {
