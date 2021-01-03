@@ -619,12 +619,8 @@ namespace neogfx::DesignStudio
                             auto const p0 = r0.center();
                             auto const p3 = r1.center();
                             auto const dxy = p0 - p3;
-                            auto const p1 = std::abs(dxy.dx) > std::abs(dxy.dy) || true ?
-                                point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.top() : placementRect.bottom() } :
-                                point{ p0.x < p3.x ? placementRect.left() : placementRect.right(), p0.mid(p3).y };
-                            auto const p2 = std::abs(dxy.dx) > std::abs(dxy.dy) || true ?
-                                point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.bottom() : placementRect.top() } :
-                                point{ p0.x < p3.x ? placementRect.right() : placementRect.left(), p0.mid(p3).y };
+                            auto const p1 = point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.top() : placementRect.bottom() };
+                            auto const p2 = point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.bottom() : placementRect.top() };
                             aGc.draw_cubic_bezier(p0, p1, p2, p3, pen{ connection->source().color(), 2.0_dip });
                         }
                     }
