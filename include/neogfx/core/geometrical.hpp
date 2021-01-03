@@ -126,6 +126,7 @@ namespace neogfx
         basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; return *this; }
         basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; return *this; }
         basic_delta operator-() const { return basic_delta(-dx, -dy); }
+        basic_delta abs() const { return basic_delta(std::abs(dx), std::abs(dy)); }
         basic_delta ceil() const { return basic_delta(std::ceil(dx), std::ceil(dy)); }
         basic_delta floor() const { return basic_delta(std::floor(dx), std::floor(dy)); }
         basic_delta round() const { return basic_delta(std::round(dx), std::round(dy)); }

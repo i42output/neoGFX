@@ -618,9 +618,23 @@ namespace neogfx::DesignStudio
                             auto const placementRect = r0.combined(r1);
                             auto const p0 = r0.center();
                             auto const p3 = r1.center();
-                            auto const dxy = p0 - p3;
-                            auto const p1 = point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.top() : placementRect.bottom() };
-                            auto const p2 = point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.bottom() : placementRect.top() };
+                            auto const dxy = (p0 - p3).abs();
+                            auto const p1 =
+                                dxy.dx >= dxy.dy ? 
+                                    (p0.x <= p3.x && p0.y <= p3.y) || (p0.x > p3.x && p0.y <= p3.y) ? 
+                                        point{ p0.mid(p3).x, placementRect.top() } :
+                                        point{ p0.mid(p3).x, placementRect.bottom() } :
+                                    (p0.y <= p3.y && p0.x <= p3.x) || (p0.y > p3.y && p0.x <= p3.x) ?
+                                        point{ placementRect.right(), p0.mid(p3).y } :
+                                        point{ placementRect.left(), p0.mid(p3).y };
+                            auto const p2 =
+                                dxy.dx >= dxy.dy ? 
+                                    (p0.x <= p3.x && p0.y <= p3.y) || (p0.x > p3.x && p0.y <= p3.y) ?
+                                        point{ p0.mid(p3).x, placementRect.bottom() } :
+                                        point{ p0.mid(p3).x, placementRect.top() } :
+                                    (p0.y <= p3.y && p0.x <= p3.x) || (p0.y > p3.y && p0.x <= p3.x) ?
+                                        point{ placementRect.left(), p0.mid(p3).y } :
+                                        point{ placementRect.right(), p0.mid(p3).y };
                             aGc.draw_cubic_bezier(p0, p1, p2, p3, pen{ connection->source().color(), 2.0_dip });
                         }
                     }
