@@ -51,7 +51,7 @@
         file: resources/note.png
         file: resources/cpp.png
 
-        file: resources/node_input.png
-        file: resources/node_output.png
+        file: resources/circle.png
+        file: resources/circle-outline.png
     }
 }

@@ -31,18 +31,32 @@
 
 namespace neogfx::DesignStudio
 {
-    class node_input : public widget<>, public i_pin_widget
+    template <typename PinType>
+    class node_pin_widget : public widget<>, public i_pin_widget
     {
         typedef widget<> base_type;
     public:
-        node_input(i_node_input_pin& aPin) :
+        node_pin_widget(PinType& aPin) :
+            iPin{ aPin },
             iLayout{ *this, alignment::Left | alignment::VCenter },
-            iPinIcon{ iLayout, image{ ":/neogfx/DesignStudio/default_nel/resources/node_input.png" } }
+            iPinIcon{ iLayout, image{ ":/neogfx/DesignStudio/default_nel/resources/circle-outline.png" } }
         {
             iPinIcon.set_fixed_size(size{ 12.0_dip });
-            aPin.set_widget(*this);
+            iPin.set_widget(*this);
+            iSink += iPin.get().connection_added([&](i_node_connection&)
+            {
+                iPinIcon.set_image(image{ iPin.connected() ? ":/neogfx/DesignStudio/default_nel/resources/circle.png" : ":/neogfx/DesignStudio/default_nel/resources/circle-outline.png" });
+            });
+            iSink += iPin.get().connection_removed([&](i_node_connection&)
+            {
+                iPinIcon.set_image(image{ iPin.connected() ? ":/neogfx/DesignStudio/default_nel/resources/circle.png" : ":/neogfx/DesignStudio/default_nel/resources/circle-outline.png" });
+            });
         }
     public:
+        neogfx::color color() const override
+        {
+            return iPinIcon.image_color() ? *iPinIcon.image_color() : palette_color(color_role::Text);
+        }
         i_widget const& icon() const override
         {
             return iPinIcon;
@@ -52,33 +66,24 @@ namespace neogfx::DesignStudio
             return iPinIcon;
         }
     private:
+        PinType& iPin;
         horizontal_layout iLayout;
         image_widget iPinIcon;
+        sink iSink;
     };
 
-    class node_output : public widget<>, public i_pin_widget
+    class node_input_pin_widget : public node_pin_widget<i_node_input_pin>
     {
-        typedef widget<> base_type;
+        typedef node_pin_widget<i_node_input_pin> base_type;
     public:
-        node_output(i_node_output_pin& aPin) :
-            iLayout{ *this, alignment::Right | alignment::VCenter },
-            iPinIcon{ iLayout, image{ ":/neogfx/DesignStudio/default_nel/resources/node_output.png" } }
-        {
-            iPinIcon.set_fixed_size(size{ 12.0_dip });
-            aPin.set_widget(*this);
-        }
+        using base_type::base_type;
+    };
+
+    class node_output_pin_widget : public node_pin_widget<i_node_output_pin>
+    {
+        typedef node_pin_widget<i_node_output_pin> base_type;
     public:
-        i_widget const& icon() const override
-        {
-            return iPinIcon;
-        }
-        i_widget& icon() override
-        {
-            return iPinIcon;
-        }
-    private:
-        horizontal_layout iLayout;
-        image_widget iPinIcon;
+        using base_type::base_type;
     };
 
     class node_widget : public widget<>
@@ -112,11 +117,11 @@ namespace neogfx::DesignStudio
             });
             iSink += iNode.input_added([&](i_node_input_pin& aPin) 
             {
-                iInputPanel.emplace<node_input>(aPin);
+                iInputPanel.emplace<node_input_pin_widget>(aPin);
             });
             iSink += iNode.output_added([&](i_node_output_pin& aPin) 
             {
-                iOutputPanel.emplace<node_output>(aPin);
+                iOutputPanel.emplace<node_output_pin_widget>(aPin);
             });
 
             iNode.add_input(*make_ref<node_input_pin>(iNode));

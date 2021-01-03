@@ -45,6 +45,7 @@ namespace neogfx
         virtual void paint(i_graphics_context& aGc) const;
     public:
         const texture& image() const;
+        const optional_color& image_color() const;
         void set_image(std::string const& aImageUri);
         void set_image(const i_image& aImage);
         void set_image(const i_texture& aImage);

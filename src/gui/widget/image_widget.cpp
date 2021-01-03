@@ -97,6 +97,11 @@ namespace neogfx
         return iTexture;
     }
 
+    const optional_color& image_widget::image_color() const
+    {
+        return iColor;
+    }
+
     void image_widget::set_image(std::string const& aImageUri)
     {
         set_image(neogfx::image{ aImageUri });

@@ -606,20 +606,27 @@ namespace neogfx::DesignStudio
             {
                 if (e->group() == element_group::Node)
                 {
-                    auto& n = static_cast<i_node&>(*e);
-                    if (!n.connections().empty() && &n.connections()[0]->source().get() == &n)
+                    auto& node = static_cast<i_node&>(*e);
+                    for (auto const& connection : node.connections())
                     {
-                        auto const& w0 = n.connections()[0]->source().as_widget();
-                        auto const& w1 = n.connections()[0]->destination().as_widget();
-                        auto const r0 = iWorkspace.view_stack().to_client_coordinates(w0.icon().to_window_coordinates(w0.icon().client_rect()));
-                        auto const r1 = iWorkspace.view_stack().to_client_coordinates(w1.icon().to_window_coordinates(w1.icon().client_rect()));
-                        auto const placementRect = r0.combined(r1);
-                        aGc.draw_cubic_bezier(
-                            r0.center(),
-                            point{ placementRect.center().x, r0.center().y < r1.center().y ? placementRect.top() : placementRect.bottom() },
-                            point{ placementRect.center().x, r0.center().y < r1.center().y ? placementRect.bottom() : placementRect.top() },
-                            r1.center(),
-                            pen{ color::White, 2.0_dip });
+                        if (&connection->source().get() == &node)
+                        {
+                            auto const& w0 = connection->source().as_widget();
+                            auto const& w1 = connection->destination().as_widget();
+                            auto const r0 = iWorkspace.view_stack().to_client_coordinates(w0.icon().to_window_coordinates(w0.icon().client_rect()));
+                            auto const r1 = iWorkspace.view_stack().to_client_coordinates(w1.icon().to_window_coordinates(w1.icon().client_rect()));
+                            auto const placementRect = r0.combined(r1);
+                            auto const p0 = r0.center();
+                            auto const p3 = r1.center();
+                            auto const dxy = p0 - p3;
+                            auto const p1 = std::abs(dxy.dx) > std::abs(dxy.dy) || true ?
+                                point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.top() : placementRect.bottom() } :
+                                point{ p0.x < p3.x ? placementRect.left() : placementRect.right(), p0.mid(p3).y };
+                            auto const p2 = std::abs(dxy.dx) > std::abs(dxy.dy) || true ?
+                                point{ p0.mid(p3).x, p0.y < p3.y ? placementRect.bottom() : placementRect.top() } :
+                                point{ p0.x < p3.x ? placementRect.right() : placementRect.left(), p0.mid(p3).y };
+                            aGc.draw_cubic_bezier(p0, p1, p2, p3, pen{ connection->source().color(), 2.0_dip });
+                        }
                     }
                 }
             }

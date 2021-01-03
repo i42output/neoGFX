@@ -44,6 +44,18 @@ namespace neogfx::DesignStudio
         {
             return iNode;
         }
+        bool connected() const override
+        {
+            for (auto const& c : get().connections())
+                if (&c->source() == this || &c->destination() == this)
+                    return true;
+            return false;
+        }
+    public:
+        neogfx::color color() const override
+        {
+            return as_widget().color();
+        }
         i_pin_widget const& as_widget() const override
         {
             return *iWidget;

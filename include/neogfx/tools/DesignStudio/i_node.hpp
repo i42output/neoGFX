@@ -30,6 +30,7 @@ namespace neogfx::DesignStudio
     class i_pin_widget
     {
     public:
+        virtual neogfx::color color() const = 0;
         virtual i_widget const& icon() const = 0;
         virtual i_widget& icon() = 0;
     };
@@ -52,6 +53,9 @@ namespace neogfx::DesignStudio
     public:
         virtual pin_type type() const = 0;
         virtual i_node& get() const = 0;
+        virtual bool connected() const = 0;
+    public:
+        virtual neogfx::color color() const = 0;
         virtual i_pin_widget const& as_widget() const = 0;
         virtual i_pin_widget& as_widget() = 0;
         virtual void set_widget(i_pin_widget& aWidget) = 0;
