@@ -39,9 +39,9 @@ namespace neogfx::DesignStudio
         auto& actionPaste = service<i_app>().action_paste();
         auto& actionDelete = service<i_app>().action_delete();
         auto& actionSelectAll = service<i_app>().action_select_all();
-        if (aElement.has_layout_item() && aElement.layout_item()->is_widget())
+        if (aElement.has_layout_item() && aElement.layout_item().is_widget())
         {
-            auto& caddyWidget = aElement.layout_item()->as_widget().parent();
+            auto& caddyWidget = aElement.layout_item().as_widget().parent();
             if (&*caddyWidget.parent().children().back() == &caddyWidget)
                 actionSendToBack.disable();
             if (&*caddyWidget.parent().children().front() == &caddyWidget)

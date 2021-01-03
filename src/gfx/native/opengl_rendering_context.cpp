@@ -122,6 +122,11 @@ namespace neogfx
             return result;
         }
 
+        inline vertices line_strip_to_lines(const vertices& aLineStrip, bool aClosed = true)
+        {
+            return line_loop_to_lines(aLineStrip, false);
+        }
+
         inline quad line_to_quad(const vec3& aStart, const vec3& aEnd, double aLineWidth)
         {
             auto const vecLine = aEnd - aStart;
@@ -186,6 +191,11 @@ namespace neogfx
             {
                 aMode = GL_LINES;
                 vertices = line_loop_to_lines(vertices);
+            }
+            else if (aMode == GL_LINE_STRIP)
+            {
+                aMode = GL_LINES;
+                vertices = line_strip_to_lines(vertices);
             }
             if (aMode == GL_LINES)
             {
@@ -578,6 +588,13 @@ namespace neogfx
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_arc&>(*op);
                     draw_arc(args.center, args.radius, args.startAngle, args.endAngle, args.pen);
+                }
+                break;
+            case graphics_operation::operation_type::DrawCubicBezier:
+                for (auto op = opBatch.first; op != opBatch.second; ++op)
+                {
+                    auto const& args = static_variant_cast<const graphics_operation::draw_cubic_bezier&>(*op);
+                    draw_cubic_bezier(args.p0, args.p1, args.p2, args.p3, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawPath:
@@ -1123,6 +1140,35 @@ namespace neogfx
         emit_any_stipple(*this, vertexArrays);
     }
 
+    void opengl_rendering_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        rendering_engine().default_shader_program().shape_shader().set_cubic_bezier(aP0.to_vec2(), aP1.to_vec2(), aP2.to_vec2(), aP3.to_vec2(), aPen.width());
+
+        if (std::holds_alternative<gradient>(aPen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()), iOpacity);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
+
+            auto r = rect{ aP0.min(aP3), aP3.max(aP0) }.inflated(aPen.width());
+            auto const function = to_function(aPen.color(), r);
+            auto rectVertices = rect_vertices(r, mesh_type::Triangles, 0.0);
+            for (auto const& v : rectVertices)
+                vertexArrays.push_back({ v,
+                    std::holds_alternative<color>(aPen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(aPen.color()).red<float>(),
+                            static_variant_cast<const color&>(aPen.color()).green<float>(),
+                            static_variant_cast<const color&>(aPen.color()).blue<float>(),
+                            static_variant_cast<const color&>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function });
+        }
+    }
+
     void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
@@ -1136,7 +1182,7 @@ namespace neogfx
 
         for (auto const& subPath : aPath.sub_paths())
         {
-            if (subPath.size() > 2)
+            if (subPath.size() >= 2)
             {
                 GLenum mode;
                 auto vertices = path_vertices(aPath, subPath, aPen.width(), mode);

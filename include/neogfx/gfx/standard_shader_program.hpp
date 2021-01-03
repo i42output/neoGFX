@@ -41,6 +41,8 @@ namespace neogfx
         i_glyph_shader& glyph_shader() override;
         const i_stipple_shader& stipple_shader() const override;
         i_stipple_shader& stipple_shader() override;
+        const i_shape_shader& shape_shader() const override;
+        i_shape_shader& shape_shader() override;
     private:
         ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;
@@ -48,5 +50,6 @@ namespace neogfx
         ref_ptr<i_filter_shader> iFilterShader;
         ref_ptr<i_glyph_shader> iGlyphShader;
         ref_ptr<i_stipple_shader> iStippleShader;
+        ref_ptr<i_shape_shader> iShapeShader;
     };
 }

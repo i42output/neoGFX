@@ -29,6 +29,7 @@ namespace neogfx
     struct no_filter_shader : std::logic_error { no_filter_shader() : std::logic_error{ "neogfx::no_filter_shader" } {} };
     struct no_glyph_shader : std::logic_error { no_glyph_shader() : std::logic_error{ "neogfx::no_glyph_shader" } {} };
     struct no_stipple_shader : std::logic_error { no_stipple_shader() : std::logic_error{ "neogfx::no_stipple_shader" } {} };
+    struct no_shape_shader : std::logic_error { no_shape_shader() : std::logic_error{ "neogfx::no_shape_shader" } {} };
 
     class i_standard_shader_program : public i_shader_program
     {
@@ -46,5 +47,7 @@ namespace neogfx
         virtual i_glyph_shader& glyph_shader() = 0;
         virtual const i_stipple_shader& stipple_shader() const = 0;
         virtual i_stipple_shader& stipple_shader() = 0;
+        virtual const i_shape_shader& shape_shader() const = 0;
+        virtual i_shape_shader& shape_shader() = 0;
     };
 }

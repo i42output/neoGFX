@@ -89,4 +89,14 @@ namespace neogfx
         virtual void start(const i_rendering_context& aContext, const vec3& aFrom) = 0;
         virtual void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) = 0;
     };
+
+    class i_shape_shader : public i_fragment_shader
+    {
+    public:
+        typedef i_shape_shader abstract_type;
+    public:
+        virtual bool shape_active() const = 0;
+        virtual void clear_shape() = 0;
+        virtual void set_cubic_bezier(const vec2& aP0, const vec2& aP1, const vec2& aP2, const vec2& aP3, scalar aWidth) = 0;
+    };
 }

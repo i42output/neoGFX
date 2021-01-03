@@ -30,6 +30,8 @@
 
 namespace neogfx::DesignStudio
 {
+    class i_project;
+
     class i_element_library : public neolib::i_reference_counted
     {
         // types
@@ -46,16 +48,16 @@ namespace neogfx::DesignStudio
         virtual const elements_ordered_t& elements_ordered() const = 0;
         // factory
     public:
-        virtual void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
+        virtual void create_element(i_project& aProject, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
         virtual void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) = 0;
         virtual DesignStudio::element_group element_group(const neolib::i_string& aElementType) const = 0;
         virtual i_texture const& element_icon(const neolib::i_string& aElementType) const = 0;
         // helpers
     public:
-        neolib::ref_ptr<i_element> create_element(std::string const& aElementType, std::string const& aElementId)
+        neolib::ref_ptr<i_element> create_element(i_project& aProject, std::string const& aElementType, std::string const& aElementId)
         {
             neolib::ref_ptr<i_element> result;
-            create_element(string{ aElementType }, string{ aElementId }, result);
+            create_element(aProject, string{ aElementType }, string{ aElementId }, result);
             return result;
         }
         neolib::ref_ptr<i_element> create_element(i_element& aParent, std::string const& aElementType, std::string const& aElementId)

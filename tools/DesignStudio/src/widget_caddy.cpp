@@ -34,7 +34,7 @@ namespace neogfx::DesignStudio
         widget{ aParent },
         iProject{ aProject },
         iElement{ aElement },
-        iItem{ aElement.layout_item() },
+        iItem{ aElement.has_layout_item() ? aElement.layout_item() : (aElement.create_layout_item(), aElement.layout_item()) },
         iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
         {    
             aAnimator.again();

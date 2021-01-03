@@ -646,4 +646,81 @@ namespace neogfx
         uStipplePosition = static_cast<float>(iPosition + aPositionOffset);
         uStippleVertex = aFrom.as<float>();
     }
+
+    standard_shape_shader::standard_shape_shader(std::string const& aName) :
+        standard_fragment_shader<i_shape_shader>{ aName }
+    {
+        disable();
+    }
+
+    void standard_shape_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
+    {
+        standard_fragment_shader<i_shape_shader>::generate_code(aProgram, aLanguage, aOutput);
+        if (aLanguage == shader_language::Glsl)
+        {
+            static const string code
+            {
+                "void draw_line(inout vec4 color, inout vec4 function)\n"
+                "{\n"
+                "    float dy = uShapeP0.y - uShapeP1.y;\n"
+                "    float dx = uShapeP0.x - uShapeP1.x;\n"
+                "    float m = dy / dx;\n" // GLSL allows divide-by-zero, we won't use the Inf
+                "    float c = uShapeP0.y - m * uShapeP0.x;\n"
+                "    float d = dx != 0.0 ? (abs(m) < 1.0 ? distance(vec2(Coord.x, m * Coord.x + c), Coord.xy) : distance(vec2((Coord.y - c) / m, Coord.y), Coord.xy)) : abs(Coord.x - uShapeP0.x);\n"
+                "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(uShapeWidth / 2.0 - 0.5, uShapeWidth / 2.0 + 0.5, d)));\n"
+                "}\n"
+                "\n"
+                "void draw_cubic_bezier(inout vec4 color, inout vec4 function)\n"
+                "{\n"
+                "    float dx = uShapeP3.x - uShapeP0.x;\n"
+                "    float t = clamp((Coord.x - uShapeP0.x) / dx, 0.0, 1.0);\n"
+                "    vec2 xy = (pow(1.0 - t, 3.0) * uShapeP0) + (3.0 * pow(1.0 - t, 2.0) * t * uShapeP1) + (3.0 * pow(1.0 - t, 2.0) * uShapeP2) + (pow(t, 3.0) * uShapeP3);\n"
+                "    float d = distance(Coord.xy, xy);\n"
+                "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(uShapeWidth / 2.0 - 0.5, uShapeWidth / 2.0 + 0.5, d)));\n"
+                "}\n"
+                "\n"
+                "void standard_shape_shader(inout vec4 color, inout vec4 function)\n"
+                "{\n"
+                "    if (uShapeEnabled)\n"
+                "    {\n"
+                "        switch(uShape)\n"
+                "        {\n"
+                "        case 1:\n" // line
+                "            draw_line(color, function);\n"
+                "            break;\n"
+                "        case 2:\n" // cubic bezier
+                "            draw_cubic_bezier(color, function);\n"
+                "            break;\n"
+                "        }\n"
+                "    }\n"
+                "}\n"_s
+            };
+            aOutput += code;
+        }
+        else
+            throw unsupported_shader_language();
+    }
+
+    bool standard_shape_shader::shape_active() const
+    {
+        return !uShapeEnabled.uniform().value().empty() &&
+            uShapeEnabled.uniform().value().get<bool>();
+    }
+
+    void standard_shape_shader::clear_shape()
+    {
+        uShapeEnabled = false;
+    }
+
+    void standard_shape_shader::set_cubic_bezier(const vec2& aP0, const vec2& aP1, const vec2& aP2, const vec2& aP3, scalar aWidth)
+    {
+        enable();
+        uShape = shader_shape::CubicBezier;
+        uShapeP0 = aP0.as<float>();
+        uShapeP1 = aP1.as<float>();
+        uShapeP2 = aP2.as<float>();
+        uShapeP3 = aP3.as<float>();
+        uShapeWidth = static_cast<float>(aWidth);
+        uShapeEnabled = true;
+    }
 }

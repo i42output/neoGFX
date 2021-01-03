@@ -145,6 +145,7 @@ namespace neogfx
         virtual void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const = 0;
         virtual void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
+        virtual void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const = 0;
         virtual void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const = 0;
@@ -360,6 +361,58 @@ namespace neogfx
         }
     private:
         const i_graphics_context& iGc;
+    };
+
+    struct blur_filter
+    {
+        rect region;
+        dimension radius;
+        blurring_algorithm algorithm = blurring_algorithm::Gaussian;
+        scalar parameter1 = 5.0;
+        scalar parameter2 = 1.0;
+    };
+
+    template <typename Filter>
+    class scoped_filter
+    {
+    public:
+        scoped_filter(i_graphics_context& aGc, Filter const& aFilter) :
+            iGc{ aGc },
+            iFilter{ aFilter },
+            iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
+            iBuffers{ std::move(create_ping_pong_buffers(aGc, iBufferRect.extents())) },
+            iRenderTarget{ front_buffer() }
+        {
+            front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
+        }
+        ~scoped_filter()
+        {
+            front_buffer().set_origin({});
+            {
+                iRenderTarget.emplace(back_buffer());
+                if constexpr (std::is_same_v<Filter, blur_filter>)
+                    back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
+            }
+            iRenderTarget = {};
+            scoped_blending_mode sbm{ iGc, neogfx::blending_mode::Blit };
+            rect const drawRect{ iFilter.region.top_left() - point{ iFilter.radius, iFilter.radius }, iBufferRect.extents() };
+            iGc.draw_texture(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
+        }
+    public:
+        i_graphics_context const& front_buffer() const
+        {
+            return *iBuffers.buffer1;
+        }
+        i_graphics_context const& back_buffer() const
+        {
+            return *iBuffers.buffer2;
+        }
+    private:
+        i_graphics_context& iGc;
+        Filter iFilter;
+        rect iBufferRect;
+        ping_pong_buffers iBuffers;
+        std::optional<scoped_render_target> iRenderTarget;
     };
 
     template <typename ValueType = double, uint32_t W = 5>

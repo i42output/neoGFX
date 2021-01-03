@@ -181,6 +181,15 @@ namespace neogfx
             pen pen;
         };
 
+        struct draw_cubic_bezier
+        {
+            point p0;
+            point p1;
+            point p2;
+            point p3;
+            pen pen;
+        };
+
         struct draw_path
         {
             path path;
@@ -291,6 +300,7 @@ namespace neogfx
             draw_rounded_rect,
             draw_circle,
             draw_arc,
+            draw_cubic_bezier,
             draw_path,
             draw_shape,
             draw_entities,
@@ -335,6 +345,7 @@ namespace neogfx
             DrawRoundedRect,
             DrawCircle,
             DrawArc,
+            DrawCubicBezier,
             DrawPath,
             DrawShape,
             DrawEntities,

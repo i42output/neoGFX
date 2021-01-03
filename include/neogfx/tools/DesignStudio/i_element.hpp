@@ -33,6 +33,8 @@
 
 namespace neogfx::DesignStudio
 {
+    class i_project;
+
     class i_element_caddy : public i_widget
     {
     public:
@@ -78,9 +80,11 @@ namespace neogfx::DesignStudio
         typedef neolib::i_vector<i_ref_ptr<i_element>> children_t;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::DesignStudio::i_element::no_parent" } {} };
+        struct no_layout_item : std::logic_error { no_layout_item() : std::logic_error{ "neogfx::DesignStudio::i_element::no_layout_item" } {} };
         struct no_caddy : std::logic_error { no_caddy() : std::logic_error{ "neogfx::DesignStudio::i_element::no_caddy" } {} };
     public:
         virtual i_element_library const& library() const = 0;
+        virtual i_project& project() const = 0;
         virtual element_group group() const = 0;
         virtual neolib::i_string const& type() const = 0;
         virtual neolib::i_string const& id() const = 0;
@@ -102,7 +106,8 @@ namespace neogfx::DesignStudio
         virtual i_element_caddy& caddy() const = 0;
         virtual void set_caddy(i_element_caddy& aCaddy) = 0;
         virtual bool has_layout_item() const = 0;
-        virtual void layout_item(i_ref_ptr<i_layout_item>& aItem) const = 0;
+        virtual void create_layout_item() = 0;
+        virtual i_layout_item& layout_item() const = 0;
     public:
         virtual element_mode mode() const = 0;
         virtual void set_mode(element_mode aMode) = 0;
@@ -138,20 +143,20 @@ namespace neogfx::DesignStudio
             aVisitor(*this);
         }
     public:
-        ref_ptr<i_layout_item> layout_item() const
-        {
-            ref_ptr<i_layout_item> item;
-            layout_item(item);
-            return item;
-        }
         bool has_widget() const
         {
-            return has_layout_item() && layout_item()->is_widget();
+            return has_layout_item() && layout_item().is_widget();
         }
         i_widget& widget() const
         {
-            return layout_item()->as_widget();
+            return layout_item().as_widget();
         }
+    };
+
+    template <typename T>
+    struct element_base
+    {
+        typedef i_element base;
     };
 
     template <typename Type>

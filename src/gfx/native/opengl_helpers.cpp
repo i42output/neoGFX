@@ -55,6 +55,7 @@ namespace neogfx
             iCurrentProgram.as<i_standard_shader_program>().filter_shader().clear_filter();
             iCurrentProgram.as<i_standard_shader_program>().glyph_shader().clear_glyph();
             iCurrentProgram.as<i_standard_shader_program>().stipple_shader().clear_stipple();
+            iCurrentProgram.as<i_standard_shader_program>().shape_shader().clear_shape();
         }
     }
 }

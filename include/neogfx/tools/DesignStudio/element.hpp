@@ -69,7 +69,7 @@ namespace neogfx::DesignStudio
         typedef BaseType base_type;
     };
 
-    template <typename Type, typename Base = i_element>
+    template <typename Type, typename Base = typename element_base<Type>::base>
     class element : public neolib::reference_counted<Base>
     {
         typedef element<Base> self_type;
@@ -80,21 +80,24 @@ namespace neogfx::DesignStudio
         define_declared_event(ContextMenu, context_menu, i_menu&)
     public:
         using typename i_element::no_parent;
+        using typename i_element::no_layout_item;
         using typename i_element::no_caddy;
     public:
         typedef abstract_t<Base> abstract_type;
         typedef neolib::vector<ref_ptr<abstract_type>> children_t;
     public:
-        element(i_element_library const& aLibrary, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_project& aProject, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
+            iProject{ aProject },
             iParent { nullptr }, 
             iGroup{ aGroup }, 
             iType{ aType }
         {
         }
-        element(i_element_library const& aLibrary, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_project& aProject, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
-            iParent{ nullptr }, 
+            iProject{ aProject },
+            iParent{ nullptr },
             iGroup{ aGroup }, 
             iType{ aType }, 
             iId{ aId }
@@ -102,6 +105,7 @@ namespace neogfx::DesignStudio
         }
         element(i_element_library const& aLibrary, i_element& aParent, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
+            iProject{ aParent.project() },
             iParent{ &aParent },
             iGroup{ aGroup }, 
             iType{ aType }
@@ -110,6 +114,7 @@ namespace neogfx::DesignStudio
         }
         element(i_element_library const& aLibrary, i_element& aParent, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
+            iProject{ aParent.project() },
             iParent{ &aParent },
             iGroup{ aGroup },
             iType{ aType }, 
@@ -124,6 +129,10 @@ namespace neogfx::DesignStudio
         i_element_library const& library() const override
         {
             return iLibrary;
+        }
+        i_project& project() const override
+        {
+            return iProject;
         }
         element_group group() const override
         {
@@ -215,13 +224,13 @@ namespace neogfx::DesignStudio
         {
             return iLayoutItem != nullptr;
         }
-        void layout_item(i_ref_ptr<i_layout_item>& aItem) const override
+        void create_layout_item() override
         {
             if (!iLayoutItem)
             {
                 if constexpr (std::is_base_of_v<i_widget, Type>)
                 {
-                    if constexpr (std::is_constructible_v<Type, i_element const&>)
+                    if constexpr (std::is_constructible_v<Type, i_element&>)
                         iLayoutItem = make_ref<Type>(*this);
                     else if constexpr (std::is_constructible_v<Type, neolib::i_string const&>)
                         iLayoutItem = make_ref<Type>(iId.to_std_string());
@@ -233,7 +242,12 @@ namespace neogfx::DesignStudio
                     }
                 }
             }
-            aItem = iLayoutItem;
+        }
+        i_layout_item& layout_item() const override
+        {
+            if (iLayoutItem != nullptr)
+                return *iLayoutItem;
+            throw no_layout_item();
         }
     public:
         element_mode mode() const override
@@ -278,6 +292,7 @@ namespace neogfx::DesignStudio
         }
     private:
         const i_element_library& iLibrary;
+        i_project& iProject;
         i_element* iParent;
         element_group iGroup;
         neolib::string iType;

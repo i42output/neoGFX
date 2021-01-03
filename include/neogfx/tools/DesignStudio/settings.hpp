@@ -28,9 +28,10 @@ namespace neogfx::DesignStudio
 {
     enum class workspace_grid : int32_t
     {
-        Lines   = 0x00000000,
-        Quads   = 0x00000001,
-        Points  = 0x00000002
+        None    = 0x00000000,
+        Lines   = 0x00000001,
+        Quads   = 0x00000002,
+        Points  = 0x00000003
     };
 
     enum class toolbar_icon_size : int32_t
@@ -44,6 +45,7 @@ namespace neogfx::DesignStudio
 }
 
 begin_declare_enum(neogfx::DesignStudio::workspace_grid)
+declare_enum_string(neogfx::DesignStudio::workspace_grid, None)
 declare_enum_string(neogfx::DesignStudio::workspace_grid, Lines)
 declare_enum_string(neogfx::DesignStudio::workspace_grid, Quads)
 declare_enum_string(neogfx::DesignStudio::workspace_grid, Points)

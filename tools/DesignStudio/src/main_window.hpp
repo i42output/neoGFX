@@ -56,6 +56,7 @@ namespace neogfx::DesignStudio
         neolib::i_setting& themeColor;
         neolib::i_setting& workspaceGridType;
         neolib::i_setting& workspaceGridSize;
+        neolib::i_setting& workspaceGridSubdivisions;
         neolib::i_setting& workspaceGridColor;
     public:
         main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager);

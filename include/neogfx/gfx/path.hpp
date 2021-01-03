@@ -126,7 +126,7 @@ namespace neogfx
         {
             vertices result;
             result.reserve((aPath.size() + 1) * (iShape == path_shape::Quads ? 6 : 1));
-            if (aPath.size() > 2)
+            if (aPath.size() >= 2)
             {
                 if (iShape == path_shape::ConvexPolygon)
                 {

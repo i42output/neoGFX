@@ -37,7 +37,7 @@ namespace neogfx::DesignStudio
 
     void project::create(const i_string& aName, const i_string& aNamespace)
     {
-        iRoot = manager().library("project"_s).create_element("project", aName);
+        iRoot = manager().library("project"_s).create_element(*this, "project", aName);
     }
 
     void project::open(const i_string& aPath)
@@ -48,7 +48,7 @@ namespace neogfx::DesignStudio
             throw invalid_project_file("bad root node");
         iName = inputFileName.stem().string();
         iNamespace = input.root().as<neolib::fjson_object>().has("namespace") ? input.root().as<neolib::fjson_object>().at("namespace").text() : "";
-        iRoot = manager().library("project"_s).create_element("project", inputFileName.stem().string());
+        iRoot = manager().library("project"_s).create_element(*this, "project", inputFileName.stem().string());
         auto userInterface = manager().library("user_interface"_s).create_element(*iRoot, "user_interface", "User Interface"_t);
         for (auto const& item : input.root())
         {

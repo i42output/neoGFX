@@ -50,7 +50,7 @@ namespace neogfx::DesignStudio
     {
         typedef image_widget base_type;
     public:
-        sticky_note(i_element const& aElement)
+        sticky_note(i_element& aElement)
         {
             set_padding(neogfx::padding{ 2.0_dip, 18.0_dip, 2.0_dip, 2.0_dip });
             thread_local std::random_device tEntropy;

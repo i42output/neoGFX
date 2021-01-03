@@ -76,6 +76,13 @@ namespace neogfx
         GaussianBlur    = 1
     };
 
+    enum class shader_shape
+    {
+        None            = 0,
+        Line            = 1,
+        CubicBezier     = 2
+    };
+
     enum class blurring_algorithm
     {
         None,

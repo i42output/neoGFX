@@ -38,15 +38,6 @@ namespace neogfx
 {
     class i_widget;
 
-    struct blur_filter
-    {
-        rect region;
-        dimension radius;
-        blurring_algorithm algorithm = blurring_algorithm::Gaussian;
-        scalar parameter1 = 5.0;
-        scalar parameter2 = 1.0;
-    };
-
     class opengl_rendering_context : public i_rendering_context
     {
     public:
@@ -321,6 +312,7 @@ namespace neogfx
         void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen);
         void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, angle aStartAngle);
         void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen);
+        void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen);
         void draw_path(const path& aPath, const pen& aPen);
         void draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen);
         void draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation);

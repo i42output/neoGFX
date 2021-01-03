@@ -110,6 +110,7 @@ namespace neogfx
         void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const override;
         void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const override;
+        void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const override;
         void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const override;

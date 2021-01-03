@@ -58,6 +58,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include "sticky_note.hpp"
+#include "node_widget.hpp"
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
@@ -136,25 +137,24 @@ namespace neogfx::DesignStudio
         return iElementsOrdered;
     }
 
-    void default_element_library::create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
+    void default_element_library::create_element(i_project& aProject, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
-        static const std::map<std::string, std::function<i_element* (const neolib::i_string&)>> sFactoryMethods =
+        static const std::map<std::string, std::function<i_element* (i_project& aProject, const neolib::i_string&)>> sFactoryMethods =
         {
-            #define MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, #Type, aElementId }; } },
-            #define MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, #Name, aElementId }; } },
+            #define MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_project& aProject, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aProject, #Type, aElementId }; } },
+            #define MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_project& aProject, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aProject, #Name, aElementId }; } },
             MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(project, i_project)
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
         {
-            aResult.reset((method->second)(aElementId));
+            aResult.reset((method->second)(aProject, aElementId));
             return;
         }
         throw unknown_element_type();
     }
 
     struct script {}; // todo
-    struct node {}; // todo
     struct build {}; // todo
 
     void default_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
@@ -173,7 +173,7 @@ namespace neogfx::DesignStudio
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2.5D_game, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(3D_game, app)
             MAKE_ELEMENT_FACTORY_FUNCTION(script)
-            MAKE_ELEMENT_FACTORY_FUNCTION(node)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(node, node_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(widget, widget<>)

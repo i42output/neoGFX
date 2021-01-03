@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/tools/DesignStudio/context_menu.hpp>
+#include <neogfx/tools/DesignStudio/i_node.hpp>
 #include "main_window.hpp"
 
 namespace neogfx::DesignStudio
@@ -39,6 +40,7 @@ namespace neogfx::DesignStudio
         themeColor{ aSettings.setting("environment.fonts_and_colors.theme"_s) },
         workspaceGridType{ aSettings.setting("environment.workspace.grid_type"_s) },
         workspaceGridSize{ aSettings.setting("environment.workspace.grid_size"_s) },
+        workspaceGridSubdivisions{ aSettings.setting("environment.workspace.grid_subdivisions"_s) },
         workspaceGridColor{ aSettings.setting("environment.workspace.grid_color"_s) },
         iLeftDock{ dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() }, ng::size{ leftDockWeight.value<double>() } },
         iRightDock{ dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() }, ng::size{ rightDockWeight.value<double>() } },
@@ -190,6 +192,8 @@ namespace neogfx::DesignStudio
         workspaceGridColor.changed(workspaceGridChanged);
         workspaceGridSize.changing(workspaceGridChanged);
         workspaceGridSize.changed(workspaceGridChanged);
+        workspaceGridSubdivisions.changing(workspaceGridChanged);
+        workspaceGridSubdivisions.changed(workspaceGridChanged);
 
         iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::drop_operation& aOperation)
         {
@@ -333,9 +337,9 @@ namespace neogfx::DesignStudio
                     tMouseSelectorMousePos = eventPos;
                     iProjectManager.active_project().root().visit([&](i_element& aElement)
                     {
-                        if (aElement.has_layout_item() && aElement.layout_item()->is_widget())
+                        if (aElement.has_layout_item() && aElement.layout_item().is_widget())
                         {
-                            auto& elementWidget = aElement.layout_item()->as_widget();
+                            auto& elementWidget = aElement.layout_item().as_widget();
                             if (rect{ tMouseSelectorAnchor->min(*tMouseSelectorMousePos), tMouseSelectorAnchor->max(*tMouseSelectorMousePos) }.contains(
                                 iWorkspace.view_stack().to_client_coordinates(elementWidget.to_window_coordinates(elementWidget.client_rect())).center()))
                                 aElement.select(true, false);
@@ -554,30 +558,71 @@ namespace neogfx::DesignStudio
         }
         else
         {
-            aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), scrollArea);
-            ng::size const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{ workspaceGridSize.value<uint32_t>(true), workspaceGridSize.value<uint32_t>(true) });
-            ng::basic_size<int32_t> const cells = ng::size{ scrollArea.cx / gridSize.cx, scrollArea.cy / gridSize.cy };
-            if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Lines)
+            if (workspaceGridType.value<workspace_grid>(true) != workspace_grid::None)
             {
-                for (int32_t x = 0; x <= cells.cx; ++x)
-                    aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, ng::color::White);
-                for (int32_t y = 0; y <= cells.cy; ++y)
-                    aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, ng::color::White);
-            }
-            else if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Quads)
-            {
-                for (int32_t x = 0; x <= cells.cx; ++x)
+                aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), scrollArea);
+                auto const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{
+                    workspaceGridSize.value<uint32_t>(true) / workspaceGridSubdivisions.value<uint32_t>(true),
+                        workspaceGridSize.value<uint32_t>(true) / workspaceGridSubdivisions.value<uint32_t>(true)});
+                ng::basic_size<int32_t> const cells = ng::size{ scrollArea.cx / gridSize.cx, scrollArea.cy / gridSize.cy };
+                if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Lines)
+                {
+                    for (int32_t x = 0; x <= cells.cx; ++x)
+                    {
+                        aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, ng::color::White);
+                    }
                     for (int32_t y = 0; y <= cells.cy; ++y)
-                        if ((x + y) % 2 == 0)
-                            aGc.fill_rect(ng::rect{ ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, gridSize }, ng::color::White);
+                    {
+                        aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, ng::color::White);
+                    }
+                }
+                else if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Quads)
+                {
+                    for (int32_t x = 0; x <= cells.cx; ++x)
+                        for (int32_t y = 0; y <= cells.cy; ++y)
+                            if ((x + y) % 2 == 0)
+                                aGc.fill_rect(ng::rect{ ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, gridSize }, ng::color::White);
+                }
+                else // Points
+                {
+                    for (int32_t x = 0; x <= cells.cx; ++x)
+                        for (int32_t y = 0; y <= cells.cy; ++y)
+                            aGc.draw_pixel(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, ng::color::White);
+                }
+                aGc.clear_gradient();
+                for (int32_t x = 0; x <= cells.cx; x += workspaceGridSubdivisions.value<uint32_t>(true))
+                {
+                    aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, service<i_app>().current_style().palette().color(color_role::Void));
+                }
+                for (int32_t y = 0; y <= cells.cy; y += workspaceGridSubdivisions.value<uint32_t>(true))
+                {
+                    aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, service<i_app>().current_style().palette().color(color_role::Void));
+                }
             }
-            else // Points
+        }
+        if (iProjectManager.project_active())
+        {
+            for (auto& e : iProjectManager.active_project().root())
             {
-                for (int32_t x = 0; x <= cells.cx; ++x)
-                    for (int32_t y = 0; y <= cells.cy; ++y)
-                        aGc.draw_pixel(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, ng::color::White);
+                if (e->group() == element_group::Node)
+                {
+                    auto& n = static_cast<i_node&>(*e);
+                    if (!n.connections().empty() && &n.connections()[0]->source().get() == &n)
+                    {
+                        auto const& w0 = n.connections()[0]->source().as_widget();
+                        auto const& w1 = n.connections()[0]->destination().as_widget();
+                        auto const r0 = iWorkspace.view_stack().to_client_coordinates(w0.icon().to_window_coordinates(w0.icon().client_rect()));
+                        auto const r1 = iWorkspace.view_stack().to_client_coordinates(w1.icon().to_window_coordinates(w1.icon().client_rect()));
+                        auto const placementRect = r0.combined(r1);
+                        aGc.draw_cubic_bezier(
+                            r0.center(),
+                            point{ placementRect.center().x, r0.center().y < r1.center().y ? placementRect.top() : placementRect.bottom() },
+                            point{ placementRect.center().x, r0.center().y < r1.center().y ? placementRect.bottom() : placementRect.top() },
+                            r1.center(),
+                            pen{ color::White, 2.0_dip });
+                    }
+                }
             }
-            aGc.clear_gradient();
         }
     }
 }

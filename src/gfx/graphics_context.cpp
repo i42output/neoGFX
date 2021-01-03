@@ -407,6 +407,11 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
     }
 
+    void graphics_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const
+    {
+        native_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, to_device_units(aP3) + iOrigin, aPen });
+    }
+
     void graphics_context::draw_path(const path& aPath, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)

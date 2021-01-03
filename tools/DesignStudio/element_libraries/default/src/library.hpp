@@ -48,7 +48,7 @@ namespace neogfx::DesignStudio
         const elements_ordered_t& elements_ordered() const override;
         // factory
     public:
-        void create_element(const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
+        void create_element(i_project& aProject, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
         void create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult) override;
         DesignStudio::element_group element_group(const neolib::i_string& aElementType) const override;
         i_texture const& element_icon(const neolib::i_string& aElementType) const override;

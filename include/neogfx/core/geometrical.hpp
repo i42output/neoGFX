@@ -842,6 +842,30 @@ namespace neogfx
             else
                 return self_type{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
         }
+        self_type with_x(coordinate_type c) const
+        {
+            auto result = *this;
+            result.extents().x = c;
+            return result;
+        }
+        self_type with_y(coordinate_type c) const
+        {
+            auto result = *this;
+            result.extents().y = c;
+            return result;
+        }
+        self_type with_cx(dimension_type d) const
+        { 
+            auto result = *this;
+            result.extents().cx = d;
+            return result;
+        }
+        self_type with_cy(dimension_type d) const 
+        { 
+            auto result = *this;
+            result.extents().cy = d;
+            return result;
+        }
         self_type with_centerd_origin() const
         {
             return self_type{ point_type{ -extents() / two }, extents() };

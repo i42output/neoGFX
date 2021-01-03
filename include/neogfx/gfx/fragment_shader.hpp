@@ -195,4 +195,26 @@ namespace neogfx
         cache_uniform(uStippleVertex)
         cache_uniform(uStippleEnabled)
     };
+
+    class standard_shape_shader : public standard_fragment_shader<i_shape_shader>
+    {
+    private:
+
+    public:
+        standard_shape_shader(std::string const& aName = "standard_shape_shader");
+    public:
+        void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
+    public:
+        bool shape_active() const override;
+        void clear_shape() override;
+        void set_cubic_bezier(const vec2& aP0, const vec2& aP1, const vec2& aP2, const vec2& aP3, scalar aWidth) override;
+    private:
+        cache_uniform(uShapeEnabled)
+        cache_uniform(uShape)
+        cache_uniform(uShapeP0)
+        cache_uniform(uShapeP1)
+        cache_uniform(uShapeP2)
+        cache_uniform(uShapeP3)
+        cache_uniform(uShapeWidth)
+    };
 }
