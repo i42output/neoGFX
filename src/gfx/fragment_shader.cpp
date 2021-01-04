@@ -674,6 +674,7 @@ namespace neogfx
                 "{\n"
                 "    return pow(1.0 - t, 3.0) * uShapeP0 + 3.0 * pow(1.0 - t, 2.0) * t * uShapeP1 + 3.0 * (1.0 - t) * pow(t, 2.0) * uShapeP2 + pow(t, 3.0) * uShapeP3;\n"
                 "}\n"
+                // todo: this implementation is rubbish: we need a kosher algorithm to find distance of point on a plane to the curve.
                 "void draw_cubic_bezier(inout vec4 color, inout vec4 function)\n"
                 "{\n"
                 "    float dx = uShapeP3.x - uShapeP0.x;\n"
