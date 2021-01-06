@@ -18,31 +18,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/gui/widget/widget.hpp>
-#include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gfx/texture_atlas.hpp>
+#include <chess/i_engine.hpp>
 
-#include <chess/i_board.hpp>
-#include <chess/i_move_validator.hpp>
-
-namespace chess::gui
+namespace chess
 {
-    class board : public i_board, public neogfx::widget<>
+    class engine : public i_engine
     {
     public:
-        board(neogfx::i_layout& aLayout, i_move_validator const& aMoveValidator);
-    protected:
-        void paint(neogfx::i_graphics_context& aGc) const override;
-    protected:
+        engine();
+    public:
         void reset() override;
-        void setup(player aTurn, chess::position const& aPosition) override;
+        void setup(player aTurn, position const& aPosition) override;
         bool move(coordinates aFrom, coordinates aTo) override;
     private:
-        neogfx::rect square_rect(coordinates aCoordinates) const;
-    private:
-        std::unordered_map<piece, neogfx::texture> iPieceTextures;
-        chess::position iPosition;
+        position iPosition;
         player iTurn;
-        i_move_validator const& iMoveValidator;
     };
 }

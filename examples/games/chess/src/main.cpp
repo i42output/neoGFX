@@ -6,6 +6,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/game_world.hpp>
+#include <chess/move_validator.hpp>
 #include <chess/board.hpp>
 
 namespace ng = neogfx;
@@ -28,7 +29,8 @@ int main(int argc, char* argv[])
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
 
         auto& window = *windowObject;
-        chess::board board{ window.client_layout() };
+        chess::move_validator moveValidator;
+        chess::gui::board board{ window.client_layout(), moveValidator };
 
         return app.exec();
     }
