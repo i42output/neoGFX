@@ -138,19 +138,27 @@ namespace neogfx
 
     void sub_texture::set_pixels(const i_image& aImage)
     {
-        size_u32 imageExtents = aImage.extents();
+        set_pixels(aImage, rect{ point{ 0.0, 0.0 }, aImage.extents() });
+    }
+
+    void sub_texture::set_pixels(const i_image& aImage, const rect& aImagePart)
+    {
+        size_u32 const imageExtents = aImage.extents();
+        point_u32 const imagePartOrigin = aImagePart.position();
+        size_u32 const imagePartExtents = aImagePart.extents();
         switch (aImage.color_format())
         {
         case color_format::RGBA8:
             {
                 const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
-                std::vector<uint8_t> data(imageExtents.cx * 4 * imageExtents.cy);
-                for (std::size_t y = 0; y < imageExtents.cy; ++y)
-                    for (std::size_t x = 0; x < imageExtents.cx; ++x)
+                std::vector<uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
+                    for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
                         for (std::size_t c = 0; c < 4; ++c)
-                            data[(imageExtents.cy - 1 - y) * imageExtents.cx * 4 + x * 4 + c] = imageData[y * imageExtents.cx * 4 + x * 4 + c];
-                set_pixels(rect{ point{}, aImage.extents() }, &data[0]);
+                            data[(imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
             }
+            break;
         }
     }
 

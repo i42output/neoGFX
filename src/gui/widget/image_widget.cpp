@@ -89,7 +89,7 @@ namespace neogfx
     {
         if (iTexture.is_empty())
             return;
-        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor ? shader_effect::Colorize : shader_effect::None);
+        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor != none ? shader_effect::Colorize : shader_effect::None);
     }
 
     const texture& image_widget::image() const
@@ -97,7 +97,7 @@ namespace neogfx
         return iTexture;
     }
 
-    const optional_color& image_widget::image_color() const
+    const color_or_gradient& image_widget::image_color() const
     {
         return iColor;
     }
@@ -127,7 +127,7 @@ namespace neogfx
         update();
     }
 
-    void image_widget::set_image_color(const optional_color& aImageColor)
+    void image_widget::set_image_color(const color_or_gradient& aImageColor)
     {
         iColor = aImageColor;
     }

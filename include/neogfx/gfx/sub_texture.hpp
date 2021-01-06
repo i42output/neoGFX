@@ -54,6 +54,7 @@ namespace neogfx
         size storage_extents() const override;
         void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
         void set_pixels(const i_image& aImage) override;
+        void set_pixels(const i_image& aImage, const rect& aImagePart) override;
         void set_pixel(const point& aPosition, const color& aColor) override;
         color get_pixel(const point& aPosition) const override;
     public:

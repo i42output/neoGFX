@@ -65,6 +65,16 @@ namespace neogfx
         return entry.first->second.second;
     }
 
+    i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage, const rect& aImagePart)
+    {
+        auto newSpace = allocate_space(aImagePart.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
+        auto nextId = iTextureManager.allocate_texture_id();
+        auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aImagePart.extents() })));
+        entry.first->second.second.set_pixels(aImage, aImagePart);
+        iTextureManager.add_sub_texture(entry.first->second.second);
+        return entry.first->second.second;
+    }
+
     void texture_atlas::destroy_sub_texture(i_sub_texture& aSubTexture)
     {
         auto iterEntry = iEntries.find(aSubTexture.atlas_id());

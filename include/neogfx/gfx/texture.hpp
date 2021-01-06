@@ -39,6 +39,7 @@ namespace neogfx
         texture(const neogfx::size& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, neogfx::color_space aColorSpace = neogfx::color_space::sRGB, const optional_color& aColor = optional_color());
         texture(const i_texture& aTexture);
         texture(const i_image& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
+        texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
         texture(const i_sub_texture& aSubTexture);
         ~texture();
         // operations
@@ -61,6 +62,7 @@ namespace neogfx
         size storage_extents() const override;
         void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
         void set_pixels(const i_image& aImage) override;
+        void set_pixels(const i_image& aImage, const rect& aImagePart) override;
         void set_pixel(const point& aPosition, const color& aColor) override;
         color get_pixel(const point& aPosition) const override;
     public:

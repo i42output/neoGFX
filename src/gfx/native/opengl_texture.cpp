@@ -178,7 +178,7 @@ namespace neogfx
     }
 
     template <typename T>
-    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, texture_data_format aDataFormat) :
+    opengl_texture<T>::opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat) :
         iManager{ aManager },
         iId{ aId },
         iUri{ aImage.uri() },
@@ -186,7 +186,7 @@ namespace neogfx
         iColorSpace{ aImage.color_space() },
         iSampling{ aImage.sampling() },
         iDataFormat{ aDataFormat },
-        iSize{ aImage.extents() },
+        iSize{ aImagePart.extents() },
         iStorageSize{ aImage.sampling() != texture_sampling::NormalMipmap ? 
             (aImage.sampling() != texture_sampling::Data ? decltype(iStorageSize){((iSize.cx + 2 - 1) / 16 + 1) * 16, ((iSize.cy + 2 - 1) / 16 + 1) * 16} : decltype(iStorageSize){iSize}) :
             decltype(iStorageSize){size{std::max(std::pow(2.0, std::ceil(std::log2(iSize.cx + 2))), 16.0), std::max(std::pow(2.0, std::ceil(std::log2(iSize.cy + 2))), 16.0)}} },
@@ -226,6 +226,9 @@ namespace neogfx
             {
             case color_format::RGBA8:
                 {
+                    size_u32 const imageExtents = aImage.extents();
+                    point_u32 const imagePartOrigin = aImagePart.position();
+                    size_u32 const imagePartExtents = aImagePart.extents();
                     std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
                     if constexpr (std::is_same_v<value_type, avec4u8>)
                     {
@@ -233,7 +236,7 @@ namespace neogfx
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c];
+                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c];
                     }
                     else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
                     {
@@ -241,7 +244,7 @@ namespace neogfx
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 for (std::size_t c = 0; c < 4; ++c)
-                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y - 1) * iSize.cx * 4 + (x - 1) * 4 + c] / 255.0f;
+                                    data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c] / 255.0f;
                     }
                     glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &data[0]));
                     if (sampling() == texture_sampling::NormalMipmap)
@@ -415,6 +418,28 @@ namespace neogfx
     void opengl_texture<T>::set_pixels(const i_image& aImage)
     {
         set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_pixels(const i_image& aImage, const rect& aImagePart)
+    {
+        size_u32 const imageExtents = aImage.extents();
+        point_u32 const imagePartOrigin = aImagePart.position();
+        size_u32 const imagePartExtents = aImagePart.extents();
+        switch (aImage.color_format())
+        {
+        case color_format::RGBA8:
+            {
+                const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                std::vector<uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
+                    for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
+                        for (std::size_t c = 0; c < 4; ++c)
+                            data[(imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
+            }
+            break;
+        }
     }
 
     template <typename T>

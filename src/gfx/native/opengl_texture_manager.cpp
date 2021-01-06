@@ -56,7 +56,7 @@ namespace neogfx
         }
     }
 
-    void opengl_texture_manager::create_texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult)
+    void opengl_texture_manager::create_texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult)
     {
         auto existing = find_texture(aImage);
         if (existing != textures().end())
@@ -70,10 +70,10 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                aResult = add_texture(make_ref<opengl_texture<avec4u8>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<avec4u8>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));
                 break;
             case texture_data_type::Float:
-                aResult = add_texture(make_ref<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));
                 break;
             }
             break;
@@ -82,10 +82,10 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                aResult = add_texture(make_ref<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<uint8_t>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));
                 break;
             case texture_data_type::Float:
-                aResult = add_texture(make_ref<opengl_texture<float>>(*this, allocate_texture_id(), aImage, aDataFormat));
+                aResult = add_texture(make_ref<opengl_texture<float>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));
                 break;
             }
             break;

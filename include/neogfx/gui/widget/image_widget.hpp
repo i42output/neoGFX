@@ -45,11 +45,11 @@ namespace neogfx
         virtual void paint(i_graphics_context& aGc) const;
     public:
         const texture& image() const;
-        const optional_color& image_color() const;
+        const color_or_gradient& image_color() const;
         void set_image(std::string const& aImageUri);
         void set_image(const i_image& aImage);
         void set_image(const i_texture& aImage);
-        void set_image_color(const optional_color& aImageColor);
+        void set_image_color(const color_or_gradient& aImageColor);
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio);
         void set_placement(cardinal aPlacement);
         void set_dpi_auto_scale(bool aDpiAutoScale);
@@ -57,7 +57,7 @@ namespace neogfx
         rect placement_rect() const;
     private:
         texture iTexture;
-        optional_color iColor;
+        color_or_gradient iColor;
         neogfx::aspect_ratio iAspectRatio;
         cardinal iPlacement;
         bool iDpiAutoScale;

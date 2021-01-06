@@ -756,6 +756,7 @@ namespace neogfx
     const sRGB_color sRGB_color::Sienna2 = sRGB_color{ 0xEE, 0x79, 0x42 };
     const sRGB_color sRGB_color::Sienna3 = sRGB_color{ 0xCD, 0x68, 0x39 };
     const sRGB_color sRGB_color::Sienna4 = sRGB_color{ 0x8B, 0x47, 0x26 };
+    const sRGB_color sRGB_color::Silver = sRGB_color{ 0xC0, 0xC0, 0xC0 };
     const sRGB_color sRGB_color::SkyBlue = sRGB_color{ 0x87, 0xCE, 0xEB };
     const sRGB_color sRGB_color::SkyBlue1 = sRGB_color{ 0x87, 0xCE, 0xFF };
     const sRGB_color sRGB_color::SkyBlue2 = sRGB_color{ 0x7E, 0xC0, 0xEE };
@@ -1506,8 +1507,9 @@ namespace neogfx
                 { "sienna1", Sienna1 },
                 { "sienna2", Sienna2 },
                 { "sienna3", Sienna3 },
-                { "sienna4", Sienna4 },
+                { "silver", Silver },
                 { "sky blue", SkyBlue },
+                { "sienna4", Sienna4 },
                 { "SkyBlue", SkyBlue },
                 { "SkyBlue1", SkyBlue1 },
                 { "SkyBlue2", SkyBlue2 },

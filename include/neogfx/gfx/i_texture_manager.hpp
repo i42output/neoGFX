@@ -54,11 +54,15 @@ namespace neogfx
         virtual void create_texture(neogfx::size const& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, color_space aColorSpace, optional_color const& aColor, i_ref_ptr<i_texture>& aResult) = 0;
         ref_ptr<i_texture> create_texture(i_image const& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte)
         {
+            return create_texture(aImage, rect{ point{}, aImage.extents() }, aDataFormat, aDataType);
+        }
+        ref_ptr<i_texture> create_texture(i_image const& aImage, const rect& aImagePart, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte)
+        {
             ref_ptr<i_texture> result;
-            create_texture(aImage, aDataFormat, aDataType, result);
+            create_texture(aImage, aImagePart, aDataFormat, aDataType, result);
             return result;
         }
-        virtual void create_texture(i_image const& aImage, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult) = 0;
+        virtual void create_texture(i_image const& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult) = 0;
         virtual void clear_textures() = 0;
     public:
         virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;

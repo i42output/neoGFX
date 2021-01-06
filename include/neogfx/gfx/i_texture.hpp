@@ -97,6 +97,7 @@ namespace neogfx
         virtual size storage_extents() const = 0;
         virtual void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) = 0;
         virtual void set_pixels(const i_image& aImage) = 0;
+        virtual void set_pixels(const i_image& aImage, const rect& aImagePart) = 0;
         virtual void set_pixel(const point& aPosition, const color& aColor) = 0;
         virtual color get_pixel(const point& aPosition) const = 0;
     public:

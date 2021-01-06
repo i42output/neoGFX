@@ -53,9 +53,9 @@ namespace neogfx::DesignStudio
             });
         }
     public:
-        neogfx::color color() const override
+        color_or_gradient color() const override
         {
-            return iPinIcon.image_color() ? *iPinIcon.image_color() : palette_color(color_role::Text);
+            return iPinIcon.image_color() != none ? iPinIcon.image_color() : palette_color(color_role::Text);
         }
         i_widget const& icon() const override
         {

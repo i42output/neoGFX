@@ -832,6 +832,17 @@ namespace neogfx
                     return basic_rect{};
             }
         }
+        self_type& center_on(const self_type& other)
+        {
+            *this = centered_on(other);
+            return *this;
+        }
+        self_type centered_on(const self_type other) const
+        {
+            auto result = *this;
+            result.position() += (other.center() - center());
+            return result;
+        }
         self_type& combine(const self_type& other)
         {
             *this = combined(other);
@@ -847,13 +858,13 @@ namespace neogfx
         self_type with_x(coordinate_type c) const
         {
             auto result = *this;
-            result.extents().x = c;
+            result.position().x = c;
             return result;
         }
         self_type with_y(coordinate_type c) const
         {
             auto result = *this;
-            result.extents().y = c;
+            result.position().y = c;
             return result;
         }
         self_type with_cx(dimension_type d) const

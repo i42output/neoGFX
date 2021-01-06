@@ -67,11 +67,12 @@ namespace neogfx
     public:
         texture_atlas(const size& aPageSize);
     public:
-        virtual const i_sub_texture& sub_texture(texture_id aSubTextureId) const;
-        virtual i_sub_texture& sub_texture(texture_id aSubTextureId);
-        virtual i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA);
-        virtual i_sub_texture& create_sub_texture(const i_image& aImage);
-        virtual void destroy_sub_texture(i_sub_texture& aSubTexture);
+        const i_sub_texture& sub_texture(texture_id aSubTextureId) const override;
+        i_sub_texture& sub_texture(texture_id aSubTextureId) override;
+        i_sub_texture& create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat = texture_data_format::RGBA) override;
+        i_sub_texture& create_sub_texture(const i_image& aImage) override;
+        i_sub_texture& create_sub_texture(const i_image& aImage, const rect& aImagePart) override;
+        void destroy_sub_texture(i_sub_texture& aSubTexture) override;
     private:
         const size& page_size() const;
         pages::iterator create_page(dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat);

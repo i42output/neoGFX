@@ -52,7 +52,7 @@ namespace neogfx::DesignStudio
             return false;
         }
     public:
-        neogfx::color color() const override
+        neogfx::color_or_gradient color() const override
         {
             return as_widget().color();
         }

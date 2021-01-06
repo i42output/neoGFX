@@ -945,6 +945,7 @@ namespace neogfx
         static const sRGB_color Sienna2;
         static const sRGB_color Sienna3;
         static const sRGB_color Sienna4;
+        static const sRGB_color Silver;
         static const sRGB_color SkyBlue;
         static const sRGB_color SkyBlue1;
         static const sRGB_color SkyBlue2;

@@ -1130,40 +1130,40 @@ namespace neogfx
             iPassword = std::nullopt;
     }
 
-    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const optional_color& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const color_or_gradient& aColor, shader_effect aShaderEffect) const
     {
-        draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, aColor, aShaderEffect);
+        draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, with_bounding_box(aColor, rect{ aPoint, aTexture.extents() }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const optional_color& aColor, shader_effect aShaderEffect) const
-    {
-        if (logical_coordinates().is_gui_orientation())
-            draw_texture(to_ecs_component(aRect), aTexture, aColor, aShaderEffect);
-        else
-            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aColor, aShaderEffect);
-    }
-
-    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect) const
-    {
-        draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, aColor, aShaderEffect);
-    }
-
-    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const color_or_gradient& aColor, shader_effect aShaderEffect) const
     {
         if (logical_coordinates().is_gui_orientation())
-            draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, aColor, aShaderEffect);
+            draw_texture(to_ecs_component(aRect), aTexture, with_bounding_box(aColor, aRect), aShaderEffect);
         else
-            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, aColor, aShaderEffect);
+            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, with_bounding_box(aColor, game_rect{ aRect }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_color& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    {
+        draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, with_bounding_box(aColor, rect{ aPoint, aTextureRect.extents() }), aShaderEffect);
+    }
+
+    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    {
+        if (logical_coordinates().is_gui_orientation())
+            draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, with_bounding_box(aColor, aRect), aShaderEffect);
+        else
+            draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, with_bounding_box(aColor, game_rect{ aRect }), aShaderEffect);
+    }
+
+    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const color_or_gradient& aColor, shader_effect aShaderEffect) const
     {
         draw_mesh(
             aMesh, 
             game::material
             { 
-                aColor != std::nullopt ? game::color{ *aColor } : std::optional<game::color>{},
-                {}, 
+                std::holds_alternative<color>(aColor) ? game::color{ to_ecs_component(std::get<color>(aColor)) } : std::optional<game::color>{},
+                std::holds_alternative<gradient>(aColor) ? game::gradient{ to_ecs_component(std::get<gradient>(aColor)) } : std::optional<game::gradient>{},
                 {},
                 to_ecs_component(aTexture),
                 aShaderEffect
@@ -1171,7 +1171,7 @@ namespace neogfx
             optional_mat44{});
     }
 
-    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor, shader_effect aShaderEffect) const
     {
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)

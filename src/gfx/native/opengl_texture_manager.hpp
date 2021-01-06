@@ -28,6 +28,6 @@ namespace neogfx
     {
     public:
         void create_texture(const neogfx::size& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, color_space aColorSpace, const optional_color& aColor, i_ref_ptr<i_texture>& aResult) override;
-        void create_texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult) override;
+        void create_texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult) override;
     };
 }

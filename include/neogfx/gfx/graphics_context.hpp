@@ -171,12 +171,12 @@ namespace neogfx
         bool password() const override;
         std::string const& password_mask() const override;
         void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F") override;
-        void draw_texture(const point& aPoint, const i_texture& aTexture, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
-        void draw_texture(const rect& aRect, const i_texture& aTexture, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
-        void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
-        void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
-        void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
-        void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
+        void draw_texture(const point& aPoint, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
+        void draw_texture(const rect& aRect, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
+        void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
+        void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
+        void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
+        void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const override;
         void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) const override;
 
         // implementation

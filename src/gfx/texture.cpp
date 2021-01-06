@@ -43,6 +43,11 @@ namespace neogfx
     {
     }
 
+    texture::texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType) :
+        iNativeTexture{ service<i_texture_manager>().create_texture(aImage, aImagePart, aDataFormat, aDataType) }
+    {
+    }
+
     texture::texture(const i_sub_texture& aSubTexture) :
         iNativeTexture{ !aSubTexture.atlas_texture().is_empty() ? aSubTexture.atlas_texture().native_texture() : ref_ptr<i_texture>{} },
         iSubTexture{ aSubTexture }
@@ -159,6 +164,27 @@ namespace neogfx
     void texture::set_pixels(const i_image& aImage)
     {
         set_pixels(rect{ point{}, aImage.extents() }, aImage.cpixels());
+    }
+
+    void texture::set_pixels(const i_image& aImage, const rect& aImagePart)
+    {
+        size_u32 const imageExtents = aImage.extents();
+        point_u32 const imagePartOrigin = aImagePart.position();
+        size_u32 const imagePartExtents = aImagePart.extents();
+        switch (aImage.color_format())
+        {
+        case color_format::RGBA8:
+            {
+                const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                std::vector<uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
+                    for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
+                        for (std::size_t c = 0; c < 4; ++c)
+                            data[(imagePartExtents.cy - 1 - y) * imagePartExtents.cx * 4 + x * 4 + c] = imageData[(y + imagePartOrigin.y) * imageExtents.cx * 4 + (x + imagePartOrigin.x) * 4 + c];
+                set_pixels(rect{ point{}, imagePartExtents }, &data[0]);
+            }
+            break;
+        }
     }
 
     void texture::set_pixel(const point& aPosition, const color& aColor)
