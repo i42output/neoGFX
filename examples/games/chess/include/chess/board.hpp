@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
@@ -34,12 +35,25 @@ namespace chess::gui
     protected:
         void paint(neogfx::i_graphics_context& aGc) const override;
     protected:
+        void mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
+        void mouse_button_released(neogfx::mouse_button aButton, const neogfx::point& aPosition) override;
+        void mouse_moved(const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
+        void mouse_entered(const neogfx::point& aPosition) override;
+        void mouse_left() override;
+    protected:
         void reset() override;
         void setup(player aTurn, chess::position const& aPosition) override;
         bool play(chess::move const& aMove) override;
     private:
+        void animate();
         neogfx::rect square_rect(coordinates aCoordinates) const;
+        std::optional<coordinates> at(neogfx::point const& aPosition) const;
     private:
+        neolib::callback_timer iAnimator;
+        std::optional<coordinates> iCursor;
+        std::optional<coordinates> iSelection;
+        std::optional<neogfx::point> iSelectionPosition;
         std::unordered_map<piece, neogfx::texture> iPieceTextures;
         chess::position iPosition;
         player iTurn;

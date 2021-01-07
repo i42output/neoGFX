@@ -22,9 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    struct move_table
+    {
+        // todo
+    };
+
+    move_table generate_move_table();
+        
     class move_validator : public i_move_validator
     {
     public:
         bool can_move(player aTurn, position const& aPosition, move const& aMove) const override;
+    private:
+
     };
 }

@@ -134,6 +134,7 @@ namespace neogfx
         basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
         basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy }; }
         basic_delta with_dy(coordinate_type dy) const { return basic_delta{ dx, dy }; }
+        coordinate_type magnitude() const { return std::sqrt(dx * dx + dy * dy); }
     public:
         template <typename T>
         basic_delta<T> as() const

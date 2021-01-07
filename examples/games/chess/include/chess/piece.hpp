@@ -30,7 +30,9 @@ namespace chess
         Bishop  = 0x02,
         Rook    = 0x03,
         Queen   = 0x04,
-        King    = 0x05
+        King    = 0x05,
+
+        COUNT   = 0x06
     };
 
     enum class piece : uint8_t
