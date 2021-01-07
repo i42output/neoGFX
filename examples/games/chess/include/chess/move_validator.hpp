@@ -25,6 +25,6 @@ namespace chess
     class move_validator : public i_move_validator
     {
     public:
-        bool can_move(player aTurn, position const& aPosition, coordinates aFrom, coordinates aTo) const override;
+        bool can_move(player aTurn, position const& aPosition, move const& aMove) const override;
     };
 }

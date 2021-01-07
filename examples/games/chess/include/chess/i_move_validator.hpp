@@ -27,6 +27,6 @@ namespace chess
     public:
         virtual ~i_move_validator() = default;
     public:
-        virtual bool can_move(player aTurn, position const& aPosition, coordinates aFrom, coordinates aTo) const = 0;
+        virtual bool can_move(player aTurn, position const& aPosition, move const& aMove) const = 0;
     };
 }

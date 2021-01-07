@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <chess/primitives.hpp>
 
-namespace chess
+namespace chess::gui
 {
     class i_board
     {
@@ -29,6 +29,6 @@ namespace chess
     public:
         virtual void reset() = 0;
         virtual void setup(player aTurn, position const& aPosition) = 0;
-        virtual bool move(coordinates aFrom, coordinates aTo) = 0;
+        virtual bool play(move const& aMove) = 0;
     };
 }

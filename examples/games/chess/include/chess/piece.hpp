@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <cstdint>
+#include <stdexcept>
 
 namespace chess
 {
@@ -63,6 +64,35 @@ namespace chess
         TYPE_MASK   = Pawn | Knight | Bishop | Rook | Queen | King,
         COLOR_MASK  = White | Black
     };
+
+    struct invalid_piece_character : std::runtime_error { invalid_piece_character() : std::runtime_error{ "chess::invalid_piece_character" } {} };
+
+    inline piece parse_piece_character(char aCharacter)
+    {
+        switch (aCharacter)
+        {
+        case 'p':
+        case 'P':
+            return piece::Pawn;
+        case 'n':
+        case 'N':
+            return piece::Knight;
+        case 'b':
+        case 'B':
+            return piece::Bishop;
+        case 'r':
+        case 'R':
+            return piece::Rook;
+        case 'q':
+        case 'Q':
+            return piece::Queen;
+        case 'k':
+        case 'K':
+            return piece::King;
+        default:
+            throw invalid_piece_character();
+        }
+    }
 
     inline piece operator&(piece lhs, piece rhs)
     {

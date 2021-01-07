@@ -29,7 +29,7 @@ namespace chess
     public:
         void reset() override;
         void setup(player aTurn, position const& aPosition) override;
-        bool move(coordinates aFrom, coordinates aTo) override;
+        bool play(move const& aMove) override;
     private:
         position iPosition;
         player iTurn;

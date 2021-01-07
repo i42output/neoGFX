@@ -36,7 +36,7 @@ namespace chess
         iTurn = aTurn;
     }
 
-    bool engine::move(coordinates aFrom, coordinates aTo)
+    bool engine::play(move const& aMove)
     {
         // todo
         return false;

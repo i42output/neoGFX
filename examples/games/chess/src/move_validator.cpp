@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    bool move_validator::can_move(player aTurn, position const& aPosition, coordinates aFrom, coordinates aTo) const
+    bool move_validator::can_move(player aTurn, position const& aPosition, move const& aMove) const
     {
         // todo
         return true;

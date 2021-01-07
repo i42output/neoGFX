@@ -64,9 +64,9 @@ namespace chess::gui
         iTurn = aTurn;
     }
 
-    bool board::move(coordinates aFrom, coordinates aTo)
+    bool board::play(chess::move const& aMove)
     {
-        if (!iMoveValidator.can_move(iTurn, iPosition, aFrom, aTo))
+        if (!iMoveValidator.can_move(iTurn, iPosition, aMove))
             return false;
         // todo
         return true;

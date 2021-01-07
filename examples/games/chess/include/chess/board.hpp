@@ -36,7 +36,7 @@ namespace chess::gui
     protected:
         void reset() override;
         void setup(player aTurn, chess::position const& aPosition) override;
-        bool move(coordinates aFrom, coordinates aTo) override;
+        bool play(chess::move const& aMove) override;
     private:
         neogfx::rect square_rect(coordinates aCoordinates) const;
     private:
