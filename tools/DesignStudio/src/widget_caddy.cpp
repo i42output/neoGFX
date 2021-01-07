@@ -40,7 +40,7 @@ namespace neogfx::DesignStudio
             aAnimator.again();
             if (has_element() && (element().mode() != element_mode::None || element().is_selected() || entered()))
                 update(); 
-        }, 20 }
+        }, std::chrono::milliseconds{ 20 } }
     {
         element().set_caddy(*this);
         bring_to_front();

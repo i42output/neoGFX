@@ -270,7 +270,7 @@ namespace neogfx
                 else
                     iButtonBox->disable_role(button_role::Reject);
             }
-        }, 100);
+        }, std::chrono::milliseconds{ 100 });
         if (has_layout(standard_layout::StatusBar))
             non_client_layout().add_at(non_client_layout().index_of(status_bar_layout()), iButtonBoxLayout);
         else

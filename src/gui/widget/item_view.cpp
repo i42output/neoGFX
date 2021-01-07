@@ -462,7 +462,7 @@ namespace neogfx
                                     else
                                         select(*item);
                                 }
-                            }, 20);
+                            }, std::chrono::milliseconds{ 20 });
                         }
                     }
                     else

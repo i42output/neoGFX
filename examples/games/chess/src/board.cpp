@@ -24,7 +24,7 @@ namespace chess::gui
 {
     board::board(neogfx::i_layout& aLayout, i_move_validator const& aMoveValidator) :
         neogfx::widget<>{ aLayout },
-        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, 20, false },
+        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 1 } },
         iTurn{ player::Invalid },
         iMoveValidator{ aMoveValidator }
     {
@@ -176,6 +176,7 @@ namespace chess::gui
         // todo: update engine
         iPosition[aMove.to.y][aMove.to.x] = iPosition[aMove.from.y][aMove.from.x];
         iPosition[aMove.from.y][aMove.from.x] = piece::None;
+        iTurn = (iTurn == player::White ? player::Black : player::White);
         update();
         return true;
     }

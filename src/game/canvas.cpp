@@ -228,7 +228,7 @@ namespace neogfx::game
                 ecs().resume_all_systems();
                 iEcsPaused = false;
             }
-        }, 1000u);
+        }, std::chrono::milliseconds{ 1000 });
 
         Painting([this](i_graphics_context& aGc)
         {

@@ -37,7 +37,7 @@ namespace neogfx
         };
     public:
         close_button(i_tab& aParent) :
-            push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ service<i_async_task>(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, 20 }
+            push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ service<i_async_task>(), [this](neolib::callback_timer& aTimer) { aTimer.again(); update_appearance(); }, std::chrono::milliseconds{ 20 } }
         {
             set_padding(neogfx::padding{ 2.0 });
             iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Color) == style_aspect::Color) update_textures(); });

@@ -49,7 +49,7 @@ namespace neogfx
                     std::distance(iEventQueue.cbegin(), e1) < std::distance(iEventQueue.cbegin(), e2)))
                     push_event(window_event{ window_event_type::NonClientLeave });
             }
-        }, 10 },
+        }, std::chrono::milliseconds{ 10 } },
         iPaused{ 0 }
     {
         set_alive();

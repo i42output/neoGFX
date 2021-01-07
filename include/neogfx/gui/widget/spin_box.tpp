@@ -242,10 +242,10 @@ namespace neogfx
             do_step(step_direction::Up);
             iStepper.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                aTimer.set_duration(125, true);
+                aTimer.set_duration(std::chrono::milliseconds{ 125 }, true);
                 aTimer.again();
                 do_step(step_direction::Up);
-            }, 500);
+            }, std::chrono::milliseconds{ 500 });
         };
         iSink += iStepUpButton.Pressed(step_up);
         iSink += iStepUpButton.clicked([this]()
@@ -264,10 +264,10 @@ namespace neogfx
             do_step(step_direction::Down);
             iStepper.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                aTimer.set_duration(125, true);
+                aTimer.set_duration(std::chrono::milliseconds{ 125 }, true);
                 aTimer.again();
                 do_step(step_direction::Down);
-            }, 500);
+            }, std::chrono::milliseconds{ 500 });
         };
         iSink += iStepDownButton.Pressed(step_down);
         iSink += iStepDownButton.clicked([this]()

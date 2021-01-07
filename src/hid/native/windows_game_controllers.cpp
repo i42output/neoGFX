@@ -191,7 +191,7 @@ namespace neogfx
                 aTimer.again();
                 if (iEnumerationRequested)
                     do_enumerate_controllers();
-            }, 500u },
+            }, std::chrono::milliseconds{ 500 } },
             iDirectInput{ nullptr }
         {
             auto result = ::CoCreateInstance(CLSID_DirectInput8, NULL, CLSCTX_INPROC_SERVER, IID_IDirectInput8, (LPVOID*)&iDirectInput);

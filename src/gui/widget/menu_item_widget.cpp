@@ -387,7 +387,7 @@ namespace neogfx
                         if (!destroyed)
                             update();
                         iSubMenuOpener.reset();
-                    }, 250);
+                    }, std::chrono::milliseconds{ 250 });
                 }
             }
         });

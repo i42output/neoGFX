@@ -247,7 +247,7 @@ namespace neogfx
         {
             aTimer.again();
             next_frame();
-        }, 10 }, 
+        }, std::chrono::milliseconds{ 10 } },
         iZeroHour{ std::chrono::high_resolution_clock::now() },
         iAnimationTime{ 0.0 }
     {

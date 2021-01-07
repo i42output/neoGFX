@@ -94,7 +94,7 @@ namespace neogfx
                     aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
                 else
                     again();
-            }, 10 },
+            }, std::chrono::milliseconds{ 10 } },
             iRow{ 0 }
         {
         }

@@ -126,7 +126,7 @@ namespace neogfx
             {
                 aTimer.again();
                 animate();
-            }, 10, true },
+            }, std::chrono::milliseconds{ 10 }, true },
             iTracking{ false }
         {
             iSink += surface().closed([this]() { iAnimationTimer.cancel(); });

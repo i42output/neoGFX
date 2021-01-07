@@ -269,7 +269,7 @@ namespace neogfx
         {
             iAnimator.again();
             animate();
-        }, 16 },
+        }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotfiyTextChanged{ 0u },
         iOutOfMemory{ false }
@@ -288,7 +288,7 @@ namespace neogfx
         {
             iAnimator.again();
             animate();
-        }, 16 },
+        }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotfiyTextChanged{ 0u },
         iOutOfMemory{ false }
@@ -307,7 +307,7 @@ namespace neogfx
         {
             iAnimator.again();
             animate();
-        }, 16 },
+        }, std::chrono::milliseconds{ 16 } },
         iSuppressTextChangedNotification{ 0u },
         iWantedToNotfiyTextChanged{ 0u },
         iOutOfMemory{ false }
@@ -1200,7 +1200,7 @@ namespace neogfx
             {
                 aTimer.again();
                 set_cursor_position(root().mouse_position() - origin(), false);
-            }, 250);
+            }, std::chrono::milliseconds{ 250 });
         }
     }
 

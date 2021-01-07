@@ -29,7 +29,7 @@ namespace neogfx
         {
             aTimer.again();
             update_state();
-        }, 50u },
+        }, std::chrono::milliseconds{ 50 } },
         iButtonMap{ aButtonMap }
     {
     }

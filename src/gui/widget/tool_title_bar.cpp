@@ -31,7 +31,7 @@ namespace neogfx
         {
             aTimer.again();
             update_state();
-        }, 100},
+        }, std::chrono::milliseconds{ 100 } },
         iLayout{ *this },
         iTitle{ iLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
         iPinButton{ iLayout, push_button_style::TitleBar },

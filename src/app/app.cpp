@@ -219,7 +219,7 @@ namespace neogfx
                 actionDelete.disable();
                 actionSelectAll.disable();
             }
-        }, 100 },
+        }, std::chrono::milliseconds{ 100 } },
         iAppContext{ *this, "neogfx::app::iAppContext" },
         actionFileNew{ "&New..."_t, ":/neogfx/resources/icons/new.png" },
         actionFileOpen{ "&Open..."_t, ":/neogfx/resources/icons/open.png" },

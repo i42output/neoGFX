@@ -460,41 +460,41 @@ namespace neogfx
             set_position(position() - step());
             iTimer = std::make_shared<neolib::callback_timer>(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                aTimer.set_duration(50);
+                aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
                 if (!iPaused)
                     set_position(position() - step());
-            }, 500);
+            }, std::chrono::milliseconds{ 500 });
             break;
         case scrollbar_element::DownButton:
             set_position(position() + step());
             iTimer = std::make_shared<neolib::callback_timer>(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                aTimer.set_duration(50);
+                aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
                 if (!iPaused)
                     set_position(position() + step());
-            }, 500);
+            }, std::chrono::milliseconds{ 500 });
             break;
         case scrollbar_element::PageUpArea:
             set_position(position() - page());
             iTimer = std::make_shared<neolib::callback_timer>(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                aTimer.set_duration(50);
+                aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
                 if (!iPaused)
                     set_position(position() - page());
-            }, 500);
+            }, std::chrono::milliseconds{ 500 });
             break;
         case scrollbar_element::PageDownArea:
             set_position(position() + page());
             iTimer = std::make_shared<neolib::callback_timer>(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
-                aTimer.set_duration(50);
+                aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
                 if (!iPaused)
                     set_position(position() + page());
-            }, 500);
+            }, std::chrono::milliseconds{ 500 });
             break;
         case scrollbar_element::Thumb:
             iThumbClickedPosition = iContainer.as_widget().root().mouse_position();
@@ -570,7 +570,7 @@ namespace neogfx
                     g.cx = element_geometry(scrollbar_element::DownButton).left() - 1.0 - g.x;
                     set_position(position() + static_cast<value_type>(delta.x * 0.25f / g.width()) * (maximum() - minimum()));
                 }
-            }, 50);
+            }, std::chrono::milliseconds{ 50 });
         }
     }
 

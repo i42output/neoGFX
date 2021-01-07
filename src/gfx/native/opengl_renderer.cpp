@@ -47,7 +47,7 @@ namespace neogfx
             ++iCounter;
             for (auto w : iWidgets)
                 w->update();
-        }, aDuration }, iCounter{ 0 }
+        }, std::chrono::milliseconds{ aDuration } }, iCounter{ 0 }
     {
     }
 

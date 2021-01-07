@@ -336,7 +336,7 @@ int main(int argc, char* argv[])
                     app.actionPasteAndGo.disable();
                 }
             }
-        }, 100 };
+        }, std::chrono::milliseconds{ 100 } };
 
         app.actionPasteAndGo.triggered([&app]()
         {
@@ -771,7 +771,7 @@ int main(int argc, char* argv[])
                 randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb<ng::color>();
                 window.button6.set_base_color(randomColor);
             }
-        }, 16);
+        }, std::chrono::milliseconds{ 16 });
 
         app.action_file_new().triggered([&]()
         {
@@ -1372,7 +1372,7 @@ int main(int argc, char* argv[])
             if (!window.has_native_window())
                 return;
             bool canUpdateCanvas = !ecs && window.canvasInstancing.can_update();
-            aTimer.set_duration(window.pageDrawing.can_update() || canUpdateCanvas ? 0u : 1u);
+            aTimer.set_duration(window.pageDrawing.can_update() || canUpdateCanvas ? std::chrono::milliseconds{ 0 } : std::chrono::milliseconds{ 1 });
             aTimer.again();
             window.pageDrawing.update();
             window.canvasInstancing.update();
@@ -1388,7 +1388,7 @@ int main(int argc, char* argv[])
                 if (gameEcs->system<ng::game::collision_detector>().can_apply())
                     gameEcs->system<ng::game::collision_detector>().apply();
             }
-        }, 1u };
+        }, std::chrono::milliseconds{ 1 } };
 
         return app.exec();
     }

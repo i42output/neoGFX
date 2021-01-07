@@ -93,7 +93,7 @@ namespace neogfx
                 "NUM" : std::string{});
             scrlLock->set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
                 "SCRL" : std::string{});
-        }, 100);
+        }, std::chrono::milliseconds{ 100 });
     }
 
     neogfx::size_policy status_bar::keyboard_lock_status::size_policy() const
