@@ -47,6 +47,9 @@ namespace chess
 
     bool move_validator::can_move(player aTurn, position const& aPosition, move const& aMove) const
     {
+        if (piece_color(aPosition[aMove.from.y][aMove.from.x]) != static_cast<piece>(aTurn))
+            return false;
+        // todo
         return true;
     }
 }

@@ -67,7 +67,7 @@ namespace chess::gui
                             {
                                 auto pieceColor = piece_color(occupier) == piece::White ? neogfx::color::Goldenrod : neogfx::color::Silver;
                                 neogfx::point mousePosition = root().mouse_position() - origin();
-                                auto adjust = (!selectedOccupier || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
+                                auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
                                     neogfx::point{} : mousePosition - *iSelectionPosition);
                                 aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), neogfx::gradient{ pieceColor.lighter(0x80), pieceColor }, neogfx::shader_effect::Colorize);
                             }
@@ -104,6 +104,12 @@ namespace chess::gui
                     iSelectionPosition = aPosition;
                     iSelection = pos;
                 }
+                else if (iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, *pos }))
+                {
+                    play(chess::move{ *iSelection, *pos });
+                    iSelectionPosition = std::nullopt;
+                    iSelection = std::nullopt;
+                }
             }
         }
         update();
@@ -116,12 +122,20 @@ namespace chess::gui
 
     void board::mouse_button_released(neogfx::mouse_button aButton, const neogfx::point& aPosition)
     {
+        bool wasCapturing = capturing();
         widget<>::mouse_button_released(aButton, aPosition);
-        auto pos = at(aPosition);
-        if (pos != iSelection)
+        if (wasCapturing)
         {
-            iSelectionPosition = std::nullopt;
-            iSelection = std::nullopt;
+            if (iSelection)
+            {
+                iSelectionPosition = std::nullopt;
+                auto pos = at(aPosition);
+                if (pos && pos != *iSelection)
+                {
+                    play(chess::move{ *iSelection, *pos });
+                    iSelection = std::nullopt;
+                }
+            }
         }
         update();
     }
@@ -159,7 +173,10 @@ namespace chess::gui
     {
         if (!iMoveValidator.can_move(iTurn, iPosition, aMove))
             return false;
-        // todo
+        // todo: update engine
+        iPosition[aMove.to.y][aMove.to.x] = iPosition[aMove.from.y][aMove.from.x];
+        iPosition[aMove.from.y][aMove.from.x] = piece::None;
+        update();
         return true;
     }
 
