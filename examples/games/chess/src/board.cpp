@@ -42,25 +42,28 @@ namespace chess::gui
 
     void board::paint(neogfx::i_graphics_context& aGc) const
     {
-        for (int32_t pass = 1; pass <= 3; ++pass)
+        int32_t constexpr RENDER_BOARD                  = 1;
+        int32_t constexpr RENDER_NON_SELECTED_PIECES    = 2;
+        int32_t constexpr RENDER_SELECTED_PIECES        = 3;
+        for (int32_t pass = RENDER_BOARD; pass <= RENDER_SELECTED_PIECES; ++pass)
             for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
                 for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
                 {
                     auto const squareRect = square_rect({ x, y });
                     switch (pass)
                     {
-                    case 1: // board
+                    case RENDER_BOARD:
                         aGc.fill_rect(squareRect, (x + y) % 2 == 0 ? neogfx::color::Gray25 : neogfx::color::Burlywood);
                         if (iCursor && *iCursor == coordinates{ x, y } && iCursor != iSelection)
                             aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection));
                         else if (iSelection && *iSelection == coordinates{ x, y })
                             aGc.fill_rect(squareRect, neogfx::color::White);
                         break;
-                    case 2: // non-selected pieces
-                    case 3: // selected piece
+                    case RENDER_NON_SELECTED_PIECES:
+                    case RENDER_SELECTED_PIECES:
                         {
                             bool selectedOccupier = (iSelection  && *iSelection == coordinates{ x, y });
-                            if ((pass == 2 && selectedOccupier) || (pass == 3 && !selectedOccupier))
+                            if ((pass == RENDER_NON_SELECTED_PIECES && selectedOccupier) || (pass == RENDER_SELECTED_PIECES && !selectedOccupier))
                                 continue;
                             auto const occupier = iPosition[y][x];
                             if (occupier != piece::None)
