@@ -49,15 +49,15 @@ namespace chess::gui
                     auto const squareRect = square_rect({ x, y });
                     switch (pass)
                     {
-                    case 1:
+                    case 1: // board
                         aGc.fill_rect(squareRect, (x + y) % 2 == 0 ? neogfx::color::Gray25 : neogfx::color::Burlywood);
                         if (iCursor && *iCursor == coordinates{ x, y } && iCursor != iSelection)
                             aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection));
                         else if (iSelection && *iSelection == coordinates{ x, y })
                             aGc.fill_rect(squareRect, neogfx::color::White);
                         break;
-                    case 2:
-                    case 3:
+                    case 2: // non-selected pieces
+                    case 3: // selected piece
                         {
                             bool selectedOccupier = (iSelection  && *iSelection == coordinates{ x, y });
                             if ((pass == 2 && selectedOccupier) || (pass == 3 && !selectedOccupier))
