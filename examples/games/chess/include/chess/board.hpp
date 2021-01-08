@@ -50,13 +50,15 @@ namespace chess::gui
         neogfx::rect square_rect(coordinates aCoordinates) const;
         std::optional<coordinates> at(neogfx::point const& aPosition) const;
     private:
+        i_move_validator const& iMoveValidator;
+        chess::position iPosition;
+        player iTurn;
+        std::unordered_map<piece, neogfx::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;
         std::optional<coordinates> iSelection;
         std::optional<neogfx::point> iSelectionPosition;
-        std::unordered_map<piece, neogfx::texture> iPieceTextures;
-        chess::position iPosition;
-        player iTurn;
-        i_move_validator const& iMoveValidator;
+        bool iShowValidMoves;
+        std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
     };
 }

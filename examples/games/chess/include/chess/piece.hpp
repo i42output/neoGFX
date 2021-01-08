@@ -35,6 +35,14 @@ namespace chess
         COUNT   = 0x06
     };
 
+    enum class piece_color_cardinal : uint8_t
+    {
+        White   = 0x00,
+        Black   = 0x01,
+
+        COUNT   = 0x02
+    };
+
     enum class piece : uint8_t
     {
         None        = 0x00,
@@ -67,6 +75,98 @@ namespace chess
         COLOR_MASK  = White | Black
     };
 
+    inline piece_cardinal as_cardinal(piece p)
+    {
+        // todo: will bitwise operations be faster? profile and see.
+        switch (p)
+        {
+        case piece::WhitePawn:
+            return piece_cardinal::Pawn;
+        case piece::WhiteKnight:
+            return piece_cardinal::Knight;
+        case piece::WhiteBishop:
+            return piece_cardinal::Bishop;
+        case piece::WhiteRook:
+            return piece_cardinal::Rook;
+        case piece::WhiteQueen:
+            return piece_cardinal::Queen;
+        case piece::WhiteKing:
+            return piece_cardinal::King;
+        case piece::BlackPawn:
+            return piece_cardinal::Pawn;
+        case piece::BlackKnight:
+            return piece_cardinal::Knight;
+        case piece::BlackBishop:
+            return piece_cardinal::Bishop;
+        case piece::BlackRook:
+            return piece_cardinal::Rook;
+        case piece::BlackQueen:
+            return piece_cardinal::Queen;
+        case piece::BlackKing:
+            return piece_cardinal::King;
+        default:
+            throw std::logic_error("chess::as_cardinal");
+        }
+    }
+
+    inline piece_color_cardinal as_color_cardinal(piece p)
+    {
+        // todo: will bitwise operations be faster? profile and see.
+        switch (p)
+        {
+        case piece::White:
+            return piece_color_cardinal::White;
+        case piece::WhitePawn:
+            return piece_color_cardinal::White;
+        case piece::WhiteKnight:
+            return piece_color_cardinal::White;
+        case piece::WhiteBishop:
+            return piece_color_cardinal::White;
+        case piece::WhiteRook:
+            return piece_color_cardinal::White;
+        case piece::WhiteQueen:
+            return piece_color_cardinal::White;
+        case piece::WhiteKing:
+            return piece_color_cardinal::White;
+        case piece::Black:
+            return piece_color_cardinal::Black;
+        case piece::BlackPawn:
+            return piece_color_cardinal::Black;
+        case piece::BlackKnight:
+            return piece_color_cardinal::Black;
+        case piece::BlackBishop:
+            return piece_color_cardinal::Black;
+        case piece::BlackRook:
+            return piece_color_cardinal::Black;
+        case piece::BlackQueen:
+            return piece_color_cardinal::Black;
+        case piece::BlackKing:
+            return piece_color_cardinal::Black;
+        default:
+            throw std::logic_error("chess::as_color_cardinal");
+        }
+    }
+
+    inline piece operator&(piece lhs, piece rhs)
+    {
+        return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+    }
+
+    inline piece operator|(piece lhs, piece rhs)
+    {
+        return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+    }
+
+    inline piece piece_type(piece p)
+    {
+        return p & piece::TYPE_MASK;
+    }
+
+    inline piece piece_color(piece p)
+    {
+        return p & piece::COLOR_MASK;
+    }
+
     struct invalid_piece_character : std::runtime_error { invalid_piece_character() : std::runtime_error{ "chess::invalid_piece_character" } {} };
 
     inline piece parse_piece_character(char aCharacter)
@@ -94,25 +194,5 @@ namespace chess
         default:
             throw invalid_piece_character();
         }
-    }
-
-    inline piece operator&(piece lhs, piece rhs)
-    {
-        return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
-    }
-
-    inline piece operator|(piece lhs, piece rhs)
-    {
-        return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
-    }
-
-    inline piece piece_type(piece p)
-    {
-        return p & piece::TYPE_MASK;
-    }
-
-    inline piece piece_color(piece p)
-    {
-        return p & piece::COLOR_MASK;
     }
 }

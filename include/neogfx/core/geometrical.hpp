@@ -121,6 +121,10 @@ namespace neogfx
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ dx, dy }; }
         basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ dx, dy, 0.0 }; }
         auto operator<=>(const basic_delta&) const = default;
+        basic_delta& operator+=(coordinate_type s) { dx +=s; dy += s; return *this; }
+        basic_delta& operator-=(coordinate_type s) { dx -=s; dy -= s; return *this; }
+        basic_delta& operator*=(coordinate_type s) { dx *=s; dy *= s; return *this; }
+        basic_delta& operator/=(coordinate_type s) { dx /=s; dy /= s; return *this; }
         basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; return *this; }
         basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; return *this; }
         basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; return *this; }
@@ -148,6 +152,38 @@ namespace neogfx
     };
 
     typedef basic_delta<coordinate> delta;
+
+    template <typename CoordinateType>
+    inline basic_delta<CoordinateType> operator+(const basic_delta<CoordinateType>& left, CoordinateType s)
+    {
+        basic_delta<CoordinateType> ret = left;
+        ret += s;
+        return ret;
+    }
+
+    template <typename CoordinateType>
+    inline basic_delta<CoordinateType> operator-(const basic_delta<CoordinateType>& left, CoordinateType s)
+    {
+        basic_delta<CoordinateType> ret = left;
+        ret -= s;
+        return ret;
+    }
+
+    template <typename CoordinateType>
+    inline basic_delta<CoordinateType> operator*(const basic_delta<CoordinateType>& left, CoordinateType s)
+    {
+        basic_delta<CoordinateType> ret = left;
+        ret *= s;
+        return ret;
+    }
+
+    template <typename CoordinateType>
+    inline basic_delta<CoordinateType> operator/(const basic_delta<CoordinateType>& left, CoordinateType s)
+    {
+        basic_delta<CoordinateType> ret = left;
+        ret /= s;
+        return ret;
+    }
 
     template <typename CoordinateType>
     inline basic_delta<CoordinateType> operator+(const basic_delta<CoordinateType>& left, const basic_delta<CoordinateType>& right)

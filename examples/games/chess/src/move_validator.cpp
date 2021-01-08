@@ -22,34 +22,103 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    move_table generate_move_table()
+    move_tables generate_move_tables()
     {
-        std::array<std::vector<neogfx::point_i32>, static_cast<std::size_t>(piece_cardinal::COUNT)> const unitMoves =
-        { {
-            { { 0, 1 } }, // pawn
-            { { 2, 1 }, { 2, -1 }, { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }, { -2, 1 }, { -2, -1 } }, // knight
-            { { -1, 1 }, { 1, 1 }, { 1, -1 }, { -1, -1 } }, // bishop
-            { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }, // rook
-            { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }, // queen
-            { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } } // king
-        } };
-        std::array<bool, static_cast<std::size_t>(piece_cardinal::COUNT)> const canMoveMultiple =
+        typedef move_tables::move_coordinates move_coordinates;
+        move_tables result
         {
-            false, // pawn
-            false, // knight
-            true, // bishop
-            true, // rook
-            true, // queen
-            false // king
+            // unit moves
+            {{
+                {{
+                    { { 0, 1 } }, // pawn
+                    { { 2, 1 }, { 2, -1 }, { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }, { -2, 1 }, { -2, -1 } }, // knight
+                    { { -1, 1 }, { 1, 1 }, { 1, -1 }, { -1, -1 } }, // bishop
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }, // rook
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }, // queen
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } } // king
+                }},
+                {{
+                    { { 0, -1 } }, // pawn
+                    { { 2, 1 }, { 2, -1 }, { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }, { -2, 1 }, { -2, -1 } }, // knight
+                    { { -1, 1 }, { 1, 1 }, { 1, -1 }, { -1, -1 } }, // bishop
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }, // rook
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }, // queen
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } } // king
+                }},
+            }},
+            // capture moves
+            {{
+                {{
+                    { { -1, 1 }, { 1, 1 } }, // pawn
+                    { { 2, 1 }, { 2, -1 }, { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }, { -2, 1 }, { -2, -1 } }, // knight
+                    { { -1, 1 }, { 1, 1 }, { 1, -1 }, { -1, -1 } }, // bishop
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }, // rook
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }, // queen
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } } // king
+                }},
+                {{
+                    { { -1, -1 }, { 1, -1 } }, // pawn
+                    { { 2, 1 }, { 2, -1 }, { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }, { -2, 1 }, { -2, -1 } }, // knight
+                    { { -1, 1 }, { 1, 1 }, { 1, -1 }, { -1, -1 } }, // bishop
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } }, // rook
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } }, // queen
+                    { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 }, { 1, 1 }, { -1, 1 }, { -1, -1 }, { 1, -1 } } // king
+                }}
+            }},
+            // can move multiple of unit move
+            {{
+                false, // pawn
+                false, // knight
+                true, // bishop
+                true, // rook
+                true, // queen
+                false // king
+            }}
         };
-        return {}; // todo
+        // all pieces
+        for (std::size_t pieceColorIndex = 0u; pieceColorIndex < static_cast<std::size_t>(piece_color_cardinal::COUNT); ++pieceColorIndex)
+            for (std::size_t pieceIndex = 0u; pieceIndex < static_cast<std::size_t>(piece_cardinal::COUNT); ++pieceIndex)
+                for (coordinates::coordinate_type yFrom = 0u; yFrom <= 7u; ++yFrom)
+                    for (coordinates::coordinate_type xFrom = 0u; xFrom <= 7u; ++xFrom)
+                        for (coordinates::coordinate_type yTo = 0u; yTo <= 7u; ++yTo)
+                            for (coordinates::coordinate_type xTo = 0u; xTo <= 7u; ++xTo)
+                            {
+                                auto calc_validity = [&](move_tables::unit_moves const& aUnitMoves, bool& aResult) 
+                                {
+                                    aResult = false;
+                                    auto const delta = move_coordinates{ static_cast<int32_t>(xTo), static_cast<int32_t>(yTo) } - move_coordinates{ static_cast<int32_t>(xFrom), static_cast<int32_t>(yFrom) };
+                                    auto const& unitMoves = aUnitMoves[pieceColorIndex][pieceIndex];
+                                    if (std::find(unitMoves.begin(), unitMoves.end(), delta) != unitMoves.end())
+                                        aResult = true;
+                                    else if (result.canMoveMultiple[pieceIndex] && (std::abs(delta.dx) == std::abs(delta.dy) || delta.dx == 0 || delta.dy == 0))
+                                    {
+                                        auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
+                                        if (std::find(unitMoves.begin(), unitMoves.end(), deltaUnity) != unitMoves.end())
+                                            aResult = true;
+                                    }
+                                };
+                                calc_validity(result.unitMoves, result.validMoves[pieceColorIndex][pieceIndex][yFrom][xFrom][yTo][xTo]);
+                                calc_validity(result.unitCaptureMoves, result.validCaptureMoves[pieceColorIndex][pieceIndex][yFrom][xFrom][yTo][xTo]);
+                            }
+        // pawn (first move)
+        for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
+        {
+            result.validMoves[static_cast<std::size_t>(piece_color_cardinal::White)][static_cast<std::size_t>(piece_cardinal::Pawn)][1u][x][3u][x] = true;
+            result.validMoves[static_cast<std::size_t>(piece_color_cardinal::Black)][static_cast<std::size_t>(piece_cardinal::Pawn)][6u][x][4u][x] = true;
+        }
+        // todo: corner cases
+        return result;
+    }
+
+    move_validator::move_validator() : 
+        iMoveTables{ generate_move_tables() }
+    {
     }
 
     bool move_validator::can_move(player aTurn, position const& aPosition, move const& aMove) const
     {
-        if (piece_color(aPosition[aMove.from.y][aMove.from.x]) != static_cast<piece>(aTurn))
-            return false;
+        bool canMove = chess::can_move(iMoveTables, aTurn, aPosition, aMove);
         // todo
-        return true;
+        return canMove;
     }
 }

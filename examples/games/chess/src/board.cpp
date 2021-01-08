@@ -16,17 +16,21 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/core/easing.hpp>
 #include <neogfx/app/i_app.hpp>
 
 #include <chess/board.hpp>
 
 namespace chess::gui
 {
+    constexpr std::chrono::seconds SHOW_VALID_MOVES_AFTER_s{ 2 };
+
     board::board(neogfx::i_layout& aLayout, i_move_validator const& aMoveValidator) :
         neogfx::widget<>{ aLayout },
-        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iMoveValidator{ aMoveValidator },
         iTurn{ player::Invalid },
-        iMoveValidator{ aMoveValidator }
+        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
+        iShowValidMoves{ false }
     {
         neogfx::image const piecesImage{ ":/chess/resources/pieces.png" };
         neogfx::size const pieceExtents{ piecesImage.extents().cy / 2.0 };
@@ -58,6 +62,17 @@ namespace chess::gui
                             aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection));
                         else if (iSelection && *iSelection == coordinates{ x, y })
                             aGc.fill_rect(squareRect, neogfx::color::White);
+                        if (iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, coordinates{x, y} }) && iLastSelectionEventTime && entered())
+                        {
+                            auto since = std::chrono::steady_clock::now() - *iLastSelectionEventTime;
+                            if (since > SHOW_VALID_MOVES_AFTER_s)
+                            {
+                                auto constexpr flashInterval_ms = 1000;
+                                auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
+                                auto const cursorAlpha = neogfx::partitioned_ease(neogfx::easing::InvertedInOutQuint, neogfx::easing::InOutQuint, normalizedFrameTime) * 0.75;
+                                aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection).with_alpha(cursorAlpha));
+                            }
+                        }
                         break;
                     case RENDER_NON_SELECTED_PIECES:
                     case RENDER_SELECTED_PIECES:
@@ -92,6 +107,7 @@ namespace chess::gui
                 {
                     iSelectionPosition = aPosition;
                     iSelection = pos;
+                    iLastSelectionEventTime = std::chrono::steady_clock::now();
                 }
             }
             else
@@ -101,17 +117,20 @@ namespace chess::gui
                 {
                     iSelectionPosition = std::nullopt;
                     iSelection = std::nullopt;
+                    iLastSelectionEventTime = std::nullopt;
                 }
                 else if (piece_color(iPosition[pos->y][pos->x]) == static_cast<piece>(iTurn))
                 {
                     iSelectionPosition = aPosition;
                     iSelection = pos;
+                    iLastSelectionEventTime = std::chrono::steady_clock::now();
                 }
                 else if (iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, *pos }))
                 {
                     play(chess::move{ *iSelection, *pos });
                     iSelectionPosition = std::nullopt;
                     iSelection = std::nullopt;
+                    iLastSelectionEventTime = std::nullopt;
                 }
             }
         }
@@ -133,10 +152,11 @@ namespace chess::gui
             {
                 iSelectionPosition = std::nullopt;
                 auto pos = at(aPosition);
-                if (pos && pos != *iSelection)
+                if (pos && pos != *iSelection && iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, *pos }))
                 {
                     play(chess::move{ *iSelection, *pos });
                     iSelection = std::nullopt;
+                    iLastSelectionEventTime = std::nullopt;
                 }
             }
         }
@@ -145,7 +165,10 @@ namespace chess::gui
 
     void board::mouse_moved(const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
     {
+        auto oldCursor = iCursor;
         iCursor = at(aPosition);
+        if (iLastSelectionEventTime && iCursor != oldCursor)
+            iLastSelectionEventTime = std::chrono::steady_clock::now();
         update();
     }
 
@@ -187,8 +210,9 @@ namespace chess::gui
     void board::animate()
     {
         iAnimator.again();
+        if (iLastSelectionEventTime)
+            update();
         // todo
-        update();
     }
 
     neogfx::rect board::square_rect(coordinates aCoordinates) const
