@@ -24,7 +24,7 @@ namespace chess::gui
 {
     board::board(neogfx::i_layout& aLayout, i_move_validator const& aMoveValidator) :
         neogfx::widget<>{ aLayout },
-        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
+        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iTurn{ player::Invalid },
         iMoveValidator{ aMoveValidator }
     {
