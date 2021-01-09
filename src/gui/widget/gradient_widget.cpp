@@ -47,6 +47,7 @@ namespace neogfx
     void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
     {
         scoped_scissor scissor(aGc, aRect);
+        // todo: create a shader primitive for this
         for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
         {
             bool alt = ((static_cast<int32_t>(x / aAlphaPatternSize) % 2) == 1);

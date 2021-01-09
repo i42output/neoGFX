@@ -26,38 +26,43 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chess/i_board.hpp>
 #include <chess/i_move_validator.hpp>
 
+namespace ng = neogfx;
+using namespace ng::unit_literals;
+
 namespace chess::gui
 {
-    class board : public i_board, public neogfx::widget<>
+    class board : public i_board, public ng::widget<>
     {
     public:
-        board(neogfx::i_layout& aLayout, i_move_validator const& aMoveValidator);
+        board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator);
     protected:
-        void paint(neogfx::i_graphics_context& aGc) const override;
+        void paint(ng::i_graphics_context& aGc) const override;
     protected:
-        void mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
-        void mouse_button_released(neogfx::mouse_button aButton, const neogfx::point& aPosition) override;
-        void mouse_moved(const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers) override;
-        void mouse_entered(const neogfx::point& aPosition) override;
+        void mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
+        void mouse_button_released(ng::mouse_button aButton, const ng::point& aPosition) override;
+        void mouse_moved(const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
+        void mouse_entered(const ng::point& aPosition) override;
         void mouse_left() override;
     protected:
         void reset() override;
         void setup(player aTurn, chess::board const& aBoard) override;
         bool play(chess::move const& aMove) override;
+        void edit(chess::move const& aMove) override;
     private:
         void animate();
-        neogfx::rect square_rect(coordinates aCoordinates) const;
-        std::optional<coordinates> at(neogfx::point const& aPosition) const;
+        ng::rect board_rect() const;
+        ng::rect square_rect(coordinates aCoordinates) const;
+        std::optional<coordinates> at(ng::point const& aPosition) const;
     private:
         i_move_validator const& iMoveValidator;
         chess::board iBoard;
         player iTurn;
-        std::unordered_map<piece, neogfx::texture> iPieceTextures;
+        std::unordered_map<piece, ng::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;
         std::optional<coordinates> iSelection;
-        std::optional<neogfx::point> iSelectionPosition;
+        std::optional<ng::point> iSelectionPosition;
         bool iShowValidMoves;
         std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
         bool iEditBoard;

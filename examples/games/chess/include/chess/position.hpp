@@ -38,18 +38,39 @@ namespace chess
     {
         position position;
         std::array<coordinates, static_cast<std::size_t>(piece_color_cardinal::COUNT)> kings;
+        std::optional<move> lastMove;
         mutable std::optional<move> checkTest;
     };
 
     inline piece piece_at(board const& aBoard, coordinates aPosition)
     {
+        auto const targetPiece = aBoard.position[aPosition.y][aPosition.x];
         if (!aBoard.checkTest)
-            return aBoard.position[aPosition.y][aPosition.x];
+            return targetPiece;
         if (aPosition == aBoard.checkTest->from)
             return piece::None;
+        auto const movingPiece = aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x];
         if (aPosition == aBoard.checkTest->to)
-            return aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x];
-        return aBoard.position[aPosition.y][aPosition.x];
+            return movingPiece;
+        // en passant
+        if (piece_type(targetPiece) == piece::Pawn && piece_type(movingPiece) == piece::Pawn &&
+            piece_color(targetPiece) != piece_color(movingPiece))
+        {
+            if (aBoard.checkTest->from.x != aBoard.checkTest->to.x)
+            {
+                if (aBoard.lastMove && aPosition == aBoard.lastMove->to)
+                {
+                    if (std::abs(static_cast<int32_t>(aBoard.lastMove->from.y) - static_cast<int32_t>(aBoard.lastMove->to.y)) == 2)
+                    {
+                        if (aBoard.checkTest->to == coordinates{ aBoard.lastMove->to.x, piece_color(movingPiece) == piece::White ? aBoard.lastMove->to.y + 1 : aBoard.lastMove->to.y - 1 })
+                        {
+                            return piece::None;
+                        }
+                    }
+                }
+            }
+        }
+        return targetPiece;
     }
 
     inline coordinates king_position(board const& aBoard, piece aKing)
@@ -63,11 +84,26 @@ namespace chess
     inline void move_piece(board& aBoard, chess::move const& aMove)
     {
         auto& source = aBoard.position[aMove.from.y][aMove.from.x];
+        auto const movingPiece = source;
         auto& destination = aBoard.position[aMove.to.y][aMove.to.x];
+        auto const targetPiece = destination;
         destination = source;
         source = piece::None;
-        if (piece_type(destination) == piece::King)
+        switch (piece_type(movingPiece))
+        {
+        case piece::King:
             aBoard.kings[static_cast<std::size_t>(as_color_cardinal(destination))] = aMove.to;
+            break;
+        case piece::Pawn:
+            // en passant
+            if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
+                aBoard.position[piece_color(movingPiece) == piece::White ? aMove.to.y - 1 : aMove.to.y + 1][aMove.to.x] = piece::None;
+            break;
+        default:
+            // do nothing
+            break;
+        }
+        aBoard.lastMove = aMove;
     }
 
     struct invalid_uci_move : std::runtime_error { invalid_uci_move() : std::runtime_error{ "chess::invalid_uci_move" } {} };

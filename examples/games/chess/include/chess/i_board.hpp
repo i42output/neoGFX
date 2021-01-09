@@ -30,5 +30,6 @@ namespace chess::gui
         virtual void reset() = 0;
         virtual void setup(player aTurn, board const& aBoard) = 0;
         virtual bool play(move const& aMove) = 0;
+        virtual void edit(move const& aMove) = 0;
     };
 }

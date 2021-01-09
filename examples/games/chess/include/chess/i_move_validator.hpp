@@ -48,20 +48,44 @@ namespace chess
             return false;
         // normal move...
         if (piece_type(targetPiece) == piece::None && !aTables.validMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
-            return false;
+        {
+            bool enPassant = false;
+            if (piece_type(movingPiece) == piece::Pawn &&
+                aTables.validCaptureMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
+                aBoard.lastMove)
+            {
+                auto const pieceLastMoved = piece_at(aBoard, aBoard.lastMove->to);
+                if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
+                {
+                    auto const delta = aBoard.lastMove->to.as<int32_t>() - aBoard.lastMove->from.as<int32_t>();
+                    if (std::abs(delta.dy) == 2)
+                    {
+                        auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
+                        if (aBoard.lastMove->to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
+                            enPassant = true;
+                    }
+                }
+            }
+            if (!enPassant)
+                return false;
+        }
         // capturing move...
         if (piece_type(targetPiece) != piece::None && !aTables.validCaptureMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
             return false;
         // any pieces in the way?
         if (aTables.canMoveMultiple[static_cast<std::size_t>(as_cardinal(movingPiece))])
         {
+            // todo: would a move array be faster than calculating/using deltas? profile and see.
             auto const delta = move_tables::move_coordinates{ static_cast<int32_t>(aMove.to.x), static_cast<int32_t>(aMove.to.y) } - move_tables::move_coordinates{ static_cast<int32_t>(aMove.from.x), static_cast<int32_t>(aMove.from.y) };
             auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
             auto const start = aMove.from.as<int32_t>() + deltaUnity;
             auto const end = aMove.to.as<int32_t>();
             for (move_tables::move_coordinates pos = start; pos != end; pos += deltaUnity)
-                if (piece_type(piece_at(aBoard, pos)) != piece::None)
+            {
+                auto const inbetweenPiece = piece_at(aBoard, pos);
+                if (piece_type(inbetweenPiece) != piece::None)
                     return false;
+            }
         }
         if (!aCheckTest)
         {

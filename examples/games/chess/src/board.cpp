@@ -23,32 +23,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <chess/board.hpp>
 
+namespace neogfx
+{
+    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip);
+}
+
 namespace chess::gui
 {
     constexpr std::chrono::seconds SHOW_VALID_MOVES_AFTER_s{ 2 };
 
-    board::board(neogfx::i_layout& aLayout, i_move_validator const& aMoveValidator) :
-        neogfx::widget<>{ aLayout },
+    board::board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator) :
+        ng::widget<>{ aLayout },
         iMoveValidator{ aMoveValidator },
         iTurn{ player::Invalid },
-        iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
+        iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
         iShowValidMoves{ false },
         iEditBoard{ false }
     {
-        neogfx::image const piecesImage{ ":/chess/resources/pieces.png" };
-        neogfx::size const pieceExtents{ piecesImage.extents().cy / 2.0 };
-        iPieceTextures.emplace(piece::Pawn, neogfx::texture{ piecesImage, neogfx::rect{ neogfx::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Pawn), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Knight, neogfx::texture{ piecesImage, neogfx::rect{ neogfx::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Knight), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Bishop, neogfx::texture{ piecesImage, neogfx::rect{ neogfx::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Bishop), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Rook, neogfx::texture{ piecesImage, neogfx::rect{ neogfx::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Rook), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Queen, neogfx::texture{ piecesImage, neogfx::rect{ neogfx::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Queen), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::King, neogfx::texture{ piecesImage, neogfx::rect{ neogfx::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::King), 0.0 }, pieceExtents } });
+        ng::image const piecesImage{ ":/chess/resources/pieces.png" };
+        ng::size const pieceExtents{ piecesImage.extents().cy / 2.0 };
+        iPieceTextures.emplace(piece::Pawn, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Pawn), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::Knight, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Knight), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::Bishop, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Bishop), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::Rook, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Rook), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::Queen, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Queen), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::King, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::King), 0.0 }, pieceExtents } });
 
         reset();
     }
 
-    void board::paint(neogfx::i_graphics_context& aGc) const
+    void board::paint(ng::i_graphics_context& aGc) const
     {
+        if (iEditBoard)
+            draw_alpha_background(aGc, board_rect(), std::min<ng::scalar>(square_rect({ 0, 0 }).width() / 4, 8.0_dip));
         int32_t constexpr RENDER_BOARD                  = 1;
         int32_t constexpr RENDER_NON_SELECTED_PIECES    = 2;
         int32_t constexpr RENDER_SELECTED_PIECES        = 3;
@@ -60,20 +67,23 @@ namespace chess::gui
                     switch (pass)
                     {
                     case RENDER_BOARD:
-                        aGc.fill_rect(squareRect, (x + y) % 2 == 0 ? neogfx::color::Gray25 : neogfx::color::Burlywood);
-                        if (iCursor && *iCursor == coordinates{ x, y } && iCursor != iSelection)
-                            aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection));
-                        else if (iSelection && *iSelection == coordinates{ x, y })
-                            aGc.fill_rect(squareRect, neogfx::color::White);
-                        if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, coordinates{x, y} }) && iLastSelectionEventTime && entered())
                         {
-                            auto since = std::chrono::steady_clock::now() - *iLastSelectionEventTime;
-                            if (since > SHOW_VALID_MOVES_AFTER_s)
+                            auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
+                            if (iCursor && *iCursor == coordinates{ x, y } && iCursor != iSelection)
+                                squareColor = palette_color(ng::color_role::Selection);
+                            else if (iSelection && *iSelection == coordinates{ x, y })
+                                squareColor = ng::color::White;
+                            aGc.fill_rect(squareRect, squareColor.with_alpha(iEditBoard ? 0.75 : 1.0));
+                            if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, coordinates{x, y} }) && iLastSelectionEventTime && entered())
                             {
-                                auto constexpr flashInterval_ms = 1000;
-                                auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-                                auto const cursorAlpha = neogfx::partitioned_ease(neogfx::easing::InvertedInOutQuint, neogfx::easing::InOutQuint, normalizedFrameTime) * 0.75;
-                                aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection).with_alpha(cursorAlpha));
+                                auto since = std::chrono::steady_clock::now() - *iLastSelectionEventTime;
+                                if (since > SHOW_VALID_MOVES_AFTER_s)
+                                {
+                                    auto constexpr flashInterval_ms = 1000;
+                                    auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
+                                    auto const cursorAlpha = ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime) * 0.75;
+                                    aGc.fill_rect(squareRect, palette_color(ng::color_role::Selection).with_alpha(cursorAlpha));
+                                }
                             }
                         }
                         break;
@@ -86,11 +96,11 @@ namespace chess::gui
                             auto const occupier = iBoard.position[y][x];
                             if (occupier != piece::None)
                             {
-                                auto pieceColor = piece_color(occupier) == piece::White ? neogfx::color::Goldenrod : neogfx::color::Silver;
-                                neogfx::point mousePosition = root().mouse_position() - origin();
+                                auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                ng::point mousePosition = root().mouse_position() - origin();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
-                                    neogfx::point{} : mousePosition - *iSelectionPosition);
-                                aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), neogfx::gradient{ pieceColor.lighter(0x80), pieceColor }, neogfx::shader_effect::Colorize);
+                                    ng::point{} : mousePosition - *iSelectionPosition);
+                                aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
                         break;
@@ -98,10 +108,10 @@ namespace chess::gui
                 }
     }
 
-    void board::mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
+    void board::mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
     {
         widget<>::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (aButton == neogfx::mouse_button::Left && capturing())
+        if (aButton == ng::mouse_button::Left && capturing())
         {
             auto const pos = at(aPosition);
             auto const pieceColor = piece_color(iBoard.position[pos->y][pos->x]);
@@ -137,14 +147,14 @@ namespace chess::gui
                 }
             }
         }
-        else if (aButton == neogfx::mouse_button::Right)
+        else if (aButton == ng::mouse_button::Right)
         {
             iSelectionPosition = std::nullopt;
             iSelection = std::nullopt;
             iLastSelectionEventTime = std::nullopt;
 
-            neogfx::context_menu contextMenu{ *this, aPosition + non_client_rect().top_left() + root().window_position() };
-            neogfx::action actionEditBoard{ "Edit Board"_t };
+            ng::context_menu contextMenu{ *this, aPosition + non_client_rect().top_left() + root().window_position() };
+            ng::action actionEditBoard{ "Edit Board"_t };
             actionEditBoard.set_checkable(true);
             actionEditBoard.set_checked(iEditBoard);
             contextMenu.menu().add_action(actionEditBoard);
@@ -155,12 +165,12 @@ namespace chess::gui
         update();
     }
 
-    void board::mouse_button_double_clicked(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
+    void board::mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
     {
         widget<>::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
     }
 
-    void board::mouse_button_released(neogfx::mouse_button aButton, const neogfx::point& aPosition)
+    void board::mouse_button_released(ng::mouse_button aButton, const ng::point& aPosition)
     {
         bool wasCapturing = capturing();
         widget<>::mouse_button_released(aButton, aPosition);
@@ -181,7 +191,7 @@ namespace chess::gui
         update();
     }
 
-    void board::mouse_moved(const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
+    void board::mouse_moved(const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
     {
         auto oldCursor = iCursor;
         iCursor = at(aPosition);
@@ -190,7 +200,7 @@ namespace chess::gui
         update();
     }
 
-    void board::mouse_entered(const neogfx::point& aPosition)
+    void board::mouse_entered(const ng::point& aPosition)
     {
         iCursor = at(aPosition);
         update();
@@ -215,16 +225,34 @@ namespace chess::gui
 
     bool board::play(chess::move const& aMove)
     {
-        if (!iMoveValidator.can_move(iTurn, iBoard, aMove) && !iEditBoard)
-            return false;
-        // todo: update engine
-        move_piece(iBoard, aMove);
         if (!iEditBoard)
+        {
+            // todo: update engine
+            if (!iMoveValidator.can_move(iTurn, iBoard, aMove))
+                return false;
+            move_piece(iBoard, aMove);
             iTurn = next_player(iTurn);
-        update();
+            update();
+        }
+        else
+            edit(aMove);
         return true;
     }
 
+    void board::edit(chess::move const& aMove)
+    {
+        auto& source = iBoard.position[aMove.from.y][aMove.from.x];
+        auto const movingPiece = source;
+        auto& destination = iBoard.position[aMove.to.y][aMove.to.x];
+        auto const targetPiece = destination;
+        destination = source;
+        source = piece::None;
+        if (piece_type(destination) == piece::King)
+            iBoard.kings[static_cast<std::size_t>(as_color_cardinal(destination))] = aMove.to;
+        iBoard.lastMove = std::nullopt;
+        update();
+    }
+        
     void board::animate()
     {
         iAnimator.again();
@@ -233,18 +261,24 @@ namespace chess::gui
         // todo
     }
 
-    neogfx::rect board::square_rect(coordinates aCoordinates) const
+    ng::rect board::board_rect() const
     {
-        auto boardRect = client_rect(false);
-        if (boardRect.cx > boardRect.cy)
-            boardRect.deflate((boardRect.cx - boardRect.cy) / 2.0, 0.0);
+        auto result = client_rect(false);
+        if (result.cx > result.cy)
+            result.deflate((result.cx - result.cy) / 2.0, 0.0);
         else
-            boardRect.deflate(0.0, (boardRect.cy - boardRect.cx) / 2.0);
-        neogfx::size squareDimensions{ boardRect.extents() / 8.0 };
-        return neogfx::rect{ boardRect.top_left() + neogfx::point{ squareDimensions * neogfx::size_u32{ aCoordinates.x, 7u - aCoordinates.y }.as<neogfx::scalar>() }, squareDimensions };
+            result.deflate(0.0, (result.cy - result.cx) / 2.0);
+        return result;
     }
 
-    std::optional<coordinates> board::at(neogfx::point const& aPosition) const
+    ng::rect board::square_rect(coordinates aCoordinates) const
+    {
+        auto const boardRect = board_rect();
+        ng::size squareDimensions{ boardRect.extents() / 8.0 };
+        return ng::rect{ boardRect.top_left() + ng::point{ squareDimensions * ng::size_u32{ aCoordinates.x, 7u - aCoordinates.y }.as<ng::scalar>() }, squareDimensions };
+    }
+
+    std::optional<coordinates> board::at(ng::point const& aPosition) const
     {
         for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
             for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
