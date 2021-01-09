@@ -25,14 +25,50 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     typedef neogfx::point_u32 coordinates;
-    typedef std::array<std::array<piece, 8>, 8> position;
-
+    
     struct move
     {
         coordinates from;
         coordinates to;
         std::optional<piece> promoteTo;
     };
+
+    typedef std::array<std::array<piece, 8>, 8> position;
+    struct board
+    {
+        position position;
+        std::array<coordinates, static_cast<std::size_t>(piece_color_cardinal::COUNT)> kings;
+        mutable std::optional<move> checkTest;
+    };
+
+    inline piece piece_at(board const& aBoard, coordinates aPosition)
+    {
+        if (!aBoard.checkTest)
+            return aBoard.position[aPosition.y][aPosition.x];
+        if (aPosition == aBoard.checkTest->from)
+            return piece::None;
+        if (aPosition == aBoard.checkTest->to)
+            return aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x];
+        return aBoard.position[aPosition.y][aPosition.x];
+    }
+
+    inline coordinates king_position(board const& aBoard, piece aKing)
+    {
+        auto const kingPosition = aBoard.kings[static_cast<std::size_t>(as_color_cardinal(aKing))];
+        if (aBoard.checkTest && aBoard.checkTest->from == kingPosition)
+            return aBoard.checkTest->to;
+        return kingPosition;
+    }
+
+    inline void move_piece(board& aBoard, chess::move const& aMove)
+    {
+        auto& source = aBoard.position[aMove.from.y][aMove.from.x];
+        auto& destination = aBoard.position[aMove.to.y][aMove.to.x];
+        destination = source;
+        source = piece::None;
+        if (piece_type(destination) == piece::King)
+            aBoard.kings[static_cast<std::size_t>(as_color_cardinal(destination))] = aMove.to;
+    }
 
     struct invalid_uci_move : std::runtime_error { invalid_uci_move() : std::runtime_error{ "chess::invalid_uci_move" } {} };
 
@@ -52,12 +88,17 @@ namespace chess
         return result;
     }
 
-    static constexpr position setup
-    { {
-        { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
-        { piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn },
-        {}, {}, {}, {},
-        { piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn },
-        { piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook },
-    } };
+    static constexpr board setup
+    {
+        {{
+            { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
+            { piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn },
+            {}, {}, {}, {},
+            { piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn },
+            { piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook },
+        }},
+        {{
+            { 4u, 0u }, { 4u, 7u }
+        }}
+    };
 }

@@ -30,7 +30,7 @@ namespace chess
         virtual ~i_engine() = default;
     public:
         virtual void reset() = 0;
-        virtual void setup(player aTurn, position const& aPosition) = 0;
+        virtual void setup(player aTurn, board const& aBoard) = 0;
         virtual bool play(move const& aMove) = 0;
     };
 }

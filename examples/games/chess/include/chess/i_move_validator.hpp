@@ -35,14 +35,16 @@ namespace chess
         valid_moves validCaptureMoves;
     };
 
-    inline bool can_move(move_tables const& aTables, player aTurn, position const& aPosition, move const& aMove)
+    inline bool in_check(move_tables const& aTables, player aPlayer, board const& aBoard);
+        
+    inline bool can_move(move_tables const& aTables, player aTurn, board const& aBoard, move const& aMove, bool aCheckTest = false)
     {
-        auto const movingPiece = piece(aPosition[aMove.from.y][aMove.from.x]);
-        auto const targetPiece = piece(aPosition[aMove.to.y][aMove.to.x]);
+        auto const movingPiece = piece_at(aBoard, aMove.from);
+        auto const targetPiece = piece_at(aBoard, aMove.to);
         if (piece_color(movingPiece) != static_cast<piece>(aTurn) ||
             piece_color(targetPiece) == static_cast<piece>(aTurn))
             return false;
-        if (piece_type(targetPiece) == piece::King)
+        if (piece_type(targetPiece) == piece::King && !aCheckTest)
             return false;
         // normal move...
         if (piece_type(targetPiece) == piece::None && !aTables.validMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
@@ -58,11 +60,30 @@ namespace chess
             auto const start = aMove.from.as<int32_t>() + deltaUnity;
             auto const end = aMove.to.as<int32_t>();
             for (move_tables::move_coordinates pos = start; pos != end; pos += deltaUnity)
-                if (piece_type(piece(aPosition[pos.y][pos.x])) != piece::None)
+                if (piece_type(piece_at(aBoard, pos)) != piece::None)
                     return false;
+        }
+        if (!aCheckTest)
+        {
+            aBoard.checkTest = aMove;
+            bool inCheck = in_check(aTables, aTurn, aBoard);
+            aBoard.checkTest = std::nullopt;
+            if (inCheck)
+                return false;
         }
         // todo: corner cases (check, en passant, castling)
         return true;
+    }
+
+    inline bool in_check(move_tables const& aTables, player aPlayer, board const& aBoard)
+    {
+        auto const opponent = next_player(aPlayer);
+        auto const kingPosition = king_position(aBoard, static_cast<piece>(aPlayer));
+        for (coordinates::coordinate_type yFrom = 0u; yFrom <= 7u; ++yFrom)
+            for (coordinates::coordinate_type xFrom = 0u; xFrom <= 7u; ++xFrom)
+                if (can_move(aTables, opponent, aBoard, move{ coordinates{ xFrom, yFrom }, kingPosition }, true))
+                    return true;
+        return false;
     }
     
     class i_move_validator
@@ -70,6 +91,6 @@ namespace chess
     public:
         virtual ~i_move_validator() = default;
     public:
-        virtual bool can_move(player aTurn, position const& aPosition, move const& aMove) const = 0;
+        virtual bool can_move(player aTurn, board const& aBoard, move const& aMove) const = 0;
     };
 }

@@ -115,9 +115,9 @@ namespace chess
     {
     }
 
-    bool move_validator::can_move(player aTurn, position const& aPosition, move const& aMove) const
+    bool move_validator::can_move(player aTurn, board const& aBoard, move const& aMove) const
     {
-        bool canMove = chess::can_move(iMoveTables, aTurn, aPosition, aMove);
+        bool canMove = chess::can_move(iMoveTables, aTurn, aBoard, aMove);
         // todo
         return canMove;
     }

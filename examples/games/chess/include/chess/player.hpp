@@ -29,4 +29,9 @@ namespace chess
         White   = static_cast<uint8_t>(piece::White),
         Black   = static_cast<uint8_t>(piece::Black)
     };
+
+    inline player next_player(player p)
+    {
+        return p == player::White ? player::Black : player::White;
+    }
 }

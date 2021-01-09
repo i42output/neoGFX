@@ -43,7 +43,7 @@ namespace chess::gui
         void mouse_left() override;
     protected:
         void reset() override;
-        void setup(player aTurn, chess::position const& aPosition) override;
+        void setup(player aTurn, chess::board const& aBoard) override;
         bool play(chess::move const& aMove) override;
     private:
         void animate();
@@ -51,7 +51,7 @@ namespace chess::gui
         std::optional<coordinates> at(neogfx::point const& aPosition) const;
     private:
         i_move_validator const& iMoveValidator;
-        chess::position iPosition;
+        chess::board iBoard;
         player iTurn;
         std::unordered_map<piece, neogfx::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
@@ -60,5 +60,6 @@ namespace chess::gui
         std::optional<neogfx::point> iSelectionPosition;
         bool iShowValidMoves;
         std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
+        bool iEditBoard;
     };
 }

@@ -30,9 +30,9 @@ namespace chess
         setup(player::White, chess::setup);
     }
 
-    void engine::setup(player aTurn, position const& aPosition)
+    void engine::setup(player aTurn, board const& aBoard)
     {
-        iPosition = aPosition;
+        iBoard = aBoard;
         iTurn = aTurn;
     }
 

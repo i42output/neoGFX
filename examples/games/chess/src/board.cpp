@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/core/easing.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/action.hpp>
+#include <neogfx/gui/window/context_menu.hpp>
 
 #include <chess/board.hpp>
 
@@ -30,7 +32,8 @@ namespace chess::gui
         iMoveValidator{ aMoveValidator },
         iTurn{ player::Invalid },
         iAnimator{ neogfx::service<neogfx::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
-        iShowValidMoves{ false }
+        iShowValidMoves{ false },
+        iEditBoard{ false }
     {
         neogfx::image const piecesImage{ ":/chess/resources/pieces.png" };
         neogfx::size const pieceExtents{ piecesImage.extents().cy / 2.0 };
@@ -62,7 +65,7 @@ namespace chess::gui
                             aGc.fill_rect(squareRect, palette_color(neogfx::color_role::Selection));
                         else if (iSelection && *iSelection == coordinates{ x, y })
                             aGc.fill_rect(squareRect, neogfx::color::White);
-                        if (iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, coordinates{x, y} }) && iLastSelectionEventTime && entered())
+                        if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, coordinates{x, y} }) && iLastSelectionEventTime && entered())
                         {
                             auto since = std::chrono::steady_clock::now() - *iLastSelectionEventTime;
                             if (since > SHOW_VALID_MOVES_AFTER_s)
@@ -80,7 +83,7 @@ namespace chess::gui
                             bool selectedOccupier = (iSelection  && *iSelection == coordinates{ x, y });
                             if ((pass == RENDER_NON_SELECTED_PIECES && selectedOccupier) || (pass == RENDER_SELECTED_PIECES && !selectedOccupier))
                                 continue;
-                            auto const occupier = iPosition[y][x];
+                            auto const occupier = iBoard.position[y][x];
                             if (occupier != piece::None)
                             {
                                 auto pieceColor = piece_color(occupier) == piece::White ? neogfx::color::Goldenrod : neogfx::color::Silver;
@@ -98,12 +101,13 @@ namespace chess::gui
     void board::mouse_button_pressed(neogfx::mouse_button aButton, const neogfx::point& aPosition, neogfx::key_modifiers_e aKeyModifiers)
     {
         widget<>::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (capturing())
+        if (aButton == neogfx::mouse_button::Left && capturing())
         {
+            auto const pos = at(aPosition);
+            auto const pieceColor = piece_color(iBoard.position[pos->y][pos->x]);
             if (!iSelection)
             {
-                auto pos = at(aPosition);
-                if (pos && piece_color(iPosition[pos->y][pos->x]) == static_cast<piece>(iTurn))
+                if (pos && pieceColor == static_cast<piece>(iTurn) || (iEditBoard && pieceColor != piece::None))
                 {
                     iSelectionPosition = aPosition;
                     iSelection = pos;
@@ -112,20 +116,19 @@ namespace chess::gui
             }
             else
             {
-                auto pos = at(aPosition);
                 if (pos == iSelection)
                 {
                     iSelectionPosition = std::nullopt;
                     iSelection = std::nullopt;
                     iLastSelectionEventTime = std::nullopt;
                 }
-                else if (piece_color(iPosition[pos->y][pos->x]) == static_cast<piece>(iTurn))
+                else if (pieceColor == static_cast<piece>(iTurn) && !iEditBoard)
                 {
                     iSelectionPosition = aPosition;
                     iSelection = pos;
                     iLastSelectionEventTime = std::chrono::steady_clock::now();
                 }
-                else if (iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, *pos }))
+                else if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard)
                 {
                     play(chess::move{ *iSelection, *pos });
                     iSelectionPosition = std::nullopt;
@@ -133,6 +136,21 @@ namespace chess::gui
                     iLastSelectionEventTime = std::nullopt;
                 }
             }
+        }
+        else if (aButton == neogfx::mouse_button::Right)
+        {
+            iSelectionPosition = std::nullopt;
+            iSelection = std::nullopt;
+            iLastSelectionEventTime = std::nullopt;
+
+            neogfx::context_menu contextMenu{ *this, aPosition + non_client_rect().top_left() + root().window_position() };
+            neogfx::action actionEditBoard{ "Edit Board"_t };
+            actionEditBoard.set_checkable(true);
+            actionEditBoard.set_checked(iEditBoard);
+            contextMenu.menu().add_action(actionEditBoard);
+            actionEditBoard.Checked([&]() { iEditBoard = true; });
+            actionEditBoard.Unchecked([&]() { iEditBoard = false; });
+            contextMenu.exec();
         }
         update();
     }
@@ -152,7 +170,7 @@ namespace chess::gui
             {
                 iSelectionPosition = std::nullopt;
                 auto pos = at(aPosition);
-                if (pos && pos != *iSelection && iMoveValidator.can_move(iTurn, iPosition, chess::move{ *iSelection, *pos }))
+                if (pos && pos != *iSelection && (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard))
                 {
                     play(chess::move{ *iSelection, *pos });
                     iSelection = std::nullopt;
@@ -189,20 +207,20 @@ namespace chess::gui
         setup(player::White, chess::setup);
     }
 
-    void board::setup(player aTurn, chess::position const& aPosition)
+    void board::setup(player aTurn, chess::board const& aBoard)
     {
-        iPosition = aPosition;
+        iBoard = aBoard;
         iTurn = aTurn;
     }
 
     bool board::play(chess::move const& aMove)
     {
-        if (!iMoveValidator.can_move(iTurn, iPosition, aMove))
+        if (!iMoveValidator.can_move(iTurn, iBoard, aMove) && !iEditBoard)
             return false;
         // todo: update engine
-        iPosition[aMove.to.y][aMove.to.x] = iPosition[aMove.from.y][aMove.from.x];
-        iPosition[aMove.from.y][aMove.from.x] = piece::None;
-        iTurn = (iTurn == player::White ? player::Black : player::White);
+        move_piece(iBoard, aMove);
+        if (!iEditBoard)
+            iTurn = next_player(iTurn);
         update();
         return true;
     }
