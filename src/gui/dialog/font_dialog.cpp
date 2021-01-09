@@ -26,8 +26,6 @@
 
 namespace neogfx
 {
-    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize);
-
     namespace
     {
         class picker_presentation_model : public item_presentation_model

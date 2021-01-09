@@ -117,6 +117,7 @@ namespace neogfx
         void draw_focus_rect(const rect& aRect) const override;
         void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0) const override;
         void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const override;
+        void fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2, scalar aZpos = 0.0) const override;
         void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const override;
         void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const override;
         void fill_path(const path& aPath, const brush& aFill) const override;

@@ -133,6 +133,13 @@ namespace neogfx
                 auto& right = static_variant_cast<const fill_rect&>(aRight);
                 return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
             }
+            case operation_type::FillCheckerRect:
+            {
+                auto& left = static_variant_cast<const fill_checker_rect&>(aLeft);
+                auto& right = static_variant_cast<const fill_checker_rect&>(aRight);
+                return left.fill1.index() == right.fill1.index() && std::holds_alternative<color>(left.fill1) &&
+                    left.fill2.index() == right.fill2.index() && std::holds_alternative<color>(left.fill2);
+            }
             case operation_type::FillShape:
             {
                 auto& left = static_variant_cast<const fill_shape&>(aLeft);

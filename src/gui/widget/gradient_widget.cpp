@@ -44,21 +44,6 @@ namespace neogfx
         static const dimension CONTROL_HEIGHT = BAR_HEIGHT + STOP_WIDTH * 2;
     }
 
-    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = ALPHA_PATTERN_SIZE)
-    {
-        scoped_scissor scissor(aGc, aRect);
-        // todo: create a shader primitive for this
-        for (coordinate x = 0; x < aRect.width(); x += aAlphaPatternSize)
-        {
-            bool alt = ((static_cast<int32_t>(x / aAlphaPatternSize) % 2) == 1);
-            for (coordinate y = 0; y < aRect.height(); y += aAlphaPatternSize)
-            {
-                aGc.fill_rect(rect{ aRect.top_left() + point{ x, y }, size{ aAlphaPatternSize, aAlphaPatternSize } }, alt ? color{ 160, 160, 160 } : color{ 255, 255, 255 });
-                alt = !alt;
-            }
-        }
-    }
-    
     namespace
     {
         class alpha_dialog : public dialog

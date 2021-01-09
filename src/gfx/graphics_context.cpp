@@ -471,6 +471,11 @@ namespace neogfx
         native_context().enqueue(graphics_operation::fill_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aFill });
     }
 
+    void graphics_context::fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2, scalar aZpos) const
+    {
+        native_context().enqueue(graphics_operation::fill_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aFill1, aFill2, aZpos });
+    }
+
     void graphics_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const
     {
         native_context().enqueue(graphics_operation::fill_circle{ to_device_units(aCenter) + iOrigin, aRadius, aFill });

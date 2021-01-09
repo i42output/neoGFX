@@ -113,8 +113,6 @@ namespace neogfx
         }
     }
 
-    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0);
-
     class gradient_dialog::preview_box : public framed_widget<>
     {
         typedef framed_widget<> base_type;

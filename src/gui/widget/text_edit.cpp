@@ -384,8 +384,6 @@ namespace neogfx
         return result.floor();
     }
 
-    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0);
-
     void text_edit::paint(i_graphics_context& aGc) const
     {
         framed_scrollable_widget::paint(aGc);

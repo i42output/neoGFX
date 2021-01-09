@@ -23,11 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <chess/board.hpp>
 
-namespace neogfx
-{
-    void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip);
-}
-
 namespace chess::gui
 {
     constexpr std::chrono::seconds SHOW_VALID_MOVES_AFTER_s{ 2 };
@@ -68,13 +63,14 @@ namespace chess::gui
                     {
                     case RENDER_BOARD:
                         {
+                            bool const canMove = iSelection && iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, coordinates{x, y} });
                             auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
                             if (iCursor && *iCursor == coordinates{ x, y } && iCursor != iSelection)
-                                squareColor = palette_color(ng::color_role::Selection);
+                                squareColor = palette_color(ng::color_role::Selection).with_alpha(canMove || !iSelection ? 1.0 : 0.5);
                             else if (iSelection && *iSelection == coordinates{ x, y })
                                 squareColor = ng::color::White;
-                            aGc.fill_rect(squareRect, squareColor.with_alpha(iEditBoard ? 0.75 : 1.0));
-                            if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, coordinates{x, y} }) && iLastSelectionEventTime && entered())
+                            aGc.fill_rect(squareRect, squareColor.with_combined_alpha(iEditBoard ? 0.75 : 1.0));
+                            if (canMove && iLastSelectionEventTime && entered())
                             {
                                 auto since = std::chrono::steady_clock::now() - *iLastSelectionEventTime;
                                 if (since > SHOW_VALID_MOVES_AFTER_s)

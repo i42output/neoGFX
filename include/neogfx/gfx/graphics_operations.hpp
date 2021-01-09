@@ -224,6 +224,15 @@ namespace neogfx
             brush fill;
         };
 
+        struct fill_checker_rect
+        {
+            rect rect;
+            size squareSize;
+            brush fill1;
+            brush fill2;
+            scalar zpos;
+        };
+
         struct fill_circle
         {
             point center;
@@ -306,6 +315,7 @@ namespace neogfx
             draw_entities,
             fill_rect,
             fill_rounded_rect,
+            fill_checker_rect,
             fill_circle,
             fill_arc,
             fill_path,
@@ -351,6 +361,7 @@ namespace neogfx
             DrawEntities,
             FillRect,
             FillRoundedRect,
+            FillCheckerRect,
             FillCircle,
             FillArc,
             FillPath,

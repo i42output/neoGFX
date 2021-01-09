@@ -629,6 +629,9 @@ namespace neogfx
                     fill_rounded_rect(args.rect, args.radius, args.fill);
                 }
                 break;
+            case graphics_operation::operation_type::FillCheckerRect:
+                fill_checker_rects(opBatch);
+                break;
             case graphics_operation::operation_type::FillCircle:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
@@ -1378,6 +1381,64 @@ namespace neogfx
                     vec4f{},
                     {},
                     function});
+            }
+        }
+    }
+
+    void opengl_rendering_context::fill_checker_rects(const graphics_operation::batch& aFillCheckerRectOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+        scoped_anti_alias saa{ *this, smoothing_mode::None };
+        disable_multisample disableMultisample{ *this };
+
+        // todo: add a shader-based primitive for this operation
+
+        for (int32_t step = 0; step <= 1; ++step)
+        {
+            auto& firstOp = static_variant_cast<const graphics_operation::fill_checker_rect&>(*aFillCheckerRectOps.first);
+
+            if (std::holds_alternative<gradient>(step == 0 ? firstOp.fill1 : firstOp.fill2))
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(step == 0 ? firstOp.fill1 : firstOp.fill2), iOpacity);
+
+            {
+                for (auto op = aFillCheckerRectOps.first; op != aFillCheckerRectOps.second; ++op)
+                {
+                    auto& drawOp = static_variant_cast<const graphics_operation::fill_checker_rect&>(*op);
+
+                    auto const squareCount = static_cast<uint32_t>(
+                        std::ceil(std::ceil(drawOp.rect.extents().cx / drawOp.squareSize.cx) * std::ceil(std::ceil(drawOp.rect.extents().cy / drawOp.squareSize.cy)) / 2.0));
+                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * squareCount) };
+
+                    for (coordinate x = 0; x < drawOp.rect.cx; x += drawOp.squareSize.cx)
+                    {
+                        bool alt = ((static_cast<int32_t>(x / drawOp.squareSize.cx) % 2) == step);
+
+                        for (coordinate y = 0; y < drawOp.rect.cy; y += drawOp.squareSize.cy)
+                        {
+                            if (alt)
+                            {
+                                auto const square = rect{ drawOp.rect.top_left() + point{ x, y }, drawOp.squareSize };
+                                auto const& fill = (step == 0 ? drawOp.fill1 : drawOp.fill2);
+                                auto const function = to_function(fill, square);
+                                auto rectVertices = rect_vertices(square, mesh_type::Triangles, drawOp.zpos);
+                                for (auto const& v : rectVertices)
+                                    vertexArrays.push_back({ v,
+                                        std::holds_alternative<color>(fill) ?
+                                            vec4f{{
+                                                static_variant_cast<const color&>(fill).red<float>(),
+                                                static_variant_cast<const color&>(fill).green<float>(),
+                                                static_variant_cast<const color&>(fill).blue<float>(),
+                                                static_variant_cast<const color&>(fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                                            vec4f{},
+                                            {},
+                                            function });
+                            }
+                            alt = !alt;
+                        }
+                    }
+                }
             }
         }
     }

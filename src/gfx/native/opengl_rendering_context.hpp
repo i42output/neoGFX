@@ -319,6 +319,7 @@ namespace neogfx
         void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0);
         void fill_rects(const graphics_operation::batch& aFillRectOps);
         void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
+        void fill_checker_rects(const graphics_operation::batch& aFillCheckerRectOps);
         void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill);
         void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill);
         void fill_path(const path& aPath, const brush& aFill);

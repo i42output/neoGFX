@@ -152,6 +152,7 @@ namespace neogfx
         virtual void draw_focus_rect(const rect& aRect) const = 0;
         virtual void fill_rect(const rect& aRect, const brush& aFill, scalar aZpos = 0.0) const = 0;
         virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const = 0;
+        virtual void fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2, scalar aZpos = 0.0) const = 0;
         virtual void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const = 0;
         virtual void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
         virtual void fill_path(const path& aPath, const brush& aFill) const = 0;
@@ -362,6 +363,12 @@ namespace neogfx
     private:
         const i_graphics_context& iGc;
     };
+
+    inline void draw_alpha_background(i_graphics_context& aGc, const rect& aRect, dimension aAlphaPatternSize = 4.0_dip)
+    {
+        scoped_scissor scissor(aGc, aRect);
+        aGc.fill_checker_rect(aRect, size{ aAlphaPatternSize }, color{ 160, 160, 160 }, color{ 255, 255, 255 });
+    }
 
     struct blur_filter
     {
