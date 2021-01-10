@@ -112,10 +112,38 @@ namespace chess
         auto const targetPiece = destination;
         destination = source;
         source = piece::None;
+        if (!aBoard.lastMove)
+            aBoard.lastMove = aMove;
+        else
+        {
+            aBoard.lastMove->from = aMove.from;
+            aBoard.lastMove->to = aMove.to;
+        }
         switch (piece_type(movingPiece))
         {
         case piece::King:
             aBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
+            aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
+            if (aMove.from.x - aMove.to.x == 2)
+            {
+                // queenside castling
+                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+                aBoard.position[aMove.from.y][0u] = piece::None;
+                aBoard.position[aMove.from.y][3u] = piece_color(movingPiece) | piece::Rook;
+            }
+            else if (aMove.to.x - aMove.from.x == 2)
+            {
+                // kingside castling
+                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
+                aBoard.position[aMove.from.y][7u] = piece::None;
+                aBoard.position[aMove.from.y][5u] = piece_color(movingPiece) | piece::Rook;
+            }
+            break;
+        case piece::Rook:
+            if (aMove.from == coordinates{ 0u, 0u } || aMove.from == coordinates{ 0u, 7u })
+                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+            else if (aMove.from == coordinates{ 7u, 0u } || aMove.from == coordinates{ 7u, 7u })
+                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
             break;
         case piece::Pawn:
             // en passant
@@ -126,7 +154,6 @@ namespace chess
             // do nothing
             break;
         }
-        aBoard.lastMove = aMove;
     }
 
     struct invalid_uci_move : std::runtime_error { invalid_uci_move() : std::runtime_error{ "chess::invalid_uci_move" } {} };

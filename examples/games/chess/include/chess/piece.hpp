@@ -156,7 +156,7 @@ namespace chess
 
     inline piece operator|(piece lhs, piece rhs)
     {
-        return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+        return static_cast<piece>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
     }
 
     inline piece piece_type(piece p)

@@ -46,7 +46,7 @@ namespace chess
             return false;
         if (piece_type(targetPiece) == piece::King && !aCheckTest)
             return false;
-        // normal move...
+        // non-capturing move...
         bool enPassant = false;
         bool castle = false;
         if (piece_type(targetPiece) == piece::None && !aTables.validMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
@@ -69,7 +69,12 @@ namespace chess
             }
             else if (piece_type(movingPiece) == piece::King && aBoard.lastMove && !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)])
             {
-                // todo: castling                
+                if (aMove.to.y == aMove.from.y)
+                {
+                    if ((aMove.to.x == 2 && !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)]) ||
+                        (aMove.to.x == 6 && !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)]))
+                        castle = !in_check(aTables, aTurn, aBoard);
+                }
             }
             if (!enPassant && !castle)
                 return false;
@@ -78,18 +83,26 @@ namespace chess
         if (piece_type(targetPiece) != piece::None && !aTables.validCaptureMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
             return false;
         // any pieces in the way?
-        if (aTables.canMoveMultiple[as_cardinal<>(movingPiece)])
+        if (aTables.canMoveMultiple[as_cardinal<>(movingPiece)] || castle)
         {
             // todo: would a move array be faster than calculating/using deltas? profile and see.
             auto const delta = move_tables::move_coordinates{ static_cast<int32_t>(aMove.to.x), static_cast<int32_t>(aMove.to.y) } - move_tables::move_coordinates{ static_cast<int32_t>(aMove.from.x), static_cast<int32_t>(aMove.from.y) };
             auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
             auto const start = aMove.from.as<int32_t>() + deltaUnity;
-            auto const end = aMove.to.as<int32_t>();
+            auto const end = (!castle ? aMove.to.as<int32_t>() : aMove.to.as<int32_t>().with_x(aMove.to.x == 2 ? 0 : 7));
             for (move_tables::move_coordinates pos = start; pos != end; pos += deltaUnity)
             {
                 auto const inbetweenPiece = piece_at(aBoard, pos);
                 if (piece_type(inbetweenPiece) != piece::None)
                     return false;
+                if (castle)
+                {
+                    aBoard.checkTest = move{ aMove.from, pos };
+                    bool inCheck = in_check(aTables, aTurn, aBoard);
+                    aBoard.checkTest = std::nullopt;
+                    if (inCheck)
+                        return false;
+                }
             }
         }
         if (!aCheckTest)

@@ -170,6 +170,19 @@ namespace chess::gui
                     iSelection = std::nullopt;
                     iLastSelectionEventTime = std::nullopt;
                     iAnimations.emplace_back(move, iBoard.position[move.to.y][move.to.x]);
+                    if (piece_type(iBoard.position[move.from.y][move.from.x]) == piece::King)
+                    {
+                        if (move.from.x - move.to.x == 2u)
+                        {
+                            // queenside castling
+                            iAnimations.emplace_back(chess::move{ coordinates{ 0u, move.from.y }, coordinates{ 3u, move.to.y } });
+                        }
+                        else if (move.to.x - move.from.x == 2u)
+                        {
+                            // kingside castling
+                            iAnimations.emplace_back(chess::move{ coordinates{ 7u, move.from.y }, coordinates{ 5u, move.to.y } });
+                        }
+                    }
                     play(move);
                 }
             }
