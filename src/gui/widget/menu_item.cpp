@@ -25,22 +25,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     menu_item::menu_item(i_action& aAction) : 
-        iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }
+        iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
     menu_item::menu_item(std::shared_ptr<i_action> aAction) : 
-        iContents{ aAction }, iOpenAnySubMenu{ true }
+        iContents{ aAction }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
     menu_item::menu_item(i_menu& aSubMenu) : 
-        iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iOpenAnySubMenu{ true }
+        iContents{ std::shared_ptr<i_menu>{std::shared_ptr<i_menu>{}, &aSubMenu } }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
     menu_item::menu_item(std::shared_ptr<i_menu> aSubMenu) : 
-        iContents{ aSubMenu }, iOpenAnySubMenu{ true }
+        iContents{ aSubMenu }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
@@ -74,6 +74,30 @@ namespace neogfx
     i_menu& menu_item::sub_menu()
     {
         return const_cast<i_menu&>(to_const(*this).sub_menu());
+    }
+
+    const i_menu_item_widget& menu_item::as_widget() const
+    {
+        if (iWidget)
+            return *iWidget;
+        throw no_widget();
+    }
+
+    i_menu_item_widget& menu_item::as_widget()
+    {
+        if (iWidget)
+            return *iWidget;
+        throw no_widget();
+    }
+
+    void menu_item::set_widget(i_menu_item_widget& aWidget)
+    {
+        iWidget = &aWidget;
+    }
+
+    void menu_item::unset_widget()
+    {
+        iWidget = nullptr;
     }
 
     bool menu_item::available() const

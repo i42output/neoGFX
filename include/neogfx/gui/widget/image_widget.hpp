@@ -26,6 +26,7 @@
 
 namespace neogfx
 {
+    // todo: i_image_widget
     class image_widget : public widget<>
     {
     public:

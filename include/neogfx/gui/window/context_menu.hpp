@@ -27,6 +27,8 @@ namespace neogfx
     class context_menu
     {
     public:
+        define_event(PopupCreated, popup_created, popup_menu&)
+    public:
         struct widget_not_created_yet : std::logic_error { widget_not_created_yet() : std::logic_error("neogfx::context_menu::widget_not_created_yet") {} };
     public:
         context_menu(const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);

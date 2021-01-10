@@ -59,6 +59,16 @@ namespace neogfx
         return iMenuItem;
     }
 
+    image_widget& menu_item_widget::item_icon()
+    {
+        return iIcon;
+    }
+
+    text_widget& menu_item_widget::item_text()
+    {
+        return iText;
+    }
+
     neogfx::size_policy menu_item_widget::size_policy() const
     {
         if (has_size_policy())
@@ -273,6 +283,8 @@ namespace neogfx
 
     void menu_item_widget::init()
     {
+        iMenuItem.set_widget(*this);
+
         set_padding(neogfx::padding{});
         iLayout.set_padding(dpi_scale(neogfx::padding{ iGap, dpi_scale(2.0), iGap * (menu().type() == menu_type::Popup ? 2.0 : 1.0), dpi_scale(2.0) }));
         iLayout.set_spacing(dpi_scale(size{ iGap, 0.0 }));

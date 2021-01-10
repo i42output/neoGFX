@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
-
+#include <neogfx/gui/widget/i_menu_item_widget.hpp>
 #include <chess/board.hpp>
 
 namespace chess::gui
@@ -105,7 +105,7 @@ namespace chess::gui
                                     auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
                                     pieceColor = ng::mix(ng::color::Red, ng::color::White, ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime));
                                 }
-                                ng::point mousePosition = root().mouse_position() - origin();
+                                ng::point const mousePosition = root().mouse_position() - origin();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
                                     ng::point{} : mousePosition - *iSelectionPosition);
                                 aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
@@ -128,7 +128,7 @@ namespace chess::gui
                             auto const occupier = iBoard.position[animation.move.to.y][animation.move.to.x];
                             if (occupier != piece::None)
                             {
-                                auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                auto const pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
                                 aGc.draw_texture(ng::rect{ *pos, squareRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
@@ -302,8 +302,34 @@ namespace chess::gui
                 // promotion
                 if ((piece_color(movingPiece) == piece::White && aMove.to.y == 7u) || (piece_color(movingPiece) == piece::Black && aMove.to.y == 0u))
                 {
-                    // todo
                     promotion = piece_color(movingPiece) | piece::Queen;
+                    ng::point const mousePosition = root().mouse_position() - origin();
+                    ng::context_menu contextMenu{ *this, mousePosition + non_client_rect().top_left() + root().window_position() };
+                    ng::action actionQueen{ "", iPieceTextures.at(piece::Queen) };
+                    ng::action actionRook{ "", iPieceTextures.at(piece::Rook) };
+                    ng::action actionBishop{ "", iPieceTextures.at(piece::Bishop) };
+                    ng::action actionKnight{ "", iPieceTextures.at(piece::Knight) };
+                    contextMenu.menu().add_action(actionQueen);
+                    contextMenu.menu().add_action(actionRook);
+                    contextMenu.menu().add_action(actionBishop);
+                    contextMenu.menu().add_action(actionKnight);
+                    contextMenu.menu().opened([&]()
+                    {
+                        contextMenu.menu().item_at(0).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
+                        contextMenu.menu().item_at(1).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
+                        contextMenu.menu().item_at(2).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
+                        contextMenu.menu().item_at(3).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
+                        auto const pieceColor = piece_color(movingPiece) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                        contextMenu.menu().item_at(0).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });
+                        contextMenu.menu().item_at(1).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });
+                        contextMenu.menu().item_at(2).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });
+                        contextMenu.menu().item_at(3).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });
+                    });
+                    actionQueen.Triggered([&]() { promotion = piece_color(movingPiece) | piece::Queen; });
+                    actionRook.Triggered([&]() { promotion = piece_color(movingPiece) | piece::Rook; });
+                    actionBishop.Triggered([&]() { promotion = piece_color(movingPiece) | piece::Bishop; });
+                    actionKnight.Triggered([&]() { promotion = piece_color(movingPiece) | piece::Knight; });
+                    contextMenu.exec();
                 }
             }
             move_piece(iBoard, chess::move{ aMove.from, aMove.to, promotion });

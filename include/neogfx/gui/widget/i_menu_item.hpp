@@ -32,6 +32,8 @@ namespace neogfx
         SubMenu
     };
 
+    class i_menu_item_widget;
+
     class i_menu_item
     {
     public:
@@ -39,6 +41,7 @@ namespace neogfx
         declare_event(deselected)
     public:
         struct wrong_type : std::logic_error { wrong_type() : std::logic_error("neogfx::i_menu_item::wrong_type") {} };
+        struct no_widget : std::logic_error { no_widget() : std::logic_error("neogfx::i_menu_item::no_widget") {} };
     public:
         virtual ~i_menu_item() = default;
     public:
@@ -47,6 +50,11 @@ namespace neogfx
         virtual i_action& action() = 0;
         virtual const i_menu& sub_menu() const = 0;
         virtual i_menu& sub_menu() = 0;
+    public:
+        virtual const i_menu_item_widget& as_widget() const = 0;
+        virtual i_menu_item_widget& as_widget() = 0;
+        virtual void set_widget(i_menu_item_widget& aWidget) = 0;
+        virtual void unset_widget() = 0;
     public:
         virtual bool available() const = 0;
         virtual void select(bool aOpenAnySubMenu = true) = 0;

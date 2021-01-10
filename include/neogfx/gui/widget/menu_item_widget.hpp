@@ -20,20 +20,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/app/i_mnemonic.hpp>
-#include <neogfx/app/i_help.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
-#include "widget.hpp"
-#include "text_widget.hpp"
-#include "image_widget.hpp"
-#include "i_menu_item.hpp"
+#include <neogfx/gui/widget/i_menu_item_widget.hpp>
+#include <neogfx/gui/widget/i_menu_item.hpp>
 
 namespace neogfx
 {
     class popup_menu;
 
-    class menu_item_widget : public widget<>, protected i_mnemonic, private i_help_source
+    class menu_item_widget : public widget<>, public i_menu_item_widget
     {
     public:
         menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
@@ -41,8 +37,11 @@ namespace neogfx
         menu_item_widget(i_layout& aLayout, i_menu& aMenu, i_menu_item& aMenuItem);
         ~menu_item_widget();
     public:
-        i_menu& menu() const;
-        i_menu_item& menu_item() const;
+        i_menu& menu() const override;
+        i_menu_item& menu_item() const override;
+    public:
+        image_widget& item_icon() override; // todo: i_image_widget
+        text_widget& item_text() override; // todo: i_text_widget
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;

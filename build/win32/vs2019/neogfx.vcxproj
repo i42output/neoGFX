@@ -499,6 +499,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_selection_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nest.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_push_button.hpp" />

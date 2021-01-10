@@ -47,11 +47,17 @@ namespace neogfx
         const i_menu& sub_menu() const override;
         i_menu& sub_menu() override;
     public:
+        const i_menu_item_widget& as_widget() const override;
+        i_menu_item_widget& as_widget() override;
+        void set_widget(i_menu_item_widget& aWidget) override;
+        void unset_widget() override;
+    public:
         bool available() const override;
         void select(bool aOpenAnySubMenu = true) override;
         bool open_any_sub_menu() const override;
     private:
         contents iContents;
         bool iOpenAnySubMenu;
+        i_menu_item_widget* iWidget;
     };
 }
