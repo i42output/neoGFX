@@ -97,10 +97,10 @@ namespace chess::gui
                             {
                                 auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
                                 bool useGradient = true;
-                                if (iFlashCheck && iMoveValidator.in_check(iTurn, iBoard) && piece_type(occupier) == piece::King && piece_color(occupier) == static_cast<piece>(iTurn))
+                                if (iFlashCheck && (iMoveValidator.in_check(iTurn, iBoard) || iFlashCheck->first) && piece_type(occupier) == piece::King && piece_color(occupier) == static_cast<piece>(iTurn))
                                 {
                                     useGradient = false;
-                                    auto const since = std::chrono::steady_clock::now() - *iFlashCheck;
+                                    auto const since = std::chrono::steady_clock::now() - iFlashCheck->second;
                                     auto constexpr flashInterval_ms = 500;
                                     auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
                                     pieceColor = ng::mix(ng::color::Red, ng::color::White, ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime));
@@ -162,7 +162,11 @@ namespace chess::gui
                     }
                     else if (correctColor && iMoveValidator.in_check(iTurn, iBoard))
                     {
-                        iFlashCheck = std::chrono::steady_clock::now();
+                        iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
+                    }
+                    else if (correctColor && iMoveValidator.check_if_moved(iTurn, iBoard, *pos))
+                    {
+                        iFlashCheck = std::make_pair(true, std::chrono::steady_clock::now());
                     }
                 }
                 else
@@ -203,7 +207,7 @@ namespace chess::gui
                     }
                     else if (iMoveValidator.in_check(iTurn, iBoard))
                     {
-                        iFlashCheck = std::chrono::steady_clock::now();
+                        iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
                     }
                 }
             }
@@ -294,7 +298,7 @@ namespace chess::gui
             move_piece(iBoard, aMove);
             iTurn = next_player(iTurn);
             if (iMoveValidator.in_check(iTurn, iBoard))
-                iFlashCheck = std::chrono::steady_clock::now();
+                iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
             update();
         }
         else
@@ -354,7 +358,7 @@ namespace chess::gui
                         iAnimations.pop_front();
                 }
             }
-            if (iFlashCheck && std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - *iFlashCheck).count() > 1)
+            if (iFlashCheck && std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - iFlashCheck->second).count() > 1)
                 iFlashCheck = std::nullopt;
             update();
         }

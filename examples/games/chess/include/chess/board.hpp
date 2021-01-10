@@ -75,6 +75,6 @@ namespace chess::gui
         std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
         bool iEditBoard;
         mutable std::deque<animation> iAnimations;
-        std::optional<std::chrono::steady_clock::time_point> iFlashCheck;
+        std::optional<std::pair<bool, std::chrono::steady_clock::time_point>> iFlashCheck;
     };
 }

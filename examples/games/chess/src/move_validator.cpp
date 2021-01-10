@@ -124,7 +124,7 @@ namespace chess
     {
         for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
             for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
-                if (can_move(aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                if (chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
                     return true;
         return false;
     }
@@ -132,5 +132,15 @@ namespace chess
     bool move_validator::in_check(player aTurn, board const& aBoard) const
     {
         return chess::in_check(iMoveTables, aTurn, aBoard);
+    }
+
+    bool move_validator::check_if_moved(player aTurn, board const& aBoard, coordinates const& aMovePosition) const
+    {
+        for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
+            for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
+                if (!chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                    if (chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }, true))
+                        return true;
+        return false;
     }
 }

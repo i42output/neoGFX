@@ -35,6 +35,7 @@ namespace chess
         bool can_move(player aTurn, board const& aBoard, move const& aMove) const override;
         bool has_moves(player aTurn, board const& aBoard, coordinates const& aMovePosition) const override;
         bool in_check(player aTurn, board const& aBoard) const override;
+        bool check_if_moved(player aTurn, board const& aBoard, coordinates const& aMovePosition) const override;
     private:
         move_tables iMoveTables;
     };
