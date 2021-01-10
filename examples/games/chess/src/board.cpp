@@ -295,7 +295,18 @@ namespace chess::gui
             // todo: update engine
             if (!iMoveValidator.can_move(iTurn, iBoard, aMove))
                 return false;
-            move_piece(iBoard, aMove);
+            auto const movingPiece = iBoard.position[aMove.from.y][aMove.from.x];
+            std::optional<piece> promotion;
+            if (piece_type(movingPiece) == piece::Pawn)
+            {
+                // promotion
+                if ((piece_color(movingPiece) == piece::White && aMove.to.y == 7u) || (piece_color(movingPiece) == piece::Black && aMove.to.y == 0u))
+                {
+                    // todo
+                    promotion = piece_color(movingPiece) | piece::Queen;
+                }
+            }
+            move_piece(iBoard, chess::move{ aMove.from, aMove.to, promotion });
             iTurn = next_player(iTurn);
             if (iMoveValidator.in_check(iTurn, iBoard))
                 iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());

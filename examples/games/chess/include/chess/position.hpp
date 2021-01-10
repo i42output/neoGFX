@@ -72,7 +72,7 @@ namespace chess
             return targetPiece;
         if (aPosition == aBoard.checkTest->from)
             return piece::None;
-        auto const movingPiece = aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x];
+        auto const movingPiece = !aBoard.checkTest->promoteTo ? aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x] : *aBoard.checkTest->promoteTo;
         if (aPosition == aBoard.checkTest->to)
             return movingPiece;
         // en passant
@@ -110,7 +110,7 @@ namespace chess
         auto const movingPiece = source;
         auto& destination = aBoard.position[aMove.to.y][aMove.to.x];
         auto const targetPiece = destination;
-        destination = source;
+        destination = (!aMove.promoteTo ? source : *aMove.promoteTo);
         source = piece::None;
         if (!aBoard.lastMove)
             aBoard.lastMove = aMove;
@@ -118,6 +118,7 @@ namespace chess
         {
             aBoard.lastMove->from = aMove.from;
             aBoard.lastMove->to = aMove.to;
+            aBoard.lastMove->promoteTo = aMove.promoteTo;
         }
         switch (piece_type(movingPiece))
         {
