@@ -323,6 +323,7 @@ namespace neogfx
         scalar intensity() const;
         bool similar_intensity(const self_type& aOther, scalar aThreshold = 0.5) const;
         return_type mid(const self_type& aOther) const;
+        return_type mix(const self_type& aOther, scalar aValue) const;
         bool light(scalar aThreshold = 0.50) const;
         bool dark(scalar aThreshold = 0.50) const;
         return_type& lighten(view_component aDelta);

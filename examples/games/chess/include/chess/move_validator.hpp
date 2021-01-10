@@ -33,6 +33,8 @@ namespace chess
         move_validator();
     public:
         bool can_move(player aTurn, board const& aBoard, move const& aMove) const override;
+        bool has_moves(player aTurn, board const& aBoard, coordinates const& aMovePosition) const override;
+        bool in_check(player aTurn, board const& aBoard) const override;
     private:
         move_tables iMoveTables;
     };

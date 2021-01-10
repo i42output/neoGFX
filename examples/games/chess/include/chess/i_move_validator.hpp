@@ -134,5 +134,7 @@ namespace chess
         virtual ~i_move_validator() = default;
     public:
         virtual bool can_move(player aTurn, board const& aBoard, move const& aMove) const = 0;
+        virtual bool has_moves(player aTurn, board const& aBoard, coordinates const& aMovePosition) const = 0;
+        virtual bool in_check(player aTurn, board const& aBoard) const = 0;
     };
 }

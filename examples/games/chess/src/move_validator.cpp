@@ -117,8 +117,20 @@ namespace chess
 
     bool move_validator::can_move(player aTurn, board const& aBoard, move const& aMove) const
     {
-        bool canMove = chess::can_move(iMoveTables, aTurn, aBoard, aMove);
-        // todo
-        return canMove;
+        return chess::can_move(iMoveTables, aTurn, aBoard, aMove);
+    }
+
+    bool move_validator::has_moves(player aTurn, board const& aBoard, coordinates const& aMovePosition) const
+    {
+        for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
+            for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
+                if (can_move(aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                    return true;
+        return false;
+    }
+
+    bool move_validator::in_check(player aTurn, board const& aBoard) const
+    {
+        return chess::in_check(iMoveTables, aTurn, aBoard);
     }
 }

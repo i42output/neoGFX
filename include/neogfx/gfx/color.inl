@@ -78,6 +78,16 @@ namespace neogfx
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
+    inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::mix(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aOther, scalar aValue) const
+    {
+        return typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type{
+            (self_type::template red<double>() * (1 - aValue) + aOther.template red<double>() * aValue),
+            (self_type::template green<double>() * (1 - aValue) + aOther.template green<double>() * aValue),
+            (self_type::template blue<double>() * (1 - aValue) + aOther.template blue<double>() * aValue),
+            (base_type::template alpha<double>() * (1 - aValue) + aOther.template alpha<double>() * aValue) };
+    }
+
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline bool basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::light(double aThreshold) const
     {
         return to_hsl().lightness() >= aThreshold;

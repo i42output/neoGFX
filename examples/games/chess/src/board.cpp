@@ -96,10 +96,19 @@ namespace chess::gui
                             if (occupier != piece::None)
                             {
                                 auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                bool useGradient = true;
+                                if (iFlashCheck && iMoveValidator.in_check(iTurn, iBoard) && piece_type(occupier) == piece::King && piece_color(occupier) == static_cast<piece>(iTurn))
+                                {
+                                    useGradient = false;
+                                    auto const since = std::chrono::steady_clock::now() - *iFlashCheck;
+                                    auto constexpr flashInterval_ms = 500;
+                                    auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
+                                    pieceColor = ng::color::Red.mix(ng::color::White, ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime));
+                                }
                                 ng::point mousePosition = root().mouse_position() - origin();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
                                     ng::point{} : mousePosition - *iSelectionPosition);
-                                aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
                         else
@@ -139,51 +148,63 @@ namespace chess::gui
         if (aButton == ng::mouse_button::Left && capturing())
         {
             auto const pos = at(aPosition);
-            auto const pieceColor = piece_color(iBoard.position[pos->y][pos->x]);
-            if (!iSelection)
+            if (pos)
             {
-                if (pos && pieceColor == static_cast<piece>(iTurn) || (iEditBoard && pieceColor != piece::None))
+                auto const pieceColor = piece_color(iBoard.position[pos->y][pos->x]);
+                bool const correctColor = (pieceColor == static_cast<piece>(iTurn));
+                if (!iSelection)
                 {
-                    iSelectionPosition = aPosition;
-                    iSelection = pos;
-                    iLastSelectionEventTime = std::chrono::steady_clock::now();
-                }
-            }
-            else
-            {
-                if (pos == iSelection)
-                {
-                    iSelectionPosition = std::nullopt;
-                    iSelection = std::nullopt;
-                    iLastSelectionEventTime = std::nullopt;
-                }
-                else if (pieceColor == static_cast<piece>(iTurn) && !iEditBoard)
-                {
-                    iSelectionPosition = aPosition;
-                    iSelection = pos;
-                    iLastSelectionEventTime = std::chrono::steady_clock::now();
-                }
-                else if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard)
-                {
-                    chess::move move{ *iSelection, *pos };
-                    iSelectionPosition = std::nullopt;
-                    iSelection = std::nullopt;
-                    iLastSelectionEventTime = std::nullopt;
-                    iAnimations.emplace_back(move, iBoard.position[move.to.y][move.to.x]);
-                    if (piece_type(iBoard.position[move.from.y][move.from.x]) == piece::King)
+                    if ((correctColor && iMoveValidator.has_moves(iTurn, iBoard, *pos)) || (iEditBoard && pieceColor != piece::None))
                     {
-                        if (move.from.x - move.to.x == 2u)
-                        {
-                            // queenside castling
-                            iAnimations.emplace_back(chess::move{ coordinates{ 0u, move.from.y }, coordinates{ 3u, move.to.y } });
-                        }
-                        else if (move.to.x - move.from.x == 2u)
-                        {
-                            // kingside castling
-                            iAnimations.emplace_back(chess::move{ coordinates{ 7u, move.from.y }, coordinates{ 5u, move.to.y } });
-                        }
+                        iSelectionPosition = aPosition;
+                        iSelection = pos;
+                        iLastSelectionEventTime = std::chrono::steady_clock::now();
                     }
-                    play(move);
+                    else if (correctColor && iMoveValidator.in_check(iTurn, iBoard))
+                    {
+                        iFlashCheck = std::chrono::steady_clock::now();
+                    }
+                }
+                else
+                {
+                    if (pos == iSelection)
+                    {
+                        iSelectionPosition = std::nullopt;
+                        iSelection = std::nullopt;
+                        iLastSelectionEventTime = std::nullopt;
+                    }
+                    else if (pieceColor == static_cast<piece>(iTurn) && !iEditBoard)
+                    {
+                        iSelectionPosition = aPosition;
+                        iSelection = pos;
+                        iLastSelectionEventTime = std::chrono::steady_clock::now();
+                    }
+                    else if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard)
+                    {
+                        chess::move move{ *iSelection, *pos };
+                        iSelectionPosition = std::nullopt;
+                        iSelection = std::nullopt;
+                        iLastSelectionEventTime = std::nullopt;
+                        iAnimations.emplace_back(move, iBoard.position[move.to.y][move.to.x]);
+                        if (piece_type(iBoard.position[move.from.y][move.from.x]) == piece::King)
+                        {
+                            if (move.from.x - move.to.x == 2u)
+                            {
+                                // queenside castling
+                                iAnimations.emplace_back(chess::move{ coordinates{ 0u, move.from.y }, coordinates{ 3u, move.to.y } });
+                            }
+                            else if (move.to.x - move.from.x == 2u)
+                            {
+                                // kingside castling
+                                iAnimations.emplace_back(chess::move{ coordinates{ 7u, move.from.y }, coordinates{ 5u, move.to.y } });
+                            }
+                        }
+                        play(move);
+                    }
+                    else if (iMoveValidator.in_check(iTurn, iBoard))
+                    {
+                        iFlashCheck = std::chrono::steady_clock::now();
+                    }
                 }
             }
         }
@@ -272,6 +293,8 @@ namespace chess::gui
                 return false;
             move_piece(iBoard, aMove);
             iTurn = next_player(iTurn);
+            if (iMoveValidator.in_check(iTurn, iBoard))
+                iFlashCheck = std::chrono::steady_clock::now();
             update();
         }
         else
@@ -317,7 +340,7 @@ namespace chess::gui
     void board::animate()
     {
         iAnimator.again();
-        if (iLastSelectionEventTime || !iAnimations.empty())
+        if (iLastSelectionEventTime || !iAnimations.empty() || iFlashCheck)
         {
             if (!iAnimations.empty())
             {
@@ -331,6 +354,8 @@ namespace chess::gui
                         iAnimations.pop_front();
                 }
             }
+            if (iFlashCheck && std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - *iFlashCheck).count() > 1)
+                iFlashCheck = std::nullopt;
             update();
         }
     }
