@@ -188,7 +188,7 @@ namespace neogfx
                 std::visit([this, &aFrom](auto&& aTo)
                 {
                     neolib::scoped_flag sf{ iUpdatingProperty };
-                    auto const value = mix(mix_value(), aFrom, aTo);
+                    auto const value = mix(aFrom, aTo, mix_value());
                     property().set_from_variant(value);
                 }, to());
             }, from());

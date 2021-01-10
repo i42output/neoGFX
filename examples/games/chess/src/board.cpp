@@ -103,7 +103,7 @@ namespace chess::gui
                                     auto const since = std::chrono::steady_clock::now() - *iFlashCheck;
                                     auto constexpr flashInterval_ms = 500;
                                     auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-                                    pieceColor = ng::color::Red.mix(ng::color::White, ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime));
+                                    pieceColor = ng::mix(ng::color::Red, ng::color::White, ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime));
                                 }
                                 ng::point mousePosition = root().mouse_position() - origin();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
