@@ -51,10 +51,12 @@ namespace chess::gui
     {
         if (iEditBoard)
             draw_alpha_background(aGc, board_rect(), std::min<ng::scalar>(square_rect({ 0, 0 }).width() / 4, 8.0_dip));
+        auto const now = std::chrono::steady_clock::now();
         int32_t constexpr RENDER_BOARD                  = 1;
         int32_t constexpr RENDER_NON_SELECTED_PIECES    = 2;
         int32_t constexpr RENDER_SELECTED_PIECES        = 3;
-        for (int32_t pass = RENDER_BOARD; pass <= RENDER_SELECTED_PIECES; ++pass)
+        int32_t constexpr RENDER_ANIMATIONS             = 4;
+        for (int32_t pass = RENDER_BOARD; pass <= RENDER_ANIMATIONS; ++pass)
             for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
                 for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
                 {
@@ -85,6 +87,7 @@ namespace chess::gui
                         break;
                     case RENDER_NON_SELECTED_PIECES:
                     case RENDER_SELECTED_PIECES:
+                        if (!animating(coordinates{ x, y }, now))
                         {
                             bool selectedOccupier = (iSelection  && *iSelection == coordinates{ x, y });
                             if ((pass == RENDER_NON_SELECTED_PIECES && selectedOccupier) || (pass == RENDER_SELECTED_PIECES && !selectedOccupier))
@@ -99,6 +102,27 @@ namespace chess::gui
                                 aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
+                        else
+                        {
+                            auto const occupier = iAnimations.front().capturedPiece;
+                            if (occupier != piece::None)
+                            {
+                                auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                aGc.draw_texture(squareRect, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                            }
+                        }
+                        break;
+                    case RENDER_ANIMATIONS:
+                        if (auto pos = animating(coordinates{ x, y }, now))
+                        {
+                            auto const& animation = iAnimations.front();
+                            auto const occupier = iBoard.position[animation.move.to.y][animation.move.to.x];
+                            if (occupier != piece::None)
+                            {
+                                auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                aGc.draw_texture(ng::rect{ *pos, squareRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                            }
+                        }
                         break;
                     }
                 }
@@ -107,6 +131,11 @@ namespace chess::gui
     void board::mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
     {
         widget<>::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        if (!iAnimations.empty())
+        {
+            iAnimations.pop_front();
+            update();
+        }
         if (aButton == ng::mouse_button::Left && capturing())
         {
             auto const pos = at(aPosition);
@@ -136,10 +165,12 @@ namespace chess::gui
                 }
                 else if (iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard)
                 {
-                    play(chess::move{ *iSelection, *pos });
+                    chess::move move{ *iSelection, *pos };
                     iSelectionPosition = std::nullopt;
                     iSelection = std::nullopt;
                     iLastSelectionEventTime = std::nullopt;
+                    iAnimations.emplace_back(move, iBoard.position[move.to.y][move.to.x]);
+                    play(move);
                 }
             }
         }
@@ -249,12 +280,46 @@ namespace chess::gui
         update();
     }
         
+    std::optional<ng::point> board::animating(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const
+    {
+        if (!iAnimations.empty())
+        {
+            auto const& animation = iAnimations.front();
+            if (animation.move.to == aMovePos)
+            {
+                if (!animation.startTime)
+                    animation.startTime = std::chrono::steady_clock::now();
+                auto const start = square_rect(animation.move.from).top_left();
+                auto const end = square_rect(animation.move.to).top_left();
+                auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
+                auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
+                auto const elapsed = std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(aTime - *animation.startTime).count() * (maxDistance / distance);
+                if (elapsed <= 1.0)
+                    return start + (end - start) * elapsed;
+            }
+        }
+        return {};
+    }
+    
     void board::animate()
     {
         iAnimator.again();
-        if (iLastSelectionEventTime)
+        if (iLastSelectionEventTime || !iAnimations.empty())
+        {
+            if (!iAnimations.empty())
+            {
+                auto& animation = iAnimations.front();
+                if (animation.startTime)
+                {
+                    auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
+                    auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
+                    auto const elapsed = std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - *animation.startTime).count() * (maxDistance / distance);
+                    if (elapsed > 1.0)
+                        iAnimations.pop_front();
+                }
+            }
             update();
-        // todo
+        }
     }
 
     ng::rect board::board_rect() const

@@ -31,6 +31,13 @@ using namespace ng::unit_literals;
 
 namespace chess::gui
 {
+    struct animation
+    {
+        chess::move move;
+        piece capturedPiece;
+        mutable std::optional<std::chrono::steady_clock::time_point> startTime;
+    };
+
     class board : public i_board, public ng::widget<>
     {
     public:
@@ -50,6 +57,7 @@ namespace chess::gui
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
     private:
+        std::optional<ng::point> animating(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const;
         void animate();
         ng::rect board_rect() const;
         ng::rect square_rect(coordinates aCoordinates) const;
@@ -66,5 +74,6 @@ namespace chess::gui
         bool iShowValidMoves;
         std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
         bool iEditBoard;
+        mutable std::deque<animation> iAnimations;
     };
 }
