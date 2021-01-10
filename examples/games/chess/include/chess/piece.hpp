@@ -75,73 +75,75 @@ namespace chess
         COLOR_MASK  = White | Black
     };
 
-    inline piece_cardinal as_cardinal(piece p)
+    template <typename T = std::size_t>
+    inline T as_cardinal(piece p)
     {
         // todo: will bitwise operations be faster? profile and see.
         switch (p)
         {
         case piece::WhitePawn:
-            return piece_cardinal::Pawn;
+            return static_cast<T>(piece_cardinal::Pawn);
         case piece::WhiteKnight:
-            return piece_cardinal::Knight;
+            return static_cast<T>(piece_cardinal::Knight);
         case piece::WhiteBishop:
-            return piece_cardinal::Bishop;
+            return static_cast<T>(piece_cardinal::Bishop);
         case piece::WhiteRook:
-            return piece_cardinal::Rook;
+            return static_cast<T>(piece_cardinal::Rook);
         case piece::WhiteQueen:
-            return piece_cardinal::Queen;
+            return static_cast<T>(piece_cardinal::Queen);
         case piece::WhiteKing:
-            return piece_cardinal::King;
+            return static_cast<T>(piece_cardinal::King);
         case piece::BlackPawn:
-            return piece_cardinal::Pawn;
+            return static_cast<T>(piece_cardinal::Pawn);
         case piece::BlackKnight:
-            return piece_cardinal::Knight;
+            return static_cast<T>(piece_cardinal::Knight);
         case piece::BlackBishop:
-            return piece_cardinal::Bishop;
+            return static_cast<T>(piece_cardinal::Bishop);
         case piece::BlackRook:
-            return piece_cardinal::Rook;
+            return static_cast<T>(piece_cardinal::Rook);
         case piece::BlackQueen:
-            return piece_cardinal::Queen;
+            return static_cast<T>(piece_cardinal::Queen);
         case piece::BlackKing:
-            return piece_cardinal::King;
+            return static_cast<T>(piece_cardinal::King);
         default:
             throw std::logic_error("chess::as_cardinal");
         }
     }
 
-    inline piece_color_cardinal as_color_cardinal(piece p)
+    template <typename T = std::size_t>
+    inline T as_color_cardinal(piece p)
     {
         // todo: will bitwise operations be faster? profile and see.
         switch (p)
         {
         case piece::White:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::WhitePawn:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::WhiteKnight:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::WhiteBishop:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::WhiteRook:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::WhiteQueen:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::WhiteKing:
-            return piece_color_cardinal::White;
+            return static_cast<T>(piece_color_cardinal::White);
         case piece::Black:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         case piece::BlackPawn:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         case piece::BlackKnight:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         case piece::BlackBishop:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         case piece::BlackRook:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         case piece::BlackQueen:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         case piece::BlackKing:
-            return piece_color_cardinal::Black;
+            return static_cast<T>(piece_color_cardinal::Black);
         default:
             throw std::logic_error("chess::as_color_cardinal");
         }

@@ -27,10 +27,10 @@ namespace chess
 
     void engine::reset()
     {
-        setup(player::White, chess::setup);
+        setup(player::White, matrix_board_setup);
     }
 
-    void engine::setup(player aTurn, board const& aBoard)
+    void engine::setup(player aTurn, matrix_board const& aBoard)
     {
         iBoard = aBoard;
         iTurn = aTurn;

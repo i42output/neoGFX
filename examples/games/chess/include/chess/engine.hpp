@@ -28,10 +28,10 @@ namespace chess
         engine();
     public:
         void reset() override;
-        void setup(player aTurn, board const& aBoard) override;
+        void setup(player aTurn, matrix_board const& aBoard) override;
         bool play(move const& aMove) override;
     private:
-        board iBoard;
+        matrix_board iBoard;
         player iTurn;
     };
 }

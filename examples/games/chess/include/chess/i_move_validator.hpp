@@ -47,11 +47,12 @@ namespace chess
         if (piece_type(targetPiece) == piece::King && !aCheckTest)
             return false;
         // normal move...
-        if (piece_type(targetPiece) == piece::None && !aTables.validMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
+        bool enPassant = false;
+        bool castle = false;
+        if (piece_type(targetPiece) == piece::None && !aTables.validMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
         {
-            bool enPassant = false;
             if (piece_type(movingPiece) == piece::Pawn &&
-                aTables.validCaptureMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
+                aTables.validCaptureMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
                 aBoard.lastMove)
             {
                 auto const pieceLastMoved = piece_at(aBoard, aBoard.lastMove->to);
@@ -66,14 +67,18 @@ namespace chess
                     }
                 }
             }
-            if (!enPassant)
+            else if (piece_type(movingPiece) == piece::King && aBoard.lastMove && !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)])
+            {
+                // todo: castling                
+            }
+            if (!enPassant && !castle)
                 return false;
         }
         // capturing move...
-        if (piece_type(targetPiece) != piece::None && !aTables.validCaptureMoves[static_cast<std::size_t>(as_color_cardinal(movingPiece))][static_cast<std::size_t>(as_cardinal(movingPiece))][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
+        if (piece_type(targetPiece) != piece::None && !aTables.validCaptureMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
             return false;
         // any pieces in the way?
-        if (aTables.canMoveMultiple[static_cast<std::size_t>(as_cardinal(movingPiece))])
+        if (aTables.canMoveMultiple[as_cardinal<>(movingPiece)])
         {
             // todo: would a move array be faster than calculating/using deltas? profile and see.
             auto const delta = move_tables::move_coordinates{ static_cast<int32_t>(aMove.to.x), static_cast<int32_t>(aMove.to.y) } - move_tables::move_coordinates{ static_cast<int32_t>(aMove.from.x), static_cast<int32_t>(aMove.from.y) };

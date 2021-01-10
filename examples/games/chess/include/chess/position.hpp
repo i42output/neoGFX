@@ -31,18 +31,41 @@ namespace chess
         coordinates from;
         coordinates to;
         std::optional<piece> promoteTo;
+        enum class castling_piece_index : uint32_t
+        {
+            QueensRook  = 0x0,
+            King        = 0x1,
+            KingsRook   = 0x2,
+
+            COUNT
+        };
+        std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> castlingState;
     };
 
-    typedef std::array<std::array<piece, 8>, 8> position;
-    struct board
+    typedef std::array<std::array<piece, 8>, 8> matrix;
+
+    struct piece_bitboard
     {
-        position position;
+        piece piece;
+        uint64_t position;
+    };
+    typedef std::array<std::array<piece_bitboard, 16>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> bitboard;
+
+    template <typename Representation>
+    struct basic_board
+    {
+        Representation position;
         std::array<coordinates, static_cast<std::size_t>(piece_color_cardinal::COUNT)> kings;
         std::optional<move> lastMove;
         mutable std::optional<move> checkTest;
     };
 
-    inline piece piece_at(board const& aBoard, coordinates aPosition)
+    using matrix_board = basic_board<matrix>;
+    using bitboard_board = basic_board<bitboard>;
+
+    using board = matrix_board;
+
+    inline piece piece_at(matrix_board const& aBoard, coordinates aPosition)
     {
         auto const targetPiece = aBoard.position[aPosition.y][aPosition.x];
         if (!aBoard.checkTest)
@@ -73,15 +96,15 @@ namespace chess
         return targetPiece;
     }
 
-    inline coordinates king_position(board const& aBoard, piece aKing)
+    inline coordinates king_position(matrix_board const& aBoard, piece aKing)
     {
-        auto const kingPosition = aBoard.kings[static_cast<std::size_t>(as_color_cardinal(aKing))];
+        auto const kingPosition = aBoard.kings[as_color_cardinal<>(aKing)];
         if (aBoard.checkTest && aBoard.checkTest->from == kingPosition)
             return aBoard.checkTest->to;
         return kingPosition;
     }
 
-    inline void move_piece(board& aBoard, chess::move const& aMove)
+    inline void move_piece(matrix_board& aBoard, chess::move const& aMove)
     {
         auto& source = aBoard.position[aMove.from.y][aMove.from.x];
         auto const movingPiece = source;
@@ -92,7 +115,7 @@ namespace chess
         switch (piece_type(movingPiece))
         {
         case piece::King:
-            aBoard.kings[static_cast<std::size_t>(as_color_cardinal(destination))] = aMove.to;
+            aBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
             break;
         case piece::Pawn:
             // en passant
@@ -124,7 +147,7 @@ namespace chess
         return result;
     }
 
-    static constexpr board setup
+    static constexpr matrix_board matrix_board_setup
     {
         {{
             { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
@@ -136,5 +159,10 @@ namespace chess
         {{
             { 4u, 0u }, { 4u, 7u }
         }}
+    };
+
+    static constexpr bitboard_board bitboard_board_setup
+    {
+        // todo
     };
 }

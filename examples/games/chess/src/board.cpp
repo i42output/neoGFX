@@ -241,7 +241,7 @@ namespace chess::gui
 
     void board::reset()
     {
-        setup(player::White, chess::setup);
+        setup(player::White, chess::matrix_board_setup);
     }
 
     void board::setup(player aTurn, chess::board const& aBoard)
@@ -275,7 +275,7 @@ namespace chess::gui
         destination = source;
         source = piece::None;
         if (piece_type(destination) == piece::King)
-            iBoard.kings[static_cast<std::size_t>(as_color_cardinal(destination))] = aMove.to;
+            iBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
         iBoard.lastMove = std::nullopt;
         update();
     }
