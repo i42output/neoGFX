@@ -87,7 +87,7 @@ namespace chess::gui
                         break;
                     case RENDER_NON_SELECTED_PIECES:
                     case RENDER_SELECTED_PIECES:
-                        if (!animating(coordinates{ x, y }, now))
+                        if (!animating_to(coordinates{ x, y }, now) && !animating_from(coordinates{ x, y }))
                         {
                             bool selectedOccupier = (iSelection  && *iSelection == coordinates{ x, y });
                             if ((pass == RENDER_NON_SELECTED_PIECES && selectedOccupier) || (pass == RENDER_SELECTED_PIECES && !selectedOccupier))
@@ -111,9 +111,10 @@ namespace chess::gui
                                 aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
-                        else
+                        else if (animating_to(coordinates{ x, y }, now))
                         {
-                            auto const occupier = iAnimations.front().capturedPiece;
+                            auto const& animation = animating_to(coordinates{ x, y }, now);
+                            auto const occupier = animation->first->capturedPiece;
                             if (occupier != piece::None)
                             {
                                 auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
@@ -122,14 +123,13 @@ namespace chess::gui
                         }
                         break;
                     case RENDER_ANIMATIONS:
-                        if (auto pos = animating(coordinates{ x, y }, now))
+                        if (auto const& animation = animating_to(coordinates{ x, y }, now))
                         {
-                            auto const& animation = iAnimations.front();
-                            auto const occupier = iBoard.position[animation.move.to.y][animation.move.to.x];
+                            auto const occupier = animation->first->movingPiece;
                             if (occupier != piece::None)
                             {
                                 auto const pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
-                                aGc.draw_texture(ng::rect{ *pos, squareRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                aGc.draw_texture(ng::rect{ animation->second, squareRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
                         break;
@@ -189,20 +189,22 @@ namespace chess::gui
                         iSelectionPosition = std::nullopt;
                         iSelection = std::nullopt;
                         iLastSelectionEventTime = std::nullopt;
-                        iAnimations.emplace_back(move, iBoard.position[move.to.y][move.to.x]);
-                        if (piece_type(iBoard.position[move.from.y][move.from.x]) == piece::King)
+                        auto const movingPiece = iBoard.position[move.from.y][move.from.x];
+                        auto const targetPiece = iBoard.position[move.to.y][move.to.x];
+                        if (piece_type(movingPiece) == piece::King && move.from.x - move.to.x == 2u)
                         {
-                            if (move.from.x - move.to.x == 2u)
-                            {
-                                // queenside castling
-                                iAnimations.emplace_back(chess::move{ coordinates{ 0u, move.from.y }, coordinates{ 3u, move.to.y } });
-                            }
-                            else if (move.to.x - move.from.x == 2u)
-                            {
-                                // kingside castling
-                                iAnimations.emplace_back(chess::move{ coordinates{ 7u, move.from.y }, coordinates{ 5u, move.to.y } });
-                            }
+                            // queenside castling
+                            iAnimations.emplace_back(move, movingPiece);
+                            iAnimations.emplace_back(chess::move{ coordinates{ 0u, move.from.y }, coordinates{ 3u, move.to.y } }, iBoard.position[move.from.y][0u]);
                         }
+                        else if (piece_type(movingPiece) == piece::King && move.to.x - move.from.x == 2u)
+                        {
+                            // kingside castling
+                            iAnimations.emplace_back(move, movingPiece);
+                            iAnimations.emplace_back(chess::move{ coordinates{ 7u, move.from.y }, coordinates{ 5u, move.to.y } }, iBoard.position[move.from.y][7u]);
+                        }
+                        else
+                            iAnimations.emplace_back(move, movingPiece, targetPiece);
                         play(move);
                     }
                     else if (iMoveValidator.in_check(iTurn, iBoard))
@@ -295,11 +297,13 @@ namespace chess::gui
             // todo: update engine
             if (!iMoveValidator.can_move(iTurn, iBoard, aMove))
                 return false;
-            auto const movingPiece = iBoard.position[aMove.from.y][aMove.from.x];
+            auto const& source = iBoard.position[aMove.from.y][aMove.from.x];
+            auto const movingPiece = source;
             std::optional<piece> promotion;
             if (piece_type(movingPiece) == piece::Pawn)
             {
                 // promotion
+                animating_to(aMove.to)->first->hold = true;
                 if ((piece_color(movingPiece) == piece::White && aMove.to.y == 7u) || (piece_color(movingPiece) == piece::Black && aMove.to.y == 0u))
                 {
                     promotion = piece_color(movingPiece) | piece::Queen;
@@ -331,6 +335,7 @@ namespace chess::gui
                     actionKnight.Triggered([&]() { promotion = piece_color(movingPiece) | piece::Knight; });
                     contextMenu.exec();
                 }
+                animating_to(aMove.to)->first->hold = false;
             }
             move_piece(iBoard, chess::move{ aMove.from, aMove.to, promotion });
             iTurn = next_player(iTurn);
@@ -357,25 +362,36 @@ namespace chess::gui
         update();
     }
         
-    std::optional<ng::point> board::animating(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const
+    std::optional<std::pair<animation const*, ng::point>> board::animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const
     {
-        if (!iAnimations.empty())
+        for (auto const& animation : iAnimations)
         {
-            auto const& animation = iAnimations.front();
             if (animation.move.to == aMovePos)
             {
-                if (!animation.startTime)
-                    animation.startTime = std::chrono::steady_clock::now();
-                auto const start = square_rect(animation.move.from).top_left();
-                auto const end = square_rect(animation.move.to).top_left();
-                auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
-                auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
-                auto const elapsed = std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(aTime - *animation.startTime).count() * (maxDistance / distance);
-                if (elapsed <= 1.0)
-                    return start + (end - start) * elapsed;
+                if (&animation == &iAnimations.front())
+                {
+                    if (!animation.startTime)
+                        animation.startTime = std::chrono::steady_clock::now();
+                    auto const start = square_rect(animation.move.from).top_left();
+                    auto const end = square_rect(animation.move.to).top_left();
+                    auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
+                    auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
+                    auto const elapsed = std::min(std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(aTime - *animation.startTime).count() * (maxDistance / distance), 1.0);
+                    return std::make_pair(&animation, start + (end - start) * elapsed);
+                }
+                else
+                    return std::make_pair(&animation, square_rect(animation.move.from).top_left());
             }
         }
         return {};
+    }
+
+    bool board::animating_from(coordinates const& aMovePos) const
+    {
+        for (auto const& animation : iAnimations)
+            if (animation.move.from == aMovePos)
+                return true;
+        return false;
     }
     
     void board::animate()
@@ -391,7 +407,7 @@ namespace chess::gui
                     auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
                     auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
                     auto const elapsed = std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - *animation.startTime).count() * (maxDistance / distance);
-                    if (elapsed > 1.0)
+                    if (elapsed > 1.0 && !animation.hold)
                         iAnimations.pop_front();
                 }
             }

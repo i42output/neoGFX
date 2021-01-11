@@ -34,8 +34,10 @@ namespace chess::gui
     struct animation
     {
         chess::move move;
+        piece movingPiece;
         piece capturedPiece;
         mutable std::optional<std::chrono::steady_clock::time_point> startTime;
+        mutable bool hold = false;
     };
 
     class board : public i_board, public ng::widget<>
@@ -57,7 +59,8 @@ namespace chess::gui
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
     private:
-        std::optional<ng::point> animating(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const;
+        std::optional<std::pair<animation const*, ng::point>> animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime = std::chrono::steady_clock::now()) const;
+        bool animating_from(coordinates const& aMovePos) const;
         void animate();
         ng::rect board_rect() const;
         ng::rect square_rect(coordinates aCoordinates) const;
