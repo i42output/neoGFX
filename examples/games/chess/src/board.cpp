@@ -407,8 +407,12 @@ namespace chess::gui
                     auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
                     auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
                     auto const elapsed = std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - *animation.startTime).count() * (maxDistance / distance);
-                    if (elapsed > 1.0 && !animation.hold)
-                        iAnimations.pop_front();
+                    if (elapsed > 1.0)
+                    {
+                        animation.capturedPiece = piece::None;
+                        if (!animation.hold)
+                            iAnimations.pop_front();
+                    }
                 }
             }
             if (iFlashCheck && std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - iFlashCheck->second).count() > 1)
