@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 
-#include <chess/i_board.hpp>
 #include <chess/i_move_validator.hpp>
+#include <chess/i_board.hpp>
 
 namespace ng = neogfx;
 using namespace ng::unit_literals;
@@ -67,9 +67,9 @@ namespace chess::gui
         void mouse_moved(const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
         void mouse_entered(const ng::point& aPosition) override;
         void mouse_left() override;
-    protected:
-        void reset() override;
-        void setup(player aTurn, chess::board const& aBoard) override;
+    public:
+        void new_game(i_player& aWhitePlayer, i_player& aBlackPlayer) override;
+        void setup(chess::board const& aBoard) override;
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
     private:
@@ -84,7 +84,6 @@ namespace chess::gui
     private:
         i_move_validator const& iMoveValidator;
         chess::board iBoard;
-        player iTurn;
         std::unordered_map<piece, ng::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;

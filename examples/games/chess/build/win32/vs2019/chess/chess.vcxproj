@@ -164,10 +164,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\chess\board.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\engine.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\ai.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\human.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_board.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\i_engine.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_move_validator.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\i_player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\move_validator.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\piece.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\player.hpp" />
@@ -184,7 +185,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\board.cpp" />
-    <ClCompile Include="..\..\..\..\src\engine.cpp" />
+    <ClCompile Include="..\..\..\..\src\ai.cpp" />
+    <ClCompile Include="..\..\..\..\src\human.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
     <ClCompile Include="..\..\..\..\src\move_validator.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\chess.res.cpp">

@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/core/geometrical.hpp>
 
 #include <chess/piece.hpp>
+#include <chess/player.hpp>
 
 namespace chess
 {
@@ -56,6 +57,7 @@ namespace chess
     {
         Representation position;
         std::array<coordinates, static_cast<std::size_t>(piece_color_cardinal::COUNT)> kings;
+        player turn;
         std::optional<move> lastMove;
         mutable std::optional<move> checkTest;
     };
@@ -194,7 +196,8 @@ namespace chess
                 }},
                 {{
                     { 4u, 0u }, { 4u, 7u }
-                }}
+                }},
+                player::White
             };
             return position;
         }
@@ -208,6 +211,11 @@ namespace chess
             static constexpr bitboard_board position
             {
                 // todo
+                {},
+                {{
+                    { 4u, 0u }, { 4u, 7u }
+                }},
+                player::White
             };
             return position;
         };

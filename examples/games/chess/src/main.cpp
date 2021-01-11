@@ -8,6 +8,8 @@
 #include <neogfx/game/game_world.hpp>
 #include <chess/move_validator.hpp>
 #include <chess/board.hpp>
+#include <chess/human.hpp>
+#include <chess/human.hpp>
 
 namespace ng = neogfx;
 using namespace ng::unit_literals;
@@ -31,6 +33,9 @@ int main(int argc, char* argv[])
         auto& window = *windowObject;
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
+        chess::human player1;
+        chess::human player2;
+        board.new_game(player1, player2);
 
         return app.exec();
     }

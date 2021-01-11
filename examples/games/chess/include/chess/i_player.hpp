@@ -18,22 +18,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/core/geometrical.hpp>
-
 #include <chess/primitives.hpp>
 
 namespace chess
 {
-    template <typename Representation>
-    class i_engine
+    enum class player_type : uint32_t
+    {
+        Human,
+        AI
+    };
+
+    class i_player 
     {
     public:
-        typedef Representation representation_type;
+        virtual ~i_player() = default;
     public:
-        virtual ~i_engine() = default;
+        virtual player_type type() const = 0;
+        virtual chess::player player() const = 0;
     public:
-        virtual void reset() = 0;
-        virtual void setup(player aTurn, basic_board<representation_type> const& aBoard) = 0;
+        virtual void greet(chess::player aPlayer, i_player& aOpponent) = 0;
         virtual bool play(move const& aMove) = 0;
     };
 }

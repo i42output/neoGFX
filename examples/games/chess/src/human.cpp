@@ -16,36 +16,33 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <chess/engine.hpp>
+#include <chess/human.hpp>
 
 namespace chess
 {
-    template <typename Representation>
-    engine<Representation>::engine() :
-        iTurn{ player::Invalid }
+    human::human() :
+        iPlayer{ chess::player::Invalid }
     {
     }
 
-    template <typename Representation>
-    void engine<Representation>::reset()
+    player_type human::type() const
     {
-        setup(player::White, chess::setup<representation_type>::position());
+        return player_type::Human;
     }
 
-    template <typename Representation>
-    void engine<Representation>::setup(player aTurn, basic_board<representation_type> const& aBoard)
+    player human::player() const
     {
-        iBoard = aBoard;
-        iTurn = aTurn;
+        return iPlayer;
     }
 
-    template <typename Representation>
-    bool engine<Representation>::play(move const& aMove)
+    void human::greet(chess::player aPlayer, i_player& aOpponent)
+    {
+        iPlayer = aPlayer;
+    }
+
+    bool human::play(move const& aMove)
     {
         // todo
         return false;
     }
-
-    template class engine<matrix>;
-    template class engine<bitboard>;
 }

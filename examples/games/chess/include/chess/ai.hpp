@@ -18,26 +18,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <chess/i_engine.hpp>
+#include <chess/i_player.hpp>
 
 namespace chess
 {
     template <typename Representation>
-    class engine : public i_engine<Representation>
+    class ai : public i_player
     {
     public:
         typedef Representation representation_type;
     public:
-        engine();
+        ai();
     public:
-        void reset() override;
-        void setup(player aTurn, basic_board<representation_type> const& aBoard) override;
+        player_type type() const override;
+        chess::player player() const override;
+    public:
+        void greet(chess::player aPlayer, i_player& aOpponent) override;
         bool play(move const& aMove) override;
     private:
+        chess::player iPlayer;
         basic_board<representation_type> iBoard;
-        player iTurn;
     };
 
-    extern template class engine<matrix>;
-    extern template class engine<bitboard>;
+    extern template class ai<matrix>;
+    extern template class ai<bitboard>;
 }

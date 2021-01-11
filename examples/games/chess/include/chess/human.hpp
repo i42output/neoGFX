@@ -21,16 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chess/primitives.hpp>
 #include <chess/i_player.hpp>
 
-namespace chess::gui
+namespace chess
 {
-    class i_board
+    class human : public i_player 
     {
     public:
-        virtual ~i_board() = default;
+        human();
     public:
-        virtual void new_game(i_player& aWhitePlayer, i_player& aBlackPlayer) = 0;
-        virtual void setup(board const& aBoard) = 0;
-        virtual bool play(move const& aMove) = 0;
-        virtual void edit(move const& aMove) = 0;
+        player_type type() const override;
+        chess::player player() const override;
+    public:
+        void greet(chess::player aPlayer, i_player& aOpponent) override;
+        bool play(move const& aMove) override;
+    private:
+        chess::player iPlayer;
     };
 }
