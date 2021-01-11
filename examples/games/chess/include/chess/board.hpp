@@ -40,6 +40,16 @@ namespace chess::gui
         mutable bool hold = false;
     };
 
+    enum class square_identification : uint32_t
+    {
+        None,
+        Outer,
+        Inner,
+        InnerExtra,
+
+        COUNT
+    };
+
     class board : public i_board, public ng::widget<>
     {
     public:
@@ -80,7 +90,7 @@ namespace chess::gui
         std::optional<coordinates> iCursor;
         std::optional<coordinates> iSelection;
         std::optional<ng::point> iSelectionPosition;
-        bool iShowIdentifiers;
+        square_identification iSquareIdentification;
         bool iShowValidMoves;
         std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
         bool iEditBoard;

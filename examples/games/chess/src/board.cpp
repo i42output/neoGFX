@@ -26,13 +26,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess::gui
 {
     constexpr std::chrono::seconds SHOW_VALID_MOVES_AFTER_s{ 2 };
+    constexpr ng::scalar BORDER = 24.0;
 
     board::board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator) :
         ng::widget<>{ aLayout },
         iMoveValidator{ aMoveValidator },
         iTurn{ player::Invalid },
         iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
-        iShowIdentifiers{ false },
+        iSquareIdentification{ square_identification::None },
         iShowValidMoves{ false },
         iEditBoard{ false }
     {
@@ -64,7 +65,8 @@ namespace chess::gui
                 for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
                 {
                     auto const squareRect = square_rect({ x, y });
-                    auto const labelRect = squareRect.deflated(ng::size{ 2.0_dip });
+                    auto const labelPadding = 2.0_dip * scale();
+                    auto const labelRect = squareRect.deflated(ng::size{ labelPadding });
                     auto const pieceRect = piece_rect({ x, y });
                     auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
                     auto labelColor = (x + y) % 2 == 0 ? ng::color::Burlywood : ng::color::Gray25;
@@ -102,12 +104,26 @@ namespace chess::gui
                                     auto const cursorAlpha = ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime) * 0.75;
                                     auto cursorColor = palette_color(ng::color_role::Selection).with_alpha(cursorAlpha);
                                     labelColor = ng::mix(labelColor, cursorColor.with_alpha(1.0).shaded(0x60), cursorAlpha / 0.75);
-                                    labelCursor = true;
+                                    labelCursor = (iSquareIdentification == square_identification::InnerExtra);
                                     aGc.fill_rect(squareRect, cursorColor);
                                 }
                             }
-                            if (iShowIdentifiers)
+                            switch (iSquareIdentification)
                             {
+                            case square_identification::None:
+                                break;
+                            case square_identification::Outer:
+                                if (x == 0u)
+                                    aGc.draw_text(ng::point{ squareRect.left() - (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0 - yLabelExtents.cx, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::Text));
+                                else if (x == 7u)
+                                    aGc.draw_text(ng::point{ squareRect.right() + (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::Text));
+                                if (y == 0u)
+                                    aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.bottom() + (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 }, xLabel, labelFont, palette_color(ng::color_role::Text));
+                                else if (y == 7u)
+                                    aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.top() - (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 - xLabelExtents.cy }, xLabel, labelFont, palette_color(ng::color_role::Text));
+                                break;
+                            case square_identification::Inner:
+                            case square_identification::InnerExtra:
                                 if (labelCursor)
                                 {
                                     aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
@@ -120,6 +136,7 @@ namespace chess::gui
                                     if (y == 0)
                                         aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
                                 }
+                                break;
                             }
                         }
                         break;
@@ -179,7 +196,7 @@ namespace chess::gui
     {
         if (aKeyCode == ng::key_code_e::KeyCode_i)
         {
-            iShowIdentifiers = !iShowIdentifiers;
+            iSquareIdentification = static_cast<square_identification>((static_cast<uint32_t>(iSquareIdentification) + 1u) % static_cast<uint32_t>(square_identification::COUNT));
             iAnimations.clear();
             update();
             return true;
@@ -484,6 +501,8 @@ namespace chess::gui
             result.deflate((result.cx - result.cy) / 2.0, 0.0);
         else
             result.deflate(0.0, (result.cy - result.cx) / 2.0);
+        if (iSquareIdentification == square_identification::Outer)
+            result.deflate(dpi_scale(BORDER) * std::min(result.width() / 8.0 / 64.0_dip, 1.0));
         return result;
     }
 
@@ -501,7 +520,7 @@ namespace chess::gui
 
     ng::rect board::piece_rect(coordinates aCoordinates) const
     {
-        if (iShowIdentifiers)
+        if (iSquareIdentification == square_identification::Inner || iSquareIdentification == square_identification::InnerExtra)
             return square_rect(aCoordinates).deflated(8.0_dip * scale());
         else
             return square_rect(aCoordinates);
