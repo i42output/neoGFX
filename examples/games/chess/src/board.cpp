@@ -61,18 +61,35 @@ namespace chess::gui
                 for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
                 {
                     auto const squareRect = square_rect({ x, y });
+                    auto const labelRect = squareRect.deflated(ng::size{ 2.0_dip });
+                    auto const pieceRect = piece_rect({ x, y });
+                    auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
+                    auto labelColor = (x + y) % 2 == 0 ? ng::color::Burlywood : ng::color::Gray25;
                     switch (pass)
                     {
                     case RENDER_BOARD:
                         {
                             bool const canMove = iSelection && iMoveValidator.can_move(iTurn, iBoard, chess::move{ *iSelection, coordinates{x, y} });
-                            auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
+                            auto labelFont = font().with_size(11 * scale()).with_style(ng::font_style::Bold);
+                            auto yLabel = std::string{ static_cast<char>(y + '1') };
+                            auto xLabel = std::string{ static_cast<char>(x + 'a') };
+                            auto yLabelExtents = aGc.text_extent(yLabel, labelFont);
+                            auto xLabelExtents = aGc.text_extent(xLabel, labelFont);
+                            bool labelCursor = false;
                             if (iCursor && *iCursor == coordinates{ x, y } && iCursor != iSelection)
+                            {
                                 squareColor = palette_color(ng::color_role::Selection).with_alpha(canMove || !iSelection ? 1.0 : 0.5);
+                                labelColor = squareColor.shaded(0x60);
+                                labelCursor = canMove;
+                            }
                             else if (iSelection && *iSelection == coordinates{ x, y })
+                            {
                                 squareColor = ng::color::White;
+                                labelColor = squareColor.shaded(0x60);
+                                labelCursor = true;
+                            }
                             aGc.fill_rect(squareRect, squareColor.with_combined_alpha(iEditBoard ? 0.75 : 1.0));
-                            if (canMove && iLastSelectionEventTime && entered())
+                            if (canMove && iLastSelectionEventTime && entered() && !labelCursor)
                             {
                                 auto since = std::chrono::steady_clock::now() - *iLastSelectionEventTime;
                                 if (since > SHOW_VALID_MOVES_AFTER_s)
@@ -80,8 +97,23 @@ namespace chess::gui
                                     auto constexpr flashInterval_ms = 1000;
                                     auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
                                     auto const cursorAlpha = ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime) * 0.75;
-                                    aGc.fill_rect(squareRect, palette_color(ng::color_role::Selection).with_alpha(cursorAlpha));
+                                    auto cursorColor = palette_color(ng::color_role::Selection).with_alpha(cursorAlpha);
+                                    labelColor = ng::mix(labelColor, cursorColor.with_alpha(1.0).shaded(0x60), cursorAlpha / 0.75);
+                                    labelCursor = true;
+                                    aGc.fill_rect(squareRect, cursorColor);
                                 }
+                            }
+                            if (labelCursor)
+                            {
+                                aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
+                                aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
+                            }
+                            else
+                            {
+                                if (x == 0)
+                                    aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
+                                if (y == 0)
+                                    aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
                             }
                         }
                         break;
@@ -108,7 +140,7 @@ namespace chess::gui
                                 ng::point const mousePosition = root().mouse_position() - origin();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
                                     ng::point{} : mousePosition - *iSelectionPosition);
-                                aGc.draw_texture(squareRect + adjust, iPieceTextures.at(piece_type(occupier)), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
+                                aGc.draw_texture(pieceRect + adjust, iPieceTextures.at(piece_type(occupier)), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
                         else if (animating_to(coordinates{ x, y }, now))
@@ -118,7 +150,7 @@ namespace chess::gui
                             if (occupier != piece::None)
                             {
                                 auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
-                                aGc.draw_texture(squareRect, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                aGc.draw_texture(pieceRect, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
                         break;
@@ -129,7 +161,7 @@ namespace chess::gui
                             if (occupier != piece::None)
                             {
                                 auto const pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
-                                aGc.draw_texture(ng::rect{ animation->second, squareRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                aGc.draw_texture(ng::rect{ animation->second, pieceRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                             }
                         }
                         break;
@@ -372,15 +404,15 @@ namespace chess::gui
                 {
                     if (!animation.startTime)
                         animation.startTime = std::chrono::steady_clock::now();
-                    auto const start = square_rect(animation.move.from).top_left();
-                    auto const end = square_rect(animation.move.to).top_left();
+                    auto const start = piece_rect(animation.move.from).top_left();
+                    auto const end = piece_rect(animation.move.to).top_left();
                     auto const maxDistance = (coordinates{ 0, 0 }.as<ng::scalar>() - coordinates{ 8, 8 }.as<ng::scalar>()).magnitude();
                     auto const distance = (animation.move.to.as<ng::scalar>() - animation.move.from.as<ng::scalar>()).magnitude();
                     auto const elapsed = std::min(std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(aTime - *animation.startTime).count() * (maxDistance / distance), 1.0);
                     return std::make_pair(&animation, start + (end - start) * elapsed);
                 }
                 else
-                    return std::make_pair(&animation, square_rect(animation.move.from).top_left());
+                    return std::make_pair(&animation, piece_rect(animation.move.from).top_left());
             }
         }
         return {};
@@ -436,6 +468,16 @@ namespace chess::gui
         auto const boardRect = board_rect();
         ng::size squareDimensions{ boardRect.extents() / 8.0 };
         return ng::rect{ boardRect.top_left() + ng::point{ squareDimensions * ng::size_u32{ aCoordinates.x, 7u - aCoordinates.y }.as<ng::scalar>() }, squareDimensions };
+    }
+
+    ng::scalar board::scale() const
+    {
+        return std::min(square_rect({ 0, 0 }).width() / 64.0_dip, 1.0);
+    }
+
+    ng::rect board::piece_rect(coordinates aCoordinates) const
+    {
+        return square_rect(aCoordinates).deflated(8.0_dip * scale());
     }
 
     std::optional<coordinates> board::at(ng::point const& aPosition) const

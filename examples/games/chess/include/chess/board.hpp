@@ -64,6 +64,8 @@ namespace chess::gui
         void animate();
         ng::rect board_rect() const;
         ng::rect square_rect(coordinates aCoordinates) const;
+        ng::scalar scale() const;
+        ng::rect piece_rect(coordinates aCoordinates) const;
         std::optional<coordinates> at(ng::point const& aPosition) const;
     private:
         i_move_validator const& iMoveValidator;
