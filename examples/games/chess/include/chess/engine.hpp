@@ -22,16 +22,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    class engine : public i_engine
+    template <typename Representation>
+    class engine : public i_engine<Representation>
     {
+    public:
+        typedef Representation representation_type;
     public:
         engine();
     public:
         void reset() override;
-        void setup(player aTurn, matrix_board const& aBoard) override;
+        void setup(player aTurn, basic_board<representation_type> const& aBoard) override;
         bool play(move const& aMove) override;
     private:
-        matrix_board iBoard;
+        basic_board<representation_type> iBoard;
         player iTurn;
     };
+
+    extern template class engine<matrix>;
+    extern template class engine<bitboard>;
 }

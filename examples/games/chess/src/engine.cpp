@@ -20,25 +20,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    engine::engine() : 
+    template <typename Representation>
+    engine<Representation>::engine() :
         iTurn{ player::Invalid }
     {
     }
 
-    void engine::reset()
+    template <typename Representation>
+    void engine<Representation>::reset()
     {
-        setup(player::White, matrix_board_setup);
+        setup(player::White, chess::setup<representation_type>::position());
     }
 
-    void engine::setup(player aTurn, matrix_board const& aBoard)
+    template <typename Representation>
+    void engine<Representation>::setup(player aTurn, basic_board<representation_type> const& aBoard)
     {
         iBoard = aBoard;
         iTurn = aTurn;
     }
 
-    bool engine::play(move const& aMove)
+    template <typename Representation>
+    bool engine<Representation>::play(move const& aMove)
     {
         // todo
         return false;
     }
+
+    template class engine<matrix>;
+    template class engine<bitboard>;
 }

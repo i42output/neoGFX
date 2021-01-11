@@ -175,22 +175,41 @@ namespace chess
         return result;
     }
 
-    static constexpr matrix_board matrix_board_setup
+    template <typename Representation>
+    struct setup;
+
+    template <>
+    struct setup<matrix>
     {
-        {{
-            { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
-            { piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn },
-            {}, {}, {}, {},
-            { piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn },
-            { piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook },
-        }},
-        {{
-            { 4u, 0u }, { 4u, 7u }
-        }}
+        static matrix_board const& position()
+        {
+            static constexpr matrix_board position
+            {
+                {{
+                    { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
+                    { piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn },
+                    {}, {}, {}, {},
+                    { piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn },
+                    { piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook },
+                }},
+                {{
+                    { 4u, 0u }, { 4u, 7u }
+                }}
+            };
+            return position;
+        }
     };
 
-    static constexpr bitboard_board bitboard_board_setup
+    template <>
+    struct setup<bitboard>
     {
-        // todo
+        static bitboard_board const& position()
+        {
+            static constexpr bitboard_board position
+            {
+                // todo
+            };
+            return position;
+        };
     };
 }

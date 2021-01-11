@@ -24,13 +24,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    template <typename Representation>
     class i_engine
     {
+    public:
+        typedef Representation representation_type;
     public:
         virtual ~i_engine() = default;
     public:
         virtual void reset() = 0;
-        virtual void setup(player aTurn, matrix_board const& aBoard) = 0;
+        virtual void setup(player aTurn, basic_board<representation_type> const& aBoard) = 0;
         virtual bool play(move const& aMove) = 0;
     };
 }

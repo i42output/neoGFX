@@ -354,7 +354,7 @@ namespace chess::gui
 
     void board::reset()
     {
-        setup(player::White, chess::matrix_board_setup);
+        setup(player::White, chess::setup<matrix>::position());
     }
 
     void board::setup(player aTurn, chess::board const& aBoard)
