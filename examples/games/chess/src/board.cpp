@@ -85,13 +85,13 @@ namespace chess::gui
                             {
                                 squareColor = palette_color(ng::color_role::Selection).with_alpha(canMove || !iSelection ? 1.0 : 0.5);
                                 labelColor = squareColor.shaded(0x60);
-                                labelCursor = canMove;
+                                labelCursor = canMove && (iSquareIdentification == square_identification::InnerExtra);
                             }
                             else if (iSelection && *iSelection == coordinates{ x, y })
                             {
                                 squareColor = ng::color::White;
                                 labelColor = squareColor.shaded(0x60);
-                                labelCursor = true;
+                                labelCursor = (iSquareIdentification == square_identification::InnerExtra);
                             }
                             aGc.fill_rect(squareRect, squareColor.with_combined_alpha(iEditBoard ? 0.75 : 1.0));
                             if (canMove && iLastSelectionEventTime && entered() && !labelCursor)
