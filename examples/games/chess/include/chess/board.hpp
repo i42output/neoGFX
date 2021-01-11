@@ -47,6 +47,10 @@ namespace chess::gui
     protected:
         void paint(ng::i_graphics_context& aGc) const override;
     protected:
+        bool key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifiers_e aKeyModifiers) override;
+    protected:
+        ng::focus_policy focus_policy() const override;
+    protected:
         void mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(ng::mouse_button aButton, const ng::point& aPosition) override;
@@ -76,6 +80,7 @@ namespace chess::gui
         std::optional<coordinates> iCursor;
         std::optional<coordinates> iSelection;
         std::optional<ng::point> iSelectionPosition;
+        bool iShowIdentifiers;
         bool iShowValidMoves;
         std::optional<std::chrono::steady_clock::time_point> iLastSelectionEventTime;
         bool iEditBoard;

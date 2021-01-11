@@ -32,6 +32,7 @@ namespace chess::gui
         iMoveValidator{ aMoveValidator },
         iTurn{ player::Invalid },
         iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
+        iShowIdentifiers{ false },
         iShowValidMoves{ false },
         iEditBoard{ false }
     {
@@ -45,6 +46,8 @@ namespace chess::gui
         iPieceTextures.emplace(piece::King, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::King), 0.0 }, pieceExtents } });
 
         reset();
+
+        set_focus();
     }
 
     void board::paint(ng::i_graphics_context& aGc) const
@@ -103,17 +106,20 @@ namespace chess::gui
                                     aGc.fill_rect(squareRect, cursorColor);
                                 }
                             }
-                            if (labelCursor)
+                            if (iShowIdentifiers)
                             {
-                                aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
-                                aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
-                            }
-                            else
-                            {
-                                if (x == 0)
+                                if (labelCursor)
+                                {
                                     aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
-                                if (y == 0)
                                     aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
+                                }
+                                else
+                                {
+                                    if (x == 0)
+                                        aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
+                                    if (y == 0)
+                                        aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
+                                }
                             }
                         }
                         break;
@@ -167,6 +173,24 @@ namespace chess::gui
                         break;
                     }
                 }
+    }
+
+    bool board::key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifiers_e aKeyModifiers)
+    {
+        if (aKeyCode == ng::key_code_e::KeyCode_i)
+        {
+            iShowIdentifiers = !iShowIdentifiers;
+            iAnimations.clear();
+            update();
+            return true;
+        }
+        else
+            return widget<>::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+    }
+
+    ng::focus_policy board::focus_policy() const
+    {
+        return ng::focus_policy::StrongFocus;
     }
 
     void board::mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
@@ -477,7 +501,10 @@ namespace chess::gui
 
     ng::rect board::piece_rect(coordinates aCoordinates) const
     {
-        return square_rect(aCoordinates).deflated(8.0_dip * scale());
+        if (iShowIdentifiers)
+            return square_rect(aCoordinates).deflated(8.0_dip * scale());
+        else
+            return square_rect(aCoordinates);
     }
 
     std::optional<coordinates> board::at(ng::point const& aPosition) const
