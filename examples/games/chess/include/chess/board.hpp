@@ -23,11 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 
+#include <chess/chess.hpp>
 #include <chess/i_move_validator.hpp>
 #include <chess/i_board.hpp>
-
-namespace ng = neogfx;
-using namespace ng::unit_literals;
 
 namespace chess::gui
 {
@@ -53,6 +51,8 @@ namespace chess::gui
     class board : public i_board, public ng::widget<>
     {
     public:
+        struct no_player : std::logic_error { no_player() : std::logic_error{ "chess::gui::board::no_player" } {} };
+    public:
         board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator);
     protected:
         void paint(ng::i_graphics_context& aGc) const override;
@@ -72,6 +72,17 @@ namespace chess::gui
         void setup(chess::board const& aBoard) override;
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
+    public:
+        i_player const& current_player() const override;
+        i_player& current_player() override;
+        i_player const& next_player() const override;
+        i_player& next_player() override;
+        i_player const& white_player() const override;
+        i_player& white_player() override;
+        i_player const& black_player() const override;
+        i_player& black_player() override;
+    private:
+        void moved(chess::move const& aMove);
     private:
         std::optional<std::pair<animation const*, ng::point>> animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime = std::chrono::steady_clock::now()) const;
         bool animating_from(coordinates const& aMovePos) const;
@@ -82,8 +93,11 @@ namespace chess::gui
         ng::rect piece_rect(coordinates aCoordinates) const;
         std::optional<coordinates> at(ng::point const& aPosition) const;
     private:
+        ng::sink iSink;
         i_move_validator const& iMoveValidator;
         chess::board iBoard;
+        i_player* iWhitePlayer;
+        i_player* iBlackPlayer;
         std::unordered_map<piece, ng::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;

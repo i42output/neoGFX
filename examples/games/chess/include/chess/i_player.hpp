@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <chess/chess.hpp>
 #include <chess/primitives.hpp>
 
 namespace chess
@@ -30,6 +31,8 @@ namespace chess
 
     class i_player 
     {
+    public:
+        declare_event(moved, move const&)
     public:
         virtual ~i_player() = default;
     public:

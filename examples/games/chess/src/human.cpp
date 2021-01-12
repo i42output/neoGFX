@@ -42,7 +42,7 @@ namespace chess
 
     bool human::play(move const& aMove)
     {
-        // todo
-        return false;
+        Moved.trigger(aMove);
+        return true;
     }
 }

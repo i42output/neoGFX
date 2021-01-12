@@ -32,5 +32,14 @@ namespace chess::gui
         virtual void setup(board const& aBoard) = 0;
         virtual bool play(move const& aMove) = 0;
         virtual void edit(move const& aMove) = 0;
+    public:
+        virtual i_player const& current_player() const = 0;
+        virtual i_player& current_player() = 0;
+        virtual i_player const& next_player() const = 0;
+        virtual i_player& next_player() = 0;
+        virtual i_player const& white_player() const = 0;
+        virtual i_player& white_player() = 0;
+        virtual i_player const& black_player() const = 0;
+        virtual i_player& black_player() = 0;
     };
 }

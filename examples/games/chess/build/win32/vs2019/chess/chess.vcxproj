@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\chess\board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\ai.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\chess.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\human.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_move_validator.hpp" />

@@ -26,6 +26,8 @@ namespace chess
     class ai : public i_player
     {
     public:
+        define_declared_event(Moved, moved, move const&)
+    public:
         typedef Representation representation_type;
     public:
         ai();
@@ -38,6 +40,7 @@ namespace chess
     private:
         chess::player iPlayer;
         basic_board<representation_type> iBoard;
+        ng::sink iSink;
     };
 
     extern template class ai<matrix>;

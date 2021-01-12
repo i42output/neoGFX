@@ -54,6 +54,9 @@
     <ClInclude Include="..\..\..\..\include\chess\ai.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\chess\chess.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="chess.rc">

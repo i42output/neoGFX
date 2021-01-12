@@ -18,25 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <chess/primitives.hpp>
-#include <chess/i_player.hpp>
+#include <neogfx/neogfx.hpp>
+#include <neogfx/core/units.hpp>
+#include <neogfx/core/event.hpp>
 
-namespace chess
-{
-    class human : public i_player 
-    {
-    public:
-        define_declared_event(Moved, moved, move const&)    
-    public:
-        human();
-    public:
-        player_type type() const override;
-        chess::player player() const override;
-    public:
-        void greet(chess::player aPlayer, i_player& aOpponent) override;
-        bool play(move const& aMove) override;
-    private:
-        ng::sink iSink;
-        chess::player iPlayer;
-    };
-}
+namespace ng = neogfx;
+using namespace ng::unit_literals;

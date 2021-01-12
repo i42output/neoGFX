@@ -43,13 +43,16 @@ namespace chess
     {
         iPlayer = aPlayer;
         iBoard = chess::setup<representation_type>::position();
+        iSink = aOpponent.moved([&](move const& aMove)
+        {
+            // todo
+        });
     }
 
     template <typename Representation>
     bool ai<Representation>::play(move const& aMove)
     {
-        // todo
-        return false;
+        Moved.trigger(aMove);
     }
 
 

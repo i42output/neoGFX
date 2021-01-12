@@ -31,6 +31,8 @@ namespace chess::gui
     board::board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator) :
         ng::widget<>{ aLayout },
         iMoveValidator{ aMoveValidator },
+        iWhitePlayer{ nullptr },
+        iBlackPlayer{ nullptr },
         iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
         iSquareIdentification{ square_identification::None },
         iShowValidMoves{ false },
@@ -352,8 +354,18 @@ namespace chess::gui
     void board::new_game(i_player& aWhitePlayer, i_player& aBlackPlayer)
     {
         setup(chess::setup<matrix>::position());
-        aWhitePlayer.greet(player::White, aBlackPlayer);
-        aBlackPlayer.greet(player::Black, aWhitePlayer);
+        iWhitePlayer = &aWhitePlayer;
+        iBlackPlayer = &aBlackPlayer;
+        white_player().greet(player::White, black_player());
+        black_player().greet(player::Black, white_player());
+        white_player().moved([&](chess::move const& aMove)
+        {
+            moved(aMove);
+        });
+        black_player().moved([&](chess::move const& aMove)
+        {
+            moved(aMove);
+        });
     }
 
     void board::setup(chess::board const& aBoard)
@@ -408,11 +420,7 @@ namespace chess::gui
                 }
                 animating_to(aMove.to)->first->hold = false;
             }
-            move_piece(iBoard, chess::move{ aMove.from, aMove.to, promotion });
-            iBoard.turn = next_player(iBoard.turn);
-            if (iMoveValidator.in_check(iBoard.turn, iBoard))
-                iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
-            update();
+            current_player().play(chess::move{ aMove.from, aMove.to, promotion });
         }
         else
             edit(aMove);
@@ -432,7 +440,80 @@ namespace chess::gui
         iBoard.lastMove = std::nullopt;
         update();
     }
+
+    i_player const& board::current_player() const
+    {
+        switch (iBoard.turn)
+        {
+        case player::White:
+            return white_player();
+        case player::Black:
+            return black_player();
+        default:
+            throw no_player();
+        }
+    }
+
+    i_player& board::current_player()
+    {
+        return const_cast<i_player&>(ng::to_const(*this).current_player());
+    }
+
+    i_player const& board::next_player() const
+    {
+        switch (iBoard.turn)
+        {
+        case player::White:
+            return black_player();
+        case player::Black:
+            return white_player();
+        default:
+            throw no_player();
+        }
+    }
+
+    i_player& board::next_player()
+    {
+        return const_cast<i_player&>(ng::to_const(*this).next_player());
+    }
+
+    i_player const& board::white_player() const
+    {
+        if (iWhitePlayer != nullptr)
+            return *iWhitePlayer;
+        throw no_player();
+    }
+
+    i_player& board::white_player()
+    {
+        if (iWhitePlayer != nullptr)
+            return *iWhitePlayer;
+        throw no_player();
+    }
+
+    i_player const& board::black_player() const
+    {
+        if (iBlackPlayer != nullptr)
+            return *iBlackPlayer;
+        throw no_player();
+    }
+
+    i_player& board::black_player()
+    {
+        if (iBlackPlayer != nullptr)
+            return *iBlackPlayer;
+        throw no_player();
+    }
         
+    void board::moved(chess::move const& aMove)
+    {
+        move_piece(iBoard, aMove);
+        iBoard.turn = next_player().player();
+        if (iMoveValidator.in_check(iBoard.turn, iBoard))
+            iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
+        update();
+    }
+
     std::optional<std::pair<animation const*, ng::point>> board::animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const
     {
         for (auto const& animation : iAnimations)
