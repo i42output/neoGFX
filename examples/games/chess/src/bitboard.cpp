@@ -16,25 +16,17 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <array>
 #include <vector>
 
-#include <chess/i_move_validator.hpp>
+#include <chess/bitboard.hpp>
 
 namespace chess
 {
-    class move_validator : public i_move_validator
+    template<>
+    move_tables<bitboard> generate_move_tables<bitboard>()
     {
-    public:
-        move_validator();
-    public:
-        bool can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const override;
-        bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-        bool in_check(player aTurn, matrix_board const& aBoard) const override;
-        bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-    private:
-        move_tables<matrix> const iMoveTables;
-    };
+        move_tables<bitboard> result{};
+        // todo
+        return result;
+    }
 }

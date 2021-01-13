@@ -68,7 +68,7 @@ namespace chess::gui
         void mouse_entered(const ng::point& aPosition) override;
         void mouse_left() override;
     public:
-        void new_game(i_player& aWhitePlayer, i_player& aBlackPlayer) override;
+        void new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer) override;
         void setup(chess::board const& aBoard) override;
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
@@ -96,8 +96,8 @@ namespace chess::gui
         ng::sink iSink;
         i_move_validator const& iMoveValidator;
         chess::board iBoard;
-        i_player* iWhitePlayer;
-        i_player* iBlackPlayer;
+        std::unique_ptr<i_player> iWhitePlayer;
+        std::unique_ptr<i_player> iBlackPlayer;
         std::unordered_map<piece, ng::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;

@@ -9,7 +9,7 @@
 #include <chess/move_validator.hpp>
 #include <chess/board.hpp>
 #include <chess/human.hpp>
-#include <chess/human.hpp>
+#include <chess/default_player_factory.hpp>
 
 namespace ng = neogfx;
 using namespace ng::unit_literals;
@@ -33,10 +33,8 @@ int main(int argc, char* argv[])
         auto& window = *windowObject;
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
-        chess::human player1;
-        chess::human player2;
-        board.new_game(player1, player2);
-
+        chess::default_player_factory playerFactory;
+        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::Human);
         return app.exec();
     }
     catch (std::exception& e)

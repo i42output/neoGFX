@@ -16,25 +16,27 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
-#include <array>
-#include <vector>
-
-#include <chess/i_move_validator.hpp>
+#include <chess/default_player_factory.hpp>
+#include <chess/human.hpp>
+#include <chess/ai.hpp>
 
 namespace chess
 {
-    class move_validator : public i_move_validator
+    std::unique_ptr<i_player> default_player_factory::create_player(player_type aType, chess::player aPlayer)
     {
-    public:
-        move_validator();
-    public:
-        bool can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const override;
-        bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-        bool in_check(player aTurn, matrix_board const& aBoard) const override;
-        bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-    private:
-        move_tables<matrix> const iMoveTables;
-    };
+        switch (aType) 
+        {
+        case player_type::Human:
+            return std::make_unique<human>(aPlayer);
+        case player_type::NetworkedHuman:
+            return nullptr; // todo
+        case player_type::AI:
+            if (aPlayer == chess::player::White)
+                return std::make_unique<ai<matrix, chess::player::White>>();
+            else
+                return std::make_unique<ai<matrix, chess::player::Black>>();
+        default:
+            return nullptr;
+        }
+    }
 }

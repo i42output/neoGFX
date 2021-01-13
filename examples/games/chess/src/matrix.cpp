@@ -18,11 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <chess/move_validator.hpp>
+#include <chess/matrix.hpp>
 
 namespace chess
 {
-    move_tables<matrix> generate_matrix_move_tables()
+    template<>
+    move_tables<matrix> generate_move_tables<matrix>()
     {
         typedef move_tables<matrix>::move_coordinates move_coordinates;
         move_tables<matrix> result
@@ -108,39 +109,5 @@ namespace chess
         }
         // todo: corner cases
         return result;
-    }
-
-    move_validator::move_validator() : 
-        iMoveTables{ generate_matrix_move_tables() }
-    {
-    }
-
-    bool move_validator::can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const
-    {
-        return chess::can_move(iMoveTables, aTurn, aBoard, aMove);
-    }
-
-    bool move_validator::has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const
-    {
-        for (coordinate y = 0u; y <= 7u; ++y)
-            for (coordinate x = 0u; x <= 7u; ++x)
-                if (chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
-                    return true;
-        return false;
-    }
-
-    bool move_validator::in_check(player aTurn, matrix_board const& aBoard) const
-    {
-        return chess::in_check(iMoveTables, aTurn, aBoard);
-    }
-
-    bool move_validator::check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const
-    {
-        for (coordinate y = 0u; y <= 7u; ++y)
-            for (coordinate x = 0u; x <= 7u; ++x)
-                if (!chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
-                    if (chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }, true))
-                        return true;
-        return false;
     }
 }

@@ -18,23 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <array>
-#include <vector>
-
-#include <chess/i_move_validator.hpp>
+#include <chess/primitives.hpp>
 
 namespace chess
 {
-    class move_validator : public i_move_validator
+    template<>
+    struct move_tables<bitboard>
     {
-    public:
-        move_validator();
-    public:
-        bool can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const override;
-        bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-        bool in_check(player aTurn, matrix_board const& aBoard) const override;
-        bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-    private:
-        move_tables<matrix> const iMoveTables;
     };
+
+    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard);
+
+    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_board const& aBoard, move const& aMove, bool aCheckTest = false)
+    {
+        // todo
+        return false;
+    }
+
+    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard)
+    {
+        // todo
+        return false;
+    }
 }

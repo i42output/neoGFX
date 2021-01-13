@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     typedef neogfx::point_u32 coordinates;
+    typedef coordinates::coordinate_type coordinate;
     
     struct move
     {
@@ -66,6 +67,11 @@ namespace chess
     using bitboard_board = basic_board<bitboard>;
 
     using board = matrix_board;
+
+    template <typename Representation>
+    struct move_tables;
+    template <typename Representation>
+    move_tables<Representation> generate_move_tables();
 
     inline piece piece_at(matrix_board const& aBoard, coordinates aPosition)
     {
@@ -157,6 +163,11 @@ namespace chess
             // do nothing
             break;
         }
+    }
+
+    inline void move_piece(bitboard_board& aBoard, chess::move const& aMove)
+    {
+        // todo
     }
 
     struct invalid_uci_move : std::runtime_error { invalid_uci_move() : std::runtime_error{ "chess::invalid_uci_move" } {} };

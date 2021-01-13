@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    human::human() :
-        iPlayer{ chess::player::Invalid }
+    human::human(chess::player aPlayer) :
+        iPlayer{ aPlayer }
     {
     }
 
@@ -35,9 +35,9 @@ namespace chess
         return iPlayer;
     }
 
-    void human::greet(chess::player aPlayer, i_player& aOpponent)
+    void human::greet(i_player& aOpponent)
     {
-        iPlayer = aPlayer;
+        // todo
     }
 
     bool human::play(move const& aMove)

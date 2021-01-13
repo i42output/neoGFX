@@ -18,23 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <array>
-#include <vector>
-
-#include <chess/i_move_validator.hpp>
+#include <chess/chess.hpp>
+#include <chess/i_player.hpp>
 
 namespace chess
 {
-    class move_validator : public i_move_validator
+    class default_player_factory : public i_player_factory
     {
     public:
-        move_validator();
-    public:
-        bool can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const override;
-        bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-        bool in_check(player aTurn, matrix_board const& aBoard) const override;
-        bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-    private:
-        move_tables<matrix> const iMoveTables;
+        std::unique_ptr<i_player> create_player(player_type aType, chess::player aPlayer) override;
     };
 }

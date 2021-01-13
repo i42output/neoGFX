@@ -163,13 +163,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\chess\bitboard.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\ai.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\chess.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\default_player_factory.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\human.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_move_validator.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_player.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\matrix.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\move_validator.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\piece.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\player.hpp" />
@@ -185,10 +188,13 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\bitboard.cpp" />
     <ClCompile Include="..\..\..\..\src\board.cpp" />
     <ClCompile Include="..\..\..\..\src\ai.cpp" />
+    <ClCompile Include="..\..\..\..\src\default_player_factory.cpp" />
     <ClCompile Include="..\..\..\..\src\human.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
+    <ClCompile Include="..\..\..\..\src\matrix.cpp" />
     <ClCompile Include="..\..\..\..\src\move_validator.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\chess.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

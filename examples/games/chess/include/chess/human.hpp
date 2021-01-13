@@ -28,12 +28,12 @@ namespace chess
     public:
         define_declared_event(Moved, moved, move const&)    
     public:
-        human();
+        human(chess::player aPlayer);
     public:
         player_type type() const override;
         chess::player player() const override;
     public:
-        void greet(chess::player aPlayer, i_player& aOpponent) override;
+        void greet(i_player& aOpponent) override;
         bool play(move const& aMove) override;
     private:
         ng::sink iSink;

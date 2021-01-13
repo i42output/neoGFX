@@ -60,8 +60,8 @@ namespace chess::gui
         int32_t constexpr RENDER_SELECTED_PIECES        = 3;
         int32_t constexpr RENDER_ANIMATIONS             = 4;
         for (int32_t pass = RENDER_BOARD; pass <= RENDER_ANIMATIONS; ++pass)
-            for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
-                for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
+            for (coordinate y = 0u; y <= 7u; ++y)
+                for (coordinate x = 0u; x <= 7u; ++x)
                 {
                     auto const squareRect = square_rect({ x, y });
                     auto const labelPadding = 2.0_dip * scale();
@@ -351,13 +351,13 @@ namespace chess::gui
         update();
     }
 
-    void board::new_game(i_player& aWhitePlayer, i_player& aBlackPlayer)
+    void board::new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer)
     {
         setup(chess::setup<matrix>::position());
-        iWhitePlayer = &aWhitePlayer;
-        iBlackPlayer = &aBlackPlayer;
-        white_player().greet(player::White, black_player());
-        black_player().greet(player::Black, white_player());
+        iWhitePlayer = std::move(aPlayerFactory.create_player(aWhitePlayer, player::White));
+        iBlackPlayer = std::move(aPlayerFactory.create_player(aBlackPlayer, player::Black));
+        white_player().greet(black_player());
+        black_player().greet(white_player());
         white_player().moved([&](chess::move const& aMove)
         {
             moved(aMove);
@@ -607,8 +607,8 @@ namespace chess::gui
 
     std::optional<coordinates> board::at(ng::point const& aPosition) const
     {
-        for (coordinates::coordinate_type y = 0u; y <= 7u; ++y)
-            for (coordinates::coordinate_type x = 0u; x <= 7u; ++x)
+        for (coordinate y = 0u; y <= 7u; ++y)
+            for (coordinate x = 0u; x <= 7u; ++x)
                 if (square_rect(coordinates{ x, y }).contains(aPosition))
                     return coordinates{ x, y };
         return {};

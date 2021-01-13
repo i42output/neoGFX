@@ -26,6 +26,7 @@ namespace chess
     enum class player_type : uint32_t
     {
         Human,
+        NetworkedHuman,
         AI
     };
 
@@ -39,7 +40,15 @@ namespace chess
         virtual player_type type() const = 0;
         virtual chess::player player() const = 0;
     public:
-        virtual void greet(chess::player aPlayer, i_player& aOpponent) = 0;
+        virtual void greet(i_player& aOpponent) = 0;
         virtual bool play(move const& aMove) = 0;
+    };
+
+    class i_player_factory
+    {
+    public:
+        virtual ~i_player_factory() = default;
+    public:
+        virtual std::unique_ptr<i_player> create_player(player_type aType, chess::player aPlayer) = 0;
     };
 }
