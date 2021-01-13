@@ -19,8 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/core/event.hpp>
 
 namespace ng = neogfx;
 using namespace ng::unit_literals;
+

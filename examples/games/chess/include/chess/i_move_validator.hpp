@@ -32,5 +32,6 @@ namespace chess
         virtual bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const = 0;
         virtual bool in_check(player aTurn, matrix_board const& aBoard) const = 0;
         virtual bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const = 0;
+        virtual double eval(player aTurn, matrix_board const& aBoard) const = 0;
     };
 }

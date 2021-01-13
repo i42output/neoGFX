@@ -21,6 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdint>
 #include <stdexcept>
 
+#include <chess/chess.hpp>
+
 namespace chess
 {
     enum class piece_cardinal : uint8_t
@@ -167,6 +169,79 @@ namespace chess
     inline piece piece_color(piece p)
     {
         return p & piece::COLOR_MASK;
+    }
+
+    template <chess::piece Color>
+    inline double piece_value(chess::piece piece);
+
+    template <>
+    inline double piece_value<chess::piece::White>(chess::piece piece)
+    {
+        switch (piece)
+        {
+        case piece::Pawn:
+        case piece::WhitePawn:
+            return 1.0;
+        case piece::BlackPawn:
+            return -1.0;
+        case piece::Knight:
+        case piece::WhiteKnight:
+            return 3.05;
+        case piece::BlackKnight:
+            return -3.05;
+        case piece::Bishop:
+        case piece::WhiteBishop:
+            return 3.33;
+        case piece::BlackBishop:
+            return -3.33;
+        case piece::Rook:
+        case piece::WhiteRook:
+            return 5.63;
+        case piece::BlackRook:
+            return -5.63;
+        case piece::Queen:
+        case piece::WhiteQueen:
+            return 9.5;
+        case piece::BlackQueen:
+            return -9.5;
+        default:
+            return 0.0;
+        }
+    }
+
+    template <>
+    inline double piece_value<chess::piece::Black>(chess::piece piece)
+    {
+        switch (piece)
+        {
+        case piece::WhitePawn:
+            return -1.0;
+        case piece::Pawn:
+        case piece::BlackPawn:
+            return 1.0;
+        case piece::WhiteKnight:
+            return -3.05;
+        case piece::Knight:
+        case piece::BlackKnight:
+            return 3.05;
+        case piece::WhiteBishop:
+            return -3.33;
+        case piece::Bishop:
+        case piece::BlackBishop:
+            return 3.33;
+        case piece::WhiteRook:
+            return -5.63;
+        case piece::Rook:
+        case piece::BlackRook:
+            return 5.63;
+        case piece::WhiteQueen:
+            return -9.5;
+        case piece::Queen:
+        case piece::BlackQueen:
+            return 9.5;
+        default:
+            return 0.0;
+        }
     }
 
     struct invalid_piece_character : std::runtime_error { invalid_piece_character() : std::runtime_error{ "chess::invalid_piece_character" } {} };

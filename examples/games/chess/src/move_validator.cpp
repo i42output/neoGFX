@@ -143,4 +143,14 @@ namespace chess
                         return true;
         return false;
     }
+
+    double move_validator::eval(player aTurn, matrix_board const& aBoard) const
+    {
+        if (aTurn == player::White)
+            return chess::eval<player::White>(iMoveTables, aTurn, aBoard);
+        else if (aTurn == player::Black)
+            return chess::eval<player::Black>(iMoveTables, aTurn, aBoard);
+        else
+            return 0.0;
+    }
 }

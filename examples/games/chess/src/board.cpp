@@ -276,13 +276,26 @@ namespace chess::gui
             iSelection = std::nullopt;
             iLastSelectionEventTime = std::nullopt;
 
+            auto square = at(root().mouse_position() - origin());
+
             ng::context_menu contextMenu{ *this, aPosition + non_client_rect().top_left() + root().window_position() };
             ng::action actionEditBoard{ "Edit Board"_t };
+            ng::action actionErase{ "Erase"_t };
             actionEditBoard.set_checkable(true);
             actionEditBoard.set_checked(iEditBoard);
             contextMenu.menu().add_action(actionEditBoard);
+            if (iEditBoard && square)
+            {
+                contextMenu.menu().add_separator();
+                contextMenu.menu().add_action(actionErase);
+            }
             actionEditBoard.Checked([&]() { iEditBoard = true; });
             actionEditBoard.Unchecked([&]() { iEditBoard = false; });
+            actionErase.Triggered([&]()
+            {
+                // todo
+                iBoard.position[square->y][square->x] = piece::None;
+            });
             contextMenu.exec();
         }
         update();
@@ -496,6 +509,7 @@ namespace chess::gui
         move_piece(iBoard, aMove);
         if (iMoveValidator.in_check(iBoard.turn, iBoard))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
+        iMoveValidator.eval(current_player().player(), iBoard);
         update();
     }
 

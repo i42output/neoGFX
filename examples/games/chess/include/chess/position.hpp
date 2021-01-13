@@ -18,8 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/core/geometrical.hpp>
-
+#include <chess/chess.hpp>
 #include <chess/piece.hpp>
 #include <chess/player.hpp>
 
@@ -27,7 +26,7 @@ namespace chess
 {
     typedef neogfx::point_u32 coordinates;
     typedef coordinates::coordinate_type coordinate;
-    
+
     struct move
     {
         coordinates from;
@@ -48,6 +47,15 @@ namespace chess
     {
         return { static_cast<char>('a' + aMove.from.x), static_cast<char>('1' + aMove.from.y), static_cast<char>('a' + aMove.to.x), static_cast<char>('1' + aMove.to.y) };
     }
+
+    template <typename chess::player Player>
+    inline coordinate promotion_rank_v;
+
+    template <>
+    inline coordinate promotion_rank_v<chess::player::White> = 8u;
+
+    template <>
+    inline coordinate promotion_rank_v<chess::player::Black> = 0u;
 
     typedef std::array<std::array<piece, 8>, 8> matrix;
 
