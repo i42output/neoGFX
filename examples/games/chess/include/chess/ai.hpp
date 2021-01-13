@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <random>
 #include <chess/i_player.hpp>
 #include <chess/matrix.hpp>
 #include <chess/bitboard.hpp>
@@ -39,6 +40,7 @@ namespace chess
     public:
         void greet(i_player& aOpponent) override;
         bool play(move const& aMove) override;
+        void ready() override;
     private:
         void play();
     private:

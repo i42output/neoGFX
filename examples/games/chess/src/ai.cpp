@@ -45,13 +45,13 @@ namespace chess
         iSink = aOpponent.moved([&](move const& aMove)
         {
             move_piece(iBoard, aMove);
-            play();
         });
     }
 
     template <typename Representation, chess::player Player>
     bool ai<Representation, Player>::play(move const& aMove)
     {
+        move_piece(iBoard, aMove);
         Moved.trigger(aMove);
         return true;
     }
@@ -59,20 +59,35 @@ namespace chess
     template <typename Representation, chess::player Player>
     void ai<Representation, Player>::play()
     {
-        thread_local std::vector<move> validMoves;
-        validMoves.clear();
+        thread_local std::vector<move> tValidMoves;
+        tValidMoves.clear();
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
             for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                 for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
                     for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                     {
-                        move const canidateMove{ { xFrom, yFrom }, { xTo, yTo } };
+                        move canidateMove{ { xFrom, yFrom }, { xTo, yTo } };
                         if (can_move(iMoveTables, Player, iBoard, canidateMove))
                         {
-                            validMoves.push_back(canidateMove);
                             // todo: pawn promotion
+                            tValidMoves.push_back(canidateMove);
                         }
                     }
+        // todo: an AI! random move for now...
+        thread_local std::random_device tEntropy;
+        thread_local std::mt19937 tGenerator(tEntropy());
+        if (tValidMoves.size() > 0u)
+        {
+            std::uniform_int_distribution<std::size_t> tDistribution(0u, tValidMoves.size() - 1u);
+            auto const moveSelection = tValidMoves[tDistribution(tGenerator)];
+            play(moveSelection);
+        }
+    }
+
+    template <typename Representation, chess::player Player>
+    void ai<Representation, Player>::ready()
+    {
+        play();
     }
 
     template class ai<matrix, chess::player::White>;

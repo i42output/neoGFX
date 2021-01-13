@@ -42,7 +42,12 @@ namespace chess
 
     bool human::play(move const& aMove)
     {
+        iLastMove = aMove;
         Moved.trigger(aMove);
         return true;
+    }
+
+    void human::ready()
+    {
     }
 }

@@ -261,22 +261,6 @@ namespace chess::gui
                         iSelectionPosition = std::nullopt;
                         iSelection = std::nullopt;
                         iLastSelectionEventTime = std::nullopt;
-                        auto const movingPiece = iBoard.position[move.from.y][move.from.x];
-                        auto const targetPiece = iBoard.position[move.to.y][move.to.x];
-                        if (piece_type(movingPiece) == piece::King && move.from.x - move.to.x == 2u)
-                        {
-                            // queenside castling
-                            iAnimations.emplace_back(move, movingPiece);
-                            iAnimations.emplace_back(chess::move{ coordinates{ 0u, move.from.y }, coordinates{ 3u, move.to.y } }, iBoard.position[move.from.y][0u]);
-                        }
-                        else if (piece_type(movingPiece) == piece::King && move.to.x - move.from.x == 2u)
-                        {
-                            // kingside castling
-                            iAnimations.emplace_back(move, movingPiece);
-                            iAnimations.emplace_back(chess::move{ coordinates{ 7u, move.from.y }, coordinates{ 5u, move.to.y } }, iBoard.position[move.from.y][7u]);
-                        }
-                        else
-                            iAnimations.emplace_back(move, movingPiece, targetPiece);
                         play(move);
                     }
                     else if (iMoveValidator.in_check(iBoard.turn, iBoard))
@@ -377,17 +361,16 @@ namespace chess::gui
     {
         if (!iEditBoard)
         {
-            // todo: update ai
-            if (!iMoveValidator.can_move(iBoard.turn, iBoard, aMove))
-                return false;
+            animate_move(aMove);
+
             auto const& source = iBoard.position[aMove.from.y][aMove.from.x];
             auto const movingPiece = source;
-            std::optional<piece> promotion;
+            std::optional<piece> promotion = aMove.promoteTo;
             if (piece_type(movingPiece) == piece::Pawn)
             {
                 // promotion
                 animating_to(aMove.to)->first->hold = true;
-                if ((piece_color(movingPiece) == piece::White && aMove.to.y == 7u) || (piece_color(movingPiece) == piece::Black && aMove.to.y == 0u))
+                if ((piece_color(movingPiece) == piece::White && aMove.to.y == 7u) || (piece_color(movingPiece) == piece::Black && aMove.to.y == 0u) && !promotion)
                 {
                     promotion = piece_color(movingPiece) | piece::Queen;
                     ng::point const mousePosition = root().mouse_position() - origin();
@@ -507,11 +490,34 @@ namespace chess::gui
         
     void board::moved(chess::move const& aMove)
     {
+        std::cerr << to_string(aMove) << std::endl; // todo: remove
+        if (current_player().type() != player_type::Human)
+            animate_move(aMove);
         move_piece(iBoard, aMove);
-        iBoard.turn = next_player().player();
         if (iMoveValidator.in_check(iBoard.turn, iBoard))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
         update();
+    }
+
+    void board::animate_move(chess::move const& aMove)
+    {
+        auto const movingPiece = iBoard.position[aMove.from.y][aMove.from.x];
+        auto const targetPiece = iBoard.position[aMove.to.y][aMove.to.x];
+        if (piece_type(movingPiece) == piece::King && aMove.from.x - aMove.to.x == 2u)
+        {
+            // queenside castling
+            iAnimations.emplace_back(aMove, movingPiece);
+            iAnimations.emplace_back(chess::move{ coordinates{ 0u, aMove.from.y }, coordinates{ 3u, aMove.to.y } }, iBoard.position[aMove.from.y][0u]);
+        }
+        else if (piece_type(movingPiece) == piece::King && aMove.to.x - aMove.from.x == 2u)
+        {
+            // kingside castling
+            iAnimations.emplace_back(aMove, movingPiece);
+            iAnimations.emplace_back(chess::move{ coordinates{ 7u, aMove.from.y }, coordinates{ 5u, aMove.to.y } }, iBoard.position[aMove.from.y][7u]);
+        }
+        else
+            iAnimations.emplace_back(aMove, movingPiece, targetPiece);
+
     }
 
     std::optional<std::pair<animation const*, ng::point>> board::animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime) const
@@ -566,6 +572,8 @@ namespace chess::gui
                             iAnimations.pop_front();
                     }
                 }
+                if (iAnimations.empty())
+                    current_player().ready();
             }
             if (iFlashCheck && std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - iFlashCheck->second).count() > 1)
                 iFlashCheck = std::nullopt;

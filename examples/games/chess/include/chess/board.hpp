@@ -84,6 +84,7 @@ namespace chess::gui
     private:
         void moved(chess::move const& aMove);
     private:
+        void animate_move(chess::move const& aMove);
         std::optional<std::pair<animation const*, ng::point>> animating_to(coordinates const& aMovePos, std::chrono::steady_clock::time_point const& aTime = std::chrono::steady_clock::now()) const;
         bool animating_from(coordinates const& aMovePos) const;
         void animate();

@@ -26,7 +26,7 @@ namespace chess
     class human : public i_player 
     {
     public:
-        define_declared_event(Moved, moved, move const&)    
+        define_declared_event(Moved, moved, move const&)
     public:
         human(chess::player aPlayer);
     public:
@@ -35,8 +35,10 @@ namespace chess
     public:
         void greet(i_player& aOpponent) override;
         bool play(move const& aMove) override;
+        void ready() override;
     private:
         ng::sink iSink;
         chess::player iPlayer;
+        std::optional<move> iLastMove;
     };
 }

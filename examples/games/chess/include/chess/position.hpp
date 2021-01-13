@@ -44,6 +44,11 @@ namespace chess
         std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> castlingState;
     };
 
+    inline std::string to_string(move const& aMove)
+    {
+        return { static_cast<char>('a' + aMove.from.x), static_cast<char>('1' + aMove.from.y), static_cast<char>('a' + aMove.to.x), static_cast<char>('1' + aMove.to.y) };
+    }
+
     typedef std::array<std::array<piece, 8>, 8> matrix;
 
     struct piece_bitboard
@@ -163,6 +168,7 @@ namespace chess
             // do nothing
             break;
         }
+        aBoard.turn = next_player(aBoard.turn);
     }
 
     inline void move_piece(bitboard_board& aBoard, chess::move const& aMove)
