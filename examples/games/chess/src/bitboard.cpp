@@ -22,6 +22,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    template <>
+    bitboard_board const& setup_position<bitboard>()
+    {
+        static constexpr bitboard_board position
+        {
+            // todo
+            {},
+            {{
+                { 4u, 0u }, { 4u, 7u }
+            }},
+            player::White
+        };
+        return position;
+    }
+
     template<>
     move_tables<bitboard> generate_move_tables<bitboard>()
     {

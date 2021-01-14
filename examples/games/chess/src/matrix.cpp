@@ -23,6 +23,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template<>
+    matrix_board const& setup_position<matrix>()
+    {
+        static constexpr matrix_board position
+        {
+            {{
+                { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
+                { piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn },
+                {}, {}, {}, {},
+                // { piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn },
+                // { piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook },
+                {},
+                { piece::None, piece::None, piece::None, piece::None, piece::BlackKing, piece::None, piece::None, piece::None },
+            }},
+            {{
+                { 4u, 0u }, { 4u, 7u }
+            }},
+            player::White
+        };
+        return position;
+    }
+
+    template<>
     move_tables<matrix> generate_move_tables<matrix>()
     {
         typedef move_tables<matrix>::move_coordinates move_coordinates;

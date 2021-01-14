@@ -74,7 +74,7 @@ namespace chess::gui
                     case RENDER_BOARD:
                         {
                             bool const canMove = iSelection && iMoveValidator.can_move(iBoard.turn, iBoard, chess::move{ *iSelection, coordinates{x, y} });
-                            auto labelFont = font().with_size(11 * scale()).with_style(ng::font_style::Bold);
+                            auto const& labelFont = font();
                             auto yLabel = std::string{ static_cast<char>(y + '1') };
                             auto xLabel = std::string{ static_cast<char>(x + 'a') };
                             auto yLabelExtents = aGc.text_extent(yLabel, labelFont);
@@ -189,6 +189,12 @@ namespace chess::gui
                         break;
                     }
                 }
+    }
+
+    void board::resized()
+    {
+        widget<>::resized();
+        set_font(ng::service<ng::i_app>().current_style().font().with_size(11 * scale()).with_style(ng::font_style::Bold));
     }
 
     bool board::key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifiers_e aKeyModifiers)
@@ -350,7 +356,7 @@ namespace chess::gui
 
     void board::new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer)
     {
-        setup(chess::setup<matrix>::position());
+        setup(chess::setup_position<matrix>());
         iWhitePlayer = std::move(aPlayerFactory.create_player(aWhitePlayer, player::White));
         iBlackPlayer = std::move(aPlayerFactory.create_player(aBlackPlayer, player::Black));
         white_player().greet(black_player());
@@ -434,6 +440,8 @@ namespace chess::gui
         if (piece_type(destination) == piece::King)
             iBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
         iBoard.lastMove = std::nullopt;
+        current_player().setup(iBoard);
+        next_player().setup(iBoard);
         update();
     }
 

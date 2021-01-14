@@ -111,7 +111,7 @@ namespace chess
                 }
             }
         }
-        if (!aCheckTest)
+        if (!aCheckTest || piece_type(movingPiece) == piece::King)
         {
             aBoard.checkTest = aMove;
             bool inCheck = in_check(aTables, aTurn, aBoard);
@@ -129,8 +129,13 @@ namespace chess
         auto const kingPosition = king_position(aBoard, static_cast<piece>(aPlayer));
         for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
             for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
-                if (can_move(aTables, opponent, aBoard, move{ coordinates{ xFrom, yFrom }, kingPosition }, true))
+            {
+                move const tryMove{ coordinates{ xFrom, yFrom }, kingPosition };
+                if (tryMove.from == kingPosition)
+                    continue;
+                if (can_move(aTables, opponent, aBoard, tryMove, true))
                     return true;
+            }
         return false;
     }
 
@@ -146,6 +151,8 @@ namespace chess
     {
         // todo: remove debug timing code
         auto start = std::chrono::steady_clock::now();
+
+        // todo: stalemate
 
         double constexpr scaleMaterial = 10.0; // todo
         double constexpr scalePromotion = 1.0; // todo
@@ -183,8 +190,8 @@ namespace chess
                         {
                             if (from == (piece::King | static_cast<piece>(Player)))
                                 kingPlayerMobility = true;
-                            if (to == (piece::King | static_cast<piece>(Player)))
-                                kingPlayerChecked = 1.0;
+                            if (to == (piece::King | static_cast<piece>(opponent_v<Player>)))
+                                kingOpponentChecked = 1.0;
                             if (from == (piece::Pawn | static_cast<piece>(Player)) && yTo == promotion_rank_v<Player>)
                                 material += (piece_value<Player>(piece::Queen) * scalePromotion);
                             mobility += 1.0;
@@ -195,8 +202,8 @@ namespace chess
                         {
                             if (from == (piece::King | static_cast<piece>(opponent_v<Player>)))
                                 kingOpponentMobility = true;
-                            if (to == (piece::King | static_cast<piece>(opponent_v<Player>)))
-                                kingOpponentChecked = 1.0;
+                            if (to == (piece::King | static_cast<piece>(Player)))
+                                kingPlayerChecked = 1.0;
                             if (from == (piece::Pawn | static_cast<piece>(opponent_v<Player>)) && yTo == promotion_rank_v<opponent_v<Player>>)
                                 material -= (piece_value<Player>(piece::Queen) * scalePromotion);
                             mobility -= 1.0;

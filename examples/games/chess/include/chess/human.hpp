@@ -36,6 +36,7 @@ namespace chess
         void greet(i_player& aOpponent) override;
         bool play(move const& aMove) override;
         void ready() override;
+        void setup(matrix_board const& aSetup) override;
     private:
         ng::sink iSink;
         chess::player iPlayer;

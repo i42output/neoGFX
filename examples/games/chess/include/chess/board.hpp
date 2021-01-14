@@ -59,6 +59,8 @@ namespace chess::gui
     protected:
         bool key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifiers_e aKeyModifiers) override;
     protected:
+        void resized() override;
+    protected:
         ng::focus_policy focus_policy() const override;
     protected:
         void mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;

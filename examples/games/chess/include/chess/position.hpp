@@ -203,46 +203,5 @@ namespace chess
     }
 
     template <typename Representation>
-    struct setup;
-
-    template <>
-    struct setup<matrix>
-    {
-        static matrix_board const& position()
-        {
-            static constexpr matrix_board position
-            {
-                {{
-                    { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
-                    { piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn },
-                    {}, {}, {}, {},
-                    { piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn },
-                    { piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook },
-                }},
-                {{
-                    { 4u, 0u }, { 4u, 7u }
-                }},
-                player::White
-            };
-            return position;
-        }
-    };
-
-    template <>
-    struct setup<bitboard>
-    {
-        static bitboard_board const& position()
-        {
-            static constexpr bitboard_board position
-            {
-                // todo
-                {},
-                {{
-                    { 4u, 0u }, { 4u, 7u }
-                }},
-                player::White
-            };
-            return position;
-        };
-    };
+    basic_board<Representation> const& setup_position();
 }

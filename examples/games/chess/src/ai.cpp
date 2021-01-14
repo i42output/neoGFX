@@ -23,7 +23,7 @@ namespace chess
     template <typename Representation, chess::player Player>
     ai<Representation, Player>::ai() :
         iMoveTables{ generate_move_tables<representation_type>() },
-        iBoard{ chess::setup<representation_type>::position() }
+        iBoard{ chess::setup_position<representation_type>() }
     {
     }
 
@@ -88,6 +88,15 @@ namespace chess
     void ai<Representation, Player>::ready()
     {
         play();
+    }
+
+    template <typename Representation, chess::player Player>
+    void ai<Representation, Player>::setup(matrix_board const& aSetup)
+    {
+        if constexpr (std::is_same_v<representation_type, matrix>)
+            iBoard = aSetup;
+        else
+            ; // todo (convert to bitboard representation)
     }
 
     template class ai<matrix, chess::player::White>;

@@ -50,4 +50,8 @@ namespace chess
     void human::ready()
     {
     }
+
+    void human::setup(matrix_board const& aSetup)
+    {
+    }
 }
