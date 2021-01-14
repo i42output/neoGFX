@@ -142,7 +142,7 @@ namespace chess
     template <player Player>
     struct eval<matrix, Player>
     {
-        double operator()(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard, eval_info* aEvalInfo = nullptr)
+        double operator()(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
         {
             auto const start = !aEvalInfo ? std::chrono::steady_clock::time_point{} : std::chrono::steady_clock::now();
 
@@ -154,6 +154,7 @@ namespace chess
             double constexpr scaleAttack = 1.0; // todo
             double constexpr scaleDefend = 1.0; // todo
             double constexpr scaleCheck = 20.0; // todo
+            double const scaleMate = 1.0 / aPly;
             double material = 0.0;
             double mobility = 0.0;
             double attack = 0.0;
@@ -216,9 +217,9 @@ namespace chess
             result -= (kingPlayerChecked * scaleCheck);
             result += (kingOpponentChecked * scaleCheck);
             if (kingPlayerChecked != 0.0 && !kingPlayerMobility)
-                result = -std::numeric_limits<double>::infinity();
+                result = -std::numeric_limits<double>::max() * scaleMate;
             if (kingOpponentChecked != 0.0 && !kingOpponentMobility)
-                result = +std::numeric_limits<double>::infinity();
+                result = +std::numeric_limits<double>::max() * scaleMate;
 
             if (aEvalInfo)
             {
@@ -228,9 +229,9 @@ namespace chess
 
             return result;
         }
-        double operator()(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard, eval_info& aEvalInfo)
+        double operator()(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard, double aPly, eval_info& aEvalInfo)
         {
-            return eval{}(aTables, aPlayer, aBoard, &aEvalInfo);
+            return eval{}(aTables, aPlayer, aBoard, aPly, &aEvalInfo);
         }
     };
 }

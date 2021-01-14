@@ -299,8 +299,9 @@ namespace chess::gui
             actionEditBoard.Unchecked([&]() { iEditBoard = false; });
             actionErase.Triggered([&]()
             {
-                // todo
                 iBoard.position[square->y][square->x] = piece::None;
+                current_player().setup(iBoard);
+                next_player().setup(iBoard);
             });
             contextMenu.exec();
         }
@@ -519,7 +520,6 @@ namespace chess::gui
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
         eval_info evalInfo;
         double eval = iMoveValidator.eval(current_player().player(), iBoard, evalInfo);
-        std::cerr << std::fixed;
         std::cerr << std::setprecision(2);
         std::cerr << "material: " << evalInfo.material << std::endl;
         std::cerr << "mobility: " << evalInfo.mobility << std::endl;

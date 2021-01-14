@@ -44,14 +44,14 @@ namespace chess
     template <player Player>
     struct eval<bitboard, Player>
     {
-        double operator()(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard, eval_info* aEvalInfo = nullptr)
+        double operator()(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
         {
             // todo
             if (aEvalInfo)
                 *aEvalInfo = eval_info{};
             return 0.0;
         }
-        double operator()(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard, eval_info& aEvalInfo)
+        double operator()(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard, double aPly, eval_info& aEvalInfo)
         {
             return eval{}(aTables, aPlayer, aBoard, &aEvalInfo);
         }

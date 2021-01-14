@@ -147,9 +147,9 @@ namespace chess
     double move_validator::eval(player aTurn, matrix_board const& aBoard, eval_info& aInfo) const
     {
         if (aTurn == player::White)
-            return chess::eval<matrix, player::White>{}(iMoveTables, aTurn, aBoard, aInfo);
+            return chess::eval<matrix, player::White>{}(iMoveTables, aTurn, aBoard, 1.0, aInfo);
         else if (aTurn == player::Black)
-            return chess::eval<matrix, player::Black>{}(iMoveTables, aTurn, aBoard, aInfo);
+            return chess::eval<matrix, player::Black>{}(iMoveTables, aTurn, aBoard, 1.0, aInfo);
         else
             return 0.0;
     }

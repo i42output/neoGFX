@@ -50,7 +50,7 @@ namespace chess
                 board_type b = aBoard;
                 move_piece(b, m);
                 chess::eval<representation_type, Player> eval;
-                auto value = eval(iMoveTables, Player, b);
+                auto value = eval(iMoveTables, Player, b, 1.0);
                 if (!bestMove || bestMove->value < value)
                     bestMove = best_move(m, value);
             }
