@@ -218,10 +218,12 @@ namespace chess
         double mobility = 0.0;
         double attack = 0.0;
         double defend = 0.0;
-        double kingPlayerChecked = 0.0;
-        bool kingPlayerMobility = false;
-        double kingOpponentChecked = 0.0;
-        bool kingOpponentMobility = false;
+        bool mobilityPlayer = false;
+        bool mobilityOpponent = false;
+        bool mobilityPlayerKing = false;
+        bool mobilityOpponentKing = false;
+        double checkedPlayerKing = 0.0;
+        double checkedOpponentKing = 0.0;
         double eval;
         std::chrono::microseconds time_usec;
     };

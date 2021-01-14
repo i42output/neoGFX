@@ -146,8 +146,6 @@ namespace chess
         {
             auto const start = !aEvalInfo ? std::chrono::steady_clock::time_point{} : std::chrono::steady_clock::now();
 
-            // todo: stalemate
-
             double constexpr scaleMaterial = 10.0; // todo
             double constexpr scalePromotion = 1.0; // todo
             double constexpr scaleMobility = 1.0; // todo
@@ -155,15 +153,18 @@ namespace chess
             double constexpr scaleDefend = 1.0; // todo
             double constexpr scaleCheck = 20.0; // todo
             double const scaleMate = 1.0 / aPly;
+            double constexpr stalemate = 0.0;
             double material = 0.0;
             double mobility = 0.0;
             double attack = 0.0;
             double defend = 0.0;
             double result = 0.0;
-            double kingPlayerChecked = 0.0;
-            bool kingPlayerMobility = false;
-            double kingOpponentChecked = 0.0;
-            bool kingOpponentMobility = false;
+            double checkedPlayerKing = 0.0;
+            bool mobilityPlayer = false;
+            bool mobilityOpponent = false;
+            bool mobilityPlayerKing = false;
+            double checkedOpponentKing = 0.0;
+            bool mobilityOpponentKing = false;
             for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                 for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
                 {
@@ -183,10 +184,11 @@ namespace chess
                             auto const valueTo = piece_value<Player>(to);
                             if (can_move(aTables, Player, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }, true))
                             {
+                                mobilityPlayer = true;
                                 if (from == (piece::King | static_cast<piece>(Player)))
-                                    kingPlayerMobility = true;
+                                    mobilityPlayerKing = true;
                                 if (to == (piece::King | static_cast<piece>(opponent_v<Player>)))
-                                    kingOpponentChecked = 1.0;
+                                    checkedOpponentKing = 1.0;
                                 if (from == (piece::Pawn | static_cast<piece>(Player)) && yTo == promotion_rank_v<Player>)
                                     material += (piece_value<Player>(piece::Queen) * scalePromotion);
                                 mobility += 1.0;
@@ -195,10 +197,11 @@ namespace chess
                             }
                             else if (can_move(aTables, opponent_v<Player>, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }, true))
                             {
+                                mobilityOpponent = true;
                                 if (from == (piece::King | static_cast<piece>(opponent_v<Player>)))
-                                    kingOpponentMobility = true;
+                                    mobilityOpponentKing = true;
                                 if (to == (piece::King | static_cast<piece>(Player)))
-                                    kingPlayerChecked = 1.0;
+                                    checkedPlayerKing = 1.0;
                                 if (from == (piece::Pawn | static_cast<piece>(opponent_v<Player>)) && yTo == promotion_rank_v<opponent_v<Player>>)
                                     material -= (piece_value<Player>(piece::Queen) * scalePromotion);
                                 mobility -= 1.0;
@@ -214,17 +217,27 @@ namespace chess
             attack *= scaleAttack;
             defend *= scaleDefend;
             result = material + mobility + attack + defend;
-            result -= (kingPlayerChecked * scaleCheck);
-            result += (kingOpponentChecked * scaleCheck);
-            if (kingPlayerChecked != 0.0 && !kingPlayerMobility)
-                result = -std::numeric_limits<double>::max() * scaleMate;
-            if (kingOpponentChecked != 0.0 && !kingOpponentMobility)
-                result = +std::numeric_limits<double>::max() * scaleMate;
+            result -= (checkedPlayerKing * scaleCheck);
+            result += (checkedOpponentKing * scaleCheck);
+            if (!mobilityPlayerKing)
+            {
+                if (checkedPlayerKing != 0.0)
+                    result = -std::numeric_limits<double>::max() * scaleMate;
+                else if (!mobilityPlayer)
+                    result = stalemate;
+            }
+            if (!mobilityOpponentKing)
+            {
+                if (checkedOpponentKing != 0.0)
+                    result = +std::numeric_limits<double>::max() * scaleMate;
+                else if (!mobilityOpponent)
+                    result = stalemate;
+            }
 
             if (aEvalInfo)
             {
                 auto const end_us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start);
-                *aEvalInfo = eval_info{ material, mobility, attack, defend, kingPlayerChecked, kingPlayerMobility, kingOpponentChecked, kingOpponentMobility, result, end_us };
+                *aEvalInfo = eval_info{ material, mobility, attack, defend, mobilityPlayer, mobilityOpponent, mobilityPlayerKing, mobilityOpponentKing, checkedPlayerKing, checkedOpponentKing, result, end_us };
             }
 
             return result;

@@ -520,16 +520,18 @@ namespace chess::gui
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
         eval_info evalInfo;
         double eval = iMoveValidator.eval(current_player().player(), iBoard, evalInfo);
-        std::cerr << std::setprecision(2);
-        std::cerr << "material: " << evalInfo.material << std::endl;
-        std::cerr << "mobility: " << evalInfo.mobility << std::endl;
-        std::cerr << "attack: " << evalInfo.attack << std::endl;
-        std::cerr << "defend: " << evalInfo.defend << std::endl;
-        std::cerr << "kingPlayerChecked: " << evalInfo.kingPlayerChecked << std::endl;
-        std::cerr << "kingPlayerMobility: " << evalInfo.kingPlayerMobility << std::endl;
-        std::cerr << "kingOpponentChecked: " << evalInfo.kingOpponentChecked << std::endl;
-        std::cerr << "kingOpponentMobility: " << evalInfo.kingOpponentMobility << std::endl;
-        std::cerr << "eval: " << eval << std::endl;
+        std::cerr << std::setprecision(4);
+        std::cerr << "material: " << std::round(evalInfo.material) << std::endl;
+        std::cerr << "mobility: " << std::round(evalInfo.mobility) << std::endl;
+        std::cerr << "attack: " << std::round(evalInfo.attack) << std::endl;
+        std::cerr << "defend: " << std::round(evalInfo.defend) << std::endl;
+        std::cerr << "mobilityPlayer: " << evalInfo.mobilityPlayer << std::endl;
+        std::cerr << "mobilityPlayerKing: " << evalInfo.mobilityPlayerKing << std::endl;
+        std::cerr << "checkedPlayerKing: " << std::round(evalInfo.checkedPlayerKing) << std::endl;
+        std::cerr << "mobilityOpponent: " << evalInfo.mobilityOpponent << std::endl;
+        std::cerr << "mobilityOpponentKing: " << evalInfo.mobilityOpponentKing << std::endl;
+        std::cerr << "checkedOpponentKing: " << std::round(evalInfo.checkedOpponentKing) << std::endl;
+        std::cerr << "eval: " << std::round(eval) << std::endl;
         std::cerr << "eval time: " << evalInfo.time_usec.count() << " us" << std::endl;
         update();
     }
