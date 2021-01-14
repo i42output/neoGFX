@@ -18,40 +18,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <random>
-#include <chess/i_player.hpp>
-#include <chess/matrix.hpp>
-#include <chess/bitboard.hpp>
+#include <thread>
+
+#include <chess/primitives.hpp>
 
 namespace chess
 {
-    template <typename Representation, player Player>
-    class ai : public i_player
+    struct best_move
     {
-    public:
-        define_declared_event(Moved, moved, move const&)
-    public:
-        typedef Representation representation_type;
-    public:
-        ai();
-    public:
-        player_type type() const override;
-        chess::player player() const override;
-    public:
-        void greet(i_player& aOpponent) override;
-        bool play(move const& aMove) override;
-        void ready() override;
-        void setup(matrix_board const& aSetup) override;
-    private:
-        void play();
-    private:
-        move_tables<representation_type> const iMoveTables;
-        basic_board<representation_type> iBoard;
-        ng::sink iSink;
+        move move;
+        double value = 0.0;
     };
 
-    extern template class ai<matrix, player::White>;
-    extern template class ai<matrix, player::Black>;
-    extern template class ai<bitboard, player::White>;
-    extern template class ai<bitboard, player::Black>;
+    template <typename Representation, player Player>
+    class ai_thread
+    {
+    public:
+        typedef Representation representation_type;
+        typedef basic_board<representation_type> board_type;
+    public:
+        ai_thread() :
+            iMoveTables{ generate_move_tables<representation_type>() }
+        {
+        }
+    public:
+        best_move eval(board_type const& aBoard, std::vector<move> const& aMoves)
+        {
+            std::optional<best_move> bestMove;
+            for (auto const& m : aMoves)
+            {
+                board_type b = aBoard;
+                move_piece(b, m);
+                chess::eval<representation_type, Player> eval;
+                auto value = eval(iMoveTables, Player, b);
+                if (!bestMove || bestMove->value < value)
+                    bestMove = best_move(m, value);
+            }
+            return *bestMove;
+        }
+    private:
+        move_tables<representation_type> const iMoveTables;
+    };
 }

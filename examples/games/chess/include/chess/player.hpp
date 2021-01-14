@@ -35,4 +35,11 @@ namespace chess
     {
         return p == player::White ? player::Black : player::White;
     }
+
+    template <player Player>
+    constexpr player opponent_v;
+    template <>
+    constexpr player opponent_v<player::White> = player::Black;
+    template <>
+    constexpr player opponent_v<player::Black> = player::White;
 }

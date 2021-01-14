@@ -52,7 +52,7 @@ namespace chess
     inline coordinate promotion_rank_v;
 
     template <>
-    inline coordinate promotion_rank_v<chess::player::White> = 8u;
+    inline coordinate promotion_rank_v<chess::player::White> = 7u;
 
     template <>
     inline coordinate promotion_rank_v<chess::player::Black> = 0u;
@@ -117,7 +117,14 @@ namespace chess
         return targetPiece;
     }
 
-    inline coordinates king_position(matrix_board const& aBoard, piece aKing)
+    inline piece piece_at(bitboard_board const& aBoard, coordinates aPosition)
+    {
+        // todo
+        return piece::None;
+    }
+
+    template <typename Representation>
+    inline coordinates king_position(basic_board<Representation> const& aBoard, piece aKing)
     {
         auto const kingPosition = aBoard.kings[as_color_cardinal<>(aKing)];
         if (aBoard.checkTest && aBoard.checkTest->from == kingPosition)
@@ -204,4 +211,21 @@ namespace chess
 
     template <typename Representation>
     basic_board<Representation> const& setup_position();
+
+    struct eval_info
+    {
+        double material = 0.0;
+        double mobility = 0.0;
+        double attack = 0.0;
+        double defend = 0.0;
+        double kingPlayerChecked = 0.0;
+        bool kingPlayerMobility = false;
+        double kingOpponentChecked = 0.0;
+        bool kingOpponentMobility = false;
+        double eval;
+        std::chrono::microseconds time_usec;
+    };
+
+    template <typename Representation, player Player>
+    struct eval;
 }

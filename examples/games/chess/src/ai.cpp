@@ -17,29 +17,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <chess/ai.hpp>
+#include <chess/ai_thread.hpp>
 
 namespace chess
 {
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     ai<Representation, Player>::ai() :
         iMoveTables{ generate_move_tables<representation_type>() },
         iBoard{ chess::setup_position<representation_type>() }
     {
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     player_type ai<Representation, Player>::type() const
     {
         return player_type::AI;
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     player ai<Representation, Player>::player() const
     {
         return Player;
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     void ai<Representation, Player>::greet(i_player& aOpponent)
     {
         iSink = aOpponent.moved([&](move const& aMove)
@@ -48,7 +49,7 @@ namespace chess
         });
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     bool ai<Representation, Player>::play(move const& aMove)
     {
         move_piece(iBoard, aMove);
@@ -56,7 +57,7 @@ namespace chess
         return true;
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     void ai<Representation, Player>::play()
     {
         thread_local std::vector<move> tValidMoves;
@@ -66,31 +67,46 @@ namespace chess
                 for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
                     for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                     {
-                        move canidateMove{ { xFrom, yFrom }, { xTo, yTo } };
-                        if (can_move(iMoveTables, Player, iBoard, canidateMove))
+                        move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
+                        if (can_move(iMoveTables, Player, iBoard, candidateMove))
                         {
-                            // todo: pawn promotion
-                            tValidMoves.push_back(canidateMove);
+                            auto const movingPiece = piece_at(iBoard, candidateMove.from);
+                            if (piece_type(movingPiece) == piece::Pawn)
+                            {
+                                auto const movingPieceColor = piece_color(movingPiece);
+                                if ((movingPieceColor == piece::White && candidateMove.to.y == promotion_rank_v<player::White>) ||
+                                    (movingPieceColor == piece::Black && candidateMove.to.y == promotion_rank_v<player::Black>))
+                                {
+                                    candidateMove.promoteTo = piece::Queen | movingPieceColor;
+                                    tValidMoves.push_back(candidateMove);
+                                    candidateMove.promoteTo = piece::Knight | movingPieceColor;
+                                    tValidMoves.push_back(candidateMove);
+                                    // todo: do we care about bishop and rook promotion?
+                                }
+                                else
+                                    tValidMoves.push_back(candidateMove);
+                            }
+                            else
+                                tValidMoves.push_back(candidateMove);
                         }
                     }
-        // todo: an AI! random move for now...
         thread_local std::random_device tEntropy;
         thread_local std::mt19937 tGenerator(tEntropy());
         if (tValidMoves.size() > 0u)
         {
-            std::uniform_int_distribution<std::size_t> tDistribution(0u, tValidMoves.size() - 1u);
-            auto const moveSelection = tValidMoves[tDistribution(tGenerator)];
-            play(moveSelection);
+            ai_thread<representation_type, Player> thread;
+            auto e = thread.eval(iBoard, tValidMoves);
+            play(e.move);
         }
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     void ai<Representation, Player>::ready()
     {
         play();
     }
 
-    template <typename Representation, chess::player Player>
+    template <typename Representation, player Player>
     void ai<Representation, Player>::setup(matrix_board const& aSetup)
     {
         if constexpr (std::is_same_v<representation_type, matrix>)
@@ -99,8 +115,8 @@ namespace chess
             ; // todo (convert to bitboard representation)
     }
 
-    template class ai<matrix, chess::player::White>;
-    template class ai<matrix, chess::player::Black>;
-    template class ai<bitboard, chess::player::White>;
-    template class ai<bitboard, chess::player::Black>;
+    template class ai<matrix, player::White>;
+    template class ai<matrix, player::Black>;
+    template class ai<bitboard, player::White>;
+    template class ai<bitboard, player::Black>;
 }

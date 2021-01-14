@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\chess\ai_thread.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\bitboard.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\ai.hpp" />

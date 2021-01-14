@@ -517,7 +517,20 @@ namespace chess::gui
         move_piece(iBoard, aMove);
         if (iMoveValidator.in_check(iBoard.turn, iBoard))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
-        iMoveValidator.eval(current_player().player(), iBoard);
+        eval_info evalInfo;
+        double eval = iMoveValidator.eval(current_player().player(), iBoard, evalInfo);
+        std::cerr << std::fixed;
+        std::cerr << std::setprecision(2);
+        std::cerr << "material: " << evalInfo.material << std::endl;
+        std::cerr << "mobility: " << evalInfo.mobility << std::endl;
+        std::cerr << "attack: " << evalInfo.attack << std::endl;
+        std::cerr << "defend: " << evalInfo.defend << std::endl;
+        std::cerr << "kingPlayerChecked: " << evalInfo.kingPlayerChecked << std::endl;
+        std::cerr << "kingPlayerMobility: " << evalInfo.kingPlayerMobility << std::endl;
+        std::cerr << "kingOpponentChecked: " << evalInfo.kingOpponentChecked << std::endl;
+        std::cerr << "kingOpponentMobility: " << evalInfo.kingOpponentMobility << std::endl;
+        std::cerr << "eval: " << eval << std::endl;
+        std::cerr << "eval time: " << evalInfo.time_usec.count() << " us" << std::endl;
         update();
     }
 
