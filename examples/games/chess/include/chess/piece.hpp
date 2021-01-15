@@ -77,78 +77,60 @@ namespace chess
         COLOR_MASK  = White | Black
     };
 
+    std::array<piece_cardinal, 256> constexpr sPieceCardinals = []()
+    {
+        std::array<piece_cardinal, 256> pieceCardinals = {};
+        pieceCardinals[static_cast<std::size_t>(piece::Pawn)] = piece_cardinal::Pawn;
+        pieceCardinals[static_cast<std::size_t>(piece::WhitePawn)] = piece_cardinal::Pawn;
+        pieceCardinals[static_cast<std::size_t>(piece::BlackPawn)] = piece_cardinal::Pawn;
+        pieceCardinals[static_cast<std::size_t>(piece::Knight)] = piece_cardinal::Knight;
+        pieceCardinals[static_cast<std::size_t>(piece::WhiteKnight)] = piece_cardinal::Knight;
+        pieceCardinals[static_cast<std::size_t>(piece::BlackKnight)] = piece_cardinal::Knight;
+        pieceCardinals[static_cast<std::size_t>(piece::Bishop)] = piece_cardinal::Bishop;
+        pieceCardinals[static_cast<std::size_t>(piece::WhiteBishop)] = piece_cardinal::Bishop;
+        pieceCardinals[static_cast<std::size_t>(piece::BlackBishop)] = piece_cardinal::Bishop;
+        pieceCardinals[static_cast<std::size_t>(piece::Rook)] = piece_cardinal::Rook;
+        pieceCardinals[static_cast<std::size_t>(piece::WhiteRook)] = piece_cardinal::Rook;
+        pieceCardinals[static_cast<std::size_t>(piece::BlackRook)] = piece_cardinal::Rook;
+        pieceCardinals[static_cast<std::size_t>(piece::Queen)] = piece_cardinal::Queen;
+        pieceCardinals[static_cast<std::size_t>(piece::WhiteQueen)] = piece_cardinal::Queen;
+        pieceCardinals[static_cast<std::size_t>(piece::BlackQueen)] = piece_cardinal::Queen;
+        pieceCardinals[static_cast<std::size_t>(piece::King)] = piece_cardinal::King;
+        pieceCardinals[static_cast<std::size_t>(piece::WhiteKing)] = piece_cardinal::King;
+        pieceCardinals[static_cast<std::size_t>(piece::BlackKing)] = piece_cardinal::King;
+        return pieceCardinals;
+    }();
+
     template <typename T = std::size_t>
     inline T as_cardinal(piece p)
     {
-        // todo: will bitwise operations be faster? profile and see.
-        switch (p)
-        {
-        case piece::WhitePawn:
-            return static_cast<T>(piece_cardinal::Pawn);
-        case piece::WhiteKnight:
-            return static_cast<T>(piece_cardinal::Knight);
-        case piece::WhiteBishop:
-            return static_cast<T>(piece_cardinal::Bishop);
-        case piece::WhiteRook:
-            return static_cast<T>(piece_cardinal::Rook);
-        case piece::WhiteQueen:
-            return static_cast<T>(piece_cardinal::Queen);
-        case piece::WhiteKing:
-            return static_cast<T>(piece_cardinal::King);
-        case piece::BlackPawn:
-            return static_cast<T>(piece_cardinal::Pawn);
-        case piece::BlackKnight:
-            return static_cast<T>(piece_cardinal::Knight);
-        case piece::BlackBishop:
-            return static_cast<T>(piece_cardinal::Bishop);
-        case piece::BlackRook:
-            return static_cast<T>(piece_cardinal::Rook);
-        case piece::BlackQueen:
-            return static_cast<T>(piece_cardinal::Queen);
-        case piece::BlackKing:
-            return static_cast<T>(piece_cardinal::King);
-        default:
-            throw std::logic_error("chess::as_cardinal");
-        }
+        return static_cast<T>(sPieceCardinals[static_cast<std::size_t>(p)]);
     }
+
+    std::array<piece_color_cardinal, 256> constexpr sPieceColorCardinals = []()
+    {
+        std::array<piece_color_cardinal, 256> pieceColorCardinals = {};
+        pieceColorCardinals[static_cast<std::size_t>(piece::White)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::Black)] = piece_color_cardinal::Black;
+        pieceColorCardinals[static_cast<std::size_t>(piece::WhitePawn)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::BlackPawn)] = piece_color_cardinal::Black;
+        pieceColorCardinals[static_cast<std::size_t>(piece::WhiteKnight)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::BlackKnight)] = piece_color_cardinal::Black;
+        pieceColorCardinals[static_cast<std::size_t>(piece::WhiteBishop)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::BlackBishop)] = piece_color_cardinal::Black;
+        pieceColorCardinals[static_cast<std::size_t>(piece::WhiteRook)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::BlackRook)] = piece_color_cardinal::Black;
+        pieceColorCardinals[static_cast<std::size_t>(piece::WhiteQueen)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::BlackQueen)] = piece_color_cardinal::Black;
+        pieceColorCardinals[static_cast<std::size_t>(piece::WhiteKing)] = piece_color_cardinal::White;
+        pieceColorCardinals[static_cast<std::size_t>(piece::BlackKing)] = piece_color_cardinal::Black;
+        return pieceColorCardinals;
+    }();
 
     template <typename T = std::size_t>
     inline T as_color_cardinal(piece p)
     {
-        // todo: will bitwise operations be faster? profile and see.
-        switch (p)
-        {
-        case piece::White:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::WhitePawn:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::WhiteKnight:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::WhiteBishop:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::WhiteRook:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::WhiteQueen:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::WhiteKing:
-            return static_cast<T>(piece_color_cardinal::White);
-        case piece::Black:
-            return static_cast<T>(piece_color_cardinal::Black);
-        case piece::BlackPawn:
-            return static_cast<T>(piece_color_cardinal::Black);
-        case piece::BlackKnight:
-            return static_cast<T>(piece_color_cardinal::Black);
-        case piece::BlackBishop:
-            return static_cast<T>(piece_color_cardinal::Black);
-        case piece::BlackRook:
-            return static_cast<T>(piece_color_cardinal::Black);
-        case piece::BlackQueen:
-            return static_cast<T>(piece_color_cardinal::Black);
-        case piece::BlackKing:
-            return static_cast<T>(piece_color_cardinal::Black);
-        default:
-            throw std::logic_error("chess::as_color_cardinal");
-        }
+        return static_cast<T>(sPieceColorCardinals[static_cast<std::size_t>(p)]);
     }
 
     inline piece operator&(piece lhs, piece rhs)
@@ -161,14 +143,98 @@ namespace chess
         return static_cast<piece>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
     }
 
+    std::array<piece, 256> constexpr sPieceTypes = []()
+    {
+        std::array<piece, 256> pieceTypes = {};
+        pieceTypes[static_cast<std::size_t>(piece::Pawn)] = piece::Pawn;
+        pieceTypes[static_cast<std::size_t>(piece::WhitePawn)] = piece::Pawn;
+        pieceTypes[static_cast<std::size_t>(piece::BlackPawn)] = piece::Pawn;
+        pieceTypes[static_cast<std::size_t>(piece::Knight)] = piece::Knight;
+        pieceTypes[static_cast<std::size_t>(piece::WhiteKnight)] = piece::Knight;
+        pieceTypes[static_cast<std::size_t>(piece::BlackKnight)] = piece::Knight;
+        pieceTypes[static_cast<std::size_t>(piece::Bishop)] = piece::Bishop;
+        pieceTypes[static_cast<std::size_t>(piece::WhiteBishop)] = piece::Bishop;
+        pieceTypes[static_cast<std::size_t>(piece::BlackBishop)] = piece::Bishop;
+        pieceTypes[static_cast<std::size_t>(piece::Rook)] = piece::Rook;
+        pieceTypes[static_cast<std::size_t>(piece::WhiteRook)] = piece::Rook;
+        pieceTypes[static_cast<std::size_t>(piece::BlackRook)] = piece::Rook;
+        pieceTypes[static_cast<std::size_t>(piece::Queen)] = piece::Queen;
+        pieceTypes[static_cast<std::size_t>(piece::WhiteQueen)] = piece::Queen;
+        pieceTypes[static_cast<std::size_t>(piece::BlackQueen)] = piece::Queen;
+        pieceTypes[static_cast<std::size_t>(piece::King)] = piece::King;
+        pieceTypes[static_cast<std::size_t>(piece::WhiteKing)] = piece::King;
+        pieceTypes[static_cast<std::size_t>(piece::BlackKing)] = piece::King;
+        return pieceTypes;
+    }();
+
+    std::array<piece, 256> constexpr sPieceColors = []()
+    {
+        std::array<piece, 256> pieceColors = {};
+        pieceColors[static_cast<std::size_t>(piece::WhitePawn)] = piece::White;
+        pieceColors[static_cast<std::size_t>(piece::BlackPawn)] = piece::Black;
+        pieceColors[static_cast<std::size_t>(piece::WhiteKnight)] = piece::White;
+        pieceColors[static_cast<std::size_t>(piece::BlackKnight)] = piece::Black;
+        pieceColors[static_cast<std::size_t>(piece::WhiteBishop)] = piece::White;
+        pieceColors[static_cast<std::size_t>(piece::BlackBishop)] = piece::Black;
+        pieceColors[static_cast<std::size_t>(piece::WhiteRook)] = piece::White;
+        pieceColors[static_cast<std::size_t>(piece::BlackRook)] = piece::Black;
+        pieceColors[static_cast<std::size_t>(piece::WhiteQueen)] = piece::White;
+        pieceColors[static_cast<std::size_t>(piece::BlackQueen)] = piece::Black;
+        pieceColors[static_cast<std::size_t>(piece::WhiteKing)] = piece::White;
+        pieceColors[static_cast<std::size_t>(piece::BlackKing)] = piece::Black;
+        return pieceColors;
+    }();
+
+    std::array<double, 256> constexpr sPieceValuesWhite = []()
+    {
+        std::array<double, 256> pieceValuesWhite = {};
+        pieceValuesWhite[static_cast<std::size_t>(piece::Pawn)] = 1.0;
+        pieceValuesWhite[static_cast<std::size_t>(piece::WhitePawn)] = 1.0;
+        pieceValuesWhite[static_cast<std::size_t>(piece::BlackPawn)] = -1.0;
+        pieceValuesWhite[static_cast<std::size_t>(piece::Knight)] = 3.05;
+        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteKnight)] = 3.05;
+        pieceValuesWhite[static_cast<std::size_t>(piece::BlackKnight)] = -3.05;
+        pieceValuesWhite[static_cast<std::size_t>(piece::Bishop)] = 3.33;
+        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteBishop)] = 3.33;
+        pieceValuesWhite[static_cast<std::size_t>(piece::BlackBishop)] = -3.33;
+        pieceValuesWhite[static_cast<std::size_t>(piece::Rook)] = 5.63;
+        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteRook)] = 5.63;
+        pieceValuesWhite[static_cast<std::size_t>(piece::BlackRook)] = -5.63;
+        pieceValuesWhite[static_cast<std::size_t>(piece::Queen)] = 9.5;
+        pieceValuesWhite[static_cast<std::size_t>(piece::WhiteQueen)] = 9.5;
+        pieceValuesWhite[static_cast<std::size_t>(piece::BlackQueen)] = -9.5;
+        return pieceValuesWhite;
+    }();
+
+    std::array<double, 256> constexpr sPieceValuesBlack = []()
+    {
+        std::array<double, 256> pieceValuesBlack = {};
+        pieceValuesBlack[static_cast<std::size_t>(piece::Pawn)] = 1.0;
+        pieceValuesBlack[static_cast<std::size_t>(piece::WhitePawn)] = -1.0;
+        pieceValuesBlack[static_cast<std::size_t>(piece::BlackPawn)] = 1.0;
+        pieceValuesBlack[static_cast<std::size_t>(piece::Knight)] = 3.05;
+        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteKnight)] = -3.05;
+        pieceValuesBlack[static_cast<std::size_t>(piece::BlackKnight)] = 3.05;
+        pieceValuesBlack[static_cast<std::size_t>(piece::Bishop)] = 3.33;
+        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteBishop)] = -3.33;
+        pieceValuesBlack[static_cast<std::size_t>(piece::BlackBishop)] = 3.33;
+        pieceValuesBlack[static_cast<std::size_t>(piece::Rook)] = 5.63;
+        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteRook)] = -5.63;
+        pieceValuesBlack[static_cast<std::size_t>(piece::BlackRook)] = 5.63;
+        pieceValuesBlack[static_cast<std::size_t>(piece::Queen)] = 9.5;
+        pieceValuesBlack[static_cast<std::size_t>(piece::WhiteQueen)] = -9.5;
+        pieceValuesBlack[static_cast<std::size_t>(piece::BlackQueen)] = 9.5;
+        return pieceValuesBlack;
+    }();
+
     inline piece piece_type(piece p)
     {
-        return p & piece::TYPE_MASK;
+        return sPieceTypes[static_cast<std::size_t>(p)];
     }
 
     inline piece piece_color(piece p)
     {
-        return p & piece::COLOR_MASK;
+        return sPieceColors[static_cast<std::size_t>(p)];
     }
 
     template <chess::piece Color>
@@ -177,71 +243,13 @@ namespace chess
     template <>
     inline double piece_value<chess::piece::White>(chess::piece piece)
     {
-        switch (piece)
-        {
-        case piece::Pawn:
-        case piece::WhitePawn:
-            return 1.0;
-        case piece::BlackPawn:
-            return -1.0;
-        case piece::Knight:
-        case piece::WhiteKnight:
-            return 3.05;
-        case piece::BlackKnight:
-            return -3.05;
-        case piece::Bishop:
-        case piece::WhiteBishop:
-            return 3.33;
-        case piece::BlackBishop:
-            return -3.33;
-        case piece::Rook:
-        case piece::WhiteRook:
-            return 5.63;
-        case piece::BlackRook:
-            return -5.63;
-        case piece::Queen:
-        case piece::WhiteQueen:
-            return 9.5;
-        case piece::BlackQueen:
-            return -9.5;
-        default:
-            return 0.0;
-        }
+        return sPieceValuesWhite[static_cast<std::size_t>(piece)];
     }
 
     template <>
     inline double piece_value<chess::piece::Black>(chess::piece piece)
     {
-        switch (piece)
-        {
-        case piece::WhitePawn:
-            return -1.0;
-        case piece::Pawn:
-        case piece::BlackPawn:
-            return 1.0;
-        case piece::WhiteKnight:
-            return -3.05;
-        case piece::Knight:
-        case piece::BlackKnight:
-            return 3.05;
-        case piece::WhiteBishop:
-            return -3.33;
-        case piece::Bishop:
-        case piece::BlackBishop:
-            return 3.33;
-        case piece::WhiteRook:
-            return -5.63;
-        case piece::Rook:
-        case piece::BlackRook:
-            return 5.63;
-        case piece::WhiteQueen:
-            return -9.5;
-        case piece::Queen:
-        case piece::BlackQueen:
-            return 9.5;
-        default:
-            return 0.0;
-        }
+        return sPieceValuesBlack[static_cast<std::size_t>(piece)];
     }
 
     struct invalid_piece_character : std::runtime_error { invalid_piece_character() : std::runtime_error{ "chess::invalid_piece_character" } {} };
