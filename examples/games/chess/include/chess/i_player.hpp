@@ -33,7 +33,7 @@ namespace chess
     class i_player 
     {
     public:
-        declare_event(moved, move const&)
+        declare_event(moved, move)
     public:
         virtual ~i_player() = default;
     public:

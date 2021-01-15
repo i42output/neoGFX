@@ -33,9 +33,9 @@ namespace chess
     class ai : public i_player, public neogfx::async_thread
     {
     public:
-        define_declared_event(Moved, moved, move const&)
+        define_declared_event(Moved, moved, move)
     private:
-        define_event(Decided, decided, move const&)
+        define_event(Decided, decided, move)
     public:
         typedef Representation representation_type;
     public:

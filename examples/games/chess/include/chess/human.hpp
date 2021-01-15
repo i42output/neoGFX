@@ -26,7 +26,7 @@ namespace chess
     class human : public i_player 
     {
     public:
-        define_declared_event(Moved, moved, move const&)
+        define_declared_event(Moved, moved, move)
     public:
         human(chess::player aPlayer);
     public:
