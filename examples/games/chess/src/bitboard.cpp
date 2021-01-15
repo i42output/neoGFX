@@ -25,7 +25,7 @@ namespace chess
     template <>
     bitboard_board const& setup_position<bitboard>()
     {
-        static constexpr bitboard_board position
+        static const bitboard_board position
         {
             // todo
             {},

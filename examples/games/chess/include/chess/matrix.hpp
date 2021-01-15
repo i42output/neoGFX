@@ -47,6 +47,8 @@ namespace chess
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
     inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove)
     {
+        if (draw(aBoard))
+            return false;
         auto const movingPiece = piece_at(aBoard, aMove.from);
         auto const targetPiece = piece_at(aBoard, aMove.to);
         if (piece_color(movingPiece) != static_cast<piece>(aTurn))
@@ -64,26 +66,26 @@ namespace chess
             {
                 if (piece_type(movingPiece) == piece::Pawn &&
                     aTables.validCaptureMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
-                    aBoard.lastMove)
+                    !aBoard.moveHistory.empty())
                 {
-                    auto const pieceLastMoved = piece_at(aBoard, aBoard.lastMove->to);
+                    auto const pieceLastMoved = piece_at(aBoard, aBoard.moveHistory.back().to);
                     if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
                     {
-                        auto const delta = aBoard.lastMove->to.as<int32_t>() - aBoard.lastMove->from.as<int32_t>();
+                        auto const delta = aBoard.moveHistory.back().to.as<int32_t>() - aBoard.moveHistory.back().from.as<int32_t>();
                         if (std::abs(delta.dy) == 2)
                         {
                             auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
-                            if (aBoard.lastMove->to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
+                            if (aBoard.moveHistory.back().to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
                                 enPassant = true;
                         }
                     }
                 }
-                else if (piece_type(movingPiece) == piece::King && (!aBoard.lastMove || !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)]))
+                else if (piece_type(movingPiece) == piece::King && (aBoard.moveHistory.empty() || aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)]))
                 {
                     if (aMove.to.y == aMove.from.y)
                     {
-                        if ((aMove.to.x == 2 && !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)]) ||
-                            (aMove.to.x == 6 && !aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)]))
+                        if ((aMove.to.x == 2 && aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)]) ||
+                            (aMove.to.x == 6 && aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)]))
                             castle = !in_check(aTables, aTurn, aBoard);
                     }
                 }

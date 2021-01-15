@@ -435,7 +435,7 @@ namespace chess::gui
         source = piece::None;
         if (piece_type(destination) == piece::King)
             iBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
-        iBoard.lastMove = std::nullopt;
+        iBoard.moveHistory.clear();
         current_player().setup(iBoard);
         next_player().setup(iBoard);
         display_eval();

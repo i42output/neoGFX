@@ -32,6 +32,7 @@ namespace chess
         coordinates from;
         coordinates to;
         std::optional<piece> promoteTo;
+        piece capture = piece::None;
         enum class castling_piece_index : uint32_t
         {
             QueensRook  = 0x0,
@@ -42,6 +43,17 @@ namespace chess
         };
         std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> castlingState;
     };
+
+    inline bool operator==(move const& lhs, move const& rhs)
+    {
+        // todo: consider castling state?
+        return lhs.from == rhs.from && lhs.to == rhs.to && lhs.promoteTo == rhs.promoteTo;
+    }
+
+    inline bool operator!=(move const& lhs, move const& rhs)
+    {
+        return !(lhs == rhs);
+    }
 
     inline std::string to_string(move const& aMove)
     {
@@ -72,7 +84,7 @@ namespace chess
         Representation position;
         std::array<coordinates, static_cast<std::size_t>(piece_color_cardinal::COUNT)> kings;
         player turn;
-        std::optional<move> lastMove;
+        neolib::vecarray<move, 20, -1> moveHistory;
         mutable std::optional<move> checkTest;
     };
 
@@ -80,6 +92,29 @@ namespace chess
     using bitboard_board = basic_board<bitboard>;
 
     using board = matrix_board;
+
+    inline std::optional<move> undo(matrix_board& aBoard)
+    {
+        std::optional<move> lastMove;
+        if (!aBoard.moveHistory.empty())
+        {
+            lastMove = aBoard.moveHistory.back();
+            aBoard.moveHistory.pop_back();
+            aBoard.position[lastMove->from.y][lastMove->from.x] = aBoard.position[lastMove->to.y][lastMove->to.x];
+            aBoard.position[lastMove->to.y][lastMove->to.x] = lastMove->capture;
+            if (!aBoard.moveHistory.empty() && lastMove->castlingState != aBoard.moveHistory.back().castlingState)
+            {
+                // todo
+            }
+        }
+        return lastMove;
+    }
+
+    inline std::optional<move> undo(bitboard_board& aBoard)
+    {
+        // todo
+        return {};
+    }
 
     template <typename Representation>
     struct move_tables;
@@ -102,11 +137,11 @@ namespace chess
         {
             if (aBoard.checkTest->from.x != aBoard.checkTest->to.x)
             {
-                if (aBoard.lastMove && aPosition == aBoard.lastMove->to)
+                if (!aBoard.moveHistory.empty() && aPosition == aBoard.moveHistory.back().to)
                 {
-                    if (std::abs(static_cast<int32_t>(aBoard.lastMove->from.y) - static_cast<int32_t>(aBoard.lastMove->to.y)) == 2)
+                    if (std::abs(static_cast<int32_t>(aBoard.moveHistory.back().from.y) - static_cast<int32_t>(aBoard.moveHistory.back().to.y)) == 2)
                     {
-                        if (aBoard.checkTest->to == coordinates{ aBoard.lastMove->to.x, piece_color(movingPiece) == piece::White ? aBoard.lastMove->to.y + 1 : aBoard.lastMove->to.y - 1 })
+                        if (aBoard.checkTest->to == coordinates{ aBoard.moveHistory.back().to.x, piece_color(movingPiece) == piece::White ? aBoard.moveHistory.back().to.y + 1 : aBoard.moveHistory.back().to.y - 1 })
                         {
                             return piece::None;
                         }
@@ -132,6 +167,18 @@ namespace chess
         return kingPosition;
     }
 
+    template <typename Representation>
+    inline bool draw(basic_board<Representation> const& aBoard)
+    {
+        // todo: hash board positions? could be slow.
+        auto const moveCount = aBoard.moveHistory.size();
+        return moveCount >= 6 &&
+            aBoard.moveHistory[moveCount - 1] == aBoard.moveHistory[moveCount - 3] &&
+            aBoard.moveHistory[moveCount - 1] == aBoard.moveHistory[moveCount - 5] &&
+            aBoard.moveHistory[moveCount - 2] == aBoard.moveHistory[moveCount - 4] &&
+            aBoard.moveHistory[moveCount - 2] == aBoard.moveHistory[moveCount - 6];
+    }
+        
     inline void move_piece(matrix_board& aBoard, chess::move const& aMove)
     {
         auto& source = aBoard.position[aMove.from.y][aMove.from.x];
@@ -140,39 +187,41 @@ namespace chess
         auto const targetPiece = destination;
         destination = (!aMove.promoteTo ? source : *aMove.promoteTo);
         source = piece::None;
-        if (!aBoard.lastMove)
-            aBoard.lastMove = aMove;
+        if (aBoard.moveHistory.empty())
+            aBoard.moveHistory.push_back(aMove);
         else
         {
-            aBoard.lastMove->from = aMove.from;
-            aBoard.lastMove->to = aMove.to;
-            aBoard.lastMove->promoteTo = aMove.promoteTo;
+            aBoard.moveHistory.back().from = aMove.from;
+            aBoard.moveHistory.back().to = aMove.to;
+            aBoard.moveHistory.back().promoteTo = aMove.promoteTo;
         }
+        if (targetPiece != piece::None)
+            aBoard.moveHistory.back().capture = targetPiece;
         switch (piece_type(movingPiece))
         {
         case piece::King:
             aBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
-            aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
+            aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
             if (aMove.from.x - aMove.to.x == 2)
             {
                 // queenside castling
-                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+                aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
                 aBoard.position[aMove.from.y][0u] = piece::None;
                 aBoard.position[aMove.from.y][3u] = piece_color(movingPiece) | piece::Rook;
             }
             else if (aMove.to.x - aMove.from.x == 2)
             {
                 // kingside castling
-                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
+                aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
                 aBoard.position[aMove.from.y][7u] = piece::None;
                 aBoard.position[aMove.from.y][5u] = piece_color(movingPiece) | piece::Rook;
             }
             break;
         case piece::Rook:
             if (aMove.from == coordinates{ 0u, 0u } || aMove.from == coordinates{ 0u, 7u })
-                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+                aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
             else if (aMove.from == coordinates{ 7u, 0u } || aMove.from == coordinates{ 7u, 7u })
-                aBoard.lastMove->castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
+                aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
             break;
         case piece::Pawn:
             // en passant

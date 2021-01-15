@@ -23,8 +23,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    template <typename Representation>
+    inline basic_board<Representation>& eval_board()
+    {
+        thread_local basic_board<Representation> sEvalBoard;
+        return sEvalBoard;
+    }
+
     template <player Player, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_board<Representation> const& node, int32_t depth, double alpha, double beta)
+    double pvs(move_tables<Representation> const& tables, basic_board<Representation>& node, int32_t depth, double alpha, double beta)
     {
         neolib::vecarray<move, 128, -1> validMoves;
         valid_moves<Player>(tables, node, validMoves);
@@ -32,24 +39,31 @@ namespace chess
             return eval<Representation, Player>{}(tables, node, static_cast<double>(depth)).eval;
         for (auto const& m : validMoves)
         {
-            basic_board<Representation> child = node; // todo: making a copy of the entire board certainly isn't optimal.
-            move_piece(child, m);
+            move_piece(node, m);
             double score = 0.0;
             if (&m == &validMoves[0])
-                score = -pvs<opponent_v<Player>>(tables, child, depth - 1, -beta, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, node, depth - 1, -beta, -alpha);
             else
             {
-                score = -pvs<opponent_v<Player>>(tables, child, depth - 1, -alpha - 1.0, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, node, depth - 1, -alpha - 1.0, -alpha);
                 if (alpha < score && score < beta)
-                    score = -pvs<opponent_v<Player>>(tables, child, depth - 1, -beta, -score);
+                    score = -pvs<opponent_v<Player>>(tables, node, depth - 1, -beta, -score);
             }
+            undo(node);
             alpha = std::max(alpha, score);
             if (alpha >= beta)
                 break;
         }
         return alpha;
     }
-    
+
+    template <player Player, typename Representation>
+    double pvs(move_tables<Representation> const& tables, basic_board<Representation> const& node, int32_t depth, double alpha, double beta)
+    {
+        eval_board<Representation>() = node;
+        return pvs(tables, eval_board<Representation>(), depth, alpha, beta);
+    }
+
     template <typename Representation, player Player>
     ai_thread<Representation, Player>::ai_thread() :
         iMoveTables{ generate_move_tables<representation_type>() },

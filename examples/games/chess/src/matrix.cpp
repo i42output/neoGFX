@@ -25,7 +25,7 @@ namespace chess
     template<>
     matrix_board const& setup_position<matrix>()
     {
-        static constexpr matrix_board position
+        static const matrix_board position
         {
             {{
                 { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
@@ -153,12 +153,21 @@ namespace chess
             double mobility = 0.0;
             double attack = 0.0;
             double defend = 0.0;
-            double checkedPlayerKing = 0.0;
             bool mobilityPlayer = false;
-            bool mobilityOpponent = false;
             bool mobilityPlayerKing = false;
-            double checkedOpponentKing = 0.0;
+            double checkedPlayerKing = 0.0;
+            bool mobilityOpponent = false;
             bool mobilityOpponentKing = false;
+            double checkedOpponentKing = 0.0;
+            if (chess::draw(aBoard))
+            {
+                if (aEvalInfo)
+                {
+                    auto const end_us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start);
+                    *aEvalInfo = eval_info{ material, mobility, attack, defend, mobilityPlayer, mobilityOpponent, mobilityPlayerKing, mobilityOpponentKing, checkedPlayerKing, checkedOpponentKing, result.eval, end_us };
+                }
+                return eval_result{ eval_node::Terminal, stalemate };
+            }
             for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                 for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
                 {
