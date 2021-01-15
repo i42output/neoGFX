@@ -18,22 +18,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <vector>
 #include <random>
+
+#include <neogfx/core/async_thread.hpp>
 #include <chess/i_player.hpp>
 #include <chess/matrix.hpp>
 #include <chess/bitboard.hpp>
+#include <chess/ai_thread.hpp>
 
 namespace chess
 {
     template <typename Representation, player Player>
-    class ai : public i_player
+    class ai : public i_player, public neogfx::async_thread
     {
     public:
         define_declared_event(Moved, moved, move const&)
+    private:
+        define_event(Decided, decided, move const&)
     public:
         typedef Representation representation_type;
     public:
         ai();
+        ~ai();
     public:
         player_type type() const override;
         chess::player player() const override;
@@ -43,10 +50,18 @@ namespace chess
         void ready() override;
         void setup(matrix_board const& aSetup) override;
     private:
+        bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
+    private:
         void play();
     private:
         move_tables<representation_type> const iMoveTables;
+        std::recursive_mutex iBoardMutex;
         basic_board<representation_type> iBoard;
+        std::vector<ai_thread<Representation, Player>> iThreads;
+        std::mutex iSignalMutex;
+        std::condition_variable iSignal;
+        bool iReady = false;
+        bool iFinished = false;
         ng::sink iSink;
     };
 

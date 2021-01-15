@@ -148,7 +148,7 @@ namespace chess
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult)
+    inline void valid_moves(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult, bool aSort = false)
     {
         aResult.clear();
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
@@ -179,6 +179,15 @@ namespace chess
                                 aResult.push_back(candidateMove);
                         }
                     }
+        if (aSort)
+            std::sort(aResult.begin(), aResult.end(), [&](auto const& lhs, auto const& rhs)
+            {
+                matrix_board lhsBoard = aBoard;
+                matrix_board rhsBoard = aBoard;
+                move_piece(lhsBoard, lhs);
+                move_piece(rhsBoard, rhs);
+                return eval<matrix, Player>{}(aTables, lhsBoard, 2.0).eval < eval<matrix, Player>{}(aTables, rhsBoard, 2.0).eval;
+            });
     }
 
 }

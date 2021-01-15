@@ -52,23 +52,60 @@ namespace chess
     
     template <typename Representation, player Player>
     ai_thread<Representation, Player>::ai_thread() :
-        iMoveTables{ generate_move_tables<representation_type>() }
+        iMoveTables{ generate_move_tables<representation_type>() },
+        iThread{ [&]() { process(); } }
     {
     }
 
     template <typename Representation, player Player>
-    best_move ai_thread<Representation, Player>::eval(board_type const& aBoard, std::vector<move> const& aMoves)
+    ai_thread<Representation, Player>::~ai_thread()
     {
-        std::optional<best_move> bestMove;
-        for (auto const& m : aMoves)
         {
-            board_type b = aBoard;
-            move_piece(b, m);
-            auto value = -pvs<opponent_v<Player>>(iMoveTables, b, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-            if (!bestMove || bestMove->value < value)
-                bestMove = best_move(m, value);
+            std::lock_guard<std::mutex> lk{ iMutex };
+            iFinished = true;
         }
-        return *bestMove;
+        iSignal.notify_one();
+        iThread.join();
+    }
+        
+    template <typename Representation, player Player>
+    std::promise<best_move>& ai_thread<Representation, Player>::eval(board_type const& aBoard, move const& aMove)
+    {
+        {
+            std::lock_guard<std::mutex> lk{ iMutex };
+            iQueue.emplace_back(aBoard, aMove);
+        }
+        return iQueue.back().result;
+    }
+
+    template <typename Representation, player Player>
+    void ai_thread<Representation, Player>::start()
+    {
+        {
+            std::unique_lock<std::mutex> lk{ iMutex };
+            if (iQueue.empty())
+                return;
+        }
+        iSignal.notify_one();
+    }
+
+    template <typename Representation, player Player>
+    void ai_thread<Representation, Player>::process()
+    {
+        for (;;)
+        {
+            std::unique_lock<std::mutex> lk{ iMutex };
+            iSignal.wait(lk, [&]() { return iFinished || !iQueue.empty(); });
+            if (iFinished)
+                return;
+            for (auto& workItem : iQueue)
+            {
+                move_piece(workItem.board, workItem.move);
+                auto const value = -pvs<opponent_v<Player>>(iMoveTables, workItem.board, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                workItem.result.set_value(best_move{ workItem.move, value });
+            }
+            iQueue.clear();
+        }
     }
 
     template class ai_thread<matrix, player::White>;

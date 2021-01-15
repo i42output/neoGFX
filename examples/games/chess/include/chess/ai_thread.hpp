@@ -18,7 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <deque>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <future>
 
 #include <chess/primitives.hpp>
 
@@ -36,11 +40,26 @@ namespace chess
     public:
         typedef Representation representation_type;
         typedef basic_board<representation_type> board_type;
+        struct work_item
+        {
+            board_type board;
+            move move;
+            std::promise<best_move> result;
+        };
     public:
         ai_thread();
+        ~ai_thread();
     public:
-        best_move eval(board_type const& aBoard, std::vector<move> const& aMoves);
+        std::promise<best_move>& eval(board_type const& aBoard, move const& aMove);
+        void start();
+    private:
+        void process();
     private:
         move_tables<representation_type> const iMoveTables;
+        std::deque<work_item> iQueue;
+        std::mutex iMutex;
+        std::condition_variable iSignal;
+        std::thread iThread;
+        bool iFinished = false;
     };
 }
