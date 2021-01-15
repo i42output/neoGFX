@@ -58,10 +58,10 @@ namespace chess
     }
 
     template <player Player, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_board<Representation> const& node, int32_t depth, double alpha, double beta)
+    double pvs_root(move_tables<Representation> const& tables, basic_board<Representation> const& node, int32_t depth, double alpha, double beta)
     {
         eval_board<Representation>() = node;
-        return pvs(tables, eval_board<Representation>(), depth, alpha, beta);
+        return pvs<Player, Representation>(tables, eval_board<Representation>(), depth, alpha, beta);
     }
 
     template <typename Representation, player Player>
@@ -115,7 +115,7 @@ namespace chess
             for (auto& workItem : iQueue)
             {
                 move_piece(workItem.board, workItem.move);
-                auto const value = -pvs<opponent_v<Player>>(iMoveTables, workItem.board, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                auto const value = -pvs_root<opponent_v<Player>>(iMoveTables, workItem.board, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
                 workItem.result.set_value(best_move{ workItem.move, value });
             }
             iQueue.clear();
