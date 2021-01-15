@@ -61,35 +61,7 @@ namespace chess
     void ai<Representation, Player>::play()
     {
         thread_local std::vector<move> tValidMoves;
-        tValidMoves.clear();
-        for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
-            for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
-                for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
-                    for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
-                    {
-                        move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
-                        if (can_move(iMoveTables, Player, iBoard, candidateMove))
-                        {
-                            auto const movingPiece = piece_at(iBoard, candidateMove.from);
-                            if (piece_type(movingPiece) == piece::Pawn)
-                            {
-                                auto const movingPieceColor = piece_color(movingPiece);
-                                if ((movingPieceColor == piece::White && candidateMove.to.y == promotion_rank_v<player::White>) ||
-                                    (movingPieceColor == piece::Black && candidateMove.to.y == promotion_rank_v<player::Black>))
-                                {
-                                    candidateMove.promoteTo = piece::Queen | movingPieceColor;
-                                    tValidMoves.push_back(candidateMove);
-                                    candidateMove.promoteTo = piece::Knight | movingPieceColor;
-                                    tValidMoves.push_back(candidateMove);
-                                    // todo: do we care about bishop and rook promotion?
-                                }
-                                else
-                                    tValidMoves.push_back(candidateMove);
-                            }
-                            else
-                                tValidMoves.push_back(candidateMove);
-                        }
-                    }
+        valid_moves<Player>(iMoveTables, iBoard, tValidMoves);
         thread_local std::random_device tEntropy;
         thread_local std::mt19937 tGenerator(tEntropy());
         if (tValidMoves.size() > 0u)

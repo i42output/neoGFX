@@ -228,6 +228,22 @@ namespace chess
         std::chrono::microseconds time_usec;
     };
 
+    enum class eval_node 
+    {
+        Branch      = 0,
+        Terminal    = 1
+    };
+
+    struct eval_result
+    {
+        eval_node node;
+        double eval;
+    };
+
     template <typename Representation, player Player>
-    struct eval;
+    struct eval
+    {
+        eval_result operator()(move_tables<Representation> const& aTables, basic_board<Representation> const& aBoard, double aPly, eval_info* aEvalInfo = nullptr);
+        eval_result operator()(move_tables<Representation> const& aTables, basic_board<Representation> const& aBoard, double aPly, eval_info& aEvalInfo);
+    };
 }

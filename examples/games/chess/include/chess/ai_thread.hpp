@@ -37,25 +37,9 @@ namespace chess
         typedef Representation representation_type;
         typedef basic_board<representation_type> board_type;
     public:
-        ai_thread() :
-            iMoveTables{ generate_move_tables<representation_type>() }
-        {
-        }
+        ai_thread();
     public:
-        best_move eval(board_type const& aBoard, std::vector<move> const& aMoves)
-        {
-            std::optional<best_move> bestMove;
-            for (auto const& m : aMoves)
-            {
-                board_type b = aBoard;
-                move_piece(b, m);
-                chess::eval<representation_type, Player> eval;
-                auto value = eval(iMoveTables, Player, b, 1.0);
-                if (!bestMove || bestMove->value < value)
-                    bestMove = best_move(m, value);
-            }
-            return *bestMove;
-        }
+        best_move eval(board_type const& aBoard, std::vector<move> const& aMoves);
     private:
         move_tables<representation_type> const iMoveTables;
     };

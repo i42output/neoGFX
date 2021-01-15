@@ -189,6 +189,7 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\ai_thread.cpp" />
     <ClCompile Include="..\..\..\..\src\bitboard.cpp" />
     <ClCompile Include="..\..\..\..\src\board.cpp" />
     <ClCompile Include="..\..\..\..\src\ai.cpp" />

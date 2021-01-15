@@ -130,4 +130,147 @@ namespace chess
         // todo: corner cases
         return result;
     }
+
+    template <player Player>
+    struct eval<matrix, Player>
+    {
+        eval_result operator()(move_tables<matrix> const& aTables, matrix_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
+        {
+            auto const start = !aEvalInfo ? std::chrono::steady_clock::time_point{} : std::chrono::steady_clock::now();
+
+            eval_result result = {};
+
+            double constexpr scaleMaterial = 100.0; // todo
+            double constexpr scalePromotion = 1.0; // todo
+            double constexpr scaleMobility = 1.0; // todo
+            double constexpr scaleAttack = 10.0; // todo
+            double constexpr scaleDefend = 1.0; // todo
+            double constexpr scaleCheck = 9.0; // todo
+            double constexpr scaleAttackAdvantage = 2.0; // todo
+            double const scaleMate = 1.0 / aPly;
+            double constexpr stalemate = 0.0;
+            double material = 0.0;
+            double mobility = 0.0;
+            double attack = 0.0;
+            double defend = 0.0;
+            double checkedPlayerKing = 0.0;
+            bool mobilityPlayer = false;
+            bool mobilityOpponent = false;
+            bool mobilityPlayerKing = false;
+            double checkedOpponentKing = 0.0;
+            bool mobilityOpponentKing = false;
+            for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
+                for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
+                {
+                    auto const from = piece_at(aBoard, coordinates{ xFrom, yFrom });
+                    if (from == piece::None)
+                        continue;
+                    auto const playerFrom = static_cast<chess::player>(piece_color(from));
+                    auto const valueFrom = piece_value<Player>(from);
+                    material += valueFrom;
+                    for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
+                        for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
+                        {
+                            if (yFrom == yTo && xFrom == xTo)
+                                continue;
+                            auto const to = piece_at(aBoard, coordinates{ xTo, yTo });
+                            auto const playerTo = static_cast<chess::player>(piece_color(to));
+                            auto const valueTo = piece_value<Player>(to);
+                            if (can_move(aTables, Player, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }, true, true))
+                            {
+                                if (playerFrom != playerTo)
+                                {
+                                    if (from == (piece::King | static_cast<piece>(Player)))
+                                        mobilityPlayerKing = true;
+                                    else
+                                        mobilityPlayer = true;
+                                    if (to == (piece::King | static_cast<piece>(opponent_v<Player>)))
+                                        checkedOpponentKing = 1.0;
+                                    if (from == (piece::Pawn | static_cast<piece>(Player)) && yTo == promotion_rank_v<Player>)
+                                        material += (piece_value<Player>(piece::Queen) * scalePromotion);
+                                    mobility += 1.0;
+                                    if (playerTo == opponent_v<Player>)
+                                        attack -= valueTo * scaleAttackAdvantage;
+                                }
+                                else
+                                    defend += valueTo;
+                            }
+                            else if (can_move(aTables, opponent_v<Player>, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }, true, true))
+                            {
+                                if (playerFrom != playerTo)
+                                {
+                                    if (from == (piece::King | static_cast<piece>(opponent_v<Player>)))
+                                        mobilityOpponentKing = true;
+                                    else
+                                        mobilityOpponent = true;
+                                    if (to == (piece::King | static_cast<piece>(Player)))
+                                        checkedPlayerKing = 1.0;
+                                    if (from == (piece::Pawn | static_cast<piece>(opponent_v<Player>)) && yTo == promotion_rank_v<opponent_v<Player>>)
+                                        material -= (piece_value<Player>(piece::Queen) * scalePromotion);
+                                    mobility -= 1.0;
+                                    if (playerTo == Player)
+                                        attack -= valueTo;
+                                }
+                                else
+                                    defend += valueTo;
+                            }
+                        }
+                }
+            material *= scaleMaterial;
+            mobility *= scaleMobility;
+            attack *= scaleAttack;
+            defend *= scaleDefend;
+            result.eval = material + mobility + attack + defend;
+            result.eval -= (checkedPlayerKing * scaleCheck);
+            result.eval += (checkedOpponentKing * scaleCheck);
+            if (!mobilityPlayerKing)
+            {
+                if (checkedPlayerKing != 0.0)
+                {
+                    if (!mobilityPlayer)
+                    {
+                        result.node = eval_node::Terminal;
+                        result.eval = -std::numeric_limits<double>::max() * scaleMate;
+                    }
+                }
+                else if (!mobilityPlayer)
+                {
+                    result.node = eval_node::Terminal;
+                    result.eval = stalemate;
+                }
+            }
+            if (!mobilityOpponentKing)
+            {
+                if (checkedOpponentKing != 0.0)
+                {
+                    if (!mobilityOpponent)
+                    {
+                        result.node = eval_node::Terminal;
+                        result.eval = +std::numeric_limits<double>::max() * scaleMate;
+                    }
+                }
+                else if (!mobilityOpponent)
+                {
+                    result.node = eval_node::Terminal;
+                    result.eval = stalemate;
+                }
+            }
+
+            if (aEvalInfo)
+            {
+                auto const end_us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - start);
+                *aEvalInfo = eval_info{ material, mobility, attack, defend, mobilityPlayer, mobilityOpponent, mobilityPlayerKing, mobilityOpponentKing, checkedPlayerKing, checkedOpponentKing, result.eval, end_us };
+            }
+
+            return result;
+        }
+        eval_result operator()(move_tables<matrix> const& aTables, matrix_board const& aBoard, double aPly, eval_info& aEvalInfo)
+        {
+            return eval{}(aTables, aBoard, aPly, &aEvalInfo);
+        }
+    };
+
+
+    template struct eval<matrix, player::White>;
+    template struct eval<matrix, player::Black>;
 }

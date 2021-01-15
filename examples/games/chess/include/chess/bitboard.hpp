@@ -29,7 +29,7 @@ namespace chess
 
     inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard);
 
-    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_board const& aBoard, move const& aMove, bool aCheckTest = false)
+    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_board const& aBoard, move const& aMove, bool aCheckTest = false, bool aDefendTest = false)
     {
         // todo
         return false;
@@ -41,19 +41,10 @@ namespace chess
         return false;
     }
 
-    template <player Player>
-    struct eval<bitboard, Player>
+    template <player Player, typename ResultContainer>
+    inline void valid_moves(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, ResultContainer& aResult)
     {
-        double operator()(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
-        {
-            // todo
-            if (aEvalInfo)
-                *aEvalInfo = eval_info{};
-            return 0.0;
-        }
-        double operator()(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard, double aPly, eval_info& aEvalInfo)
-        {
-            return eval{}(aTables, aPlayer, aBoard, &aEvalInfo);
-        }
-    };
+        // todo
+        aResult.clear();
+    }
 }

@@ -44,4 +44,23 @@ namespace chess
         // todo
         return result;
     }
+
+    template <player Player>
+    struct eval<bitboard, Player>
+    {
+        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
+        {
+            // todo
+            if (aEvalInfo)
+                *aEvalInfo = eval_info{};
+            return { eval_node::Terminal, 0.0 };
+        }
+        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, double aPly, eval_info& aEvalInfo)
+        {
+            return eval{}(aTables, aBoard, aPly, &aEvalInfo);
+        }
+    };
+
+    template struct eval<bitboard, player::White>;
+    template struct eval<bitboard, player::Black>;
 }
