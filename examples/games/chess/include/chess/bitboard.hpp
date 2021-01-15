@@ -27,14 +27,17 @@ namespace chess
     {
     };
 
+    template <bool IntoCheckTest = false>
     inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard);
 
-    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_board const& aBoard, move const& aMove, bool aCheckTest = false, bool aDefendTest = false)
+    template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
+    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_board const& aBoard, move const& aMove)
     {
         // todo
         return false;
     }
 
+    template <bool IntoCheckTest>
     inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard)
     {
         // todo

@@ -117,14 +117,14 @@ namespace chess
 
     bool move_validator::can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const
     {
-        return chess::can_move(iMoveTables, aTurn, aBoard, aMove);
+        return chess::can_move<>(iMoveTables, aTurn, aBoard, aMove);
     }
 
     bool move_validator::has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const
     {
         for (coordinate y = 0u; y <= 7u; ++y)
             for (coordinate x = 0u; x <= 7u; ++x)
-                if (chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                if (chess::can_move<>(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
                     return true;
         return false;
     }
@@ -138,8 +138,8 @@ namespace chess
     {
         for (coordinate y = 0u; y <= 7u; ++y)
             for (coordinate x = 0u; x <= 7u; ++x)
-                if (!chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
-                    if (chess::can_move(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }, true))
+                if (!chess::can_move<>(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                    if (chess::can_move<true>(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
                         return true;
         return false;
     }

@@ -230,7 +230,13 @@ namespace chess::gui
             {
                 auto const pieceColor = piece_color(iBoard.position[pos->y][pos->x]);
                 bool const correctColor = (pieceColor == static_cast<piece>(iBoard.turn));
-                if (!iSelection)
+                if (pos == iSelection)
+                {
+                    iSelectionPosition = std::nullopt;
+                    iSelection = std::nullopt;
+                    iLastSelectionEventTime = std::nullopt;
+                }
+                else if (!iSelection || (correctColor && !iEditBoard))
                 {
                     if ((correctColor && iMoveValidator.has_moves(iBoard.turn, iBoard, *pos)) || (iEditBoard && pieceColor != piece::None))
                     {
@@ -249,19 +255,7 @@ namespace chess::gui
                 }
                 else
                 {
-                    if (pos == iSelection)
-                    {
-                        iSelectionPosition = std::nullopt;
-                        iSelection = std::nullopt;
-                        iLastSelectionEventTime = std::nullopt;
-                    }
-                    else if (pieceColor == static_cast<piece>(iBoard.turn) && !iEditBoard)
-                    {
-                        iSelectionPosition = aPosition;
-                        iSelection = pos;
-                        iLastSelectionEventTime = std::chrono::steady_clock::now();
-                    }
-                    else if (iMoveValidator.can_move(iBoard.turn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard)
+                    if (iMoveValidator.can_move(iBoard.turn, iBoard, chess::move{ *iSelection, *pos }) || iEditBoard)
                     {
                         chess::move move{ *iSelection, *pos };
                         iSelectionPosition = std::nullopt;

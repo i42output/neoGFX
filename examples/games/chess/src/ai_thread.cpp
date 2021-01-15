@@ -26,7 +26,7 @@ namespace chess
     template <player Player, typename Representation>
     double pvs(move_tables<Representation> const& tables, basic_board<Representation> const& node, int32_t depth, double alpha, double beta)
     {
-        neolib::vecarray<move, 64> validMoves;
+        neolib::vecarray<move, 128, -1> validMoves;
         valid_moves<Player>(tables, node, validMoves);
         if (depth == 0 || validMoves.empty())
             return eval<Representation, Player>{}(tables, node, static_cast<double>(depth)).eval;

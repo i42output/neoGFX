@@ -41,17 +41,21 @@ namespace chess
 
     move_tables<matrix> generate_matrix_move_tables();
 
+    template <bool IntoCheckTest = false>
     inline bool in_check(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard);
         
-    inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove, bool aCheckTest = false, bool aDefendTest = false)
+    template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
+    inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove)
     {
+        if (aTurn == player::Invalid)
+            std::cerr << "foo";
         auto const movingPiece = piece_at(aBoard, aMove.from);
         auto const targetPiece = piece_at(aBoard, aMove.to);
         if (piece_color(movingPiece) != static_cast<piece>(aTurn))
             return false;
-        if (piece_color(targetPiece) == static_cast<piece>(aTurn) && !aDefendTest)
+        if (!DefendTest && piece_color(targetPiece) == static_cast<piece>(aTurn))
             return false;
-        if (piece_type(targetPiece) == piece::King && !aCheckTest)
+        if (!CheckTest && piece_type(targetPiece) == piece::King)
             return false;
         // non-capturing move...
         bool enPassant = false;
@@ -119,10 +123,10 @@ namespace chess
                 }
             }
         }
-        if (!aCheckTest || piece_type(movingPiece) == piece::King)
+        if (!CheckTest && !IntoCheckTest)
         {
             aBoard.checkTest = aMove;
-            bool inCheck = in_check(aTables, aTurn, aBoard);
+            bool inCheck = (piece_type(movingPiece) != piece::King ? in_check<false>(aTables, aTurn, aBoard) : in_check<true>(aTables, aTurn, aBoard));
             aBoard.checkTest = std::nullopt;
             if (inCheck)
                 return false;
@@ -131,6 +135,7 @@ namespace chess
         return true;
     }
 
+    template <bool IntoCheckTest>
     inline bool in_check(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard)
     {
         auto const opponent = next_player(aPlayer);
@@ -141,7 +146,7 @@ namespace chess
                 move const tryMove{ coordinates{ xFrom, yFrom }, kingPosition };
                 if (tryMove.from == kingPosition)
                     continue;
-                if (can_move(aTables, opponent, aBoard, tryMove, true))
+                if (can_move<true, IntoCheckTest>(aTables, opponent, aBoard, tryMove))
                     return true;
             }
         return false;
@@ -157,7 +162,7 @@ namespace chess
                     for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                     {
                         move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
-                        if (can_move(aTables, Player, aBoard, candidateMove))
+                        if (can_move<>(aTables, Player, aBoard, candidateMove))
                         {
                             auto const movingPiece = piece_at(aBoard, candidateMove.from);
                             if (piece_type(movingPiece) == piece::Pawn)

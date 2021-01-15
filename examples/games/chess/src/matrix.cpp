@@ -176,7 +176,7 @@ namespace chess
                             auto const to = piece_at(aBoard, coordinates{ xTo, yTo });
                             auto const playerTo = static_cast<chess::player>(piece_color(to));
                             auto const valueTo = piece_value<Player>(to);
-                            if (can_move(aTables, Player, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }, true, true))
+                            if (can_move<true, false, true>(aTables, Player, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }))
                             {
                                 if (playerFrom != playerTo)
                                 {
@@ -195,7 +195,7 @@ namespace chess
                                 else
                                     defend += valueTo;
                             }
-                            else if (can_move(aTables, opponent_v<Player>, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }, true, true))
+                            else if (can_move<true, false, true>(aTables, opponent_v<Player>, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }))
                             {
                                 if (playerFrom != playerTo)
                                 {
