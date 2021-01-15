@@ -296,6 +296,7 @@ namespace chess::gui
                 iBoard.position[square->y][square->x] = piece::None;
                 current_player().setup(iBoard);
                 next_player().setup(iBoard);
+                display_eval();
             });
             contextMenu.exec();
         }
@@ -437,6 +438,7 @@ namespace chess::gui
         iBoard.lastMove = std::nullopt;
         current_player().setup(iBoard);
         next_player().setup(iBoard);
+        display_eval();
         update();
     }
 
@@ -512,9 +514,17 @@ namespace chess::gui
         move_piece(iBoard, aMove);
         if (iMoveValidator.in_check(iBoard.turn, iBoard))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
+        display_eval();
+        update();
+    }
+
+    void board::display_eval() const
+    {
         eval_info evalInfo;
         double eval = iMoveValidator.eval(current_player().player(), iBoard, evalInfo);
         std::cerr << std::setprecision(4);
+        if (iEditBoard)
+            std::cerr << "[EDIT BOARD]" << std::endl;
         std::cerr << "material: " << std::round(evalInfo.material) << std::endl;
         std::cerr << "mobility: " << std::round(evalInfo.mobility) << std::endl;
         std::cerr << "attack: " << std::round(evalInfo.attack) << std::endl;
@@ -527,7 +537,6 @@ namespace chess::gui
         std::cerr << "checkedOpponentKing: " << std::round(evalInfo.checkedOpponentKing) << std::endl;
         std::cerr << "eval: " << std::round(eval) << std::endl;
         std::cerr << "eval time: " << evalInfo.time_usec.count() << " us" << std::endl;
-        update();
     }
 
     void board::animate_move(chess::move const& aMove)
