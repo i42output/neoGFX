@@ -80,12 +80,12 @@ namespace chess
                         }
                     }
                 }
-                else if (piece_type(movingPiece) == piece::King && (aBoard.moveHistory.empty() || aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)]))
+                else if (piece_type(movingPiece) == piece::King && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)]))
                 {
                     if (aMove.to.y == aMove.from.y)
                     {
-                        if ((aMove.to.x == 2 && aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)]) ||
-                            (aMove.to.x == 6 && aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)]))
+                        if ((aMove.to.x == 2 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)])) ||
+                            (aMove.to.x == 6 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)])))
                             castle = !in_check(aTables, aTurn, aBoard);
                     }
                 }
