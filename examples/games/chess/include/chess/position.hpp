@@ -100,21 +100,39 @@ namespace chess
         {
             lastMove = aBoard.moveHistory.back();
             aBoard.moveHistory.pop_back();
-            aBoard.position[lastMove->from.y][lastMove->from.x] = aBoard.position[lastMove->to.y][lastMove->to.x];
+            auto const movedPiece = aBoard.position[lastMove->to.y][lastMove->to.x];
+            aBoard.position[lastMove->from.y][lastMove->from.x] = movedPiece;
             aBoard.position[lastMove->to.y][lastMove->to.x] = lastMove->capture;
-            if (!aBoard.moveHistory.empty())
+            if (lastMove->promoteTo)
+            {
+                if (lastMove->to.y == promotion_rank_v<player::White>)
+                    aBoard.position[lastMove->from.y][lastMove->from.x] = piece::WhitePawn;
+                else if (lastMove->to.y == promotion_rank_v<player::Black>)
+                    aBoard.position[lastMove->from.y][lastMove->from.x] = piece::BlackPawn;
+            }
+            else if (!aBoard.moveHistory.empty())
             {
                 if (lastMove->castlingState != aBoard.moveHistory.back().castlingState)
                 {
                     // todo: undo castling
                 }
-                if (lastMove->promoteTo)
+                else if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
+                    aBoard.moveHistory.back().to.y - aBoard.moveHistory.back().from.y == 2u)
                 {
-                    // todo: undo pawn promotion
+                    aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
+                    aBoard.position[lastMove->to.y + 1u][lastMove->to.x] = lastMove->capture;
                 }
-                // todo: undo en passant
+                else if (lastMove->capture == piece::BlackPawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 5u } &&
+                    aBoard.moveHistory.back().from.y - aBoard.moveHistory.back().to.y == 2u)
+                {
+                    aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
+                    aBoard.position[lastMove->to.y - 1u][lastMove->to.x] = lastMove->capture;
+                }
             }
-            // todo: king positions
+            if (movedPiece == piece::WhiteKing)
+                aBoard.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
+            else if (movedPiece == piece::BlackKing)
+                aBoard.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
             aBoard.turn = next_player(aBoard.turn);
         }
         return lastMove;
@@ -230,7 +248,11 @@ namespace chess
         case piece::Pawn:
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
-                aBoard.position[piece_color(movingPiece) == piece::White ? aMove.to.y - 1 : aMove.to.y + 1][aMove.to.x] = piece::None;
+            {
+                auto& targetPawn = aBoard.position[piece_color(movingPiece) == piece::White ? aMove.to.y - 1 : aMove.to.y + 1][aMove.to.x];
+                newMove.capture = targetPawn;
+                targetPawn = piece::None;
+            }
             break;
         default:
             // do nothing
