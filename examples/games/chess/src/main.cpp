@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
         auto& window = *windowObject;
 
-        ng::action newGame{ "New Game"_t, ":/chess/resources/open-in-new.png" };
+        ng::action newGame{ "New Game"_t, ":/chess/resources/power.png" };
         ng::action openGame{ "Open Game"_t, ":/chess/resources/folder-open-outline.png" };
         ng::action saveGame{ "Save Game"_t, ":/chess/resources/content-save-outline.png" };
         ng::action undoMove{ "Undo Move"_t, ":/chess/resources/undo-variant.png" };
@@ -43,6 +43,7 @@ int main(int argc, char* argv[])
         ng::action suggestMove{ "Suggest Move"_t, ":/chess/resources/lifebuoy.png" };
         ng::action connect{ "Connect"_t, ":/chess/resources/lan-connect.png" };
         ng::action disconnect{ "Disconnect"_t, ":/chess/resources/lan-disconnect.png" };
+        ng::action settings{ "Settings"_t, ":/chess/resources/tune-vertical.png" };
         ng::action about{ "About"_t, ":/chess/resources/help-circle-outline.png" };
 
         saveGame.enable(false);
@@ -68,6 +69,8 @@ int main(int argc, char* argv[])
         toolbar.add_action(play);
         toolbar.add_action(stop);
         toolbar.add_separator();
+        toolbar.add_action(settings);
+        toolbar.add_separator();
         toolbar.add_action(about);
         ourToolbarLayout.add_spacer();
 
@@ -79,7 +82,7 @@ int main(int argc, char* argv[])
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
+        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::Human);
 
         board.changed([&]()
         {

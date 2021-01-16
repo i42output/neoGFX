@@ -4,7 +4,7 @@
     resource: {
         files: [
             resources/pieces.png
-            resources/open-in-new.png
+            resources/power.png
             resources/folder-open-outline.png
             resources/content-save-outline.png
             resources/redo-variant.png
@@ -16,6 +16,7 @@
             resources/lan-connect.png
             resources/lan-disconnect.png
             resources/lan-pending.png
+            resources/tune-vertical.png
             resources/help-circle-outline.png
         ]
     }
