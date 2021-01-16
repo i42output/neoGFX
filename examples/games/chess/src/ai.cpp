@@ -67,6 +67,22 @@ namespace chess
     }
 
     template <typename Representation, player Player>
+    void ai<Representation, Player>::play()
+    {
+        {
+            std::unique_lock<std::mutex> lk{ iSignalMutex };
+            iPlaying = true;
+        }
+        iSignal.notify_one();
+    }
+
+    template <typename Representation, player Player>
+    void ai<Representation, Player>::stop()
+    {
+        // todo
+    }
+
+    template <typename Representation, player Player>
     bool ai<Representation, Player>::play(move const& aMove)
     {
         std::lock_guard<std::recursive_mutex> lk{ iBoardMutex };
@@ -89,16 +105,21 @@ namespace chess
         std::unique_lock<std::mutex> lk{ iSignalMutex };
         if (!iFinished)
         {
-            iSignal.wait_for(lk, std::chrono::seconds{ 1 }, [&]() { return iReady || iFinished; });
-            if (iReady)
-                play();
+            iSignal.wait_for(lk, std::chrono::seconds{ 1 }, [&]() { return iPlaying || iFinished; });
+            if (iPlaying)
+            {
+                auto bestMove = execute();
+                iPlaying = false;
+                if (bestMove)
+                    Decided.trigger(bestMove->move);
+            }
         }
 
         return didWork;
     }
 
     template <typename Representation, player Player>
-    void ai<Representation, Player>::play()
+    std::optional<best_move> ai<Representation, Player>::execute()
     {
         thread_local std::vector<move> tValidMoves;
         std::optional<std::lock_guard<std::recursive_mutex>> lk{ iBoardMutex };
@@ -127,19 +148,15 @@ namespace chess
                 if (!bestMove || bestMove->value < nextMove.value)
                     bestMove = nextMove;
             }
-            Decided.trigger(bestMove->move);
-            iReady = false;
+            return bestMove;
         }
+        return {};
     }
 
     template <typename Representation, player Player>
-    void ai<Representation, Player>::ready()
+    bool ai<Representation, Player>::playing() const
     {
-        {
-            std::unique_lock<std::mutex> lk{ iSignalMutex };
-            iReady = true;
-        }
-        iSignal.notify_one();
+        return iPlaying;
     }
 
     template <typename Representation, player Player>

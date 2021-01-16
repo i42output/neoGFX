@@ -37,7 +37,14 @@ namespace chess
 
     void human::greet(i_player& aOpponent)
     {
-        // todo
+    }
+
+    void human::play()
+    {
+    }
+
+    void human::stop()
+    {
     }
 
     bool human::play(move const& aMove)
@@ -47,11 +54,12 @@ namespace chess
         return true;
     }
 
-    void human::undo()
+    bool human::playing() const
     {
+        return false;
     }
 
-    void human::ready()
+    void human::undo()
     {
     }
 

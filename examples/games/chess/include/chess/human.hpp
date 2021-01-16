@@ -34,9 +34,11 @@ namespace chess
         chess::player player() const override;
     public:
         void greet(i_player& aOpponent) override;
+        void play() override;
+        void stop() override;
         bool play(move const& aMove) override;
+        bool playing() const override;
         void undo() override;
-        void ready() override;
         void setup(matrix_board const& aSetup) override;
     private:
         ng::sink iSink;

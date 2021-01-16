@@ -486,6 +486,34 @@ namespace chess::gui
         }
     }
 
+    bool board::can_play() const
+    {
+        return current_player().type() == player_type::AI && !current_player().playing();
+    }
+
+    void board::play()
+    {
+        if (!current_player().playing())
+        {
+            current_player().play();
+            Changed.trigger();
+        }
+    }
+
+    bool board::can_stop() const
+    {
+        return current_player().playing();
+    }
+
+    void board::stop()
+    {
+        if (current_player().playing())
+        {
+            current_player().stop();
+            Changed.trigger();
+        }
+    }
+
     i_player const& board::current_player() const
     {
         switch (iBoard.turn)
@@ -659,7 +687,7 @@ namespace chess::gui
                     }
                 }
                 if (iAnimations.empty())
-                    current_player().ready();
+                    play();
             }
             if (iFlashCheck && std::chrono::duration_cast<std::chrono::duration<ng::scalar>>(std::chrono::steady_clock::now() - iFlashCheck->second).count() > 1)
                 iFlashCheck = std::nullopt;

@@ -46,14 +46,16 @@ namespace chess
         chess::player player() const override;
     public:
         void greet(i_player& aOpponent) override;
+        void play() override;
+        void stop() override;
         bool play(move const& aMove) override;
+        bool playing() const override;
         void undo() override;
-        void ready() override;
         void setup(matrix_board const& aSetup) override;
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
-        void play();
+        std::optional<best_move> execute();
     private:
         move_tables<representation_type> const iMoveTables;
         std::recursive_mutex iBoardMutex;
@@ -61,8 +63,8 @@ namespace chess
         std::vector<ai_thread<Representation, Player>> iThreads;
         std::mutex iSignalMutex;
         std::condition_variable iSignal;
-        bool iReady = false;
-        bool iFinished = false;
+        std::atomic<bool> iPlaying = false;
+        std::atomic<bool> iFinished = false;
         ng::sink iSink;
     };
 

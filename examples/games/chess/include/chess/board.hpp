@@ -80,6 +80,10 @@ namespace chess::gui
         void undo() override;
         bool can_redo() const override;
         void redo() override;  
+        bool can_play() const override;
+        void play() override;
+        bool can_stop() const override;
+        void stop() override;
     public:
         i_player const& current_player() const override;
         i_player& current_player() override;

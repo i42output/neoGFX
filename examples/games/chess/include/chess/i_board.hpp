@@ -39,6 +39,10 @@ namespace chess::gui
         virtual void undo() = 0;
         virtual bool can_redo() const = 0;
         virtual void redo() = 0;
+        virtual bool can_play() const = 0;
+        virtual void play() = 0;
+        virtual bool can_stop() const = 0;
+        virtual void stop() = 0;
     public:
         virtual i_player const& current_player() const = 0;
         virtual i_player& current_player() = 0;

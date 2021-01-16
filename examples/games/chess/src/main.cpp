@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
         ng::action saveGame{ "Save Game"_t, ":/chess/resources/content-save-outline.png" };
         ng::action undoMove{ "Undo Move"_t, ":/chess/resources/undo-variant.png" };
         ng::action redoMove{ "Redo Move"_t, ":/chess/resources/redo-variant.png" };
+        ng::action play{ "Resume/Play"_t, ":/chess/resources/play.png" };
+        ng::action stop{ "Stop"_t, ":/chess/resources/stop.png" };
         ng::action resign{ "Resign"_t, ":/chess/resources/handshake-outline.png" };
         ng::action suggestMove{ "Suggest Move"_t, ":/chess/resources/lifebuoy.png" };
         ng::action connect{ "Connect"_t, ":/chess/resources/lan-connect.png" };
@@ -44,8 +46,6 @@ int main(int argc, char* argv[])
         ng::action about{ "About"_t, ":/chess/resources/help-circle-outline.png" };
 
         saveGame.enable(false);
-        undoMove.enable(false);
-        redoMove.enable(false);
         disconnect.enable(false);
 
         window.toolbar_layout().add_spacer();
@@ -65,6 +65,8 @@ int main(int argc, char* argv[])
         toolbar.add_separator();
         toolbar.add_action(undoMove);
         toolbar.add_action(redoMove);
+        toolbar.add_action(play);
+        toolbar.add_action(stop);
         toolbar.add_separator();
         toolbar.add_action(about);
         ourToolbarLayout.add_spacer();
@@ -77,17 +79,23 @@ int main(int argc, char* argv[])
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::Human);
+        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
 
         board.changed([&]()
         {
             undoMove.enable(board.can_undo());
             redoMove.enable(board.can_redo());
+            play.enable(board.can_play());
+            stop.enable(board.can_stop());
         });
         undoMove.enable(board.can_undo());
         redoMove.enable(board.can_redo());
+        play.enable(board.can_play());
+        stop.enable(board.can_stop());
         undoMove.Triggered([&]() { board.undo(); });
         redoMove.Triggered([&]() { board.redo(); });
+        play.Triggered([&]() { board.play(); });
+        stop.Triggered([&]() { board.stop(); });
 
         return app.exec();
     }
