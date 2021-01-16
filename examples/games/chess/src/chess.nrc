@@ -4,6 +4,17 @@
     resource: {
         files: [
             resources/pieces.png
+            resources/open-in-new.png
+            resources/folder-open-outline.png
+            resources/content-save-outline.png
+            resources/redo-variant.png
+            resources/undo-variant.png
+            resources/handshake-outline.png
+            resources/lifebuoy.png
+            resources/lan-connect.png
+            resources/lan-disconnect.png
+            resources/lan-pending.png
+            resources/help-circle-outline.png
         ]
     }
 }
