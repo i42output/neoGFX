@@ -41,7 +41,8 @@ namespace chess
 
             COUNT
         };
-        std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> castlingState;
+        typedef std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> castling_state;
+        castling_state castlingState;
     };
 
     inline bool operator==(move const& lhs, move const& rhs)
@@ -105,6 +106,7 @@ namespace chess
             aBoard.position[lastMove->to.y][lastMove->to.x] = lastMove->capture;
             if (lastMove->promoteTo)
             {
+                // pawn promotion
                 if (lastMove->to.y == promotion_rank_v<player::White>)
                     aBoard.position[lastMove->from.y][lastMove->from.x] = piece::WhitePawn;
                 else if (lastMove->to.y == promotion_rank_v<player::Black>)
@@ -112,11 +114,8 @@ namespace chess
             }
             else if (!aBoard.moveHistory.empty())
             {
-                if (lastMove->castlingState != aBoard.moveHistory.back().castlingState)
-                {
-                    // todo: undo castling
-                }
-                else if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
+                // en passant
+                if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
                     aBoard.moveHistory.back().to.y - aBoard.moveHistory.back().from.y == 2u)
                 {
                     aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
@@ -130,9 +129,35 @@ namespace chess
                 }
             }
             if (movedPiece == piece::WhiteKing)
+            {
                 aBoard.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
+                // castling (white)
+                if (lastMove->to.x - lastMove->from.x == 2u)
+                {
+                    aBoard.position[0u][7u] = piece::WhiteRook;
+                    aBoard.position[0u][5u] = piece::None;
+                }
+                else if (lastMove->from.x - lastMove->to.x == 2u)
+                {
+                    aBoard.position[0u][0u] = piece::WhiteRook;
+                    aBoard.position[0u][3u] = piece::None;
+                }
+            }
             else if (movedPiece == piece::BlackKing)
+            {
                 aBoard.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
+                // castling (black)
+                if (lastMove->to.x - lastMove->from.x == 2u)
+                {
+                    aBoard.position[7u][7u] = piece::BlackRook;
+                    aBoard.position[7u][5u] = piece::None;
+                }
+                else if (lastMove->from.x - lastMove->to.x == 2u)
+                {
+                    aBoard.position[7u][0u] = piece::BlackRook;
+                    aBoard.position[7u][3u] = piece::None;
+                }
+            }
             aBoard.turn = next_player(aBoard.turn);
         }
         return lastMove;
@@ -215,10 +240,9 @@ namespace chess
         auto const targetPiece = destination;
         destination = (!aMove.promoteTo ? source : *aMove.promoteTo);
         source = piece::None;
-        aBoard.moveHistory.push_back(aMove);
+        auto const currentMoveCount = aBoard.moveHistory.size();
+        aBoard.moveHistory.emplace_back(aMove.from, aMove.to, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aBoard.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
         auto& newMove = aBoard.moveHistory.back();
-        if (targetPiece != piece::None)
-            newMove.capture = targetPiece;
         switch (piece_type(movingPiece))
         {
         case piece::King:
