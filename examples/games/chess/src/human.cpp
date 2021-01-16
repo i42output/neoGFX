@@ -47,6 +47,10 @@ namespace chess
         return true;
     }
 
+    void human::undo()
+    {
+    }
+
     void human::ready()
     {
     }

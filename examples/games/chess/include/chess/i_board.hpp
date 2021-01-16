@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/core/event.hpp>
 #include <chess/primitives.hpp>
 #include <chess/i_player.hpp>
 
@@ -26,12 +27,18 @@ namespace chess::gui
     class i_board
     {
     public:
+        declare_event(changed)
+    public:
         virtual ~i_board() = default;
     public:
         virtual void new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer) = 0;
         virtual void setup(board const& aBoard) = 0;
         virtual bool play(move const& aMove) = 0;
         virtual void edit(move const& aMove) = 0;
+        virtual bool can_undo() const = 0;
+        virtual void undo() = 0;
+        virtual bool can_redo() const = 0;
+        virtual void redo() = 0;
     public:
         virtual i_player const& current_player() const = 0;
         virtual i_player& current_player() = 0;

@@ -76,6 +76,12 @@ namespace chess
     }
 
     template <typename Representation, player Player>
+    void ai<Representation, Player>::undo()
+    {
+        chess::undo(iBoard);
+    }
+
+    template <typename Representation, player Player>
     bool ai<Representation, Player>::do_work(neolib::yield_type aYieldType)
     {
         bool didWork = async_task::do_work(aYieldType);
@@ -90,7 +96,6 @@ namespace chess
 
         return didWork;
     }
-
 
     template <typename Representation, player Player>
     void ai<Representation, Player>::play()

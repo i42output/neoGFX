@@ -33,6 +33,7 @@ namespace chess::gui
         iMoveValidator{ aMoveValidator },
         iWhitePlayer{ nullptr },
         iBlackPlayer{ nullptr },
+        iInRedo{ false },
         iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
         iSquareIdentification{ square_identification::None },
         iShowValidMoves{ false },
@@ -365,11 +366,14 @@ namespace chess::gui
         {
             moved(aMove);
         });
+        iUndoneMoves.clear();
+        Changed.trigger();
     }
 
     void board::setup(chess::board const& aBoard)
     {
         iBoard = aBoard;
+        Changed.trigger();
     }
 
     bool board::play(chess::move const& aMove)
@@ -422,6 +426,7 @@ namespace chess::gui
         }
         else
             edit(aMove);
+        Changed.trigger();
         return true;
     }
 
@@ -439,7 +444,46 @@ namespace chess::gui
         current_player().setup(iBoard);
         next_player().setup(iBoard);
         display_eval();
+        Changed.trigger();
         update();
+    }
+
+    bool board::can_undo() const
+    {
+        return !iBoard.moveHistory.empty();
+    }
+
+    void board::undo()
+    {
+        if (can_undo())
+        {
+            iUndoneMoves.push_back(*chess::undo(iBoard));
+            current_player().undo();
+            next_player().undo();
+            Changed.trigger();
+            update();
+        }
+    }
+
+    bool board::can_redo() const
+    {
+        return !iUndoneMoves.empty();
+    }
+
+    void board::redo()
+    {
+        if (can_redo())
+        {
+            neolib::scoped_flag sf{ iInRedo };
+            auto redoMove = iUndoneMoves.back();
+            iUndoneMoves.pop_back();
+            if (piece_color(piece_at(iBoard, redoMove.to)) == piece::White)
+                white_player().play(redoMove);
+            else
+                black_player().play(redoMove);
+            Changed.trigger();
+            update();
+        }
     }
 
     i_player const& board::current_player() const
@@ -515,6 +559,8 @@ namespace chess::gui
         if (iMoveValidator.in_check(iBoard.turn, iBoard))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
         display_eval();
+        if (!iInRedo)
+            iUndoneMoves.clear();
         update();
     }
 

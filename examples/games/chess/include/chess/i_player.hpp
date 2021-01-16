@@ -42,6 +42,7 @@ namespace chess
     public:
         virtual void greet(i_player& aOpponent) = 0;
         virtual bool play(move const& aMove) = 0;
+        virtual void undo() = 0;
         virtual void ready() = 0;
         virtual void setup(matrix_board const& aSetup) = 0;
     };

@@ -51,6 +51,8 @@ namespace chess::gui
     class board : public i_board, public ng::widget<>
     {
     public:
+        define_declared_event(Changed, changed)
+    public:
         struct no_player : std::logic_error { no_player() : std::logic_error{ "chess::gui::board::no_player" } {} };
     public:
         board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator);
@@ -74,6 +76,10 @@ namespace chess::gui
         void setup(chess::board const& aBoard) override;
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
+        bool can_undo() const override;
+        void undo() override;
+        bool can_redo() const override;
+        void redo() override;  
     public:
         i_player const& current_player() const override;
         i_player& current_player() override;
@@ -102,6 +108,8 @@ namespace chess::gui
         chess::board iBoard;
         std::unique_ptr<i_player> iWhitePlayer;
         std::unique_ptr<i_player> iBlackPlayer;
+        std::vector<chess::move> iUndoneMoves;
+        bool iInRedo;
         std::unordered_map<piece, ng::texture> iPieceTextures;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;

@@ -35,8 +35,8 @@ int main(int argc, char* argv[])
         ng::action newGame{ "New Game"_t, ":/chess/resources/open-in-new.png" };
         ng::action openGame{ "Open Game"_t, ":/chess/resources/folder-open-outline.png" };
         ng::action saveGame{ "Save Game"_t, ":/chess/resources/content-save-outline.png" };
-        ng::action redoMove{ "Redo Move"_t, ":/chess/resources/redo-variant.png" };
         ng::action undoMove{ "Undo Move"_t, ":/chess/resources/undo-variant.png" };
+        ng::action redoMove{ "Redo Move"_t, ":/chess/resources/redo-variant.png" };
         ng::action resign{ "Resign"_t, ":/chess/resources/handshake-outline.png" };
         ng::action suggestMove{ "Suggest Move"_t, ":/chess/resources/lifebuoy.png" };
         ng::action connect{ "Connect"_t, ":/chess/resources/lan-connect.png" };
@@ -44,8 +44,8 @@ int main(int argc, char* argv[])
         ng::action about{ "About"_t, ":/chess/resources/help-circle-outline.png" };
 
         saveGame.enable(false);
-        redoMove.enable(false);
         undoMove.enable(false);
+        redoMove.enable(false);
         disconnect.enable(false);
 
         window.toolbar_layout().add_spacer();
@@ -77,7 +77,17 @@ int main(int argc, char* argv[])
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
+        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::Human);
+
+        board.changed([&]()
+        {
+            undoMove.enable(board.can_undo());
+            redoMove.enable(board.can_redo());
+        });
+        undoMove.enable(board.can_undo());
+        redoMove.enable(board.can_redo());
+        undoMove.Triggered([&]() { board.undo(); });
+        redoMove.Triggered([&]() { board.redo(); });
 
         return app.exec();
     }

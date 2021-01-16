@@ -47,6 +47,7 @@ namespace chess
     public:
         void greet(i_player& aOpponent) override;
         bool play(move const& aMove) override;
+        void undo() override;
         void ready() override;
         void setup(matrix_board const& aSetup) override;
     private:
