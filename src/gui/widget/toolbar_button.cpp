@@ -97,18 +97,17 @@ namespace neogfx
     size toolbar_button::minimum_size(optional_size const& aAvailableSpace) const
     {
         auto result = push_button::minimum_size(aAvailableSpace);
-        // todo vertical toolbars
         if (!has_minimum_size() && action().is_separator())
-            result.cx = padding().size().cx + units_converter(*this).from_device_units(2.0);
+            result = padding().size() + units_converter(*this).from_device_units(size{ 2.0 });
         return result;
     }
 
     size toolbar_button::maximum_size(optional_size const& aAvailableSpace) const
     {
         auto result = push_button::maximum_size(aAvailableSpace);
-        // todo vertical toolbars
+        // todo: vertical toolbars
         if (!has_maximum_size() && action().is_separator())
-            result.cx = padding().size().cx + units_converter(*this).from_device_units(2.0);
+            result = { padding().size().cx + units_converter(*this).from_device_units(2.0), size::max_size().cy };
         return result;
     }
 
