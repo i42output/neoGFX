@@ -27,6 +27,9 @@ namespace chess
     typedef neogfx::point_u32 coordinates;
     typedef coordinates::coordinate_type coordinate;
 
+    typedef neogfx::point_i32 coordinates_i32;
+    typedef coordinates_i32::coordinate_type coordinate_i32;
+
     struct move
     {
         coordinates from;

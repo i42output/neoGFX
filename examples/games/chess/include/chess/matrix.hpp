@@ -32,9 +32,12 @@ namespace chess
         typedef std::array<std::array<std::vector<move_coordinates>, static_cast<std::size_t>(piece_cardinal::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> unit_moves;
         typedef std::array<bool, static_cast<std::size_t>(piece_cardinal::COUNT)> can_move_multiple;
         typedef std::array<std::array<std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u>, static_cast<std::size_t>(piece_cardinal::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> valid_moves;
+        typedef std::pair<std::size_t, std::array<move_coordinates, 8>> move_path;
+        typedef std::array<std::array<std::array<std::array<move_path, 8u>, 8u>, 8u>, 8u> move_paths;
         unit_moves unitMoves;
         unit_moves unitCaptureMoves;
         can_move_multiple canMoveMultiple;
+        move_paths movePaths;
         valid_moves validMoves;
         valid_moves validCaptureMoves;
     };
@@ -106,23 +109,23 @@ namespace chess
         // any pieces in the way?
         if (aTables.canMoveMultiple[movingPieceCardinal] || castle)
         {
-            // todo: would a move array be faster than calculating/using deltas? profile and see.
-            auto const delta = move_tables<matrix>::move_coordinates{ static_cast<int32_t>(aMove.to.x), static_cast<int32_t>(aMove.to.y) } - move_tables<matrix>::move_coordinates{ static_cast<int32_t>(aMove.from.x), static_cast<int32_t>(aMove.from.y) };
-            auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
-            auto const start = aMove.from.as<int32_t>() + deltaUnity;
-            auto const end = (!castle ? aMove.to.as<int32_t>() : aMove.to.as<int32_t>().with_x(aMove.to.x == 2 ? 0 : 7));
-            for (move_tables<matrix>::move_coordinates pos = start; pos != end; pos += deltaUnity)
+            auto const movePath = aTables.movePaths[aMove.from.y][aMove.from.x][aMove.to.y][!castle ? aMove.to.x : aMove.to.x == 2 ? 0 : 7];
+            if (movePath.first > 1)
             {
-                auto const inbetweenPiece = piece_at(aBoard, pos);
-                if (piece_type(inbetweenPiece) != piece::None)
-                    return false;
-                if (castle)
+                for (std::size_t i = 1; i < movePath.first - 1; ++i)
                 {
-                    aBoard.checkTest = move{ aMove.from, pos };
-                    bool inCheck = in_check(aTables, aTurn, aBoard);
-                    aBoard.checkTest = std::nullopt;
-                    if (inCheck)
+                    auto const pos = movePath.second[i];
+                    auto const inbetweenPiece = piece_at(aBoard, pos);
+                    if (piece_type(inbetweenPiece) != piece::None)
                         return false;
+                    if (castle)
+                    {
+                        aBoard.checkTest = move{ aMove.from, pos };
+                        bool inCheck = in_check(aTables, aTurn, aBoard);
+                        aBoard.checkTest = std::nullopt;
+                        if (inCheck)
+                            return false;
+                    }
                 }
             }
         }

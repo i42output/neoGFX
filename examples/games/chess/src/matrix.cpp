@@ -127,7 +127,27 @@ namespace chess
             result.validMoves[static_cast<std::size_t>(piece_color_cardinal::White)][static_cast<std::size_t>(piece_cardinal::Pawn)][1u][x][3u][x] = true;
             result.validMoves[static_cast<std::size_t>(piece_color_cardinal::Black)][static_cast<std::size_t>(piece_cardinal::Pawn)][6u][x][4u][x] = true;
         }
-        // todo: corner cases
+        for (coordinate_i32 yFrom = 0; yFrom <= 7; ++yFrom)
+            for (coordinate_i32 xFrom = 0; xFrom <= 7; ++xFrom)
+                for (coordinate_i32 yTo = 0; yTo <= 7; ++yTo)
+                    for (coordinate_i32 xTo = 0; xTo <= 7; ++xTo)
+                    {
+                        auto const delta = move_tables<matrix>::move_coordinates{ xTo, yTo } - move_tables<matrix>::move_coordinates{ xFrom, yFrom };
+                        if (delta.dx != 0 && delta.dy != 0 && std::abs(delta.dx) != std::abs(delta.dy))
+                            continue;
+                        auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
+                        auto const start = coordinates_i32{ xFrom, yFrom };
+                        auto const end = coordinates_i32{ xTo, yTo };
+                        auto pos = start;
+                        for(;;)
+                        {
+                            result.movePaths[yFrom][xFrom][yTo][xTo].second[result.movePaths[yFrom][xFrom][yTo][xTo].first++] = pos;
+                            if (pos == end)
+                                break;
+                            pos += deltaUnity;
+                        }
+                    }
+
         return result;
     }
 
