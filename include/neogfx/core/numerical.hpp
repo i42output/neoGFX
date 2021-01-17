@@ -46,4 +46,64 @@ namespace neogfx
     using neolib::math::operators::operator!=;
 
     using neolib::math::nearly_equal;
+
+    // why? most of these operations would normally be indeterminate; only use these functions if inf is being used as a special a sentinal value (e.g. neoGFX unbounded dimensions)
+    template <typename T>
+    inline T inf_add(T lhs, T rhs)
+    {
+        if (lhs != std::abs(std::numeric_limits<T>::infinity()) && rhs != std::abs(std::numeric_limits<T>::infinity()))
+            return lhs + rhs;
+        else if (lhs == std::numeric_limits<T>::infinity() && rhs == std::numeric_limits<T>::infinity())
+            return std::numeric_limits<T>::infinity();
+        else if (lhs == -std::numeric_limits<T>::infinity() && rhs == -std::numeric_limits<T>::infinity())
+            return -std::numeric_limits<T>::infinity();
+        else if (lhs == -std::numeric_limits<T>::infinity() && rhs == std::numeric_limits<T>::infinity())
+            return 0.0;
+        else if (lhs == std::numeric_limits<T>::infinity() && rhs == -std::numeric_limits<T>::infinity())
+            return 0.0;
+        else if (lhs == std::numeric_limits<T>::infinity() || rhs == std::numeric_limits<T>::infinity())
+            return std::numeric_limits<T>::infinity();
+        else
+            return -std::numeric_limits<T>::infinity();
+    }
+
+    // why? most of these operations would normally be indeterminate; only use these functions if inf is being used as a special a sentinal value (e.g. neoGFX unbounded dimensions)
+    template <typename T>
+    inline T inf_multiply(T lhs, T rhs)
+    {
+        if (lhs == 0.0 || rhs == 0.0)
+            return 0.0;
+        else if (lhs != std::numeric_limits<T>::infinity() && rhs != std::numeric_limits<T>::infinity())
+            return lhs * rhs;
+        else if ((lhs > 0.0 && rhs > 0.0) || (lhs < 0.0 && rhs < 0.0))
+            return std::numeric_limits<T>::infinity();
+        else
+            return -std::numeric_limits<T>::infinity();
+    }
+
+    // why? most of these operations would normally be indeterminate; only use these functions if inf is being used as a special a sentinal value (e.g. neoGFX unbounded dimensions)
+    template <typename T, uint32_t D>
+    inline basic_vector<T, D, column_vector> inf_multiply(const basic_matrix<T, D, D>& left, const basic_vector<T, D, column_vector>& right)
+    {
+        if (left.is_identity())
+            return right;
+        basic_vector<T, D, column_vector> result;
+        for (uint32_t row = 0; row < D; ++row)
+            for (uint32_t index = 0; index < D; ++index)
+                result[row] = inf_add(result[row], inf_multiply(left[index][row], right[index]));
+        return result;
+    }
+
+    // why? most of these operations would normally be indeterminate; only use these functions if inf is being used as a special a sentinal value (e.g. neoGFX unbounded dimensions)
+    template <typename T, uint32_t D>
+    inline basic_vector<T, D, row_vector> inf_multiply(const basic_vector<T, D, row_vector>& left, const basic_matrix<T, D, D>& right)
+    {
+        if (right.is_identity())
+            return left;
+        basic_vector<T, D, row_vector> result;
+        for (uint32_t column = 0; column < D; ++column)
+            for (uint32_t index = 0; index < D; ++index)
+                result[column] = inf_add(result[column], inf_multiply(left[index], right[column][index]));
+        return result;
+    }
 }
