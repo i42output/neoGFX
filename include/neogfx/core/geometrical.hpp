@@ -252,8 +252,8 @@ namespace neogfx
     public:
         basic_vector<dimension_type, 2> to_vec2() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 2>{ cx, cy }; }
         basic_vector<dimension_type, 3> to_vec3() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
-        basic_vector<dimension_type, 2> to_vec2_nt() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
-        basic_vector<dimension_type, 3> to_vec3_nt() const { return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
+        basic_vector<dimension_type, 2> to_vec2_inf() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
+        basic_vector<dimension_type, 3> to_vec3_inf() const { return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
         delta_type to_delta() const { return delta_type(cx, cy); }
         bool empty() const { return cx == 0 || cy == 0; }
         auto operator<=>(const basic_size&) const = default;
@@ -1230,7 +1230,7 @@ namespace neogfx
     {
         if (aSize == basic_size<T>::max_size())
             return aSize;
-        return aTransformation * aSize.to_vec3_nt();
+        return inf_multiply(aTransformation, aSize.to_vec3_inf());
     }
 
     template <typename T>
