@@ -1006,7 +1006,7 @@ namespace neogfx
 
             inputWidget.clicked([this]() { handle_clicked(); });
 
-            inputWidget.set_size_policy(size_constraint::Expanding);
+            inputWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
 
             auto& inputLabelLayout = inputWidget.label().layout();
             inputLabelLayout.set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
@@ -1035,7 +1035,7 @@ namespace neogfx
                 }
             });
 
-            inputWidget.set_size_policy(size_constraint::Expanding);
+            inputWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
 
             inputWidget.layout().add(iDownArrow);
 
