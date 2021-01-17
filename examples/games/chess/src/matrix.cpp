@@ -132,9 +132,13 @@ namespace chess
                 for (coordinate_i32 yTo = 0; yTo <= 7; ++yTo)
                     for (coordinate_i32 xTo = 0; xTo <= 7; ++xTo)
                     {
-                        auto const delta = move_tables<matrix>::move_coordinates{ xTo, yTo } - move_tables<matrix>::move_coordinates{ xFrom, yFrom };
-                        if (delta.dx != 0 && delta.dy != 0 && std::abs(delta.dx) != std::abs(delta.dy))
+                        bool aKnight = false;
+                        if (!can_move_trivial(coordinates_i32{ xFrom, yFrom }.as<coordinate>(), coordinates_i32{ xTo, yTo }.as<coordinate>(), aKnight))
                             continue;
+                        result.trivialMoves[yFrom][xFrom][yTo][xTo] = true;
+                        if (aKnight)
+                            continue;
+                        auto const delta = move_tables<matrix>::move_coordinates{ xTo, yTo } - move_tables<matrix>::move_coordinates{ xFrom, yFrom };
                         auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
                         auto const start = coordinates_i32{ xFrom, yFrom };
                         auto const end = coordinates_i32{ xTo, yTo };
@@ -147,7 +151,6 @@ namespace chess
                             pos += deltaUnity;
                         }
                     }
-
         return result;
     }
 
@@ -200,12 +203,13 @@ namespace chess
                     for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                         for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
                         {
-                            if (yFrom == yTo && xFrom == xTo)
+                            move const candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
+                            if (!can_move_trivial(aTables, candidateMove.from, candidateMove.to))
                                 continue;
-                            auto const to = piece_at<>(aBoard, coordinates{ xTo, yTo });
+                            auto const to = piece_at<>(aBoard, candidateMove.to );
                             auto const playerTo = static_cast<chess::player>(piece_color(to));
                             auto const valueTo = piece_value<Player>(to);
-                            if (can_move<true, false, true>(aTables, Player, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }))
+                            if (can_move<true, false, true>(aTables, Player, aBoard, candidateMove))
                             {
                                 if (playerFrom != playerTo)
                                 {
@@ -224,7 +228,7 @@ namespace chess
                                 else
                                     defend += valueTo;
                             }
-                            else if (can_move<true, false, true>(aTables, opponent_v<Player>, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }))
+                            else if (can_move<true, false, true>(aTables, opponent_v<Player>, aBoard, candidateMove))
                             {
                                 if (playerFrom != playerTo)
                                 {

@@ -33,10 +33,12 @@ namespace chess
         typedef std::array<bool, static_cast<std::size_t>(piece_cardinal::COUNT)> can_move_multiple;
         typedef std::array<std::array<std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u>, static_cast<std::size_t>(piece_cardinal::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> valid_moves;
         typedef std::pair<std::size_t, std::array<move_coordinates, 8>> move_path;
+        typedef std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u> trivial_moves;
         typedef std::array<std::array<std::array<std::array<move_path, 8u>, 8u>, 8u>, 8u> move_paths;
         unit_moves unitMoves;
         unit_moves unitCaptureMoves;
         can_move_multiple canMoveMultiple;
+        trivial_moves trivialMoves;
         move_paths movePaths;
         valid_moves validMoves;
         valid_moves validCaptureMoves;
@@ -47,9 +49,31 @@ namespace chess
     template <bool IntoCheckTest = false>
     inline bool in_check(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard);
         
+    inline bool can_move_trivial(coordinates const& aFrom, coordinates const& aTo, bool& aKnight)
+    {
+        if (aFrom == aTo)
+            return false;
+        auto const delta = (aTo.as<int32_t>() - aFrom.as<int32_t>()).abs();
+        if (delta.dx != 0 && delta.dy != 0 && delta.dx != delta.dy)
+        {
+            if ((delta.dx == 1 && delta.dy == 2) || (delta.dx == 2 && delta.dy == 1))
+                aKnight = true;
+            else
+                return false;
+        }
+        return true;
+    }
+
+    inline bool can_move_trivial(move_tables<matrix> const& aTables, coordinates const& aFrom, coordinates const& aTo)
+    {
+        return aTables.trivialMoves[aFrom.y][aFrom.x][aTo.y][aTo.x];
+    }
+
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
     inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove)
     {
+        if (!can_move_trivial(aTables, aMove.from, aMove.to))
+            return false;
         auto const movingPiece = piece_at<IntoCheckTest, false>(aBoard, aMove.from);
         auto const targetPiece = piece_at<false, IntoCheckTest>(aBoard, aMove.to);
         auto const movingPieceColor = piece_color(movingPiece);
