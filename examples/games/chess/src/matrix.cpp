@@ -171,7 +171,7 @@ namespace chess
             for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                 for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
                 {
-                    auto const from = piece_at(aBoard, coordinates{ xFrom, yFrom });
+                    auto const from = piece_at<>(aBoard, coordinates{ xFrom, yFrom });
                     if (from == piece::None)
                         continue;
                     auto const playerFrom = static_cast<chess::player>(piece_color(from));
@@ -182,7 +182,7 @@ namespace chess
                         {
                             if (yFrom == yTo && xFrom == xTo)
                                 continue;
-                            auto const to = piece_at(aBoard, coordinates{ xTo, yTo });
+                            auto const to = piece_at<>(aBoard, coordinates{ xTo, yTo });
                             auto const playerTo = static_cast<chess::player>(piece_color(to));
                             auto const valueTo = piece_value<Player>(to);
                             if (can_move<true, false, true>(aTables, Player, aBoard, move{ { xFrom, yFrom }, { xTo, yTo } }))

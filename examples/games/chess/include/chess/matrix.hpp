@@ -47,26 +47,31 @@ namespace chess
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
     inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove)
     {
-        auto const movingPiece = piece_at(aBoard, aMove.from);
-        auto const targetPiece = piece_at(aBoard, aMove.to);
-        if (piece_color(movingPiece) != static_cast<piece>(aTurn))
+        auto const movingPiece = piece_at<IntoCheckTest, false>(aBoard, aMove.from);
+        auto const targetPiece = piece_at<false, IntoCheckTest>(aBoard, aMove.to);
+        auto const movingPieceColor = piece_color(movingPiece);
+        if (movingPieceColor != static_cast<piece>(aTurn))
             return false;
-        if (!DefendTest && piece_color(targetPiece) == static_cast<piece>(aTurn))
+        auto const targetPieceColor = piece_color(targetPiece);
+        if (!DefendTest && targetPieceColor == static_cast<piece>(aTurn))
             return false;
-        if (!CheckTest && piece_type(targetPiece) == piece::King)
+        auto const targetPieceType = piece_type(targetPiece);
+        if (!CheckTest && targetPieceType == piece::King)
             return false;
+        auto const movingPieceColorCardinal = as_color_cardinal<>(movingPiece);
+        auto const movingPieceCardinal = as_cardinal<>(movingPiece);
         // non-capturing move...
         bool enPassant = false;
         bool castle = false;
-        if (piece_type(targetPiece) == piece::None)
+        if (targetPieceType == piece::None)
         {
-            if (!aTables.validMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
+            if (!aTables.validMoves[movingPieceColorCardinal][movingPieceCardinal][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
             {
                 if (piece_type(movingPiece) == piece::Pawn &&
-                    aTables.validCaptureMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
+                    aTables.validCaptureMoves[movingPieceColorCardinal][movingPieceCardinal][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
                     !aBoard.moveHistory.empty())
                 {
-                    auto const pieceLastMoved = piece_at(aBoard, aBoard.moveHistory.back().to);
+                    auto const pieceLastMoved = piece_at<CheckTest, CheckTest>(aBoard, aBoard.moveHistory.back().to);
                     if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
                     {
                         auto const delta = aBoard.moveHistory.back().to.as<int32_t>() - aBoard.moveHistory.back().from.as<int32_t>();
@@ -78,28 +83,28 @@ namespace chess
                         }
                     }
                 }
-                else if (piece_type(movingPiece) == piece::King && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)]))
+                else if (piece_type(movingPiece) == piece::King && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::King)]))
                 {
                     if (aMove.to.y == aMove.from.y)
                     {
-                        if ((aMove.to.x == 2 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)])) ||
-                            (aMove.to.x == 6 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)])))
+                        if ((aMove.to.x == 2 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::QueensRook)])) ||
+                            (aMove.to.x == 6 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::KingsRook)])))
                             castle = !in_check(aTables, aTurn, aBoard);
                     }
                 }
                 if (!enPassant && !castle)
                     return false;
             }
-            else if (movingPiece == piece::WhitePawn && aMove.to.y - aMove.from.y == 2u && piece_at(aBoard, coordinates{ aMove.from.x, aMove.from.y + 1u }) != piece::None)
+            else if (movingPiece == piece::WhitePawn && aMove.to.y - aMove.from.y == 2u && piece_at<CheckTest, CheckTest>(aBoard, coordinates{ aMove.from.x, aMove.from.y + 1u }) != piece::None)
                 return false;
-            else if (movingPiece == piece::BlackPawn && aMove.from.y - aMove.to.y == 2u && piece_at(aBoard, coordinates{ aMove.from.x, aMove.from.y - 1u }) != piece::None)
+            else if (movingPiece == piece::BlackPawn && aMove.from.y - aMove.to.y == 2u && piece_at<CheckTest, CheckTest>(aBoard, coordinates{ aMove.from.x, aMove.from.y - 1u }) != piece::None)
                 return false;
         }
         // capturing move...
-        if (piece_type(targetPiece) != piece::None && !aTables.validCaptureMoves[as_color_cardinal<>(movingPiece)][as_cardinal<>(movingPiece)][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
+        if (targetPieceType != piece::None && !aTables.validCaptureMoves[movingPieceColorCardinal][movingPieceCardinal][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x])
             return false;
         // any pieces in the way?
-        if (aTables.canMoveMultiple[as_cardinal<>(movingPiece)] || castle)
+        if (aTables.canMoveMultiple[movingPieceCardinal] || castle)
         {
             // todo: would a move array be faster than calculating/using deltas? profile and see.
             auto const delta = move_tables<matrix>::move_coordinates{ static_cast<int32_t>(aMove.to.x), static_cast<int32_t>(aMove.to.y) } - move_tables<matrix>::move_coordinates{ static_cast<int32_t>(aMove.from.x), static_cast<int32_t>(aMove.from.y) };
@@ -163,7 +168,7 @@ namespace chess
                         move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
                         if (can_move<>(aTables, Player, aBoard, candidateMove))
                         {
-                            auto const movingPiece = piece_at(aBoard, candidateMove.from);
+                            auto const movingPiece = piece_at<>(aBoard, candidateMove.from);
                             if (piece_type(movingPiece) == piece::Pawn)
                             {
                                 auto const movingPieceColor = piece_color(movingPiece);
