@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::Human);
+        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
 
         board.changed([&]()
         {

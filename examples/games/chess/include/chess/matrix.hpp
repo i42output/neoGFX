@@ -47,8 +47,6 @@ namespace chess
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
     inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove)
     {
-        if (draw(aBoard))
-            return false;
         auto const movingPiece = piece_at(aBoard, aMove.from);
         auto const targetPiece = piece_at(aBoard, aMove.to);
         if (piece_color(movingPiece) != static_cast<piece>(aTurn))
@@ -131,7 +129,8 @@ namespace chess
             if (inCheck)
                 return false;
         }
-        // todo: corner cases (check, en passant, castling)
+        if (draw(aBoard))
+            return false;
         return true;
     }
 
