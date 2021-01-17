@@ -39,7 +39,9 @@ namespace neogfx
         iWeight{ static_cast<uint32_t>(-1), {} },
         iMinimumSize{ static_cast<uint32_t>(-1), {} },
         iMaximumSize{ static_cast<uint32_t>(-1), {} },
-        iFixedSize{ static_cast<uint32_t>(-1), {} }
+        iFixedSize{ static_cast<uint32_t>(-1), {} },
+        iTransformation{ static_cast<uint32_t>(-1), mat33::identity() },
+        iCombinedTransformation{ static_cast<uint32_t>(-1), mat33::identity() }
     {
         set_alive();
     }
@@ -52,7 +54,9 @@ namespace neogfx
         iWeight{ static_cast<uint32_t>(-1), {} },
         iMinimumSize{ static_cast<uint32_t>(-1), {} },
         iMaximumSize{ static_cast<uint32_t>(-1), {} },
-        iFixedSize{ static_cast<uint32_t>(-1), {} }
+        iFixedSize{ static_cast<uint32_t>(-1), {} },
+        iTransformation{ static_cast<uint32_t>(-1), mat33::identity() },
+        iCombinedTransformation{ static_cast<uint32_t>(-1), mat33::identity() }
     {
         set_alive();
     }
@@ -128,6 +132,21 @@ namespace neogfx
     i_widget& layout_item_proxy::as_widget()
     {
         return subject().as_widget();
+    }
+
+    bool layout_item_proxy::has_parent_layout_item() const
+    {
+        return subject().has_parent_layout_item();
+    }
+
+    const i_layout_item& layout_item_proxy::parent_layout_item() const
+    {
+        return subject().parent_layout_item();
+    }
+
+    i_layout_item& layout_item_proxy::parent_layout_item()
+    {
+        return subject().parent_layout_item();
     }
 
     bool layout_item_proxy::is_spacer() const
@@ -267,7 +286,7 @@ namespace neogfx
 
     point layout_item_proxy::position() const
     {
-        return subject().position();
+        return transformation(true) * subject().position();
     }
 
     void layout_item_proxy::set_position(const point& aPosition)
@@ -277,7 +296,7 @@ namespace neogfx
 
     size layout_item_proxy::extents() const
     {
-        return subject().extents();
+        return transformation(true) * subject().extents();
     }
 
     void layout_item_proxy::set_extents(const size& aExtents)
@@ -400,7 +419,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << "layout_item_proxy::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << endl;
 #endif // NEOGFX_DEBUG
-        return cachedMinSize;
+        return transformation(true) * cachedMinSize;
     }
 
     void layout_item_proxy::set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout)
@@ -437,7 +456,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << "layout_item_proxy::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << endl;
 #endif // NEOGFX_DEBUG
-        return cachedMaxSize;
+        return transformation(true) * cachedMaxSize;
     }
 
     void layout_item_proxy::set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout)
@@ -472,7 +491,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << "layout_item_proxy::fixed_size(" << aAvailableSpace << ") -> " << cachedFixedSize << endl;
 #endif // NEOGFX_DEBUG
-        return cachedFixedSize;
+        return transformation(true) * cachedFixedSize;
     }
 
     void layout_item_proxy::set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout)
@@ -482,6 +501,42 @@ namespace neogfx
             iFixedSize.second = *aFixedSize;
     }
 
+    bool layout_item_proxy::has_transformation() const
+    {
+        return subject().has_transformation();
+    }
+
+    mat33 layout_item_proxy::transformation(bool aCombineAncestorTransformations) const
+    {
+        auto& attribute = !aCombineAncestorTransformations ? iTransformation : iCombinedTransformation;
+#ifdef NEOGFX_DEBUG
+        if (&subject() == debug::layoutItem)
+            service<debug::logger>() << "layout_item_proxy::transformation(" << aCombineAncestorTransformations << ")" << endl;
+#endif // NEOGFX_DEBUG
+        auto& cachedTransformation = attribute.second;
+        if (attribute.first != global_layout_id())
+        {
+#ifdef NEOGFX_DEBUG
+            if (&subject() == debug::layoutItem)
+                service<debug::logger>() << "layout_item_proxy::transformation(" << aCombineAncestorTransformations << ") (cache invalid)" << endl;
+#endif // NEOGFX_DEBUG
+            cachedTransformation = subject().transformation(aCombineAncestorTransformations);
+            attribute.first = global_layout_id();
+        }
+#ifdef NEOGFX_DEBUG
+        if (&subject() == debug::layoutItem)
+            service<debug::logger>() << "layout_item_proxy::transformation(" << aCombineAncestorTransformations << ") -> " << cachedTransformation << endl;
+#endif // transformation
+        return cachedTransformation;
+    }
+
+    void layout_item_proxy::set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout)
+    {
+        subject().set_transformation(aTransformation, aUpdateLayout);
+        if (aTransformation != std::nullopt)
+            iTransformation.second = *aTransformation;
+    }
+
     bool layout_item_proxy::has_padding() const
     {
         return subject().has_padding();
@@ -489,7 +544,7 @@ namespace neogfx
 
     padding layout_item_proxy::padding() const
     {
-        return subject().padding();
+        return transformation(true) * subject().padding();
     }
 
     void layout_item_proxy::set_padding(optional_padding const& aPadding, bool aUpdateLayout)

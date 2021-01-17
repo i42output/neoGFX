@@ -47,6 +47,10 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:
+        bool has_parent_layout_item() const override;
+        const i_layout_item& parent_layout_item() const override;
+        i_layout_item& parent_layout_item() override;;
+    public:
         bool is_spacer() const;
     public:
         bool has_parent_layout() const override;
@@ -89,6 +93,9 @@ namespace neogfx
         bool has_fixed_size() const override;
         size fixed_size(optional_size const& aAvailableSpace = {}) const override;
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override;
+        bool has_transformation() const override;
+        mat33 transformation(bool aCombineAncestorTransformations = false) const override;
+        void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override;
     public:
         bool has_padding() const override;
         neogfx::padding padding() const override;
@@ -123,6 +130,8 @@ namespace neogfx
         mutable std::pair<uint32_t, size> iMinimumSize;
         mutable std::pair<uint32_t, size> iMaximumSize;
         mutable std::pair<uint32_t, size> iFixedSize;
+        mutable std::pair<uint32_t, mat33> iTransformation;
+        mutable std::pair<uint32_t, mat33> iCombinedTransformation;
         mutable std::optional<const i_anchor_t<decltype(layout_item<object<i_layout>>::MinimumSize)>*> iMinimumSizeAnchor;
     };
 }

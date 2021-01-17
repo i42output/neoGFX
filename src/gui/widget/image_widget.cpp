@@ -77,7 +77,7 @@ namespace neogfx
 
     size image_widget::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (has_minimum_size() || iTexture.is_empty())
+        if (has_minimum_size() || iTexture.is_empty() || size_policy() == size_constraint::DefaultMinimumExpanding)
             return widget::minimum_size(aAvailableSpace);
         size result = units_converter{ *this }.from_device_units(iTexture.extents()) + padding().size();
         if (iDpiAutoScale)

@@ -53,6 +53,10 @@ namespace neogfx
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
     public:
+        virtual bool has_parent_layout_item() const = 0;
+        virtual const i_layout_item& parent_layout_item() const = 0;
+        virtual i_layout_item& parent_layout_item() = 0;
+    public:
         virtual bool has_parent_layout() const = 0;
         virtual const i_layout& parent_layout() const = 0;
         virtual i_layout& parent_layout() = 0;

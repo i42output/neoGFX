@@ -18,22 +18,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/toolbar.hpp>
 
 namespace neogfx
 {
-    toolbar::toolbar() : 
-        iLayout{ *this }
+    // todo: vertical toolbars
+
+    toolbar::toolbar(toolbar_style aStyle) :
+        iStyle{ aStyle }, iLayout { *this }
     {
     }
 
-    toolbar::toolbar(i_widget& aParent) : 
-        widget{ aParent }, iLayout{ *this }
+    toolbar::toolbar(i_widget& aParent, toolbar_style aStyle) :
+        widget{ aParent }, iStyle{ aStyle }, iLayout{ *this }
     {
     }
 
-    toolbar::toolbar(i_layout& aLayout) : 
-        widget{ aLayout }, iLayout{ *this }
+    toolbar::toolbar(i_layout& aLayout, toolbar_style aStyle) :
+        widget{ aLayout }, iStyle{ aStyle }, iLayout{ *this }
     {
     }
 

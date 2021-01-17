@@ -252,6 +252,8 @@ namespace neogfx
     public:
         basic_vector<dimension_type, 2> to_vec2() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 2>{ cx, cy }; }
         basic_vector<dimension_type, 3> to_vec3() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
+        basic_vector<dimension_type, 2> to_vec2_nt() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
+        basic_vector<dimension_type, 3> to_vec3_nt() const { return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
         delta_type to_delta() const { return delta_type(cx, cy); }
         bool empty() const { return cx == 0 || cy == 0; }
         auto operator<=>(const basic_size&) const = default;
@@ -284,7 +286,7 @@ namespace neogfx
         void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx == max_dimension()) || (rhs.cy != 0.0 && cy == max_dimension())) throw bad_size(); }
         // helpers
     public:
-        static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::max(); }
+        static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::infinity(); }
         static constexpr basic_size max_size() { return basic_size{ max_dimension(), max_dimension() }; }
         // attributes
     public:
@@ -644,6 +646,8 @@ namespace neogfx
         dimension_type bottom;
     };
 
+    typedef basic_box_areas<double> box_areas;
+
     template <typename DimensionType>
     inline basic_box_areas<DimensionType> operator+(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
     {
@@ -752,6 +756,7 @@ namespace neogfx
         explicit basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
         basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
         basic_rect(const aabb_2d& aBoundingBox) : basic_rect{ aBoundingBox.min.x, aBoundingBox.min.y, aBoundingBox.max.x, aBoundingBox.max.y } {}
+        basic_rect(const basic_box_areas<coordinate_type>& aBoxAreas) : basic_rect{ aBoxAreas.top_left(), aBoxAreas.bottom_right() } {}
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
         basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& other) : point_type{ other }, size_type{ other } {}
@@ -1213,6 +1218,34 @@ namespace neogfx
     typedef std::optional<vector2> optional_vector2;
     typedef std::optional<vector3> optional_vector3;
     typedef std::optional<vector4> optional_vector4;
+
+    template <typename T>
+    inline basic_point<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_point<T> const& aPoint)
+    {
+        return aTransformation * aPoint.to_vec3();
+    }
+
+    template <typename T>
+    inline basic_size<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_size<T> const& aSize)
+    {
+        if (aSize == basic_size<T>::max_size())
+            return aSize;
+        return aTransformation * aSize.to_vec3_nt();
+    }
+
+    template <typename T>
+    inline basic_rect<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_rect<T> const& aRect)
+    {
+        return basic_rect<T>{ basic_point<T>{ aTransformation* aRect.top_left().to_vec3() }, basic_point<T>{ aTransformation * aRect.bottom_right().to_vec3() } };
+    }
+
+    template <typename T>
+    inline basic_box_areas<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_box_areas<T> const& aBoxAreas)
+    {
+        basic_rect<T> temp = aBoxAreas;
+        temp = aTransformation * temp;
+        return basic_box_areas<T>{ temp.left(), temp.top(), temp.right(), temp.bottom() };
+    }
 
     template <typename Elem, typename Traits, typename T>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_point<T>& aPoint)

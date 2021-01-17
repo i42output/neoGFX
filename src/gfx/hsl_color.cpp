@@ -190,7 +190,7 @@ namespace neogfx
 
     double hsl_color::undefined_hue()
     {
-        return -std::numeric_limits<double>::max();
+        return -std::numeric_limits<double>::infinity();
     }
 
     bool hsl_color::operator==(const hsl_color& aOther) const

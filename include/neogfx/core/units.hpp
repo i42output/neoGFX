@@ -224,7 +224,7 @@ namespace neogfx
         value_type value() const
         {
             if (units() == length_units::NoUnitsAsMaximumLength)
-                return std::numeric_limits<value_type>::max();
+                return std::numeric_limits<value_type>::infinity();
             return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), unconverted_value());
         }
         value_type unconverted_value() const
@@ -238,7 +238,7 @@ namespace neogfx
         std::string to_string(bool aToEmit = true) const
         {
             if (units() == length_units::NoUnitsAsMaximumLength)
-                return (aToEmit ? "std::numeric_limits<dimension>::max()" : "max");
+                return (aToEmit ? "std::numeric_limits<dimension>::infinity()" : "max");
             std::ostringstream oss;
             oss << unconverted_value();
             if (aToEmit)

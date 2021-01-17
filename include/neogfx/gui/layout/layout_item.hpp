@@ -45,6 +45,22 @@ namespace neogfx
         }
         // implementation
     public:
+        bool has_parent_layout_item() const override
+        {
+            return as_layout_item().has_parent_layout() || (as_layout_item().is_widget() && as_layout_item().as_widget().has_parent());
+        }
+        const i_layout_item& parent_layout_item() const override
+        {
+            if (as_layout_item().has_parent_layout())
+                return as_layout_item().parent_layout();
+            else
+                return as_layout_item().as_widget().parent();
+        }
+        i_layout_item& parent_layout_item() override
+        {
+            return const_cast<i_layout_item&>(to_const(*this).parent_layout_item());
+        }
+    public:
         bool has_layout_manager() const override
         {
             if (!as_layout_item().has_layout_owner())
@@ -224,6 +240,35 @@ namespace neogfx
                     update_layout();
             }
         }
+        bool has_transformation() const override
+        {
+            return Transformation != std::nullopt;
+        }
+        mat33 transformation(bool aCombineAncestorTransformations = false) const override
+        {
+            if (!aCombineAncestorTransformations)
+            {
+                if (has_transformation())
+                    return *Transformation;
+                return mat33::identity();
+            }
+            else
+                return has_parent_layout_item() ? parent_layout_item().transformation(true) * transformation() : transformation();
+        }
+        void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override
+        {
+            optional_mat33 newTransformation = (aTransformation != std::nullopt ? *aTransformation : optional_mat33{});
+            if (Transformation != newTransformation)
+            {
+#ifdef NEOGFX_DEBUG
+                if (debug::layoutItem == this)
+                    service<debug::logger>() << typeid(*this).name() << "::set_transformation(" << aTransformation << ", " << aUpdateLayout << ")" << endl;
+#endif // NEOGFX_DEBUG
+                Transformation.assign(newTransformation, aUpdateLayout);
+                if (aUpdateLayout)
+                    update_layout();
+            }
+        }
     public:
         bool has_padding() const override
         {
@@ -313,6 +358,7 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
         define_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
         define_property(property_category::hard_geometry, optional_size, FixedSize, fixed_size)
+        define_property(property_category::hard_geometry, optional_mat33, Transformation, transformation)
         define_anchor(Position)
         define_anchor(Size)
         define_anchor(Padding)

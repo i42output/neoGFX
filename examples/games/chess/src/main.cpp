@@ -74,11 +74,6 @@ int main(int argc, char* argv[])
         toolbar.add_action(about);
         ourToolbarLayout.add_spacer();
 
-        window.SizeChanged([&]()
-        {
-            toolbar.show(window.extents().cx >= 256.0 && window.extents().cy >= 256.0);
-        });
-
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;

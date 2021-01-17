@@ -27,6 +27,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+    enum class toolbar_style : uint32_t
+    {
+        Default = 0x00000000
+    };
+
+    inline constexpr toolbar_style operator|(toolbar_style aLhs, toolbar_style aRhs)
+    {
+        return static_cast<toolbar_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr toolbar_style operator&(toolbar_style aLhs, toolbar_style aRhs)
+    {
+        return static_cast<toolbar_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
     class toolbar : public widget<>, public i_action_container
     {
     private:
@@ -37,9 +52,9 @@ namespace neogfx
     public:
         struct bad_button_index : std::logic_error { bad_button_index() : std::logic_error("neogfx::toolbar::bad_button_index") {} };
     public:
-        toolbar();
-        toolbar(i_widget& aParent);
-        toolbar(i_layout& aLayout);
+        toolbar(toolbar_style aStyle = toolbar_style::Default);
+        toolbar(i_widget& aParent, toolbar_style aStyle = toolbar_style::Default);
+        toolbar(i_layout& aLayout, toolbar_style aStyle = toolbar_style::Default);
     public:
         neogfx::size_policy size_policy() const override;
     public:
@@ -55,6 +70,7 @@ namespace neogfx
         virtual i_action& insert_action(button_index aButtonIndex, std::shared_ptr<i_action> aAction);
         virtual void insert_separator(button_index aButtonIndex);
     private:
+        toolbar_style iStyle;
         flow_layout iLayout;
         button_list iButtons;
         action iSeparator;

@@ -86,7 +86,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NEOLIB_HOSTED_ENVIRONMENT;NEOGFX_DEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -126,7 +126,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NEOLIB_HOSTED_ENVIRONMENT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NEOLIB_HOSTED_ENVIRONMENT;NEOGFX_DEBUG</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>

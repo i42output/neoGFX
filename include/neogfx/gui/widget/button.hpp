@@ -93,7 +93,7 @@ namespace neogfx
         void set_image(std::string const& aImageUri);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
-        void set_image_extents(const size& aImageExtents);
+        void set_image_extents(const optional_size& aImageExtents);
         const neogfx::label& label() const;
         neogfx::label& label();
         const neogfx::text_widget& text_widget() const;

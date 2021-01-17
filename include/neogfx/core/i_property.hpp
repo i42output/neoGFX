@@ -66,9 +66,11 @@ namespace neogfx
         float,
         double,
         std::string,
+        mat33,
         size,
         point,
         rect,
+        box_areas,
         custom_type>;
 
     template <typename T>

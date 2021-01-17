@@ -560,8 +560,8 @@ namespace neogfx
             break;
         case UsvStageDone:
             {
-                point min{ std::numeric_limits<scalar>::max(), std::numeric_limits<scalar>::max() };
-                point max{ std::numeric_limits<scalar>::min(), std::numeric_limits<scalar>::min() };
+                point min{ std::numeric_limits<scalar>::infinity(), std::numeric_limits<scalar>::infinity() };
+                point max{ -std::numeric_limits<scalar>::infinity(), -std::numeric_limits<scalar>::infinity() };
                 for (auto& c : as_widget().children())
                 {
                     if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)

@@ -35,10 +35,10 @@ namespace neogfx
     {
         if (iBoundingRect && std::get<0>(*iBoundingRect) == aOffsetPosition && std::get<1>(*iBoundingRect) == aPixelWidthAdjustment)
             return std::get<2>(*iBoundingRect);
-        coordinate_type minX = std::numeric_limits<coordinate_type>::max();
-        coordinate_type minY = std::numeric_limits<coordinate_type>::max();
-        coordinate_type maxX = std::numeric_limits<coordinate_type>::min();
-        coordinate_type maxY = std::numeric_limits<coordinate_type>::min();
+        coordinate_type minX = std::numeric_limits<coordinate_type>::infinity();
+        coordinate_type minY = std::numeric_limits<coordinate_type>::infinity();
+        coordinate_type maxX = -std::numeric_limits<coordinate_type>::infinity();
+        coordinate_type maxY = -std::numeric_limits<coordinate_type>::infinity();
         for (auto const& sub_path : iSubPaths)
             for (auto const& point : sub_path)
             {

@@ -107,7 +107,7 @@ namespace neogfx
                 return static_cast<To>(aComponent * std::numeric_limits<To>::max());
             else if constexpr (std::is_floating_point_v<To> && std::is_integral_v<From>)
             {
-                if constexpr (!std::is_integral_v<From> || !std::is_integral_v<view_component>)
+                if constexpr (!std::is_integral_v<view_component>)
                     return static_cast<To>(aComponent) / std::numeric_limits<From>::max();
                 else
                     return static_cast<To>(aComponent) / std::numeric_limits<view_component>::max();

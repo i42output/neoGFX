@@ -197,7 +197,7 @@ namespace neogfx
 
     double hsv_color::undefined_hue()
     {
-        return -std::numeric_limits<double>::max();
+        return -std::numeric_limits<double>::infinity();
     }
 
 

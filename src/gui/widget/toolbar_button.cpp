@@ -96,16 +96,20 @@ namespace neogfx
 
     size toolbar_button::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (push_button::has_minimum_size() || !action().is_separator())
-            return push_button::minimum_size(aAvailableSpace);
-        return units_converter(*this).from_device_units(size{ 2.0, 2.0 });
-    }    
+        auto result = push_button::minimum_size(aAvailableSpace);
+        // todo vertical toolbars
+        if (!has_minimum_size() && action().is_separator())
+            result.cx = padding().size().cx + units_converter(*this).from_device_units(2.0);
+        return result;
+    }
 
     size toolbar_button::maximum_size(optional_size const& aAvailableSpace) const
     {
-        if (push_button::has_maximum_size() || !action().is_separator())
-            return push_button::maximum_size(aAvailableSpace);
-        return size::max_size();
+        auto result = push_button::maximum_size(aAvailableSpace);
+        // todo vertical toolbars
+        if (!has_maximum_size() && action().is_separator())
+            result.cx = padding().size().cx + units_converter(*this).from_device_units(2.0);
+        return result;
     }
 
     void toolbar_button::paint(i_graphics_context& aGc) const
@@ -116,6 +120,8 @@ namespace neogfx
         {
             scoped_units su(*this, units::Pixels);
             rect line = client_rect();
+            // todo: vertical toolbars
+            line.x = std::floor(line.center().x);
             line.deflate(0, std::floor(client_rect().height() / 6.0));
             line.cx = 1.0;
             color ink = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));

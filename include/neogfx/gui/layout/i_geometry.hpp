@@ -32,8 +32,9 @@ namespace neogfx
         Minimum,
         Maximum,
         Expanding,
-        MinimumExpanding, // minimum unless a weight is defined
-        ExpandingUniform, // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
+        MinimumExpanding,           // minimum unless a weight is defined
+        DefaultMinimumExpanding,    // default minimum unless a weight is defined
+        ExpandingUniform,           // leftover pixels are unwanted to ensure siblings are the same (pixel perfect) size after weighting
         Manual
     };
 
@@ -73,6 +74,7 @@ declare_enum_string(neogfx::size_constraint, Minimum)
 declare_enum_string(neogfx::size_constraint, Maximum)
 declare_enum_string(neogfx::size_constraint, Expanding)
 declare_enum_string(neogfx::size_constraint, MinimumExpanding)
+declare_enum_string(neogfx::size_constraint, DefaultMinimumExpanding)
 declare_enum_string(neogfx::size_constraint, ExpandingUniform)
 declare_enum_string(neogfx::size_constraint, Manual)
 end_declare_enum(neogfx::size_constraint)
@@ -224,6 +226,9 @@ namespace neogfx
         virtual bool has_fixed_size() const = 0;
         virtual size fixed_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) = 0;
+        virtual bool has_transformation() const = 0;
+        virtual mat33 transformation(bool aCombineAncestorTransformations = false) const = 0;
+        virtual void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) = 0;
     public:
         virtual bool has_padding() const = 0;
         virtual neogfx::padding padding() const = 0;
@@ -244,7 +249,11 @@ namespace neogfx
             auto effectivePolicy = size_policy();
             if (effectivePolicy.horizontal_size_policy() == size_constraint::MinimumExpanding)
                 effectivePolicy.set_horizontal_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            else if (effectivePolicy.horizontal_size_policy() == size_constraint::DefaultMinimumExpanding)
+                effectivePolicy.set_horizontal_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
             if (effectivePolicy.vertical_size_policy() == size_constraint::MinimumExpanding)
+                effectivePolicy.set_vertical_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            else if (effectivePolicy.vertical_size_policy() == size_constraint::DefaultMinimumExpanding)
                 effectivePolicy.set_vertical_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
             return effectivePolicy;
         }

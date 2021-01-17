@@ -260,10 +260,10 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    void button<ButtonInterface>::set_image_extents(const size& aImageExtents)
+    void button<ButtonInterface>::set_image_extents(const optional_size& aImageExtents)
     {
         image_widget().set_fixed_size(aImageExtents);
-        label().image_widget().set_size_policy(size_constraint::Fixed);
+        image_widget().set_size_policy(aImageExtents ? size_constraint::Fixed : size_constraint::Minimum);
     }
 
     template <typename ButtonInterface>
