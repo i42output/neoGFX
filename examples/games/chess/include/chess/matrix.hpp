@@ -204,9 +204,12 @@ namespace chess
                                 {
                                     candidateMove.promoteTo = piece::Queen | movingPieceColor;
                                     aResult.push_back(candidateMove);
+                                    candidateMove.promoteTo = piece::Rook | movingPieceColor;
+                                    aResult.push_back(candidateMove);
+                                    candidateMove.promoteTo = piece::Bishop | movingPieceColor;
+                                    aResult.push_back(candidateMove);
                                     candidateMove.promoteTo = piece::Knight | movingPieceColor;
                                     aResult.push_back(candidateMove);
-                                    // todo: do we care about bishop and rook promotion?
                                 }
                                 else
                                     aResult.push_back(candidateMove);
