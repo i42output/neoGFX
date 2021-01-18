@@ -42,13 +42,12 @@ namespace chess
         typedef std::vector<stack_node_t> stack_node_stack_t;
         thread_local stack_node_stack_t stackNodeStack;
         auto const stackUsageDepth = startDepth - depth;
+        bool const useStack = stackUsageDepth >= USE_STACK_DEPTH;
         auto const stackStackIndex = stackUsageDepth - USE_STACK_DEPTH;
-        bool const useStack = stackStackIndex >= 0;
-        if (useStack && stackNodeStack.size() < stackStackIndex + 1)
+        if (useStack && stackNodeStack.size() <= stackStackIndex)
         {
-            if (stackNodeStack.capacity() < STACK_NODE_STACK_CAPACITY)
-                stackNodeStack.reserve(STACK_NODE_STACK_CAPACITY);
-            if (stackStackIndex + 1 > stackNodeStack.capacity())
+            stackNodeStack.reserve(STACK_NODE_STACK_CAPACITY);
+            if (stackStackIndex >= stackNodeStack.capacity())
                 throw stack_node_stack_limit_exceeded();
             stackNodeStack.resize(stackStackIndex + 1);
         }
@@ -68,7 +67,7 @@ namespace chess
         {
             move_piece(board, *child.move);
             double score = 0.0;
-            if (&child == &validMoves[0])
+                if (&child == &validMoves[0])
                 score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -alpha);
             else
             {

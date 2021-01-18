@@ -152,7 +152,6 @@ namespace chess
         // todo: opening book and/or sensible white first move...
         if (children.size() > 0u)
         {
-            ai_thread<representation_type, Player> thread;
             std::vector<std::future<game_tree_node>> futures;
             futures.reserve(children.size());
             auto iterThread = iThreads.begin();
@@ -182,7 +181,7 @@ namespace chess
                 });
             thread_local std::random_device tEntropy;
             thread_local std::mt19937 tGenerator{ tEntropy() };
-            std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) };
+            std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) - 1 };
             iRootNode = std::move(bestMoves[options(tGenerator)]);
             return &*iRootNode;
         }
