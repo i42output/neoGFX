@@ -124,8 +124,9 @@ namespace chess
         thread_local std::vector<move> tValidMoves;
         std::optional<std::lock_guard<std::recursive_mutex>> lk{ iBoardMutex };
         valid_moves<Player>(iMoveTables, iBoard, tValidMoves, true);
+        // todo: opening book and/or sensible white first move...
         thread_local std::random_device tEntropy;
-        thread_local std::mt19937 tGenerator(tEntropy());
+        thread_local std::mt19937 tGenerator{ tEntropy() };
         if (tValidMoves.size() > 0u)
         {
             ai_thread<representation_type, Player> thread;
@@ -141,14 +142,26 @@ namespace chess
             lk = std::nullopt;
             for (auto& t : iThreads)
                 t.start();
-            std::optional<best_move> bestMove;
+            std::vector<best_move> bestMoves;
             for (auto& future : futures)
             {
                 auto const& nextMove = future.get();
-                if (!bestMove || bestMove->value < nextMove.value)
-                    bestMove = nextMove;
+                bestMoves.push_back(nextMove);
             }
-            return bestMove;
+            std::sort(bestMoves.begin(), bestMoves.end(),
+                [](auto const& m1, auto const& m2)
+                {
+                    return m1.value >= m2.value;
+                });
+            auto const bestMove = bestMoves[0];
+            auto const decimator = 0.125 * (iBoard.moveHistory.size() + 1); // todo: involve difficulty level?
+            auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
+                [decimator, bestMove](auto const& m)
+                {
+                    return static_cast<int64_t>(m.value * decimator) != static_cast<int64_t>(bestMove.value * decimator);
+                });
+            std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) };
+            return bestMoves[options(tGenerator)];
         }
         return {};
     }

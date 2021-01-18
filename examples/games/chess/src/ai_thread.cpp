@@ -111,7 +111,7 @@ namespace chess
                 evalBoard = workItem.board;
                 move_piece(evalBoard, workItem.move);
                 auto const value = -pvs<opponent_v<Player>>(iMoveTables, evalBoard, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-                workItem.result.set_value(best_move{ workItem.move, value });
+                workItem.result.set_value(best_move{ value, workItem.move });
             }
             iQueue.clear();
         }

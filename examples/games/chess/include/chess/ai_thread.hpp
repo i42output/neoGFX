@@ -30,8 +30,8 @@ namespace chess
 {
     struct best_move
     {
-        move move;
         double value = 0.0;
+        move move;
     };
 
     template <typename Representation, player Player>
