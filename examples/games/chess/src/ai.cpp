@@ -134,6 +134,11 @@ namespace chess
         }
         else
         {
+            if (iRootNode->children == std::nullopt)
+            {
+                iRootNode->children.emplace();
+                valid_moves<Player>(iMoveTables, iBoard, *iRootNode);
+            }
             auto existing = std::find_if(iRootNode->children->begin(), iRootNode->children->end(), [&](game_tree_node const& n) { return n.move == iBoard.moveHistory.back(); });
             if (existing == iRootNode->children->end())
                 throw node_not_found();

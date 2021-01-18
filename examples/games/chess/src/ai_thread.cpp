@@ -30,15 +30,38 @@ namespace chess
         return sEvalBoard;
     }
 
+    // use stack to limit RAM usage... (todo: make configurable?)
+    constexpr int32_t USE_STACK_DEPTH = 4;
+    constexpr std::size_t STACK_NODE_STACK_CAPACITY = 32; // todo: what should this hard limit be?
+    struct stack_node_stack_limit_exceeded : std::logic_error { stack_node_stack_limit_exceeded() : std::logic_error{ "chess::stack_node_stack_limit_exceeded" } {} };
+
     template <player Player, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_board<Representation>& board, game_tree_node& node, int32_t depth, double alpha, double beta)
+    double pvs(move_tables<Representation> const& tables, basic_board<Representation>& board, game_tree_node& node, int32_t startDepth, int32_t depth, double alpha, double beta)
     {
-        if (node.children == std::nullopt)
+        typedef game_tree_node stack_node_t;
+        typedef std::vector<stack_node_t> stack_node_stack_t;
+        thread_local stack_node_stack_t stackNodeStack;
+        auto const stackUsageDepth = startDepth - depth;
+        auto const stackStackIndex = stackUsageDepth - USE_STACK_DEPTH;
+        bool const useStack = stackStackIndex >= 0;
+        if (useStack && stackNodeStack.size() < stackStackIndex + 1)
         {
-            node.children.emplace();
-            valid_moves<Player>(tables, board, node);
+            if (stackNodeStack.capacity() < STACK_NODE_STACK_CAPACITY)
+                stackNodeStack.reserve(STACK_NODE_STACK_CAPACITY);
+            if (stackStackIndex + 1 > stackNodeStack.capacity())
+                throw stack_node_stack_limit_exceeded();
+            stackNodeStack.resize(stackStackIndex + 1);
         }
-        auto& validMoves = *node.children;
+        auto& use = (useStack ? stackNodeStack[stackStackIndex] : node);
+        use.eval = std::nullopt;
+        if (use.children == std::nullopt)
+        {
+            use.children.emplace();
+            valid_moves<Player>(tables, board, use);
+        }
+        else if (useStack)
+            valid_moves<Player>(tables, board, use);
+        auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
             return eval<Representation, Player>{}(tables, board, static_cast<double>(depth)).eval;
         for (auto& child : validMoves)
@@ -46,14 +69,14 @@ namespace chess
             move_piece(board, *child.move);
             double score = 0.0;
             if (&child == &validMoves[0])
-                score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -beta, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -alpha);
             else
             {
-                score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -alpha - 1.0, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -alpha - 1.0, -alpha);
                 if (alpha < score && score < beta)
-                    score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -beta, -score);
+                    score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -score);
             }
-            node.eval = -score;
+            use.eval = -score;
             undo(board);
             alpha = std::max(alpha, score);
             if (alpha >= beta)
@@ -116,7 +139,7 @@ namespace chess
                 evalBoard = workItem.board;
                 auto& node = workItem.node;
                 move_piece(evalBoard, *node.move );
-                pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, 4, 4, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();
