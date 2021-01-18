@@ -248,9 +248,10 @@ namespace chess
         auto const currentMoveCount = aBoard.moveHistory.size();
         aBoard.moveHistory.emplace_back(aMove.from, aMove.to, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aBoard.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
         auto& newMove = aBoard.moveHistory.back();
-        switch (piece_type(movingPiece))
+        switch (movingPiece)
         {
-        case piece::King:
+        case piece::WhiteKing:
+        case piece::BlackKing:
             aBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
             newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
             if (aMove.from.x - aMove.to.x == 2)
@@ -268,13 +269,20 @@ namespace chess
                 aBoard.position[aMove.from.y][5u] = piece_color(movingPiece) | piece::Rook;
             }
             break;
-        case piece::Rook:
-            if (aMove.from == coordinates{ 0u, 0u } || aMove.from == coordinates{ 0u, 7u })
-                newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
-            else if (aMove.from == coordinates{ 7u, 0u } || aMove.from == coordinates{ 7u, 7u })
-                newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
+        case piece::WhiteRook:
+            if (aMove.from == coordinates{ 0u, 0u })
+                newMove.castlingState[as_color_cardinal<>(piece::White)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+            else if (aMove.from == coordinates{ 7u, 0u })
+                newMove.castlingState[as_color_cardinal<>(piece::White)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
             break;
-        case piece::Pawn:
+        case piece::BlackRook:
+            if (aMove.from == coordinates{ 0u, 7u })
+                newMove.castlingState[as_color_cardinal<>(piece::Black)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+            else if (aMove.from == coordinates{ 7u, 7u })
+                newMove.castlingState[as_color_cardinal<>(piece::Black)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
+            break;
+        case piece::WhitePawn:
+        case piece::BlackPawn:
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
             {
@@ -282,6 +290,24 @@ namespace chess
                 newMove.capture = targetPawn;
                 targetPawn = piece::None;
             }
+            break;
+        default:
+            // do nothing
+            break;
+        }
+        switch (targetPiece)
+        {
+        case piece::WhiteRook:
+            if (aMove.to == coordinates{ 0u, 0u })
+                newMove.castlingState[as_color_cardinal<>(piece::White)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+            else if (aMove.to == coordinates{ 7u, 0u })
+                newMove.castlingState[as_color_cardinal<>(piece::White)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
+            break;
+        case piece::BlackRook:
+            if (aMove.to == coordinates{ 0u, 7u })
+                newMove.castlingState[as_color_cardinal<>(piece::Black)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
+            else if (aMove.to == coordinates{ 7u, 7u })
+                newMove.castlingState[as_color_cardinal<>(piece::Black)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
             break;
         default:
             // do nothing
