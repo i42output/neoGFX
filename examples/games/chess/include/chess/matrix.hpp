@@ -203,19 +203,19 @@ namespace chess
                                     (movingPieceColor == piece::Black && candidateMove.to.y == promotion_rank_v<player::Black>))
                                 {
                                     candidateMove.promoteTo = piece::Queen | movingPieceColor;
-                                    aResult.push_back(candidateMove);
+                                    aResult.emplace_back(candidateMove);
                                     candidateMove.promoteTo = piece::Rook | movingPieceColor;
-                                    aResult.push_back(candidateMove);
+                                    aResult.emplace_back(candidateMove);
                                     candidateMove.promoteTo = piece::Bishop | movingPieceColor;
-                                    aResult.push_back(candidateMove);
+                                    aResult.emplace_back(candidateMove);
                                     candidateMove.promoteTo = piece::Knight | movingPieceColor;
-                                    aResult.push_back(candidateMove);
+                                    aResult.emplace_back(candidateMove);
                                 }
                                 else
-                                    aResult.push_back(candidateMove);
+                                    aResult.emplace_back(candidateMove);
                             }
                             else
-                                aResult.push_back(candidateMove);
+                                aResult.emplace_back(candidateMove);
                         }
                     }
         if (aSort)
@@ -223,8 +223,8 @@ namespace chess
             {
                 matrix_board lhsBoard = aBoard;
                 matrix_board rhsBoard = aBoard;
-                move_piece(lhsBoard, lhs);
-                move_piece(rhsBoard, rhs);
+                move_piece(lhsBoard, as_move(lhs));
+                move_piece(rhsBoard, as_move(rhs));
                 return eval<matrix, Player>{}(aTables, lhsBoard, 2.0).eval < eval<matrix, Player>{}(aTables, rhsBoard, 2.0).eval;
             });
     }

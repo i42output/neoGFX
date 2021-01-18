@@ -28,12 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    struct best_move
-    {
-        double value = 0.0;
-        move move;
-    };
-
     template <typename Representation, player Player>
     class ai_thread
     {
@@ -43,14 +37,14 @@ namespace chess
         struct work_item
         {
             board_type board;
-            move move;
-            std::promise<best_move> result;
+            game_tree_node node;
+            std::promise<game_tree_node> result;
         };
     public:
         ai_thread();
         ~ai_thread();
     public:
-        std::promise<best_move>& eval(board_type const& aBoard, move const& aMove);
+        std::promise<game_tree_node>& eval(board_type const& aBoard, game_tree_node&& aNode);
         void start();
     private:
         void process();

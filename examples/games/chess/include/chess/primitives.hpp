@@ -21,4 +21,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chess/piece.hpp>
 #include <chess/player.hpp>
 #include <chess/position.hpp>
+#include <chess/node.hpp>
 

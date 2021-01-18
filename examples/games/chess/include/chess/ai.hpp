@@ -55,7 +55,7 @@ namespace chess
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
-        std::optional<best_move> execute();
+        std::optional<game_tree_node> execute();
     private:
         move_tables<representation_type> const iMoveTables;
         std::recursive_mutex iBoardMutex;

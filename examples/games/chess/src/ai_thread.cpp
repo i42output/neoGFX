@@ -31,25 +31,29 @@ namespace chess
     }
 
     template <player Player, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_board<Representation>& node, int32_t depth, double alpha, double beta)
+    double pvs(move_tables<Representation> const& tables, basic_board<Representation>& board, game_tree_node& node, int32_t depth, double alpha, double beta)
     {
-        neolib::vecarray<move, 128, -1> validMoves;
-        valid_moves<Player>(tables, node, validMoves);
-        if (depth == 0 || validMoves.empty())
-            return eval<Representation, Player>{}(tables, node, static_cast<double>(depth)).eval;
-        for (auto const& m : validMoves)
+        if (node.children == std::nullopt)
         {
-            move_piece(node, m);
+            node.children.emplace();
+            valid_moves<Player>(tables, board, *node.children);
+        }
+        auto& validMoves = *node.children;
+        if (depth == 0 || validMoves.empty())
+            return eval<Representation, Player>{}(tables, board, static_cast<double>(depth)).eval;
+        for (auto& child : validMoves)
+        {
+            move_piece(board, child.move);
             double score = 0.0;
-            if (&m == &validMoves[0])
-                score = -pvs<opponent_v<Player>>(tables, node, depth - 1, -beta, -alpha);
+            if (&child == &validMoves[0])
+                score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -beta, -alpha);
             else
             {
-                score = -pvs<opponent_v<Player>>(tables, node, depth - 1, -alpha - 1.0, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -alpha - 1.0, -alpha);
                 if (alpha < score && score < beta)
-                    score = -pvs<opponent_v<Player>>(tables, node, depth - 1, -beta, -score);
+                    score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -beta, -score);
             }
-            undo(node);
+            undo(board);
             alpha = std::max(alpha, score);
             if (alpha >= beta)
                 break;
@@ -76,11 +80,11 @@ namespace chess
     }
         
     template <typename Representation, player Player>
-    std::promise<best_move>& ai_thread<Representation, Player>::eval(board_type const& aBoard, move const& aMove)
+    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(board_type const& aBoard, game_tree_node&& aNode)
     {
         {
             std::lock_guard<std::mutex> lk{ iMutex };
-            iQueue.emplace_back(aBoard, aMove);
+            iQueue.emplace_back(aBoard, std::move(aNode));
         }
         return iQueue.back().result;
     }
@@ -109,9 +113,10 @@ namespace chess
             {
                 auto& evalBoard = eval_board<Representation>();
                 evalBoard = workItem.board;
-                move_piece(evalBoard, workItem.move);
-                auto const value = -pvs<opponent_v<Player>>(iMoveTables, evalBoard, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-                workItem.result.set_value(best_move{ value, workItem.move });
+                auto& node = workItem.node;
+                move_piece(evalBoard, node.move );
+                node.eval = -pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                workItem.result.set_value(std::move(node));
             }
             iQueue.clear();
         }

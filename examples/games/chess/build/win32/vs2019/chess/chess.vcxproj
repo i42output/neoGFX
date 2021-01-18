@@ -179,6 +179,7 @@
     <ClInclude Include="..\..\..\..\include\chess\i_player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\matrix.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\move_validator.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\node.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\piece.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\position.hpp" />
