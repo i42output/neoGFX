@@ -477,7 +477,7 @@ namespace chess::gui
             neolib::scoped_flag sf{ iInRedo };
             auto redoMove = iUndoneMoves.back();
             iUndoneMoves.pop_back();
-            if (piece_color(piece_at<>(iBoard, redoMove.to)) == piece::White)
+            if (piece_color(piece_at(iBoard, redoMove.to)) == piece::White)
                 white_player().play(redoMove);
             else
                 black_player().play(redoMove);

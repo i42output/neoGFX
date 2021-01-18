@@ -74,6 +74,15 @@ int main(int argc, char* argv[])
         toolbar.add_action(about);
         ourToolbarLayout.add_spacer();
 
+/*        window.SizeChanged([&]()
+        {
+            auto scale = std::min(window.extents().cx / 720.0_dip, 1.0);
+            toolbar.set_transformation(ng::mat33
+                {{ scale, 0.0, 0.0 },
+                 { 0.0, scale, 0.0 },
+                 { 0.0, 0.0, 1.0 }});
+        }); */
+
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;

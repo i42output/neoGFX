@@ -177,17 +177,14 @@ namespace chess
     template <typename Representation>
     move_tables<Representation> generate_move_tables();
 
-    template <bool CheckTestFrom = false, bool CheckTestTo = false>
     inline piece piece_at(matrix_board const& aBoard, coordinates aPosition)
     {
         auto const targetPiece = aBoard.position[aPosition.y][aPosition.x];
-        if constexpr (!CheckTestFrom && !CheckTestTo)
+        if (!aBoard.checkTest)
             return targetPiece;
-        if constexpr (CheckTestFrom)
+        if (aPosition == aBoard.checkTest->from)
             return piece::None;
         auto const movingPiece = !aBoard.checkTest->promoteTo ? aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x] : *aBoard.checkTest->promoteTo;
-        if (aPosition == aBoard.checkTest->to)
-            return movingPiece;
         // en passant
         if (piece_type(targetPiece) == piece::Pawn && piece_type(movingPiece) == piece::Pawn &&
             piece_color(targetPiece) != piece_color(movingPiece))
@@ -206,10 +203,11 @@ namespace chess
                 }
             }
         }
+        if (aPosition == aBoard.checkTest->to)
+            return movingPiece;
         return targetPiece;
     }
 
-    template <bool CheckTestFrom = false, bool CheckTestTo = false>
     inline piece piece_at(bitboard_board const& aBoard, coordinates aPosition)
     {
         // todo

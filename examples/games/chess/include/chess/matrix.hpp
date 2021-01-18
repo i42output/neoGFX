@@ -74,8 +74,8 @@ namespace chess
     {
         if (!can_move_trivial(aTables, aMove.from, aMove.to))
             return false;
-        auto const movingPiece = piece_at<IntoCheckTest, false>(aBoard, aMove.from);
-        auto const targetPiece = piece_at<false, IntoCheckTest>(aBoard, aMove.to);
+        auto const movingPiece = piece_at(aBoard, aMove.from);
+        auto const targetPiece = piece_at(aBoard, aMove.to);
         auto const movingPieceColor = piece_color(movingPiece);
         if (movingPieceColor != static_cast<piece>(aTurn))
             return false;
@@ -98,7 +98,7 @@ namespace chess
                     aTables.validCaptureMoves[movingPieceColorCardinal][movingPieceCardinal][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
                     !aBoard.moveHistory.empty())
                 {
-                    auto const pieceLastMoved = piece_at<CheckTest, CheckTest>(aBoard, aBoard.moveHistory.back().to);
+                    auto const pieceLastMoved = piece_at(aBoard, aBoard.moveHistory.back().to);
                     if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
                     {
                         auto const delta = aBoard.moveHistory.back().to.as<int32_t>() - aBoard.moveHistory.back().from.as<int32_t>();
@@ -122,9 +122,9 @@ namespace chess
                 if (!enPassant && !castle)
                     return false;
             }
-            else if (movingPiece == piece::WhitePawn && aMove.to.y - aMove.from.y == 2u && piece_at<CheckTest, CheckTest>(aBoard, coordinates{ aMove.from.x, aMove.from.y + 1u }) != piece::None)
+            else if (movingPiece == piece::WhitePawn && aMove.to.y - aMove.from.y == 2u && piece_at(aBoard, coordinates{ aMove.from.x, aMove.from.y + 1u }) != piece::None)
                 return false;
-            else if (movingPiece == piece::BlackPawn && aMove.from.y - aMove.to.y == 2u && piece_at<CheckTest, CheckTest>(aBoard, coordinates{ aMove.from.x, aMove.from.y - 1u }) != piece::None)
+            else if (movingPiece == piece::BlackPawn && aMove.from.y - aMove.to.y == 2u && piece_at(aBoard, coordinates{ aMove.from.x, aMove.from.y - 1u }) != piece::None)
                 return false;
         }
         // capturing move...
@@ -195,7 +195,7 @@ namespace chess
                         move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
                         if (can_move<>(aTables, Player, aBoard, candidateMove))
                         {
-                            auto const movingPiece = piece_at<>(aBoard, candidateMove.from);
+                            auto const movingPiece = piece_at(aBoard, candidateMove.from);
                             if (piece_type(movingPiece) == piece::Pawn)
                             {
                                 auto const movingPieceColor = piece_color(movingPiece);
