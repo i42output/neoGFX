@@ -184,9 +184,22 @@ namespace chess
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult, bool aSort = false)
+    inline void sort_nodes(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult)
     {
-        aResult.clear();
+        std::sort(as_valid_moves(aResult).begin(), as_valid_moves(aResult).end(), [&](auto const& lhs, auto const& rhs)
+        {
+            matrix_board lhsBoard = aBoard;
+            matrix_board rhsBoard = aBoard;
+            move_piece(lhsBoard, as_move(lhs));
+            move_piece(rhsBoard, as_move(rhs));
+            return eval<matrix, Player>{}(aTables, lhsBoard, 2.0).eval < eval<matrix, Player>{}(aTables, rhsBoard, 2.0).eval;
+        });
+    }
+
+    template <player Player, typename ResultContainer>
+    inline void valid_moves(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult)
+    {
+        as_valid_moves(aResult).clear();
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
             for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                 for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
@@ -203,30 +216,20 @@ namespace chess
                                     (movingPieceColor == piece::Black && candidateMove.to.y == promotion_rank_v<player::Black>))
                                 {
                                     candidateMove.promoteTo = piece::Queen | movingPieceColor;
-                                    aResult.emplace_back(candidateMove);
+                                    as_valid_moves(aResult).emplace_back(candidateMove);
                                     candidateMove.promoteTo = piece::Rook | movingPieceColor;
-                                    aResult.emplace_back(candidateMove);
+                                    as_valid_moves(aResult).emplace_back(candidateMove);
                                     candidateMove.promoteTo = piece::Bishop | movingPieceColor;
-                                    aResult.emplace_back(candidateMove);
+                                    as_valid_moves(aResult).emplace_back(candidateMove);
                                     candidateMove.promoteTo = piece::Knight | movingPieceColor;
-                                    aResult.emplace_back(candidateMove);
+                                    as_valid_moves(aResult).emplace_back(candidateMove);
                                 }
                                 else
-                                    aResult.emplace_back(candidateMove);
+                                    as_valid_moves(aResult).emplace_back(candidateMove);
                             }
                             else
-                                aResult.emplace_back(candidateMove);
+                                as_valid_moves(aResult).emplace_back(candidateMove);
                         }
                     }
-        if (aSort)
-            std::sort(aResult.begin(), aResult.end(), [&](auto const& lhs, auto const& rhs)
-            {
-                matrix_board lhsBoard = aBoard;
-                matrix_board rhsBoard = aBoard;
-                move_piece(lhsBoard, as_move(lhs));
-                move_piece(rhsBoard, as_move(rhs));
-                return eval<matrix, Player>{}(aTables, lhsBoard, 2.0).eval < eval<matrix, Player>{}(aTables, rhsBoard, 2.0).eval;
-            });
     }
-
 }

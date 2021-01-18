@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chess/matrix.hpp>
 #include <chess/bitboard.hpp>
 #include <chess/ai_thread.hpp>
+#include <chess/node.hpp>
 
 namespace chess
 {
@@ -36,6 +37,8 @@ namespace chess
         define_declared_event(Moved, moved, move)
     private:
         define_event(Decided, decided, move)
+    public:
+        struct node_not_found : std::logic_error { node_not_found() : std::logic_error{ "chess::ai::node_not_found" } {} };
     public:
         typedef Representation representation_type;
     public:
@@ -55,7 +58,7 @@ namespace chess
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
-        std::optional<game_tree_node> execute();
+        game_tree_node const* execute();
     private:
         move_tables<representation_type> const iMoveTables;
         std::recursive_mutex iBoardMutex;
@@ -65,6 +68,7 @@ namespace chess
         std::condition_variable iSignal;
         std::atomic<bool> iPlaying = false;
         std::atomic<bool> iFinished = false;
+        std::optional<game_tree_node> iRootNode;
         ng::sink iSink;
     };
 

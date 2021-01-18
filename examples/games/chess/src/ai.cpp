@@ -94,6 +94,7 @@ namespace chess
     template <typename Representation, player Player>
     void ai<Representation, Player>::undo()
     {
+        iRootNode = std::nullopt;
         chess::undo(iBoard);
     }
 
@@ -108,10 +109,10 @@ namespace chess
             iSignal.wait_for(lk, std::chrono::seconds{ 1 }, [&]() { return iPlaying || iFinished; });
             if (iPlaying)
             {
-                auto bestMove = std::move(execute());
+                auto bestMove = execute();
                 iPlaying = false;
                 if (bestMove)
-                    Decided.trigger(bestMove->move);
+                    Decided.trigger(*bestMove->move);
             }
         }
 
@@ -119,23 +120,40 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    std::optional<game_tree_node> ai<Representation, Player>::execute()
+    game_tree_node const* ai<Representation, Player>::execute()
     {
-        thread_local std::vector<move> tValidMoves;
         std::optional<std::lock_guard<std::recursive_mutex>> lk{ iBoardMutex };
-        valid_moves<Player>(iMoveTables, iBoard, tValidMoves, true);
+        if (!iRootNode)
+        {
+            if (iBoard.moveHistory.empty())
+                iRootNode.emplace(iBoard.moveHistory.back());
+            else
+                iRootNode.emplace();
+            iRootNode->children.emplace();
+            valid_moves<Player>(iMoveTables, iBoard, *iRootNode);
+        }
+        else
+        {
+            auto existing = std::find_if(iRootNode->children->begin(), iRootNode->children->end(), [&](game_tree_node const& n) { return n.move == iBoard.moveHistory.back(); });
+            if (existing == iRootNode->children->end())
+                throw node_not_found();
+            game_tree_node temp = std::move(*existing);
+            iRootNode = std::move(temp);
+        }
+        sort_nodes<Player>(iMoveTables, iBoard, *iRootNode);
+
+        auto& children = *(*iRootNode).children;
+
         // todo: opening book and/or sensible white first move...
-        thread_local std::random_device tEntropy;
-        thread_local std::mt19937 tGenerator{ tEntropy() };
-        if (tValidMoves.size() > 0u)
+        if (children.size() > 0u)
         {
             ai_thread<representation_type, Player> thread;
             std::vector<std::future<game_tree_node>> futures;
-            futures.reserve(tValidMoves.size());
+            futures.reserve(children.size());
             auto iterThread = iThreads.begin();
-            for (auto const& m : tValidMoves)
+            for (auto& child : children)
             {
-                futures.emplace_back(iterThread->eval(iBoard, m).get_future());
+                futures.emplace_back(iterThread->eval(iBoard, std::move(child)).get_future());
                 if (++iterThread == iThreads.end())
                     iterThread = iThreads.begin();
             }
@@ -157,10 +175,13 @@ namespace chess
                 {
                     return static_cast<int64_t>(*m.eval * decimator) != static_cast<int64_t>(bestMoveEval * decimator);
                 });
+            thread_local std::random_device tEntropy;
+            thread_local std::mt19937 tGenerator{ tEntropy() };
             std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) };
-            return std::move(bestMoves[options(tGenerator)]);
+            iRootNode = std::move(bestMoves[options(tGenerator)]);
+            return &*iRootNode;
         }
-        return {};
+        return nullptr;
     }
 
     template <typename Representation, player Player>
@@ -175,6 +196,7 @@ namespace chess
         if constexpr (std::is_same_v<representation_type, matrix>)
         {
             std::lock_guard<std::recursive_mutex> lk{ iBoardMutex };
+            iRootNode = std::nullopt;
             iBoard = aSetup;
         }
         else

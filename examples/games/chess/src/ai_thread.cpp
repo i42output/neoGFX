@@ -36,14 +36,14 @@ namespace chess
         if (node.children == std::nullopt)
         {
             node.children.emplace();
-            valid_moves<Player>(tables, board, *node.children);
+            valid_moves<Player>(tables, board, node);
         }
         auto& validMoves = *node.children;
         if (depth == 0 || validMoves.empty())
             return eval<Representation, Player>{}(tables, board, static_cast<double>(depth)).eval;
         for (auto& child : validMoves)
         {
-            move_piece(board, child.move);
+            move_piece(board, *child.move);
             double score = 0.0;
             if (&child == &validMoves[0])
                 score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -beta, -alpha);
@@ -53,6 +53,7 @@ namespace chess
                 if (alpha < score && score < beta)
                     score = -pvs<opponent_v<Player>>(tables, board, child, depth - 1, -beta, -score);
             }
+            node.eval = -score;
             undo(board);
             alpha = std::max(alpha, score);
             if (alpha >= beta)
@@ -114,8 +115,8 @@ namespace chess
                 auto& evalBoard = eval_board<Representation>();
                 evalBoard = workItem.board;
                 auto& node = workItem.node;
-                move_piece(evalBoard, node.move );
-                node.eval = -pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                move_piece(evalBoard, *node.move );
+                pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, 3, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();

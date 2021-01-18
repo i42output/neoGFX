@@ -45,9 +45,15 @@ namespace chess
     }
 
     template <player Player, typename ResultContainer>
+    inline void sort_nodes(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, ResultContainer& aResult)
+    {
+        // todo
+    }
+
+    template <player Player, typename ResultContainer>
     inline void valid_moves(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, ResultContainer& aResult, bool aSort = false)
     {
         // todo
-        aResult.clear();
+        as_valid_moves(aResult).clear();
     }
 }
