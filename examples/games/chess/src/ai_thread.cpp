@@ -85,7 +85,7 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    ai_thread<Representation, Player>::ai_thread(int32_t aPlyDepth) :
+    ai_thread<Representation, Player>::ai_thread() :
         iMoveTables{ generate_move_tables<representation_type>() },
         iThread{ [&]() { process(); } }
     {
