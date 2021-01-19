@@ -1,4 +1,4 @@
-The "neogfx" C++ GUI library is dependent on the following 3rd party components which must be installed separately:
+The "neogfx" C++ app/game engine and development platform is dependent on the following 3rd party components which must be installed separately:
 
 * Boost (currently assumed to be in /usr/local)
 * OpenSSL (currently assumed to be in /usr/local)
@@ -7,6 +7,5 @@ The "neogfx" C++ GUI library is dependent on the following 3rd party components 
 * Freetype (set environment variable "DevDirFreetype" to point to directory root of library)
 * Glew (set environment variable "DevDirGlew" to point to directory root of library)
 * Harfbuzz (set environment variable "DevDirHarfBuzz" to point to directory root of library)
-* SDL (set environment variable "DevDirSDL" to point to directory root of library)
 
 Note when neoGFX 1.0 is released it will be provided with CMake build scripts (i.e. the current Visual Studio development projects will be removed).
