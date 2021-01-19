@@ -67,7 +67,7 @@ namespace chess
         {
             move_piece(board, *child.move);
             double score = 0.0;
-                if (&child == &validMoves[0])
+            if (&child == &validMoves[0])
                 score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -alpha);
             else
             {

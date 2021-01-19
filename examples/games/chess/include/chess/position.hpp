@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <ostream>
+
 #include <chess/chess.hpp>
 #include <chess/piece.hpp>
 #include <chess/player.hpp>
@@ -79,6 +81,8 @@ namespace chess
     {
         piece piece;
         uint64_t position;
+
+        auto operator<=>(const piece_bitboard&) const = default;
     };
     typedef std::array<std::array<piece_bitboard, 16>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> bitboard;
 
@@ -92,10 +96,91 @@ namespace chess
         mutable std::optional<move> checkTest;
     };
 
+    template <typename Representation>
+    inline bool operator==(basic_board<Representation> const& lhs, basic_board<Representation> const& rhs)
+    {
+        bool const samePosition = lhs.position == rhs.position;
+        bool const sameKings = lhs.kings == rhs.kings;
+        bool const sameTurn = lhs.turn == rhs.turn;
+        bool const sameHistory = lhs.moveHistory == rhs.moveHistory;
+        return samePosition && sameKings && sameTurn && sameHistory;
+    }
+
+    template <typename Representation>
+    inline bool operator!=(basic_board<Representation> const& lhs, basic_board<Representation> const& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
     using matrix_board = basic_board<matrix>;
     using bitboard_board = basic_board<bitboard>;
 
     using board = matrix_board;
+
+    template <typename CharT, typename CharTraitsT>
+    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, matrix_board const& aBoard)
+    {
+        aStream << "  01234567" << std::endl << std::endl;
+        for (coordinate y = 7u; y >= 0u && y <= 7u; --y)
+        {
+            aStream << y << " ";
+            for (coordinate x = 0u; x <= 7u; ++x)
+            {
+                switch (aBoard.position[y][x])
+                {
+                case piece::WhitePawn:
+                    aStream << "P";
+                    break;
+                case piece::WhiteKnight:
+                    aStream << "N";
+                    break;
+                case piece::WhiteBishop:
+                    aStream << "B";
+                    break;
+                case piece::WhiteRook:
+                    aStream << "R";
+                    break;
+                case piece::WhiteQueen:
+                    aStream << "Q";
+                    break;
+                case piece::WhiteKing:
+                    aStream << "K";
+                    break;
+                case piece::BlackPawn:
+                    aStream << "p";
+                    break;
+                case piece::BlackKnight:
+                    aStream << "n";
+                    break;
+                case piece::BlackBishop:
+                    aStream << "b";
+                    break;
+                case piece::BlackRook:
+                    aStream << "r";
+                    break;
+                case piece::BlackQueen:
+                    aStream << "q";
+                    break;
+                case piece::BlackKing:
+                    aStream << "k";
+                    break;
+                default:
+                    aStream << ".";
+                    break;
+                }
+            }
+            aStream << " " << y << std::endl;
+        }
+        aStream << std::endl << "  01234567" << std::endl;
+        return aStream;
+    }
+
+    template <typename CharT, typename CharTraitsT>
+    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, bitboard_board const& aBoard)
+    {
+        // todo
+        return aStream;
+    }
 
     inline std::optional<move> undo(matrix_board& aBoard)
     {
@@ -120,16 +205,20 @@ namespace chess
                 switch (movedPiece)
                 {
                 case piece::BlackPawn:
+                    // en passant (white)
                     if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
-                        aBoard.moveHistory.back().to.y - aBoard.moveHistory.back().from.y == 2u)
+                        aBoard.moveHistory.back().to == coordinates{ aBoard.moveHistory.back().to.x, 3u } &&
+                        aBoard.moveHistory.back().from == coordinates{ aBoard.moveHistory.back().to.x, 1u })
                     {
                         aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
                         aBoard.position[lastMove->to.y + 1u][lastMove->to.x] = piece::WhitePawn;
                     }
                     break;
                 case piece::WhitePawn:
+                    // en passant (black)
                     if (lastMove->capture == piece::BlackPawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 5u } &&
-                        aBoard.moveHistory.back().from.y - aBoard.moveHistory.back().to.y == 2u)
+                        aBoard.moveHistory.back().to == coordinates{ aBoard.moveHistory.back().to.x, 4u } &&
+                        aBoard.moveHistory.back().from == coordinates{ aBoard.moveHistory.back().to.x, 6u })
                     {
                         aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
                         aBoard.position[lastMove->to.y - 1u][lastMove->to.x] = piece::BlackPawn;
