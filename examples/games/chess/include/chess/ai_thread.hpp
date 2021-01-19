@@ -44,6 +44,7 @@ namespace chess
         ai_thread();
         ~ai_thread();
     public:
+        void set_ply_depth(int32_t aPlyDepth);
         std::promise<game_tree_node>& eval(board_type const& aBoard, game_tree_node&& aNode);
         void start();
     private:
@@ -54,6 +55,7 @@ namespace chess
         std::mutex iMutex;
         std::condition_variable iSignal;
         std::thread iThread;
+        int32_t iPlyDepth = 0;
         bool iFinished = false;
     };
 }

@@ -44,6 +44,7 @@ namespace chess::gui
         Outer,
         Inner,
         InnerExtra,
+        Debug,
 
         COUNT
     };

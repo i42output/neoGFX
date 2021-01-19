@@ -115,50 +115,57 @@ namespace chess
                 else if (lastMove->to.y == promotion_rank_v<player::Black>)
                     aBoard.position[lastMove->from.y][lastMove->from.x] = piece::BlackPawn;
             }
-            else if (!aBoard.moveHistory.empty())
+            else
             {
-                // en passant
-                if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
-                    aBoard.moveHistory.back().to.y - aBoard.moveHistory.back().from.y == 2u)
+                switch (movedPiece)
                 {
-                    aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
-                    aBoard.position[lastMove->to.y + 1u][lastMove->to.x] = lastMove->capture;
-                }
-                else if (lastMove->capture == piece::BlackPawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 5u } &&
-                    aBoard.moveHistory.back().from.y - aBoard.moveHistory.back().to.y == 2u)
-                {
-                    aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
-                    aBoard.position[lastMove->to.y - 1u][lastMove->to.x] = lastMove->capture;
-                }
-            }
-            if (movedPiece == piece::WhiteKing)
-            {
-                aBoard.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
-                // castling (white)
-                if (lastMove->to.x - lastMove->from.x == 2u)
-                {
-                    aBoard.position[0u][7u] = piece::WhiteRook;
-                    aBoard.position[0u][5u] = piece::None;
-                }
-                else if (lastMove->from.x - lastMove->to.x == 2u)
-                {
-                    aBoard.position[0u][0u] = piece::WhiteRook;
-                    aBoard.position[0u][3u] = piece::None;
-                }
-            }
-            else if (movedPiece == piece::BlackKing)
-            {
-                aBoard.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
-                // castling (black)
-                if (lastMove->to.x - lastMove->from.x == 2u)
-                {
-                    aBoard.position[7u][7u] = piece::BlackRook;
-                    aBoard.position[7u][5u] = piece::None;
-                }
-                else if (lastMove->from.x - lastMove->to.x == 2u)
-                {
-                    aBoard.position[7u][0u] = piece::BlackRook;
-                    aBoard.position[7u][3u] = piece::None;
+                case piece::BlackPawn:
+                    if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
+                        aBoard.moveHistory.back().to.y - aBoard.moveHistory.back().from.y == 2u)
+                    {
+                        aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
+                        aBoard.position[lastMove->to.y + 1u][lastMove->to.x] = piece::WhitePawn;
+                    }
+                    break;
+                case piece::WhitePawn:
+                    if (lastMove->capture == piece::BlackPawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 5u } &&
+                        aBoard.moveHistory.back().from.y - aBoard.moveHistory.back().to.y == 2u)
+                    {
+                        aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
+                        aBoard.position[lastMove->to.y - 1u][lastMove->to.x] = piece::BlackPawn;
+                    }
+                    break;
+                case piece::WhiteKing:
+                    aBoard.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
+                    // castling (white)
+                    if (lastMove->to.x - lastMove->from.x == 2u)
+                    {
+                        aBoard.position[0u][7u] = piece::WhiteRook;
+                        aBoard.position[0u][5u] = piece::None;
+                    }
+                    else if (lastMove->from.x - lastMove->to.x == 2u)
+                    {
+                        aBoard.position[0u][0u] = piece::WhiteRook;
+                        aBoard.position[0u][3u] = piece::None;
+                    }
+                    break;
+                case piece::BlackKing:
+                    aBoard.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
+                    // castling (black)
+                    if (lastMove->to.x - lastMove->from.x == 2u)
+                    {
+                        aBoard.position[7u][7u] = piece::BlackRook;
+                        aBoard.position[7u][5u] = piece::None;
+                    }
+                    else if (lastMove->from.x - lastMove->to.x == 2u)
+                    {
+                        aBoard.position[7u][0u] = piece::BlackRook;
+                        aBoard.position[7u][3u] = piece::None;
+                    }
+                    break;
+                default:
+                    // do nothing
+                    break;
                 }
             }
             aBoard.turn = next_player(aBoard.turn);

@@ -85,7 +85,7 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    ai_thread<Representation, Player>::ai_thread() :
+    ai_thread<Representation, Player>::ai_thread(int32_t aPlyDepth) :
         iMoveTables{ generate_move_tables<representation_type>() },
         iThread{ [&]() { process(); } }
     {
@@ -100,6 +100,12 @@ namespace chess
         }
         iSignal.notify_one();
         iThread.join();
+    }
+
+    template <typename Representation, player Player>
+    void ai_thread<Representation, Player>::set_ply_depth(int32_t aPlyDepth)
+    {
+        iPlyDepth = aPlyDepth;
     }
         
     template <typename Representation, player Player>
@@ -138,7 +144,7 @@ namespace chess
                 evalBoard = workItem.board;
                 auto& node = workItem.node;
                 move_piece(evalBoard, *node.move );
-                pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, 4, 4, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();

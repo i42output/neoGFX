@@ -27,6 +27,8 @@ namespace chess
         iBoard{ chess::setup_position<representation_type>() },
         iThreads{ std::max(1u, std::thread::hardware_concurrency()) }
     {
+        for (auto& aiThread : iThreads)
+            aiThread.set_ply_depth(3);
         start();
         Decided([&](move const& aBestMove)
         {

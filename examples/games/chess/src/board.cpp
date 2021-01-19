@@ -76,8 +76,8 @@ namespace chess::gui
                         {
                             bool const canMove = iSelection && iMoveValidator.can_move(iBoard.turn, iBoard, chess::move{ *iSelection, coordinates{x, y} });
                             auto const& labelFont = font();
-                            auto yLabel = std::string{ static_cast<char>(y + '1') };
-                            auto xLabel = std::string{ static_cast<char>(x + 'a') };
+                            auto yLabel = std::string{ static_cast<char>(y + (iSquareIdentification != square_identification::Debug ? '1' : '0')) };
+                            auto xLabel = std::string{ static_cast<char>(x + (iSquareIdentification != square_identification::Debug ? 'a' : '0')) };
                             auto yLabelExtents = aGc.text_extent(yLabel, labelFont);
                             auto xLabelExtents = aGc.text_extent(xLabel, labelFont);
                             bool labelCursor = false;
@@ -136,6 +136,16 @@ namespace chess::gui
                                     if (y == 0)
                                         aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
                                 }
+                                break;
+                            case square_identification::Debug:
+                                if (x == 0u)
+                                    aGc.draw_text(ng::point{ squareRect.left() - (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0 - yLabelExtents.cx, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
+                                else if (x == 7u)
+                                    aGc.draw_text(ng::point{ squareRect.right() + (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
+                                if (y == 0u)
+                                    aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.bottom() + (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 }, xLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
+                                else if (y == 7u)
+                                    aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.top() - (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 - xLabelExtents.cy }, xLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
                                 break;
                             }
                         }
@@ -702,7 +712,7 @@ namespace chess::gui
             result.deflate((result.cx - result.cy) / 2.0, 0.0);
         else
             result.deflate(0.0, (result.cy - result.cx) / 2.0);
-        if (iSquareIdentification == square_identification::Outer)
+        if (iSquareIdentification == square_identification::Outer || iSquareIdentification == square_identification::Debug)
             result.deflate(dpi_scale(BORDER) * std::min(result.width() / 8.0 / 64.0_dip, 1.0));
         return result;
     }
