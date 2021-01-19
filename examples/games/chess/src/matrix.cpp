@@ -170,7 +170,7 @@ namespace chess
             double constexpr scaleDefend = 1.0; // todo
             double constexpr scaleCheck = 9.0; // todo
             double constexpr scaleAttackAdvantage = 2.0; // todo
-            double const scaleMate = 1.0 / aPly;
+            double const scaleMate = 1.0 / std::pow(10.0, aPly);
             double constexpr stalemate = 0.0;
             double material = 0.0;
             double mobility = 0.0;

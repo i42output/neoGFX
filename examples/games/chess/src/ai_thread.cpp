@@ -62,7 +62,11 @@ namespace chess
             valid_moves<Player>(tables, board, use);
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
-            return eval<Representation, Player>{}(tables, board, static_cast<double>(depth)).eval;
+        {
+            auto bestGuess = eval<Representation, Player>{}(tables, board, static_cast<double>(startDepth - depth)).eval;
+            use.eval = -bestGuess;
+            return bestGuess;
+        }
         for (auto& child : validMoves)
         {
             move_piece(board, *child.move);
@@ -75,12 +79,12 @@ namespace chess
                 if (alpha < score && score < beta)
                     score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -score);
             }
-            use.eval = -score;
             undo(board);
             alpha = std::max(alpha, score);
             if (alpha >= beta)
                 break;
         }
+        use.eval = -alpha;
         return alpha;
     }
 

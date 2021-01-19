@@ -171,13 +171,19 @@ namespace chess
                 bestMoves.push_back(std::move(future.get()));
             std::sort(bestMoves.begin(), bestMoves.end(),
                 [](auto const& m1, auto const& m2)
-                {
-                    return m1.eval >= m2.eval;
+                { 
+                    return m1.eval > m2.eval;
                 });
             auto const bestMoveEval = *bestMoves[0].eval;
+            bool const bestMoveIsMate = bestMoveEval > std::numeric_limits<int64_t>::max();
+            if (bestMoveIsMate)
+            {
+                iRootNode = std::move(bestMoves[0]);
+                return &*iRootNode;
+            }
             auto const decimator = 0.125 * (iBoard.moveHistory.size() + 1); // todo: involve difficulty level?
             auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
-                [bestMoveEval, decimator](auto const& m)
+                [bestMoveEval, bestMoveIsMate, decimator](auto const& m)
                 {
                     return static_cast<int64_t>(*m.eval * decimator) != static_cast<int64_t>(bestMoveEval * decimator);
                 });
