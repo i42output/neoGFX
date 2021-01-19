@@ -280,11 +280,19 @@ namespace chess
                 newMove.castlingState[as_color_cardinal<>(piece::Black)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
             break;
         case piece::WhitePawn:
+            // en passant
+            if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
+            {
+                auto& targetPawn = aBoard.position[4u][aMove.to.x];
+                newMove.capture = targetPawn;
+                targetPawn = piece::None;
+            }
+            break;
         case piece::BlackPawn:
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
             {
-                auto& targetPawn = aBoard.position[piece_color(movingPiece) == piece::White ? aMove.to.y - 1 : aMove.to.y + 1][aMove.to.x];
+                auto& targetPawn = aBoard.position[3u][aMove.to.x];
                 newMove.capture = targetPawn;
                 targetPawn = piece::None;
             }
