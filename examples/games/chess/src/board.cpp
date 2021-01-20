@@ -217,6 +217,11 @@ namespace chess::gui
             update();
             return true;
         }
+        else if (aKeyCode == ng::key_code_e::KeyCode_SLASH)
+        {
+            display_query();
+            return true;
+        }
         else
             return widget<>::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
     }
@@ -602,6 +607,24 @@ namespace chess::gui
         update();
     }
 
+    template <typename CharT, typename CharTraitsT>
+    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, eval_info const& aEvalInfo)
+    {
+        aStream << "material: " << std::round(aEvalInfo.material) << std::endl;
+        aStream << "mobility: " << std::round(aEvalInfo.mobility) << std::endl;
+        aStream << "attack: " << std::round(aEvalInfo.attack) << std::endl;
+        aStream << "defend: " << std::round(aEvalInfo.defend) << std::endl;
+        aStream << "mobilityPlayer: " << aEvalInfo.mobilityPlayer << std::endl;
+        aStream << "mobilityPlayerKing: " << aEvalInfo.mobilityPlayerKing << std::endl;
+        aStream << "checkedPlayerKing: " << std::round(aEvalInfo.checkedPlayerKing) << std::endl;
+        aStream << "mobilityOpponent: " << aEvalInfo.mobilityOpponent << std::endl;
+        aStream << "mobilityOpponentKing: " << aEvalInfo.mobilityOpponentKing << std::endl;
+        aStream << "checkedOpponentKing: " << std::round(aEvalInfo.checkedOpponentKing) << std::endl;
+        aStream << "eval: " << std::round(aEvalInfo.eval) << std::endl;
+        aStream << "eval time: " << aEvalInfo.time_usec.count() << " us" << std::endl;
+        return aStream;
+    }
+
     void board::display_eval() const
     {
         eval_info evalInfo;
@@ -609,18 +632,36 @@ namespace chess::gui
         std::cerr << std::setprecision(4);
         if (iEditBoard)
             std::cerr << "[EDIT BOARD]" << std::endl;
-        std::cerr << "material: " << std::round(evalInfo.material) << std::endl;
-        std::cerr << "mobility: " << std::round(evalInfo.mobility) << std::endl;
-        std::cerr << "attack: " << std::round(evalInfo.attack) << std::endl;
-        std::cerr << "defend: " << std::round(evalInfo.defend) << std::endl;
-        std::cerr << "mobilityPlayer: " << evalInfo.mobilityPlayer << std::endl;
-        std::cerr << "mobilityPlayerKing: " << evalInfo.mobilityPlayerKing << std::endl;
-        std::cerr << "checkedPlayerKing: " << std::round(evalInfo.checkedPlayerKing) << std::endl;
-        std::cerr << "mobilityOpponent: " << evalInfo.mobilityOpponent << std::endl;
-        std::cerr << "mobilityOpponentKing: " << evalInfo.mobilityOpponentKing << std::endl;
-        std::cerr << "checkedOpponentKing: " << std::round(evalInfo.checkedOpponentKing) << std::endl;
-        std::cerr << "eval: " << std::round(eval) << std::endl;
-        std::cerr << "eval time: " << evalInfo.time_usec.count() << " us" << std::endl;
+        std::cerr << evalInfo;
+    }
+
+    void board::display_query() const
+    {
+        std::cerr << "[QUERY START]" << std::endl;
+        std::vector<std::pair<chess::move, eval_info>> results;
+        auto queryBoard = iBoard;
+        for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
+            for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
+                for (coordinate xTo = 0u; xTo<= 7u; ++xTo)
+                    for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
+                    {
+                        chess::move const candidateMove{ coordinates{ xFrom, yFrom }, coordinates{ xTo, yTo } };
+                        if (iMoveValidator.can_move(queryBoard.turn, queryBoard, candidateMove))
+                        {
+                            move_piece(queryBoard, candidateMove);
+                            eval_info evalInfo;
+                            double eval = iMoveValidator.eval(current_player().player(), queryBoard, evalInfo);
+                            results.push_back(std::make_pair(candidateMove, evalInfo));
+                            chess::undo(queryBoard);
+                        }
+                    }
+        std::sort(results.begin(), results.end(), [](auto const& lhs, auto const& rhs) { return lhs.second.eval > rhs.second.eval; });
+        for (auto const& m : results)
+        {
+            std::cerr << "??? " << to_string(m.first) << " ???" << std::endl;
+            std::cerr << m.second;
+        }
+        std::cerr << "[QUERY END]" << std::endl;
     }
 
     void board::animate_move(chess::move const& aMove)

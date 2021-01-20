@@ -64,7 +64,7 @@ namespace chess
         if (depth == 0 || validMoves.empty())
         {
             auto bestGuess = eval<Representation, Player>{}(tables, board, static_cast<double>(startDepth - depth)).eval;
-            use.eval = -bestGuess;
+            use.eval = bestGuess;
             return bestGuess;
         }
         for (auto& child : validMoves)
