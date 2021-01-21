@@ -63,9 +63,7 @@ namespace chess
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
         {
-            auto bestGuess = eval<Representation, Player>{}(tables, board, static_cast<double>(startDepth - depth)).eval;
-            use.eval = bestGuess;
-            return bestGuess;
+            return *(use.eval = eval<Representation, Player>{}(tables, board, static_cast<double>(startDepth - depth)).eval);
         }
         for (auto& child : validMoves)
         {
@@ -84,7 +82,7 @@ namespace chess
             if (alpha >= beta)
                 break;
         }
-        use.eval = -alpha;
+        use.eval = alpha;
         return alpha;
     }
 
@@ -149,6 +147,7 @@ namespace chess
                 auto& node = workItem.node;
                 move_piece(evalBoard, *node.move );
                 pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                node.eval = -*node.eval;
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();

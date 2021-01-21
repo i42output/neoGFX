@@ -637,7 +637,7 @@ namespace chess::gui
 
     void board::display_query() const
     {
-        std::cerr << "[QUERY START]" << std::endl;
+        std::cerr << std::endl << "[QUERY START]" << std::endl << std::endl;
         std::vector<std::pair<chess::move, eval_info>> results;
         auto queryBoard = iBoard;
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
@@ -658,10 +658,10 @@ namespace chess::gui
         std::sort(results.begin(), results.end(), [](auto const& lhs, auto const& rhs) { return lhs.second.eval > rhs.second.eval; });
         for (auto const& m : results)
         {
-            std::cerr << "??? " << to_string(m.first) << " ???" << std::endl;
+            std::cerr << "*** " << to_string(m.first) << " ***" << std::endl;
             std::cerr << m.second;
         }
-        std::cerr << "[QUERY END]" << std::endl;
+        std::cerr << std::endl << "[QUERY END]" << std::endl << std::endl;
     }
 
     void board::animate_move(chess::move const& aMove)

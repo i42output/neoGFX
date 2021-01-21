@@ -28,7 +28,7 @@ namespace chess
         iThreads{ std::max(1u, std::thread::hardware_concurrency()) }
     {
         for (auto& aiThread : iThreads)
-            aiThread.set_ply_depth(3);
+            aiThread.set_ply_depth(4);
         start();
         Decided([&](move const& aBestMove)
         {
