@@ -48,9 +48,9 @@ namespace neogfx::DesignStudio
                     case element_group::Workflow:
                     {
                         auto node = aElement.group() != element_group::Project ?
-                            item_model().append_item(aPosition, &aElement, aElement.id().to_std_string()) :
-                            item_model().insert_item(aPosition, &aElement, aElement.id().to_std_string());
-                        item_model().insert_cell_data(node, 1u, aElement.type().to_std_string());
+                            item_model().append_item(aPosition, &aElement, aElement.id()) :
+                            item_model().insert_item(aPosition, &aElement, aElement.id());
+                        item_model().insert_cell_data(node, 1u, aElement.type());
                         for (auto& child : aElement)
                             addNode(node, *child);
                     }

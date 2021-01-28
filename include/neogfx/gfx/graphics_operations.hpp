@@ -280,7 +280,7 @@ namespace neogfx
             std::optional<game::filter> filter;
         };
 
-        typedef neolib::variant<
+        typedef std::variant<std::monostate,
             set_logical_coordinate_system,
             set_logical_coordinates,
             set_origin,

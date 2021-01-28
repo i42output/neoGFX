@@ -117,6 +117,7 @@ namespace chess::gui
         std::vector<chess::move> iUndoneMoves;
         bool iInRedo;
         std::unordered_map<piece, ng::texture> iPieceTextures;
+        bool iColorizePieces;
         neolib::callback_timer iAnimator;
         std::optional<coordinates> iCursor;
         std::optional<coordinates> iSelection;

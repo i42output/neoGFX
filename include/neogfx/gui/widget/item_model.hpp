@@ -568,7 +568,7 @@ namespace neogfx
         }
         void update_cell_data(item_model_index const& aIndex, const item_cell_data& aCellData) override
         {
-            if (std::holds_alternative<std::string>(aCellData) && std::get<std::string>(aCellData).empty())
+            if (std::holds_alternative<string>(aCellData) && std::get<string>(aCellData).empty())
             {
                 update_cell_data(aIndex, {});
                 return;
@@ -621,7 +621,7 @@ namespace neogfx
         }
         bool do_insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData)
         {
-            if (std::holds_alternative<std::string>(aCellData) && std::get<std::string>(aCellData).empty())
+            if (std::holds_alternative<string>(aCellData) && std::get<string>(aCellData).empty())
                 return do_insert_cell_data(aItem, aColumnIndex, {});
             bool changed = false;
             auto ri = aItem.get<iterator, iterator, sibling_iterator>();

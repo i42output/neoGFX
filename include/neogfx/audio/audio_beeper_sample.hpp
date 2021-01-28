@@ -33,7 +33,7 @@ namespace neogfx
         struct item_silence { double duration; };
         struct item_repeat_start { uint32_t repeatCount; };
         struct item_repeat_end {};
-        typedef neolib::variant<item_beep, item_envelope, item_silence, item_repeat_start, item_repeat_end> value_type;
+        typedef std::variant<std::monostate, item_beep, item_envelope, item_silence, item_repeat_start, item_repeat_end> value_type;
     public:
         audio_beeper_sample(const audio_spec& aSpec);
     public:

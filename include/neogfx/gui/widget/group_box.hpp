@@ -92,7 +92,7 @@ namespace neogfx
     private:
         vertical_layout iLayout;
         horizontal_layout iTitleLayout;
-        neolib::variant<label_ptr, check_box_ptr> iTitle;
+        std::variant<std::monostate, label_ptr, check_box_ptr> iTitle;
         item_container iItemContainer;
         ref_ptr<i_layout> iItemLayout;
         define_property(property_category::color, optional_color, BorderColor, border_color)

@@ -82,7 +82,7 @@ namespace neogfx
                 {
                     std::optional<std::string> existingStyle;
                     if (iOurSelectionModel.has_current_index())
-                        existingStyle = static_variant_cast<std::string const&>(item_model().cell_data(to_item_model_index(iOurSelectionModel.current_index())));
+                        existingStyle = static_variant_cast<string const&>(item_model().cell_data(to_item_model_index(iOurSelectionModel.current_index())));
                     item_model().clear();
                     iFonts.clear();
                     if (aCurrentIndex != std::nullopt)
@@ -93,7 +93,7 @@ namespace neogfx
                         std::optional<uint32_t> matchingStyle;
                         for (uint32_t s = 0; s < styleCount; ++s)
                         {
-                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s).to_std_string());
+                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
                             if (existingStyle && *existingStyle == fm.font_style(fontFamilyIndex, s))
                                 matchingStyle = s;
                         }
@@ -118,7 +118,7 @@ namespace neogfx
                     auto& fm = service<i_font_manager>();
                     iFonts[modelRow] = font{ 
                         fm.font_family(familyModelRow), 
-                        static_variant_cast<std::string const&>(item_model().cell_data(to_item_model_index(aIndex))), 
+                        static_variant_cast<string const&>(item_model().cell_data(to_item_model_index(aIndex))), 
                         12.0 };
                 }
                 return iFonts[modelRow];
@@ -226,7 +226,7 @@ namespace neogfx
         auto& fm = service<i_font_manager>();
 
         for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
-            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi).to_std_string());
+            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
 
         update_selected_font(*this);
     }

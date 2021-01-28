@@ -31,7 +31,7 @@ namespace neogfx
         struct item_silence { double duration; };
         struct item_repeat_start { uint32_t repeatCount; };
         struct item_repeat_end {};
-        typedef neolib::variant<item_sample, item_silence, item_repeat_start, item_repeat_end> value_type;
+        typedef std::variant<std::monostate, item_sample, item_silence, item_repeat_start, item_repeat_end> value_type;
         typedef uint32_t item_index;
     public:
         struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_audio_track::bad_item_index") {} };

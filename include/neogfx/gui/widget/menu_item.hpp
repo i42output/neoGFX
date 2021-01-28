@@ -34,7 +34,7 @@ namespace neogfx
     private:
         typedef std::shared_ptr<i_action> action_pointer;
         typedef std::shared_ptr<i_menu> menu_pointer;
-        typedef neolib::variant<action_pointer, menu_pointer> contents;
+        typedef std::variant<std::monostate, action_pointer, menu_pointer> contents;
     public:
         menu_item(i_action& aAction);
         menu_item(std::shared_ptr<i_action> aAction);

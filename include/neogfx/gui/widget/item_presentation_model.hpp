@@ -707,7 +707,7 @@ namespace neogfx
             case item_data_type::String:
             default:
                 if (!aString.empty())
-                    return aString;
+                    return string{ aString };
                 else
                     return {};
             }
@@ -941,10 +941,10 @@ namespace neogfx
                     auto col = iSortOrder[i].first;
                     auto const& v1 = item_model().cell_data(item_model_index{ aLhs.value, model_column(col) });
                     auto const& v2 = item_model().cell_data(item_model_index{ aRhs.value, model_column(col) });
-                    if (std::holds_alternative<std::string>(v1) && std::holds_alternative<std::string>(v2))
+                    if (std::holds_alternative<string>(v1) && std::holds_alternative<string>(v2))
                     {
-                        std::string s1 = boost::to_upper_copy<std::string>(std::get<std::string>(v1));
-                        std::string s2 = boost::to_upper_copy<std::string>(std::get<std::string>(v2));
+                        std::string s1 = boost::to_upper_copy<std::string>(std::get<string>(v1));
+                        std::string s2 = boost::to_upper_copy<std::string>(std::get<string>(v2));
                         if (s1 < s2)
                             return iSortOrder[i].second == sort_direction::Ascending;
                         else if (s2 < s1)

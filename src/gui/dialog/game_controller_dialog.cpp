@@ -65,7 +65,7 @@ namespace neogfx
     {
         for (auto const& controller : service<i_game_controllers>().controllers())
         {
-            iControllerSelector.model().insert_item(iControllerSelector.model().rows(), controller->product_name().to_std_string());
+            iControllerSelector.model().insert_item(iControllerSelector.model().rows(), controller->product_name());
             if (controller->player_assigned() && controller->player() == game_player::One)
                 iControllerSelector.selection_model().set_current_index(iControllerSelector.presentation_model().rows() - 1);
         }

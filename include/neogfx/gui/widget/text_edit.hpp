@@ -158,7 +158,7 @@ namespace neogfx
         private:
             static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
         private:
-            typedef neolib::variant<style_list::const_iterator, nullptr_t> tag_style;
+            typedef std::variant<std::monostate, style_list::const_iterator, nullptr_t> tag_style;
         public:
             struct tag_data
             {
@@ -510,7 +510,7 @@ namespace neogfx
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
         bool password() const;
-        std::string const& password_mask() const;
+        string const& password_mask() const;
         void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F");
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
@@ -641,7 +641,7 @@ namespace neogfx
         define_property(property_category::other, bool, ReadOnly, read_only, false)
         define_property(property_category::other, bool, WordWrap, word_wrap, iType == MultiLine)
         define_property(property_category::other, bool, Password, password, false)
-        define_property(property_category::other, std::string, PasswordMask, password_mask)
+        define_property(property_category::other, string, PasswordMask, password_mask)
         define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)
     };
 

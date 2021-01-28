@@ -370,7 +370,7 @@ namespace neogfx
                     iCustomColors = gd.gradient_selector().custom_colors();
             });
             auto stopIter = stop_at(aPosition);
-            if (stopIter != neolib::none && stopIter == stop_at(*iClicked))
+            if (!std::holds_alternative<std::monostate>(stopIter) && stopIter == stop_at(*iClicked))
             {
                 if (std::holds_alternative<gradient::color_stop_list::iterator>(stopIter))
                 {
@@ -563,7 +563,7 @@ namespace neogfx
     neogfx::mouse_cursor gradient_widget::mouse_cursor() const
     {
         point mousePos = root().mouse_position() - origin();
-        if (stop_at(mousePos) != neolib::none)
+        if (!std::holds_alternative<std::monostate>(stop_at(mousePos)))
             return mouse_system_cursor::Arrow;
         else if (contents_rect().contains(mousePos))
         {
@@ -590,7 +590,7 @@ namespace neogfx
 
     bool gradient_widget::is_stop_at(point const& aPosition) const
     {
-        return stop_at(aPosition) != neolib::none;
+        return !std::holds_alternative<std::monostate>(stop_at(aPosition));
     }
 
     gradient_widget::stop_const_iterator gradient_widget::stop_at(point const& aPosition) const

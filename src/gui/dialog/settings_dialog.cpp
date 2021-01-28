@@ -157,7 +157,7 @@ namespace neogfx
                         auto const& e = aSetting.value().get<neolib::i_enum>();
                         auto enumModel = make_ref<basic_item_model<neolib::i_enum::underlying_type>>();
                         for (auto& ee : e.enumerators())
-                            enumModel->insert_item(enumModel->end(), ee.first(), iSettings.friendly_text(aSetting, ee.second()).to_std_string());
+                            enumModel->insert_item(enumModel->end(), ee.first(), iSettings.friendly_text(aSetting, ee.second()));
                         settingWidget->set_model(enumModel);
                         aSink += settingWidget->selection_changed([&, settingWidget, enumModel](const optional_item_model_index& aCurrentIndex)
                         {
@@ -365,12 +365,12 @@ namespace neogfx
         std::map<std::string, ref_ptr<setting_group_widget>> groupWidgets;
         for (auto const& category : iSettings.all_categories())
         {
-            auto c = treeModel->insert_item(treeModel->send(), make_ref<setting_group_widget_list::element_type>(), category.second().to_std_string());
+            auto c = treeModel->insert_item(treeModel->send(), make_ref<setting_group_widget_list::element_type>(), category.second());
             auto existingGroups = iSettings.all_groups().find(category.first());
             if (existingGroups != iSettings.all_groups().end())
                 for (auto const& group : existingGroups->second())
                 {
-                    auto g = treeModel->append_item(c, make_ref<setting_group_widget_list::element_type>(), group.second().to_std_string());
+                    auto g = treeModel->append_item(c, make_ref<setting_group_widget_list::element_type>(), group.second());
                     auto settingGroupWidget = make_ref<setting_group_widget>(group.second().to_std_string());
                     iDetailLayout.add(settingGroupWidget);
                     treeModel->item(c)->push_back(settingGroupWidget);

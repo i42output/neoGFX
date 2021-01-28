@@ -21,6 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/pair.hpp>
+#include <neolib/core/optional.hpp>
 #include <neolib/core/variant.hpp>
 #include <neolib/core/generic_iterator.hpp>
 #include <neogfx/core/i_property.hpp>
@@ -110,8 +113,8 @@ namespace neogfx
     struct item_cell_choice_type
     {
         typedef T value_type;
-        typedef std::pair<value_type, std::string> option;
-        typedef std::vector<option> type;
+        typedef neolib::pair<value_type, string> option;
+        typedef neolib::vector<option> type;
     };
 
     typedef neolib::variant<
@@ -122,19 +125,19 @@ namespace neogfx
         uint64_t,
         float,
         double,
-        std::string,
+        string,
         void*,
         custom_type,
-        item_cell_choice_type<bool>::type::const_iterator,
-        item_cell_choice_type<int32_t>::type::const_iterator,
-        item_cell_choice_type<uint32_t>::type::const_iterator,
-        item_cell_choice_type<int64_t>::type::const_iterator,
-        item_cell_choice_type<uint64_t>::type::const_iterator,
-        item_cell_choice_type<float>::type::const_iterator,
-        item_cell_choice_type<double>::type::const_iterator,
-        item_cell_choice_type<std::string>::type::const_iterator,
-        item_cell_choice_type<void*>::type::const_iterator,
-        item_cell_choice_type<custom_type>::type::const_iterator> item_cell_data_variant;
+        item_cell_choice_type<bool>::type::value_type const*,
+        item_cell_choice_type<int32_t>::type::value_type const*,
+        item_cell_choice_type<uint32_t>::type::value_type const*,
+        item_cell_choice_type<int64_t>::type::value_type const*,
+        item_cell_choice_type<uint64_t>::type::value_type const*,
+        item_cell_choice_type<float>::type::value_type const*,
+        item_cell_choice_type<double>::type::value_type const*,
+        item_cell_choice_type<string>::type::value_type const*,
+        item_cell_choice_type<void*>::type::value_type const*,
+        item_cell_choice_type<custom_type>::type::value_type const*> item_cell_data_variant;
 
     template <typename T> struct classify_item_call_data { static constexpr item_cell_data_category category = item_cell_data_category::Invalid; };
     template <> struct classify_item_call_data<bool> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
@@ -144,19 +147,19 @@ namespace neogfx
     template <> struct classify_item_call_data<uint64_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<float> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<double> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
-    template <> struct classify_item_call_data<std::string> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
+    template <> struct classify_item_call_data<string> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<void*> { static constexpr item_cell_data_category category = item_cell_data_category::Pointer; };
     template <> struct classify_item_call_data<custom_type> { static constexpr item_cell_data_category category = item_cell_data_category::CustomType; };
-    template <> struct classify_item_call_data<item_cell_choice_type<bool>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<int32_t>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<uint32_t>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<int64_t>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<uint64_t>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<float>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<double>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<std::string>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<void*>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChoosePointer; };
-    template <> struct classify_item_call_data<item_cell_choice_type<custom_type>::type::const_iterator> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseCustomType; };
+    template <> struct classify_item_call_data<item_cell_choice_type<bool>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<int32_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<uint32_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<int64_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<uint64_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<float>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<double>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<string>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<void*>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChoosePointer; };
+    template <> struct classify_item_call_data<item_cell_choice_type<custom_type>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseCustomType; };
 
     class item_cell_data : public item_cell_data_variant
     {
@@ -164,13 +167,18 @@ namespace neogfx
         item_cell_data() 
         {
         }
-        template <typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data>, int> = 0>
+        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T const&>, sfinae>>
+        item_cell_data(T const& aValue) :
+            item_cell_data_variant{ aValue }
+        {
+        }
+        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T&&>, sfinae>>
         item_cell_data(T&& aValue) : 
             item_cell_data_variant{ std::forward<T>(aValue) }
         {
         }
-        item_cell_data(const item_cell_data& aOther) : 
-            item_cell_data_variant{ static_cast<const item_cell_data_variant&>(aOther) } 
+        item_cell_data(item_cell_data const& aOther) :
+            item_cell_data_variant{ static_cast<item_cell_data_variant const&>(aOther) } 
         {
         }
         item_cell_data(item_cell_data&& aOther) : 
@@ -178,13 +186,22 @@ namespace neogfx
         {
         }
     public:
-        item_cell_data(const char* aString) : item_cell_data_variant{ std::string{ aString } } 
+        item_cell_data(char const* aString) : 
+            item_cell_data_variant{ string{ aString } } 
+        {
+        }
+        item_cell_data(std::string const& aString) :
+            item_cell_data_variant{ string{ aString } }
+        {
+        }
+        item_cell_data(std::string&& aString) :
+            item_cell_data_variant{ string{ aString } }
         {
         }
     public:
-        item_cell_data& operator=(const item_cell_data& aOther)
+        item_cell_data& operator=(item_cell_data const& aOther)
         {
-            item_cell_data_variant::operator=(static_cast<const item_cell_data_variant&>(aOther));
+            item_cell_data_variant::operator=(static_cast<item_cell_data_variant const&>(aOther));
             return *this;
         }
         item_cell_data& operator=(item_cell_data&& aOther)
@@ -192,16 +209,32 @@ namespace neogfx
             item_cell_data_variant::operator=(static_cast<item_cell_data_variant&&>(std::move(aOther)));
             return *this;
         }
-        template <typename T, std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data>, int> = 0>
+        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T const&>, sfinae>>
+        item_cell_data& operator=(T const& aArgument)
+        {
+            item_cell_data_variant::operator=(aArgument);
+            return *this;
+        }
+        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T&&>, sfinae>>
         item_cell_data& operator=(T&& aArgument)
         {
             item_cell_data_variant::operator=(std::forward<T>(aArgument));
             return *this;
         }
     public:
-        item_cell_data& operator=(const char* aString)
+        item_cell_data& operator=(char const* aString)
         {
-            item_cell_data_variant::operator=(std::string{ aString });
+            item_cell_data_variant::operator=(string{ aString });
+            return *this;
+        }
+        item_cell_data& operator=(std::string const& aString)
+        {
+            item_cell_data_variant::operator=(string{ aString });
+            return *this;
+        }
+        item_cell_data& operator=(std::string&& aString)
+        {
+            item_cell_data_variant::operator=(string{ aString });
             return *this;
         }
     public:
@@ -232,9 +265,9 @@ namespace neogfx
     {
     public:
         declare_event(column_info_changed, item_model_index::column_type)
-        declare_event(item_added, const item_model_index&)
-        declare_event(item_changed, const item_model_index&)
-        declare_event(item_removed, const item_model_index&)
+        declare_event(item_added, item_model_index const&)
+        declare_event(item_changed, item_model_index const&)
+        declare_event(item_removed, item_model_index const&)
         declare_event(updating)
         declare_event(updated)
         declare_event(cleared)
@@ -257,12 +290,12 @@ namespace neogfx
         virtual void set_column_name(item_model_index::column_type aColumnIndex, std::string const& aName) = 0;
         virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) = 0;
-        virtual const item_cell_data& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_min_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
-        virtual const item_cell_data& column_max_value(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_max_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
-        virtual const item_cell_data& column_step_value(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_step_value(item_model_index::column_type aColumnIndex, const item_cell_data& aValue) = 0;
+        virtual item_cell_data const& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_min_value(item_model_index::column_type aColumnIndex, item_cell_data const& aValue) = 0;
+        virtual item_cell_data const& column_max_value(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_max_value(item_model_index::column_type aColumnIndex, item_cell_data const& aValue) = 0;
+        virtual item_cell_data const& column_step_value(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_step_value(item_model_index::column_type aColumnIndex, item_cell_data const& aValue) = 0;
     public:
         virtual iterator index_to_iterator(item_model_index const& aIndex) = 0;
         virtual const_iterator index_to_iterator(item_model_index const& aIndex) const = 0;
@@ -276,12 +309,12 @@ namespace neogfx
         virtual iterator send() = 0;
         virtual const_iterator send() const = 0;
         virtual bool has_children(const_iterator aParent) const = 0;
-        virtual bool has_children(const item_model_index& aParentIndex) const = 0;
+        virtual bool has_children(item_model_index const& aParentIndex) const = 0;
         virtual bool has_parent(const_iterator aChild) const = 0;
-        virtual bool has_parent(const item_model_index& aChildIndex) const = 0;
+        virtual bool has_parent(item_model_index const& aChildIndex) const = 0;
         virtual iterator parent(const_iterator aChild) = 0;
         virtual const_iterator parent(const_iterator aChild) const = 0;
-        virtual item_model_index parent(const item_model_index& aChildIndex) const = 0;
+        virtual item_model_index parent(item_model_index const& aChildIndex) const = 0;
         virtual iterator sbegin(const_iterator aParent) = 0;
         virtual const_iterator sbegin(const_iterator aParent) const = 0;
         virtual iterator send(const_iterator aParent) = 0;
@@ -290,17 +323,17 @@ namespace neogfx
         virtual bool empty() const = 0;
         virtual void reserve(uint32_t aItemCount) = 0;
         virtual uint32_t capacity() const = 0;
-        virtual iterator insert_item(const_iterator aPosition, const item_cell_data& aCellData) = 0;
-        virtual iterator insert_item(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
-        virtual iterator append_item(const_iterator aParent, const item_cell_data& aCellData) = 0;
-        virtual iterator append_item(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
+        virtual iterator insert_item(const_iterator aPosition, item_cell_data const& aCellData) = 0;
+        virtual iterator insert_item(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
+        virtual iterator append_item(const_iterator aParent, item_cell_data const& aCellData) = 0;
+        virtual iterator append_item(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
         virtual void clear() = 0;
         virtual iterator erase(const_iterator aPosition) = 0;
-        virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, const item_cell_data& aCellData) = 0;
-        virtual void insert_cell_data(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
-        virtual void update_cell_data(item_model_index const& aIndex, const item_cell_data& aCellData) = 0;
+        virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, item_cell_data const& aCellData) = 0;
+        virtual void insert_cell_data(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
+        virtual void update_cell_data(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
     public:
         virtual const item_cell_info& cell_info(item_model_index const& aIndex) const = 0;
-        virtual const item_cell_data& cell_data(item_model_index const& aIndex) const = 0;
+        virtual item_cell_data const& cell_data(item_model_index const& aIndex) const = 0;
     };
 }

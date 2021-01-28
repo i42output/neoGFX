@@ -65,7 +65,7 @@ namespace neogfx
         uint64_t,
         float,
         double,
-        std::string,
+        string,
         mat33,
         size,
         point,

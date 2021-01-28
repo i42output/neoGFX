@@ -36,7 +36,7 @@ namespace neogfx
         typedef std::string filename_type;
         typedef std::pair<const void*, std::size_t> memory_block_type;
     private:
-        typedef neolib::variant<filename_type, memory_block_type> source_type;
+        typedef std::variant<std::monostate, filename_type, memory_block_type> source_type;
         typedef std::map<std::pair<font_style, string>, FT_Long> style_map;
         typedef std::map<std::tuple<FT_Long, font_style, font::point_size, size>, ref_ptr<i_native_font_face>> face_map;
     public:

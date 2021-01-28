@@ -53,7 +53,7 @@ namespace neogfx
         };
         typedef std::array<optional_color, 24> custom_color_list;
     private:
-        typedef neolib::variant<color, hsv_color> representations;
+        typedef std::variant<std::monostate, color, hsv_color> representations;
         typedef std::optional<custom_color_list::iterator> optional_custom_color_list_iterator;
         class color_box : public framed_widget<>
         {

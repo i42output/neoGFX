@@ -32,7 +32,7 @@ namespace neogfx::DesignStudio
 
     void populate_workflow_model(workflow_model& aModel, workflow_presentation_model& aPresentationModel)
     {
-        auto stringify_tool = [](const ng::i_string& aInput) -> std::string
+        auto stringify_tool = [](const ng::i_string& aInput) -> string
         {
             std::string result;
             auto bits = neolib::tokens(aInput.to_std_string(), "_"s);

@@ -64,7 +64,7 @@ namespace neogfx::DesignStudio
         auto toolboxAction = aModel.append_item(toolboxUserInterface, ds::element_group::Action, "Action");
         auto toolboxLayout = aModel.append_item(toolboxUserInterface, ds::element_group::Layout, "Layout");
         auto toolboxWidget = aModel.append_item(toolboxUserInterface, ds::element_group::Widget, "Widget");
-        auto stringify_tool = [](const ng::i_string& aInput) -> std::string
+        auto stringify_tool = [](const ng::i_string& aInput) -> string
         {
             std::string result;
             auto bits = neolib::tokens(aInput.to_std_string(), "_"s);

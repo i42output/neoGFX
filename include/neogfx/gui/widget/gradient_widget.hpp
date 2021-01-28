@@ -39,8 +39,8 @@ namespace neogfx
         define_event(AlphaStopSelected, alpha_stop_selected)
         define_event(AlphaStopDeselected, alpha_stop_deselected)
     private:
-        typedef neolib::variant<neogfx::gradient::color_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
-        typedef neolib::variant<neogfx::gradient::color_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
+        typedef std::variant<std::monostate, neogfx::gradient::color_stop_list::const_iterator, neogfx::gradient::alpha_stop_list::const_iterator> stop_const_iterator;
+        typedef std::variant<std::monostate, neogfx::gradient::color_stop_list::iterator, neogfx::gradient::alpha_stop_list::iterator> stop_iterator;
     public:
         gradient_widget(i_gradient const& aGradient = neogfx::gradient{});
         gradient_widget(i_widget& aParent, i_gradient const& aGradient = neogfx::gradient{});

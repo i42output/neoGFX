@@ -34,6 +34,7 @@ namespace chess::gui
         iWhitePlayer{ nullptr },
         iBlackPlayer{ nullptr },
         iInRedo{ false },
+        iColorizePieces{ true },
         iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
         iSquareIdentification{ square_identification::None },
         iShowValidMoves{ false },
@@ -41,12 +42,18 @@ namespace chess::gui
     {
         ng::image const piecesImage{ ":/chess/resources/pieces.png" };
         ng::size const pieceExtents{ piecesImage.extents().cy / 2.0 };
-        iPieceTextures.emplace(piece::Pawn, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Pawn), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Knight, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Knight), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Bishop, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Bishop), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Rook, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Rook), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::Queen, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Queen), 0.0 }, pieceExtents } });
-        iPieceTextures.emplace(piece::King, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::King), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::WhitePawn, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Pawn), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::WhiteKnight, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Knight), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::WhiteBishop, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Bishop), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::WhiteRook, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Rook), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::WhiteQueen, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Queen), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::WhiteKing, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::King), 0.0 }, pieceExtents } });
+        iPieceTextures.emplace(piece::BlackPawn, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Pawn), iColorizePieces ? 0.0 : pieceExtents.cy }, pieceExtents } });
+        iPieceTextures.emplace(piece::BlackKnight, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Knight), iColorizePieces ? 0.0 : pieceExtents.cy }, pieceExtents } });
+        iPieceTextures.emplace(piece::BlackBishop, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Bishop), iColorizePieces ? 0.0 : pieceExtents.cy }, pieceExtents } });
+        iPieceTextures.emplace(piece::BlackRook, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Rook), iColorizePieces ? 0.0 : pieceExtents.cy }, pieceExtents } });
+        iPieceTextures.emplace(piece::BlackQueen, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::Queen), iColorizePieces ? 0.0 : pieceExtents.cy }, pieceExtents } });
+        iPieceTextures.emplace(piece::BlackKing, ng::texture{ piecesImage, ng::rect{ ng::point{ pieceExtents.cx * static_cast<double>(piece_cardinal::King), iColorizePieces ? 0.0 : pieceExtents.cy }, pieceExtents } });
 
         set_focus();
     }
@@ -70,6 +77,7 @@ namespace chess::gui
                     auto const pieceRect = piece_rect({ x, y });
                     auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
                     auto labelColor = (x + y) % 2 == 0 ? ng::color::Burlywood : ng::color::Gray25;
+                    bool const colorizePieces = true;
                     switch (pass)
                     {
                     case RENDER_BOARD:
@@ -173,7 +181,10 @@ namespace chess::gui
                                 ng::point const mousePosition = root().mouse_position() - origin();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
                                     ng::point{} : mousePosition - *iSelectionPosition);
-                                aGc.draw_texture(pieceRect + adjust, iPieceTextures.at(piece_type(occupier)), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
+                                if (iColorizePieces)
+                                    aGc.draw_texture(pieceRect + adjust, iPieceTextures.at(occupier), useGradient ? ng::gradient{ pieceColor.lighter(0x80), pieceColor } : ng::color_or_gradient{ pieceColor }, ng::shader_effect::Colorize);
+                                else
+                                    aGc.draw_texture(pieceRect + adjust, iPieceTextures.at(occupier));
                             }
                         }
                         else if (animating_to(coordinates{ x, y }, now))
@@ -182,8 +193,13 @@ namespace chess::gui
                             auto const occupier = animation->first->capturedPiece;
                             if (occupier != piece::None)
                             {
-                                auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
-                                aGc.draw_texture(pieceRect, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                if (iColorizePieces)
+                                {
+                                    auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                    aGc.draw_texture(pieceRect, iPieceTextures.at(occupier), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                }
+                                else
+                                    aGc.draw_texture(pieceRect, iPieceTextures.at(occupier));
                             }
                         }
                         break;
@@ -193,8 +209,13 @@ namespace chess::gui
                             auto const occupier = animation->first->movingPiece;
                             if (occupier != piece::None)
                             {
-                                auto const pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
-                                aGc.draw_texture(ng::rect{ animation->second, pieceRect.extents() }, iPieceTextures.at(piece_type(occupier)), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                if (iColorizePieces)
+                                {
+                                    auto const pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                    aGc.draw_texture(ng::rect{ animation->second, pieceRect.extents() }, iPieceTextures.at(occupier), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
+                                }
+                                else
+                                    aGc.draw_texture(ng::rect{ animation->second, pieceRect.extents() }, iPieceTextures.at(occupier));
                             }
                         }
                         break;
@@ -409,10 +430,10 @@ namespace chess::gui
                     promotion = piece_color(movingPiece) | piece::Queen;
                     ng::point const mousePosition = root().mouse_position() - origin();
                     ng::context_menu contextMenu{ *this, mousePosition + non_client_rect().top_left() + root().window_position() };
-                    ng::action actionQueen{ "", iPieceTextures.at(piece::Queen) };
-                    ng::action actionRook{ "", iPieceTextures.at(piece::Rook) };
-                    ng::action actionBishop{ "", iPieceTextures.at(piece::Bishop) };
-                    ng::action actionKnight{ "", iPieceTextures.at(piece::Knight) };
+                    ng::action actionQueen{ "", iPieceTextures.at(piece::Queen | piece_color(movingPiece)) };
+                    ng::action actionRook{ "", iPieceTextures.at(piece::Rook | piece_color(movingPiece)) };
+                    ng::action actionBishop{ "", iPieceTextures.at(piece::Bishop | piece_color(movingPiece)) };
+                    ng::action actionKnight{ "", iPieceTextures.at(piece::Knight | piece_color(movingPiece)) };
                     contextMenu.menu().add_action(actionQueen);
                     contextMenu.menu().add_action(actionRook);
                     contextMenu.menu().add_action(actionBishop);

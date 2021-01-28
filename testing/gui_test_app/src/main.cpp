@@ -429,7 +429,7 @@ int main(int argc, char* argv[])
         });
         window.buttonChina.clicked([&window]() 
         { 
-            window.set_title_text(u8"请停止食用犬"_t); 
+            window.set_title_text(u8"一只敏捷的狐狸跳过一只懒狗。"_t); 
             if (window.buttonChina.has_maximum_size())
                 window.buttonChina.set_maximum_size({});
             else 
@@ -442,7 +442,7 @@ int main(int argc, char* argv[])
         window.dropList2.model().insert_item(window.dropList2.model().end(), "Triangle");
         window.dropList2.model().insert_item(window.dropList2.model().end(), "Circle");
         for (int32_t i = 1; i <= 100; ++i)
-            window.dropList3.model().insert_item(window.dropList3.model().end(), "Example_" + boost::lexical_cast<std::string>(i));
+            window.dropList3.model().insert_item(window.dropList3.model().end(), "Example_"_t + boost::lexical_cast<std::string>(i));
         neolib::random prng;
         for (int32_t i = 1; i <= 250; ++i)
         {

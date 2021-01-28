@@ -1083,7 +1083,7 @@ namespace neogfx
         return Password;
     }
 
-    std::string const& text_edit::password_mask() const
+    string const& text_edit::password_mask() const
     {
         return PasswordMask;
     }
@@ -1776,7 +1776,7 @@ namespace neogfx
         (void)aWhere;
         graphics_context gc{ *this, graphics_context::type::Unattached };
         if (password())
-            gc.set_password(true, PasswordMask.value().empty() ? "\xE2\x97\x8F"s : PasswordMask);
+            gc.set_password(true, PasswordMask.value().empty() ? "\xE2\x97\x8F"_s : PasswordMask);
         glyphs().clear();
         iGlyphParagraphs.clear();
         iCharacterToParagraphCache.clear();

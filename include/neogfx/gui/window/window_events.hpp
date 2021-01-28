@@ -51,6 +51,8 @@ namespace neogfx
     class window_event
     {
     public:
+        typedef window_event abstract_type; // todo
+    public:
         typedef neolib::variant<neogfx::size, neogfx::point> parameter_type;
     public:
         window_event(window_event_type aType, const parameter_type& aParameter = parameter_type()) :
@@ -102,6 +104,9 @@ namespace neogfx
     template <mouse_event_location Location>
     class basic_mouse_event
     {
+        typedef basic_mouse_event<Location> self_type;
+    public:
+        typedef self_type abstract_type; // todo
     public:
         typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifiers_e> parameter_type;
     public:
@@ -182,7 +187,9 @@ namespace neogfx
     class keyboard_event
     {
     public:
-        typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, std::string> parameter_type;
+        typedef keyboard_event abstract_type; // todo
+    public:
+        typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, string> parameter_type;
     public:
         keyboard_event(keyboard_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
             iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
@@ -207,7 +214,7 @@ namespace neogfx
         }
         std::string text() const
         {
-            return static_variant_cast<std::string>(iParameter1);
+            return static_variant_cast<string>(iParameter1);
         }
     private:
         keyboard_event_type iType;

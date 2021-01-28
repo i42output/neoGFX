@@ -81,8 +81,8 @@ namespace neogfx
                 Target,
                 Visited
             };
-            typedef neolib::variant<std::string> pseudo_class_argument;
-            typedef neolib::variant<std::string, std::pair<pseudo_class_e, pseudo_class_argument>> argument;
+            typedef std::variant<std::monostate, std::string> pseudo_class_argument;
+            typedef std::variant<std::monostate, std::string, std::pair<pseudo_class_e, pseudo_class_argument>> argument;
             typedef neolib::vecarray<argument, 4, -1> arguments_type;
             typedef std::pair<type_e, arguments_type> value_type;
         public:
