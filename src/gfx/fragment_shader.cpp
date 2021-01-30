@@ -705,7 +705,7 @@ namespace neogfx
                 "}\n"
                 "void draw_cubic_bezier(inout vec4 color, inout vec4 function)\n"
                 "{\n"
-                "    float d = bezier_udBezier(uShapeP0, uShapeP1, uShapeP2, uShapeP3, Coord.xy);\n"
+                "    float d = bezier_udBezier(uShapeP0, uShapeP1, uShapeP2, uShapeP3, Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5)));\n"
                 "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(uShapeWidth / 2.0 - 0.5, uShapeWidth / 2.0 + 0.5, d)));\n"
                 "}\n"
                 "\n"
