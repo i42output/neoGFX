@@ -215,6 +215,16 @@ namespace neogfx
         cache_uniform(uShapeP1)
         cache_uniform(uShapeP2)
         cache_uniform(uShapeP3)
+        cache_uniform(uCoef_xxx)
+        cache_uniform(uCoef_xxy)
+        cache_uniform(uCoef_xyy)
+        cache_uniform(uCoef_yyy)
+        cache_uniform(uCoef_xx)
+        cache_uniform(uCoef_xy)
+        cache_uniform(uCoef_yy)
+        cache_uniform(uCoef_x)
+        cache_uniform(uCoef_y)
+        cache_uniform(uCoef_0)
         cache_uniform(uShapeWidth)
     };
 }

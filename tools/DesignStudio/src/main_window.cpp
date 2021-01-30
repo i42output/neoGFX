@@ -620,7 +620,7 @@ namespace neogfx::DesignStudio
                             auto const p3 = r1.center();
                             auto const dxy = (p0 - p3).abs();
                             auto const p1 =
-                                dxy.dx >= dxy.dy ? 
+                                dxy.dx >= dxy.dy || true ? 
                                     (p0.x <= p3.x && p0.y <= p3.y) || (p0.x > p3.x && p0.y <= p3.y) ? 
                                         point{ p0.mid(p3).x, placementRect.top() } :
                                         point{ p0.mid(p3).x, placementRect.bottom() } :
@@ -628,7 +628,7 @@ namespace neogfx::DesignStudio
                                         point{ placementRect.right(), p0.mid(p3).y } :
                                         point{ placementRect.left(), p0.mid(p3).y };
                             auto const p2 =
-                                dxy.dx >= dxy.dy ?
+                                dxy.dx >= dxy.dy || true ?
                                     (p0.x <= p3.x && p0.y <= p3.y) || (p0.x > p3.x && p0.y <= p3.y) ?
                                         point{ p0.mid(p3).x, placementRect.bottom() } :
                                         point{ p0.mid(p3).x, placementRect.top() } :
