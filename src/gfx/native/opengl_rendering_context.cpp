@@ -1155,7 +1155,7 @@ namespace neogfx
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
 
-            auto r = rect{ aP0.min(aP3), aP3.max(aP0) }.inflated(aPen.width());
+            auto r = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
             auto const function = to_function(aPen.color(), r);
             auto rectVertices = rect_vertices(r, mesh_type::Triangles, 0.0);
             for (auto const& v : rectVertices)

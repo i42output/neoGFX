@@ -611,30 +611,39 @@ namespace neogfx::DesignStudio
                     {
                         if (&connection->source().get() == &node)
                         {
-                            auto const& w0 = connection->source().as_widget();
-                            auto const& w1 = connection->destination().as_widget();
-                            auto const r0 = iWorkspace.view_stack().to_client_coordinates(w0.icon().to_window_coordinates(w0.icon().client_rect()));
-                            auto const r1 = iWorkspace.view_stack().to_client_coordinates(w1.icon().to_window_coordinates(w1.icon().client_rect()));
-                            auto const placementRect = r0.combined(r1);
-                            auto const p0 = r0.center();
-                            auto const p3 = r1.center();
-                            auto const dxy = (p0 - p3).abs();
-                            auto const p1 =
-                                dxy.dx >= dxy.dy || true ? 
-                                    (p0.x <= p3.x && p0.y <= p3.y) || (p0.x > p3.x && p0.y <= p3.y) ? 
-                                        point{ p0.mid(p3).x, placementRect.top() } :
-                                        point{ p0.mid(p3).x, placementRect.bottom() } :
-                                    (p0.y <= p3.y && p0.x <= p3.x) || (p0.y > p3.y && p0.x <= p3.x) ?
-                                        point{ placementRect.right(), p0.mid(p3).y } :
-                                        point{ placementRect.left(), p0.mid(p3).y };
-                            auto const p2 =
-                                dxy.dx >= dxy.dy || true ?
-                                    (p0.x <= p3.x && p0.y <= p3.y) || (p0.x > p3.x && p0.y <= p3.y) ?
-                                        point{ p0.mid(p3).x, placementRect.bottom() } :
-                                        point{ p0.mid(p3).x, placementRect.top() } :
-                                    (p0.y <= p3.y && p0.x <= p3.x) || (p0.y > p3.y && p0.x <= p3.x) ?
-                                        point{ placementRect.left(), p0.mid(p3).y } :
-                                        point{ placementRect.right(), p0.mid(p3).y };
+                            auto const& node0 = connection->source().get();
+                            auto const& node1 = connection->destination().get();
+                            auto const& pinWidget0 = connection->source().as_widget();
+                            auto const& pinWidget1 = connection->destination().as_widget();
+                            auto const nodeRect0 = iWorkspace.view_stack().to_client_coordinates(node0.widget().to_window_coordinates(node0.widget().client_rect()));
+                            auto const nodeRect1 = iWorkspace.view_stack().to_client_coordinates(node1.widget().to_window_coordinates(node1.widget().client_rect()));
+                            auto const pinRect0 = iWorkspace.view_stack().to_client_coordinates(pinWidget0.icon().to_window_coordinates(pinWidget0.icon().client_rect()));
+                            auto const pinRect1 = iWorkspace.view_stack().to_client_coordinates(pinWidget1.icon().to_window_coordinates(pinWidget1.icon().client_rect()));
+                            auto const placementRect = pinRect0.combined(pinRect1);
+                            auto p0 = pinRect0.center();
+                            auto p3 = pinRect1.center();
+                            bool const xPositive = (p3.x - p0.x > std::max(nodeRect0.width(), nodeRect1.width()) / 4.0);
+                            bool const yPositive = (p3.y >= p0.y);
+                            auto p1 = point{ xPositive ? p0.mid(p3).x : nodeRect1.left() - nodeRect1.width() * 2.0, placementRect.top() };
+                            auto p2 = point{ xPositive ? p0.mid(p3).x : nodeRect0.right() + nodeRect0.width() * 2.0, placementRect.bottom() };
+                            if (xPositive)
+                            {
+                                if (!yPositive)
+                                    std::swap(p1.y, p2.y);
+                            }
+                            else
+                            {
+                                std::swap(p0, p3);
+                                if (!yPositive)
+                                    std::swap(p1.y, p2.y);
+                                if (std::abs(p3.y - p0.y) > std::max(nodeRect0.width(), nodeRect1.width()) * 2.0)
+                                {
+                                    p1.y = p0.mid(p3).y;
+                                    p2.y = p0.mid(p3).y;
+                                }
+                            }
+                            aGc.draw_cubic_bezier(p0, p1, p2, p3, pen{ connection->source().color(), 2.0_dip });
+                            aGc.draw_cubic_bezier(p0, p1, p2, p3, pen{ color::Black, 4.0_dip });
                             aGc.draw_cubic_bezier(p0, p1, p2, p3, pen{ connection->source().color(), 2.0_dip });
                         }
                     }
