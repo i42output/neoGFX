@@ -622,10 +622,12 @@ namespace neogfx::DesignStudio
                             auto const placementRect = pinRect0.combined(pinRect1);
                             auto p0 = pinRect0.center();
                             auto p3 = pinRect1.center();
-                            bool const xPositive = (p3.x - p0.x > std::max(nodeRect0.width(), nodeRect1.width()) / 4.0);
+                            auto const bendRadius = 128.0_dip;
+                            auto const negativeControlPoint = bendRadius * 2.0 + std::sqrt(placementRect.width());
+                            bool const xPositive = (p3.x - p0.x > bendRadius / 4.0);
                             bool const yPositive = (p3.y >= p0.y);
-                            auto p1 = point{ xPositive ? p0.mid(p3).x : nodeRect1.left() - nodeRect1.width() * 2.0, placementRect.top() };
-                            auto p2 = point{ xPositive ? p0.mid(p3).x : nodeRect0.right() + nodeRect0.width() * 2.0, placementRect.bottom() };
+                            auto p1 = point{ xPositive ? p0.mid(p3).x : nodeRect1.left() - negativeControlPoint, placementRect.top() };
+                            auto p2 = point{ xPositive ? p0.mid(p3).x : nodeRect0.right() + negativeControlPoint, placementRect.bottom() };
                             if (xPositive)
                             {
                                 if (!yPositive)
@@ -636,7 +638,7 @@ namespace neogfx::DesignStudio
                                 std::swap(p0, p3);
                                 if (!yPositive)
                                     std::swap(p1.y, p2.y);
-                                if (std::abs(p3.y - p0.y) > std::max(nodeRect0.width(), nodeRect1.width()) * 2.0)
+                                if (std::abs(yPositive ? nodeRect1.top() - nodeRect0.bottom() : nodeRect0.top() - nodeRect1.bottom()) > bendRadius)
                                 {
                                     p1.y = p0.mid(p3).y;
                                     p2.y = p0.mid(p3).y;
