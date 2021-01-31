@@ -27,11 +27,13 @@
 namespace neogfx
 {
     class i_layout;
+    class i_spacer;
     class i_widget;
     class i_layout_item_proxy;
 
     struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::not_a_layout") {} };
     struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::not_a_widget") {} };
+    struct not_a_spacer : std::logic_error { not_a_spacer() : std::logic_error("neogfx::not_a_spacer") {} };
     struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::no_parent_layout") {} };
     struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::no_layout_owner") {} };
     struct no_layout_manager : std::logic_error { no_layout_manager() : std::logic_error("neogfx::no_layout_manager") {} };
@@ -49,6 +51,9 @@ namespace neogfx
         virtual bool is_layout() const = 0;
         virtual const i_layout& as_layout() const = 0;
         virtual i_layout& as_layout() = 0;
+        virtual bool is_spacer() const = 0;
+        virtual const i_spacer& as_spacer() const = 0;
+        virtual i_spacer& as_spacer() = 0;
         virtual bool is_widget() const = 0;
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;

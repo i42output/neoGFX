@@ -571,6 +571,24 @@ namespace neogfx
     }
 
     template <typename Interface>
+    bool widget<Interface>::is_spacer() const
+    {
+        return false;
+    }
+
+    template <typename Interface>
+    const i_spacer& widget<Interface>::as_spacer() const
+    {
+        throw not_a_spacer();
+    }
+
+    template <typename Interface>
+    i_spacer& widget<Interface>::as_spacer()
+    {
+        throw not_a_spacer();
+    }
+
+    template <typename Interface>
     bool widget<Interface>::is_widget() const
     {
         return true;

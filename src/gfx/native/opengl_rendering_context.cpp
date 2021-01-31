@@ -2088,8 +2088,8 @@ namespace neogfx
                                 vertices[nextIndex] = { xyz, rgba, uv, xyzw };
                             if (uvGui)
                                 vertices[nextIndex].st.y = *uvGui - vertices[nextIndex].st.y;
+                            vertices[nextIndex].rgba[3] *= static_cast<float>(iOpacity);
                             ++nextIndex;
-                            vertices.back().rgba[3] *= static_cast<float>(iOpacity);
                         }
                     }
                     cacheIndices[0] = static_cast<uint32_t>(vertexStartIndex);

@@ -21,6 +21,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/widget.tpp>
 #include <neogfx/gui/window/context_menu.hpp>
+#include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include "widget_caddy.hpp"
 
 namespace neogfx
@@ -42,6 +43,7 @@ namespace neogfx::DesignStudio
                 update(); 
         }, std::chrono::milliseconds{ 20 } }
     {
+        set_minimum_size(size{ 96.0_dip, 32.0_dip });
         element().set_caddy(*this);
         bring_to_front();
         move(aPosition);
@@ -64,6 +66,8 @@ namespace neogfx::DesignStudio
         });
         if (item().is_widget())
             add(item().as_widget());
+        else
+            item().set_layout_owner(this);
     }
     
     widget_caddy::~widget_caddy()
@@ -94,7 +98,7 @@ namespace neogfx::DesignStudio
             result.cx += padding().size().cx;
         if (result.cy != 0.0)
             result.cy += padding().size().cy;
-        return result;
+        return result != size{} ? result : widget::minimum_size(aAvailableSpace);
     }
 
     neogfx::widget_type widget_caddy::widget_type() const
@@ -141,6 +145,32 @@ namespace neogfx::DesignStudio
         case element_mode::Drag:
         case element_mode::Edit:
             return 1;
+        }
+    }
+
+    void widget_caddy::paint(i_graphics_context& aGc) const
+    {
+        widget::paint(aGc);
+        if (item().is_layout())
+        {
+            auto const r = client_rect(false);
+            {
+                scoped_opacity so{ aGc, aGc.opacity() * 0.5 };
+                scoped_scissor ss{ aGc, r };
+                size const iconSize{ std::min<scalar>(r.cx, std::min<scalar>(r.cy, 16.0_dip)), std::min<scalar>(r.cx, std::min<scalar>(r.cy, 16.0_dip)) };
+                for (int32_t y = 0; y < r.height() / iconSize.cy; ++y)
+                {
+                    for (int32_t x = 0; x < r.width() / iconSize.cx; ++x)
+                    {
+                        if (y % 2 == 1 || x % 3 != y % 3)
+                            continue;
+                        aGc.draw_texture(rect{ r.top_left() + point{ iconSize } / 4.0 + basic_point<int32_t>{ x, y }.as<scalar>() * iconSize, iconSize }, element().library().element_icon(element().type()));
+                    }
+                }
+            }
+            aGc.line_stipple_on(4.0, 0xCCCC);
+            aGc.draw_rect(r, pen{ color::PowderBlue.lighter(0x20) });
+            aGc.line_stipple_off();
         }
     }
 

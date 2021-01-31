@@ -119,6 +119,21 @@ namespace neogfx
         return subject().as_layout();
     }
 
+    bool layout_item_proxy::is_spacer() const
+    {
+        return subject().is_spacer();
+    }
+
+    const i_spacer& layout_item_proxy::as_spacer() const
+    {
+        return subject().as_spacer();
+    }
+
+    i_spacer& layout_item_proxy::as_spacer()
+    {
+        return subject().as_spacer();
+    }
+
     bool layout_item_proxy::is_widget() const
     {
         return subject().is_widget();
@@ -147,11 +162,6 @@ namespace neogfx
     i_layout_item& layout_item_proxy::parent_layout_item()
     {
         return subject().parent_layout_item();
-    }
-
-    bool layout_item_proxy::is_spacer() const
-    {
-        return !is_layout() && !is_widget();
     }
 
     bool layout_item_proxy::has_parent_layout() const

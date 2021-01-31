@@ -43,6 +43,9 @@ namespace neogfx
         bool is_layout() const override;
         const i_layout& as_layout() const override;
         i_layout& as_layout() override;
+        bool is_spacer() const override;
+        const i_spacer& as_spacer() const override;
+        i_spacer& as_spacer() override;
         bool is_widget() const override;
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
@@ -50,8 +53,6 @@ namespace neogfx
         bool has_parent_layout_item() const override;
         const i_layout_item& parent_layout_item() const override;
         i_layout_item& parent_layout_item() override;;
-    public:
-        bool is_spacer() const;
     public:
         bool has_parent_layout() const override;
         const i_layout& parent_layout() const override;

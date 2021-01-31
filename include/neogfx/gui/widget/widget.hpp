@@ -171,6 +171,9 @@ namespace neogfx
         bool is_layout() const override;
         const i_layout& as_layout() const override;
         i_layout& as_layout() override;
+        bool is_spacer() const override;
+        const i_spacer& as_spacer() const override;
+        i_spacer& as_spacer() override;
         i_widget& as_widget() override;
     public:
         bool has_parent_layout() const override;

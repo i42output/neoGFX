@@ -241,6 +241,13 @@ namespace neogfx::DesignStudio
                         // todo: widget creation for the other widget types
                     }
                 }
+                else if constexpr (std::is_base_of_v<i_layout, Type>)
+                {
+                    if constexpr (std::is_constructible_v<Type, i_element&>)
+                        iLayoutItem = make_ref<Type>(*this);
+                    else
+                        iLayoutItem = make_ref<Type>();
+                }
             }
         }
         i_layout_item& layout_item() const override

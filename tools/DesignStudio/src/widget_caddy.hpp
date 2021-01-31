@@ -61,6 +61,7 @@ namespace neogfx::DesignStudio
         int32_t layer() const override;
     protected:
         int32_t render_layer() const override;
+        void paint(i_graphics_context& aGc) const override;
         void paint_non_client_after(i_graphics_context& aGc) const override;
     protected:
         neogfx::focus_policy focus_policy() const override;

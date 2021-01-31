@@ -105,6 +105,21 @@ namespace neogfx
         return *this;
     }
 
+    bool layout::is_spacer() const
+    {
+        return false;
+    }
+
+    const i_spacer& layout::as_spacer() const
+    {
+        throw not_a_spacer();
+    }
+
+    i_spacer& layout::as_spacer()
+    {
+        throw not_a_spacer();
+    }
+
     bool layout::is_widget() const
     {
         return false;
