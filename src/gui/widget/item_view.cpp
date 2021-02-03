@@ -1265,7 +1265,7 @@ namespace neogfx
                 if (!cellCheckBoxSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
+                cellRect.indent(point{ presentation_model().cell_padding(*this).left, std::ceil((cellRect.cy - cellCheckBoxSize->cy) / 2.0) });
                 cellRect.extents() = *cellCheckBoxSize;
                 return cellRect;
             }
@@ -1276,7 +1276,7 @@ namespace neogfx
                 if (!cellTreeExpanderSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellTreeExpanderSize->cy) / 2.0) });
+                cellRect.indent(point{ presentation_model().cell_padding(*this).left, std::ceil((cellRect.cy - cellTreeExpanderSize->cy) / 2.0) });
                 cellRect.extents() = *cellTreeExpanderSize;
                 cellRect.x -= presentation_model().cell_tree_expander_size(aItemIndex, aGc)->cx;
                 return cellRect;
@@ -1288,7 +1288,7 @@ namespace neogfx
                 if (!cellImageSize)
                     throw invalid_cell_part();
                 auto cellRect = cell_rect(aItemIndex);
-                cellRect.indent(point{ presentation_model().cell_padding(*this).left, ((cellRect.cy - cellImageSize->cy) / 2.0) });
+                cellRect.indent(point{ presentation_model().cell_padding(*this).left, std::ceil((cellRect.cy - cellImageSize->cy) / 2.0) });
                 cellRect.extents() = *cellImageSize;
                 auto const& cellCheckBoxSize = presentation_model().cell_check_box_size(aItemIndex, aGc);
                 if (cellCheckBoxSize)
