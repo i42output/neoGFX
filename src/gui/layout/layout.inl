@@ -117,7 +117,7 @@ namespace neogfx
         }
 
         template <typename AxisPolicy>
-        inline size::dimension_type weighted_size(const neogfx::layout_item_proxy& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
+        inline size::dimension_type weighted_size(const neogfx::layout_item_cache& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
         {
             auto guess = AxisPolicy::cx(aItem.weight()) / AxisPolicy::cx(aTotalExpanderWeight) * aLeftover;
             if (!aItem.effective_size_policy().maintain_aspect_ratio())
@@ -277,7 +277,7 @@ namespace neogfx
             if (debug::layoutItem == &item.subject())
                 service<debug::logger>() << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
-            auto& disposition = item.proxy_for_layout().cached_disposition();
+            auto& disposition = item.as_layout_item_cache().cached_disposition();
             disposition = layout_item_disposition::Unknown;
             if (AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Minimum)
             {
@@ -307,7 +307,7 @@ namespace neogfx
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
-                auto& disposition = item.proxy_for_layout().cached_disposition();
+                auto& disposition = item.as_layout_item_cache().cached_disposition();
                 if (disposition != layout_item_disposition::Unknown && disposition != layout_item_disposition::Weighted)
                     continue;
 #ifdef NEOGFX_DEBUG
@@ -345,7 +345,7 @@ namespace neogfx
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
-                auto& disposition = item.proxy_for_layout().cached_disposition();
+                auto& disposition = item.as_layout_item_cache().cached_disposition();
                 if (disposition == layout_item_disposition::Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSize);
             }
@@ -373,7 +373,7 @@ namespace neogfx
             auto const itemMaxSize = item.maximum_size(availableSize);
             size s;
             AxisPolicy::cy(s) = std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSize)), AxisPolicy::cy(itemMaxSize));
-            auto disposition = item.proxy_for_layout().cached_disposition();
+            auto disposition = item.as_layout_item_cache().cached_disposition();
             if (disposition == layout_item_disposition::FixedSize)
                 AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
             else if (disposition == layout_item_disposition::TooSmall)

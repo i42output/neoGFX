@@ -567,9 +567,6 @@
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item_proxy.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -796,9 +793,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\object_type.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item_proxy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp">
@@ -1099,6 +1093,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item_widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item_cache.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item_cache.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1408,9 +1408,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\tab_page.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\layout\layout_item_proxy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="x64\Tools\GeneratedFiles\icons.res.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -1610,6 +1607,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\layout\layout_item_cache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

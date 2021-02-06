@@ -1,4 +1,4 @@
-// i_layout_item_proxy.hpp
+// i_layout_item_cache.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2018, 2020 Leigh Johnston.  All Rights Reserved.
@@ -34,7 +34,7 @@ namespace neogfx
         FixedSize
     };
 
-    class i_layout_item_proxy : public i_layout_item
+    class i_layout_item_cache : public i_layout_item
     {
         friend class layout;
     public:
@@ -42,6 +42,7 @@ namespace neogfx
         virtual i_layout_item& subject() = 0;
         virtual i_ref_ptr<i_layout_item>& subject_ptr() = 0;
     public:
+        virtual bool& combine_child_ancestor_transformations() const = 0;
         virtual layout_item_disposition& cached_disposition() const = 0;
     };
 }

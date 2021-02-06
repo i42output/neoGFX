@@ -138,21 +138,6 @@ namespace neogfx
         // do nothing
     }
 
-    bool spacer::is_proxy() const
-    {
-        return false;
-    }
-
-    const i_layout_item_proxy& spacer::proxy_for_layout() const
-    {
-        return parent_layout().find_proxy(*this);
-    }
-
-    i_layout_item_proxy& spacer::proxy_for_layout()
-    {
-        return parent_layout().find_proxy(*this);
-    }
-
     expansion_policy spacer::expansion_policy() const
     {
         return iExpansionPolicy;
@@ -165,11 +150,6 @@ namespace neogfx
             iExpansionPolicy = aExpansionPolicy;
             update_layout();
         }
-    }
-
-    size spacer::extents() const
-    {
-        return units_converter(*this).from_device_units(Size);
     }
 
     bool spacer::high_dpi() const
@@ -185,21 +165,6 @@ namespace neogfx
             has_layout_owner() && layout_owner().has_surface() ?
                 layout_owner().surface().ppi() : 
                 service<i_surface_manager>().display().metrics().ppi());
-    }
-
-    point spacer::position() const
-    {
-        return units_converter(*this).from_device_units(Position);
-    }
-
-    void spacer::set_position(const point& aPosition)
-    {
-        Position = units_converter(*this).to_device_units(aPosition);
-    }
-
-    void spacer::set_extents(const size& aExtents)
-    {
-        Size = units_converter(*this).to_device_units(aExtents);
     }
 
     size_policy spacer::size_policy() const

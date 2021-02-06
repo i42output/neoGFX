@@ -270,20 +270,18 @@ namespace neogfx::DesignStudio
             auto part = toggleSelect ? cardinal::Center : resize_part_at(aPosition);
             if (!part)
                 part = cardinal::Center;
-            element().select(toggleSelect ? !element().is_selected() : true, !toggleSelect && element().root().selected_child_count() <= 1);
-            if (element().is_selected())
+            if (part == cardinal::Center)
+                element().select(toggleSelect ? !element().is_selected() : true, !toggleSelect && element().root().selected_child_count() <= 1);
+            if (element().is_selected() && part == cardinal::Center)
             {
-                if (part == cardinal::Center)
+                element().root().visit([&](i_element& aElement)
                 {
-                    element().root().visit([&](i_element& aElement)
-                    {
-                        if (aElement.is_selected() && aElement.has_caddy())
-                            aElement.caddy().start_drag(cardinal::Center, aPosition);
-                    });
-                }
-                else
-                    start_drag(*part, aPosition);
+                    if (aElement.is_selected() && aElement.has_caddy())
+                        aElement.caddy().start_drag(cardinal::Center, aPosition);
+                });
             }
+            else if (part != cardinal::Center)
+                start_drag(*part, aPosition);
         }
     }
 

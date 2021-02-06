@@ -133,10 +133,6 @@ namespace neogfx
         const i_device_metrics& device_metrics() const override;
         // i_geometry
     public:
-        point position() const override;
-        void set_position(const point& aPosition) override;
-        size extents() const override;
-        void set_extents(const size& aSize) override;
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
         size maximum_size(optional_size const& aAvailableSpace = {}) const override;
@@ -184,9 +180,6 @@ namespace neogfx
         const i_widget& layout_owner() const override;
         i_widget& layout_owner() override;
         void set_layout_owner(i_widget* aOwner) override;
-        bool is_proxy() const override;
-        const i_layout_item_proxy& proxy_for_layout() const override;
-        i_layout_item_proxy& proxy_for_layout() override;
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget

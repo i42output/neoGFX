@@ -59,9 +59,6 @@ namespace neogfx
         const i_widget& layout_owner() const override;
         i_widget& layout_owner() override;
         void set_layout_owner(i_widget* aOwner) override;
-        bool is_proxy() const override;
-        const i_layout_item_proxy& proxy_for_layout() const override;
-        i_layout_item_proxy& proxy_for_layout() override;
     public:
         neogfx::expansion_policy expansion_policy() const override;
         void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) override;
@@ -69,10 +66,6 @@ namespace neogfx
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
     public:
-        point position() const override;
-        void set_position(const point& aPosition) override;
-        size extents() const override;
-        void set_extents(const size& aExtents) override;
         neogfx::size_policy size_policy() const override;
     public:
         neogfx::padding padding() const override;

@@ -32,19 +32,19 @@ int main(int argc, char* argv[])
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
         auto& window = *windowObject;
 
-        ng::action newGame{ "New Game"_t, ":/chess/resources/power.png" };
-        ng::action openGame{ "Open Game"_t, ":/chess/resources/folder-open-outline.png" };
-        ng::action saveGame{ "Save Game"_t, ":/chess/resources/content-save-outline.png" };
-        ng::action undoMove{ "Undo Move"_t, ":/chess/resources/undo-variant.png" };
-        ng::action redoMove{ "Redo Move"_t, ":/chess/resources/redo-variant.png" };
-        ng::action play{ "Resume/Play"_t, ":/chess/resources/play.png" };
-        ng::action stop{ "Stop"_t, ":/chess/resources/stop.png" };
-        ng::action resign{ "Resign"_t, ":/chess/resources/handshake-outline.png" };
-        ng::action suggestMove{ "Suggest Move"_t, ":/chess/resources/lifebuoy.png" };
-        ng::action connect{ "Connect"_t, ":/chess/resources/lan-connect.png" };
-        ng::action disconnect{ "Disconnect"_t, ":/chess/resources/lan-disconnect.png" };
-        ng::action settings{ "Settings"_t, ":/chess/resources/tune-vertical.png" };
-        ng::action about{ "About"_t, ":/chess/resources/help-circle-outline.png" };
+        ng::action newGame{ "New Game"_t, ":/chess/resources/power.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action openGame{ "Open Game"_t, ":/chess/resources/folder-open-outline.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action saveGame{ "Save Game"_t, ":/chess/resources/content-save-outline.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action undoMove{ "Undo Move"_t, ":/chess/resources/undo-variant.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action redoMove{ "Redo Move"_t, ":/chess/resources/redo-variant.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action play{ "Resume/Play"_t, ":/chess/resources/play.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action stop{ "Stop"_t, ":/chess/resources/stop.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action resign{ "Resign"_t, ":/chess/resources/handshake-outline.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action suggestMove{ "Suggest Move"_t, ":/chess/resources/lifebuoy.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action connect{ "Connect"_t, ":/chess/resources/lan-connect.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action disconnect{ "Disconnect"_t, ":/chess/resources/lan-disconnect.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action settings{ "Settings"_t, ":/chess/resources/tune-vertical.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
+        ng::action about{ "About"_t, ":/chess/resources/help-circle-outline.png", window.dpi_scale(1.0), ng::texture_sampling::NormalMipmap };
 
         saveGame.enable(false);
         disconnect.enable(false);
@@ -74,14 +74,10 @@ int main(int argc, char* argv[])
         toolbar.add_action(about);
         ourToolbarLayout.add_spacer();
 
-/*        window.SizeChanged([&]()
-        {
-            auto scale = std::min(window.extents().cx / 720.0_dip, 1.0);
-            toolbar.set_transformation(ng::mat33
-                {{ scale, 0.0, 0.0 },
-                 { 0.0, scale, 0.0 },
-                 { 0.0, 0.0, 1.0 }});
-        }); */
+        toolbar.set_transformation(ng::mat33
+            {{ 1.0, 0.0, 0.0 },
+             { 0.0, 1.0, 0.0 },
+             { 0.0, 0.0, 1.0 }});
 
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };

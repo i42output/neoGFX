@@ -29,7 +29,7 @@ namespace neogfx
     class i_layout;
     class i_spacer;
     class i_widget;
-    class i_layout_item_proxy;
+    class i_layout_item_cache;
 
     struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::not_a_layout") {} };
     struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::not_a_widget") {} };
@@ -73,9 +73,9 @@ namespace neogfx
         virtual bool has_layout_manager() const = 0;
         virtual const i_widget& layout_manager() const = 0;
         virtual i_widget& layout_manager() = 0;
-        virtual bool is_proxy() const = 0;
-        virtual const i_layout_item_proxy& proxy_for_layout() const = 0;
-        virtual i_layout_item_proxy& proxy_for_layout() = 0;
+        virtual bool is_layout_item_cache() const = 0;
+        virtual const i_layout_item_cache& as_layout_item_cache() const = 0;
+        virtual i_layout_item_cache& as_layout_item_cache() = 0;
     public:
         virtual void update_layout(bool aDeferLayout = true) = 0;
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;

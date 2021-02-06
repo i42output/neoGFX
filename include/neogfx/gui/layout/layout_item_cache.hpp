@@ -1,4 +1,4 @@
-// layout_item_proxy.hpp
+// layout_item_cache.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -23,18 +23,18 @@
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
-#include <neogfx/gui/layout/layout_item.hpp>
-#include <neogfx/gui/layout/i_layout_item_proxy.hpp>
+#include <neogfx/gui/layout/i_layout_item.hpp>
+#include <neogfx/gui/layout/i_layout_item_cache.hpp>
 
 namespace neogfx
 {
-    class layout_item_proxy : public object<reference_counted<i_layout_item_proxy>>
+    class layout_item_cache : public object<reference_counted<i_layout_item_cache>>
     {
     public:
-        layout_item_proxy(i_layout_item& aItem);
-        layout_item_proxy(i_ref_ptr<i_layout_item> const& aItem);
-        layout_item_proxy(const layout_item_proxy& aOther);
-        ~layout_item_proxy();
+        layout_item_cache(i_layout_item& aItem);
+        layout_item_cache(i_ref_ptr<i_layout_item> const& aItem);
+        layout_item_cache(const layout_item_cache& aOther);
+        ~layout_item_cache();
     public:
         void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
         const anchor_map_type& anchors() const override;
@@ -65,9 +65,9 @@ namespace neogfx
         bool has_layout_manager() const override;
         const i_widget& layout_manager() const override;
         i_widget& layout_manager() override;
-        bool is_proxy() const override;
-        const i_layout_item_proxy& proxy_for_layout() const override;
-        i_layout_item_proxy& proxy_for_layout() override;
+        bool is_layout_item_cache() const override;
+        const i_layout_item_cache& as_layout_item_cache() const override;
+        i_layout_item_cache& as_layout_item_cache() override;
     public:
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
@@ -116,14 +116,17 @@ namespace neogfx
         i_layout_item& subject() override;
         i_ref_ptr<i_layout_item>& subject_ptr() override;
     public:
+        bool& combine_child_ancestor_transformations() const override;
         layout_item_disposition& cached_disposition() const override;
     public:
-        bool operator==(const layout_item_proxy& aOther) const;
+        bool operator==(const layout_item_cache& aOther) const;
     private:
-        bool subject_is_proxy() const;
+        bool subject_is_layout_item_cache() const;
+        bool combine_ancestor_transformations() const;
     private:
         ref_ptr<i_layout_item> iSubject;
-        bool iSubjectIsProxy;
+        bool iSubjectIsCache;
+        mutable bool iCombineChildAncestorTransformations = true;
         mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
@@ -133,6 +136,6 @@ namespace neogfx
         mutable std::pair<uint32_t, size> iFixedSize;
         mutable std::pair<uint32_t, mat33> iTransformation;
         mutable std::pair<uint32_t, mat33> iCombinedTransformation;
-        mutable std::optional<const i_anchor_t<decltype(layout_item<object<i_layout>>::MinimumSize)>*> iMinimumSizeAnchor;
+        mutable std::optional<const i_anchor*> iMinimumSizeAnchor;
     };
 }

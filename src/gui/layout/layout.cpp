@@ -21,7 +21,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/layout.hpp>
-#include <neogfx/gui/layout/layout_item_proxy.hpp>
+#include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 #include <neogfx/app/i_app.hpp>
 #include "layout.inl"
@@ -184,21 +184,6 @@ namespace neogfx
                 i.subject().set_layout_owner(aOwner);
     }
 
-    bool layout::is_proxy() const
-    {
-        return false;
-    }
-
-    const i_layout_item_proxy& layout::proxy_for_layout() const
-    {
-        return parent_layout().find_proxy(*this);
-    }
-
-    i_layout_item_proxy& layout::proxy_for_layout()
-    {
-        return parent_layout().find_proxy(*this);
-    }
-
     i_layout_item& layout::add(i_layout_item& aItem)
     {
         return add(ref_ptr<i_layout_item>{ref_ptr<i_layout_item>{}, & aItem});
@@ -218,7 +203,7 @@ namespace neogfx
     {
         if (aItem->is_widget() && (aItem->as_widget().widget_type() & widget_type::Floating) == widget_type::Floating)
             throw widget_is_floating();
-        if (aItem->has_parent_layout() && !aItem->is_proxy())
+        if (aItem->has_parent_layout() && !aItem->is_layout_item_cache())
         {
             if (&aItem->parent_layout() != this) // move
                 aItem->parent_layout().remove(*aItem);
@@ -353,19 +338,6 @@ namespace neogfx
         return const_cast<i_layout&>(to_const(*this).get_layout_at(aIndex));
     }
 
-    const i_layout_item_proxy& layout::find_proxy(const i_layout_item& aItem) const
-    {
-        for (auto& item : items())
-            if (&item == &aItem || &item.subject() == &aItem)
-                return item;
-        throw item_not_found();
-    }
-
-    i_layout_item_proxy& layout::find_proxy(i_layout_item& aItem)
-    {
-        return const_cast<i_layout_item_proxy&>(to_const(*this).find_proxy(aItem));
-    }
-
     bool layout::high_dpi() const
     {
         return has_layout_owner() && layout_owner().has_surface() ?
@@ -384,7 +356,7 @@ namespace neogfx
     padding layout::padding() const
     {
         auto const& adjustedPadding = (has_padding() ? *Padding : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
-        return units_converter(*this).from_device_units(adjustedPadding);
+        return transformation(true) * units_converter(*this).from_device_units(adjustedPadding);
     }
 
     bool layout::has_spacing() const
@@ -590,24 +562,9 @@ namespace neogfx
         iInvalidated = false;
     }
 
-    point layout::position() const
-    {
-        return units_converter(*this).from_device_units(Position);
-    }
-    
-    void layout::set_position(const point& aPosition)
-    {
-        Position = units_converter(*this).to_device_units(aPosition);
-    }
-
-    size layout::extents() const
-    {
-        return units_converter(*this).from_device_units(Size);
-    }
-
     void layout::set_extents(const size& aExtents)
     {
-        Size = units_converter(*this).to_device_units(aExtents);
+        base_type::set_extents(aExtents);
         if (enabled() && (autoscale() & neogfx::autoscale::LockFixedSize) == neogfx::autoscale::LockFixedSize)
             FixedSize = extents();
     }

@@ -240,8 +240,6 @@ namespace neogfx
         virtual i_widget& get_widget_at(layout_item_index aIndex) = 0;
         virtual const i_layout& get_layout_at(layout_item_index aIndex) const = 0;
         virtual i_layout& get_layout_at(layout_item_index aIndex) = 0;
-        virtual const i_layout_item_proxy& find_proxy(const i_layout_item& aItem) const = 0;
-        virtual i_layout_item_proxy& find_proxy(i_layout_item& aItem) = 0;
     public:
         virtual bool has_spacing() const = 0;
         virtual size spacing() const = 0;

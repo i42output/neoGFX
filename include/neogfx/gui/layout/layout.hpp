@@ -27,7 +27,7 @@
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
-#include <neogfx/gui/layout/layout_item_proxy.hpp>
+#include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -48,7 +48,7 @@ namespace neogfx
     public:
         typedef i_layout abstract_type;
     protected:
-        typedef layout_item_proxy item;
+        typedef layout_item_cache item;
         typedef std::list<item, neolib::fast_pool_allocator<item>> item_list;
         enum item_type_e
         {
@@ -89,9 +89,6 @@ namespace neogfx
         const i_widget& layout_owner() const override;
         i_widget& layout_owner() override;
         void set_layout_owner(i_widget* aOwner) override;
-        bool is_proxy() const override;
-        const i_layout_item_proxy& proxy_for_layout() const override;
-        i_layout_item_proxy& proxy_for_layout() override;
     public:
         i_layout_item& add(i_layout_item& aItem) override;
         i_layout_item& add_at(layout_item_index aPosition, i_layout_item& aItem) override;
@@ -112,8 +109,6 @@ namespace neogfx
         i_widget& get_widget_at(layout_item_index aIndex) override;
         const i_layout& get_layout_at(layout_item_index aIndex) const override;
         i_layout& get_layout_at(layout_item_index aIndex) override;
-        const i_layout_item_proxy& find_proxy(const i_layout_item& aItem) const override;
-        i_layout_item_proxy& find_proxy(i_layout_item& aItem) override;
     public:
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
@@ -139,9 +134,6 @@ namespace neogfx
         void invalidate(bool aDeferLayout = true) override;
         void validate() override;
     public:
-        point position() const override;
-        void set_position(const point& aPosition) override;
-        size extents() const override;
         void set_extents(const size& aExtents) override;
         neogfx::size_policy size_policy() const override;
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;

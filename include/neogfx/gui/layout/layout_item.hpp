@@ -24,6 +24,7 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable.hpp>
+#include <neogfx/gui/layout/layout_item_cache.hpp>
 
 namespace neogfx
 {
@@ -39,6 +40,10 @@ namespace neogfx
         typedef self_type property_context_type;
         // construction
     public:
+        layout_item() :
+            iCache{ make_ref<layout_item_cache>(*this) }
+        {
+        }
         ~layout_item()
         {
             base_type::set_destroying();
@@ -51,8 +56,10 @@ namespace neogfx
         }
         const i_layout_item& parent_layout_item() const override
         {
-            if (as_layout_item().has_parent_layout())
+            if (as_layout_item().has_parent_layout() && &as_layout_item().parent_layout().layout_owner() == &as_layout_item().layout_owner())
                 return as_layout_item().parent_layout();
+            else if (as_layout_item().is_layout())
+                return as_layout_item().layout_owner();
             else
                 return as_layout_item().as_widget().parent();
         }
@@ -93,6 +100,18 @@ namespace neogfx
         {
             return const_cast<i_widget&>(to_const(*this).layout_manager());
         }
+        bool is_layout_item_cache() const override
+        {
+            return false;
+        }
+        const i_layout_item_cache& as_layout_item_cache() const override
+        {
+            return *iCache;
+        }
+        i_layout_item_cache& as_layout_item_cache() override
+        {
+            return *iCache;
+        }
     public:
         void update_layout(bool aDeferLayout = true) override
         {
@@ -108,6 +127,23 @@ namespace neogfx
                 as_layout_item().layout_owner().layout_root(aDeferLayout);
         }
     public:
+        point position() const override
+        {
+            return units_converter(*this).from_device_units(Position);
+        }
+        void set_position(const point& aPosition) override
+        {
+            if (Position != units_converter(*this).to_device_units(aPosition))
+                Position.assign(units_converter(*this).to_device_units(aPosition), false);
+        }
+        size extents() const override
+        {
+            return units_converter(*this).from_device_units(Size);
+        }
+        void set_extents(const size& aExtents) override
+        {
+            Size.assign(units_converter(*this).to_device_units(aExtents), false);
+        }
         bool has_size_policy() const override
         {
             return SizePolicy != std::nullopt;
@@ -364,5 +400,7 @@ namespace neogfx
         define_anchor(Padding)
         define_anchor(MinimumSize)
         define_anchor(MaximumSize)
+    private:
+        ref_ptr<i_layout_item_cache> iCache;
     };
 }
