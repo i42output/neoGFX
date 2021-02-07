@@ -84,11 +84,6 @@ namespace neogfx
         return iSubject;
     }
 
-    bool& layout_item_cache::combine_child_ancestor_transformations() const
-    {
-        return iCombineChildAncestorTransformations;
-    }
-
     layout_item_disposition& layout_item_cache::cached_disposition() const
     {
         return iCachedDisposition;
@@ -430,11 +425,12 @@ namespace neogfx
             cachedMinSize = subject().apply_fixed_size(cachedMinSize);
             iMinimumSize.first = global_layout_id();
         }
+        auto const result = transformation() * cachedMinSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << "layout_item_cache::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << endl;
+            service<debug::logger>() << "layout_item_cache::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << " -> " << result << endl;
 #endif // NEOGFX_DEBUG
-        return transformation(combine_ancestor_transformations()) * cachedMinSize;
+        return result;
     }
 
     void layout_item_cache::set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout)
@@ -467,11 +463,12 @@ namespace neogfx
             cachedMaxSize = subject().apply_fixed_size(subject().maximum_size(aAvailableSpace));
             iMaximumSize.first = global_layout_id();
         }
+        auto const result = transformation() * cachedMaxSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << "layout_item_cache::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << endl;
+            service<debug::logger>() << "layout_item_cache::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << " ->  " << result << endl;
 #endif // NEOGFX_DEBUG
-        return transformation(combine_ancestor_transformations()) * cachedMaxSize;
+        return result;
     }
 
     void layout_item_cache::set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout)
@@ -502,11 +499,12 @@ namespace neogfx
             cachedFixedSize = subject().fixed_size(aAvailableSpace);
             iFixedSize.first = global_layout_id();
         }
+        auto const result = transformation() * cachedFixedSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << "layout_item_cache::fixed_size(" << aAvailableSpace << ") -> " << cachedFixedSize << endl;
+            service<debug::logger>() << "layout_item_cache::fixed_size(" << aAvailableSpace << ") -> " << cachedFixedSize << " -> " << result << endl;
 #endif // NEOGFX_DEBUG
-        return transformation(combine_ancestor_transformations()) * cachedFixedSize;
+        return result;
     }
 
     void layout_item_cache::set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout)
@@ -596,10 +594,5 @@ namespace neogfx
     bool layout_item_cache::subject_is_layout_item_cache() const
     {
         return iSubjectIsCache;
-    }
-
-    bool layout_item_cache::combine_ancestor_transformations() const
-    {
-        return has_parent_layout_item() && parent_layout_item().as_layout_item_cache().combine_child_ancestor_transformations();
     }
 }

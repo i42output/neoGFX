@@ -129,7 +129,8 @@ namespace neogfx
     public:
         point position() const override
         {
-            return units_converter(*this).from_device_units(Position);
+            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) * 
+                units_converter(*this).from_device_units(Position);
         }
         void set_position(const point& aPosition) override
         {
@@ -138,7 +139,8 @@ namespace neogfx
         }
         size extents() const override
         {
-            return units_converter(*this).from_device_units(Size);
+            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) * 
+                units_converter(*this).from_device_units(Size);
         }
         void set_extents(const size& aExtents) override
         {

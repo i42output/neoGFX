@@ -116,17 +116,14 @@ namespace neogfx
         i_layout_item& subject() override;
         i_ref_ptr<i_layout_item>& subject_ptr() override;
     public:
-        bool& combine_child_ancestor_transformations() const override;
         layout_item_disposition& cached_disposition() const override;
     public:
         bool operator==(const layout_item_cache& aOther) const;
     private:
         bool subject_is_layout_item_cache() const;
-        bool combine_ancestor_transformations() const;
     private:
         ref_ptr<i_layout_item> iSubject;
         bool iSubjectIsCache;
-        mutable bool iCombineChildAncestorTransformations = true;
         mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;

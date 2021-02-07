@@ -74,10 +74,20 @@ int main(int argc, char* argv[])
         toolbar.add_action(about);
         ourToolbarLayout.add_spacer();
 
-        toolbar.set_transformation(ng::mat33
-            {{ 1.0, 0.0, 0.0 },
-             { 0.0, 1.0, 0.0 },
-             { 0.0, 0.0, 1.0 }});
+        auto update_toolbar = [&]()
+        {
+            auto const scale = std::min(1.0, window.extents().cx / 800.0_dip);
+            for (uint32_t i = 0u; i < toolbar.button_count(); ++i)
+                if (!toolbar.button(i).action().is_separator())
+                    toolbar.button(i).set_transformation(ng::mat33
+                        {{ scale, 0.0, 0.0 },
+                         { 0.0, scale, 0.0 },
+                         { 0.0, 0.0, 1.0 }});
+        };
+        update_toolbar();
+
+        window.SizeChanged(update_toolbar);
+
 
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
