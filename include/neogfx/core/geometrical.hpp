@@ -614,6 +614,7 @@ namespace neogfx
         basic_box_areas(dimension_type left, dimension_type top, dimension_type right, dimension_type bottom) : left(left), top(top), right(right), bottom(bottom) {}
         basic_box_areas(dimension_type leftRight, dimension_type topBottom) : left(leftRight), top(topBottom), right(leftRight), bottom(topBottom) {}
         basic_box_areas(const size_type& aDimensions) : basic_box_areas{ aDimensions.cx, aDimensions.cy } {};
+        basic_box_areas(const point_type& aTopLeft, const point_type& aBottomRight) : left(aTopLeft.x), top(aTopLeft.y), right(aBottomRight.x), bottom(aBottomRight.y) {}
         template <typename DimensionType2>
         basic_box_areas(const basic_box_areas<DimensionType2>& other) :
             left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
@@ -1242,9 +1243,7 @@ namespace neogfx
     template <typename T>
     inline basic_box_areas<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_box_areas<T> const& aBoxAreas)
     {
-        basic_rect<T> temp = aBoxAreas;
-        temp = aTransformation * temp;
-        return basic_box_areas<T>{ temp.left(), temp.top(), temp.right(), temp.bottom() };
+        return basic_box_areas<T>{ basic_point<T>{ aTransformation * aBoxAreas.top_left().to_vec3() }, basic_point<T>{ aTransformation * aBoxAreas.bottom_right().to_vec3() } };
     }
 
     template <typename Elem, typename Traits, typename T>
@@ -1312,6 +1311,13 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_box_areas<T>& aBoxAreas)
+    {
+        aStream << "[" << aBoxAreas.top_left() << " -> " << aBoxAreas.bottom_right() << ", " << aBoxAreas.size() << "]";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_point<T>>& aPoint)
     {
         if (aPoint)
@@ -1339,7 +1345,16 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_rect<T>>& aRect)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_rect<T>>& aBoxAreas)
+    {
+        if (aBoxAreas)
+            return aStream << *aBoxAreas;
+        aStream << "(nullopt)";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits, typename T>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_box_areas<T>>& aRect)
     {
         if (aRect)
             return aStream << *aRect;
