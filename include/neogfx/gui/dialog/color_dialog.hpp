@@ -182,6 +182,7 @@ namespace neogfx
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:
         void init();
+        static custom_color_list& previous_custom_colors();
         scalar color_space_coefficient() const;
         void change_color_space(color_space aColorSpace);
         mode_e current_mode() const;

@@ -747,6 +747,7 @@ namespace neogfx
         iCurrentChannel{ ChannelHue },
         iCurrentColor{ aCurrentColor },
         iSelectedColor{ aCurrentColor.to_hsv() },
+        iCustomColors{ previous_custom_colors() },
         iCurrentCustomColor{ iCustomColors.end() },
         iUpdatingWidgets{ false },
         iScreenPickerActive{ false },
@@ -789,6 +790,7 @@ namespace neogfx
         iCurrentChannel{ChannelHue },
         iCurrentColor{aCurrentColor },
         iSelectedColor{aCurrentColor.to_hsv() },
+        iCustomColors{ previous_custom_colors() },
         iCurrentCustomColor{ iCustomColors.end() },
         iUpdatingWidgets{ false },
         iScreenPickerActive{ false },
@@ -828,6 +830,7 @@ namespace neogfx
 
     color_dialog::~color_dialog()
     {
+        previous_custom_colors() = iCustomColors;
     }
 
     color color_dialog::current_color() const
@@ -1031,6 +1034,12 @@ namespace neogfx
         layout().invalidate();
         center_on_parent(true);
         set_ready_to_render(true);
+    }
+
+    color_dialog::custom_color_list& color_dialog::previous_custom_colors()
+    {
+        static custom_color_list sCustomColors;
+        return sCustomColors;
     }
 
     scalar color_dialog::color_space_coefficient() const

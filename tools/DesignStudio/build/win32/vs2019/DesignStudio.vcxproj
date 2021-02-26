@@ -106,7 +106,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>32000000</StackReserveSize>
+      <StackReserveSize>64000000</StackReserveSize>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;opengl32.lib;neolibd.lib;neogfxd.lib;zlibstaticd.lib;libpng16_staticd.lib;Imm32.lib;version.lib;libglew32d.lib;freetyped.lib;harfbuzzd.lib;winmm.lib;D2d1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -133,7 +133,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>32000000</StackReserveSize>
+      <StackReserveSize>64000000</StackReserveSize>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;opengl32.lib;neolib.lib;neogfx.lib;zlibstatic.lib;libpng16_static.lib;Imm32.lib;version.lib;libglew32.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -160,7 +160,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>32000000</StackReserveSize>
+      <StackReserveSize>64000000</StackReserveSize>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;opengl32.lib;neolib.lib;neogfx.lib;zlibstatic.lib;libpng16_static.lib;Imm32.lib;version.lib;libglew32.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
@@ -188,7 +188,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <StackReserveSize>32000000</StackReserveSize>
+      <StackReserveSize>64000000</StackReserveSize>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;opengl32.lib;neolibd.lib;neogfxd.lib;zlibstaticd.lib;libpng16_staticd.lib;Imm32.lib;version.lib;libglew32.lib;freetyped.lib;harfbuzzd.lib;winmm.lib;D2d1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
