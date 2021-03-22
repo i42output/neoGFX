@@ -30,11 +30,11 @@ namespace neogfx
         Left        = 0x0001,
         Right       = 0x0002,
         Center      = 0x0004,
-        Centre      = alignment::Center,
+        Centre      = Center,
         Justify     = 0x0008,
         Top         = 0x0010,
         VCenter     = 0x0020,
-        VCentre     = alignment::VCenter,
+        VCentre     = VCenter,
         Bottom      = 0x0040,
         Horizontal  = Left | Center | Right | Justify,
         Vertical    = Top | VCenter | Bottom
