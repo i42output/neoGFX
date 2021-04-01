@@ -27,6 +27,7 @@ namespace neogfx
     menu::menu(menu_type aType, std::string const& aTitle) :
         iParent{ nullptr }, 
         iType{ aType }, 
+        iGroup{},
         iTitle{ aTitle }, 
         iOpenCount{ 0 }, 
         iModal{ false }
@@ -36,7 +37,8 @@ namespace neogfx
     menu::menu(i_menu& aParent, menu_type aType, std::string const& aTitle) :
         iParent{ &aParent }, 
         iType{ aType }, 
-        iTitle{ aTitle }, 
+        iGroup{},
+        iTitle{ aTitle },
         iOpenCount{ 0 }, 
         iModal{ false }
     {
@@ -79,6 +81,16 @@ namespace neogfx
         return iType;
     }
 
+    uuid const& menu::group() const
+    {
+        return iGroup;
+    }
+
+    void menu::set_group(uuid const& aGroup)
+    {
+        iGroup = aGroup;
+    }
+
     std::string const& menu::title() const
     {
         return iTitle;
@@ -118,6 +130,18 @@ namespace neogfx
         return static_cast<uint32_t>(iItems.size());
     }
 
+    uint32_t menu::ideal_insert_index(uuid const& aGroup) const
+    {
+        if (count() == 0u)
+            return 0u;
+        for (auto index = count(); index --> 0u;)
+        {
+            if (item_at(index).group() == aGroup)
+                return index + 1u;
+        }
+        return count();
+    }
+
     const i_menu_item& menu::item_at(item_index aItemIndex) const
     {
         if (aItemIndex >= count())
@@ -132,29 +156,29 @@ namespace neogfx
 
     void menu::add_sub_menu(i_menu& aSubMenu)
     {
-        insert_sub_menu_at(count(), aSubMenu);
+        insert_sub_menu_at(ideal_insert_index(aSubMenu), aSubMenu);
     }
 
-    i_menu& menu::add_sub_menu(std::string const& aSubMenuTitle)
+    i_menu& menu::add_sub_menu(std::string const& aSubMenuTitle, uuid const& aGroup)
     {
-        return insert_sub_menu_at(count(), aSubMenuTitle);
+        return insert_sub_menu_at(ideal_insert_index(aGroup), aSubMenuTitle);
     }
 
     i_action& menu::add_action(i_action& aAction)
     {
-        insert_action_at(count(), aAction);
+        insert_action_at(ideal_insert_index(aAction), aAction);
         return aAction;
     }
 
     i_action& menu::add_action(std::shared_ptr<i_action> aAction)
     {
-        insert_action_at(count(), aAction);
+        insert_action_at(ideal_insert_index(*aAction), aAction);
         return *aAction;
     }
 
-    void menu::add_separator()
+    void menu::add_separator(uuid const& aGroup)
     {
-        insert_separator_at(count());
+        insert_separator_at(ideal_insert_index(aGroup));
     }
 
     void menu::insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu)
@@ -164,10 +188,11 @@ namespace neogfx
         ItemAdded.trigger(aItemIndex);
     }
 
-    i_menu& menu::insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle)
+    i_menu& menu::insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle, uuid const& aGroup)
     {
         auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(menu_type::Popup, aSubMenuTitle)));
         (**newItem).sub_menu().set_parent(*this);
+        (**newItem).sub_menu().set_group(aGroup);
         ItemAdded.trigger(aItemIndex);
         return (**newItem).sub_menu();
     }
@@ -192,9 +217,10 @@ namespace neogfx
         });
     }
 
-    void menu::insert_separator_at(item_index aItemIndex)
+    void menu::insert_separator_at(item_index aItemIndex, uuid const& aGroup)
     {
         insert_action_at(aItemIndex, iSeparator);
+        item_at(aItemIndex).action().set_group(aGroup);
     }
 
     void menu::remove_at(item_index aItemIndex)

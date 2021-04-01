@@ -54,6 +54,8 @@ namespace neogfx
         i_menu& parent() override;
         void set_parent(i_menu& aParent) override;
         menu_type type() const override;
+        uuid const& group() const override;
+        void set_group(uuid const& aGroup) override;
         std::string const& title() const override;
         void set_title(std::string const& aTitle) override;
         const i_texture& image() const override;
@@ -61,18 +63,19 @@ namespace neogfx
         void set_image(const i_image& aImage) override;
         void set_image(const i_texture& aTexture) override;
         uint32_t count() const override;
+        uint32_t ideal_insert_index(uuid const& aGroup) const override;
         const i_menu_item& item_at(item_index aItemIndex) const override;
         i_menu_item& item_at(item_index aItemIndex) override;
         void add_sub_menu(i_menu& aSubMenu) override;
-        i_menu& add_sub_menu(std::string const& aSubMenuTitle) override;
+        i_menu& add_sub_menu(std::string const& aSubMenuTitle, uuid const& aGroup = {}) override;
         i_action& add_action(i_action& aAction) override;
         i_action& add_action(std::shared_ptr<i_action> aAction) override;
-        void add_separator() override;
+        void add_separator(uuid const& aGroup = {}) override;
         void insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu) override;
-        i_menu& insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuText) override;
+        i_menu& insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuText, uuid const& aGroup = {}) override;
         void insert_action_at(item_index aItemIndex, i_action& aAction) override;
         void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) override;
-        void insert_separator_at(item_index aItemIndex) override;
+        void insert_separator_at(item_index aItemIndex, uuid const& aGroup = {}) override;
         void remove_at(item_index aItemIndex) override;
         item_index find(const i_menu_item& aItem) const override;
         item_index find(const i_menu& aSubMenu) const override;
@@ -90,9 +93,12 @@ namespace neogfx
         void close() override;
         bool is_modal() const override;
         void set_modal(bool aModal) override;
+    public:
+        using i_menu::ideal_insert_index;
     private:
         i_menu* iParent;
         menu_type iType;
+        uuid iGroup;
         std::string iTitle;
         texture iImage;
         item_list iItems;

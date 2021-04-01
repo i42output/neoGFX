@@ -1,0 +1,6 @@
+{
+    namespace: "neogfx::DesignStudio::neos"
+
+    resource: {
+    }
+}

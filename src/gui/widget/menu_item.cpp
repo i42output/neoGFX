@@ -52,6 +52,14 @@ namespace neogfx
             return menu_item_type::SubMenu;
     }
 
+    uuid const& menu_item::group() const
+    {
+        if (type() == menu_item_type::Action)
+            return action().group();
+        else
+            return sub_menu().group();
+    }
+
     const i_action& menu_item::action() const
     {
         if (type() != menu_item_type::Action)

@@ -79,6 +79,7 @@
                         action: mainApp.actionShowStatusBar
                     }
                     menu: {
+                        id: menuTools
                         title: "&Tools"
                         action: mainApp.actionSettings
                         action: mainApp.actionImportAndExportSettings

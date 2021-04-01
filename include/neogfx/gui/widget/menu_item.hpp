@@ -42,6 +42,7 @@ namespace neogfx
         menu_item(std::shared_ptr<i_menu> aSubMenu);
     public:
         menu_item_type type() const override;
+        uuid const& group() const override;
         const i_action& action() const override;
         i_action& action() override;
         const i_menu& sub_menu() const override;

@@ -49,6 +49,7 @@
         file: resources/horizontalspacer.png
 
         file: resources/note.png
+        file: resources/neos.png
         file: resources/cpp.png
 
         file: resources/circle.png

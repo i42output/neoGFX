@@ -70,6 +70,7 @@ namespace neogfx::DesignStudio
     {
         { "project" },
         { "build" },
+        { "scripting_languages" },
         { "sticky_note" },
         { "code" },
         { "script" },
@@ -156,6 +157,7 @@ namespace neogfx::DesignStudio
 
     struct script {}; // todo
     struct build {}; // todo
+    struct scripting_languages {}; // todo
 
     void default_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
@@ -165,6 +167,7 @@ namespace neogfx::DesignStudio
             #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId, element_group(aElementType) }; } },
             MAKE_ELEMENT_FACTORY_FUNCTION(user_interface)
             MAKE_ELEMENT_FACTORY_FUNCTION(build)
+            MAKE_ELEMENT_FACTORY_FUNCTION(scripting_languages)
             MAKE_ELEMENT_FACTORY_FUNCTION(sticky_note)
             MAKE_ELEMENT_FACTORY_FUNCTION(app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(MVC_app, app)
@@ -228,6 +231,7 @@ namespace neogfx::DesignStudio
             { "project", DesignStudio::element_group::Project },
             { "build", DesignStudio::element_group::Workflow },
             { "sticky_note", DesignStudio::element_group::Workflow },
+            { "scripting_languages", DesignStudio::element_group::Workflow },
             { "code", DesignStudio::element_group::Code },
             { "script", DesignStudio::element_group::Script },
             { "node", DesignStudio::element_group::Node },
@@ -301,6 +305,13 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/cpp.png" }, color::Khaki);
+                }
+            },
+            {
+                "scripting_languages",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/neos.png" }, color::Khaki);
                 }
             },
             {

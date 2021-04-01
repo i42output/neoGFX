@@ -53,7 +53,7 @@ namespace neogfx
         bool is_checkable() const override;
         bool is_checked() const override;
         bool is_unchecked() const override;
-        uint32_t group() const override;
+        uuid const& group() const override;
         bool is_separator() const override;
         i_string const& text() const override;
         i_string const& menu_text() const override;
@@ -66,7 +66,7 @@ namespace neogfx
         action& set_enabled(bool aEnabled) override;
         action& set_checkable(bool aCheckable) override;
         action& set_checked(bool aChecked) override;
-        action& set_group(uint32_t aGroup) override;
+        action& set_group(uuid const& aGroup) override;
         action& set_separator(bool aIsSeparator) override;
         action& set_text(i_optional<i_string> const& aText = optional_text()) override;
         action& set_menu_text(i_optional<i_string> const& aMenuText = optional_text()) override;
@@ -90,7 +90,7 @@ namespace neogfx
         bool iEnabled;
         bool iCheckable;
         bool iChecked;
-        uint32_t iGroup;
+        uuid iGroup;
         bool iSeparator;
         optional_text iText;
         optional_text iMenuText;

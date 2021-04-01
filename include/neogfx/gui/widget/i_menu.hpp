@@ -67,6 +67,8 @@ namespace neogfx
         virtual i_menu& parent() = 0;
         virtual void set_parent(i_menu& aParent) = 0;
         virtual menu_type type() const = 0;
+        virtual uuid const& group() const = 0;
+        virtual void set_group(uuid const& aGroup) = 0;
         virtual std::string const& title() const = 0;
         virtual void set_title(std::string const& aTitle) = 0;
         virtual const i_texture& image() const = 0;
@@ -74,16 +76,17 @@ namespace neogfx
         virtual void set_image(const i_image& aImage) = 0;
         virtual void set_image(const i_texture& aTexture) = 0;        
         virtual uint32_t count() const = 0;
+        virtual uint32_t ideal_insert_index(uuid const& aGroup) const = 0;
         virtual const i_menu_item& item_at(item_index aItemIndex) const = 0;
         virtual i_menu_item& item_at(item_index aItemIndex) = 0;
         virtual void add_sub_menu(i_menu& aSubMenu) = 0;
-        virtual i_menu& add_sub_menu(std::string const& aSubMenuTitle) = 0;
-        virtual void add_separator() = 0;
+        virtual i_menu& add_sub_menu(std::string const& aSubMenuTitle, uuid const& aGroup = {}) = 0;
+        virtual void add_separator(uuid const& aGroup = {}) = 0;
         virtual void insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu) = 0;
-        virtual i_menu& insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle) = 0;
+        virtual i_menu& insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle, uuid const& aGroup = {}) = 0;
         virtual void insert_action_at(item_index aItemIndex, i_action& aAction) = 0;
         virtual void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) = 0;
-        virtual void insert_separator_at(item_index aItemIndex) = 0;
+        virtual void insert_separator_at(item_index aItemIndex, uuid const& aGroup = {}) = 0;
         virtual void remove_at(item_index aItemIndex) = 0;
         virtual item_index find(const i_menu_item& aItem) const = 0;
         virtual item_index find(const i_menu& aSubMenu) const = 0;
@@ -101,5 +104,14 @@ namespace neogfx
         virtual void close() = 0;
         virtual bool is_modal() const = 0;
         virtual void set_modal(bool aModal) = 0;
+    public:
+        uint32_t ideal_insert_index(i_action const& aAction) const
+        {
+            return ideal_insert_index(aAction.group());
+        }
+        uint32_t ideal_insert_index(i_menu const& aSubMenu) const
+        {
+            return ideal_insert_index(aSubMenu.group());
+        }
     };
 }

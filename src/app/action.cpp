@@ -24,27 +24,27 @@
 namespace neogfx
 {
     action::action() :
-        iEnabled{ false }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ true }
+        iEnabled{ false }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ true }
     {
     }
 
     action::action(string const& aText) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }
     {
     }
 
     action::action(string const& aText, string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
     {
     }
 
     action::action(string const& aText, const i_texture& aImage) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
 
     action::action(string const& aText, const i_image& aImage) :
-        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{ 0 }, iSeparator{ false }, iText{ aText }, iImage{ aImage }
+        iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
     }
 
@@ -103,7 +103,7 @@ namespace neogfx
         return !iChecked;
     }
 
-    uint32_t action::group() const
+    uuid const& action::group() const
     {
         return iGroup;
     }
@@ -232,7 +232,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_group(uint32_t aGroup)
+    action& action::set_group(uuid const& aGroup)
     {
         if (iGroup != aGroup)
         {

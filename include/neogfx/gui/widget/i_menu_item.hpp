@@ -46,6 +46,7 @@ namespace neogfx
         virtual ~i_menu_item() = default;
     public:
         virtual menu_item_type type() const = 0;
+        virtual uuid const& group() const = 0;
         virtual const i_action& action() const = 0;
         virtual i_action& action() = 0;
         virtual const i_menu& sub_menu() const = 0;
