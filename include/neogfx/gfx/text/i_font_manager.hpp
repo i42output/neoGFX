@@ -63,21 +63,21 @@ namespace neogfx
         virtual ~i_font_manager() = default;
     public:
         virtual void* font_library_handle() const = 0;
-        virtual const font_info& default_system_font_info(system_font_role aRole) const = 0;
+        virtual i_optional<font_info> const& default_system_font_info(system_font_role aRole) const = 0;
         virtual const i_fallback_font_info& default_fallback_font_info() const = 0;
         virtual i_native_font_face& create_default_font(const i_device_resolution& aDevice) = 0;
-        virtual bool has_fallback_font(const i_native_font_face& aExistingFont) const = 0;
-        virtual i_native_font_face& create_fallback_font(const i_native_font_face& aExistingFont) = 0;
+        virtual bool has_fallback_font(i_native_font_face const& aExistingFont) const = 0;
+        virtual i_native_font_face& create_fallback_font(i_native_font_face const& aExistingFont) = 0;
         virtual i_native_font_face& create_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(const font_info& aInfo, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(i_native_font& aFont, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual bool is_font_file(i_string const& aFileName) const = 0;
-        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, i_device_resolution const& aDevice) = 0;
         virtual i_native_font_face& load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& load_font_from_file(i_string const& aFileName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) = 0;
+        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_device_resolution const& aDevice) = 0;
         virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
     public:

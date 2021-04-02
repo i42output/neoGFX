@@ -69,7 +69,7 @@ namespace neogfx::nrc
             {
                 if (iTitle)
                     emit(",\n"
-                        "   %1%{ %2%, menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
+                        "   %1%{ %2%, \"%3%\"_t, menu_type::Popup }", id(), parent().id(), *iTitle);
                 else
                     emit(",\n"
                         "   %1%{ %2% }", id(), parent().id());
@@ -78,7 +78,7 @@ namespace neogfx::nrc
             {
                 if (iTitle)
                     emit(",\n"
-                        "   %1%{ menu_type::Popup, \"%3%\"_t }", id(), parent().id(), *iTitle);
+                        "   %1%{ \"%3%\"_t, menu_type::Popup }", id(), parent().id(), *iTitle);
             }
             ui_element<>::emit_ctor();
         }

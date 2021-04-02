@@ -316,3 +316,5 @@ Debug
 /3rdparty/harfbuzz/harfbuzz-2.7.2/stage
 /3rdparty/freetype/freetype-2.10.4/stage
 /tools/DesignStudio/element_libraries/neos/build/win32/neos/neos.vcxproj.user
+/tools/DesignStudio/element_libraries/neos/build/win32/neos/.vs/neos/v16/*.suo
+/tools/DesignStudio/element_libraries/neos/build/win32/neos/.vs/neos/v16

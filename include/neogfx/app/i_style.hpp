@@ -66,7 +66,7 @@ namespace neogfx
         Widget
     };
 
-    typedef std::optional<font_role> optional_font_role;
+    typedef optional<font_role> optional_font_role;
 
     class i_style
     {

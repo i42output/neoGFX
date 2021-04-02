@@ -42,6 +42,9 @@ namespace neogfx::DesignStudio
     public:
         default_element_library(neolib::i_application& aApplication, std::string const& aPluginPath);
         ~default_element_library();
+        //initialisation
+    public:
+        void ide_ready(i_ide& aIde) override;
         // meta
     public:
         const elements_t& elements() const override;

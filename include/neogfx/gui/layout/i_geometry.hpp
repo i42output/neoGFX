@@ -110,6 +110,8 @@ namespace neogfx
     class size_policy
     {
     public:
+        typedef size_policy abstract_type; // todo
+    public:
         struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("neogfx::size_policy::no_aspect_ratio") {} };
     public:
         size_policy(size_constraint aConstraint, optional_size const& aAspectRatio = {}) :
@@ -194,7 +196,7 @@ namespace neogfx
         return aStream;
     }
 
-    typedef std::optional<size_policy> optional_size_policy;
+    typedef optional<size_policy> optional_size_policy;
 
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const optional_size_policy& aPolicy)

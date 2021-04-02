@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
+#include <neogfx/tools/DesignStudio/i_ide.hpp>
 #include "new_project_dialog.hpp"
 #include "toolbox_model.hpp"
 #include "workflow_model.hpp"
@@ -40,7 +41,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::DesignStudio
 {
-    class main_window_ex : public main_window, private i_clipboard_sink
+    class main_window_ex : public main_window, public reference_counted<i_ide>, private i_clipboard_sink
     {
     public:
         neolib::i_setting& autoscaleDocks;
@@ -62,6 +63,9 @@ namespace neogfx::DesignStudio
         main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager);
     protected:
         void close() override;
+    protected:
+        void add_action(uuid const& aMenuId, i_action& aAction) override;
+        void add_sub_menu(uuid const& aMenuId, i_menu& aSubMenu) override;
     protected:
         bool can_undo() const override;
         bool can_redo() const override;

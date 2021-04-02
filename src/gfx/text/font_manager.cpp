@@ -66,7 +66,7 @@ namespace neogfx
     {
         namespace platform_specific
         {
-            font_info default_system_font_info(system_font_role aRole)
+            std::optional<font_info> default_system_font_info(system_font_role aRole)
             {
 #ifdef WIN32
                 if (service<i_font_manager>().has_font("Segoe UI", "Regular") && (aRole == system_font_role::Caption || aRole == system_font_role::Menu || aRole == system_font_role::StatusBar))
@@ -93,7 +93,7 @@ namespace neogfx
                 }
                 return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font_style::Normal, 8);
 #else
-                throw std::logic_error("neogfx::detail::platform_specific::default_system_font_info: Unknown system");
+                return {};
 #endif
             }
 
@@ -834,17 +834,17 @@ namespace neogfx
         return iFontLib;
     }
 
-    const font_info& font_manager::default_system_font_info(system_font_role aRole) const
+    i_optional<font_info> const& font_manager::default_system_font_info(system_font_role aRole) const
     {
         if (iDefaultSystemFontInfo[aRole] == std::nullopt)
-            iDefaultSystemFontInfo[aRole].emplace(detail::platform_specific::default_system_font_info(aRole));
-        return *iDefaultSystemFontInfo[aRole];
+            iDefaultSystemFontInfo[aRole] = detail::platform_specific::default_system_font_info(aRole);
+        return iDefaultSystemFontInfo[aRole];
     }
 
     const i_fallback_font_info& font_manager::default_fallback_font_info() const
     {
         if (iDefaultFallbackFontInfo == std::nullopt)
-            iDefaultFallbackFontInfo.emplace(detail::platform_specific::default_fallback_font_info());
+            iDefaultFallbackFontInfo = detail::platform_specific::default_fallback_font_info();
         return *iDefaultFallbackFontInfo;
     }
 
@@ -1058,8 +1058,8 @@ namespace neogfx
     i_native_font& font_manager::find_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize)
     {
         auto family = iFontFamilies.find(aFamilyName);
-        if (family == iFontFamilies.end())
-            family = iFontFamilies.find(default_system_font_info(system_font_role::Widget).family_name());
+        if (family == iFontFamilies.end() && default_system_font_info(system_font_role::Widget) != std::nullopt)
+            family = iFontFamilies.find(default_system_font_info(system_font_role::Widget)->family_name());
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
         std::multimap<uint32_t, native_font_list::iterator> matches;
@@ -1093,8 +1093,8 @@ namespace neogfx
     i_native_font& font_manager::find_best_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size)
     {
         auto family = iFontFamilies.find(aFamilyName);
-        if (family == iFontFamilies.end())
-            family = iFontFamilies.find(default_system_font_info(system_font_role::Widget).family_name());
+        if (family == iFontFamilies.end() && default_system_font_info(system_font_role::Widget) != std::nullopt)
+            family = iFontFamilies.find(default_system_font_info(system_font_role::Widget)->family_name());
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
         std::optional<std::pair<std::pair<uint32_t, font_weight>, i_native_font*>> bestNormalFont;

@@ -438,6 +438,38 @@ namespace neogfx::DesignStudio
         main_window::close();
     }
 
+    void main_window_ex::add_action(uuid const& aMenuId, i_action& aAction)
+    {
+        if (aMenuId == id::MenuBar)
+        {
+            menuBar.insert_action_at(menuBar.find(menuTools), aAction);
+        }
+        else if (aMenuId == id::ToolsMenu)
+        {
+            menuTools.add_action(aAction);
+        }
+        else
+        {
+            menuBar.insert_action_at(menuBar.find_sub_menu(aMenuId), aAction);
+        }
+    }
+
+    void main_window_ex::add_sub_menu(uuid const& aMenuId, i_menu& aSubMenu)
+    {
+        if (aMenuId == id::MenuBar)
+        {
+            menuBar.insert_sub_menu_at(menuBar.find(menuTools), aSubMenu);
+        }
+        else if (aMenuId == id::ToolsMenu)
+        {
+            menuTools.add_sub_menu(aSubMenu);
+        }
+        else
+        {
+            menuBar.insert_sub_menu_at(menuBar.find_sub_menu(aMenuId), aSubMenu);
+        }
+    }
+
     bool main_window_ex::can_undo() const
     {
         // todo

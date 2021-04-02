@@ -231,7 +231,7 @@ namespace neogfx
     {
         if (!iHash)
         {
-            hash_digest_type::container_type result(SHA256_DIGEST_LENGTH);
+            hash_digest_type::std_type result(SHA256_DIGEST_LENGTH);
             SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
             iHash = result;
         }

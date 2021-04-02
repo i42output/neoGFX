@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu::menu(menu_type aType, std::string const& aTitle) :
+    menu::menu(std::string const& aTitle, menu_type aType) :
         iParent{ nullptr }, 
         iType{ aType }, 
         iGroup{},
@@ -34,7 +34,7 @@ namespace neogfx
     {
     }
 
-    menu::menu(i_menu& aParent, menu_type aType, std::string const& aTitle) :
+    menu::menu(i_menu& aParent, std::string const& aTitle, menu_type aType) :
         iParent{ &aParent }, 
         iType{ aType }, 
         iGroup{},
@@ -183,18 +183,20 @@ namespace neogfx
 
     void menu::insert_sub_menu_at(item_index aItemIndex, i_menu& aSubMenu)
     {
-        auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aSubMenu));
-        (**newItem).sub_menu().set_parent(*this);
+        auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aSubMenu));
+        newItem.sub_menu().set_parent(*this);
+        aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded.trigger(aItemIndex);
     }
 
     i_menu& menu::insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle, uuid const& aGroup)
     {
-        auto newItem = iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(menu_type::Popup, aSubMenuTitle)));
-        (**newItem).sub_menu().set_parent(*this);
-        (**newItem).sub_menu().set_group(aGroup);
+        auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(aSubMenuTitle)));
+        newItem.sub_menu().set_parent(*this);
+        newItem.sub_menu().set_group(aGroup);
+        aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded.trigger(aItemIndex);
-        return (**newItem).sub_menu();
+        return newItem.sub_menu();
     }
 
     void menu::insert_action_at(item_index aItemIndex, i_action& aAction)
@@ -205,6 +207,7 @@ namespace neogfx
     void menu::insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction)
     {
         iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
+        aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded.trigger(aItemIndex);
         aAction->changed([this, aAction]()
         {
@@ -229,6 +232,14 @@ namespace neogfx
             throw bad_item_index();
         iItems.erase(iItems.begin() + aItemIndex);
         ItemRemoved.trigger(aItemIndex);
+    }
+
+    menu::item_index menu::find_sub_menu(uuid const& aGroup) const
+    {
+        for (item_index i = 0; i < iItems.size(); ++i)
+            if (iItems[i]->group() == aGroup && iItems[i]->type() == menu_item_type::SubMenu)
+                return i;
+        throw item_not_found();
     }
 
     menu::item_index menu::find(const i_menu_item& aItem) const
@@ -375,5 +386,18 @@ namespace neogfx
     void menu::set_modal(bool aModal)
     {
         iModal = aModal;
+    }
+
+    menu::item_index menu::update_grouping_separators(item_index aItemIndex)
+    {
+        if (type() == menu_type::MenuBar)
+            return aItemIndex;
+        if (item_at(aItemIndex).is_separator())
+            return aItemIndex;
+        if (aItemIndex > 0u && item_at(aItemIndex).group() != item_at(aItemIndex - 1u).group() && !item_at(aItemIndex - 1u).is_separator())
+            insert_separator_at(aItemIndex++);
+        if (aItemIndex < count() - 1u && item_at(aItemIndex).group() != item_at(aItemIndex + 1u).group() && !item_at(aItemIndex + 1u).is_separator())
+            insert_separator_at(aItemIndex + 1u);
+        return aItemIndex;
     }
 }

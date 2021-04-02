@@ -28,7 +28,8 @@
 #include <neolib/app/i_application.hpp>
 #include <neolib/app/version.hpp>
 #include <neogfx/gfx/texture.hpp>
-#include <neogfx/tools/DesignStudio/i_ide.hpp>
+#include <neogfx/app/action.hpp>
+#include <neogfx/gui/widget/menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 
 namespace neogfx::DesignStudio
@@ -43,6 +44,9 @@ namespace neogfx::DesignStudio
     public:
         neos_element_library(neolib::i_application& aApplication, std::string const& aPluginPath);
         ~neos_element_library();
+        //initialisation
+    public:
+        void ide_ready(i_ide& aIde) override;
         // meta
     public:
         const elements_t& elements() const override;
@@ -64,9 +68,21 @@ namespace neogfx::DesignStudio
     private:
         neolib::i_application& iApplication;
         std::string iPluginPath;
-        ref_ptr<i_ide> iIde;
         elements_ordered_t iElementsOrdered;
         elements_t iElements;
         mutable std::map<color, std::map<std::string, texture>> iIcons;
+        action iSeparator;
+        action iNewScript;
+        action iStartDebugging;
+        action iStartWithoutDebugging;
+        action iStepInto;
+        action iStepOver;
+        action iToggleBreakpoint;
+        action iNewBreakpoint;
+        action iDeleteAllBreakpoints;
+        action iDisableAllBreakpoints;
+        action iImportScriptingLanguage;
+        action iEditScriptingLanguage;
+        menu iScriptMenu;
     };
 }

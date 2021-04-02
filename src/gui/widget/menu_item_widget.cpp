@@ -294,6 +294,7 @@ namespace neogfx
             iIcon.set_fixed_size(size{});
         iSpacer.set_minimum_size(size{ 0.0, 0.0 });
         iText.set_font_role(font_role::Menu);
+        iShortcutText.set_font_role(font_role::Menu);
         auto text_updated = [this]()
         {
             auto m = mnemonic_from_text(iText.text());

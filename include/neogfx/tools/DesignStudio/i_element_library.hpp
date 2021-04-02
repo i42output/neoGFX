@@ -26,6 +26,7 @@
 #include <neolib/core/i_string.hpp>
 #include <neolib/plugin/i_plugin.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/tools/DesignStudio/i_ide.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
@@ -42,6 +43,9 @@ namespace neogfx::DesignStudio
         // exceptions
     public:
         struct unknown_element_type : std::logic_error { unknown_element_type() : std::logic_error{ "neogfx::DesignStudio::i_element_library::unknown_element_type" } {} };
+        //initialisation
+    public:
+        virtual void ide_ready(i_ide& aIde) = 0;
         // meta
     public:
         virtual const elements_t& elements() const = 0;

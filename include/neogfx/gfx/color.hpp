@@ -1032,7 +1032,7 @@ namespace neogfx
         // operations
     public:
         static sRGB_color from_linear(const linear_color& aLinear);
-        static std::optional<sRGB_color> from_name(std::string const& aName);
+        static optional<sRGB_color> from_name(std::string const& aName);
         linear_color to_linear() const;
         scalar brightness() const;
         scalar luma() const;
@@ -1040,7 +1040,7 @@ namespace neogfx
 
     using color = sRGB_color;
 
-    typedef std::optional<color> optional_color;
+    typedef optional<color> optional_color;
 }
 
 define_setting_type(neogfx::color)

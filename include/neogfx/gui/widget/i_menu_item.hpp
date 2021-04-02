@@ -60,5 +60,10 @@ namespace neogfx
         virtual bool available() const = 0;
         virtual void select(bool aOpenAnySubMenu = true) = 0;
         virtual bool open_any_sub_menu() const = 0;
+    public:
+        bool is_separator() const
+        {
+            return type() == menu_item_type::Action && action().is_separator();
+        }
     };
 }

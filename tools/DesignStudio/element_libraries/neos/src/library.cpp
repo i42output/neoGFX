@@ -32,14 +32,61 @@ namespace neogfx::DesignStudio
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
         iElementsOrdered
+        {
+        },
+        iElements{ elements_ordered().begin(), elements_ordered().end() },
+        iSeparator{},
+        iNewScript{ "New Script..."_t },
+        iStartDebugging{ "Start Debugging"_t },
+        iStartWithoutDebugging{ "Start Without Debugging"_t },
+        iStepInto{ "Step Into"_t },
+        iStepOver{ "Step Over"_t },
+        iToggleBreakpoint{ "Toggle Breakpoint"_t },
+        iNewBreakpoint{ "New Breakpoint"_t },
+        iDeleteAllBreakpoints{ "Delete All Breakpoints"_t },
+        iDisableAllBreakpoints{ "Disable All Breakpoints"_t },
+        iImportScriptingLanguage{ "Import Scripting Language..."_t },
+        iEditScriptingLanguage{ "Edit Scripting Language..."_t },
+        iScriptMenu{ "Script"_t }
     {
-    },
-        iElements{ elements_ordered().begin(), elements_ordered().end() }
-    {
+        iSeparator.set_group(library_id());
+        iNewScript.set_group(library_id());
+        iStartDebugging.set_group(library_id()).set_shortcut("F5");
+        iStartWithoutDebugging.set_group(library_id()).set_shortcut("Ctrl+F5");
+        iStepInto.set_group(library_id()).set_shortcut("F11");
+        iStepOver.set_group(library_id()).set_shortcut("F10");
+        iToggleBreakpoint.set_group(library_id()).set_shortcut("F9");
+        iNewBreakpoint.set_group(library_id());
+        iDeleteAllBreakpoints.set_group(library_id());
+        iDisableAllBreakpoints.set_group(library_id());
+        iImportScriptingLanguage.set_group(library_id());
+        iEditScriptingLanguage.set_group(library_id());
+
+        iScriptMenu.set_group(library_id());
+        iScriptMenu.add_action(iNewScript);
+        iScriptMenu.add_action(iSeparator);
+        iScriptMenu.add_action(iStartDebugging);
+        iScriptMenu.add_action(iStartWithoutDebugging);
+        iScriptMenu.add_action(iSeparator);
+        iScriptMenu.add_action(iStepInto);
+        iScriptMenu.add_action(iStepOver);
+        iScriptMenu.add_action(iSeparator);
+        iScriptMenu.add_action(iToggleBreakpoint);
+        iScriptMenu.add_action(iNewBreakpoint);
+        iScriptMenu.add_action(iDeleteAllBreakpoints);
+        iScriptMenu.add_action(iDisableAllBreakpoints);
+        iScriptMenu.add_action(iSeparator);
+        iScriptMenu.add_action(iImportScriptingLanguage);
+        iScriptMenu.add_action(iEditScriptingLanguage);
     }
 
     neos_element_library::~neos_element_library()
     {
+    }
+
+    void neos_element_library::ide_ready(i_ide& aIde)
+    {
+        aIde.add_sub_menu(id::MenuBar, iScriptMenu);
     }
 
     const neos_element_library::elements_t& neos_element_library::elements() const

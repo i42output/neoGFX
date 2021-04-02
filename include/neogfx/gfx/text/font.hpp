@@ -163,7 +163,7 @@ namespace neogfx
         mutable std::shared_ptr<instance> iInstance;
     };
 
-    typedef std::optional<font_info> optional_font_info;
+    typedef optional<font_info> optional_font_info;
 
     typedef neolib::small_cookie font_id;
 
@@ -233,7 +233,7 @@ namespace neogfx
         mutable std::shared_ptr<instance> iInstance;
     };
 
-    typedef std::optional<font> optional_font;
+    typedef optional<font> optional_font;
 
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const font_info& aFont)

@@ -90,7 +90,7 @@ namespace neogfx
             }
         }
         else if (uProjectionMatrix.uniform().is_dirty())
-            uProjectionMatrix = iProjectionMatrix.value().as<float>().transposed();
+            uProjectionMatrix = iProjectionMatrix->as<float>().transposed();
 
         auto const& offset = aContext.offset();
         if (uTransformationMatrix.uniform().is_dirty() || iOffset == std::nullopt || *iOffset != offset)

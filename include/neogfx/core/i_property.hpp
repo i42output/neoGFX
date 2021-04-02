@@ -190,7 +190,13 @@ namespace neogfx
     public:
         property_variant get(i_property const&) const override
         {
-            return iGetter();
+            if constexpr (neolib::is_optional_v<T>)
+            {
+                auto const& ov = iGetter();
+                return ov != std::nullopt ? property_variant{ *ov } : property_variant{ neolib::none };
+            }
+            else
+                return iGetter();
         }
     public:
         const void* data() const override

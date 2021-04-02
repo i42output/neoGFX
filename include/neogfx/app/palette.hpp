@@ -32,6 +32,8 @@ namespace neogfx
     class palette : public i_palette
     {
     public:
+        typedef i_palette abstract_type;
+    public:
         define_declared_event(Changed, changed)
     public:
         palette();
@@ -44,6 +46,8 @@ namespace neogfx
         palette& operator=(const i_palette& aOther);
         palette& operator=(const palette& aOther);
     public:
+        bool operator==(const palette& aOther) const;
+        bool operator!=(const palette& aOther) const;
         bool operator==(const i_palette& aOther) const override;
         bool operator!=(const i_palette& aOther) const override;
     public:

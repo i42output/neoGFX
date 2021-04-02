@@ -96,6 +96,28 @@ namespace neogfx
         return operator=(static_cast<const i_palette&>(aOther));
     }
 
+    bool palette::operator==(const palette& aOther) const
+    {
+        return
+            iThemeColor == aOther.maybe_color(color_role::Theme) &&
+            iBackgroundColor == aOther.maybe_color(color_role::Background) &&
+            iForegroundColor == aOther.maybe_color(color_role::Foreground) &&
+            iBaseColor == aOther.maybe_color(color_role::Base) &&
+            iAlternateBaseColor == aOther.maybe_color(color_role::AlternateBase) &&
+            iTextColor == aOther.maybe_color(color_role::Text) &&
+            iSelectionColor == aOther.maybe_color(color_role::Selection) &&
+            iSelectedTextColor == aOther.maybe_color(color_role::SelectedText) &&
+            iHoverColor == aOther.maybe_color(color_role::Hover) &&
+            iPrimaryAccentColor == aOther.maybe_color(color_role::PrimaryAccent) &&
+            iSecondaryAccentColor == aOther.maybe_color(color_role::SecondaryAccent) &&
+            iVoidColor == aOther.maybe_color(color_role::Void);
+    }
+
+    bool palette::operator!=(const palette& aOther) const
+    {
+        return !(*this == aOther);
+    }
+
     bool palette::operator==(const i_palette& aOther) const
     {
         return

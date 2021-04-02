@@ -128,6 +128,10 @@ namespace neogfx::DesignStudio
     {
     }
 
+    void default_element_library::ide_ready(i_ide& aIde)
+    {
+    }
+
     const default_element_library::elements_t& default_element_library::elements() const
     {
         return iElements;

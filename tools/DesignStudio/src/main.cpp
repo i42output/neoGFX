@@ -19,10 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
-#include <neogfx/tools/DesignStudio/project_manager.hpp>
-#include <neogfx/tools/DesignStudio/project.hpp>
-#include <neogfx/tools/DesignStudio/settings.hpp>
-#include "main_window.hpp"
+#include "app.hpp"
 
 using namespace neolib::string_literals;
 
@@ -41,22 +38,10 @@ int main(int argc, char* argv[])
     std::cout << "------ " << appInfo.name() << " ------" << std::endl;
     std::cout << appInfo.copyright() << std::endl << std::endl;
 
-    ds::main_app app{ appInfo };
-
-    app.change_style("Dark");
-    app.current_style().set_spacing(ng::size{ 4.0 });
-
-    std::cout << "Loading element libraries..." << std::endl;
-    app.plugin_manager().load_plugins();
-    for (auto const& plugin : app.plugin_manager().plugins())
-        std::cout << "Element library '" << plugin->name() << "' loaded." << std::endl;
+    ds::app app{ appInfo };
 
     try
     {
-        ds::settings settings;
-        ds::project_manager pm;
-        ds::main_window_ex mainWindow{ app, settings, pm };
-
         return app.exec();
     }
     catch (std::exception& e)

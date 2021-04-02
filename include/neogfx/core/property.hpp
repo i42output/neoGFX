@@ -132,7 +132,8 @@ namespace neogfx
                 else
                     return neolib::none;
             }
-            return value();
+            else
+                return value();
         }
         property_variant get_new_as_variant() const override
         {
@@ -145,7 +146,8 @@ namespace neogfx
                     else
                         return neolib::none;
                 }
-                return *iNewValue;
+                else
+                    return *iNewValue;
             }
             throw no_new_value();
         }
@@ -212,7 +214,7 @@ namespace neogfx
         self_type& assign(T2&& aValue, bool aOwnerNotify = true)
         {
             typedef std::decay_t<decltype(aValue)> try_type;
-            if constexpr (std::is_same_v<try_type, value_type> || std::is_same_v<std::optional<try_type>, value_type>)
+            if constexpr (std::is_same_v<try_type, value_type> || std::is_same_v<neolib::optional<try_type>, value_type>)
                 return do_assign(std::forward<T2>(aValue), aOwnerNotify);
             else if constexpr (std::is_same_v<try_type, custom_type>)
                 return do_assign(neolib::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify);
@@ -263,12 +265,12 @@ namespace neogfx
             return value() != aRhs;
         }
         template <typename T>
-        bool operator==(const std::optional<T>& aRhs) const
+        bool operator==(const neolib::optional<T>& aRhs) const
         {
             return value() == aRhs;
         }
         template <typename T>
-        bool operator!=(const std::optional<T>& aRhs) const
+        bool operator!=(const neolib::optional<T>& aRhs) const
         {
             return value() != aRhs;
         }
@@ -341,7 +343,11 @@ namespace neogfx
                 bool const discardChanged = !PropertyChanged.trigger(get_as_variant());
                 if (destroyed)
                     return *this;
-                bool const discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
+                bool discardChangedFromTo = false;
+                if constexpr (!neolib::is_optional_v<T>)
+                    discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
+                else
+                    discardChangedFromTo = !PropertyChangedFromTo.trigger(previousValue != std::nullopt ? property_variant{ *previousValue } : property_variant{ neolib::none }, get_as_variant());
                 if (destroyed)
                     return *this;
                 if (!discardChanged && !Changed.trigger(value()))
@@ -360,7 +366,7 @@ namespace neogfx
         string iName;
         calculator_function_type iCalculator;
         mutable value_type iValue;
-        std::optional<value_type> iNewValue;
+        neolib::optional<value_type> iNewValue;
         i_property_delegate* iDelegate = nullptr;
         bool iDiscardChangeEvents = false;
     };

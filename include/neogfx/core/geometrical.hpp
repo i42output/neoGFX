@@ -74,10 +74,12 @@ namespace neogfx
         static constexpr bool value = true;
     };
 
-    typedef std::optional<logical_coordinate_system> optional_logical_coordinate_system;
+    typedef optional<logical_coordinate_system> optional_logical_coordinate_system;
 
     struct logical_coordinates
     {
+        typedef logical_coordinates abstract_type; // todo
+
         vec2 bottomLeft;
         vec2 topRight;
         bool is_gui_orientation() const
@@ -1203,22 +1205,22 @@ namespace neogfx
     typedef basic_padding<dimension> padding;
     typedef basic_margin<dimension> margin;
 
-    typedef std::optional<dimension> optional_dimension;
-    typedef std::optional<angle> optional_angle;
-    typedef std::optional<delta> optional_delta;
-    typedef std::optional<point> optional_point;
-    typedef std::optional<size> optional_size;
-    typedef std::optional<rect> optional_rect;
-    typedef std::optional<delta_u32> optional_delta_u32;
-    typedef std::optional<point_u32> optional_point_u32;
-    typedef std::optional<size_u32> optional_size_u32;
-    typedef std::optional<rect_u32> optional_rect_u32;
-    typedef std::optional<padding> optional_padding;
-    typedef std::optional<margin> optional_margin;
-    typedef std::optional<vector1> optional_vector1;
-    typedef std::optional<vector2> optional_vector2;
-    typedef std::optional<vector3> optional_vector3;
-    typedef std::optional<vector4> optional_vector4;
+    typedef optional<dimension> optional_dimension;
+    typedef optional<angle> optional_angle;
+    typedef optional<delta> optional_delta;
+    typedef optional<point> optional_point;
+    typedef optional<size> optional_size;
+    typedef optional<rect> optional_rect;
+    typedef optional<delta_u32> optional_delta_u32;
+    typedef optional<point_u32> optional_point_u32;
+    typedef optional<size_u32> optional_size_u32;
+    typedef optional<rect_u32> optional_rect_u32;
+    typedef optional<padding> optional_padding;
+    typedef optional<margin> optional_margin;
+    typedef optional<vector1> optional_vector1;
+    typedef optional<vector2> optional_vector2;
+    typedef optional<vector3> optional_vector3;
+    typedef optional<vector4> optional_vector4;
 
     template <typename T>
     inline basic_point<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_point<T> const& aPoint)

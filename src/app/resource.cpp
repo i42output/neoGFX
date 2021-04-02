@@ -47,7 +47,7 @@ namespace neogfx
                 {
                     if (archive.file_path(i) == uri.fragment())
                     {
-                        archive.extract_to(i, iData.container());
+                        archive.extract_to(i, iData.to_std_vector());
                         iSize = iData.size();
                     }
                 }
@@ -63,7 +63,7 @@ namespace neogfx
                 {
                     if (archive.file_path(i) == uri.fragment())
                     {
-                        archive.extract_to(i, iData.container());
+                        archive.extract_to(i, iData.to_std_vector());
                         iSize = iData.size();
                     }
                     else
@@ -160,7 +160,7 @@ namespace neogfx
     {
         if (!iHash)
         {
-            hash_digest_type::container_type result{ SHA256_DIGEST_LENGTH };
+            hash_digest_type::std_type result{ SHA256_DIGEST_LENGTH };
             SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
             iHash = result;
         }

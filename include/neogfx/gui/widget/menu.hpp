@@ -44,8 +44,8 @@ namespace neogfx
         typedef std::unique_ptr<i_menu_item> item_pointer;
         typedef std::vector<item_pointer> item_list;
     public:
-        menu(i_menu& aParent, menu_type aType = menu_type::Popup, std::string const& aTitle = std::string());
-        menu(menu_type aType = menu_type::Popup, std::string const& aTitle = std::string());
+        menu(i_menu& aParent, std::string const& aTitle = std::string{}, menu_type aType = menu_type::Popup);
+        menu(std::string const& aTitle = std::string{}, menu_type aType = menu_type::Popup);
         ~menu();
     public:
         const i_widget& as_widget() const override;
@@ -77,6 +77,7 @@ namespace neogfx
         void insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction) override;
         void insert_separator_at(item_index aItemIndex, uuid const& aGroup = {}) override;
         void remove_at(item_index aItemIndex) override;
+        item_index find_sub_menu(uuid const& aGroup) const override;
         item_index find(const i_menu_item& aItem) const override;
         item_index find(const i_menu& aSubMenu) const override;
         bool has_selected_item() const override;
@@ -95,6 +96,8 @@ namespace neogfx
         void set_modal(bool aModal) override;
     public:
         using i_menu::ideal_insert_index;
+    private:
+        item_index update_grouping_separators(item_index aItemIndex);
     private:
         i_menu* iParent;
         menu_type iType;

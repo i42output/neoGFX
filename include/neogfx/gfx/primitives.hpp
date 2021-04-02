@@ -187,7 +187,7 @@ namespace neogfx
     {
     public:
         typedef double auxiliary_parameter;
-        typedef std::optional<auxiliary_parameter> optional_auxiliary_parameter;
+        typedef optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
         text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, bool aIgnoreEmoji = false) :
             iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iIgnoreEmoji{ aIgnoreEmoji }

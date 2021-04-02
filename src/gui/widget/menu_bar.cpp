@@ -25,17 +25,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu_bar::menu_bar() : menu(menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
+    menu_bar::menu_bar() : menu({}, menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
     {
         init();
     }
 
-    menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu(menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
+    menu_bar::menu_bar(i_widget& aParent) : widget(aParent), menu({}, menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
     {
         init();
     }
 
-    menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu(menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
+    menu_bar::menu_bar(i_layout& aLayout) : widget(aLayout), menu({}, menu_type::MenuBar), iLayout(*this), iOpenSubMenu{ std::make_unique<popup_menu>(*this, point{}) }
     {
         init();
     }
