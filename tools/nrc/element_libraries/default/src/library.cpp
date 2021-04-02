@@ -123,7 +123,7 @@ namespace neogfx::nrc
 
     bool default_ui_element_library::handles_element(i_ui_element& aParent, const neolib::i_string& aElementType) const
     {
-        auto range = boost::make_iterator_range(iChildElements.container().equal_range(aElementType.to_std_string()));
+        auto range = boost::make_iterator_range(iChildElements.to_std_multimap().equal_range(aElementType.to_std_string()));
         for (auto const& ce : range)
         {
             if (ce.second.second() == ui_element_type::None)

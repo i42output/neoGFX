@@ -134,7 +134,7 @@ namespace neogfx::nrc
             return get_data(aKey).get<abstract_t<T>>();
         }
         template <typename T>
-        std::optional<T> get_optional(std::string const& aKey) const
+        neolib::optional<T> get_optional(std::string const& aKey) const
         {
             if (data_exists(aKey))
             {
@@ -144,15 +144,15 @@ namespace neogfx::nrc
                     return get_data(aKey).get<abstract_t<T>>();
             }
             else
-                return std::optional<T>{};
+                return neolib::optional<T>{};
         }
         template <typename T>
-        std::optional<T> get_optional_enum(std::string const& aKey) const
+        neolib::optional<T> get_optional_enum(std::string const& aKey) const
         {
             if (data_exists(aKey))
                 return neolib::string_to_enum<T>(get_data(aKey).get<neolib::i_string>());
             else
-                return std::optional<T>{};
+                return neolib::optional<T>{};
         }
         template <typename T, typename U>
         const abstract_t<T>& get(std::string const& aKey, const U& aDefault) const

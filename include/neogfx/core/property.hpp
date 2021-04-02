@@ -192,23 +192,27 @@ namespace neogfx
         {
             if (!has_delegate())
                 return iValue;
-            const value_type* dptr = nullptr;
-            std::visit([this, &dptr](auto&& arg)
+            std::visit([this](auto&& arg)
             {
                 typedef std::decay_t<decltype(arg)> try_type;
                 if constexpr (std::is_same_v<try_type, value_type>)
-                    dptr = &arg;
+                    iValue = arg;
                 else if constexpr (std::is_same_v<try_type, custom_type>)
-                    dptr = &neolib::any_cast<const value_type&>(arg);
+                {
+                    if constexpr (!neolib::is_optional_v<value_type>)
+                        iValue = neolib::any_cast<const value_type&>(arg);
+                    else
+                        iValue = neolib::any_cast<const neolib::optional_t<value_type>&>(arg);
+                }
                 else if constexpr (std::is_same_v<try_type, neolib::none_t>)
-                    dptr = nullptr;
+                    iValue = {};
                 else
                 {
                     // [[unreachable]]
                     throw invalid_type();
                 }
             }, delegate().get(*this));
-            return (iValue = *dptr);
+            return iValue;
         }
         template <typename T2>
         self_type& assign(T2&& aValue, bool aOwnerNotify = true)
