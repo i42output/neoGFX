@@ -124,6 +124,8 @@ namespace neogfx
         auto appearance = text_appearance();
         if (appearance.ink() == neolib::none)
             appearance.set_ink(text_color());
+        if (appearance.effect())
+            textPosition += size{ appearance.effect()->width() };
         if (multi_line())
             aGc.draw_multiline_glyph_text(textPosition, glyph_text(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal);
         else
@@ -280,6 +282,8 @@ namespace neogfx
             iTextExtent = gc.glyph_text_extent(glyph_text());
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
+        if (text_appearance().effect())
+            *iTextExtent += size{ text_appearance().effect()->width() * 2.0 };
         return *iTextExtent;
     }
 
