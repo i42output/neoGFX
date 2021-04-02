@@ -737,8 +737,9 @@ namespace neogfx
         {
             if (cell_checkable(aIndex))
             {
-                auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : * cell_font(aIndex));
-                dimension const length = units_converter(aGc).from_device_units(cellFont.height() * (2.0 / 3.0));
+                auto const& cellFont = cell_font(aIndex);
+                auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
+                dimension const length = units_converter(aGc).from_device_units(effectiveFont.height() * (2.0 / 3.0));
                 auto const checkBoxSize = service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length });
                 return checkBoxSize;
             }
@@ -757,16 +758,18 @@ namespace neogfx
         }
         neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
         {
-            optional_font cellFont = cell_font(aIndex);
             if (cell_meta(aIndex).text != std::nullopt)
                 return *cell_meta(aIndex).text;
-            cell_meta(aIndex).text = aGc.to_glyph_text(cell_to_string(aIndex), cellFont == std::nullopt ? default_font() : *cellFont);
+            auto const& cellFont = cell_font(aIndex);
+            auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
+            cell_meta(aIndex).text = aGc.to_glyph_text(cell_to_string(aIndex), effectiveFont);
             return *cell_meta(aIndex).text;
         }
         size cell_extents(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
         {
             auto oldItemHeight = item_height(aIndex, aGc);
-            auto const& cellFont = (cell_font(aIndex) == std::nullopt ? default_font() : *cell_font(aIndex));
+            auto const& cellFont = cell_font(aIndex);
+            auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
             auto& cellMeta = cell_meta(aIndex);
             if (cellMeta.extents != std::nullopt)
                 return units_converter(aGc).from_device_units(*cellMeta.extents);
@@ -774,7 +777,7 @@ namespace neogfx
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
             if (cell_editable(aIndex) && cellInfo.dataStep != neolib::none)
             {
-                cellExtents.cx = std::max(cellExtents.cx, aGc.text_extent(cellInfo.dataMax.to_string(), cellFont).cx);
+                cellExtents.cx = std::max(cellExtents.cx, aGc.text_extent(cellInfo.dataMax.to_string(), effectiveFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::INTERNAL_SPACING.cx + basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
                 cellExtents.cy = std::max<dimension>(cellExtents.cy, dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cy * 2.0));
             }
@@ -791,7 +794,7 @@ namespace neogfx
                 cellExtents.cx += (maybeCellImageSize->cx + units_converter(aGc).to_device_units(cell_spacing(aGc)).cx);
                 cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
-            cellExtents.cy = std::max(cellExtents.cy, cellFont.height());
+            cellExtents.cy = std::max(cellExtents.cy, effectiveFont.height());
             cellMeta.extents = cellExtents.ceil();
             if (iTotalHeight != std::nullopt)
                 *iTotalHeight += (item_height(aIndex, aGc) - oldItemHeight);

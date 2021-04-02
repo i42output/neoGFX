@@ -50,6 +50,15 @@ namespace neogfx
         }
         // implementation
     public:
+        const i_string& id() const override
+        {
+            return iId;
+        }
+        void set_id(const i_string& aId) override
+        {
+            iId = aId;
+        }
+    public:
         bool has_parent_layout_item() const override
         {
             return as_layout_item().has_parent_layout() || (as_layout_item().is_widget() && as_layout_item().as_widget().has_parent());
@@ -403,6 +412,7 @@ namespace neogfx
         define_anchor(MinimumSize)
         define_anchor(MaximumSize)
     private:
+        string iId;
         ref_ptr<i_layout_item_cache> iCache;
     };
 }

@@ -192,6 +192,10 @@ namespace neogfx
 
     void font_widget::init()
     {
+        iFamilyPicker.set_id("neogfx::font_widget::family_picker"_s);
+        iStylePicker.set_id("neogfx::font_widget::style_picker"_s);
+        iSizePicker.set_id("neogfx::font_widget::size_picker"_s);
+
         iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
         iStylePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
         iSizePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });

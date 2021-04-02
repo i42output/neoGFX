@@ -36,10 +36,17 @@ namespace neogfx
     template <typename Base>
     struct setting_widget : public Base
     {
+        typedef Base base_type;
+
+        neolib::i_setting& setting;
         bool updating = false;
 
-        typedef Base base_type;
-        using base_type::base_type;
+        template <typename... Args>
+        setting_widget(neolib::i_setting& aSetting, Args&&... aArgs) : 
+            base_type{ std::forward<Args>(aArgs)... }, setting{ aSetting }
+        {
+            base_type::set_id("setting::"_s + aSetting.key());
+        }
     };
 
     template <typename T>
@@ -47,7 +54,7 @@ namespace neogfx
     {
         ref_ptr<i_widget> operator()(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink)
         {
-            auto settingWidget = make_ref<setting_widget<basic_slider_box<T>>>(aLayout);
+            auto settingWidget = make_ref<setting_widget<basic_slider_box<T>>>(aSetting, aLayout);
             settingWidget->set_minimum(aSetting.constraints().minimum_value<T>());
             settingWidget->set_maximum(aSetting.constraints().maximum_value<T>());
             settingWidget->set_step(aSetting.constraints().step_value<T>());
@@ -93,7 +100,7 @@ namespace neogfx
                 {
                 case neolib::setting_type::Boolean:
                     {
-                        auto settingWidget = make_ref<setting_widget<check_box>>(aLayout);
+                        auto settingWidget = make_ref<setting_widget<check_box>>(aSetting, aLayout);
                         settingWidget->set_checked(aSetting.value().get<bool>());
                         aSink += settingWidget->Checked([&, settingWidget]()
                         {
@@ -153,7 +160,7 @@ namespace neogfx
                     break;
                 case neolib::setting_type::Enum:
                     {
-                        auto settingWidget = make_ref<setting_widget<drop_list>>(aLayout);
+                        auto settingWidget = make_ref<setting_widget<drop_list>>(aSetting, aLayout);
                         auto const& e = aSetting.value().get<neolib::i_enum>();
                         auto enumModel = make_ref<basic_item_model<neolib::i_enum::underlying_type>>();
                         for (auto& ee : e.enumerators())
@@ -180,7 +187,7 @@ namespace neogfx
                 case neolib::setting_type::Custom:
                     if (aSetting.value().type_name() == "neogfx::color")
                     {
-                        auto settingWidget = make_ref<setting_widget<color_widget>>(aLayout, aSetting.value().get<color>());
+                        auto settingWidget = make_ref<setting_widget<color_widget>>(aSetting, aLayout, aSetting.value().get<color>());
                         aSink += settingWidget->ColorChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
@@ -200,7 +207,7 @@ namespace neogfx
                     }
                     else if (aSetting.value().type_name() == "neogfx::gradient")
                     {
-                        auto settingWidget = make_ref<setting_widget<gradient_widget>>(aLayout, aSetting.value().get<unique_gradient>());
+                        auto settingWidget = make_ref<setting_widget<gradient_widget>>(aSetting, aLayout, aSetting.value().get<unique_gradient>());
                         settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
                         aSink += settingWidget->GradientChanged([&, settingWidget]()
                         {
@@ -221,7 +228,7 @@ namespace neogfx
                     }
                     else if (aSetting.value().type_name() == "neogfx::font")
                     {
-                        auto settingWidget = make_ref<setting_widget<font_widget>>(aLayout, font{ aSetting.value().get<font_info>() });
+                        auto settingWidget = make_ref<setting_widget<font_widget>>(aSetting, aLayout, font{ aSetting.value().get<font_info>() });
                         settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
                         aSink += settingWidget->SelectionChanged([&, settingWidget]()
                         {

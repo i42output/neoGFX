@@ -104,6 +104,16 @@ namespace neogfx
         return subject().anchors();
     }
 
+    const i_string& layout_item_cache::id() const
+    {
+        return subject().id();
+    }
+
+    void layout_item_cache::set_id(const i_string& aId)
+    {
+        subject().set_id(aId);
+    }
+
     bool layout_item_cache::is_layout() const
     {
         return subject().is_layout();

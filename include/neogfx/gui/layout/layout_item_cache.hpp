@@ -40,6 +40,9 @@ namespace neogfx
         const anchor_map_type& anchors() const override;
         anchor_map_type& anchors() override;
     public:
+        const i_string& id() const override;
+        void set_id(const i_string& aId) override;
+    public:
         bool is_layout() const override;
         const i_layout& as_layout() const override;
         i_layout& as_layout() override;

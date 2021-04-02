@@ -48,6 +48,9 @@ namespace neogfx
     public:
         virtual ~i_layout_item() = default;
     public:
+        virtual const i_string& id() const = 0;
+        virtual void set_id(const i_string& aId) = 0;
+    public:
         virtual bool is_layout() const = 0;
         virtual const i_layout& as_layout() const = 0;
         virtual i_layout& as_layout() = 0;
