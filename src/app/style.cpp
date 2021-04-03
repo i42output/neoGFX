@@ -39,11 +39,11 @@ namespace neogfx
         iSpacing{ aOther.spacing() },
         iPalette{ aOther.palette() }
     {
-        iFontInfo[font_role::Caption] = aOther.font_info(font_role::Caption);
-        iFontInfo[font_role::Menu] = aOther.font_info(font_role::Menu);
-        iFontInfo[font_role::Toolbar] = aOther.font_info(font_role::Toolbar);
-        iFontInfo[font_role::StatusBar] = aOther.font_info(font_role::StatusBar);
-        iFontInfo[font_role::Widget] = aOther.font_info(font_role::Widget);
+        iFontInfo[font_role::Caption] = aOther.font_available(font_role::Caption) ? aOther.font_info(font_role::Caption) : optional_font_info{};
+        iFontInfo[font_role::Menu] = aOther.font_available(font_role::Menu) ? aOther.font_info(font_role::Menu) : optional_font_info{};
+        iFontInfo[font_role::Toolbar] = aOther.font_available(font_role::Toolbar) ? aOther.font_info(font_role::Toolbar) : optional_font_info{};
+        iFontInfo[font_role::StatusBar] = aOther.font_available(font_role::StatusBar) ? aOther.font_info(font_role::StatusBar) : optional_font_info{};
+        iFontInfo[font_role::Widget] = aOther.font_available(font_role::Widget) ? aOther.font_info(font_role::Widget) : optional_font_info{};
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });
     }
 
@@ -69,11 +69,11 @@ namespace neogfx
             iPadding = aOther.all_padding();
             iSpacing = aOther.spacing();
             iPalette = aOther.palette();
-            iFontInfo[font_role::Caption] = aOther.font_info(font_role::Caption);
-            iFontInfo[font_role::Menu] = aOther.font_info(font_role::Menu);
-            iFontInfo[font_role::Toolbar] = aOther.font_info(font_role::Toolbar);
-            iFontInfo[font_role::StatusBar] = aOther.font_info(font_role::StatusBar);
-            iFontInfo[font_role::Widget] = aOther.font_info(font_role::Widget);
+            iFontInfo[font_role::Caption] = aOther.font_available(font_role::Caption) ? aOther.font_info(font_role::Caption) : optional_font_info{};
+            iFontInfo[font_role::Menu] = aOther.font_available(font_role::Menu) ? aOther.font_info(font_role::Menu) : optional_font_info{};
+            iFontInfo[font_role::Toolbar] = aOther.font_available(font_role::Toolbar) ? aOther.font_info(font_role::Toolbar) : optional_font_info{};
+            iFontInfo[font_role::StatusBar] = aOther.font_available(font_role::StatusBar) ? aOther.font_info(font_role::StatusBar) : optional_font_info{};
+            iFontInfo[font_role::Widget] = aOther.font_available(font_role::Widget) ? aOther.font_info(font_role::Widget) : optional_font_info{};
             handle_change(style_aspect::Font);
         }
         return *this;
@@ -85,11 +85,11 @@ namespace neogfx
             iPadding == aOther.all_padding() &&
             iSpacing == aOther.spacing() &&
             iPalette == aOther.palette() &&
-            iFontInfo[font_role::Caption] == aOther.font_info(font_role::Caption) &&
-            iFontInfo[font_role::Menu] == aOther.font_info(font_role::Menu) &&
-            iFontInfo[font_role::Toolbar] == aOther.font_info(font_role::Toolbar) &&
-            iFontInfo[font_role::StatusBar] == aOther.font_info(font_role::StatusBar) &&
-            iFontInfo[font_role::Widget] == aOther.font_info(font_role::Widget);
+            maybe_font_info(font_role::Caption) == aOther.maybe_font_info(font_role::Caption) &&
+            maybe_font_info(font_role::Menu) == aOther.maybe_font_info(font_role::Menu) &&
+            maybe_font_info(font_role::Toolbar) == aOther.maybe_font_info(font_role::Toolbar) &&
+            maybe_font_info(font_role::StatusBar) == aOther.maybe_font_info(font_role::StatusBar) &&
+            maybe_font_info(font_role::Widget) == aOther.maybe_font_info(font_role::Widget);
     }
 
     bool style::operator!=(const i_style& aOther) const
@@ -163,6 +163,11 @@ namespace neogfx
         }
     }
 
+    bool style::font_available(font_role aRole) const
+    {
+        return iFontInfo[aRole] != std::nullopt;
+    }
+
     const font_info& style::font_info(font_role aRole) const
     {
         if (iFontInfo[aRole] == std::nullopt)
@@ -186,7 +191,18 @@ namespace neogfx
                 break;
             }
         }
-        return *iFontInfo[aRole];
+
+        if (iFontInfo[aRole] != std::nullopt)
+            return *iFontInfo[aRole];
+        else if (aRole != font_role::Widget)
+            return font_info(font_role::Widget);
+        else
+            throw no_font_for_role();
+    }
+
+    const i_optional<font_info>& style::maybe_font_info(font_role aRole) const
+    {
+        return iFontInfo[aRole];
     }
 
     void style::set_font_info(font_role aRole, const neogfx::font_info& aFontInfo)
@@ -201,9 +217,15 @@ namespace neogfx
 
     const font& style::font(font_role aRole) const
     {
-        if (iFont[aRole] == std::nullopt)
-            iFont[aRole].emplace(font_info(aRole));
-        return *iFont[aRole];
+        if (iFont[aRole] != std::nullopt)
+            return *iFont[aRole];
+
+        if (font_available(aRole))
+            return iFont[aRole].emplace(font_info(aRole));
+        else if (aRole != font_role::Widget)
+            return font(font_role::Widget);
+        else
+            throw no_font_for_role();
     }
 
     void style::handle_change(style_aspect aAspect)

@@ -71,6 +71,8 @@ namespace neogfx
     class i_style
     {
     public:
+        struct no_font_for_role : std::runtime_error { no_font_for_role() : std::runtime_error{ "neogfx::i_style::no_font_for_role" } {} };
+    public:
         declare_event(changed, style_aspect)
     public:
         typedef std::array<neogfx::padding, static_cast<std::size_t>(padding_role::COUNT)> padding_list;
@@ -87,7 +89,9 @@ namespace neogfx
         virtual i_palette& palette() = 0;
         virtual void set_palette(const i_palette& aPalette) = 0;
         virtual void set_palette_color(color_role aRole, const optional_color& aColor) = 0;
+        virtual bool font_available(font_role aRole) const = 0;
         virtual const neogfx::font_info& font_info(font_role aRole) const = 0;
+        virtual const i_optional<neogfx::font_info>& maybe_font_info(font_role aRole) const = 0;
         virtual void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) = 0;
         virtual const neogfx::font& font(font_role aRole) const = 0;
     public:

@@ -83,7 +83,7 @@ namespace neogfx
     {
         size result = widget::minimum_size();
         if (menu_item().type() == menu_item_type::Action && menu_item().action().is_separator())
-            result.cy = units_converter(*this).from_device_units(3.0_dip);
+            result.cy = units_converter(*this).from_device_units(7.0_dip);
         return result;
     }
 
@@ -172,7 +172,7 @@ namespace neogfx
         {
             scoped_units su{ *this, units::Pixels };
             rect line = client_rect(false);
-            line.y += 1.0_dip;
+            line.y += std::floor(line.height() / 2.0);
             line.cy = 1.0_dip;
             line.x += dpi_scale(iGap);
             line.cx -= dpi_scale(iGap * 2.0);

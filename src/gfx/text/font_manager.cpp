@@ -69,29 +69,36 @@ namespace neogfx
             std::optional<font_info> default_system_font_info(system_font_role aRole)
             {
 #ifdef WIN32
+#if 0 // Has Microsoft (tm) changed their mind on this? (See VS2019 font usage)
                 if (service<i_font_manager>().has_font("Segoe UI", "Regular") && (aRole == system_font_role::Caption || aRole == system_font_role::Menu || aRole == system_font_role::StatusBar))
                     return font_info{ "Segoe UI", "Regular", 9 };
-                std::wstring defaultFontFaceName = L"Microsoft Sans Serif";
-                HKEY hkeyDefaultFont;
-                if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes",
-                    0, KEY_READ, &hkeyDefaultFont) == ERROR_SUCCESS)
+#endif
+                if (aRole == system_font_role::Widget)
                 {
-                    DWORD dwType;
-                    wchar_t byteBuffer[LF_FACESIZE + 1];
-                    DWORD dwBufferSize = sizeof(byteBuffer);
-                    if (RegQueryValueEx(hkeyDefaultFont, L"MS Shell Dlg 2", NULL, &dwType,
-                        (LPBYTE)&byteBuffer, &dwBufferSize) == ERROR_SUCCESS)
+                    std::wstring defaultFontFaceName = L"Microsoft Sans Serif";
+                    HKEY hkeyDefaultFont;
+                    if (::RegOpenKeyEx(HKEY_LOCAL_MACHINE, L"Software\\Microsoft\\Windows NT\\CurrentVersion\\FontSubstitutes",
+                        0, KEY_READ, &hkeyDefaultFont) == ERROR_SUCCESS)
                     {
-                        defaultFontFaceName = (LPCTSTR)byteBuffer;
+                        DWORD dwType;
+                        wchar_t byteBuffer[LF_FACESIZE + 1];
+                        DWORD dwBufferSize = sizeof(byteBuffer);
+                        if (RegQueryValueEx(hkeyDefaultFont, L"MS Shell Dlg 2", NULL, &dwType,
+                            (LPBYTE)&byteBuffer, &dwBufferSize) == ERROR_SUCCESS)
+                        {
+                            defaultFontFaceName = (LPCTSTR)byteBuffer;
+                        }
+                        else if (RegQueryValueEx(hkeyDefaultFont, L"MS Shell Dlg", NULL, &dwType,
+                            (LPBYTE)&byteBuffer, &dwBufferSize) == ERROR_SUCCESS)
+                        {
+                            defaultFontFaceName = (LPCTSTR)byteBuffer;
+                        }
+                        ::RegCloseKey(hkeyDefaultFont);
                     }
-                    else if (RegQueryValueEx(hkeyDefaultFont, L"MS Shell Dlg", NULL, &dwType,
-                        (LPBYTE)&byteBuffer, &dwBufferSize) == ERROR_SUCCESS)
-                    {
-                        defaultFontFaceName = (LPCTSTR)byteBuffer;
-                    }
-                    ::RegCloseKey(hkeyDefaultFont);
+                    return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font_style::Normal, 8);
                 }
-                return font_info(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(defaultFontFaceName.c_str())), font_style::Normal, 8);
+                else
+                    return {};
 #else
                 return {};
 #endif

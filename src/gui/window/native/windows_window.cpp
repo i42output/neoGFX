@@ -1334,7 +1334,10 @@ namespace neogfx
                     if (!minimized && (LOWORD(wparam) != WA_INACTIVE))
                         self.handle_event(window_event{ window_event_type::FocusGained });
                     else
-                        self.handle_event(window_event{ window_event_type::FocusLost });
+                    {
+                        if (self.is_alive())
+                            self.handle_event(window_event{ window_event_type::FocusLost });
+                    }
                 }
                 break;
             case WM_MOUSEACTIVATE:
