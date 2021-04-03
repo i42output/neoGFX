@@ -74,6 +74,10 @@ namespace neogfx::DesignStudio
     {
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
+        if (item().is_widget())
+            remove(item().as_widget());
+        else
+            item().set_layout_owner(nullptr);
     }
 
     bool widget_caddy::has_element() const

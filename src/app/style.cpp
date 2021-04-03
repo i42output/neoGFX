@@ -165,11 +165,6 @@ namespace neogfx
 
     bool style::font_available(font_role aRole) const
     {
-        return iFontInfo[aRole] != std::nullopt;
-    }
-
-    const font_info& style::font_info(font_role aRole) const
-    {
         if (iFontInfo[aRole] == std::nullopt)
         {
             switch (aRole)
@@ -191,9 +186,13 @@ namespace neogfx
                 break;
             }
         }
+        return iFontInfo[aRole] != std::nullopt;
+    }
 
-        if (iFontInfo[aRole] != std::nullopt)
-            return *iFontInfo[aRole];
+    const font_info& style::font_info(font_role aRole) const
+    {
+        if (font_available(aRole))
+            return *maybe_font_info(aRole);
         else if (aRole != font_role::Widget)
             return font_info(font_role::Widget);
         else
@@ -202,6 +201,7 @@ namespace neogfx
 
     const i_optional<font_info>& style::maybe_font_info(font_role aRole) const
     {
+        (void)font_available(aRole);
         return iFontInfo[aRole];
     }
 

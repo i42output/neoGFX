@@ -283,7 +283,7 @@ namespace neogfx
         {
             return has_parent() && aWidget.has_parent() && &parent() == &aWidget.parent();
         }
-        ref_ptr<i_widget> remove(i_widget& aChild, bool aSingular = false)
+        ref_ptr<i_widget> remove(i_widget& aChild, bool aSingular = true)
         {
             ref_ptr<i_widget> ref;
             remove(aChild, aSingular, ref);
