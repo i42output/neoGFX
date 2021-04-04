@@ -462,6 +462,11 @@ namespace neogfx
         return (style() & window_style::Nested) == window_style::Nested;
     }
 
+    void window::create_nest(i_widget& aNest)
+    {
+        iNest.emplace(aNest);
+    }
+
     const i_nest& window::nest() const
     {
         if (is_nest())
@@ -577,6 +582,8 @@ namespace neogfx
     void window::set_parent(i_widget& aParent)
     {
         iParentWindow = &aParent.root();
+        if ((style() & window_style::Nested) == window_style::Nested && !aParent.is_root())
+            base_type::set_parent(aParent);
     }
 
     bool window::is_managing_layout() const
@@ -670,9 +677,7 @@ namespace neogfx
             }
             else
             {
-                rect shadowRect = to_client_coordinates(non_client_rect());
-                shadowRect.position() += point{ 4.0_dip, 4.0_dip };
-                aGc.fill_rounded_rect(shadowRect, 4.0_dip, color::Yellow);
+                // todo
             }
         }
         aGc.set_extents(extents());
@@ -680,7 +685,11 @@ namespace neogfx
         base_type::render(aGc);
         if (is_nest())
             for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
-                as_nest().nested_window(nw).as_window().as_widget().render(aGc);
+            {
+                auto const& nestedWindow = as_nest().nested_window(nw).as_window().as_widget();
+                if (!nestedWindow.has_parent())
+                    nestedWindow.render(aGc);
+            }
         PaintOverlay.trigger(aGc);
     }
 
@@ -1018,7 +1027,8 @@ namespace neogfx
 
     void window::init()
     {
-        iSurfaceDestroyed.emplace(surface().native_surface());
+        if (!is_nested())
+            iSurfaceDestroyed.emplace(surface().native_surface());
 
         base_type::init();
         set_decoration_style(window_style_to_decoration_style(iStyle));

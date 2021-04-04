@@ -106,7 +106,7 @@ namespace neogfx::DesignStudio
         virtual i_element_caddy& caddy() const = 0;
         virtual void set_caddy(i_element_caddy& aCaddy) = 0;
         virtual bool has_layout_item() const = 0;
-        virtual void create_layout_item() = 0;
+        virtual void create_layout_item(i_widget& aParent) = 0;
         virtual i_layout_item& layout_item() const = 0;
     public:
         virtual element_mode mode() const = 0;

@@ -220,7 +220,7 @@ namespace neogfx
     {
         if (iParent != &aParent)
         {
-            if (is_root() || aParent.adding_child())
+            if ((is_root() && !root().is_nested()) || aParent.adding_child())
             {
                 iParent = &aParent;
                 parent_changed();
@@ -255,9 +255,9 @@ namespace neogfx
     template <typename Interface>
     i_widget& widget<Interface>::add(const i_ref_ptr<i_widget>& aChild)
     {
-        neolib::scoped_flag sf{ iAddingChild };
         if (aChild->has_parent() && &aChild->parent() == this)
             return *aChild;
+        neolib::scoped_flag sf{ iAddingChild };
         i_widget* oldParent = aChild->has_parent() ? &aChild->parent() : nullptr;
         ref_ptr<i_widget> child = aChild;
         if (oldParent != nullptr)

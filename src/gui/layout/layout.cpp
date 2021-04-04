@@ -178,10 +178,13 @@ namespace neogfx
 
     void layout::set_layout_owner(i_widget* aOwner)
     {
-        iOwner = aOwner;
-        for (auto& i : items())
-            if (!i.subject().has_layout_owner())
-                i.subject().set_layout_owner(aOwner);
+        if (iOwner != aOwner)
+        {
+            iOwner = aOwner;
+            for (auto& i : items())
+                if (!i.subject().has_layout_owner())
+                    i.subject().set_layout_owner(aOwner);
+        }
     }
 
     i_layout_item& layout::add(i_layout_item& aItem)

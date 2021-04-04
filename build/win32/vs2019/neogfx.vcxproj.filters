@@ -465,9 +465,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\message_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\mdi_window.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -58,6 +58,8 @@ namespace neogfx::DesignStudio
     {
         // todo: decompose this ctor body into smaller member initialization functions...
 
+        create_nest(iWorkspace);
+
         hide();
 
         aApp.actionShowStandardToolbar.checked([&]() { standardToolbar.show(); });

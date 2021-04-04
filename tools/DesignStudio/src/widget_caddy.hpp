@@ -49,6 +49,7 @@ namespace neogfx::DesignStudio
     public:
         bool has_element() const;
         i_element& element() const;
+        bool has_item() const;
         i_layout_item& item() const;
     public:
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;

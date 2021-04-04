@@ -224,7 +224,7 @@ namespace neogfx::DesignStudio
         {
             return iLayoutItem != nullptr;
         }
-        void create_layout_item() override
+        void create_layout_item(i_widget& aParent) override
         {
             if (!iLayoutItem)
             {
@@ -232,6 +232,16 @@ namespace neogfx::DesignStudio
                 {
                     if constexpr (std::is_constructible_v<Type, i_element&>)
                         iLayoutItem = make_ref<Type>(*this);
+                    else if constexpr (std::is_constructible_v<Type, i_widget&, window_style>)
+                        iLayoutItem = make_ref<Type>(aParent, (window_style::Default | window_style::Nested) & ~window_style::Resize);
+                    else if constexpr (std::is_constructible_v<Type, i_widget&, neolib::i_string const&, window_style>)
+                        iLayoutItem = make_ref<Type>(aParent, iId.to_std_string(), (window_style::Default | window_style::Nested) & ~window_style::Resize);
+                    else if constexpr (std::is_constructible_v<Type, i_widget&, neolib::i_string const&>)
+                        iLayoutItem = make_ref<Type>(aParent, iId.to_std_string());
+                    else if constexpr (std::is_constructible_v<Type, window_style>)
+                        iLayoutItem = make_ref<Type>((window_style::Default | window_style::Nested) & ~window_style::Resize);
+                    else if constexpr (std::is_constructible_v<Type, neolib::i_string const&, window_style>)
+                        iLayoutItem = make_ref<Type>(iId.to_std_string(), (window_style::Default | window_style::Nested) & ~window_style::Resize);
                     else if constexpr (std::is_constructible_v<Type, neolib::i_string const&>)
                         iLayoutItem = make_ref<Type>(iId.to_std_string());
                     else if constexpr (std::is_default_constructible_v<Type>)

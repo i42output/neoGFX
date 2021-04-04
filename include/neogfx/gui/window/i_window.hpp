@@ -84,6 +84,7 @@ namespace neogfx
         virtual const i_window& ultimate_ancestor() const = 0;
         virtual i_window& ultimate_ancestor() = 0;
     public:
+        virtual void create_nest(i_widget& aNest) = 0;
         virtual const i_nest& nest() const = 0;
         virtual i_nest& nest() = 0;
         virtual bool is_nested() const = 0;

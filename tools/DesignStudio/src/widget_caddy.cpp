@@ -35,7 +35,6 @@ namespace neogfx::DesignStudio
         widget{ aParent },
         iProject{ aProject },
         iElement{ aElement },
-        iItem{ aElement.has_layout_item() ? aElement.layout_item() : (aElement.create_layout_item(), aElement.layout_item()) },
         iAnimator{ service<i_async_task>(), [this](neolib::callback_timer& aAnimator) 
         {    
             aAnimator.again();
@@ -64,6 +63,7 @@ namespace neogfx::DesignStudio
             if (&aElement == iElement)
                 parent().remove(*this);
         });
+        iItem = aElement.has_layout_item() ? aElement.layout_item() : (aElement.create_layout_item(*this), aElement.layout_item());
         if (item().is_widget())
             add(item().as_widget());
         else
@@ -74,10 +74,13 @@ namespace neogfx::DesignStudio
     {
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
-        if (item().is_widget())
-            remove(item().as_widget());
-        else
-            item().set_layout_owner(nullptr);
+        if (has_item())
+        {
+            if (item().is_widget())
+                remove(item().as_widget());
+            else
+                item().set_layout_owner(nullptr);
+        }
     }
 
     bool widget_caddy::has_element() const
@@ -88,6 +91,11 @@ namespace neogfx::DesignStudio
     i_element& widget_caddy::element() const
     {
         return *iElement;
+    }
+
+    bool widget_caddy::has_item() const
+    {
+        return iItem.valid();
     }
 
     i_layout_item& widget_caddy::item() const

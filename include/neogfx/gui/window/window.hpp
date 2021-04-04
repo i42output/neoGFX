@@ -88,6 +88,7 @@ namespace neogfx
         const i_window& ultimate_ancestor() const override;
         i_window& ultimate_ancestor() override;
     public:
+        void create_nest(i_widget& aNest) override;
         const i_nest& nest() const override;
         i_nest& nest() override;
         bool is_nested() const override;

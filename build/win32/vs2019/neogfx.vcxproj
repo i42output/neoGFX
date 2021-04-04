@@ -519,7 +519,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\list_view.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\mdi_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item.hpp" />

@@ -832,11 +832,12 @@ namespace neogfx
 
     const i_widget& surface_window_proxy::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
-        auto& w = window_at_position(aPosition);
-        point adjustedPosition = aPosition;
-        if (w.is_nested())
-            adjustedPosition -= w.as_widget().origin();
-        return w.as_widget().widget_for_mouse_event(adjustedPosition, aForHitTest);
+        auto& candidateWindow = window_at_position(aPosition);
+        auto const location = current_mouse_event_location();
+        auto& correctWindow = !candidateWindow.is_nested() ||
+            ((location == mouse_event_location::NonClient && !candidateWindow.as_widget().ignore_non_client_mouse_events()) ||
+            (location == mouse_event_location::Client && !candidateWindow.as_widget().ignore_mouse_events())) ? candidateWindow : as_window();
+        return correctWindow.as_widget().widget_for_mouse_event(aPosition, aForHitTest);
     }
 
     i_widget& surface_window_proxy::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
