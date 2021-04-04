@@ -591,7 +591,7 @@ namespace neogfx
             return std::visit([&, this](auto&& arg) -> std::string
             {
                 typedef std::decay_t<decltype(arg)> type;
-                if constexpr(!std::is_same_v<type, neolib::none_t> && classify_item_call_data<type>::category == item_cell_data_category::Value)
+                if constexpr(!std::is_same_v<type, std::monostate> && classify_item_call_data<type>::category == item_cell_data_category::Value)
                     return (cell_format(aIndex) % std::get<type>(item_model().cell_data(modelIndex))).str();
                 else
                     return "";

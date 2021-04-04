@@ -193,7 +193,7 @@ namespace neogfx
             if constexpr (neolib::is_optional_v<T>)
             {
                 auto const& ov = iGetter();
-                return ov != std::nullopt ? property_variant{ *ov } : property_variant{ neolib::none };
+                return ov != std::nullopt ? property_variant{ *ov } : property_variant{};
             }
             else
                 return iGetter();

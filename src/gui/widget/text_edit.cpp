@@ -1093,7 +1093,7 @@ namespace neogfx
         if (Password != aPassword || PasswordMask != aMask)
         {
             Password = aPassword;
-            PasswordMask = aMask;
+            PasswordMask = string{ aMask };
             refresh_paragraph(iText.begin(), 0);
         }
     }

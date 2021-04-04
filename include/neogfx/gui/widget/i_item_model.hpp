@@ -243,7 +243,7 @@ namespace neogfx
             return std::visit([](auto&& arg) -> std::string
             {
                 typedef typename std::remove_cv<typename std::remove_reference<decltype(arg)>::type>::type type;
-                if constexpr(!std::is_same_v<type, neolib::none_t> && classify_item_call_data<type>::category == item_cell_data_category::Value)
+                if constexpr(!std::is_same_v<type, std::monostate> && classify_item_call_data<type>::category == item_cell_data_category::Value)
                     return (boost::basic_format<char>{"%1%"} % arg).str();
                 else
                     return "";
