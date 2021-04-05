@@ -135,9 +135,7 @@ namespace neogfx
     void text_widget::set_font(optional_font const& aFont)
     {
         widget::set_font(aFont);
-        iTextExtent = std::nullopt;
-        iSizeHintExtent = std::nullopt;
-        iGlyphText = std::nullopt;
+        reset_cache();
     }
 
     bool text_widget::visible() const
@@ -158,8 +156,7 @@ namespace neogfx
         {
             size oldSize = minimum_size();
             iText = aText;
-            iTextExtent = std::nullopt;
-            iGlyphText = std::nullopt;
+            reset_cache();
             TextChanged.trigger();
             if (oldSize != minimum_size())
             {
@@ -181,7 +178,7 @@ namespace neogfx
         {
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
-            iSizeHintExtent = std::nullopt;
+            reset_cache();
             bool const canLayout = has_parent_layout() && (visible() || !parent_layout().ignore_visibility());
             if (canLayout)
                 parent_layout().invalidate();
@@ -257,6 +254,7 @@ namespace neogfx
         if (iTextAppearance != aTextAppearance)
         {
             iTextAppearance = aTextAppearance;
+            reset_cache();
             update();
         }
     }
@@ -322,21 +320,19 @@ namespace neogfx
     {
         set_padding(neogfx::padding{ 0.0 });
         set_ignore_mouse_events(true);
-        auto reset_cache = [&]()
+        auto style_changed = [&]()
         {
-            iTextExtent = std::nullopt;
-            iSizeHintExtent = std::nullopt;
-            iGlyphText = std::nullopt;
+            reset_cache();
             if (has_parent_layout())
                 parent_layout().invalidate();
             update();
         };
-        iSink += service<i_app>().current_style_changed([this, reset_cache](style_aspect aAspect)
+        iSink += service<i_app>().current_style_changed([this, style_changed](style_aspect aAspect)
         {
             if (!has_font() && (aAspect & style_aspect::Font) == style_aspect::Font)
-                reset_cache();
+                style_changed();
         });
-        iSink += service<i_rendering_engine>().subpixel_rendering_changed(reset_cache);
+        iSink += service<i_rendering_engine>().subpixel_rendering_changed(style_changed);
     }
 
     const neogfx::glyph_text& text_widget::glyph_text() const
@@ -348,5 +344,12 @@ namespace neogfx
             iGlyphText = gc.to_glyph_text(iText, font());
         }
         return *iGlyphText;
+    }
+
+    void text_widget::reset_cache()
+    {
+        iTextExtent = std::nullopt;
+        iSizeHintExtent = std::nullopt;
+        iGlyphText = std::nullopt;
     }
 }

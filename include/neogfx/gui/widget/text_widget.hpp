@@ -88,6 +88,7 @@ namespace neogfx
     private:
         void init();
         const neogfx::glyph_text& glyph_text() const;
+        void reset_cache();
     private:
         std::string iText;
         mutable std::optional<neogfx::glyph_text> iGlyphText;
