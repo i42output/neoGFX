@@ -22,8 +22,6 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/decorated.hpp>
-#include <neogfx/gui/widget/nest.hpp>
-#include <neogfx/gui/widget/i_nested_window.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
@@ -44,7 +42,6 @@ namespace neogfx
         define_declared_event(Closed, closed)
         define_declared_event(PaintOverlay, paint_overlay, i_graphics_context&)
     private:
-        class nested_details;
         class client;
         typedef std::optional<normal_title_bar> optional_title_bar;
     public:
@@ -88,15 +85,7 @@ namespace neogfx
         const i_window& ultimate_ancestor() const override;
         i_window& ultimate_ancestor() override;
     public:
-        void create_nest(i_widget& aNest) override;
-        const i_nest& nest() const override;
-        i_nest& nest() override;
         bool is_nested() const override;
-        const i_nested_window& as_nested() const override;
-        i_nested_window& as_nested() override;
-        bool is_nest() const override;
-        const i_nest& as_nest() const override;
-        i_nest& as_nest() override;
     public:
         bool is_strong() const override;
         bool is_weak() const override;
@@ -220,9 +209,7 @@ namespace neogfx
         mutable neogfx::window_placement iPlacement;
         bool iClosed;
         sink iSink;
-        std::optional<neogfx::nest> iNest;
         std::unique_ptr<i_surface_window> iSurfaceWindow;
-        std::unique_ptr<i_nested_window> iNestedWindowDetails;
         bool iReadyToRender;
         std::string iTitleText;
         window_style iStyle;

@@ -190,7 +190,7 @@ namespace neogfx
                 break;
             case window_event_type::Resizing:
                 surface_window().native_window_resized();
-                invalidate(rect{ surface_size() });
+                invalidate(rect{ surface_extents() });
                 render();
                 break;
             case window_event_type::Resized:

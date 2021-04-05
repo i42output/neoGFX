@@ -42,6 +42,7 @@ namespace neogfx
     public:
         render_target_type target_type() const override;
         const i_texture& target_texture() const override;
+        point target_origin() const override;
         size target_extents() const override;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;

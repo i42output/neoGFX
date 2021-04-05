@@ -47,7 +47,7 @@ namespace neogfx
         declare_event(paint_overlay, i_graphics_context&)
     private:
         friend class window;
-        friend class surface_window_proxy;
+        friend class surface_window;
     public:
         enum dismissal_type_e
         {
@@ -84,15 +84,7 @@ namespace neogfx
         virtual const i_window& ultimate_ancestor() const = 0;
         virtual i_window& ultimate_ancestor() = 0;
     public:
-        virtual void create_nest(i_widget& aNest) = 0;
-        virtual const i_nest& nest() const = 0;
-        virtual i_nest& nest() = 0;
         virtual bool is_nested() const = 0;
-        virtual const i_nested_window& as_nested() const = 0;
-        virtual i_nested_window& as_nested() = 0;
-        virtual bool is_nest() const = 0;
-        virtual const i_nest& as_nest() const = 0;
-        virtual i_nest& as_nest() = 0;
     public:
         virtual bool is_strong() const = 0;
         virtual bool is_weak() const = 0;

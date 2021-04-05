@@ -65,6 +65,11 @@ namespace neogfx
         return *iFrameBufferTexture;
     }
 
+    point opengl_window::target_origin() const
+    {
+        return {};
+    }
+
     size opengl_window::target_extents() const
     {
         return extents();
@@ -370,7 +375,7 @@ namespace neogfx
 
     size opengl_window::extents() const
     {
-        return surface_size();
+        return surface_extents();
     }
 
     i_surface_window& opengl_window::surface_window() const

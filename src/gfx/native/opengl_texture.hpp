@@ -93,6 +93,7 @@ namespace neogfx
         void* target_device_handle() const override;
         pixel_format_t pixel_format() const override;
         const i_texture& target_texture() const override;
+        point target_origin() const override;
         size target_extents() const override;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;

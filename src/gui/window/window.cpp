@@ -26,7 +26,7 @@
 #include <neogfx/app/drag_drop.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_display.hpp>
-#include <neogfx/hid/surface_window_proxy.hpp>
+#include <neogfx/hid/surface_window.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/window/window.hpp>
@@ -82,53 +82,6 @@ namespace neogfx
         if (iSurface != nullptr && !*iWindowDestroyed && !*iSurfaceDestroyed)
             iSurface->resume_rendering();
     }
-
-    class window::nested_details : public i_nested_window
-    {
-    public:
-        nested_details(i_window& aSurrogate) : iSurrogate{ aSurrogate }
-        {
-            nested_root().add(*this);
-        }
-        ~nested_details()
-        {
-            nested_root().remove(*this);
-        }
-    public:
-        const i_nest& nested_root() const override
-        {
-            return iSurrogate.nest();
-        }
-        i_nest& nested_root() override
-        {
-            return iSurrogate.nest();
-        }
-        bool has_nested_parent() const override
-        {
-            return iSurrogate.has_parent_window() && iSurrogate.parent_window().is_nested();
-        }
-        const i_nested_window& nested_parent() const override
-        {
-            if (has_nested_parent())
-                return iSurrogate.parent_window().as_nested();
-            throw no_nested_parent();
-        }
-        i_nested_window& nested_parent() override
-        {
-            return const_cast<i_nested_window&>(to_const(*this).nested_parent());
-        }
-    public:
-        const i_window& as_window() const override
-        {
-            return iSurrogate;
-        }
-        i_window& as_window() override
-        {
-            return iSurrogate;
-        }
-    private:
-        i_window& iSurrogate;
-    };
 
     class window::client : public framed_scrollable_widget
     {
@@ -272,7 +225,7 @@ namespace neogfx
                 throw fullscreen_window_cannot_nest();
             iStyle |= window_style::Fullscreen;
             iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
-            iSurfaceWindow = std::make_unique<surface_window_proxy>(
+            iSurfaceWindow = std::make_unique<surface_window>(
                 *this,
                 [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
             {
@@ -285,7 +238,7 @@ namespace neogfx
                     aNewWindow);
             });
         }
-        else if (!is_nested())
+        else
         {
             auto correctedPlacement = aPlacement;
             if (!has_parent_window(false) && service<i_surface_manager>().display().is_fullscreen())
@@ -299,14 +252,14 @@ namespace neogfx
             default:
             case window_state::Normal:
                 if (!has_parent_window(false))
-                    iSurfaceWindow = std::make_unique<surface_window_proxy>(
+                    iSurfaceWindow = std::make_unique<surface_window>(
                         *this,
                         [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
                         { 
                             service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style(), aNewWindow); 
                         });
                 else
-                    iSurfaceWindow = std::make_unique<surface_window_proxy>(
+                    iSurfaceWindow = std::make_unique<surface_window>(
                         *this,
                         [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
                         { 
@@ -461,58 +414,6 @@ namespace neogfx
     {
         return (style() & window_style::Nested) == window_style::Nested;
     }
-
-    void window::create_nest(i_widget& aNest)
-    {
-        iNest.emplace(aNest);
-    }
-
-    const i_nest& window::nest() const
-    {
-        if (is_nest())
-            return as_nest();
-        if (!has_parent_window())
-            throw not_in_nest();
-        const i_window* w = &parent_window();
-        while (!w->is_nest() && w->has_parent_window())
-            w = &w->parent_window();
-        if (w->is_nest())
-            return w->as_nest();
-        throw not_in_nest();
-    }
-
-    i_nest& window::nest()
-    {
-        return const_cast<i_nest&>(to_const(*this).nest());
-    }
-
-    const i_nested_window& window::as_nested() const
-    {
-        return *iNestedWindowDetails;
-    }
-
-    i_nested_window& window::as_nested()
-    {
-        return const_cast<i_nested_window&>(to_const(*this).as_nested());
-    }
-
-    bool window::is_nest() const
-    {
-        return iNest != std::nullopt;
-    }
-
-    const i_nest& window::as_nest() const
-    {
-        if (is_nest())
-            return *iNest;
-        throw not_a_nest();
-    }
-
-    i_nest& window::as_nest()
-    {
-        return const_cast<i_nest&>(to_const(*this).as_nest());
-    }
-
     bool window::is_strong() const
     {
         return !is_weak();
@@ -658,10 +559,6 @@ namespace neogfx
     {
         if (!base_type::update(aUpdateRect))
             return false;
-        if (is_nest())
-            for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
-                if (!as_nest().nested_window(nw).as_window().as_widget().non_client_rect().intersection(aUpdateRect).empty())
-                    as_nest().nested_window(nw).as_window().as_widget().update(true);
         return true;
     }
 
@@ -683,13 +580,6 @@ namespace neogfx
         aGc.set_extents(extents());
         aGc.set_origin(origin());
         base_type::render(aGc);
-        if (is_nest())
-            for (std::size_t nw = 0; nw < as_nest().nested_window_count(); ++nw)
-            {
-                auto const& nestedWindow = as_nest().nested_window(nw).as_window().as_widget();
-                if (!nestedWindow.has_parent())
-                    nestedWindow.render(aGc);
-            }
         PaintOverlay.trigger(aGc);
     }
 
@@ -1011,9 +901,9 @@ namespace neogfx
             ++iCountedEnable;
         else
             --iCountedEnable;
-        if (is_surface() && has_native_window() && !is_nest())
+        if (is_surface() && has_native_window())
             native_window().enable(iCountedEnable >= 0);
-        else if (!is_surface() || is_nest())
+        else if (!is_surface())
             enable(iCountedEnable >= 0);
     }
 
@@ -1027,8 +917,7 @@ namespace neogfx
 
     void window::init()
     {
-        if (!is_nested())
-            iSurfaceDestroyed.emplace(surface().native_surface());
+        iSurfaceDestroyed.emplace(surface().native_surface());
 
         base_type::init();
         set_decoration_style(window_style_to_decoration_style(iStyle));
@@ -1037,14 +926,10 @@ namespace neogfx
         {
             if (is_fullscreen())
                 set_frame_style(frame_style::NoFrame);
-            iNest.emplace(*this);
         }
 
         if ((style() & window_style::InitiallyHidden) == window_style::InitiallyHidden)
             hide();
-
-        if (is_nested())
-            iNestedWindowDetails = std::make_unique<nested_details>(*this);
 
         update_modality(false);
 
@@ -1056,17 +941,14 @@ namespace neogfx
 
         set_padding({});
 
-        if (!is_nested())
-            resize(native_surface().surface_size());
-        else
-            layout_items(true);
+        resize(native_surface().surface_extents());
 
         set_background_opacity(1.0);
 
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
             if ((aAspect & style_aspect::Color) == style_aspect::Color)
-                surface().native_surface().invalidate(rect{ surface().surface_size() });
+                surface().native_surface().invalidate(rect{ surface().surface_extents() });
         });
 
         init_scrollbars();

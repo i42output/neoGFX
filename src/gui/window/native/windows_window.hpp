@@ -93,8 +93,8 @@ namespace neogfx
             void* native_handle() const override;
             point surface_position() const override;
             void move_surface(const point& aPosition) override;
-            size surface_size() const override;
-            void resize_surface(const size& aSize) override;
+            size surface_extents() const override;
+            void resize_surface(const size& aExtents) override;
         public:
             bool can_render() const override;
             void render(bool aOOBRequest = false) override;

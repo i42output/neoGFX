@@ -500,8 +500,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item_widget.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nested_window.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_nest.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_skin.hpp" />
@@ -523,7 +521,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item_widget.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\nest.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.hpp" />
@@ -577,7 +574,7 @@
     <ClInclude Include="..\..\..\include\neogfx\hid\i_mouse.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\mouse.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\surface_manager.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\hid\surface_window_proxy.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\hid\surface_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\video_mode.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\hid\window_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\neogfx.hpp" />
@@ -605,6 +602,7 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
+    <ClInclude Include="..\..\..\src\gui\window\native\virtual_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_directinput_controller.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_display.hpp" />
@@ -732,7 +730,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\nest.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
@@ -759,6 +756,7 @@
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\opengl_window.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\native\virtual_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
@@ -777,7 +775,7 @@
     <ClCompile Include="..\..\..\src\hid\native\windows_window_manager.cpp" />
     <ClCompile Include="..\..\..\src\hid\native\windows_xinput_controller.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
-    <ClCompile Include="..\..\..\src\hid\surface_window_proxy.cpp" />
+    <ClCompile Include="..\..\..\src\hid\surface_window.cpp" />
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">

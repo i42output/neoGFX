@@ -357,7 +357,7 @@ namespace neogfx
             {
                 if (iParentWidget != nullptr)
                 {
-                    rect menuBarRect = iParentWidget->non_client_rect() + (!is_nested() ? wm.window_rect(parent_window()).position() : point{});
+                    rect menuBarRect = iParentWidget->non_client_rect() + wm.window_rect(parent_window()).position();
                     if (!ourRect.intersection(menuBarRect).empty())
                     {
                         if (desktopRect.bottom() - menuBarRect.bottom() > ourRect.height())
@@ -370,8 +370,6 @@ namespace neogfx
             else
             {
                 rect parentRect{ wm.window_rect(parent_window()) };
-                if (is_nested())
-                    parentRect = point{};
                 if (ourRect.intersection(parentRect).width() > 8.0)
                 {
                     if (parentRect.right() + ourRect.width() < desktopRect.right())

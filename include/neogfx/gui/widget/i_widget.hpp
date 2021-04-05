@@ -326,7 +326,7 @@ namespace neogfx
     public:
         bool can_update() const
         {
-            return has_root() && (root().has_native_surface() || root().is_nested()) && !effectively_hidden() && !layout_items_in_progress();
+            return has_root() && root().has_native_surface() && !effectively_hidden() && !layout_items_in_progress();
         }
         bool update(bool aIncludeNonClient = false)
         {

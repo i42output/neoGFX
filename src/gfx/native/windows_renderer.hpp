@@ -51,6 +51,8 @@ namespace neogfx
             struct failed_to_destroy_opengl_context : std::runtime_error { failed_to_destroy_opengl_context(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_destroy_opengl_context: " + aReason) {} };
             struct failed_to_get_opengl_function : std::runtime_error { failed_to_get_opengl_function(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_get_opengl_function: " + aReason) {} };
             struct failed_to_set_pixel_format : std::runtime_error { failed_to_set_pixel_format(std::string const& aReason) : std::runtime_error("neogfx::native::windows::renderer::failed_to_set_pixel_format: " + aReason) {} };
+            struct virtual_surface_must_have_parent : std::logic_error { virtual_surface_must_have_parent() : std::logic_error("neogfx::native::windows::renderer::virtual_surface_must_have_parent") {} };
+            struct virtual_surface_cannot_be_fullscreen : std::logic_error { virtual_surface_cannot_be_fullscreen() : std::logic_error("neogfx::native::windows::renderer::virtual_surface_cannot_be_fullscreen") {} };
             struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::native::windows::renderer::no_target_active") {} };
         public:
             renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows);

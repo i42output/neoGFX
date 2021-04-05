@@ -69,6 +69,9 @@ namespace neogfx
         rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
         rect desktop_rect(const i_surface& aSurface) const override;
     public:
+        const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) const override;
+        i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) override;
+    public:
         bool is_surface_attached(void* aNativeSurfaceHandle) const override;
         i_surface& attached_surface(void* aNativeSurfaceHandle) override;
     private:

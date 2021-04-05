@@ -567,6 +567,12 @@ namespace neogfx
     }
 
     template <typename T>
+    point opengl_texture<T>::target_origin() const
+    {
+        return {};
+    }
+
+    template <typename T>
     size opengl_texture<T>::target_extents() const
     {
         return extents();

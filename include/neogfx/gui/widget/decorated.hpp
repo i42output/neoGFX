@@ -438,7 +438,7 @@ namespace neogfx
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
             widget_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-            if (aButton == mouse_button::Left && as_widget().capturing() && (!as_widget().is_root() || as_widget().root().is_nested()))
+            if (aButton == mouse_button::Left && as_widget().capturing() && !as_widget().is_root())
             {
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))

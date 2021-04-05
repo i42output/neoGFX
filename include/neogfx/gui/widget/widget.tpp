@@ -220,7 +220,7 @@ namespace neogfx
     {
         if (iParent != &aParent)
         {
-            if ((is_root() && !root().is_nested()) || aParent.adding_child())
+            if (is_root() || aParent.adding_child())
             {
                 iParent = &aParent;
                 parent_changed();
@@ -813,7 +813,7 @@ namespace neogfx
     {
         if (iOrigin == std::nullopt)
         {
-            if ((!is_root() || root().is_nested()))
+            if (!is_root())
             {
                 if (has_parent())
                     iOrigin = as_widget().position() + parent().origin();
@@ -1113,11 +1113,6 @@ namespace neogfx
             clipRect = clipRect.intersection(client_rect());
         if (!is_root())
             clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
-        else if (root().is_nested())
-        {
-            auto& parent = root().parent_window().as_widget();
-            clipRect = clipRect.intersection(to_client_coordinates(parent.to_window_coordinates(parent.default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
-        }
         return *(cachedRect = clipRect);
     }
 

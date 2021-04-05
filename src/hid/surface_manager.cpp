@@ -83,6 +83,25 @@ namespace neogfx
         }    
     }
 
+    const i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition) const
+    {
+        for (auto s = iSurfaces.begin(); s != iSurfaces.end(); ++s)
+        {
+            auto const& surface = **s;
+            if (!surface.is_window() || !aProgenitor.is_owner_of(surface) || !surface.as_surface_window().native_window().visible())
+                continue;
+            rect const surfaceRect{ surface.as_surface_window().native_surface().target_origin(), surface.as_surface_window().native_surface().target_extents() };
+            if (surfaceRect.contains(aPosition))
+                return surface;
+        }
+        return aProgenitor;
+    }
+
+    i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition)
+    {
+        return const_cast<i_surface&>(to_const(*this).surface_at_position(aProgenitor, aPosition));
+    }
+
     bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const
     {
         for (auto& s : iSurfaces)
@@ -144,7 +163,7 @@ namespace neogfx
     void surface_manager::invalidate_surfaces()
     {
         for (auto& s : iSurfaces)
-            s->invalidate_surface(rect(point{}, s->surface_size()), false);
+            s->invalidate_surface(rect(point{}, s->surface_extents()), false);
     }
 
     void surface_manager::render_surfaces()
@@ -189,7 +208,7 @@ namespace neogfx
 
     i_display& surface_manager::display(const i_surface& aSurface) const
     {
-        rect rectSurface{ aSurface.surface_position(), aSurface.surface_size() };
+        rect rectSurface{ aSurface.surface_position(), aSurface.surface_extents() };
         std::multimap<double, uint32_t> matches;
         for (uint32_t i = 0; i < display_count(); ++i)
         {

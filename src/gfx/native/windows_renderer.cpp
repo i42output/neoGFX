@@ -27,6 +27,7 @@
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include "../../gui/window/native/windows_window.hpp"
+#include "../../gui/window/native/virtual_window.hpp"
 #include "windows_renderer.hpp"
 
 namespace neogfx
@@ -358,19 +359,28 @@ namespace neogfx
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
-            aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle);
+            if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+                aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle);
+            else
+                throw virtual_surface_must_have_parent();
         }
 
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
-            aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle);
+            if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+                aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle);
+            else
+                throw virtual_surface_must_have_parent();
         }
 
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
         {
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
-            aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle);
+            if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+                aResult = make_ref<window>(*this, aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle);
+            else
+                throw virtual_surface_must_have_parent();
         }
 
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
@@ -378,7 +388,12 @@ namespace neogfx
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             window* parent = dynamic_cast<window*>(&aParent);
             if (parent != nullptr)
-                aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle);
+            {
+                if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+                    aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aVideoMode, aWindowTitle, aStyle);
+                else
+                    throw virtual_surface_cannot_be_fullscreen();
+            }
             else
                 create_window(aSurfaceManager, aWindow, aVideoMode, aWindowTitle, aStyle, aResult);
         }
@@ -388,7 +403,12 @@ namespace neogfx
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             window* parent = dynamic_cast<window*>(&aParent);
             if (parent != nullptr)
-                aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle);
+            {
+                if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+                    aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle);
+                else
+                    aResult = make_ref<virtual_window>(*this, aSurfaceManager, aWindow, *parent, aDimensions, aWindowTitle, aStyle);
+            }
             else
                 create_window(aSurfaceManager, aWindow, aDimensions, aWindowTitle, aStyle, aResult);
         }
@@ -398,7 +418,12 @@ namespace neogfx
             neolib::scoped_counter<uint32_t> sc(iCreatingWindow);
             window* parent = dynamic_cast<window*>(&aParent);
             if (parent != nullptr)
-                aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle);
+            {
+                if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+                    aResult = make_ref<window>(*this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle);
+                else
+                    aResult = make_ref<virtual_window>(*this, aSurfaceManager, aWindow, *parent, aPosition, aDimensions, aWindowTitle, aStyle);
+            }
             else
                 create_window(aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle, aResult);
         }

@@ -497,7 +497,7 @@ namespace neogfx
             ::SetWindowPos(iHandle, HWND_NOTOPMOST, static_cast<int>(aPosition.x), static_cast<int>(aPosition.y), 0, 0, SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOACTIVATE);
         }
 
-        size window::surface_size() const
+        size window::surface_extents() const
         {
             if (!iExtents)
             {
@@ -508,9 +508,9 @@ namespace neogfx
             return *iExtents;
         }
 
-        void window::resize_surface(const size& aSize)
+        void window::resize_surface(const size& aExtents)
         {
-            ::SetWindowPos(iHandle, HWND_NOTOPMOST, 0, 0, static_cast<int>(aSize.cx), static_cast<int>(aSize.cy), SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
+            ::SetWindowPos(iHandle, HWND_NOTOPMOST, 0, 0, static_cast<int>(aExtents.cx), static_cast<int>(aExtents.cy), SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
         }
 
         bool window::can_render() const
@@ -1309,7 +1309,7 @@ namespace neogfx
                                 basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
                         }
                         result = wndproc(hwnd, msg, wparam, lparam);
-                        self.handle_event(window_event(window_event_type::Resizing, self.surface_size()));
+                        self.handle_event(window_event(window_event_type::Resizing, self.surface_extents()));
                     }
                 }
                 break;

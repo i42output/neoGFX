@@ -1,4 +1,4 @@
-// surface_window_proxy.hpp
+// surface_window.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_native_window;
 
-    class surface_window_proxy : public object<i_surface_window>
+    class surface_window : public object<i_surface_window>
     {
     public:
         define_declared_event(DpiChanged, dpi_changed)
@@ -36,8 +36,8 @@ namespace neogfx
         define_declared_event(Closing, closing)
         define_declared_event(Closed, closed)
     public:
-        surface_window_proxy(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator);
-        ~surface_window_proxy();
+        surface_window(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator);
+        ~surface_window();
     public:
         dimension horizontal_dpi() const override;
         dimension vertical_dpi() const override;
@@ -87,8 +87,8 @@ namespace neogfx
     public:
         point surface_position() const override;
         void move_surface(const point& aPosition) override;
-        size surface_size() const override;
-        void resize_surface(const size& aSize) override;
+        size surface_extents() const override;
+        void resize_surface(const size& aExtents) override;
         double surface_opacity() const override;
         void set_surface_opacity(double aOpacity) override;
         double surface_transparency() const override;

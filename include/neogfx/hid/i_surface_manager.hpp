@@ -55,6 +55,9 @@ namespace neogfx
         virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
         virtual rect desktop_rect(const i_surface& aSurface) const = 0;
     public:
+        virtual const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) const = 0;
+        virtual i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) = 0;
+    public:
         virtual bool is_surface_attached(void* aNativeSurfaceHandle) const = 0;
         virtual i_surface& attached_surface(void* aNativeSurfaceHandle) = 0;
     public:

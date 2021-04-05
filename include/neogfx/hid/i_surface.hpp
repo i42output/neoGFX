@@ -99,8 +99,8 @@ namespace neogfx
     public:
         virtual point surface_position() const = 0;
         virtual void move_surface(const point& aPosition) = 0;
-        virtual size surface_size() const = 0;
-        virtual void resize_surface(const size& aSize) = 0;
+        virtual size surface_extents() const = 0;
+        virtual void resize_surface(const size& aExtents) = 0;
         virtual double surface_opacity() const = 0;
         virtual void set_surface_opacity(double aOpacity) = 0;
         virtual double surface_transparency() const = 0;

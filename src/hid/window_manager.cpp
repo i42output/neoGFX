@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/widget/i_nest.hpp>
 #include <neogfx/hid/window_manager.hpp>
 
 namespace neogfx
@@ -75,20 +74,14 @@ namespace neogfx
         return false;
     }
 
-    rect window_manager::desktop_rect(const i_window& aWindow, bool aIgnoreNesting) const
+    rect window_manager::desktop_rect(const i_window& aWindow) const
     {
-        if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
-            return service<i_surface_manager>().desktop_rect(aWindow.surface());
-        else
-            return rect{ point{}, window_rect(aWindow.nest().as_widget().root()).extents() };
+       return service<i_surface_manager>().desktop_rect(aWindow.surface());
     }
 
-    rect window_manager::window_rect(const i_window& aWindow, bool aIgnoreNesting) const
+    rect window_manager::window_rect(const i_window& aWindow) const
     {
-        if (aIgnoreNesting || (!aWindow.is_nest() && !aWindow.is_nested()))
-            return rect{ aWindow.surface().surface_position(), aWindow.surface().surface_size() };
-        else
-            return rect{ aWindow.as_widget().position(), aWindow.as_widget().extents() };
+        return rect{ aWindow.surface().surface_position(), aWindow.surface().surface_extents() };
     }
 
     void window_manager::move_window(i_window& aWindow, const point& aPosition)
