@@ -177,7 +177,7 @@ namespace neogfx
     void push_button::paint_non_client(i_graphics_context& aGc) const
     {
         button::paint_non_client(aGc);
-        if ((iStyle == push_button_style::Toolbar || iStyle == push_button_style::TitleBar) && enabled() && (entered() || capturing()))
+        if ((iStyle == push_button_style::Toolbar || iStyle == push_button_style::TitleBar) && enabled() && (entered() || capturing()) && !ignore_mouse_events())
         {
             color background = (capturing() && entered() ? 
                 service<i_app>().current_style().palette().color(color_role::Selection) : 

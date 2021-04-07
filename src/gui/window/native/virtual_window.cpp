@@ -289,7 +289,7 @@ namespace neogfx
 
     point virtual_window::surface_position() const
     {
-        return parent().surface_position();
+        return iPosition;
     }
 
     void virtual_window::move_surface(const point& aPosition)

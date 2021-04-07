@@ -205,7 +205,7 @@ namespace neogfx
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing() && widget.capture_position() && aItem.element_rect(skin_element::ClickableArea).contains(*widget.capture_position()))
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color const fillColor = widget.enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?
+        color const fillColor = widget.enabled() && !widget.ignore_mouse_events() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?
             hoverColor : widget.base_color();
         aGc.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
         color borderColor = default_border_color(widget);
@@ -234,7 +234,7 @@ namespace neogfx
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing())
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color fillColor = widget.effectively_enabled() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ? 
+        color fillColor = widget.effectively_enabled() && !widget.ignore_mouse_events() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ?
             hoverColor : widget.base_color();
         aGc.fill_circle(discRect.center(), discRect.width() / 2.0, fillColor.with_combined_alpha(enabledAlphaCoefficient));
         discRect.deflate(3.0_dip, 3.0_dip);

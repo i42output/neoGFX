@@ -36,7 +36,9 @@ template <> neogfx::i_surface_manager& services::start_service<neogfx::i_surface
 namespace neogfx
 {
     surface_manager::surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine) :
-        iBasicServices(aBasicServices), iRenderingEngine(aRenderingEngine), iRenderingSurfaces(false)
+        iBasicServices{ aBasicServices }, 
+        iRenderingEngine{ aRenderingEngine }, 
+        iRenderingSurfaces{ false }
     {
         iSink = service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
@@ -83,13 +85,20 @@ namespace neogfx
         }    
     }
 
-    const i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition) const
+    const i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent) const
     {
         for (auto s = iSurfaces.begin(); s != iSurfaces.end(); ++s)
         {
             auto const& surface = **s;
             if (!surface.is_window() || !aProgenitor.is_owner_of(surface) || !surface.as_surface_window().native_window().visible())
                 continue;
+            if (aForMouseEvent)
+            {
+                auto const location = aProgenitor.as_surface_window().current_mouse_event_location();
+                if ((location == mouse_event_location::Client && surface.as_surface_window().as_widget().ignore_mouse_events()) ||
+                    (location == mouse_event_location::NonClient && surface.as_surface_window().as_widget().ignore_non_client_mouse_events()))
+                    continue;
+            }
             rect const surfaceRect{ surface.as_surface_window().native_surface().target_origin(), surface.as_surface_window().native_surface().target_extents() };
             if (surfaceRect.contains(aPosition))
                 return surface;
@@ -97,9 +106,55 @@ namespace neogfx
         return aProgenitor;
     }
 
-    i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition)
+    i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent)
     {
-        return const_cast<i_surface&>(to_const(*this).surface_at_position(aProgenitor, aPosition));
+        return const_cast<i_surface&>(to_const(*this).surface_at_position(aProgenitor, aPosition, aForMouseEvent));
+    }
+
+    i_nest& surface_manager::nest_for(i_widget const& aNestWidget, nest_type aNestType) const
+    {
+        auto existing = std::find_if(iNests.begin(), iNests.end(), [&](auto&& e) { return &e->widget() == &aNestWidget; });
+        if (existing == iNests.end())
+            existing = iNests.insert(iNests.end(), std::make_unique<nest>(aNestWidget, aNestType));
+        if ((**existing).type() != aNestType)
+            throw wrong_nest_type();
+        return **existing;
+    }
+
+    i_nest& surface_manager::find_nest(i_native_window const& aNestedWindow) const
+    {
+        for (auto& n : iNests)
+            if (n->has(aNestedWindow))
+                return *n;
+        throw nest_not_found();
+    }
+
+    void surface_manager::destroy_nest(i_nest& aNest)
+    {
+        auto existing = std::find_if(iNests.begin(), iNests.end(), [&](auto&& e) { return &*e == &aNest; });
+        auto existingActive = std::find(iActiveNest.begin(), iActiveNest.end(), &aNest);
+        if (existingActive != iActiveNest.end())
+            throw cannot_destroy_active_nest();
+        iNests.erase(existing);
+    }
+
+    i_nest& surface_manager::active_nest() const
+    {
+        if (!iActiveNest.empty())
+            return *iActiveNest.back();
+        throw nest_not_active();
+    }
+
+    void surface_manager::activate_nest(i_nest& aNest)
+    {
+        iActiveNest.push_back(&aNest);
+    }
+
+    void surface_manager::deactivate_nest(i_nest& aNest)
+    {
+        if (iActiveNest.empty() || &*iActiveNest.back() != &aNest)
+            throw nest_not_active();
+        iActiveNest.pop_back();
     }
 
     bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const

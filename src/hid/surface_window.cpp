@@ -488,7 +488,7 @@ namespace neogfx
         return as_widget().ready_to_render();
     }
 
-    void surface_window::native_window_render(const rect&) const
+    void surface_window::native_window_render(const rect& aInvalidatedArea) const
     {
         graphics_context gc{ *this };
         as_widget().render(gc);
@@ -809,19 +809,19 @@ namespace neogfx
         return as_window().as_widget();
     }
 
-    const i_window& surface_window::window_at_position(const point& aPosition) const
+    const i_window& surface_window::window_at_position(const point& aPosition, bool aForMouseEvent) const
     {
-        return service<i_surface_manager>().surface_at_position(*this, aPosition).as_surface_window().as_window();
+        return service<i_surface_manager>().surface_at_position(*this, aPosition, aForMouseEvent).as_surface_window().as_window();
     }
 
-    i_window& surface_window::window_at_position(const point& aPosition)
+    i_window& surface_window::window_at_position(const point& aPosition, bool aForMouseEvent)
     {
-        return const_cast<i_window&>(to_const(*this).window_at_position(aPosition));
+        return const_cast<i_window&>(to_const(*this).window_at_position(aPosition, aForMouseEvent));
     }
 
     const i_widget& surface_window::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
-        auto& candidateWindow = window_at_position(aPosition);
+        auto& candidateWindow = window_at_position(aPosition, true);
         return candidateWindow.as_widget().widget_for_mouse_event(aPosition, aForHitTest);
     }
 

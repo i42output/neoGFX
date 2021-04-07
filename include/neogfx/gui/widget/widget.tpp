@@ -220,7 +220,7 @@ namespace neogfx
     {
         if (iParent != &aParent)
         {
-            if (is_root() || aParent.adding_child())
+            if ((is_root() && !root().is_nested()) || aParent.adding_child())
             {
                 iParent = &aParent;
                 parent_changed();
@@ -820,6 +820,8 @@ namespace neogfx
                 else
                     iOrigin = as_widget().position();
             }
+            else if (root().is_nested())
+                iOrigin = as_widget().position();
             else
                 iOrigin = point{};
         }

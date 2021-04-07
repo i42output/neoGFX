@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/core/units.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/app/action.hpp>
+#include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -250,6 +251,8 @@ namespace neogfx::DesignStudio
                     {
                         // todo: widget creation for the other widget types
                     }
+                    if (iLayoutItem->is_widget() && iLayoutItem->as_widget().is_root() && iLayoutItem->as_widget().root().is_nested())
+                        service<i_surface_manager>().nest_for(aParent, nest_type::Caddy).add(iLayoutItem->as_widget().root().native_window());
                 }
                 else if constexpr (std::is_base_of_v<i_layout, Type>)
                 {

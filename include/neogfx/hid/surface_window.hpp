@@ -145,8 +145,8 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget()  override;
     public:
-        const i_window& window_at_position(const point& aPosition) const;
-        i_window& window_at_position(const point& aPosition);
+        const i_window& window_at_position(const point& aPosition, bool aForMouseEvent = false) const;
+        i_window& window_at_position(const point& aPosition, bool aForMouseEvent = false);
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false);
     private:

@@ -20,10 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <set>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include "i_surface_manager.hpp"
+#include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/hid/nest.hpp>
 
 namespace neogfx
 {
@@ -47,6 +47,7 @@ namespace neogfx
             }
         };
         typedef std::set<i_surface*, surface_sorter> surface_list;
+        typedef neolib::mutable_set<nest> nest_list;
     public:
         surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
     public:
@@ -69,8 +70,15 @@ namespace neogfx
         rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
         rect desktop_rect(const i_surface& aSurface) const override;
     public:
-        const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) const override;
-        i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) override;
+        const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent = false) const override;
+        i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent = false) override;
+    public:
+        i_nest& nest_for(i_widget const& aNestWidget, nest_type aNestType) const override;
+        virtual i_nest& find_nest(i_native_window const& aNestedWindow) const override;
+        void destroy_nest(i_nest& aNest) override;
+        i_nest& active_nest() const override;
+        void activate_nest(i_nest& aNest) override;
+        void deactivate_nest(i_nest& aNest) override;
     public:
         bool is_surface_attached(void* aNativeSurfaceHandle) const override;
         i_surface& attached_surface(void* aNativeSurfaceHandle) override;
@@ -80,5 +88,7 @@ namespace neogfx
         surface_list iSurfaces;
         bool iRenderingSurfaces;
         sink iSink;
+        mutable std::vector<std::unique_ptr<i_nest>> iNests;
+        std::vector<i_nest*> iActiveNest;
     };
 }

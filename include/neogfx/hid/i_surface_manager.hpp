@@ -20,12 +20,18 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "i_surface.hpp"
-#include "i_display.hpp"
+#include <neogfx/hid/i_surface.hpp>
+#include <neogfx/hid/i_display.hpp>
+#include <neogfx/hid/i_nest.hpp>
 
 namespace neogfx
 {
     class i_display;
+
+    struct nest_not_found : std::logic_error { nest_not_found() : std::logic_error{ "neogfx::nest_not_found" } {} };
+    struct wrong_nest_type : std::logic_error { wrong_nest_type() : std::logic_error{ "neogfx::wrong_nest_type" } {} };
+    struct nest_not_active : std::logic_error { nest_not_active() : std::logic_error{ "neogfx::nest_not_active" } {} };
+    struct cannot_destroy_active_nest : std::logic_error { cannot_destroy_active_nest() : std::logic_error{ "neogfx::cannot_destroy_active_nest" } {} };
 
     class i_surface_manager : public i_service
     {
@@ -48,19 +54,42 @@ namespace neogfx
         virtual void invalidate_surfaces() = 0;
         virtual void render_surfaces() = 0;
         virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
-        virtual void display_error_message(const i_native_surface& aParent, std::string const& aTitle, std::string const& aMessage) const = 0;
+        virtual void display_error_message(i_native_surface const& aParent, std::string const& aTitle, std::string const& aMessage) const = 0;
         virtual uint32_t display_count() const = 0;
         virtual i_display& display(uint32_t aDisplayIndex = 0) const = 0;
-        virtual i_display& display(const i_surface& aSurface) const = 0;
+        virtual i_display& display(i_surface const& aSurface) const = 0;
         virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
-        virtual rect desktop_rect(const i_surface& aSurface) const = 0;
+        virtual rect desktop_rect(i_surface const& aSurface) const = 0;
     public:
-        virtual const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) const = 0;
-        virtual i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition) = 0;
+        virtual const i_surface& surface_at_position(i_surface const& aProgenitor, point const& aPosition, bool aForMouseEvent = false) const = 0;
+        virtual i_surface& surface_at_position(i_surface const& aProgenitor, point const& aPosition, bool aForMouseEvent = false) = 0;
+    public:
+        virtual i_nest& nest_for(i_widget const& aNestWidget, nest_type aNestType) const = 0;
+        virtual i_nest& find_nest(i_native_window const& aNestedWindow) const = 0;
+        virtual void destroy_nest(i_nest& aNest) = 0;
+        virtual i_nest& active_nest() const = 0;
+        virtual void activate_nest(i_nest& aNest) = 0;
+        virtual void deactivate_nest(i_nest& aNest) = 0;
     public:
         virtual bool is_surface_attached(void* aNativeSurfaceHandle) const = 0;
         virtual i_surface& attached_surface(void* aNativeSurfaceHandle) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0xf189b8a1, 0x37d3, 0x4288, 0x9654, { 0xf8, 0xd, 0x19, 0xf1, 0xe, 0x2d } }; return sIid; }
+    };
+
+    class scoped_nest
+    {
+    public:
+        scoped_nest(i_widget& aNestWidget, nest_type aNestType) :
+            iNest{ service<i_surface_manager>().nest_for(aNestWidget, aNestType) }
+        {
+            service<i_surface_manager>().activate_nest(iNest);
+        }
+        ~scoped_nest()
+        {
+            service<i_surface_manager>().deactivate_nest(iNest);
+        }
+    private:
+        i_nest& iNest;
     };
 }
