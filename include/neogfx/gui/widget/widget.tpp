@@ -863,6 +863,7 @@ namespace neogfx
         iOrigin = std::nullopt;
         for (auto& child : iChildren)
             child->parent_moved();
+        ParentPositionChanged.trigger();
     }
     
     template <typename Interface>

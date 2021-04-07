@@ -39,6 +39,7 @@ namespace neogfx
         define_declared_event(ChildRemoved, child_removed, i_widget&)
         define_declared_event(VisibilityChanged, visibility_changed)
         define_declared_event(PositionChanged, position_changed)
+        define_declared_event(ParentPositionChanged, parent_position_changed)
         define_declared_event(SizeChanged, size_changed)
         define_declared_event(LayoutCompleted, layout_completed)
         define_declared_event(Painting, painting, i_graphics_context&)

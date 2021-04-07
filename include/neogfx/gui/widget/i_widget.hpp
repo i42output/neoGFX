@@ -45,6 +45,7 @@ namespace neogfx
         declare_event(child_removed, i_widget&)
         declare_event(visibility_changed)
         declare_event(position_changed)
+        declare_event(parent_position_changed)
         declare_event(size_changed)
         declare_event(layout_completed)
         declare_event(painting, i_graphics_context&)

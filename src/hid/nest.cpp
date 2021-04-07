@@ -70,6 +70,10 @@ namespace neogfx
             {
                 aNestedWindow.surface_window().as_widget().move(widget().origin() + widget().client_rect(false).top_left());
             });
+            iSink += widget().parent_position_changed([&]()
+            {
+                aNestedWindow.surface_window().as_widget().move(widget().origin() + widget().client_rect(false).top_left());
+            });
             iSink += widget().size_changed([&]()
             {
                 aNestedWindow.surface_window().as_widget().resize(widget().client_rect(false).extents());
