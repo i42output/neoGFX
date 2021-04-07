@@ -268,6 +268,11 @@ namespace neogfx
         return const_cast<i_native_window&>(to_const(*this).parent());
     }
 
+    bool virtual_window::is_nested() const
+    {
+        return true;
+    }
+
     bool virtual_window::initialising() const
     {
         return false;

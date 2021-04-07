@@ -45,6 +45,7 @@ namespace neogfx
     public:
         virtual const i_native_window& parent() const = 0;
         virtual i_native_window& parent() = 0;
+        virtual bool is_nested() const = 0;
     public:
         virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
         virtual bool events_queued() const = 0;

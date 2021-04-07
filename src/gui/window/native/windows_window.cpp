@@ -461,6 +461,11 @@ namespace neogfx
             return const_cast<i_native_window&>(to_const(*this).parent());
         }
 
+        bool window::is_nested() const
+        {
+            return false;
+        }
+
         bool window::initialising() const
         {
             return !iReady;

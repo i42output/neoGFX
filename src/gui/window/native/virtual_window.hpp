@@ -77,6 +77,7 @@ namespace neogfx
         bool has_parent() const override;
         const i_native_window& parent() const override;
         i_native_window& parent() override;
+        bool is_nested() const override;
     public:
         bool initialising() const override;
         void initialisation_complete() override;

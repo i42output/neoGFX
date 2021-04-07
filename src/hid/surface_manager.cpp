@@ -94,6 +94,8 @@ namespace neogfx
                 continue;
             if (aForMouseEvent)
             {
+                if (!surface.as_surface_window().native_window().is_nested())
+                    continue;
                 auto const location = aProgenitor.as_surface_window().current_mouse_event_location();
                 if ((location == mouse_event_location::Client && surface.as_surface_window().as_widget().ignore_mouse_events()) ||
                     (location == mouse_event_location::NonClient && surface.as_surface_window().as_widget().ignore_non_client_mouse_events()))
