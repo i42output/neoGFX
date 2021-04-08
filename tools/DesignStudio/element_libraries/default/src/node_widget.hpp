@@ -1,4 +1,4 @@
-// sticky_note.hpp
+// node_widget.hpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -21,8 +21,6 @@
 
 #include <neogfx/neogfx.hpp>
 #include <random>
-#include <neogfx/app/action.hpp>
-#include <neogfx/app/file_dialog.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
@@ -193,7 +191,7 @@ namespace neogfx::DesignStudio
     };
 
     template <>
-    struct element_base<node_widget>
+    struct element_traits<node_widget> : element_traits<i_element>
     {
         typedef node base;
     };

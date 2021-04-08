@@ -42,6 +42,10 @@ namespace neogfx
         });
     }
  
+    nest::~nest()
+    {
+    }
+#
     i_widget const& nest::widget() const
     {
         return iWidget;

@@ -70,7 +70,7 @@ namespace neogfx::DesignStudio
         typedef BaseType base_type;
     };
 
-    template <typename Type, typename Base = typename element_base<Type>::base>
+    template <typename Type, typename Base = typename element_traits<Type>::base>
     class element : public neolib::reference_counted<Base>
     {
         typedef element<Base> self_type;
@@ -207,6 +207,10 @@ namespace neogfx::DesignStudio
             DesignStudio::create_default_children<Type>(*this);
         }
     public:
+        bool needs_caddy() const override
+        {
+            return element_traits<Type>::needsCaddy;
+        }
         bool has_caddy() const override
         {
             return iCaddy != nullptr;

@@ -279,9 +279,11 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_project_manager.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element_library.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_script.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\node.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\project.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\project_manager.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\script.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\settings.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\symbol.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\element.hpp" />

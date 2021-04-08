@@ -50,6 +50,10 @@ namespace neogfx::DesignStudio
         {
             aChild.set_ignore_mouse_events(true);
         });
+        iSink += ChildRemoved([&](i_widget& aChild)
+        {
+            aChild.set_ignore_mouse_events(false);
+        });
         iSink += element().mode_changed([&]()
         {
             update();

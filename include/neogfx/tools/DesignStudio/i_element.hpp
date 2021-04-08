@@ -102,6 +102,7 @@ namespace neogfx::DesignStudio
     public:
         virtual void create_default_children() = 0;
     public:
+        virtual bool needs_caddy() const = 0;
         virtual bool has_caddy() const = 0;
         virtual i_element_caddy& caddy() const = 0;
         virtual void set_caddy(i_element_caddy& aCaddy) = 0;
@@ -154,9 +155,10 @@ namespace neogfx::DesignStudio
     };
 
     template <typename T>
-    struct element_base
+    struct element_traits
     {
         typedef i_element base;
+        static constexpr bool needsCaddy = true;
     };
 
     template <typename Type>

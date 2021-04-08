@@ -65,11 +65,12 @@ namespace neogfx::DesignStudio
             if (widgetCaddy)
             {
                 auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
-                aTarget.as_widget().add(widgetCaddy);
-                widgetCaddy->move(widgetCaddy->to_client_coordinates(windowPosition));
+                auto widget = iSelectedElement->needs_caddy() ? ref_ptr<i_widget>{ widgetCaddy } : ref_ptr<i_widget>{ widgetCaddy->element().layout_item().as_widget() };
+                aTarget.as_widget().add(widget);
+                widget->move(widget->to_client_coordinates(windowPosition));
                 iSelectedElement->set_mode(element_mode::None);
                 if (iSelectedElement->group() == element_group::Workflow)
-                    widgetCaddy->bring_to_front();
+                    widget->bring_to_front();
             }
             iDragDropItem = nullptr;
             iSelectedElement = {};
@@ -98,6 +99,7 @@ namespace neogfx::DesignStudio
             case ds::element_group::Code:
             case ds::element_group::UserInterface:
                 return ng::size{ 24.0_dip, 24.0_dip };
+            case ds::element_group::Node:
             case ds::element_group::Script:
             case ds::element_group::App:
             case ds::element_group::Menu:

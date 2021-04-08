@@ -30,6 +30,7 @@ namespace neogfx
     {
     public:
         nest(i_widget const& aWidget, nest_type aType);
+        ~nest();
     public:
         i_widget const& widget() const override;
         nest_type type() const override;

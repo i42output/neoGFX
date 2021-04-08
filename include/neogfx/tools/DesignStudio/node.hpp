@@ -1,4 +1,4 @@
-// i_node.hpp
+// node.hpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston

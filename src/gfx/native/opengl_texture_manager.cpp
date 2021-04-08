@@ -60,7 +60,10 @@ namespace neogfx
     {
         auto existing = find_texture(aImage);
         if (existing != textures().end())
+        {
             aResult = existing->first();
+            return;
+        }
         switch (aDataFormat)
         {
         case texture_data_format::RGBA:

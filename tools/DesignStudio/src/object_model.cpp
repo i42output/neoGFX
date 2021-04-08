@@ -43,6 +43,7 @@ namespace neogfx::DesignStudio
                     case element_group::App:
                     case element_group::Menu:
                     case element_group::Node:
+                    case element_group::Script:
                     case element_group::Widget:
                     case element_group::Layout:
                     case element_group::Workflow:

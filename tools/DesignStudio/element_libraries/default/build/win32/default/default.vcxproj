@@ -237,6 +237,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\library.hpp" />
     <ClInclude Include="..\..\..\src\node_widget.hpp" />
+    <ClInclude Include="..\..\..\src\script_widget.hpp" />
     <ClInclude Include="..\..\..\src\sticky_note.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -59,6 +59,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/element.hpp>
 #include "sticky_note.hpp"
 #include "node_widget.hpp"
+#include "script_widget.hpp"
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
@@ -159,7 +160,6 @@ namespace neogfx::DesignStudio
         throw unknown_element_type();
     }
 
-    struct script {}; // todo
     struct build {}; // todo
     struct scripting_languages {}; // todo
 
@@ -179,7 +179,7 @@ namespace neogfx::DesignStudio
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2D_game, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(2.5D_game, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(3D_game, app)
-            MAKE_ELEMENT_FACTORY_FUNCTION(script)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(script, script_widget)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(node, node_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
