@@ -1903,23 +1903,24 @@ namespace neogfx
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
         const i_widget* result = nullptr;
-        auto const position = (is_root() ? aPosition - origin() : aPosition);
+        auto const clientPosition = (is_root() ? aPosition - origin() : aPosition);
         if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
         {
             auto const outerRect = to_client_coordinates(non_client_rect());
             auto const innerRect = outerRect.deflated(root().border());
-            if (outerRect.contains(position) && !innerRect.contains(position))
+            if (outerRect.contains(clientPosition) && !innerRect.contains(clientPosition))
                 result = this;
         }
-        if (!result && non_client_rect().contains(position))
+        if (!result && non_client_rect().contains(aPosition))
         {
             auto const location = mouse_event_location();
-            const i_widget* w = &get_widget_at(position);
+            const i_widget* w = &get_widget_at(clientPosition);
             for (; w != this ; w = &w->parent()) 
             {
+                auto const widgetClientPosition = aPosition - w->origin();
                 if (w->effectively_hidden() || (w->effectively_disabled() && !aForHitTest))
                     continue;
-                if (w->part(position - w->origin()).part == widget_part::Nowhere)
+                if (w->part(widgetClientPosition).part == widget_part::Nowhere)
                     continue;
                 if (!w->ignore_mouse_events() && location != neogfx::mouse_event_location::NonClient)
                     break;
@@ -1927,8 +1928,8 @@ namespace neogfx
                     break;
                 if (location != neogfx::mouse_event_location::NonClient &&
                     w->ignore_mouse_events() && !w->ignore_non_client_mouse_events(false) &&
-                    w->non_client_rect().deflated(w->padding()).contains(position) &&
-                    !w->client_rect(false).contains(position - w->origin()))
+                    w->non_client_rect().deflated(w->padding()).contains(aPosition) &&
+                    !w->client_rect(false).contains(widgetClientPosition))
                     break;
             }
             result = w;

@@ -154,10 +154,10 @@ namespace neogfx
         virtual mouse_button button_state() const = 0;
     public:
         virtual bool capturing() const = 0;
-        virtual const i_surface& capture_target() const = 0;
+        virtual i_surface& capture_target() const = 0;
         virtual mouse_capture_type capture_type() const = 0;
-        virtual void capture(const i_surface& aTarget) = 0;
-        virtual void capture_raw(const i_surface& aTarget) = 0;
+        virtual void capture(i_surface& aTarget) = 0;
+        virtual void capture_raw(i_surface& aTarget) = 0;
         virtual void release_capture() = 0;
     public:
         bool is_button_pressed(mouse_button aButton) const

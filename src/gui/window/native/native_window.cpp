@@ -127,6 +127,16 @@ namespace neogfx
                 break;
             }
         }
+        else if (std::holds_alternative<mouse_event>(aEvent))
+        {
+            auto& mouse = service<i_mouse>();
+            if (mouse.capturing() && &mouse.capture_target() != &surface_window())
+            {
+                mouse.capture_target().as_surface_window().native_window().push_event(aEvent);
+                return;
+            }
+        }
+
         iEventQueue.push_back(aEvent);
     }
 

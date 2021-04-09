@@ -60,7 +60,7 @@ namespace neogfx
             return iCaptureTarget != nullptr;
         }
 
-        const i_surface& mouse::capture_target() const
+        i_surface& mouse::capture_target() const
         {
             if (iCaptureTarget == nullptr)
                 throw not_capturing();
@@ -72,7 +72,7 @@ namespace neogfx
             return iCaptureType;
         }
 
-        void mouse::capture(const i_surface& aTarget)
+        void mouse::capture(i_surface& aTarget)
         {
             if (iCaptureTarget != nullptr)
                 throw already_capturing();
@@ -81,7 +81,7 @@ namespace neogfx
             iCaptureType = mouse_capture_type::Normal;
         }
 
-        void mouse::capture_raw(const i_surface& aTarget)
+        void mouse::capture_raw(i_surface& aTarget)
         {
             if (iCaptureTarget != nullptr)
                 throw already_capturing();
