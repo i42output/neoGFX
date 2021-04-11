@@ -81,7 +81,9 @@ namespace neogfx
 
     rect window_manager::window_rect(const i_window& aWindow) const
     {
-        return rect{ aWindow.surface().surface_position(), aWindow.surface().surface_extents() };
+        return aWindow.is_nested() ?
+            window_rect(aWindow.parent_window()) :
+            rect{ aWindow.surface().surface_position(), aWindow.surface().surface_extents() };
     }
 
     void window_manager::move_window(i_window& aWindow, const point& aPosition)

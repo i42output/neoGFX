@@ -912,6 +912,13 @@ namespace neogfx
             result.position().y = c;
             return result;
         }
+        self_type with_extents(const size_type& e) const
+        {
+            auto result = *this;
+            result.extents().cx = e.cx;
+            result.extents().cy = e.cy;
+            return result;
+        }
         self_type with_cx(dimension_type d) const
         { 
             auto result = *this;
