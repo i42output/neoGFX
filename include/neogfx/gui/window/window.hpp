@@ -111,8 +111,6 @@ namespace neogfx
     public:
         layer_t layer() const override;
     public:
-        void moved() override;
-        void resized() override;
         widget_part hit_test(const point& aPosition) const override;
     public:
         neogfx::size_policy size_policy() const override;

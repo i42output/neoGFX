@@ -813,15 +813,13 @@ namespace neogfx
     {
         if (iOrigin == std::nullopt)
         {
-            if (!is_root())
+            if (!is_root() || root().is_nested())
             {
                 if (has_parent())
                     iOrigin = as_widget().position() + parent().origin();
                 else
                     iOrigin = as_widget().position();
             }
-            else if (root().is_nested())
-                iOrigin = root().surface().surface_position();
             else
                 iOrigin = point{};
         }
@@ -854,6 +852,8 @@ namespace neogfx
                 parent().layout_items_completed();
             }
         }
+        if (is_root())
+            root().surface().move_surface(!root().is_nested() ? as_widget().position() : as_widget().origin());
         PositionChanged.trigger();
     }
 
@@ -877,6 +877,8 @@ namespace neogfx
         {
             update(true);
             as_widget().set_extents(aSize);
+            if (is_root())
+                root().surface().resize_surface(aSize);
             update(true);
             resized();
         }

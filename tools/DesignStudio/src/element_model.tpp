@@ -64,10 +64,10 @@ namespace neogfx::DesignStudio
             ref_ptr<widget_caddy> widgetCaddy = aItem.source().drag_drop_widget();
             if (widgetCaddy)
             {
-                auto windowPosition = widgetCaddy->to_window_coordinates(widgetCaddy->position());
                 auto widget = iSelectedElement->needs_caddy() ? ref_ptr<i_widget>{ widgetCaddy } : ref_ptr<i_widget>{ widgetCaddy->element().layout_item().as_widget() };
+                auto const position = aTarget.as_widget().to_client_coordinates(widget->to_window_coordinates(point{}));
                 aTarget.as_widget().add(widget);
-                widget->move(widget->to_client_coordinates(windowPosition));
+                widget->move(position);
                 iSelectedElement->set_mode(element_mode::None);
                 if (iSelectedElement->group() == element_group::Workflow)
                     widget->bring_to_front();

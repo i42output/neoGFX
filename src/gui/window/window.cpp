@@ -518,19 +518,6 @@ namespace neogfx
         return (!is_nested() ? LayerWidget : LayerNestedWindow) + base_type::layer();
     }
 
-    void window::moved()
-    {
-        window_manager().move_window(*this, position());
-        base_type::moved();
-    }
-
-    void window::resized()
-    {
-        window_manager().resize_window(*this, extents());
-        base_type::resized();
-        update(true);
-    }
-
     widget_part window::hit_test(const point& aPosition) const
     {
         auto result = base_type::hit_test(aPosition);
