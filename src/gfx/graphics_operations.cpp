@@ -34,6 +34,7 @@ namespace neogfx
             case Invalid: return "Invalid";
             case SetLogicalCoordinateSystem: return "SetLogicalCoordinateSystem";
             case SetLogicalCoordinates: return "SetLogicalCoordinates";
+            case SetViewport: return "SetViewport";
             case ScissorOn: return "ScissorOn";
             case ScissorOff: return "ScissorOff";
             case SnapToPixelOn: return "SnapToPixelOn";

@@ -50,6 +50,10 @@ namespace neogfx
 
     class i_graphics_context;
 
+    typedef int32_t layer_t;
+    layer_t constexpr LayerWidget       = 0x00000000u;
+    layer_t constexpr LayerNestedWindow = 0x10000000u;
+
     struct ping_pong_buffers
     {
         scoped_render_target srt;
@@ -103,8 +107,8 @@ namespace neogfx
         virtual point from_device_units(const point& aValue) const = 0;
         virtual rect from_device_units(const rect& aValue) const = 0;
         virtual path from_device_units(const path& aValue) const = 0;
-        virtual int32_t layer() const = 0;
-        virtual void set_layer(int32_t aLayer) = 0;
+        virtual layer_t layer() const = 0;
+        virtual void set_layer(layer_t aLayer) = 0;
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
@@ -114,6 +118,8 @@ namespace neogfx
         virtual void set_origin(const point& aOrigin) const = 0;
         virtual point origin() const = 0;
         virtual void flush() const = 0;
+        virtual void set_default_viewport() const = 0;
+        virtual void set_viewport(const rect& aViewportRect) const = 0;
         virtual void scissor_on(const rect& aRect) const = 0;
         virtual void scissor_off() const = 0;
         virtual bool snap_to_pixel() const = 0;

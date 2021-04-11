@@ -101,8 +101,8 @@ namespace neogfx
     public:
         virtual void bring_child_to_front(const i_widget& aChild) = 0;
         virtual void send_child_to_back(const i_widget& aChild) = 0;
-        virtual int32_t layer() const = 0;
-        virtual void set_layer(int32_t aLayer) = 0;
+        virtual layer_t layer() const = 0;
+        virtual void set_layer(layer_t aLayer) = 0;
     public:
         virtual const i_widget& before() const = 0;
         virtual i_widget& before() = 0;
@@ -150,8 +150,8 @@ namespace neogfx
         virtual widget_part part(const point& aPosition) const = 0;
         virtual widget_part hit_test(const point& aPosition) const = 0;
     public:
-        virtual int32_t render_layer() const = 0;
-        virtual void set_render_layer(const std::optional<int32_t>& aLayer) = 0;
+        virtual layer_t render_layer() const = 0;
+        virtual void set_render_layer(const std::optional<layer_t>& aLayer) = 0;
         virtual bool update(const rect& aUpdateRect) = 0;
         virtual bool requires_update() const = 0;
         virtual rect update_rect() const = 0;

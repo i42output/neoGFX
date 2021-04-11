@@ -513,6 +513,11 @@ namespace neogfx
         return base_type::device_metrics();
     }
 
+    layer_t window::layer() const
+    {
+        return (!is_nested() ? LayerWidget : LayerNestedWindow) + base_type::layer();
+    }
+
     void window::moved()
     {
         window_manager().move_window(*this, position());

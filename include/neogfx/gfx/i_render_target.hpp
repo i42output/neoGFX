@@ -62,6 +62,9 @@ namespace neogfx
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
         virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) = 0;
     public:
+        virtual rect_i32 viewport() const = 0;
+        virtual rect_i32 set_viewport(const rect_i32& aViewport) const = 0;
+    public:
         virtual bool target_active() const = 0;
         virtual void activate_target() const = 0;
         virtual void deactivate_target() const = 0;

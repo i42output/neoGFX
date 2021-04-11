@@ -52,7 +52,7 @@ namespace neogfx
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
         iLayoutInProgress{ 0 },
-        iLayer{ 0 }
+        iLayer{ LayerWidget }
     {
         base_type::Position.Changed([this](const point&) { moved(); });
         base_type::set_alive();
@@ -67,7 +67,7 @@ namespace neogfx
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
         iLayoutInProgress{ 0 },
-        iLayer{ 0 }
+        iLayer{ LayerWidget }
     {
         base_type::Position.Changed([this](const point&) { moved(); });
         aParent.add(*this);
@@ -83,7 +83,7 @@ namespace neogfx
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
         iLayoutInProgress{ 0 },
-        iLayer{ 0 }
+        iLayer{ LayerWidget }
     {
         base_type::Position.Changed([this](const point&) { moved(); });
         aLayout.add(*this);
@@ -404,13 +404,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    int32_t widget<Interface>::layer() const
+    layer_t widget<Interface>::layer() const
     {
         return iLayer;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_layer(int32_t aLayer)
+    void widget<Interface>::set_layer(layer_t aLayer)
     {
         if (iLayer != aLayer)
         {
@@ -821,7 +821,7 @@ namespace neogfx
                     iOrigin = as_widget().position();
             }
             else if (root().is_nested())
-                iOrigin = as_widget().position();
+                iOrigin = root().surface().surface_position();
             else
                 iOrigin = point{};
         }
@@ -841,7 +841,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::moved()
     {
-        if (!is_root())
+        if (!is_root() || root().is_nested())
         {
             update(true);
             iOrigin = std::nullopt;
@@ -1059,7 +1059,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    int32_t widget<Interface>::render_layer() const
+    layer_t widget<Interface>::render_layer() const
     {
         if (iRenderLayer != std::nullopt)
             return *iRenderLayer;
@@ -1067,7 +1067,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_render_layer(const std::optional<int32_t>& aLayer)
+    void widget<Interface>::set_render_layer(const std::optional<layer_t>& aLayer)
     {
         if (iRenderLayer != aLayer)
         {
@@ -1144,7 +1144,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
 
         aGc.set_extents(as_widget().extents());
-        aGc.set_origin(origin());
+        aGc.set_origin(as_widget().origin());
 
         scoped_snap_to_pixel snap{ aGc };
         scoped_opacity sc{ aGc, effectively_enabled() ? opacity() : opacity() * 0.75 };
@@ -1153,14 +1153,15 @@ namespace neogfx
             scoped_scissor scissor(aGc, nonClientClipRect);
             paint_non_client(aGc);
 
-            for (auto i = iChildren.rbegin(); i != iChildren.rend(); ++i)
+            for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
             {
-                auto const& child = *i;
-                if ((child->widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
+                auto const& childWidget = **iterChild;
+                if ((childWidget.widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
                     continue;
-                rect intersection = nonClientClipRect.intersection(child->non_client_rect() - origin());
-                if (!intersection.empty())
-                    child->render(aGc);
+                rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - origin());
+                if (intersection.empty() && !childWidget.is_root())
+                    continue;
+                childWidget.render(aGc);
             }
         }
 
@@ -1206,7 +1207,7 @@ namespace neogfx
                 if ((childWidget.widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient)
                     continue;
                 rect intersection = clipRect.intersection(to_client_coordinates(childWidget.non_client_rect()));
-                if (intersection.empty())
+                if (intersection.empty() && !childWidget.is_root())
                     continue;
                 widgetLayers[childWidget.render_layer()].push_back(&childWidget);
             }
@@ -1902,8 +1903,8 @@ namespace neogfx
     template <typename Interface>
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
+        auto const clientPosition = aPosition - origin();
         const i_widget* result = nullptr;
-        auto const clientPosition = (is_root() ? aPosition - origin() : aPosition);
         if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
         {
             auto const outerRect = to_client_coordinates(non_client_rect());

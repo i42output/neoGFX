@@ -620,6 +620,22 @@ namespace neogfx
     }
 
     template <typename T>
+    rect_i32 opengl_texture<T>::viewport() const
+    {
+        GLint currentViewport[4];
+        glCheck(glGetIntegerv(GL_VIEWPORT, currentViewport));
+        return rect_i32{ point_i32{ currentViewport[0], currentViewport[1] }, size_i32{ currentViewport[2], currentViewport[3] } };
+    }
+
+    template <typename T>
+    rect_i32 opengl_texture<T>::set_viewport(const rect_i32& aViewport) const
+    {
+        auto const oldViewport = viewport();
+        glCheck(glViewport(aViewport.x, aViewport.y, static_cast<GLsizei>(aViewport.cx), static_cast<GLsizei>(aViewport.cy)));
+        return oldViewport;
+    }
+
+    template <typename T>
     void opengl_texture<T>::activate_target() const
     {
         bool alreadyActive = target_active();
@@ -677,7 +693,7 @@ namespace neogfx
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
         if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
-        glCheck(glViewport(1, 1, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+        set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<int32_t>() });
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         if (!alreadyActive)

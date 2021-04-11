@@ -69,8 +69,8 @@ namespace neogfx
         point from_device_units(const point& aValue) const override;
         rect from_device_units(const rect& aValue) const override;
         path from_device_units(const path& aValue) const override;
-        int32_t layer() const override;
-        void set_layer(int32_t aLayer) override;
+        layer_t layer() const override;
+        void set_layer(layer_t aLayer) override;
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const override;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const override;
@@ -79,6 +79,8 @@ namespace neogfx
         void set_origin(const point& aOrigin) const override;
         point origin() const override;
         void flush() const override;
+        void set_default_viewport() const override;
+        void set_viewport(const rect& aViewportRect) const override;
         void scissor_on(const rect& aRect) const override;
         void scissor_off() const override;
         bool snap_to_pixel() const override;

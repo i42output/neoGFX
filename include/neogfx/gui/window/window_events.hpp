@@ -128,6 +128,10 @@ namespace neogfx
         {
             return static_variant_cast<neogfx::point>(iParameter1);
         }
+        self_type with_position(neogfx::point const& aPosition) const
+        {
+            return self_type{ iType, aPosition, iParameter2, iParameter3, iParameter4 };
+        }
         neogfx::mouse_button mouse_button() const
         {
             return static_variant_cast<neogfx::mouse_button>(iParameter2);

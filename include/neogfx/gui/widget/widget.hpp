@@ -104,8 +104,8 @@ namespace neogfx
     public:
         void bring_child_to_front(const i_widget& aChild) override;
         void send_child_to_back(const i_widget& aChild) override;
-        int32_t layer() const override;
-        void set_layer(int32_t aLayer) override;
+        layer_t layer() const override;
+        void set_layer(layer_t aLayer) override;
     public:
         const i_widget& before() const override;
         i_widget& before() override;
@@ -185,8 +185,8 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
     public:
-        int32_t render_layer() const override;
-        void set_render_layer(const std::optional<int32_t>& aLayer) override;
+        layer_t render_layer() const override;
+        void set_render_layer(const std::optional<layer_t>& aLayer) override;
         bool update(const rect& aUpdateRect) override;
         bool requires_update() const override;
         rect update_rect() const override;

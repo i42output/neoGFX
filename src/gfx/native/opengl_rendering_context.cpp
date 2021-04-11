@@ -479,6 +479,16 @@ namespace neogfx
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                     set_origin(static_variant_cast<const graphics_operation::set_origin&>(*op).origin);
                 break;
+            case graphics_operation::operation_type::SetViewport:
+                for (auto op = opBatch.first; op != opBatch.second; ++op)
+                {
+                    auto const& setViewport = static_variant_cast<const graphics_operation::set_viewport&>(*op);
+                    if (setViewport.rect)
+                        render_target().set_viewport(setViewport.rect->as<int32_t>());
+                    else
+                        render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<int32_t>());
+                }
+                break;
             case graphics_operation::operation_type::ScissorOn:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                     scissor_on(static_variant_cast<const graphics_operation::scissor_on&>(*op).rect);

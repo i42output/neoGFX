@@ -21,6 +21,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
+#include "../../../gfx/native/opengl_rendering_context.hpp"
 #include "virtual_window.hpp"
 
 namespace neogfx
@@ -86,12 +87,12 @@ namespace neogfx
 
     point virtual_window::target_origin() const
     {
-        return iPosition + parent().target_origin();
+        return parent().target_origin();
     }
 
     size virtual_window::target_extents() const
     {
-        return iExtents;
+        return parent().target_extents();
     }
 
     void virtual_window::activate_target() const
@@ -140,12 +141,12 @@ namespace neogfx
             throw logical_coordinates_not_specified();
             break;
         case neogfx::logical_coordinate_system::AutomaticGui:
-            result.bottomLeft = vec2{ 0.0, extents().cy };
-            result.topRight = vec2{ extents().cx, 0.0 };
+            result.bottomLeft = vec2{ 0.0, parent().extents().cy };
+            result.topRight = vec2{ parent().extents().cx, 0.0 };
             break;
         case neogfx::logical_coordinate_system::AutomaticGame:
             result.bottomLeft = vec2{ 0.0, 0.0 };
-            result.topRight = vec2{ extents().cx, extents().cy };
+            result.topRight = vec2{ parent().extents().cx, parent().extents().cy };
             break;
         }
         return result;
@@ -154,6 +155,16 @@ namespace neogfx
     void virtual_window::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
     {
         iLogicalCoordinates = aCoordinates;
+    }
+
+    rect_i32 virtual_window::viewport() const
+    {
+        return parent().viewport();
+    }
+
+    rect_i32 virtual_window::set_viewport(const rect_i32& aViewport) const
+    {
+        return parent().set_viewport(aViewport);
     }
 
     uint64_t virtual_window::frame_counter() const
@@ -323,14 +334,12 @@ namespace neogfx
 
     std::unique_ptr<i_rendering_context> virtual_window::create_graphics_context(blending_mode aBlendingMode) const
     {
-        auto graphicsContext = parent().create_graphics_context(aBlendingMode);
-        return graphicsContext;
+        return parent().create_graphics_context(aBlendingMode);
     }
 
     std::unique_ptr<i_rendering_context> virtual_window::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
-        auto graphicsContext = parent().create_graphics_context(aWidget, aBlendingMode);
-        return graphicsContext;
+        return parent().create_graphics_context(aWidget, aBlendingMode);
     }
 
     void virtual_window::close(bool aForce)

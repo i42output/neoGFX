@@ -109,7 +109,7 @@ namespace neogfx
             }
             glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(target_texture().native_texture().native_handle())));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
-            glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+            set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<int32_t>() });
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
             glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         }
@@ -188,6 +188,20 @@ namespace neogfx
     void opengl_window::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
     {
         iLogicalCoordinates = aCoordinates;
+    }
+
+    rect_i32 opengl_window::viewport() const
+    {
+        GLint currentViewport[4];
+        glCheck(glGetIntegerv(GL_VIEWPORT, currentViewport));
+        return rect_i32{ point_i32{ currentViewport[0], currentViewport[1] }, size_i32{ currentViewport[2], currentViewport[3] } };
+    }
+
+    rect_i32 opengl_window::set_viewport(const rect_i32& aViewport) const
+    {
+        auto const oldViewport = viewport();
+        glCheck(glViewport(aViewport.x, aViewport.y, static_cast<GLsizei>(aViewport.cx), static_cast<GLsizei>(aViewport.cy)));
+        return oldViewport;
     }
 
     uint64_t opengl_window::frame_counter() const
@@ -334,7 +348,7 @@ namespace neogfx
         glCheck(status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
         if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
-        glCheck(glViewport(0, 0, static_cast<GLsizei>(extents().cx), static_cast<GLsizei>(extents().cy)));
+        set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<int32_t>() });
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
 

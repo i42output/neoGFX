@@ -73,9 +73,8 @@ namespace neogfx
         iRenderTarget{ aSurface.native_surface() },
         iNativeGraphicsContext{ nullptr },
         iDefaultFont{},
-        iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
-        iLayer{ 0 },
+        iLayer{ LayerWidget },
         iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
@@ -89,9 +88,8 @@ namespace neogfx
         iRenderTarget{ aSurface.native_surface() },
         iNativeGraphicsContext{ nullptr },
         iDefaultFont{ aDefaultFont },
-        iOrigin{ 0.0, 0.0 },
         iExtents{ aSurface.extents() },
-        iLayer{ 0 },
+        iLayer{ LayerWidget },
         iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
@@ -107,7 +105,7 @@ namespace neogfx
         iDefaultFont{ aWidget.font() },
         iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
-        iLayer{ 0 },
+        iLayer{ LayerWidget },
         iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
@@ -122,9 +120,8 @@ namespace neogfx
         iRenderTarget{ static_cast<i_native_texture&>(aTexture.native_texture()) },
         iNativeGraphicsContext{ nullptr },
         iDefaultFont{ font() },
-        iOrigin{},
         iExtents{ aTexture.extents() },
-        iLayer{ 0 },
+        iLayer{ LayerWidget },
         iSnapToPixel{ false },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
@@ -141,7 +138,7 @@ namespace neogfx
         iDefaultFont{ aOther.iDefaultFont },
         iOrigin{ aOther.origin() },
         iExtents{ aOther.extents() },
-        iLayer{ 0 },
+        iLayer{ LayerWidget },
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
         iSnapToPixel{ aOther.iSnapToPixel },
@@ -263,12 +260,12 @@ namespace neogfx
         return result;
     }
 
-    int32_t graphics_context::layer() const
+    layer_t graphics_context::layer() const
     {
         return iLayer;
     }
 
-    void graphics_context::set_layer(int32_t aLayer)
+    void graphics_context::set_layer(layer_t aLayer)
     {
         if (iLayer != aLayer)
         {
@@ -345,8 +342,11 @@ namespace neogfx
 
     void graphics_context::set_origin(const point& aOrigin) const
     {
-        iOrigin = to_device_units(aOrigin);
-        native_context().enqueue(graphics_operation::set_origin{ iOrigin });
+        if (iOrigin != to_device_units(aOrigin))
+        {
+            iOrigin = to_device_units(aOrigin);
+            native_context().enqueue(graphics_operation::set_origin{ iOrigin });
+        }
     }
 
     point graphics_context::origin() const
@@ -747,6 +747,16 @@ namespace neogfx
     {
         native_context().flush();
     }
+
+    void graphics_context::set_default_viewport() const
+    {
+        native_context().enqueue(graphics_operation::set_viewport{});
+    }
+
+    void graphics_context::set_viewport(const rect& aViewportRect) const
+    {
+        native_context().enqueue(graphics_operation::set_viewport{ to_device_units(aViewportRect) });
+        }
 
     void graphics_context::scissor_on(const rect& aRect) const
     {

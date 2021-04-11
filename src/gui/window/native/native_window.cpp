@@ -129,10 +129,14 @@ namespace neogfx
         }
         else if (std::holds_alternative<mouse_event>(aEvent))
         {
+            auto const& mouseEvent = static_variant_cast<const mouse_event&>(aEvent);
             auto& mouse = service<i_mouse>();
-            if (mouse.capturing() && &mouse.capture_target() != &surface_window())
+            auto& surface = mouse.capturing() ? mouse.capture_target() :
+                service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true);
+            if (&surface != &surface_window())
             {
-                mouse.capture_target().as_surface_window().native_window().push_event(aEvent);
+                auto const adjustedPosition = mouseEvent.position() - surface.surface_position();
+                surface.as_surface_window().native_window().push_event(mouseEvent.with_position(adjustedPosition));
                 return;
             }
         }

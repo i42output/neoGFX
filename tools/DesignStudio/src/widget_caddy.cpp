@@ -137,30 +137,30 @@ namespace neogfx::DesignStudio
         }
     }
 
-    int32_t widget_caddy::layer() const
+    layer_t widget_caddy::layer() const
     {
         switch (element().mode())
         {
         case element_mode::None:
         default:
-            return 0;
+            return LayerWidget + 0;
         case element_mode::Drag:
-            return -1;
+            return LayerWidget - 1;
         case element_mode::Edit:
-            return 1;
+            return LayerWidget + 1;
         }
     }
 
-    int32_t widget_caddy::render_layer() const
+    layer_t widget_caddy::render_layer() const
     {
         switch (element().mode())
         {
         case element_mode::None:
         default:
-            return 0;
+            return LayerWidget + 0;
         case element_mode::Drag:
         case element_mode::Edit:
-            return 1;
+            return LayerWidget + 1;
         }
     }
 

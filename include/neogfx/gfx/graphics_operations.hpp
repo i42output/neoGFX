@@ -50,6 +50,11 @@ namespace neogfx
             logical_coordinates coordinates;
         };
 
+        struct set_viewport
+        {
+            std::optional<rect> rect;
+        };
+
         struct scissor_on
         {
             rect rect;
@@ -284,6 +289,7 @@ namespace neogfx
             set_logical_coordinate_system,
             set_logical_coordinates,
             set_origin,
+            set_viewport,
             scissor_on,
             scissor_off,
             snap_to_pixel_on,
@@ -330,6 +336,7 @@ namespace neogfx
             SetLogicalCoordinateSystem,
             SetLogicalCoordinates,
             SetOrigin,
+            SetViewport,
             ScissorOn,
             ScissorOff,
             SnapToPixelOn,

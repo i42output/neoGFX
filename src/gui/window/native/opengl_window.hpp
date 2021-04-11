@@ -50,6 +50,9 @@ namespace neogfx
         neogfx::logical_coordinates logical_coordinates() const override;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
     public:
+        rect_i32 viewport() const override;
+        rect_i32 set_viewport(const rect_i32& aViewport) const override;
+    public:
         bool target_active() const override;
         void activate_target() const override;
         void deactivate_target() const override;

@@ -23,6 +23,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/hid/nest.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
@@ -34,11 +35,6 @@ namespace neogfx
         iSink += widget().destroyed([&]()
         {
             service<i_surface_manager>().destroy_nest(*this);
-        });
-        iSink += widget().painted([&](i_graphics_context& aGc)
-        {
-            for (auto& nestedWindow : iNestedWindows)
-                nestedWindow->surface_window().as_widget().render(aGc);
         });
     }
  

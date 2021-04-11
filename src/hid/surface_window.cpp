@@ -492,7 +492,6 @@ namespace neogfx
     {
         graphics_context gc{ *this };
         as_widget().render(gc);
-        gc.flush();
     }
 
     void surface_window::native_window_dismiss_children()
