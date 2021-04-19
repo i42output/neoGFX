@@ -81,6 +81,7 @@ namespace neogfx
     public:
         virtual texture_id id() const = 0;
         virtual i_string const& uri() const = 0;
+        virtual rect const& part() const = 0;
         virtual texture_type type() const = 0;
         virtual bool is_render_target() const = 0;
         virtual const i_render_target& as_render_target() const = 0;

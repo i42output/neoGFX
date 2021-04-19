@@ -74,6 +74,17 @@ namespace neogfx
         return false;
     }
 
+    i_window& window_manager::hosting_window(const i_window& aNestedWindow) const
+    {
+        auto existing = std::find(iWindows.begin(), iWindows.end(), &aNestedWindow);
+        if (existing == iWindows.end())
+            throw window_not_found();
+        auto w = *existing;
+        while (w->is_nested() && w->has_parent_window())
+            w = &w->parent_window();
+        return *w;
+    }
+
     rect window_manager::desktop_rect(const i_window& aWindow) const
     {
        return service<i_surface_manager>().desktop_rect(aWindow.surface());
@@ -110,5 +121,24 @@ namespace neogfx
             if (w->is_active())
                 return *w;
         throw no_window_active();
+    }
+
+
+    point window_manager::mouse_position() const
+    {
+        return service<i_mouse>().position();
+    }
+
+    point window_manager::mouse_position(const i_window& aWindow) const
+    {
+        if ((aWindow.style() & window_style::Nested) != window_style::Nested)
+            return point{ mouse_position() - aWindow.surface().surface_position() };
+        else
+            return point{ mouse_position() - hosting_window(aWindow).surface().surface_position() - aWindow.surface().surface_position() };
+    }
+
+    bool window_manager::is_mouse_button_pressed(mouse_button aButton) const
+    {
+        return (aButton & service<i_mouse>().button_state()) != mouse_button::None;
     }
 }

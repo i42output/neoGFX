@@ -131,11 +131,11 @@ namespace neogfx
         basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; return *this; }
         basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; return *this; }
         basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; return *this; }
-        basic_delta operator-() const { return basic_delta(-dx, -dy); }
-        basic_delta abs() const { return basic_delta(std::abs(dx), std::abs(dy)); }
-        basic_delta ceil() const { return basic_delta(std::ceil(dx), std::ceil(dy)); }
-        basic_delta floor() const { return basic_delta(std::floor(dx), std::floor(dy)); }
-        basic_delta round() const { return basic_delta(std::round(dx), std::round(dy)); }
+        basic_delta operator-() const { return basic_delta{ -dx, -dy }; }
+        basic_delta abs() const { return basic_delta{ std::abs(dx), std::abs(dy) }; }
+        basic_delta ceil() const { return basic_delta{ std::ceil(dx), std::ceil(dy) }; }
+        basic_delta floor() const { return basic_delta{ std::floor(dx), std::floor(dy) }; }
+        basic_delta round() const { return basic_delta{ std::round(dx), std::round(dy) }; }
         basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy) }; }
         basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
         basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy }; }
@@ -395,6 +395,8 @@ namespace neogfx
         basic_size<coordinate_type> to_size() const { return basic_size<CoordinateType>{ x, y }; }
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
         basic_vector<coordinate_type, 3> to_vec3(coordinate_type z = 0.0) const { return basic_vector<coordinate_type, 3>{ x, y, z }; }
+        explicit operator basic_delta<coordinate_type>() const { return to_delta(); }
+        explicit operator basic_size<coordinate_type>() const { return to_size(); }
         auto operator<=>(const basic_point&) const = default;
         basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }
         basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; return *this; }
@@ -408,10 +410,11 @@ namespace neogfx
         basic_point& operator-=(const basic_delta<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.dx); y -= static_cast<coordinate_type>(other.dy); return *this; }
         basic_point& operator+=(const basic_size<coordinate_type>& other) { x += static_cast<coordinate_type>(other.cx); y += static_cast<coordinate_type>(other.cy); return *this; }
         basic_point& operator-=(const basic_size<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.cx); y -= static_cast<coordinate_type>(other.cy); return *this; }
-        basic_point operator-() const { return basic_point(-x, -y); }
-        basic_point ceil() const { return basic_point(std::ceil(x), std::ceil(y)); }
-        basic_point floor() const { return basic_point(std::floor(x), std::floor(y)); }
-        basic_point round() const { return basic_point(std::round(x), std::round(y)); }
+        basic_point operator-() const { return basic_point{ -x, -y }; }
+        basic_point abs() const { return basic_point{ std::abs(x), std::abs(y) }; }
+        basic_point ceil() const { return basic_point{ std::ceil(x), std::ceil(y) }; }
+        basic_point floor() const { return basic_point{ std::floor(x), std::floor(y) }; }
+        basic_point round() const { return basic_point{ std::round(x), std::round(y) }; }
         basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y) }; }
         basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y) }; }
         basic_point min_max(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::max(y, other.y) }; }
@@ -419,6 +422,7 @@ namespace neogfx
         basic_point mid(const basic_point& other) const { return basic_point{ (x + other.x) / static_cast<coordinate_type>(2.0), (y + other.y) / static_cast<coordinate_type>(2.0) }; }
         basic_point with_x(coordinate_type x) const { return basic_point{ x, y }; }
         basic_point with_y(coordinate_type y) const { return basic_point{ x, y }; }
+        coordinate_type magnitude() const { return std::sqrt(x * x + y * y); }
         template <typename T>
         basic_point<T> as() const
         {
@@ -441,11 +445,11 @@ namespace neogfx
     }
 
     template <typename CoordinateType>
-    inline basic_delta<CoordinateType> operator-(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
+    inline basic_point<CoordinateType> operator-(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
     {
         basic_point<CoordinateType> ret = left;
         ret -= right;
-        return basic_delta<CoordinateType>(ret.x, ret.y);
+        return ret;
     }
 
     template <typename CoordinateType>
@@ -505,11 +509,11 @@ namespace neogfx
     }
 
     template <typename CoordinateType>
-    inline basic_delta<CoordinateType> operator-(const basic_point<CoordinateType>& left, const basic_delta<CoordinateType>& right)
+    inline basic_point<CoordinateType> operator-(const basic_point<CoordinateType>& left, const basic_delta<CoordinateType>& right)
     {
         basic_point<CoordinateType> ret = left;
         ret -= right;
-        return basic_delta<CoordinateType>(ret.x, ret.y);
+        return ret;
     }
 
     template <typename CoordinateType>
@@ -754,7 +758,7 @@ namespace neogfx
     public:
         basic_rect() : epsilon { default_epsilon } {}
         basic_rect(const point_type& coordinates, const size_type& dimensions) : point_type{ coordinates }, size_type{ dimensions } {}
-        basic_rect(const point_type& leftCorner, const point_type& rightCorner) : point_type{ leftCorner }, size_type{ std::abs<CoordinateType>(rightCorner.x - leftCorner.x), std::abs<CoordinateType>(rightCorner.y - leftCorner.y) } {}
+        basic_rect(const point_type& leftCorner, const point_type& rightCorner) : basic_rect{ leftCorner.x, leftCorner.y, rightCorner.x, rightCorner.y } {}
         explicit basic_rect(const point_type& coordinates) : point_type{ coordinates }, size_type{} {}
         explicit basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
         basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}

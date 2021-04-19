@@ -111,9 +111,9 @@ namespace chess
                                     auto const& unitMoves = aUnitMoves[pieceColorIndex][pieceIndex];
                                     if (std::find(unitMoves.begin(), unitMoves.end(), delta) != unitMoves.end())
                                         aResult = true;
-                                    else if (result.canMoveMultiple[pieceIndex] && (std::abs(delta.dx) == std::abs(delta.dy) || delta.dx == 0 || delta.dy == 0))
+                                    else if (result.canMoveMultiple[pieceIndex] && (std::abs(delta.x) == std::abs(delta.y) || delta.x == 0 || delta.y == 0))
                                     {
-                                        auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
+                                        auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                                         if (std::find(unitMoves.begin(), unitMoves.end(), deltaUnity) != unitMoves.end())
                                             aResult = true;
                                     }
@@ -139,7 +139,7 @@ namespace chess
                         if (aKnight)
                             continue;
                         auto const delta = move_tables<matrix>::move_coordinates{ xTo, yTo } - move_tables<matrix>::move_coordinates{ xFrom, yFrom };
-                        auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
+                        auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                         auto const start = coordinates_i32{ xFrom, yFrom };
                         auto const end = coordinates_i32{ xTo, yTo };
                         auto pos = start;

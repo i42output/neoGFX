@@ -530,28 +530,28 @@ namespace neogfx
                 switch (iTracking->part)
                 {
                 case widget_part::BorderLeft:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy });
                     break;
                 case widget_part::BorderTopLeft:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy - delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy - delta.y });
                     break;
                 case widget_part::BorderTop:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy - delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy - delta.y });
                     break;
                 case widget_part::BorderTopRight:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy - delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.x, iTracking->startSize.cy - delta.y });
                     break;
                 case widget_part::BorderRight:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.x, iTracking->startSize.cy });
                     break;
                 case widget_part::BorderBottomRight:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.dx, iTracking->startSize.cy + delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.x, iTracking->startSize.cy + delta.y });
                     break;
                 case widget_part::BorderBottom:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy + delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy + delta.y });
                     break;
                 case widget_part::BorderBottomLeft:
-                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.dx, iTracking->startSize.cy + delta.dy });
+                    newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy + delta.y });
                     break;
                 }
                 if (newSize != currentSize)

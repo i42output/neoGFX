@@ -1010,7 +1010,7 @@ namespace neogfx
             bool const childTextEdit = (&textEdit != &editor());
             auto const& textRect = cell_rect(newIndex, cell_part::Text);
             auto const adjust = textRect.position() - textEditRect.position();
-            auto const paddingAdjust = neogfx::padding{ adjust.dx, adjust.dy, adjust.dx, 0 };
+            auto const paddingAdjust = neogfx::padding{ adjust.x, adjust.y, adjust.x, 0 };
             textEdit.set_padding(paddingAdjust);
             if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));

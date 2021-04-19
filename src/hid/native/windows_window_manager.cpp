@@ -43,24 +43,6 @@ namespace neogfx
             return nullptr;
         }
 
-        point window_manager::mouse_position() const
-        {
-            return service<i_mouse>().position();
-        }
-
-        point window_manager::mouse_position(const i_window& aWindow) const
-        {
-            if ((aWindow.style() & window_style::Nested) != window_style::Nested || !aWindow.has_parent_window())
-                return point{ mouse_position() - aWindow.surface().surface_position() };
-            else
-                return point{ mouse_position() - aWindow.surface().surface_position() } +window_rect(aWindow).position();
-        }
-
-        bool window_manager::is_mouse_button_pressed(mouse_button aButton) const
-        {
-            return (aButton & service<i_mouse>().button_state()) != mouse_button::None;
-        }
-
         void window_manager::save_mouse_cursor()
         {
             iSavedCursors.push_back(std::make_shared<cursor>(::GetCursor()));

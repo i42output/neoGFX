@@ -52,6 +52,11 @@ namespace neogfx
         return native_texture().uri();
     }
 
+    rect const& sub_texture::part() const
+    {
+        return native_texture().part();
+    }
+
     texture_type sub_texture::type() const
     {
         return texture_type::SubTexture;

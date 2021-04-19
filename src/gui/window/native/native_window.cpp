@@ -135,8 +135,7 @@ namespace neogfx
                 service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true);
             if (&surface != &surface_window())
             {
-                auto const adjustedPosition = mouseEvent.position() - surface.surface_position();
-                surface.as_surface_window().native_window().push_event(mouseEvent.with_position(adjustedPosition));
+                surface.as_surface_window().native_window().push_event(mouseEvent);
                 return;
             }
         }

@@ -41,6 +41,7 @@ namespace neogfx
         virtual std::size_t window_count() const = 0;
         virtual i_window& window(std::size_t aIndex) = 0;
         virtual bool any_strong_windows() const = 0;
+        virtual i_window& hosting_window(const i_window& aNestedWindow) const = 0;
     public:
         virtual rect desktop_rect(const i_window& aWindow) const = 0;
         virtual rect window_rect(const i_window& aWindow) const = 0;

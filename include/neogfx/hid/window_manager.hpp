@@ -51,6 +51,7 @@ namespace neogfx
         std::size_t window_count() const override;
         i_window& window(std::size_t aIndex) override;
         bool any_strong_windows() const override;
+        i_window& hosting_window(const i_window& aNestedWindow) const override;
     public:
         rect desktop_rect(const i_window& aWindow) const override;
         rect window_rect(const i_window& aWindow) const override;
@@ -59,6 +60,10 @@ namespace neogfx
     public:
         bool window_activated() const override;
         i_window& active_window() const override;
+    public:
+        point mouse_position() const override;
+        point mouse_position(const i_window& aWindow) const override;
+        bool is_mouse_button_pressed(mouse_button aButton) const override;
     private:
         window_list iWindows;
     };

@@ -58,7 +58,7 @@ namespace neogfx
 
     void opengl_texture_manager::create_texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult)
     {
-        auto existing = find_texture(aImage);
+        auto existing = find_texture(aImage, aImagePart);
         if (existing != textures().end())
         {
             aResult = existing->first();

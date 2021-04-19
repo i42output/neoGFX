@@ -53,6 +53,7 @@ namespace neogfx
     public:
         texture_id id() const override;
         string const& uri() const override;
+        rect const& part() const override;
         texture_type type() const override;
         bool is_render_target() const override;
         const i_render_target& as_render_target() const override;
@@ -114,6 +115,7 @@ namespace neogfx
         i_texture_manager& iManager;
         texture_id iId;
         string iUri;
+        rect iPart;
         dimension iDpiScaleFactor;
         neogfx::color_space iColorSpace;
         texture_sampling iSampling;

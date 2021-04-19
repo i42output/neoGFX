@@ -390,47 +390,47 @@ namespace neogfx::DesignStudio
 
     void widget_caddy::drag(point const& aPosition, bool aIgnoreConstraints)
     {
-        auto const delta = point{ aPosition - resizer_part_rect(iDragInfo->part).center() } - iDragInfo->dragFrom;
+        auto const adjust = point{ aPosition - resizer_part_rect(iDragInfo->part).center() } - iDragInfo->dragFrom;
         auto r = non_client_rect();
         switch (iDragInfo->part)
         {
         case cardinal::NorthWest:
-            r.x += delta.dx;
-            r.y += delta.dy;
-            r.cx -= delta.dx;
-            r.cy -= delta.dy;
+            r.x += adjust.x;
+            r.y += adjust.y;
+            r.cx -= adjust.x;
+            r.cy -= adjust.y;
             break;
         case cardinal::NorthEast:
-            r.y += delta.dy;
-            r.cx += delta.dx;
-            r.cy -= delta.dy;
+            r.y += adjust.y;
+            r.cx += adjust.x;
+            r.cy -= adjust.y;
             break;
         case cardinal::North:
-            r.y += delta.dy;
-            r.cy -= delta.dy;
+            r.y += adjust.y;
+            r.cy -= adjust.y;
             break;
         case cardinal::West:
-            r.x += delta.dx;
-            r.cx -= delta.dx;
+            r.x += adjust.x;
+            r.cx -= adjust.x;
             break;
         case cardinal::Center:
-            r.x += delta.dx;
-            r.y += delta.dy;
+            r.x += adjust.x;
+            r.y += adjust.y;
             break;
         case cardinal::East:
-            r.cx += delta.dx;
+            r.cx += adjust.x;
             break;
         case cardinal::SouthWest:
-            r.x += delta.dx;
-            r.cx -= delta.dx;
-            r.cy += delta.dy;
+            r.x += adjust.x;
+            r.cx -= adjust.x;
+            r.cy += adjust.y;
             break;
         case cardinal::SouthEast:
-            r.cx += delta.dx;
-            r.cy += delta.dy;
+            r.cx += adjust.x;
+            r.cy += adjust.y;
             break;
         case cardinal::South:
-            r.cy += delta.dy;
+            r.cy += adjust.y;
             break;
         }
         auto const minSize = aIgnoreConstraints ? padding().size() : minimum_size();

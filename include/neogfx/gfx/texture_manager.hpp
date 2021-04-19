@@ -53,8 +53,8 @@ namespace neogfx
     protected:
         const texture_list& textures() const;
         texture_list& textures();
-        texture_list::const_iterator find_texture(i_image const& aImage) const;
-        texture_list::iterator find_texture(i_image const& aImage);
+        texture_list::const_iterator find_texture(i_image const& aImage, rect const& aImagePart) const;
+        texture_list::iterator find_texture(i_image const& aImage, rect const& aImagePart);
         ref_ptr<i_texture> add_texture(i_ref_ptr<i_native_texture> const& aTexture);
     private:
         void cleanup();

@@ -54,9 +54,9 @@ namespace chess
         if (aFrom == aTo)
             return false;
         auto const delta = (aTo.as<int32_t>() - aFrom.as<int32_t>()).abs();
-        if (delta.dx != 0 && delta.dy != 0 && delta.dx != delta.dy)
+        if (delta.x != 0 && delta.y != 0 && delta.x != delta.y)
         {
-            if ((delta.dx == 1 && delta.dy == 2) || (delta.dx == 2 && delta.dy == 1))
+            if ((delta.x == 1 && delta.y == 2) || (delta.x == 2 && delta.y == 1))
                 aKnight = true;
             else
                 return false;
@@ -102,9 +102,9 @@ namespace chess
                     if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
                     {
                         auto const delta = aBoard.moveHistory.back().to.as<int32_t>() - aBoard.moveHistory.back().from.as<int32_t>();
-                        if (std::abs(delta.dy) == 2)
+                        if (std::abs(delta.y) == 2)
                         {
-                            auto const& deltaUnity = neogfx::delta_i32{ delta.dx != 0 ? delta.dx / std::abs(delta.dx) : 0, delta.dy != 0 ? delta.dy / std::abs(delta.dy) : 0 };
+                            auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                             if (aBoard.moveHistory.back().to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
                                 enPassant = true;
                         }

@@ -38,6 +38,7 @@ namespace neogfx
     public:
         texture_id id() const override;
         i_string const& uri() const override;
+        rect const& part() const override;
         texture_type type() const override;
         bool is_render_target() const override;
         const i_render_target& as_render_target() const override;

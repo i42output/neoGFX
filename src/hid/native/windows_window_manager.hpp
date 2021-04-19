@@ -59,10 +59,6 @@ namespace neogfx
         public:
             i_window* window_from_position(const point& aPosition) const override;
         public:
-            point mouse_position() const override;
-            point mouse_position(const i_window& aWindow) const override;
-            bool is_mouse_button_pressed(mouse_button aButton) const override;
-        public:
             void save_mouse_cursor() override;
             void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
             void restore_mouse_cursor(const i_window& aWindow) override;

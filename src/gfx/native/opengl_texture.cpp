@@ -91,6 +91,7 @@ namespace neogfx
         iManager{ aManager },
         iId{ aId },
         iUri{ "neogfx::opengl_texture::internal" },
+        iPart{ aExtents },
         iDpiScaleFactor{ aDpiScaleFactor },
         iColorSpace{ aColorSpace },
         iSampling{ aSampling },
@@ -182,6 +183,7 @@ namespace neogfx
         iManager{ aManager },
         iId{ aId },
         iUri{ aImage.uri() },
+        iPart{ aImagePart },
         iDpiScaleFactor{ aImage.dpi_scale_factor() },
         iColorSpace{ aImage.color_space() },
         iSampling{ aImage.sampling() },
@@ -287,6 +289,12 @@ namespace neogfx
     string const& opengl_texture<T>::uri() const
     {
         return iUri;
+    }
+
+    template <typename T>
+    rect const& opengl_texture<T>::part() const
+    {
+        return iPart;
     }
 
     template <typename T>

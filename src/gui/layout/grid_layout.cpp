@@ -400,7 +400,7 @@ namespace neogfx
                                     if (row2 == s.second.y && col2 == s.second.x)
                                     {
                                         toPos = colPos2 + size{ maxColWidth[col2], maxRowHeight[row2] };
-                                        i->second->layout_as(fromPos, toPos - fromPos);
+                                        i->second->layout_as(fromPos, size{ toPos - fromPos });
                                         foundSpan = true;
                                     }
                                     colPos2.x += maxColWidth[col2];
