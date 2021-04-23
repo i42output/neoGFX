@@ -148,7 +148,7 @@ namespace neogfx
         iUnderline{ false },
         iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) : font_weight::Normal },
         iSize{ aSize },
-        iKerning{ true }
+        iKerning{ false }
     {
     }
 

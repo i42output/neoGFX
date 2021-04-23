@@ -164,10 +164,9 @@ hb_ot_shape_planner_t::compile (hb_ot_shape_plan_t           &plan,
 #ifndef HB_NO_AAT_SHAPE
     if (hb_aat_layout_has_positioning (face))
       plan.apply_kerx = true;
-    else
 #endif
 #ifndef HB_NO_OT_KERN
-    if (hb_ot_layout_has_kerning (face))
+    else if (hb_ot_layout_has_kerning (face))
       plan.apply_kern = true;
 #endif
   }

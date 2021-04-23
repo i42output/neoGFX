@@ -201,6 +201,7 @@ namespace neogfx
                 iGlyphInfo{ nullptr },
                 iGlyphPos{ nullptr }
             {
+                scoped_kerning sk{ aFont.kerning() };
                 hb_ft_font_set_load_flags(iFont, aParent.is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
                 hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));

@@ -576,9 +576,19 @@ int main(int argc, char* argv[])
         {
             auto fi = app.current_style().font_info();
             if (window.checkKerning.is_checked())
+            {
                 fi.enable_kerning();
+                auto newTextEditFont = window.textEdit.font();
+                newTextEditFont.enable_kerning();
+                window.textEdit.set_font(newTextEditFont);
+            }
             else
+            {
                 fi.disable_kerning();
+                auto newTextEditFont = window.textEdit.font();
+                newTextEditFont.disable_kerning();
+                window.textEdit.set_font(newTextEditFont);
+            }
             app.current_style().set_font_info(fi);
         });
         window.checkSubpixel.Toggled([&app, &window]()

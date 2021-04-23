@@ -28,6 +28,11 @@
 #define HB_H
 #define HB_H_IN
 
+#ifdef BUILDING_HARFBUZZ
+#define FT_Get_Advance neoGFX_Get_Advance
+#define FT_Get_Kerning neoGFX_Get_Kerning
+#endif
+
 #include "hb-blob.h"
 #include "hb-buffer.h"
 #include "hb-common.h"

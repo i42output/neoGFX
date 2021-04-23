@@ -69,6 +69,31 @@ namespace neogfx
 {
     class i_rendering_engine;
 
+    bool kerning_enabled();
+    void enable_kerning();
+    void disable_kerning();
+
+    class scoped_kerning
+    {
+    public:
+        scoped_kerning(bool aEnableKerning) : iPrevious{ kerning_enabled() }
+        {
+            if (aEnableKerning)
+                enable_kerning();
+            else
+                disable_kerning();
+        }
+        ~scoped_kerning()
+        {
+            if (iPrevious)
+                enable_kerning();
+            else
+                disable_kerning();
+        }
+    private:
+        bool iPrevious;
+    };
+
     class native_font_face : public neolib::reference_counted<i_native_font_face>
     {
     private:
@@ -82,8 +107,8 @@ namespace neogfx
             hb_font_t* font;
             hb_buffer_t* buf;
             hb_unicode_funcs_t* unicodeFuncs;
-            hb_handle(FT_Face aHandle) :
-                font(hb_ft_font_create(static_cast<FT_Face>(aHandle), NULL)),
+            hb_handle(const native_font_face& aFace) :
+                font(hb_ft_font_create(static_cast<FT_Face>(aFace.handle()), NULL)),
                 buf(hb_buffer_create()),
                 unicodeFuncs(hb_buffer_get_unicode_funcs(buf))
             {

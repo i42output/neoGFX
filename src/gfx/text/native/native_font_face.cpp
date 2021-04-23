@@ -26,6 +26,7 @@
 #include FT_OUTLINE_H
 #include FT_BITMAP_H
 #include FT_LCD_FILTER_H
+#include FT_ADVANCES_H
 #include "../../native/opengl.hpp"
 #include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
@@ -41,40 +42,58 @@ namespace neogfx
         typedef std::unordered_map<std::pair<FT_UInt, FT_Int32>, FT_Fixed, boost::hash<std::pair<FT_UInt, FT_Int32>>> get_advance_cache_face;
         typedef std::unordered_map<FT_Face, get_advance_cache_face> get_advance_cache;
         get_advance_cache sGetAdvanceCache;
+    }
 
-        extern "C"
+    extern "C" FT_EXPORT(FT_Error)
+        neoGFX_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+    {
+        auto cachedFace = sGetAdvanceCache.find(face);
+        if (cachedFace != sGetAdvanceCache.end())
         {
-            FT_EXPORT(FT_Error) orig_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance);
-        }
-
-        FT_Error neogfx_FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
-        {
-            auto cachedFace = sGetAdvanceCache.find(face);
-            if (cachedFace != sGetAdvanceCache.end())
+            auto entry = cachedFace->second.find(std::make_pair(gindex, load_flags));
+            if (entry != cachedFace->second.end())
             {
-                auto entry = cachedFace->second.find(std::make_pair(gindex, load_flags));
-                if (entry != cachedFace->second.end())
-                {
-                    *padvance = entry->second;
-                    return FT_Err_Ok;
-                }
-                auto result = orig_FT_Get_Advance(face, gindex, load_flags, padvance);
-                if (result == FT_Err_Ok)
-                    cachedFace->second[std::make_pair(gindex, load_flags)] = *padvance;
-                return result;
+                *padvance = entry->second;
+                return FT_Err_Ok;
             }
-            auto result = orig_FT_Get_Advance(face, gindex, load_flags, padvance);
-            freetypeCheck(result);
+            auto result = FT_Get_Advance(face, gindex, load_flags, padvance);
+            if (result == FT_Err_Ok)
+                cachedFace->second[std::make_pair(gindex, load_flags)] = *padvance;
             return result;
         }
+        auto result = FT_Get_Advance(face, gindex, load_flags, padvance);
+        return result;
+    }
 
-        extern "C"
-        {
-            FT_EXPORT(FT_Error) FT_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
-            {
-                return neogfx_FT_Get_Advance(face, gindex, load_flags, padvance);
-            }
-        }
+    thread_local bool tKerningEnabled = false;
+
+    bool kerning_enabled()
+    {
+        return tKerningEnabled;
+    }
+
+    void enable_kerning()
+    {
+        tKerningEnabled = true;
+    }
+
+    void disable_kerning()
+    {
+        tKerningEnabled = false;
+    }
+
+    extern "C" FT_EXPORT(FT_Error)
+        neoGFX_Get_Kerning(FT_Face     face,
+            FT_UInt     left_glyph,
+            FT_UInt     right_glyph,
+            FT_UInt     kern_mode,
+            FT_Vector* akerning)
+    {
+        // Not currently used by Harfbuzz as we have disabled OT kerning in Harfbuzz.
+        auto result = FT_Get_Kerning(face, left_glyph, right_glyph, kern_mode, akerning);
+        if (!kerning_enabled())
+            *akerning = FT_Vector{};
+        return result;
     }
 
     native_font_face::native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
@@ -249,7 +268,7 @@ namespace neogfx
     void* native_font_face::aux_handle() const
     {
         if (iAuxHandle == nullptr)
-            iAuxHandle = std::make_unique<hb_handle>(iHandle);
+            iAuxHandle = std::make_unique<hb_handle>(*this);
         return &*iAuxHandle;
     }
 
