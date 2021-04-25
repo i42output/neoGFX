@@ -95,6 +95,9 @@ namespace neogfx
 
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs)
         {
+            // either whitespace?
+            if (is_whitespace(lhs) || is_whitespace(rhs))
+                return true;
             // ensure emoji cannot allow subpixel and non-subpixel glyphs in same batch
             if (is_emoji(lhs) != is_emoji(rhs))
                 return false;
