@@ -365,31 +365,14 @@ namespace neogfx
     neogfx::padding text_edit::padding() const
     {
         auto result = framed_scrollable_widget::padding();
-        if (default_style().character().text_effect())
-        {
-            scalar scale = 1.0;
-            switch (default_style().character().text_effect()->type())
-            {
-            case text_effect_type::None:
-            default:
-                scale = 1.0;
-            case text_effect_type::Outline:
-                scale = 1.0;
-            case text_effect_type::Glow:
-            case text_effect_type::Shadow:
-                scale = 0.5;
-            }
-            result += default_style().character().text_effect()->width() * scale;
-        }
-        return result.floor();
+        return result + padding_adjust();
     }
 
     void text_edit::paint(i_graphics_context& aGc) const
     {
         framed_scrollable_widget::paint(aGc);
         rect clipRect = default_clip_rect().intersection(client_rect(false));
-        if (default_style().character().text_effect())
-            clipRect.inflate(size{ default_style().character().text_effect()->width() });
+        clipRect.inflate(size{ padding_adjust() });
         if (iOutOfMemory)
         {
             draw_alpha_background(aGc, clipRect);
@@ -403,8 +386,7 @@ namespace neogfx
         {
             auto const& column = static_cast<const glyph_column&>(text_edit::column(columnIndex));
             auto columnClipRect = clipRect.intersection(column_rect(columnIndex, true));
-            if (column_style(columnIndex).character().text_effect())
-                columnClipRect.inflate(size{ column_style(columnIndex).character().text_effect()->width() });
+            columnClipRect.inflate(size{ std::max(calc_padding_adjust(column_style(columnIndex)), padding_adjust()) });
             scoped_scissor scissor2{ aGc, columnClipRect };
             auto const& columnRectSansPadding = column_rect(columnIndex);
             auto const& lines = column.lines();
@@ -2197,6 +2179,39 @@ namespace neogfx
         if (cursorRect.right() > columnRectSansPadding.right())
             cursorRect.x += (columnRectSansPadding.right() - cursorRect.right());
         return cursorRect;
+    }
+
+    double text_edit::calc_padding_adjust(style const& aStyle) const
+    {
+        if (!aStyle.character().text_effect())
+            return 0.0;
+        else
+        {
+            scalar scale = 1.0;
+            switch (aStyle.character().text_effect()->type())
+            {
+            case text_effect_type::None:
+            default:
+                scale = 1.0;
+                break;
+            case text_effect_type::Outline:
+                scale = 1.0;
+                break;
+            case text_effect_type::Glow:
+            case text_effect_type::Shadow:
+                scale = 0.5;
+                break;
+            }
+            return std::floor(aStyle.character().text_effect()->width() * scale);
+        }
+    }
+
+    double text_edit::padding_adjust() const
+    {
+        auto paddingAdjust = calc_padding_adjust(default_style());
+        for (auto const& s : iStyles)
+            paddingAdjust = std::max(paddingAdjust, calc_padding_adjust(s));
+        return paddingAdjust;
     }
 
     std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd)

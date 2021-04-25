@@ -596,6 +596,8 @@ namespace neogfx
         void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
         void draw_cursor(i_graphics_context const& aGc) const;
         rect cursor_rect() const;
+        double calc_padding_adjust(style const& aStyle) const;
+        double padding_adjust() const;
         static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
     private:
         sink iSink;
