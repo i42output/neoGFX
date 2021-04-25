@@ -71,6 +71,7 @@ namespace neogfx
     private:
         void init();
         virtual void select_item(bool aOpenAnySubMenu = false);
+        void close_menu();
     private:
         sink iSink;
         dimension iGap = 9.0;

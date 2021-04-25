@@ -178,7 +178,7 @@ namespace chess::gui
                                     auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count() + flashInterval_ms / 2) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
                                     pieceColor = ng::mix(ng::color::Red, ng::color::White, ng::partitioned_ease(ng::easing::InvertedInOutQuint, ng::easing::InOutQuint, normalizedFrameTime));
                                 }
-                                ng::point const mousePosition = root().mouse_position() - origin();
+                                ng::point const mousePosition = mouse_position();
                                 auto adjust = (!selectedOccupier || !iSelectionPosition || (mousePosition - *iSelectionPosition).magnitude() < 8.0 ?
                                     ng::point{} : mousePosition - *iSelectionPosition);
                                 if (iColorizePieces)
@@ -313,7 +313,7 @@ namespace chess::gui
             iSelection = std::nullopt;
             iLastSelectionEventTime = std::nullopt;
 
-            auto square = at(root().mouse_position() - origin());
+            auto square = at(mouse_position());
 
             ng::context_menu contextMenu{ *this, aPosition + non_client_rect().top_left() + root().window_position() };
             ng::action actionEditBoard{ "Edit Board"_t };
@@ -428,7 +428,7 @@ namespace chess::gui
                 if ((piece_color(movingPiece) == piece::White && aMove.to.y == 7u) || (piece_color(movingPiece) == piece::Black && aMove.to.y == 0u) && !promotion)
                 {
                     promotion = piece_color(movingPiece) | piece::Queen;
-                    ng::point const mousePosition = root().mouse_position() - origin();
+                    ng::point const mousePosition = mouse_position();
                     ng::context_menu contextMenu{ *this, mousePosition + non_client_rect().top_left() + root().window_position() };
                     ng::action actionQueen{ "", iPieceTextures.at(piece::Queen | piece_color(movingPiece)) };
                     ng::action actionRook{ "", iPieceTextures.at(piece::Rook | piece_color(movingPiece)) };

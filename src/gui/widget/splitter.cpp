@@ -165,7 +165,7 @@ namespace neogfx
     
     neogfx::mouse_cursor splitter::mouse_cursor() const
     {
-        auto s = separator_at(root().mouse_position() - origin());
+        auto s = separator_at(mouse_position());
         if (s != std::nullopt || iTracking != std::nullopt)
             return (iType & splitter_type::Horizontal) == splitter_type::Horizontal ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
         else

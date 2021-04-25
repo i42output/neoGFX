@@ -78,8 +78,6 @@ namespace neogfx
         scoped_units su(aGc, units::Pixels);
         rect const g = aItem.element_rect(skin_element::Scrollbar);
         auto const width = aScrollbar.width();
-        point oldOrigin = aGc.origin();
-        aGc.set_origin({});
         color scrollbarColor = aScrollbar.container().scrollbar_color(aScrollbar).shaded(0x30);
         color backgroundColor = scrollbarColor.unshaded(0x30);
         if (aScrollbar.style() == scrollbar_style::Normal)
@@ -193,7 +191,6 @@ namespace neogfx
         if (aScrollbar.style() == scrollbar_style::Normal)
             aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.type() == scrollbar_type::Vertical ? padding : 0.0, aScrollbar.type() == scrollbar_type::Vertical ? 0.0 : padding),
                 scrollbarColor.shaded(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00));;
-        aGc.set_origin(oldOrigin);
     }
 
     void default_skin::draw_check_box(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const
@@ -205,7 +202,7 @@ namespace neogfx
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing() && widget.capture_position() && aItem.element_rect(skin_element::ClickableArea).contains(*widget.capture_position()))
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color const fillColor = widget.enabled() && !widget.ignore_mouse_events() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.root().mouse_position() - widget.origin()) ?
+        color const fillColor = widget.enabled() && !widget.ignore_mouse_events() && aItem.element_rect(skin_element::ClickableArea).contains(widget.capture_position() ? *widget.capture_position() : widget.mouse_position()) ?
             hoverColor : widget.base_color();
         aGc.fill_rect(boxRect, fillColor.with_combined_alpha(enabledAlphaCoefficient));
         color borderColor = default_border_color(widget);
@@ -234,7 +231,7 @@ namespace neogfx
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing())
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);
-        color fillColor = widget.effectively_enabled() && !widget.ignore_mouse_events() && aItem.element_rect(skin_element::ClickableArea).contains(widget.root().mouse_position() - widget.origin()) ?
+        color fillColor = widget.effectively_enabled() && !widget.ignore_mouse_events() && aItem.element_rect(skin_element::ClickableArea).contains(widget.mouse_position()) ?
             hoverColor : widget.base_color();
         aGc.fill_circle(discRect.center(), discRect.width() / 2.0, fillColor.with_combined_alpha(enabledAlphaCoefficient));
         discRect.deflate(3.0_dip, 3.0_dip);

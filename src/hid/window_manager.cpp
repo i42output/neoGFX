@@ -131,10 +131,19 @@ namespace neogfx
 
     point window_manager::mouse_position(const i_window& aWindow) const
     {
+        auto const mousePosition = mouse_position();
+        auto const surfacePosition = aWindow.surface().surface_position();
         if ((aWindow.style() & window_style::Nested) != window_style::Nested)
-            return point{ mouse_position() - aWindow.surface().surface_position() };
+        {
+            point const result{ mousePosition - surfacePosition };
+            return result;
+        }
         else
-            return point{ mouse_position() - hosting_window(aWindow).surface().surface_position() - aWindow.surface().surface_position() };
+        {
+            auto const hostingWindowSurfacePosition = hosting_window(aWindow).surface().surface_position();
+            point const result{ mousePosition - hostingWindowSurfacePosition };
+            return result;
+        }
     }
 
     bool window_manager::is_mouse_button_pressed(mouse_button aButton) const

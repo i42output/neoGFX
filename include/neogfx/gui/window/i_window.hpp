@@ -76,7 +76,7 @@ namespace neogfx
         virtual const i_native_window& native_window() const = 0;
         virtual i_native_window& native_window() = 0;
     public:
-        virtual bool has_parent_window(bool aSameSurface = true) const = 0;
+        virtual bool has_parent_window() const = 0;
         virtual const i_window& parent_window() const = 0;
         virtual i_window& parent_window() = 0;
         virtual bool is_parent_of(const i_window& aChildWindow) const = 0;
@@ -165,7 +165,7 @@ namespace neogfx
         {
             if (is_surface())
                 return &surface().as_surface_window();
-            else if (has_parent_window(false))
+            else if (has_parent_window())
                 return parent_window().find_surface();
             else
                 return nullptr;
@@ -177,7 +177,7 @@ namespace neogfx
         bool is_ancestor_of(const i_window& aWindow) const
         {
             const i_window* w = &aWindow;
-            while (w != this && w->has_parent_window(false))
+            while (w != this && w->has_parent_window())
                 w = &w->parent_window();
             return w == this;
         }

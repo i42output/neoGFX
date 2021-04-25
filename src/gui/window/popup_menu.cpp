@@ -351,7 +351,7 @@ namespace neogfx
             ourRect.position().y += (desktopRect.bottom() - ourRect.bottom());
         if (ourRect.right() > desktopRect.right())
             ourRect.position().x += (desktopRect.right() - ourRect.right());
-        if (has_menu() && menu().has_parent() && has_parent_window(false))
+        if (has_menu() && menu().has_parent() && has_parent_window())
         {
             if (menu().parent().type() == menu_type::MenuBar)
             {

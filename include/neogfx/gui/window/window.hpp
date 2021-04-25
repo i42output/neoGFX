@@ -77,7 +77,7 @@ namespace neogfx
         const i_native_window& native_window() const override;
         i_native_window& native_window() override;
     public:
-        bool has_parent_window(bool aSameSurface = true) const override;
+        bool has_parent_window() const override;
         const i_window& parent_window() const override;
         i_window& parent_window()  override;
         bool is_parent_of(const i_window& aChildWindow) const override;

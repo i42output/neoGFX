@@ -110,7 +110,7 @@ namespace neogfx
     {
         return (auto_hide() && clicked_element() == scrollbar_element::None &&
             ((style() != scrollbar_style::Normal && hovering_element() == scrollbar_element::None) ||
-             (style() == scrollbar_style::Normal && !container().scrollbar_geometry(*this).contains(container().as_widget().root().mouse_position()))));
+             (style() == scrollbar_style::Normal && !container().scrollbar_geometry(*this).contains(container().as_widget().mouse_position()))));
     }
 
     scrollbar::value_type scrollbar::position() const
@@ -413,13 +413,13 @@ namespace neogfx
     {
         if (!visible())
             return;
-        if (clicked_element() != scrollbar_element::None && clicked_element() != element_at(iContainer.as_widget().root().mouse_position()))
+        if (clicked_element() != scrollbar_element::None && clicked_element() != element_at(iContainer.as_widget().mouse_position()))
             pause();
         else
             resume();
         if (clicked_element() == scrollbar_element::Thumb)
         {
-            point delta = (std::holds_alternative<point>(aUpdateParams) ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().root().mouse_position()) - iThumbClickedPosition;
+            point delta = (std::holds_alternative<point>(aUpdateParams) ? static_variant_cast<point>(aUpdateParams) : iContainer.as_widget().mouse_position()) - iThumbClickedPosition;
             scoped_units su(units::Pixels);
             rect g = iContainer.scrollbar_geometry(*this);
             if (iType == scrollbar_type::Vertical)
@@ -439,7 +439,7 @@ namespace neogfx
             iContainer.scrollbar_updated(*this, Updated);
         }
         if (clicked_element() == scrollbar_element::None && iContainer.as_widget().entered() && !iContainer.as_widget().ignore_mouse_events())
-            hover_element(element_at(iContainer.as_widget().root().mouse_position()));
+            hover_element(element_at(iContainer.as_widget().mouse_position()));
         else
             unhover_element();
     }
@@ -497,7 +497,7 @@ namespace neogfx
             }, std::chrono::milliseconds{ 500 });
             break;
         case scrollbar_element::Thumb:
-            iThumbClickedPosition = iContainer.as_widget().root().mouse_position();
+            iThumbClickedPosition = iContainer.as_widget().mouse_position();
             iThumbClickedValue = position();
             break;
         default:
@@ -551,11 +551,11 @@ namespace neogfx
     {
         if (iScrollTrackPosition == std::nullopt)
         {
-            iScrollTrackPosition = iContainer.as_widget().root().mouse_position();
+            iScrollTrackPosition = iContainer.as_widget().mouse_position();
             iTimer = std::make_shared<neolib::callback_timer>(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();
-                point delta = iContainer.as_widget().root().mouse_position() - *iScrollTrackPosition;
+                point delta = iContainer.as_widget().mouse_position() - *iScrollTrackPosition;
                 scoped_units su(iContainer.as_widget(), units::Pixels);
                 rect g = iContainer.scrollbar_geometry(*this);
                 if (iType == scrollbar_type::Vertical)

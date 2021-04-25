@@ -562,7 +562,7 @@ namespace neogfx
     
     neogfx::mouse_cursor gradient_widget::mouse_cursor() const
     {
-        point mousePos = root().mouse_position() - origin();
+        point mousePos = mouse_position();
         if (!std::holds_alternative<std::monostate>(stop_at(mousePos)))
             return mouse_system_cursor::Arrow;
         else if (contents_rect().contains(mousePos))

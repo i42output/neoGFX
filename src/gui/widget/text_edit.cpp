@@ -554,7 +554,7 @@ namespace neogfx
 
     neogfx::mouse_cursor text_edit::mouse_cursor() const
     {
-        if (client_rect(false).contains(root().mouse_position() - origin()) || iDragger != std::nullopt)
+        if (client_rect(false).contains(mouse_position()) || iDragger != std::nullopt)
             return mouse_system_cursor::IBeam;
         else
             return framed_scrollable_widget::mouse_cursor();
@@ -1197,7 +1197,7 @@ namespace neogfx
             iDragger.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
             {
                 aTimer.again();
-                set_cursor_position(root().mouse_position() - origin(), false);
+                set_cursor_position(mouse_position(), false);
             }, std::chrono::milliseconds{ 250 });
         }
     }

@@ -260,6 +260,7 @@ namespace neogfx
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
+        point mouse_position() const override;
         neogfx::mouse_cursor mouse_cursor() const override;
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

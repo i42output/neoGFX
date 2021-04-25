@@ -1840,9 +1840,15 @@ namespace neogfx
     }
 
     template <typename Interface>
+    point widget<Interface>::mouse_position() const
+    {
+        return root().mouse_position() - origin();
+    }
+
+    template <typename Interface>
     neogfx::mouse_cursor widget<Interface>::mouse_cursor() const
     {
-        auto const partUnderMouse = part(root().mouse_position() - origin());
+        auto const partUnderMouse = part(mouse_position());
         if (part_active(partUnderMouse))
         {
             switch (partUnderMouse.part)

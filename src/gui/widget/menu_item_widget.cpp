@@ -422,22 +422,12 @@ namespace neogfx
             menu().clear_selection();
             if (destroyed)
                 return;
-            menu_item().action().triggered().trigger();
-            if (destroyed)
-                return;
-            if (menu_item().action().is_checkable())
-                menu_item().action().toggle();
-            if (destroyed)
-                return;
-            i_menu* menuToClose = &menu();
-            while (menuToClose->has_parent())
-                menuToClose = &menuToClose->parent();
-            if (menuToClose->type() == menu_type::MenuBar)
-                menuToClose->clear_selection();
-            else if (menuToClose->type() == menu_type::Popup && menuToClose->is_open())
-                menuToClose->close();
-            if (destroyed)
-                return;
+            update();
+            auto& item = menu_item();
+            close_menu();
+            item.action().triggered().trigger();
+            if (item.action().is_checkable())
+                item.action().toggle();
         }
         else
         {
@@ -465,5 +455,16 @@ namespace neogfx
                     subMenu.select_item_at(subMenu.first_available_item(), false);
             }
         }
+    }
+
+    void menu_item_widget::close_menu()
+    {
+        i_menu* menuToClose = &menu();
+        while (menuToClose->has_parent())
+            menuToClose = &menuToClose->parent();
+        if (menuToClose->type() == menu_type::MenuBar)
+            menuToClose->clear_selection();
+        else if (menuToClose->type() == menu_type::Popup && menuToClose->is_open())
+            menuToClose->close();
     }
 }

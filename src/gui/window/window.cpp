@@ -241,7 +241,7 @@ namespace neogfx
         else
         {
             auto correctedPlacement = aPlacement;
-            if (!has_parent_window(false) && service<i_surface_manager>().display().is_fullscreen())
+            if (!has_parent_window() && service<i_surface_manager>().display().is_fullscreen())
             {
                 iStyle |= window_style::Fullscreen;
                 iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
@@ -251,7 +251,7 @@ namespace neogfx
             {
             default:
             case window_state::Normal:
-                if (!has_parent_window(false))
+                if (!has_parent_window())
                     iSurfaceWindow = std::make_unique<surface_window>(
                         *this,
                         [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
@@ -359,11 +359,9 @@ namespace neogfx
         return const_cast<i_native_window&>(to_const(*this).native_window());
     }
 
-    bool window::has_parent_window(bool aSameSurface) const
+    bool window::has_parent_window() const
     {
-        return iParentWindow != nullptr &&
-            (!aSameSurface ||
-                (has_surface() && iParentWindow->has_surface() && &surface() == &iParentWindow->surface()));
+        return iParentWindow != nullptr;
     }
 
     const i_window& window::parent_window() const
@@ -380,7 +378,7 @@ namespace neogfx
 
     bool window::is_parent_of(const i_window& aChildWindow) const
     {
-        return aChildWindow.has_parent_window(false) && &aChildWindow.parent_window() == this;
+        return aChildWindow.has_parent_window() && &aChildWindow.parent_window() == this;
     }
 
     bool window::is_owner_of(const i_window& aChildWindow) const
@@ -388,7 +386,7 @@ namespace neogfx
         const i_window* w = &aChildWindow;
         if (w == this)
             return false;
-        while (w->has_parent_window(false))
+        while (w->has_parent_window())
         {
             w = &w->parent_window();
             if (w == this)
@@ -400,7 +398,7 @@ namespace neogfx
     const i_window& window::ultimate_ancestor() const
     {
         const i_window* w = this;
-        while (w->has_parent_window(false))
+        while (w->has_parent_window())
             w = &w->parent_window();
         return *w;
     }
@@ -665,7 +663,7 @@ namespace neogfx
 
     void window::center_on_parent(bool aSetMinimumSize)
     {
-        if (has_parent_window(false))
+        if (has_parent_window())
         {
             layout_items();
             if (aSetMinimumSize)
@@ -776,7 +774,7 @@ namespace neogfx
                     w.counted_window_enable(aEnableAncestors);
             }
         }
-        if (aEnableAncestors && has_parent_window(false) && (style() & window_style::NoActivate) != window_style::NoActivate)
+        if (aEnableAncestors && has_parent_window() && (style() & window_style::NoActivate) != window_style::NoActivate)
             parent_window().activate();
     }
 

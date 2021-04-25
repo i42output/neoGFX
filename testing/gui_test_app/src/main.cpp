@@ -1363,7 +1363,7 @@ int main(int argc, char* argv[])
             }
             thread_local std::string currentInfoText;
             thread_local std::optional<ng::glyph_text> infoGlyphText;
-            bool const mouseOver = window.pageInstancing.client_rect().contains(window.pageInstancing.root().mouse_position() - window.pageInstancing.origin());
+            bool const mouseOver = window.pageInstancing.client_rect().contains(window.pageInstancing.mouse_position());
             if (mouseOver)
             {
                 std::ostringstream newInfoText;

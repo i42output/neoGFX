@@ -105,12 +105,12 @@ namespace neogfx
     widget_part scrollable_widget<Base>::part(const point& aPosition) const
     {
         if (vertical_scrollbar().visible() && 
-            (vertical_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None) ||
-            (vertical_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition + as_widget().origin())))
+            (vertical_scrollbar().element_at(aPosition) != scrollbar_element::None) ||
+            (vertical_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition)))
             return widget_part{ *this, widget_part::VerticalScrollbar };
         else if (horizontal_scrollbar().visible() &&
-            (horizontal_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None) ||
-            (horizontal_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition + as_widget().origin())))
+            (horizontal_scrollbar().element_at(aPosition) != scrollbar_element::None) ||
+            (horizontal_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition)))
             return widget_part{ *this, widget_part::HorizontalScrollbar };
         else
             return base_type::part(aPosition);
@@ -128,13 +128,10 @@ namespace neogfx
             !vertical_scrollbar().auto_hidden() && !horizontal_scrollbar().auto_hidden() &&
             vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
         {
-            point const oldOrigin = aGc.origin();
-            aGc.set_origin(point{});
             auto const spareSquare = rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(vertical_scrollbar()).bottom() },
                     size{ scrollbar_geometry(vertical_scrollbar()).width(), scrollbar_geometry(horizontal_scrollbar()).height() } };
             aGc.fill_rect(spareSquare, scrollbar_color(vertical_scrollbar()));
-            aGc.set_origin(oldOrigin);
         }
     }
 
@@ -188,15 +185,15 @@ namespace neogfx
             {
                 if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
                 {
-                    if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None)
+                    if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition) != scrollbar_element::None)
                     {
                         as_widget().update(true);
-                        vertical_scrollbar().click_element(vertical_scrollbar().element_at(aPosition + as_widget().origin()));
+                        vertical_scrollbar().click_element(vertical_scrollbar().element_at(aPosition));
                     }
-                    else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None)
+                    else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition) != scrollbar_element::None)
                     {
                         as_widget().update(true);
-                        horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(aPosition + as_widget().origin()));
+                        horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(aPosition));
                     }
                 }
             }
@@ -211,15 +208,15 @@ namespace neogfx
         {
             if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
             {
-                if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None)
+                if (vertical_scrollbar().visible() && vertical_scrollbar().element_at(aPosition) != scrollbar_element::None)
                 {
                     as_widget().update(true);
-                    vertical_scrollbar().click_element(vertical_scrollbar().element_at(aPosition + as_widget().origin()));
+                    vertical_scrollbar().click_element(vertical_scrollbar().element_at(aPosition));
                 }
-                else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition + as_widget().origin()) != scrollbar_element::None)
+                else if (horizontal_scrollbar().visible() && horizontal_scrollbar().element_at(aPosition) != scrollbar_element::None)
                 {
                     as_widget().update(true);
-                    horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(aPosition + as_widget().origin()));
+                    horizontal_scrollbar().click_element(horizontal_scrollbar().element_at(aPosition));
                 }
             }
         }
@@ -253,8 +250,8 @@ namespace neogfx
     void scrollable_widget<Base>::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         base_type::mouse_moved(aPosition, aKeyModifiers);
-        vertical_scrollbar().update(aPosition + as_widget().origin());
-        horizontal_scrollbar().update(aPosition + as_widget().origin());
+        vertical_scrollbar().update(aPosition);
+        horizontal_scrollbar().update(aPosition);
     }
 
     template <typename Base>
@@ -399,7 +396,7 @@ namespace neogfx
     template <typename Base>
     rect scrollable_widget<Base>::scrollbar_geometry(const i_scrollbar& aScrollbar) const
     {
-        auto const sbrect = as_widget().to_window_coordinates(as_widget().client_rect());
+        auto const sbrect = client_rect();
         switch (aScrollbar.type())
         {
         case scrollbar_type::Vertical:

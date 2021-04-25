@@ -361,7 +361,7 @@ namespace neogfx::DesignStudio
     mouse_cursor widget_caddy::mouse_cursor() const
     {
         auto const part = (service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) == key_modifiers_e::KeyModifier_NONE ?
-            resize_part_at(root().mouse_position() - origin()) : cardinal::Center;
+            resize_part_at(mouse_position()) : cardinal::Center;
         if (part)
             switch (*part)
             {

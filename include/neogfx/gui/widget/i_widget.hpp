@@ -225,6 +225,7 @@ namespace neogfx
         virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_entered(const point& aPosition) = 0;
         virtual void mouse_left() = 0;
+        virtual point mouse_position() const = 0;
         virtual neogfx::mouse_cursor mouse_cursor() const = 0;
     public:
         virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;

@@ -453,7 +453,7 @@ namespace neogfx
                             iMouseTracker.emplace(service<i_async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
                             {
                                 aTimer.again();
-                                auto const pos = root().mouse_position() - origin();
+                                auto const pos = mouse_position();
                                 auto const item = item_at(pos);
                                 if (item != std::nullopt)
                                 {
@@ -890,7 +890,7 @@ namespace neogfx
         if (!iHotTracking)
         {
             iHotTracking = true;
-            if (&widget_for_mouse_event(root().mouse_position() - origin()) == this)
+            if (&widget_for_mouse_event(mouse_position()) == this)
                 iIgnoreNextMouseMove = true;
         }
     }
@@ -1038,8 +1038,8 @@ namespace neogfx
         {
             auto& textEdit = editor_text_edit();
             textEdit.set_focus();
-            if (textEdit.client_rect().contains(root().mouse_position() - textEdit.origin()))
-                textEdit.set_cursor_position(root().mouse_position() - textEdit.origin(), true, capturing());
+            if (textEdit.client_rect().contains(textEdit.mouse_position()))
+                textEdit.set_cursor_position(textEdit.mouse_position(), true, capturing());
             else
                 textEdit.cursor().set_anchor(textEdit.cursor().position());
         }

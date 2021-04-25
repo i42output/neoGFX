@@ -329,7 +329,7 @@ namespace neogfx
 
     neogfx::mouse_cursor color_dialog::x_picker::mouse_cursor() const
     {
-        point mousePos = root().mouse_position() - origin();
+        point mousePos = mouse_position();
         if (client_rect(false).contains(mousePos))
             return mouse_system_cursor::Crosshair;
         return base_type::mouse_cursor();
@@ -538,7 +538,7 @@ namespace neogfx
 
     neogfx::mouse_cursor color_dialog::yz_picker::mouse_cursor() const
     {
-        point mousePos = root().mouse_position() - origin();
+        point mousePos = mouse_position();
         if (client_rect(false).contains(mousePos))
             return mouse_system_cursor::Crosshair;
         return framed_scrollable_widget::mouse_cursor();
