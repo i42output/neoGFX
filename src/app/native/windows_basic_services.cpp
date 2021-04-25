@@ -128,9 +128,10 @@ namespace neogfx
             {
                 return ::IsClipboardFormatAvailable(CF_UNICODETEXT) && !text().empty();
             }
-            std::string text() const override
+            i_string const& text() const override
             {
-                std::string result;
+                thread_local string result;
+                result = {};
                 if (::IsClipboardFormatAvailable(CF_UNICODETEXT))
                 {
                     if (::OpenClipboard(NULL))
@@ -154,7 +155,7 @@ namespace neogfx
                 }
                 return result;
             }
-            void set_text(std::string const& aText) override
+            void set_text(i_string const& aText) override
             {
                 if (::OpenClipboard(NULL))
                 {

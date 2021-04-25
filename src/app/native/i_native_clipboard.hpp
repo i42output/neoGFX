@@ -35,8 +35,8 @@ namespace neogfx
         struct unsupported_clipboard_operation : clipboard_error { unsupported_clipboard_operation() : clipboard_error{ "neogfx::i_native_clipboard::unsupported_clipboard_operation" } {} };
     public:
         virtual bool has_text() const = 0;
-        virtual std::string text() const = 0;
-        virtual void set_text(std::string const& aText) = 0;
+        virtual i_string const& text() const = 0;
+        virtual void set_text(i_string const& aText) = 0;
         virtual bool has_image() const = 0;
         virtual neogfx::image image() const = 0;
         virtual void set_image(const neogfx::image& aImage) = 0;

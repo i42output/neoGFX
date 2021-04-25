@@ -40,9 +40,11 @@ namespace neogfx
         void activate(i_clipboard_sink& aSink) override;
         void deactivate(i_clipboard_sink& aSink) override;
     public:
+        using i_clipboard::text;
+        using i_clipboard::set_text;
         bool has_text() const override;
-        std::string text() const override;
-        void set_text(std::string const& aText) override;
+        void text(i_string& aResult) const override;
+        void set_text(i_string const& aText) override;
         bool has_image() const override;
         neogfx::image image() const override;
         void set_image(const neogfx::image& aImage) override;
