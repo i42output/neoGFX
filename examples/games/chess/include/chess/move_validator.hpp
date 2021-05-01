@@ -30,12 +30,12 @@ namespace chess
     public:
         move_validator();
     public:
-        bool can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const override;
-        bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-        bool in_check(player aTurn, matrix_board const& aBoard) const override;
-        bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const override;
-        double eval(player aTurn, matrix_board const& aBoard, eval_info& aInfo) const override;
+        bool can_move(player aTurn, mailbox_position const& aPosition, move const& aMove) const override;
+        bool has_moves(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const override;
+        bool in_check(player aTurn, mailbox_position const& aPosition) const override;
+        bool check_if_moved(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const override;
+        double eval(player aTurn, mailbox_position const& aPosition, eval_info& aInfo) const override;
     private:
-        move_tables<matrix> const iMoveTables;
+        move_tables<mailbox> const iMoveTables;
     };
 }

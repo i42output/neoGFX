@@ -16,17 +16,16 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neolib/core/vecarray.hpp>
 #include <chess/ai_thread.hpp>
-#include <chess/matrix.hpp>
+#include <chess/mailbox.hpp>
 #include <chess/bitboard.hpp>
 
 namespace chess
 {
     template <typename Representation>
-    inline basic_board<Representation>& eval_board()
+    inline basic_position<Representation>& eval_board()
     {
-        thread_local basic_board<Representation> sEvalBoard = {};
+        thread_local basic_position<Representation> sEvalBoard = {};
         return sEvalBoard;
     }
 
@@ -36,7 +35,7 @@ namespace chess
     struct stack_node_stack_limit_exceeded : std::logic_error { stack_node_stack_limit_exceeded() : std::logic_error{ "chess::stack_node_stack_limit_exceeded" } {} };
 
     template <player Player, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_board<Representation>& board, game_tree_node& node, int32_t startDepth, int32_t depth, double alpha, double beta)
+    double pvs(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t startDepth, int32_t depth, double alpha, double beta)
     {
         typedef game_tree_node stack_node_t;
         typedef std::vector<stack_node_t> stack_node_stack_t;
@@ -56,28 +55,28 @@ namespace chess
         if (use.children == std::nullopt)
         {
             use.children.emplace();
-            valid_moves<Player>(tables, board, use);
+            valid_moves<Player>(tables, position, use);
         }
         else if (useStack)
-            valid_moves<Player>(tables, board, use);
+            valid_moves<Player>(tables, position, use);
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
         {
-            return *(use.eval = eval<Representation, Player>{}(tables, board, static_cast<double>(startDepth - depth)).eval);
+            return *(use.eval = eval<Representation, Player>{}(tables, position, static_cast<double>(startDepth - depth)).eval);
         }
         for (auto& child : validMoves)
         {
-            move_piece(board, *child.move);
+            move_piece(position, *child.move);
             double score = 0.0;
             if (&child == &validMoves[0])
-                score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, position, child, startDepth, depth - 1, -beta, -alpha);
             else
             {
-                score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -alpha - 1.0, -alpha);
+                score = -pvs<opponent_v<Player>>(tables, position, child, startDepth, depth - 1, -alpha - 1.0, -alpha);
                 if (alpha < score && score < beta)
-                    score = -pvs<opponent_v<Player>>(tables, board, child, startDepth, depth - 1, -beta, -score);
+                    score = -pvs<opponent_v<Player>>(tables, position, child, startDepth, depth - 1, -beta, -score);
             }
-            undo(board);
+            undo(position);
             alpha = std::max(alpha, score);
             if (alpha >= beta)
                 break;
@@ -111,11 +110,11 @@ namespace chess
     }
         
     template <typename Representation, player Player>
-    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(board_type const& aBoard, game_tree_node&& aNode)
+    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(position_type const& aPosition, game_tree_node&& aNode)
     {
         {
             std::lock_guard<std::mutex> lk{ iMutex };
-            iQueue.emplace_back(aBoard, std::move(aNode));
+            iQueue.emplace_back(aPosition, std::move(aNode));
         }
         return iQueue.back().result;
     }
@@ -142,11 +141,11 @@ namespace chess
                 return;
             for (auto& workItem : iQueue)
             {
-                auto& evalBoard = eval_board<Representation>();
-                evalBoard = workItem.board;
+                auto& evalPosition = eval_board<Representation>();
+                evalPosition = workItem.position;
                 auto& node = workItem.node;
-                move_piece(evalBoard, *node.move );
-                pvs<opponent_v<Player>>(iMoveTables, evalBoard, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                move_piece(evalPosition, *node.move );
+                pvs<opponent_v<Player>>(iMoveTables, evalPosition, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
                 node.eval = -*node.eval;
                 workItem.result.set_value(std::move(node));
             }
@@ -154,8 +153,8 @@ namespace chess
         }
     }
 
-    template class ai_thread<matrix, player::White>;
-    template class ai_thread<matrix, player::Black>;
+    template class ai_thread<mailbox, player::White>;
+    template class ai_thread<mailbox, player::Black>;
     template class ai_thread<bitboard, player::White>;
     template class ai_thread<bitboard, player::Black>;
 }

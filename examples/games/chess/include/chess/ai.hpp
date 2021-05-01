@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/core/async_thread.hpp>
 #include <chess/i_player.hpp>
-#include <chess/matrix.hpp>
+#include <chess/mailbox.hpp>
 #include <chess/bitboard.hpp>
 #include <chess/ai_thread.hpp>
 #include <chess/node.hpp>
@@ -54,15 +54,15 @@ namespace chess
         bool play(move const& aMove) override;
         bool playing() const override;
         void undo() override;
-        void setup(matrix_board const& aSetup) override;
+        void setup(mailbox_position const& aSetup) override;
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
         game_tree_node const* execute();
     private:
         move_tables<representation_type> const iMoveTables;
-        std::recursive_mutex iBoardMutex;
-        basic_board<representation_type> iBoard;
+        std::recursive_mutex iPositionMutex;
+        basic_position<representation_type> iPosition;
         std::vector<ai_thread<Representation, Player>> iThreads;
         std::mutex iSignalMutex;
         std::condition_variable iSignal;
@@ -72,8 +72,8 @@ namespace chess
         ng::sink iSink;
     };
 
-    extern template class ai<matrix, player::White>;
-    extern template class ai<matrix, player::Black>;
+    extern template class ai<mailbox, player::White>;
+    extern template class ai<mailbox, player::Black>;
     extern template class ai<bitboard, player::White>;
     extern template class ai<bitboard, player::Black>;
 }

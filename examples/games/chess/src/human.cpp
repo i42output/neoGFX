@@ -63,7 +63,7 @@ namespace chess
     {
     }
 
-    void human::setup(matrix_board const& aSetup)
+    void human::setup(mailbox_position const& aSetup)
     {
     }
 }

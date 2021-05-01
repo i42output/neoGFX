@@ -24,7 +24,7 @@ namespace chess
     ai<Representation, Player>::ai() :
         async_thread{ "chess::ai" },
         iMoveTables{ generate_move_tables<representation_type>() },
-        iBoard{ chess::setup_position<representation_type>() },
+        iPosition{ chess::setup_position<representation_type>() },
         iThreads{ std::max(1u, std::thread::hardware_concurrency()) }
     {
         for (auto& aiThread : iThreads)
@@ -63,8 +63,8 @@ namespace chess
     {
         iSink = aOpponent.moved([&](move const& aMove)
         {
-            std::lock_guard<std::recursive_mutex> lk{ iBoardMutex };
-            move_piece(iBoard, aMove);
+            std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
+            move_piece(iPosition, aMove);
         });
     }
 
@@ -87,8 +87,8 @@ namespace chess
     template <typename Representation, player Player>
     bool ai<Representation, Player>::play(move const& aMove)
     {
-        std::lock_guard<std::recursive_mutex> lk{ iBoardMutex };
-        move_piece(iBoard, aMove);
+        std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
+        move_piece(iPosition, aMove);
         Moved.trigger(aMove);
         return true;
     }
@@ -97,7 +97,7 @@ namespace chess
     void ai<Representation, Player>::undo()
     {
         iRootNode = std::nullopt;
-        chess::undo(iBoard);
+        chess::undo(iPosition);
     }
 
     template <typename Representation, player Player>
@@ -124,30 +124,30 @@ namespace chess
     template <typename Representation, player Player>
     game_tree_node const* ai<Representation, Player>::execute()
     {
-        std::optional<std::lock_guard<std::recursive_mutex>> lk{ iBoardMutex };
+        std::optional<std::lock_guard<std::recursive_mutex>> lk{ iPositionMutex };
         if (!iRootNode)
         {
-            if (iBoard.moveHistory.empty())
-                iRootNode.emplace(iBoard.moveHistory.back());
+            if (iPosition.moveHistory.empty())
+                iRootNode.emplace(iPosition.moveHistory.back());
             else
                 iRootNode.emplace();
             iRootNode->children.emplace();
-            valid_moves<Player>(iMoveTables, iBoard, *iRootNode);
+            valid_moves<Player>(iMoveTables, iPosition, *iRootNode);
         }
         else
         {
             if (iRootNode->children == std::nullopt)
             {
                 iRootNode->children.emplace();
-                valid_moves<Player>(iMoveTables, iBoard, *iRootNode);
+                valid_moves<Player>(iMoveTables, iPosition, *iRootNode);
             }
-            auto existing = std::find_if(iRootNode->children->begin(), iRootNode->children->end(), [&](game_tree_node const& n) { return n.move == iBoard.moveHistory.back(); });
+            auto existing = std::find_if(iRootNode->children->begin(), iRootNode->children->end(), [&](game_tree_node const& n) { return n.move == iPosition.moveHistory.back(); });
             if (existing == iRootNode->children->end())
                 throw node_not_found();
             game_tree_node temp = std::move(*existing);
             iRootNode = std::move(temp);
         }
-        sort_nodes<Player>(iMoveTables, iBoard, *iRootNode);
+        sort_nodes<Player>(iMoveTables, iPosition, *iRootNode);
 
         auto& children = *(*iRootNode).children;
 
@@ -159,7 +159,7 @@ namespace chess
             auto iterThread = iThreads.begin();
             for (auto& child : children)
             {
-                futures.emplace_back(iterThread->eval(iBoard, std::move(child)).get_future());
+                futures.emplace_back(iterThread->eval(iPosition, std::move(child)).get_future());
                 if (++iterThread == iThreads.end())
                     iterThread = iThreads.begin();
             }
@@ -181,7 +181,7 @@ namespace chess
                 iRootNode = std::move(bestMoves[0]);
                 return &*iRootNode;
             }
-            auto const decimator = 0.125 * (iBoard.moveHistory.size() + 1); // todo: involve difficulty level?
+            auto const decimator = 0.125 * (iPosition.moveHistory.size() + 1); // todo: involve difficulty level?
             auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
                 [bestMoveEval, bestMoveIsMate, decimator](auto const& m)
                 {
@@ -203,20 +203,20 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    void ai<Representation, Player>::setup(matrix_board const& aSetup)
+    void ai<Representation, Player>::setup(mailbox_position const& aSetup)
     {
-        if constexpr (std::is_same_v<representation_type, matrix>)
+        if constexpr (std::is_same_v<representation_type, mailbox>)
         {
-            std::lock_guard<std::recursive_mutex> lk{ iBoardMutex };
+            std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
             iRootNode = std::nullopt;
-            iBoard = aSetup;
+            iPosition = aSetup;
         }
         else
             ; // todo (convert to bitboard representation)
     }
 
-    template class ai<matrix, player::White>;
-    template class ai<matrix, player::Black>;
+    template class ai<mailbox, player::White>;
+    template class ai<mailbox, player::Black>;
     template class ai<bitboard, player::White>;
     template class ai<bitboard, player::Black>;
 }

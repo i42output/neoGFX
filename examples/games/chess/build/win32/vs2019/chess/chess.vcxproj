@@ -177,7 +177,7 @@
     <ClInclude Include="..\..\..\..\include\chess\i_board.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_move_validator.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\i_player.hpp" />
-    <ClInclude Include="..\..\..\..\include\chess\matrix.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\mailbox.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\move_validator.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\node.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\piece.hpp" />
@@ -201,7 +201,7 @@
     <ClCompile Include="..\..\..\..\src\default_player_factory.cpp" />
     <ClCompile Include="..\..\..\..\src\human.cpp" />
     <ClCompile Include="..\..\..\..\src\main.cpp" />
-    <ClCompile Include="..\..\..\..\src\matrix.cpp" />
+    <ClCompile Include="..\..\..\..\src\mailbox.cpp" />
     <ClCompile Include="..\..\..\..\src\move_validator.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\chess.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

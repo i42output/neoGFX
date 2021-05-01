@@ -37,6 +37,8 @@ namespace chess
         COUNT   = 0x06
     };
 
+    constexpr std::size_t PIECES = static_cast<std::size_t>(piece_cardinal::COUNT);
+
     enum class piece_color_cardinal : uint8_t
     {
         White   = 0x00,
@@ -44,6 +46,8 @@ namespace chess
 
         COUNT   = 0x02
     };
+
+    constexpr std::size_t PIECE_COLORS = static_cast<std::size_t>(piece_color_cardinal::COUNT);
 
     enum class piece : uint8_t
     {

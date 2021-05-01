@@ -23,9 +23,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template <>
-    bitboard_board const& setup_position<bitboard>()
+    bitboard_position const& setup_position<bitboard>()
     {
-        static const bitboard_board position
+        static const bitboard_position position
         {
             // todo
             {},
@@ -48,16 +48,16 @@ namespace chess
     template <player Player>
     struct eval<bitboard, Player>
     {
-        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
+        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
         {
             // todo
             if (aEvalInfo)
                 *aEvalInfo = eval_info{};
             return { eval_node::Terminal, 0.0 };
         }
-        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, double aPly, eval_info& aEvalInfo)
+        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, double aPly, eval_info& aEvalInfo)
         {
-            return eval{}(aTables, aBoard, aPly, &aEvalInfo);
+            return eval{}(aTables, aPosition, aPly, &aEvalInfo);
         }
     };
 

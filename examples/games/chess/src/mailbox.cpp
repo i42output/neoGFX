@@ -18,14 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 
-#include <chess/matrix.hpp>
+#include <chess/mailbox.hpp>
 
 namespace chess
 {
     template<>
-    matrix_board const& setup_position<matrix>()
+    mailbox_position const& setup_position<mailbox>()
     {
-        static const matrix_board position
+        static const mailbox_position position
         {
             {{
                 { piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook },
@@ -43,10 +43,10 @@ namespace chess
     }
 
     template<>
-    move_tables<matrix> generate_move_tables<matrix>()
+    move_tables<mailbox> generate_move_tables<mailbox>()
     {
-        typedef move_tables<matrix>::move_coordinates move_coordinates;
-        move_tables<matrix> result
+        typedef move_tables<mailbox>::move_coordinates move_coordinates;
+        move_tables<mailbox> result
         {
             // unit moves
             {{
@@ -97,14 +97,14 @@ namespace chess
             }}
         };
         // all pieces
-        for (std::size_t pieceColorIndex = 0u; pieceColorIndex < static_cast<std::size_t>(piece_color_cardinal::COUNT); ++pieceColorIndex)
-            for (std::size_t pieceIndex = 0u; pieceIndex < static_cast<std::size_t>(piece_cardinal::COUNT); ++pieceIndex)
+        for (std::size_t pieceColorIndex = 0u; pieceColorIndex < PIECE_COLORS; ++pieceColorIndex)
+            for (std::size_t pieceIndex = 0u; pieceIndex < PIECES; ++pieceIndex)
                 for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                     for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
                         for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                             for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
                             {
-                                auto calc_validity = [&](move_tables<matrix>::unit_moves const& aUnitMoves, bool& aResult) 
+                                auto calc_validity = [&](move_tables<mailbox>::unit_moves const& aUnitMoves, bool& aResult) 
                                 {
                                     aResult = false;
                                     auto const delta = move_coordinates{ static_cast<int32_t>(xTo), static_cast<int32_t>(yTo) } - move_coordinates{ static_cast<int32_t>(xFrom), static_cast<int32_t>(yFrom) };
@@ -138,7 +138,7 @@ namespace chess
                         result.trivialMoves[yFrom][xFrom][yTo][xTo] = true;
                         if (aKnight)
                             continue;
-                        auto const delta = move_tables<matrix>::move_coordinates{ xTo, yTo } - move_tables<matrix>::move_coordinates{ xFrom, yFrom };
+                        auto const delta = move_tables<mailbox>::move_coordinates{ xTo, yTo } - move_tables<mailbox>::move_coordinates{ xFrom, yFrom };
                         auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                         auto const start = coordinates_i32{ xFrom, yFrom };
                         auto const end = coordinates_i32{ xTo, yTo };
@@ -155,9 +155,9 @@ namespace chess
     }
 
     template <player Player>
-    struct eval<matrix, Player>
+    struct eval<mailbox, Player>
     {
-        eval_result operator()(move_tables<matrix> const& aTables, matrix_board const& aBoard, double aPly, eval_info* aEvalInfo = nullptr)
+        eval_result operator()(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
         {
             auto const start = !aEvalInfo ? std::chrono::steady_clock::time_point{} : std::chrono::steady_clock::now();
 
@@ -182,7 +182,7 @@ namespace chess
             bool mobilityOpponent = false;
             bool mobilityOpponentKing = false;
             double checkedOpponentKing = 0.0;
-            if (chess::draw(aBoard))
+            if (chess::draw(aPosition))
             {
                 if (aEvalInfo)
                 {
@@ -194,7 +194,7 @@ namespace chess
             for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                 for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
                 {
-                    auto const from = piece_at(aBoard, coordinates{ xFrom, yFrom });
+                    auto const from = piece_at(aPosition, coordinates{ xFrom, yFrom });
                     if (from == piece::None)
                         continue;
                     auto const playerFrom = static_cast<chess::player>(piece_color(from));
@@ -206,10 +206,10 @@ namespace chess
                             move const candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
                             if (!can_move_trivial(aTables, candidateMove.from, candidateMove.to))
                                 continue;
-                            auto const to = piece_at(aBoard, candidateMove.to );
+                            auto const to = piece_at(aPosition, candidateMove.to );
                             auto const playerTo = static_cast<chess::player>(piece_color(to));
                             auto const valueTo = piece_value<Player>(to);
-                            if (can_move<true, false, true>(aTables, Player, aBoard, candidateMove))
+                            if (can_move<true, false, true>(aTables, Player, aPosition, candidateMove))
                             {
                                 if (playerFrom != playerTo)
                                 {
@@ -228,7 +228,7 @@ namespace chess
                                 else
                                     defend += valueTo;
                             }
-                            else if (can_move<true, false, true>(aTables, opponent_v<Player>, aBoard, candidateMove))
+                            else if (can_move<true, false, true>(aTables, opponent_v<Player>, aPosition, candidateMove))
                             {
                                 if (playerFrom != playerTo)
                                 {
@@ -297,13 +297,13 @@ namespace chess
 
             return result;
         }
-        eval_result operator()(move_tables<matrix> const& aTables, matrix_board const& aBoard, double aPly, eval_info& aEvalInfo)
+        eval_result operator()(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, double aPly, eval_info& aEvalInfo)
         {
-            return eval{}(aTables, aBoard, aPly, &aEvalInfo);
+            return eval{}(aTables, aPosition, aPly, &aEvalInfo);
         }
     };
 
 
-    template struct eval<matrix, player::White>;
-    template struct eval<matrix, player::Black>;
+    template struct eval<mailbox, player::White>;
+    template struct eval<mailbox, player::Black>;
 }

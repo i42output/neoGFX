@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <ostream>
 
+#include <neolib/core/static_vector.hpp>
+
 #include <chess/chess.hpp>
 #include <chess/piece.hpp>
 #include <chess/player.hpp>
@@ -46,7 +48,7 @@ namespace chess
 
             COUNT
         };
-        typedef std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> castling_state;
+        typedef std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, PIECE_COLORS> castling_state;
         castling_state castlingState;
     };
 
@@ -75,31 +77,40 @@ namespace chess
     template <>
     inline coordinate promotion_rank_v<chess::player::Black> = 0u;
 
-    typedef std::array<std::array<piece, 8>, 8> matrix;
-
-    struct piece_bitboard
+    typedef std::array<std::array<piece, 8>, 8> mailbox;
+    
+    struct bitboard
     {
-        piece piece;
-        uint64_t position;
-
-        auto operator<=>(const piece_bitboard&) const = default;
+        typedef uint64_t bits;
+        std::array<bits, PIECE_COLORS> byColor;
+        std::array<bits, PIECES> byPiece;
+        std::array<piece, 64> bySquare;
     };
-    typedef std::array<std::array<piece_bitboard, 16>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> bitboard;
+
+    inline constexpr coordinates coordinates_from_bit(bitboard::bits aBits)
+    {
+        return coordinates{ static_cast<uint32_t>(aBits % 8ull), static_cast<uint32_t>(aBits / 8ull) };
+    }
+
+    inline constexpr bitboard::bits bit_from_coordinates(coordinates const& aPosition)
+    {
+        return aPosition.x + aPosition.y * 8ull;
+    }
 
     template <typename Representation>
-    struct basic_board
+    struct basic_position
     {
-        Representation position;
-        std::array<coordinates, static_cast<std::size_t>(piece_color_cardinal::COUNT)> kings;
+        Representation rep;
+        std::array<coordinates, PIECE_COLORS> kings;
         player turn;
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
     };
 
     template <typename Representation>
-    inline bool operator==(basic_board<Representation> const& lhs, basic_board<Representation> const& rhs)
+    inline bool operator==(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
     {
-        bool const samePosition = lhs.position == rhs.position;
+        bool const samePosition = lhs.rep == rhs.rep;
         bool const sameKings = lhs.kings == rhs.kings;
         bool const sameTurn = lhs.turn == rhs.turn;
         bool const sameHistory = lhs.moveHistory == rhs.moveHistory;
@@ -107,18 +118,18 @@ namespace chess
     }
 
     template <typename Representation>
-    inline bool operator!=(basic_board<Representation> const& lhs, basic_board<Representation> const& rhs)
+    inline bool operator!=(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
     {
         return !(lhs == rhs);
     }
 
-    using matrix_board = basic_board<matrix>;
-    using bitboard_board = basic_board<bitboard>;
+    using mailbox_position = basic_position<mailbox>;
+    using bitboard_position = basic_position<bitboard>;
 
-    using board = matrix_board;
+    using position = mailbox_position;
 
     template <typename CharT, typename CharTraitsT>
-    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, matrix_board const& aBoard)
+    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, mailbox_position const& aPosition)
     {
         aStream << "  01234567" << std::endl << std::endl;
         for (coordinate y = 7u; y >= 0u && y <= 7u; --y)
@@ -126,7 +137,7 @@ namespace chess
             aStream << y << " ";
             for (coordinate x = 0u; x <= 7u; ++x)
             {
-                switch (aBoard.position[y][x])
+                switch (aPosition.rep[y][x])
                 {
                 case piece::WhitePawn:
                     aStream << "P";
@@ -176,29 +187,29 @@ namespace chess
     }
 
     template <typename CharT, typename CharTraitsT>
-    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, bitboard_board const& aBoard)
+    inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, bitboard_position const& aPosition)
     {
         // todo
         return aStream;
     }
 
-    inline std::optional<move> undo(matrix_board& aBoard)
+    inline std::optional<move> undo(mailbox_position& aPosition)
     {
         std::optional<move> lastMove;
-        if (!aBoard.moveHistory.empty())
+        if (!aPosition.moveHistory.empty())
         {
-            lastMove = aBoard.moveHistory.back();
-            aBoard.moveHistory.pop_back();
-            auto const movedPiece = aBoard.position[lastMove->to.y][lastMove->to.x];
-            aBoard.position[lastMove->from.y][lastMove->from.x] = movedPiece;
-            aBoard.position[lastMove->to.y][lastMove->to.x] = lastMove->capture;
+            lastMove = aPosition.moveHistory.back();
+            aPosition.moveHistory.pop_back();
+            auto const movedPiece = aPosition.rep[lastMove->to.y][lastMove->to.x];
+            aPosition.rep[lastMove->from.y][lastMove->from.x] = movedPiece;
+            aPosition.rep[lastMove->to.y][lastMove->to.x] = lastMove->capture;
             if (lastMove->promoteTo)
             {
                 // pawn promotion
                 if (lastMove->to.y == promotion_rank_v<player::White>)
-                    aBoard.position[lastMove->from.y][lastMove->from.x] = piece::WhitePawn;
+                    aPosition.rep[lastMove->from.y][lastMove->from.x] = piece::WhitePawn;
                 else if (lastMove->to.y == promotion_rank_v<player::Black>)
-                    aBoard.position[lastMove->from.y][lastMove->from.x] = piece::BlackPawn;
+                    aPosition.rep[lastMove->from.y][lastMove->from.x] = piece::BlackPawn;
             }
             else
             {
@@ -206,50 +217,50 @@ namespace chess
                 {
                 case piece::BlackPawn:
                     // en passant (white)
-                    if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 2u } &&
-                        aBoard.moveHistory.back().to == coordinates{ aBoard.moveHistory.back().to.x, 3u } &&
-                        aBoard.moveHistory.back().from == coordinates{ aBoard.moveHistory.back().to.x, 1u })
+                    if (lastMove->capture == piece::WhitePawn && lastMove->to == coordinates{ aPosition.moveHistory.back().to.x, 2u } &&
+                        aPosition.moveHistory.back().to == coordinates{ aPosition.moveHistory.back().to.x, 3u } &&
+                        aPosition.moveHistory.back().from == coordinates{ aPosition.moveHistory.back().to.x, 1u })
                     {
-                        aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
-                        aBoard.position[lastMove->to.y + 1u][lastMove->to.x] = piece::WhitePawn;
+                        aPosition.rep[lastMove->to.y][lastMove->to.x] = piece::None;
+                        aPosition.rep[lastMove->to.y + 1u][lastMove->to.x] = piece::WhitePawn;
                     }
                     break;
                 case piece::WhitePawn:
                     // en passant (black)
-                    if (lastMove->capture == piece::BlackPawn && lastMove->to == coordinates{ aBoard.moveHistory.back().to.x, 5u } &&
-                        aBoard.moveHistory.back().to == coordinates{ aBoard.moveHistory.back().to.x, 4u } &&
-                        aBoard.moveHistory.back().from == coordinates{ aBoard.moveHistory.back().to.x, 6u })
+                    if (lastMove->capture == piece::BlackPawn && lastMove->to == coordinates{ aPosition.moveHistory.back().to.x, 5u } &&
+                        aPosition.moveHistory.back().to == coordinates{ aPosition.moveHistory.back().to.x, 4u } &&
+                        aPosition.moveHistory.back().from == coordinates{ aPosition.moveHistory.back().to.x, 6u })
                     {
-                        aBoard.position[lastMove->to.y][lastMove->to.x] = piece::None;
-                        aBoard.position[lastMove->to.y - 1u][lastMove->to.x] = piece::BlackPawn;
+                        aPosition.rep[lastMove->to.y][lastMove->to.x] = piece::None;
+                        aPosition.rep[lastMove->to.y - 1u][lastMove->to.x] = piece::BlackPawn;
                     }
                     break;
                 case piece::WhiteKing:
-                    aBoard.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
+                    aPosition.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
                     // castling (white)
                     if (lastMove->to.x - lastMove->from.x == 2u)
                     {
-                        aBoard.position[0u][7u] = piece::WhiteRook;
-                        aBoard.position[0u][5u] = piece::None;
+                        aPosition.rep[0u][7u] = piece::WhiteRook;
+                        aPosition.rep[0u][5u] = piece::None;
                     }
                     else if (lastMove->from.x - lastMove->to.x == 2u)
                     {
-                        aBoard.position[0u][0u] = piece::WhiteRook;
-                        aBoard.position[0u][3u] = piece::None;
+                        aPosition.rep[0u][0u] = piece::WhiteRook;
+                        aPosition.rep[0u][3u] = piece::None;
                     }
                     break;
                 case piece::BlackKing:
-                    aBoard.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
+                    aPosition.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
                     // castling (black)
                     if (lastMove->to.x - lastMove->from.x == 2u)
                     {
-                        aBoard.position[7u][7u] = piece::BlackRook;
-                        aBoard.position[7u][5u] = piece::None;
+                        aPosition.rep[7u][7u] = piece::BlackRook;
+                        aPosition.rep[7u][5u] = piece::None;
                     }
                     else if (lastMove->from.x - lastMove->to.x == 2u)
                     {
-                        aBoard.position[7u][0u] = piece::BlackRook;
-                        aBoard.position[7u][3u] = piece::None;
+                        aPosition.rep[7u][0u] = piece::BlackRook;
+                        aPosition.rep[7u][3u] = piece::None;
                     }
                     break;
                 default:
@@ -257,12 +268,12 @@ namespace chess
                     break;
                 }
             }
-            aBoard.turn = next_player(aBoard.turn);
+            aPosition.turn = next_player(aPosition.turn);
         }
         return lastMove;
     }
 
-    inline std::optional<move> undo(bitboard_board& aBoard)
+    inline std::optional<move> undo(bitboard_position& aPosition)
     {
         // todo
         return {};
@@ -273,25 +284,25 @@ namespace chess
     template <typename Representation>
     move_tables<Representation> generate_move_tables();
 
-    inline piece piece_at(matrix_board const& aBoard, coordinates aPosition)
+    inline piece piece_at(mailbox_position const& aPosition, coordinates const& aCoordinates)
     {
-        auto const targetPiece = aBoard.position[aPosition.y][aPosition.x];
-        if (!aBoard.checkTest)
+        auto const targetPiece = aPosition.rep[aCoordinates.y][aCoordinates.x];
+        if (!aPosition.checkTest)
             return targetPiece;
-        if (aPosition == aBoard.checkTest->from)
+        if (aCoordinates == aPosition.checkTest->from)
             return piece::None;
-        auto const movingPiece = !aBoard.checkTest->promoteTo ? aBoard.position[aBoard.checkTest->from.y][aBoard.checkTest->from.x] : *aBoard.checkTest->promoteTo;
+        auto const movingPiece = !aPosition.checkTest->promoteTo ? aPosition.rep[aPosition.checkTest->from.y][aPosition.checkTest->from.x] : *aPosition.checkTest->promoteTo;
         // en passant
         if (piece_type(targetPiece) == piece::Pawn && piece_type(movingPiece) == piece::Pawn &&
             piece_color(targetPiece) != piece_color(movingPiece))
         {
-            if (aBoard.checkTest->from.x != aBoard.checkTest->to.x)
+            if (aPosition.checkTest->from.x != aPosition.checkTest->to.x)
             {
-                if (!aBoard.moveHistory.empty() && aPosition == aBoard.moveHistory.back().to)
+                if (!aPosition.moveHistory.empty() && aCoordinates == aPosition.moveHistory.back().to)
                 {
-                    if (std::abs(static_cast<int32_t>(aBoard.moveHistory.back().from.y) - static_cast<int32_t>(aBoard.moveHistory.back().to.y)) == 2)
+                    if (std::abs(static_cast<int32_t>(aPosition.moveHistory.back().from.y) - static_cast<int32_t>(aPosition.moveHistory.back().to.y)) == 2)
                     {
-                        if (aBoard.checkTest->to == coordinates{ aBoard.moveHistory.back().to.x, piece_color(movingPiece) == piece::White ? aBoard.moveHistory.back().to.y + 1 : aBoard.moveHistory.back().to.y - 1 })
+                        if (aPosition.checkTest->to == coordinates{ aPosition.moveHistory.back().to.x, piece_color(movingPiece) == piece::White ? aPosition.moveHistory.back().to.y + 1 : aPosition.moveHistory.back().to.y - 1 })
                         {
                             return piece::None;
                         }
@@ -299,68 +310,68 @@ namespace chess
                 }
             }
         }
-        if (aPosition == aBoard.checkTest->to)
+        if (aCoordinates == aPosition.checkTest->to)
             return movingPiece;
         return targetPiece;
     }
 
-    inline piece piece_at(bitboard_board const& aBoard, coordinates aPosition)
+    inline piece piece_at(bitboard_position const& aPosition, coordinates const& aCoordinates)
     {
         // todo
         return piece::None;
     }
 
     template <typename Representation>
-    inline coordinates king_position(basic_board<Representation> const& aBoard, piece aKing)
+    inline coordinates king_position(basic_position<Representation> const& aPosition, piece aKing)
     {
-        auto const kingPosition = aBoard.kings[as_color_cardinal<>(aKing)];
-        if (aBoard.checkTest && aBoard.checkTest->from == kingPosition)
-            return aBoard.checkTest->to;
+        auto const kingPosition = aPosition.kings[as_color_cardinal<>(aKing)];
+        if (aPosition.checkTest && aPosition.checkTest->from == kingPosition)
+            return aPosition.checkTest->to;
         return kingPosition;
     }
 
     template <typename Representation>
-    inline bool draw(basic_board<Representation> const& aBoard)
+    inline bool draw(basic_position<Representation> const& aPosition)
     {
         // todo: hash board positions? could be slow.
-        auto const moveCount = aBoard.moveHistory.size();
+        auto const moveCount = aPosition.moveHistory.size();
         return moveCount >= 6 &&
-            aBoard.moveHistory[moveCount - 1] == aBoard.moveHistory[moveCount - 3] &&
-            aBoard.moveHistory[moveCount - 1] == aBoard.moveHistory[moveCount - 5] &&
-            aBoard.moveHistory[moveCount - 2] == aBoard.moveHistory[moveCount - 4] &&
-            aBoard.moveHistory[moveCount - 2] == aBoard.moveHistory[moveCount - 6];
+            aPosition.moveHistory[moveCount - 1] == aPosition.moveHistory[moveCount - 3] &&
+            aPosition.moveHistory[moveCount - 1] == aPosition.moveHistory[moveCount - 5] &&
+            aPosition.moveHistory[moveCount - 2] == aPosition.moveHistory[moveCount - 4] &&
+            aPosition.moveHistory[moveCount - 2] == aPosition.moveHistory[moveCount - 6];
     }
         
-    inline void move_piece(matrix_board& aBoard, chess::move const& aMove)
+    inline void move_piece(mailbox_position& aPosition, chess::move const& aMove)
     {
-        auto& source = aBoard.position[aMove.from.y][aMove.from.x];
+        auto& source = aPosition.rep[aMove.from.y][aMove.from.x];
         auto const movingPiece = source;
-        auto& destination = aBoard.position[aMove.to.y][aMove.to.x];
+        auto& destination = aPosition.rep[aMove.to.y][aMove.to.x];
         auto const targetPiece = destination;
         destination = (!aMove.promoteTo ? source : *aMove.promoteTo);
         source = piece::None;
-        auto const currentMoveCount = aBoard.moveHistory.size();
-        aBoard.moveHistory.emplace_back(aMove.from, aMove.to, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aBoard.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
-        auto& newMove = aBoard.moveHistory.back();
+        auto const currentMoveCount = aPosition.moveHistory.size();
+        aPosition.moveHistory.emplace_back(aMove.from, aMove.to, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aPosition.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
+        auto& newMove = aPosition.moveHistory.back();
         switch (movingPiece)
         {
         case piece::WhiteKing:
         case piece::BlackKing:
-            aBoard.kings[as_color_cardinal<>(destination)] = aMove.to;
+            aPosition.kings[as_color_cardinal<>(destination)] = aMove.to;
             newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
             if (aMove.from.x - aMove.to.x == 2)
             {
                 // queenside castling
                 newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
-                aBoard.position[aMove.from.y][0u] = piece::None;
-                aBoard.position[aMove.from.y][3u] = piece_color(movingPiece) | piece::Rook;
+                aPosition.rep[aMove.from.y][0u] = piece::None;
+                aPosition.rep[aMove.from.y][3u] = piece_color(movingPiece) | piece::Rook;
             }
             else if (aMove.to.x - aMove.from.x == 2)
             {
                 // kingside castling
                 newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
-                aBoard.position[aMove.from.y][7u] = piece::None;
-                aBoard.position[aMove.from.y][5u] = piece_color(movingPiece) | piece::Rook;
+                aPosition.rep[aMove.from.y][7u] = piece::None;
+                aPosition.rep[aMove.from.y][5u] = piece_color(movingPiece) | piece::Rook;
             }
             break;
         case piece::WhiteRook:
@@ -379,7 +390,7 @@ namespace chess
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
             {
-                auto& targetPawn = aBoard.position[4u][aMove.to.x];
+                auto& targetPawn = aPosition.rep[4u][aMove.to.x];
                 newMove.capture = targetPawn;
                 targetPawn = piece::None;
             }
@@ -388,7 +399,7 @@ namespace chess
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
             {
-                auto& targetPawn = aBoard.position[3u][aMove.to.x];
+                auto& targetPawn = aPosition.rep[3u][aMove.to.x];
                 newMove.capture = targetPawn;
                 targetPawn = piece::None;
             }
@@ -415,10 +426,10 @@ namespace chess
             // do nothing
             break;
         }
-        aBoard.turn = next_player(aBoard.turn);
+        aPosition.turn = next_player(aPosition.turn);
     }
 
-    inline void move_piece(bitboard_board& aBoard, chess::move const& aMove)
+    inline void move_piece(bitboard_position& aPosition, chess::move const& aMove)
     {
         // todo
     }
@@ -442,7 +453,7 @@ namespace chess
     }
 
     template <typename Representation>
-    basic_board<Representation> const& setup_position();
+    basic_position<Representation> const& setup_position();
 
     struct eval_info
     {
@@ -475,7 +486,7 @@ namespace chess
     template <typename Representation, player Player>
     struct eval
     {
-        eval_result operator()(move_tables<Representation> const& aTables, basic_board<Representation> const& aBoard, double aPly, eval_info* aEvalInfo = nullptr);
-        eval_result operator()(move_tables<Representation> const& aTables, basic_board<Representation> const& aBoard, double aPly, eval_info& aEvalInfo);
+        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation> const& aPosition, double aPly, eval_info* aEvalInfo = nullptr);
+        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation> const& aPosition, double aPly, eval_info& aEvalInfo);
     };
 }

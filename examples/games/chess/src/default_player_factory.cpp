@@ -32,9 +32,9 @@ namespace chess
             return nullptr; // todo
         case player_type::AI:
             if (aPlayer == chess::player::White)
-                return std::make_unique<ai<matrix, chess::player::White>>();
+                return std::make_unique<ai<mailbox, chess::player::White>>();
             else
-                return std::make_unique<ai<matrix, chess::player::Black>>();
+                return std::make_unique<ai<mailbox, chess::player::Black>>();
         default:
             return nullptr;
         }

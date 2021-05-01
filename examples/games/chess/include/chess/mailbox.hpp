@@ -26,12 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template<>
-    struct move_tables<matrix>
+    struct move_tables<mailbox>
     {
         typedef neogfx::point_i32 move_coordinates;
-        typedef std::array<std::array<std::vector<move_coordinates>, static_cast<std::size_t>(piece_cardinal::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> unit_moves;
-        typedef std::array<bool, static_cast<std::size_t>(piece_cardinal::COUNT)> can_move_multiple;
-        typedef std::array<std::array<std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u>, static_cast<std::size_t>(piece_cardinal::COUNT)>, static_cast<std::size_t>(piece_color_cardinal::COUNT)> valid_moves;
+        typedef std::array<std::array<std::vector<move_coordinates>, PIECES>, PIECE_COLORS> unit_moves;
+        typedef std::array<bool, PIECES> can_move_multiple;
+        typedef std::array<std::array<std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u>, PIECES>, PIECE_COLORS> valid_moves;
         typedef std::pair<std::size_t, std::array<move_coordinates, 8>> move_path;
         typedef std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u> trivial_moves;
         typedef std::array<std::array<std::array<std::array<move_path, 8u>, 8u>, 8u>, 8u> move_paths;
@@ -44,10 +44,10 @@ namespace chess
         valid_moves validCaptureMoves;
     };
 
-    move_tables<matrix> generate_matrix_move_tables();
+    move_tables<mailbox> generate_mailbox_move_tables();
 
     template <bool IntoCheckTest = false>
-    inline bool in_check(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard);
+    inline bool in_check(move_tables<mailbox> const& aTables, player aPlayer, mailbox_position const& aPosition);
         
     inline bool can_move_trivial(coordinates const& aFrom, coordinates const& aTo, bool& aKnight)
     {
@@ -64,18 +64,18 @@ namespace chess
         return true;
     }
 
-    inline bool can_move_trivial(move_tables<matrix> const& aTables, coordinates const& aFrom, coordinates const& aTo)
+    inline bool can_move_trivial(move_tables<mailbox> const& aTables, coordinates const& aFrom, coordinates const& aTo)
     {
         return aTables.trivialMoves[aFrom.y][aFrom.x][aTo.y][aTo.x];
     }
 
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
-    inline bool can_move(move_tables<matrix> const& aTables, player aTurn, matrix_board const& aBoard, move const& aMove)
+    inline bool can_move(move_tables<mailbox> const& aTables, player aTurn, mailbox_position const& aPosition, move const& aMove)
     {
         if (!can_move_trivial(aTables, aMove.from, aMove.to))
             return false;
-        auto const movingPiece = piece_at(aBoard, aMove.from);
-        auto const targetPiece = piece_at(aBoard, aMove.to);
+        auto const movingPiece = piece_at(aPosition, aMove.from);
+        auto const targetPiece = piece_at(aPosition, aMove.to);
         auto const movingPieceColor = piece_color(movingPiece);
         if (movingPieceColor != static_cast<piece>(aTurn))
             return false;
@@ -96,35 +96,35 @@ namespace chess
             {
                 if (piece_type(movingPiece) == piece::Pawn &&
                     aTables.validCaptureMoves[movingPieceColorCardinal][movingPieceCardinal][aMove.from.y][aMove.from.x][aMove.to.y][aMove.to.x] &&
-                    !aBoard.moveHistory.empty())
+                    !aPosition.moveHistory.empty())
                 {
-                    auto const pieceLastMoved = piece_at(aBoard, aBoard.moveHistory.back().to);
+                    auto const pieceLastMoved = piece_at(aPosition, aPosition.moveHistory.back().to);
                     if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
                     {
-                        auto const delta = aBoard.moveHistory.back().to.as<int32_t>() - aBoard.moveHistory.back().from.as<int32_t>();
+                        auto const delta = aPosition.moveHistory.back().to.as<int32_t>() - aPosition.moveHistory.back().from.as<int32_t>();
                         if (std::abs(delta.y) == 2)
                         {
                             auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
-                            if (aBoard.moveHistory.back().to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
+                            if (aPosition.moveHistory.back().to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
                                 enPassant = true;
                         }
                     }
                 }
-                else if (piece_type(movingPiece) == piece::King && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::King)]))
+                else if (piece_type(movingPiece) == piece::King && (aPosition.moveHistory.empty() || !aPosition.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::King)]))
                 {
                     if (aMove.to.y == aMove.from.y)
                     {
-                        if ((aMove.to.x == 2 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::QueensRook)])) ||
-                            (aMove.to.x == 6 && (aBoard.moveHistory.empty() || !aBoard.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::KingsRook)])))
-                            castle = !in_check(aTables, aTurn, aBoard);
+                        if ((aMove.to.x == 2 && (aPosition.moveHistory.empty() || !aPosition.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::QueensRook)])) ||
+                            (aMove.to.x == 6 && (aPosition.moveHistory.empty() || !aPosition.moveHistory.back().castlingState[movingPieceColorCardinal][static_cast<std::size_t>(move::castling_piece_index::KingsRook)])))
+                            castle = !in_check(aTables, aTurn, aPosition);
                     }
                 }
                 if (!enPassant && !castle)
                     return false;
             }
-            else if (movingPiece == piece::WhitePawn && aMove.to.y - aMove.from.y == 2u && piece_at(aBoard, coordinates{ aMove.from.x, aMove.from.y + 1u }) != piece::None)
+            else if (movingPiece == piece::WhitePawn && aMove.to.y - aMove.from.y == 2u && piece_at(aPosition, coordinates{ aMove.from.x, aMove.from.y + 1u }) != piece::None)
                 return false;
-            else if (movingPiece == piece::BlackPawn && aMove.from.y - aMove.to.y == 2u && piece_at(aBoard, coordinates{ aMove.from.x, aMove.from.y - 1u }) != piece::None)
+            else if (movingPiece == piece::BlackPawn && aMove.from.y - aMove.to.y == 2u && piece_at(aPosition, coordinates{ aMove.from.x, aMove.from.y - 1u }) != piece::None)
                 return false;
         }
         // capturing move...
@@ -139,14 +139,14 @@ namespace chess
                 for (std::size_t i = 1; i < movePath.first - 1; ++i)
                 {
                     auto const pos = movePath.second[i];
-                    auto const inbetweenPiece = piece_at(aBoard, pos);
+                    auto const inbetweenPiece = piece_at(aPosition, pos);
                     if (piece_type(inbetweenPiece) != piece::None)
                         return false;
                     if (castle)
                     {
-                        aBoard.checkTest = move{ aMove.from, pos };
-                        bool inCheck = in_check(aTables, aTurn, aBoard);
-                        aBoard.checkTest = std::nullopt;
+                        aPosition.checkTest = move{ aMove.from, pos };
+                        bool inCheck = in_check(aTables, aTurn, aPosition);
+                        aPosition.checkTest = std::nullopt;
                         if (inCheck)
                             return false;
                     }
@@ -155,49 +155,49 @@ namespace chess
         }
         if (!IntoCheckTest)
         {
-            aBoard.checkTest = aMove;
-            bool inCheck = in_check<true>(aTables, aTurn, aBoard);
-            aBoard.checkTest = std::nullopt;
+            aPosition.checkTest = aMove;
+            bool inCheck = in_check<true>(aTables, aTurn, aPosition);
+            aPosition.checkTest = std::nullopt;
             if (inCheck)
                 return false;
         }
-        if (draw(aBoard))
+        if (draw(aPosition))
             return false;
         return true;
     }
 
     template <bool IntoCheckTest>
-    inline bool in_check(move_tables<matrix> const& aTables, player aPlayer, matrix_board const& aBoard)
+    inline bool in_check(move_tables<mailbox> const& aTables, player aPlayer, mailbox_position const& aPosition)
     {
         auto const opponent = next_player(aPlayer);
-        auto const kingPosition = king_position(aBoard, static_cast<piece>(aPlayer));
+        auto const kingPosition = king_position(aPosition, static_cast<piece>(aPlayer));
         for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
             for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
             {
                 move const tryMove{ coordinates{ xFrom, yFrom }, kingPosition };
                 if (tryMove.from == kingPosition)
                     continue;
-                if (can_move<true, IntoCheckTest>(aTables, opponent, aBoard, tryMove))
+                if (can_move<true, IntoCheckTest>(aTables, opponent, aPosition, tryMove))
                     return true;
             }
         return false;
     }
 
     template <player Player, typename ResultContainer>
-    inline void sort_nodes(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult)
+    inline void sort_nodes(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
     {
         std::sort(as_valid_moves(aResult).begin(), as_valid_moves(aResult).end(), [&](auto const& lhs, auto const& rhs)
         {
-            matrix_board lhsBoard = aBoard;
-            matrix_board rhsBoard = aBoard;
+            mailbox_position lhsBoard = aPosition;
+            mailbox_position rhsBoard = aPosition;
             move_piece(lhsBoard, as_move(lhs));
             move_piece(rhsBoard, as_move(rhs));
-            return eval<matrix, Player>{}(aTables, lhsBoard, 2.0).eval < eval<matrix, Player>{}(aTables, rhsBoard, 2.0).eval;
+            return eval<mailbox, Player>{}(aTables, lhsBoard, 2.0).eval < eval<mailbox, Player>{}(aTables, rhsBoard, 2.0).eval;
         });
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<matrix> const& aTables, matrix_board const& aBoard, ResultContainer& aResult)
+    inline void valid_moves(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
     {
         as_valid_moves(aResult).clear();
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
@@ -206,9 +206,9 @@ namespace chess
                     for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                     {
                         move candidateMove{ { xFrom, yFrom }, { xTo, yTo } };
-                        if (can_move<>(aTables, Player, aBoard, candidateMove))
+                        if (can_move<>(aTables, Player, aPosition, candidateMove))
                         {
-                            auto const movingPiece = piece_at(aBoard, candidateMove.from);
+                            auto const movingPiece = piece_at(aPosition, candidateMove.from);
                             if (piece_type(movingPiece) == piece::Pawn)
                             {
                                 auto const movingPieceColor = piece_color(movingPiece);

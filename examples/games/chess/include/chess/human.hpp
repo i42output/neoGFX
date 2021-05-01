@@ -39,7 +39,7 @@ namespace chess
         bool play(move const& aMove) override;
         bool playing() const override;
         void undo() override;
-        void setup(matrix_board const& aSetup) override;
+        void setup(mailbox_position const& aSetup) override;
     private:
         ng::sink iSink;
         chess::player iPlayer;

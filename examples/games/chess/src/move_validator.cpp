@@ -23,45 +23,45 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     move_validator::move_validator() : 
-        iMoveTables{ generate_move_tables<matrix>() }
+        iMoveTables{ generate_move_tables<mailbox>() }
     {
     }
 
-    bool move_validator::can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const
+    bool move_validator::can_move(player aTurn, mailbox_position const& aPosition, move const& aMove) const
     {
-        return chess::can_move<>(iMoveTables, aTurn, aBoard, aMove);
+        return chess::can_move<>(iMoveTables, aTurn, aPosition, aMove);
     }
 
-    bool move_validator::has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const
+    bool move_validator::has_moves(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const
     {
         for (coordinate y = 0u; y <= 7u; ++y)
             for (coordinate x = 0u; x <= 7u; ++x)
-                if (chess::can_move<>(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                if (chess::can_move<>(iMoveTables, aTurn, aPosition, move{ aMovePosition, coordinates{x, y} }))
                     return true;
         return false;
     }
 
-    bool move_validator::in_check(player aTurn, matrix_board const& aBoard) const
+    bool move_validator::in_check(player aTurn, mailbox_position const& aPosition) const
     {
-        return chess::in_check(iMoveTables, aTurn, aBoard);
+        return chess::in_check(iMoveTables, aTurn, aPosition);
     }
 
-    bool move_validator::check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const
+    bool move_validator::check_if_moved(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const
     {
         for (coordinate y = 0u; y <= 7u; ++y)
             for (coordinate x = 0u; x <= 7u; ++x)
-                if (!chess::can_move<>(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
-                    if (chess::can_move<true>(iMoveTables, aTurn, aBoard, move{ aMovePosition, coordinates{x, y} }))
+                if (!chess::can_move<>(iMoveTables, aTurn, aPosition, move{ aMovePosition, coordinates{x, y} }))
+                    if (chess::can_move<true>(iMoveTables, aTurn, aPosition, move{ aMovePosition, coordinates{x, y} }))
                         return true;
         return false;
     }
 
-    double move_validator::eval(player aTurn, matrix_board const& aBoard, eval_info& aInfo) const
+    double move_validator::eval(player aTurn, mailbox_position const& aPosition, eval_info& aInfo) const
     {
         if (aTurn == player::White)
-            return chess::eval<matrix, player::White>{}(iMoveTables, aBoard, 1.0, aInfo).eval;
+            return chess::eval<mailbox, player::White>{}(iMoveTables, aPosition, 1.0, aInfo).eval;
         else if (aTurn == player::Black)
-            return chess::eval<matrix, player::Black>{}(iMoveTables, aBoard, 1.0, aInfo).eval;
+            return chess::eval<mailbox, player::Black>{}(iMoveTables, aPosition, 1.0, aInfo).eval;
         else
             return 0.0;
     }

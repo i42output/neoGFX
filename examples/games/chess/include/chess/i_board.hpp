@@ -32,7 +32,7 @@ namespace chess::gui
         virtual ~i_board() = default;
     public:
         virtual void new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer) = 0;
-        virtual void setup(board const& aBoard) = 0;
+        virtual void setup(position const& aPosition) = 0;
         virtual bool play(move const& aMove) = 0;
         virtual void edit(move const& aMove) = 0;
         virtual bool can_undo() const = 0;

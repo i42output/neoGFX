@@ -19,7 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <chess/primitives.hpp>
-#include <chess/matrix.hpp>
+#include <chess/mailbox.hpp>
 
 namespace chess
 {
@@ -28,10 +28,10 @@ namespace chess
     public:
         virtual ~i_move_validator() = default;
     public:
-        virtual bool can_move(player aTurn, matrix_board const& aBoard, move const& aMove) const = 0;
-        virtual bool has_moves(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const = 0;
-        virtual bool in_check(player aTurn, matrix_board const& aBoard) const = 0;
-        virtual bool check_if_moved(player aTurn, matrix_board const& aBoard, coordinates const& aMovePosition) const = 0;
-        virtual double eval(player aTurn, matrix_board const& aBoard, eval_info& aInfo) const = 0;
+        virtual bool can_move(player aTurn, mailbox_position const& aPosition, move const& aMove) const = 0;
+        virtual bool has_moves(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const = 0;
+        virtual bool in_check(player aTurn, mailbox_position const& aPosition) const = 0;
+        virtual bool check_if_moved(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const = 0;
+        virtual double eval(player aTurn, mailbox_position const& aPosition, eval_info& aInfo) const = 0;
     };
 }

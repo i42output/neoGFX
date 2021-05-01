@@ -46,7 +46,7 @@ namespace chess
         virtual bool play(move const& aMove) = 0;
         virtual bool playing() const = 0;
         virtual void undo() = 0;
-        virtual void setup(matrix_board const& aSetup) = 0;
+        virtual void setup(mailbox_position const& aSetup) = 0;
     };
 
     class i_player_factory

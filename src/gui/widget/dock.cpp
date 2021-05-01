@@ -161,7 +161,7 @@ namespace neogfx
         iParentLayoutSizePolicyDelegate.emplace(
             get_property(parent_layout(), "SizePolicy"), SizePolicy,
             [this]() -> optional_size_policy { return size_policy(); });
-        set_padding(neogfx::padding{ 1.5_mm });
+        set_padding((area() & dock_area::Vertical) != dock_area::None ? neogfx::padding{ 1.5_mm, 0, 1.5_mm, 0 } : neogfx::padding{ 0, 1.5_mm, 0, 1.5_mm });
         layout().set_padding(neogfx::padding{}, false);
         layout().set_spacing(padding().top_left().to_vec2(), false);
         set_background_opacity(1.0);

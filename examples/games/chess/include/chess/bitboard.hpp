@@ -28,30 +28,30 @@ namespace chess
     };
 
     template <bool IntoCheckTest = false>
-    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard);
+    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_position const& aPosition);
 
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
-    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_board const& aBoard, move const& aMove)
+    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_position const& aPosition, move const& aMove)
     {
         // todo
         return false;
     }
 
     template <bool IntoCheckTest>
-    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_board const& aBoard)
+    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_position const& aPosition)
     {
         // todo
         return false;
     }
 
     template <player Player, typename ResultContainer>
-    inline void sort_nodes(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, ResultContainer& aResult)
+    inline void sort_nodes(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult)
     {
         // todo
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<bitboard> const& aTables, bitboard_board const& aBoard, ResultContainer& aResult, bool aSort = false)
+    inline void valid_moves(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult, bool aSort = false)
     {
         // todo
         as_valid_moves(aResult).clear();

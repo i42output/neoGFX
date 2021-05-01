@@ -33,10 +33,10 @@ namespace chess
     {
     public:
         typedef Representation representation_type;
-        typedef basic_board<representation_type> board_type;
+        typedef basic_position<representation_type> position_type;
         struct work_item
         {
-            board_type board;
+            position_type position;
             game_tree_node node;
             std::promise<game_tree_node> result;
         };
@@ -45,7 +45,7 @@ namespace chess
         ~ai_thread();
     public:
         void set_ply_depth(int32_t aPlyDepth);
-        std::promise<game_tree_node>& eval(board_type const& aBoard, game_tree_node&& aNode);
+        std::promise<game_tree_node>& eval(position_type const& aPosition, game_tree_node&& aNode);
         void start();
     private:
         void process();
