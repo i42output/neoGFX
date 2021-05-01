@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template<>
-    struct move_tables<mailbox>
+    struct move_tables<mailbox_rep>
     {
         typedef neogfx::point_i32 move_coordinates;
         typedef std::array<std::array<std::vector<move_coordinates>, PIECES>, PIECE_COLORS> unit_moves;
@@ -44,10 +44,10 @@ namespace chess
         valid_moves validCaptureMoves;
     };
 
-    move_tables<mailbox> generate_mailbox_move_tables();
+    move_tables<mailbox_rep> generate_mailbox_move_tables();
 
     template <bool IntoCheckTest = false>
-    inline bool in_check(move_tables<mailbox> const& aTables, player aPlayer, mailbox_position const& aPosition);
+    inline bool in_check(move_tables<mailbox_rep> const& aTables, player aPlayer, mailbox_position const& aPosition);
         
     inline bool can_move_trivial(coordinates const& aFrom, coordinates const& aTo, bool& aKnight)
     {
@@ -64,13 +64,13 @@ namespace chess
         return true;
     }
 
-    inline bool can_move_trivial(move_tables<mailbox> const& aTables, coordinates const& aFrom, coordinates const& aTo)
+    inline bool can_move_trivial(move_tables<mailbox_rep> const& aTables, coordinates const& aFrom, coordinates const& aTo)
     {
         return aTables.trivialMoves[aFrom.y][aFrom.x][aTo.y][aTo.x];
     }
 
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
-    inline bool can_move(move_tables<mailbox> const& aTables, player aTurn, mailbox_position const& aPosition, move const& aMove)
+    inline bool can_move(move_tables<mailbox_rep> const& aTables, player aTurn, mailbox_position const& aPosition, move const& aMove)
     {
         if (!can_move_trivial(aTables, aMove.from, aMove.to))
             return false;
@@ -167,7 +167,7 @@ namespace chess
     }
 
     template <bool IntoCheckTest>
-    inline bool in_check(move_tables<mailbox> const& aTables, player aPlayer, mailbox_position const& aPosition)
+    inline bool in_check(move_tables<mailbox_rep> const& aTables, player aPlayer, mailbox_position const& aPosition)
     {
         auto const opponent = next_player(aPlayer);
         auto const kingPosition = king_position(aPosition, static_cast<piece>(aPlayer));
@@ -184,7 +184,7 @@ namespace chess
     }
 
     template <player Player, typename ResultContainer>
-    inline void sort_nodes(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
+    inline void sort_nodes(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
     {
         std::sort(as_valid_moves(aResult).begin(), as_valid_moves(aResult).end(), [&](auto const& lhs, auto const& rhs)
         {
@@ -192,12 +192,12 @@ namespace chess
             mailbox_position rhsBoard = aPosition;
             move_piece(lhsBoard, as_move(lhs));
             move_piece(rhsBoard, as_move(rhs));
-            return eval<mailbox, Player>{}(aTables, lhsBoard, 2.0).eval < eval<mailbox, Player>{}(aTables, rhsBoard, 2.0).eval;
+            return eval<mailbox_rep, Player>{}(aTables, lhsBoard, 2.0).eval < eval<mailbox_rep, Player>{}(aTables, rhsBoard, 2.0).eval;
         });
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
+    inline void valid_moves(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
     {
         as_valid_moves(aResult).clear();
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)

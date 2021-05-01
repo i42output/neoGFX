@@ -153,8 +153,8 @@ namespace chess
         }
     }
 
-    template class ai_thread<mailbox, player::White>;
-    template class ai_thread<mailbox, player::Black>;
-    template class ai_thread<bitboard, player::White>;
-    template class ai_thread<bitboard, player::Black>;
+    template class ai_thread<mailbox_rep, player::White>;
+    template class ai_thread<mailbox_rep, player::Black>;
+    template class ai_thread<bitboard_rep, player::White>;
+    template class ai_thread<bitboard_rep, player::Black>;
 }

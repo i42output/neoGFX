@@ -72,8 +72,8 @@ namespace chess
         ng::sink iSink;
     };
 
-    extern template class ai<mailbox, player::White>;
-    extern template class ai<mailbox, player::Black>;
-    extern template class ai<bitboard, player::White>;
-    extern template class ai<bitboard, player::Black>;
+    extern template class ai<mailbox_rep, player::White>;
+    extern template class ai<mailbox_rep, player::Black>;
+    extern template class ai<bitboard_rep, player::White>;
+    extern template class ai<bitboard_rep, player::Black>;
 }

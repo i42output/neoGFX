@@ -389,7 +389,7 @@ namespace chess::gui
 
     void board::new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer)
     {
-        setup(chess::setup_position<mailbox>());
+        setup(chess::setup_position<mailbox_rep>());
         iWhitePlayer = std::move(aPlayerFactory.create_player(aWhitePlayer, player::White));
         iBlackPlayer = std::move(aPlayerFactory.create_player(aBlackPlayer, player::Black));
         white_player().greet(black_player());

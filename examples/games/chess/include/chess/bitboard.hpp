@@ -22,36 +22,46 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    inline constexpr coordinates coordinates_from_bit(bitboard aBits)
+    {
+        return coordinates{ static_cast<uint32_t>(aBits % 8ull), static_cast<uint32_t>(aBits / 8ull) };
+    }
+
+    inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
+    {
+        return aPosition.x + aPosition.y * 8ull;
+    }
+
     template<>
-    struct move_tables<bitboard>
+    struct move_tables<bitboard_rep>
     {
     };
 
     template <bool IntoCheckTest = false>
-    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_position const& aPosition);
+    inline bool in_check(move_tables<bitboard_rep> const& aTables, player aPlayer, bitboard_position const& aPosition);
 
     template<bool CheckTest = false, bool IntoCheckTest = false, bool DefendTest = false>
-    inline bool can_move(move_tables<bitboard> const& aTables, player aTurn, bitboard_position const& aPosition, move const& aMove)
+    inline bool can_move(move_tables<bitboard_rep> const& aTables, player aTurn, bitboard_position const& aPosition, move const& aMove)
     {
         // todo
         return false;
     }
 
     template <bool IntoCheckTest>
-    inline bool in_check(move_tables<bitboard> const& aTables, player aPlayer, bitboard_position const& aPosition)
+    inline bool in_check(move_tables<bitboard_rep> const& aTables, player aPlayer, bitboard_position const& aPosition)
     {
         // todo
         return false;
     }
 
     template <player Player, typename ResultContainer>
-    inline void sort_nodes(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult)
+    inline void sort_nodes(move_tables<bitboard_rep> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult)
     {
         // todo
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult, bool aSort = false)
+    inline void valid_moves(move_tables<bitboard_rep> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult, bool aSort = false)
     {
         // todo
         as_valid_moves(aResult).clear();

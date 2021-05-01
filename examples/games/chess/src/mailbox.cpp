@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template<>
-    mailbox_position const& setup_position<mailbox>()
+    mailbox_position const& setup_position<mailbox_rep>()
     {
         static const mailbox_position position
         {
@@ -43,10 +43,10 @@ namespace chess
     }
 
     template<>
-    move_tables<mailbox> generate_move_tables<mailbox>()
+    move_tables<mailbox_rep> generate_move_tables<mailbox_rep>()
     {
-        typedef move_tables<mailbox>::move_coordinates move_coordinates;
-        move_tables<mailbox> result
+        typedef move_tables<mailbox_rep>::move_coordinates move_coordinates;
+        move_tables<mailbox_rep> result
         {
             // unit moves
             {{
@@ -104,7 +104,7 @@ namespace chess
                         for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                             for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
                             {
-                                auto calc_validity = [&](move_tables<mailbox>::unit_moves const& aUnitMoves, bool& aResult) 
+                                auto calc_validity = [&](move_tables<mailbox_rep>::unit_moves const& aUnitMoves, bool& aResult) 
                                 {
                                     aResult = false;
                                     auto const delta = move_coordinates{ static_cast<int32_t>(xTo), static_cast<int32_t>(yTo) } - move_coordinates{ static_cast<int32_t>(xFrom), static_cast<int32_t>(yFrom) };
@@ -138,7 +138,7 @@ namespace chess
                         result.trivialMoves[yFrom][xFrom][yTo][xTo] = true;
                         if (aKnight)
                             continue;
-                        auto const delta = move_tables<mailbox>::move_coordinates{ xTo, yTo } - move_tables<mailbox>::move_coordinates{ xFrom, yFrom };
+                        auto const delta = move_tables<mailbox_rep>::move_coordinates{ xTo, yTo } - move_tables<mailbox_rep>::move_coordinates{ xFrom, yFrom };
                         auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                         auto const start = coordinates_i32{ xFrom, yFrom };
                         auto const end = coordinates_i32{ xTo, yTo };
@@ -155,9 +155,9 @@ namespace chess
     }
 
     template <player Player>
-    struct eval<mailbox, Player>
+    struct eval<mailbox_rep, Player>
     {
-        eval_result operator()(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
+        eval_result operator()(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
         {
             auto const start = !aEvalInfo ? std::chrono::steady_clock::time_point{} : std::chrono::steady_clock::now();
 
@@ -297,13 +297,13 @@ namespace chess
 
             return result;
         }
-        eval_result operator()(move_tables<mailbox> const& aTables, mailbox_position const& aPosition, double aPly, eval_info& aEvalInfo)
+        eval_result operator()(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, double aPly, eval_info& aEvalInfo)
         {
             return eval{}(aTables, aPosition, aPly, &aEvalInfo);
         }
     };
 
 
-    template struct eval<mailbox, player::White>;
-    template struct eval<mailbox, player::Black>;
+    template struct eval<mailbox_rep, player::White>;
+    template struct eval<mailbox_rep, player::Black>;
 }

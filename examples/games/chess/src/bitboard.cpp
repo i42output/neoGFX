@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template <>
-    bitboard_position const& setup_position<bitboard>()
+    bitboard_position const& setup_position<bitboard_rep>()
     {
         static const bitboard_position position
         {
@@ -38,29 +38,29 @@ namespace chess
     }
 
     template<>
-    move_tables<bitboard> generate_move_tables<bitboard>()
+    move_tables<bitboard_rep> generate_move_tables<bitboard_rep>()
     {
-        move_tables<bitboard> result{};
+        move_tables<bitboard_rep> result{};
         // todo
         return result;
     }
 
     template <player Player>
-    struct eval<bitboard, Player>
+    struct eval<bitboard_rep, Player>
     {
-        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
+        eval_result operator()(move_tables<bitboard_rep> const& aTables, bitboard_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
         {
             // todo
             if (aEvalInfo)
                 *aEvalInfo = eval_info{};
             return { eval_node::Terminal, 0.0 };
         }
-        eval_result operator()(move_tables<bitboard> const& aTables, bitboard_position const& aPosition, double aPly, eval_info& aEvalInfo)
+        eval_result operator()(move_tables<bitboard_rep> const& aTables, bitboard_position const& aPosition, double aPly, eval_info& aEvalInfo)
         {
             return eval{}(aTables, aPosition, aPly, &aEvalInfo);
         }
     };
 
-    template struct eval<bitboard, player::White>;
-    template struct eval<bitboard, player::Black>;
+    template struct eval<bitboard_rep, player::White>;
+    template struct eval<bitboard_rep, player::Black>;
 }

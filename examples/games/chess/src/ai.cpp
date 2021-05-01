@@ -205,18 +205,18 @@ namespace chess
     template <typename Representation, player Player>
     void ai<Representation, Player>::setup(mailbox_position const& aSetup)
     {
-        if constexpr (std::is_same_v<representation_type, mailbox>)
+        if constexpr (std::is_same_v<representation_type, mailbox_rep>)
         {
             std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
             iRootNode = std::nullopt;
             iPosition = aSetup;
         }
         else
-            ; // todo (convert to bitboard representation)
+            ; // todo (convert to bitboard_rep representation)
     }
 
-    template class ai<mailbox, player::White>;
-    template class ai<mailbox, player::Black>;
-    template class ai<bitboard, player::White>;
-    template class ai<bitboard, player::Black>;
+    template class ai<mailbox_rep, player::White>;
+    template class ai<mailbox_rep, player::Black>;
+    template class ai<bitboard_rep, player::White>;
+    template class ai<bitboard_rep, player::Black>;
 }

@@ -36,6 +36,6 @@ namespace chess
         bool check_if_moved(player aTurn, mailbox_position const& aPosition, coordinates const& aMovePosition) const override;
         double eval(player aTurn, mailbox_position const& aPosition, eval_info& aInfo) const override;
     private:
-        move_tables<mailbox> const iMoveTables;
+        move_tables<mailbox_rep> const iMoveTables;
     };
 }

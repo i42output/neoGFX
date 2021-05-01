@@ -77,25 +77,16 @@ namespace chess
     template <>
     inline coordinate promotion_rank_v<chess::player::Black> = 0u;
 
-    typedef std::array<std::array<piece, 8>, 8> mailbox;
+    typedef std::array<std::array<piece, 8>, 8> mailbox_rep;
     
-    struct bitboard
+    typedef uint64_t bitboard;
+
+    struct bitboard_rep
     {
-        typedef uint64_t bits;
-        std::array<bits, PIECE_COLORS> byColor;
-        std::array<bits, PIECES> byPiece;
+        std::array<bitboard, PIECE_COLORS> byColor;
+        std::array<bitboard, PIECES> byPiece;
         std::array<piece, 64> bySquare;
     };
-
-    inline constexpr coordinates coordinates_from_bit(bitboard::bits aBits)
-    {
-        return coordinates{ static_cast<uint32_t>(aBits % 8ull), static_cast<uint32_t>(aBits / 8ull) };
-    }
-
-    inline constexpr bitboard::bits bit_from_coordinates(coordinates const& aPosition)
-    {
-        return aPosition.x + aPosition.y * 8ull;
-    }
 
     template <typename Representation>
     struct basic_position
@@ -106,6 +97,9 @@ namespace chess
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
     };
+
+    using mailbox_position = basic_position<mailbox_rep>;
+    using bitboard_position = basic_position<bitboard_rep>;
 
     template <typename Representation>
     inline bool operator==(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
@@ -122,9 +116,6 @@ namespace chess
     {
         return !(lhs == rhs);
     }
-
-    using mailbox_position = basic_position<mailbox>;
-    using bitboard_position = basic_position<bitboard>;
 
     using position = mailbox_position;
 

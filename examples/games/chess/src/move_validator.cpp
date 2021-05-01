@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     move_validator::move_validator() : 
-        iMoveTables{ generate_move_tables<mailbox>() }
+        iMoveTables{ generate_move_tables<mailbox_rep>() }
     {
     }
 
@@ -59,9 +59,9 @@ namespace chess
     double move_validator::eval(player aTurn, mailbox_position const& aPosition, eval_info& aInfo) const
     {
         if (aTurn == player::White)
-            return chess::eval<mailbox, player::White>{}(iMoveTables, aPosition, 1.0, aInfo).eval;
+            return chess::eval<mailbox_rep, player::White>{}(iMoveTables, aPosition, 1.0, aInfo).eval;
         else if (aTurn == player::Black)
-            return chess::eval<mailbox, player::Black>{}(iMoveTables, aPosition, 1.0, aInfo).eval;
+            return chess::eval<mailbox_rep, player::Black>{}(iMoveTables, aPosition, 1.0, aInfo).eval;
         else
             return 0.0;
     }
