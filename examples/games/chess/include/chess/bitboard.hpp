@@ -22,16 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    inline constexpr coordinates coordinates_from_bit(bitboard aBits)
-    {
-        return coordinates{ static_cast<uint32_t>(aBits % 8ull), static_cast<uint32_t>(aBits / 8ull) };
-    }
-
-    inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
-    {
-        return aPosition.x + aPosition.y * 8ull;
-    }
-
     template<>
     struct move_tables<bitboard_rep>
     {

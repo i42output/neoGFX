@@ -119,6 +119,49 @@ namespace chess
 
     using position = mailbox_position;
 
+    inline constexpr coordinates coordinates_from_bit(bitboard aBits)
+    {
+        return coordinates{ static_cast<uint32_t>(aBits % 8ull), static_cast<uint32_t>(aBits / 8ull) };
+    }
+
+    inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
+    {
+        return aPosition.x + aPosition.y * 8ull;
+    }
+
+    inline std::string to_string(piece aPiece, std::string const& aNone = ".")
+    {
+        switch (aPiece)
+        {
+        case piece::WhitePawn:
+            return "P";
+        case piece::WhiteKnight:
+            return "N";
+        case piece::WhiteBishop:
+            return "B";
+        case piece::WhiteRook:
+            return "R";
+        case piece::WhiteQueen:
+            return "Q";
+        case piece::WhiteKing:
+            return "K";
+        case piece::BlackPawn:
+            return "p";
+        case piece::BlackKnight:
+            return "n";
+        case piece::BlackBishop:
+            return "b";
+        case piece::BlackRook:
+            return "r";
+        case piece::BlackQueen:
+            return "q";
+        case piece::BlackKing:
+            return "k";
+        default:
+            return aNone;
+        }
+    }
+
     template <typename CharT, typename CharTraitsT>
     inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, mailbox_position const& aPosition)
     {
@@ -127,50 +170,7 @@ namespace chess
         {
             aStream << y << " ";
             for (coordinate x = 0u; x <= 7u; ++x)
-            {
-                switch (aPosition.rep[y][x])
-                {
-                case piece::WhitePawn:
-                    aStream << "P";
-                    break;
-                case piece::WhiteKnight:
-                    aStream << "N";
-                    break;
-                case piece::WhiteBishop:
-                    aStream << "B";
-                    break;
-                case piece::WhiteRook:
-                    aStream << "R";
-                    break;
-                case piece::WhiteQueen:
-                    aStream << "Q";
-                    break;
-                case piece::WhiteKing:
-                    aStream << "K";
-                    break;
-                case piece::BlackPawn:
-                    aStream << "p";
-                    break;
-                case piece::BlackKnight:
-                    aStream << "n";
-                    break;
-                case piece::BlackBishop:
-                    aStream << "b";
-                    break;
-                case piece::BlackRook:
-                    aStream << "r";
-                    break;
-                case piece::BlackQueen:
-                    aStream << "q";
-                    break;
-                case piece::BlackKing:
-                    aStream << "k";
-                    break;
-                default:
-                    aStream << ".";
-                    break;
-                }
-            }
+                aStream << to_string(aPosition.rep[y][x]);
             aStream << " " << y << std::endl;
         }
         aStream << std::endl << "  01234567" << std::endl;
@@ -180,7 +180,15 @@ namespace chess
     template <typename CharT, typename CharTraitsT>
     inline std::basic_ostream<CharT, CharTraitsT>& operator<<(std::basic_ostream<CharT, CharTraitsT>& aStream, bitboard_position const& aPosition)
     {
-        // todo
+        aStream << "  01234567" << std::endl << std::endl;
+        for (coordinate y = 7u; y >= 0u && y <= 7u; --y)
+        {
+            aStream << y << " ";
+            for (coordinate x = 0u; x <= 7u; ++x)
+                aStream << to_string(aPosition.rep.bySquare[x + y * 8u]);
+            aStream << " " << y << std::endl;
+        }
+        aStream << std::endl << "  01234567" << std::endl;
         return aStream;
     }
 
