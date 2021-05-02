@@ -85,8 +85,44 @@ namespace chess
     {
         std::array<bitboard, PIECE_COLORS> byColor;
         std::array<bitboard, PIECES> byPiece;
-        std::array<piece, 64> bySquare;
+        std::array<piece, 64u> bySquare;
     };
+
+    inline piece piece_at(mailbox_rep const& aRep, coordinates const& aCoordinates)
+    {
+        return aRep[aCoordinates.y][aCoordinates.x];
+    }
+
+    inline piece piece_at(bitboard_rep const& aRep, coordinates const& aCoordinates)
+    {
+        return aRep.bySquare[aCoordinates.y * 8u + aCoordinates.x];
+    }
+        
+    inline void set_piece(mailbox_rep& aRep, coordinates const& aCoordinates, piece aPiece)
+    {
+        aRep[aCoordinates.y][aCoordinates.x] = aPiece;
+    }
+
+    inline void set_piece(bitboard_rep& aRep, coordinates const& aCoordinates, piece aPiece)
+    {
+        uint64_t const index = aCoordinates.y * 8u + aCoordinates.x;
+        auto const oldPiece = aRep.bySquare[index];
+        aRep.bySquare[index] = aPiece;
+        if (aPiece == piece::None)
+        {
+            aRep.byColor[as_color_cardinal(piece::White)] &= ~index;
+            aRep.byColor[as_color_cardinal(piece::Black)] &= ~index;
+            aRep.byPiece[as_cardinal(oldPiece)] &= ~index;
+        }
+        else
+        {
+            aRep.byColor[as_color_cardinal(aPiece)] |= index;
+            aRep.byColor[as_color_cardinal(piece_opponent_color(aPiece))] &= ~index;
+            if (oldPiece != piece::None)
+                aRep.byPiece[as_cardinal(oldPiece)] &= ~index;
+            aRep.byPiece[as_cardinal(aPiece)] |= index;
+        }
+    }
 
     template <typename Representation>
     struct basic_position
@@ -198,17 +234,19 @@ namespace chess
         if (!aPosition.moveHistory.empty())
         {
             lastMove = aPosition.moveHistory.back();
+            auto const& lastMoveFrom = lastMove->from;
+            auto const& lastMoveTo = lastMove->to;
             aPosition.moveHistory.pop_back();
-            auto const movedPiece = aPosition.rep[lastMove->to.y][lastMove->to.x];
-            aPosition.rep[lastMove->from.y][lastMove->from.x] = movedPiece;
-            aPosition.rep[lastMove->to.y][lastMove->to.x] = lastMove->capture;
+            auto const movedPiece = piece_at(aPosition.rep, lastMoveTo);
+            set_piece(aPosition.rep, lastMoveFrom, movedPiece);
+            set_piece(aPosition.rep, lastMoveTo, lastMove->capture);
             if (lastMove->promoteTo)
             {
                 // pawn promotion
                 if (lastMove->to.y == promotion_rank_v<player::White>)
-                    aPosition.rep[lastMove->from.y][lastMove->from.x] = piece::WhitePawn;
+                    set_piece(aPosition.rep, lastMoveFrom, piece::WhitePawn);
                 else if (lastMove->to.y == promotion_rank_v<player::Black>)
-                    aPosition.rep[lastMove->from.y][lastMove->from.x] = piece::BlackPawn;
+                    set_piece(aPosition.rep, lastMoveFrom, piece::BlackPawn);
             }
             else
             {
@@ -220,8 +258,8 @@ namespace chess
                         aPosition.moveHistory.back().to == coordinates{ aPosition.moveHistory.back().to.x, 3u } &&
                         aPosition.moveHistory.back().from == coordinates{ aPosition.moveHistory.back().to.x, 1u })
                     {
-                        aPosition.rep[lastMove->to.y][lastMove->to.x] = piece::None;
-                        aPosition.rep[lastMove->to.y + 1u][lastMove->to.x] = piece::WhitePawn;
+                        set_piece(aPosition.rep, lastMoveTo, piece::None);
+                        set_piece(aPosition.rep, lastMoveTo.with_y(lastMoveTo.y + 1u), piece::WhitePawn);
                     }
                     break;
                 case piece::WhitePawn:
@@ -230,36 +268,36 @@ namespace chess
                         aPosition.moveHistory.back().to == coordinates{ aPosition.moveHistory.back().to.x, 4u } &&
                         aPosition.moveHistory.back().from == coordinates{ aPosition.moveHistory.back().to.x, 6u })
                     {
-                        aPosition.rep[lastMove->to.y][lastMove->to.x] = piece::None;
-                        aPosition.rep[lastMove->to.y - 1u][lastMove->to.x] = piece::BlackPawn;
+                        set_piece(aPosition.rep, lastMoveTo, piece::None);
+                        set_piece(aPosition.rep, lastMoveTo.with_y(lastMoveTo.y - 1u), piece::BlackPawn);
                     }
                     break;
                 case piece::WhiteKing:
-                    aPosition.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMove->from;
+                    aPosition.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMoveFrom;
                     // castling (white)
-                    if (lastMove->to.x - lastMove->from.x == 2u)
+                    if (lastMoveTo.x - lastMoveFrom.x == 2u)
                     {
-                        aPosition.rep[0u][7u] = piece::WhiteRook;
-                        aPosition.rep[0u][5u] = piece::None;
+                        set_piece(aPosition.rep, coordinates{ 7u, 0u }, piece::WhiteRook);
+                        set_piece(aPosition.rep, coordinates{ 5u, 0u }, piece::None);
                     }
-                    else if (lastMove->from.x - lastMove->to.x == 2u)
+                    else if (lastMoveFrom.x - lastMoveTo.x == 2u)
                     {
-                        aPosition.rep[0u][0u] = piece::WhiteRook;
-                        aPosition.rep[0u][3u] = piece::None;
+                        set_piece(aPosition.rep, coordinates{ 0u, 0u }, piece::WhiteRook);
+                        set_piece(aPosition.rep, coordinates{ 3u, 0u }, piece::None);
                     }
                     break;
                 case piece::BlackKing:
-                    aPosition.kings[as_color_cardinal<>(piece::BlackKing)] = lastMove->from;
+                    aPosition.kings[as_color_cardinal<>(piece::BlackKing)] = lastMoveFrom;
                     // castling (black)
-                    if (lastMove->to.x - lastMove->from.x == 2u)
+                    if (lastMoveTo.x - lastMoveFrom.x == 2u)
                     {
-                        aPosition.rep[7u][7u] = piece::BlackRook;
-                        aPosition.rep[7u][5u] = piece::None;
+                        set_piece(aPosition.rep, coordinates{ 7u, 7u }, piece::BlackRook);
+                        set_piece(aPosition.rep, coordinates{ 5u, 7u }, piece::None);
                     }
-                    else if (lastMove->from.x - lastMove->to.x == 2u)
+                    else if (lastMoveFrom.x - lastMoveTo.x == 2u)
                     {
-                        aPosition.rep[7u][0u] = piece::BlackRook;
-                        aPosition.rep[7u][3u] = piece::None;
+                        set_piece(aPosition.rep, coordinates{ 0u, 7u }, piece::BlackRook);
+                        set_piece(aPosition.rep, coordinates{ 3u, 7u }, piece::None);
                     }
                     break;
                 default:
@@ -340,7 +378,7 @@ namespace chess
             aPosition.moveHistory[moveCount - 2] == aPosition.moveHistory[moveCount - 4] &&
             aPosition.moveHistory[moveCount - 2] == aPosition.moveHistory[moveCount - 6];
     }
-        
+
     inline void move_piece(mailbox_position& aPosition, chess::move const& aMove)
     {
         auto& source = aPosition.rep[aMove.from.y][aMove.from.x];

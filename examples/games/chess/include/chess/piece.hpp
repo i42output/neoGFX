@@ -241,6 +241,11 @@ namespace chess
         return sPieceColors[static_cast<std::size_t>(p)];
     }
 
+    inline piece piece_opponent_color(piece p)
+    {
+        return piece_color(p) == piece::White ? piece::Black : piece::White;
+    }
+
     template <chess::piece Color>
     inline double piece_value(chess::piece piece);
 
