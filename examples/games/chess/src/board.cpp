@@ -34,6 +34,10 @@ namespace chess::gui
         iWhitePlayer{ nullptr },
         iBlackPlayer{ nullptr },
         iInRedo{ false },
+        iColorWhiteSquare{ 235, 236, 208 },
+        iColorBlackSquare{ 119, 149, 86 },
+        iColorWhitePiece{ ng::color::Gray90 },
+        iColorBlackPiece{ ng::color::Gray10 },
         iColorizePieces{ true },
         iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
         iSquareIdentification{ square_identification::None },
@@ -75,8 +79,8 @@ namespace chess::gui
                     auto const labelPadding = 2.0_dip * scale();
                     auto const labelRect = squareRect.deflated(ng::size{ labelPadding });
                     auto const pieceRect = piece_rect({ x, y });
-                    auto squareColor = (x + y) % 2 == 0 ? ng::color::Gray25 : ng::color::Burlywood;
-                    auto labelColor = (x + y) % 2 == 0 ? ng::color::Burlywood : ng::color::Gray25;
+                    auto squareColor = (x + y) % 2 == 0 ? iColorBlackSquare : iColorWhiteSquare;
+                    auto labelColor = (x + y) % 2 == 0 ? iColorWhiteSquare : iColorBlackSquare;
                     bool const colorizePieces = true;
                     switch (pass)
                     {
@@ -168,7 +172,7 @@ namespace chess::gui
                             auto const occupier = iPosition.rep[y][x];
                             if (occupier != piece::None)
                             {
-                                auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                auto pieceColor = piece_color(occupier) == piece::White ? iColorWhitePiece : iColorBlackPiece;
                                 bool useGradient = true;
                                 if (iFlashCheck && (iMoveValidator.in_check(iPosition.turn, iPosition) || iFlashCheck->first) && piece_type(occupier) == piece::King && piece_color(occupier) == static_cast<piece>(iPosition.turn))
                                 {
@@ -195,7 +199,7 @@ namespace chess::gui
                             {
                                 if (iColorizePieces)
                                 {
-                                    auto pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                    auto pieceColor = piece_color(occupier) == piece::White ? iColorWhitePiece : iColorBlackPiece;
                                     aGc.draw_texture(pieceRect, iPieceTextures.at(occupier), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                                 }
                                 else
@@ -211,7 +215,7 @@ namespace chess::gui
                             {
                                 if (iColorizePieces)
                                 {
-                                    auto const pieceColor = piece_color(occupier) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                                    auto const pieceColor = piece_color(occupier) == piece::White ? iColorWhitePiece : iColorBlackPiece;
                                     aGc.draw_texture(ng::rect{ animation->second, pieceRect.extents() }, iPieceTextures.at(occupier), ng::gradient{ pieceColor.lighter(0x80), pieceColor }, ng::shader_effect::Colorize);
                                 }
                                 else
@@ -444,7 +448,7 @@ namespace chess::gui
                         contextMenu.menu().item_at(1).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
                         contextMenu.menu().item_at(2).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
                         contextMenu.menu().item_at(3).as_widget().item_icon().set_fixed_size(ng::size{ 48.0_dip, 48.0_dip });
-                        auto const pieceColor = piece_color(movingPiece) == piece::White ? ng::color::Goldenrod : ng::color::Silver;
+                        auto const pieceColor = piece_color(movingPiece) == piece::White ? iColorWhitePiece : iColorBlackPiece;
                         contextMenu.menu().item_at(0).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });
                         contextMenu.menu().item_at(1).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });
                         contextMenu.menu().item_at(2).as_widget().item_icon().set_image_color(ng::gradient{ pieceColor.lighter(0x80), pieceColor });

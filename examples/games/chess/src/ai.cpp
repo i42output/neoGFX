@@ -174,6 +174,10 @@ namespace chess
                 { 
                     return m1.eval > m2.eval;
                 });
+            for (auto const& m : bestMoves)
+            {
+                std::cout << to_string(*m.move) << ": " << *m.eval << std::endl;
+            }
             auto const bestMoveEval = *bestMoves[0].eval;
             bool const bestMoveIsMate = bestMoveEval > std::numeric_limits<int64_t>::max();
             if (bestMoveIsMate)

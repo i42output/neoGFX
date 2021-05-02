@@ -34,8 +34,8 @@ namespace chess
     constexpr std::size_t STACK_NODE_STACK_CAPACITY = 32; // todo: what should this hard limit be?
     struct stack_node_stack_limit_exceeded : std::logic_error { stack_node_stack_limit_exceeded() : std::logic_error{ "chess::stack_node_stack_limit_exceeded" } {} };
 
-    template <player Player, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t startDepth, int32_t depth, double alpha, double beta)
+    template <player Player, player Turn, typename Representation>
+    double negascout(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t startDepth, int32_t depth, double alpha, double beta)
     {
         typedef game_tree_node stack_node_t;
         typedef std::vector<stack_node_t> stack_node_stack_t;
@@ -51,38 +51,37 @@ namespace chess
             stackNodeStack.resize(stackStackIndex + 1);
         }
         auto& use = (useStack ? stackNodeStack[stackStackIndex] : node);
-        use.eval = std::nullopt;
         if (use.children == std::nullopt)
         {
             use.children.emplace();
-            valid_moves<Player>(tables, position, use);
+            valid_moves<Turn>(tables, position, use);
         }
         else if (useStack)
-            valid_moves<Player>(tables, position, use);
+            valid_moves<Turn>(tables, position, use);
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
         {
-            return *(use.eval = eval<Representation, Player>{}(tables, position, static_cast<double>(startDepth - depth)).eval);
+            auto result = eval<Representation, Turn>{}(tables, position, static_cast<double>(startDepth - depth)).eval;
+            if constexpr (Player == Turn)
+                return result;
+            else
+                return -result;
         }
+        auto a = alpha;
+        auto b = beta;
         for (auto& child : validMoves)
         {
             move_piece(position, *child.move);
-            double score = 0.0;
-            if (&child == &validMoves[0])
-                score = -pvs<opponent_v<Player>>(tables, position, child, startDepth, depth - 1, -beta, -alpha);
-            else
-            {
-                score = -pvs<opponent_v<Player>>(tables, position, child, startDepth, depth - 1, -alpha - 1.0, -alpha);
-                if (alpha < score && score < beta)
-                    score = -pvs<opponent_v<Player>>(tables, position, child, startDepth, depth - 1, -beta, -score);
-            }
+            double t = -negascout<Player, opponent_v<Turn>>(tables, position, child, startDepth, depth - 1, -b, -a);
+            if (t > a && t < beta && &child != &validMoves[0] && depth > 1)
+                a = -negascout<Player, opponent_v<Turn>>(tables, position, child, startDepth, depth - 1, -beta, -t);
             undo(position);
-            alpha = std::max(alpha, score);
-            if (alpha >= beta)
-                break;
+            a = std::max(a, t);
+            if (a >= beta)
+                return a;
+            b = a + std::numeric_limits<double>::epsilon();
         }
-        use.eval = alpha;
-        return alpha;
+        return a;
     }
 
     template <typename Representation, player Player>
@@ -145,8 +144,7 @@ namespace chess
                 evalPosition = workItem.position;
                 auto& node = workItem.node;
                 move_piece(evalPosition, *node.move );
-                pvs<opponent_v<Player>>(iMoveTables, evalPosition, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
-                node.eval = -*node.eval;
+                node.eval = negascout<Player, opponent_v<Player>>(iMoveTables, evalPosition, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();
