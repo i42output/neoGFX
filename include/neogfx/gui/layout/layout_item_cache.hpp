@@ -98,7 +98,7 @@ namespace neogfx
         size fixed_size(optional_size const& aAvailableSpace = {}) const override;
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override;
         bool has_transformation() const override;
-        mat33 transformation(bool aCombineAncestorTransformations = false) const override;
+        mat33 const& transformation(bool aCombineAncestorTransformations = false) const override;
         void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override;
     public:
         bool has_padding() const override;
@@ -113,6 +113,7 @@ namespace neogfx
         void update_layout(bool aDeferLayout = true) override;
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
+        void invalidate_combined_transformation() override;
         void fix_weightings(bool aRecalculate = true) override;
     public:
         const i_layout_item& subject() const override;

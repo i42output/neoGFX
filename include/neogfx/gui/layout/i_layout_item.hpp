@@ -83,6 +83,7 @@ namespace neogfx
         virtual void update_layout(bool aDeferLayout = true) = 0;
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
+        virtual void invalidate_combined_transformation() = 0;
         virtual void fix_weightings(bool aRecalculate = true) = 0;
     public:
         virtual void layout_item_enabled(i_layout_item& aItem) = 0;

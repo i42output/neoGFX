@@ -291,7 +291,7 @@ namespace neogfx
         {
             return Transformation != std::nullopt;
         }
-        mat33 transformation(bool aCombineAncestorTransformations = false) const override
+        mat33 const& transformation(bool aCombineAncestorTransformations = false) const override
         {
             if (!aCombineAncestorTransformations)
             {
@@ -300,13 +300,20 @@ namespace neogfx
                 return mat33::identity();
             }
             else
-                return has_parent_layout_item() ? parent_layout_item().transformation(true) * transformation() : transformation();
+            {
+                if (iCombinedTransformation == std::nullopt)
+                {
+                    iCombinedTransformation = has_parent_layout_item() ? parent_layout_item().transformation(true) * transformation() : transformation();
+                }
+                return *iCombinedTransformation;
+            }
         }
         void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override
         {
             optional_mat33 newTransformation = (aTransformation != std::nullopt ? *aTransformation : optional_mat33{});
             if (Transformation != newTransformation)
             {
+                invalidate_combined_transformation();
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
                     service<debug::logger>() << typeid(*this).name() << "::set_transformation(" << aTransformation << ", " << aUpdateLayout << ")" << endl;
@@ -332,6 +339,31 @@ namespace neogfx
             }
         }
     public:
+        void invalidate_combined_transformation() override
+        {
+            iCombinedTransformation = std::nullopt;
+
+            auto& self = as_layout_item();
+            if (self.is_layout())
+            {
+                auto& layout = self.as_layout();
+                for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
+                {
+                    auto& item = layout.item_at(itemIndex);
+                    item.invalidate_combined_transformation();
+                }
+            }
+            else if (self.is_widget())
+            {
+                auto& widget = self.as_widget();
+                for (auto& child : widget.children())
+                {
+                    child->invalidate_combined_transformation();
+                }
+                if (widget.has_layout())
+                    widget.layout().invalidate_combined_transformation();
+            }
+        }
         void fix_weightings(bool aRecalculate = true) override
         {
 #ifdef NEOGFX_DEBUG
@@ -414,5 +446,6 @@ namespace neogfx
     private:
         string iId;
         ref_ptr<i_layout_item_cache> iCache;
+        mutable optional_mat33 iCombinedTransformation;
     };
 }

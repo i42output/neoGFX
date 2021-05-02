@@ -279,6 +279,12 @@ namespace neogfx
         subject().layout_as(adjustedPosition, adjustedSize);
     }
 
+    void layout_item_cache::invalidate_combined_transformation()
+    {
+        subject().invalidate_combined_transformation();
+        iCombinedTransformation.second = subject().transformation(true);
+    }
+
     void layout_item_cache::fix_weightings(bool aRecalculate)
     {
         subject().fix_weightings(aRecalculate);
@@ -529,7 +535,7 @@ namespace neogfx
         return subject().has_transformation();
     }
 
-    mat33 layout_item_cache::transformation(bool aCombineAncestorTransformations) const
+    mat33 const& layout_item_cache::transformation(bool aCombineAncestorTransformations) const
     {
         auto& attribute = !aCombineAncestorTransformations ? iTransformation : iCombinedTransformation;
 #ifdef NEOGFX_DEBUG
@@ -558,6 +564,7 @@ namespace neogfx
         subject().set_transformation(aTransformation, aUpdateLayout);
         if (aTransformation != std::nullopt)
             iTransformation.second = *aTransformation;
+        iCombinedTransformation.second = subject().transformation(true);
     }
 
     bool layout_item_cache::has_padding() const
