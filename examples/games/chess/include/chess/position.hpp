@@ -228,7 +228,8 @@ namespace chess
         return aStream;
     }
 
-    inline std::optional<move> undo(mailbox_position& aPosition)
+    template <typename Representation>
+    inline std::optional<move> undo(basic_position<Representation>& aPosition)
     {
         std::optional<move> lastMove;
         if (!aPosition.moveHistory.empty())
@@ -310,25 +311,20 @@ namespace chess
         return lastMove;
     }
 
-    inline std::optional<move> undo(bitboard_position& aPosition)
-    {
-        // todo
-        return {};
-    }
-
     template <typename Representation>
     struct move_tables;
     template <typename Representation>
     move_tables<Representation> generate_move_tables();
 
-    inline piece piece_at(mailbox_position const& aPosition, coordinates const& aCoordinates)
+    template <typename Representation>
+    inline piece piece_at(basic_position<Representation> const& aPosition, coordinates const& aCoordinates)
     {
-        auto const targetPiece = aPosition.rep[aCoordinates.y][aCoordinates.x];
+        auto const targetPiece = piece_at(aPosition.rep, aCoordinates);
         if (!aPosition.checkTest)
             return targetPiece;
         if (aCoordinates == aPosition.checkTest->from)
             return piece::None;
-        auto const movingPiece = !aPosition.checkTest->promoteTo ? aPosition.rep[aPosition.checkTest->from.y][aPosition.checkTest->from.x] : *aPosition.checkTest->promoteTo;
+        auto const movingPiece = !aPosition.checkTest->promoteTo ? piece_at(aPosition.rep, aPosition.checkTest->from) : *aPosition.checkTest->promoteTo;
         // en passant
         if (piece_type(targetPiece) == piece::Pawn && piece_type(movingPiece) == piece::Pawn &&
             piece_color(targetPiece) != piece_color(movingPiece))
@@ -352,12 +348,6 @@ namespace chess
         return targetPiece;
     }
 
-    inline piece piece_at(bitboard_position const& aPosition, coordinates const& aCoordinates)
-    {
-        // todo
-        return piece::None;
-    }
-
     template <typename Representation>
     inline coordinates king_position(basic_position<Representation> const& aPosition, piece aKing)
     {
@@ -379,14 +369,14 @@ namespace chess
             aPosition.moveHistory[moveCount - 2] == aPosition.moveHistory[moveCount - 6];
     }
 
-    inline void move_piece(mailbox_position& aPosition, chess::move const& aMove)
+    template <typename Representation>
+    inline void move_piece(basic_position<Representation>& aPosition, chess::move const& aMove)
     {
-        auto& source = aPosition.rep[aMove.from.y][aMove.from.x];
-        auto const movingPiece = source;
-        auto& destination = aPosition.rep[aMove.to.y][aMove.to.x];
-        auto const targetPiece = destination;
-        destination = (!aMove.promoteTo ? source : *aMove.promoteTo);
-        source = piece::None;
+        auto const movingPiece = piece_at(aPosition.rep, aMove.from);
+        auto const targetPiece = piece_at(aPosition.rep, aMove.to);
+        auto const destinationPiece = (!aMove.promoteTo ? movingPiece : *aMove.promoteTo);
+        set_piece(aPosition.rep, aMove.to, destinationPiece);
+        set_piece(aPosition.rep, aMove.from, piece::None);
         auto const currentMoveCount = aPosition.moveHistory.size();
         aPosition.moveHistory.emplace_back(aMove.from, aMove.to, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aPosition.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
         auto& newMove = aPosition.moveHistory.back();
@@ -394,21 +384,21 @@ namespace chess
         {
         case piece::WhiteKing:
         case piece::BlackKing:
-            aPosition.kings[as_color_cardinal<>(destination)] = aMove.to;
+            aPosition.kings[as_color_cardinal<>(destinationPiece)] = aMove.to;
             newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
             if (aMove.from.x - aMove.to.x == 2)
             {
                 // queenside castling
                 newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::QueensRook)] = true;
-                aPosition.rep[aMove.from.y][0u] = piece::None;
-                aPosition.rep[aMove.from.y][3u] = piece_color(movingPiece) | piece::Rook;
+                set_piece(aPosition.rep, aMove.from.with_x(0u), piece::None);
+                set_piece(aPosition.rep, aMove.from.with_x(3u), piece_color(movingPiece) | piece::Rook);
             }
             else if (aMove.to.x - aMove.from.x == 2)
             {
                 // kingside castling
                 newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::KingsRook)] = true;
-                aPosition.rep[aMove.from.y][7u] = piece::None;
-                aPosition.rep[aMove.from.y][5u] = piece_color(movingPiece) | piece::Rook;
+                set_piece(aPosition.rep, aMove.from.with_x(7u), piece::None);
+                set_piece(aPosition.rep, aMove.from.with_x(5u), piece_color(movingPiece) | piece::Rook);
             }
             break;
         case piece::WhiteRook:
@@ -427,18 +417,16 @@ namespace chess
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
             {
-                auto& targetPawn = aPosition.rep[4u][aMove.to.x];
-                newMove.capture = targetPawn;
-                targetPawn = piece::None;
+                newMove.capture = piece_at(aPosition.rep, aMove.to.with_y(4u));
+                set_piece(aPosition.rep, aMove.to.with_y(4u), piece::None);
             }
             break;
         case piece::BlackPawn:
             // en passant
             if (targetPiece == piece::None && aMove.from.x != aMove.to.x)
             {
-                auto& targetPawn = aPosition.rep[3u][aMove.to.x];
-                newMove.capture = targetPawn;
-                targetPawn = piece::None;
+                newMove.capture = piece_at(aPosition.rep, aMove.to.with_y(3u));
+                set_piece(aPosition.rep, aMove.to.with_y(3u), piece::None);
             }
             break;
         default:
@@ -464,11 +452,6 @@ namespace chess
             break;
         }
         aPosition.turn = next_player(aPosition.turn);
-    }
-
-    inline void move_piece(bitboard_position& aPosition, chess::move const& aMove)
-    {
-        // todo
     }
 
     struct invalid_uci_move : std::runtime_error { invalid_uci_move() : std::runtime_error{ "chess::invalid_uci_move" } {} };
