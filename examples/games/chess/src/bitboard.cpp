@@ -40,7 +40,7 @@ namespace chess
     template<>
     move_tables<bitboard_rep> generate_move_tables<bitboard_rep>()
     {
-        move_tables<bitboard_rep> result{};
+        move_tables<bitboard_rep> result{ generate_move_tables<mailbox_rep>() };
         // todo
         return result;
     }

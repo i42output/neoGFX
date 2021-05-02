@@ -19,12 +19,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <chess/primitives.hpp>
+#include <chess/mailbox.hpp>
 
 namespace chess
 {
     template<>
-    struct move_tables<bitboard_rep>
+    struct move_tables<bitboard_rep> : move_tables<mailbox_rep>
     {
+        typedef move_tables<mailbox_rep> base_type;
+
+        // todo
+
+        move_tables(base_type const& aMailboxMoveTables) :
+            base_type{ aMailboxMoveTables }
+        {
+        }
     };
 
     template <bool IntoCheckTest = false>
