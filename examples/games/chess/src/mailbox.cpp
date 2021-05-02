@@ -164,12 +164,12 @@ namespace chess
             eval_result result = {};
 
             double constexpr scaleMaterial = 100.0; // todo
-            double constexpr scalePromotion = 1.0; // todo
-            double constexpr scaleMobility = 1.0; // todo
-            double constexpr scaleAttack = 10.0; // todo
-            double constexpr scaleDefend = 1.0; // todo
-            double constexpr scaleCheck = 9.0; // todo
-            double constexpr scaleAttackAdvantage = 2.0; // todo
+            double constexpr scalePromotion = 0.01; // todo
+            double constexpr scaleMobility = 0.01; // todo
+            double constexpr scaleAttack = 0.04; // todo
+            double constexpr scaleDefend = 0.02; // todo
+            double constexpr scaleCheck = 1.0; // todo
+            double constexpr scaleAttackAdvantage = 0.04; // todo
             double const scaleMate = 1.0 / std::pow(10.0, aPly);
             double constexpr stalemate = 0.0;
             double material = 0.0;
