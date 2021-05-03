@@ -42,7 +42,7 @@ namespace chess
     public:
         typedef Representation representation_type;
     public:
-        ai();
+        ai(int32_t aPly = 4);
         ~ai();
     public:
         player_type type() const override;
@@ -60,6 +60,7 @@ namespace chess
     private:
         game_tree_node const* execute();
     private:
+        int32_t iPly;
         move_tables<representation_type> const iMoveTables;
         std::recursive_mutex iPositionMutex;
         basic_position<representation_type> iPosition;

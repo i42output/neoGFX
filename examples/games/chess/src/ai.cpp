@@ -21,14 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template <typename Representation, player Player>
-    ai<Representation, Player>::ai() :
+    ai<Representation, Player>::ai(int32_t aPly) :
         async_thread{ "chess::ai" },
+        iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },
         iPosition{ chess::setup_position<representation_type>() },
         iThreads{ std::max(1u, std::thread::hardware_concurrency()) }
     {
-        for (auto& aiThread : iThreads)
-            aiThread.set_ply_depth(4);
         start();
         Decided([&](move const& aBestMove)
         {
@@ -154,40 +153,48 @@ namespace chess
         // todo: opening book and/or sensible white first move...
         if (children.size() > 0u)
         {
-            std::vector<std::future<game_tree_node>> futures;
-            futures.reserve(children.size());
-            auto iterThread = iThreads.begin();
-            for (auto& child : children)
-            {
-                futures.emplace_back(iterThread->eval(iPosition, std::move(child)).get_future());
-                if (++iterThread == iThreads.end())
-                    iterThread = iThreads.begin();
-            }
-            lk = std::nullopt;
-            for (auto& t : iThreads)
-                t.start();
+            std::vector<game_tree_node> tryMoves{ std::move(children) };
             std::vector<game_tree_node> bestMoves;
-            for (auto& future : futures)
-                bestMoves.push_back(std::move(future.get()));
-            std::sort(bestMoves.begin(), bestMoves.end(),
-                [](auto const& m1, auto const& m2)
-                { 
-                    return m1.eval > m2.eval;
-                });
-            for (auto const& m : bestMoves)
+            for (int32_t ply = 1; ply <= iPly; ++ply)
             {
-                std::cout << to_string(*m.move) << ": " << *m.eval << std::endl;
+                if (tryMoves.empty())
+                    std::swap(tryMoves, bestMoves);
+                std::vector<std::future<game_tree_node>> futures;
+                futures.reserve(tryMoves.size());
+                auto iterThread = iThreads.begin();
+                for (auto& child : tryMoves)
+                {
+                    futures.emplace_back(iterThread->eval(iPosition, std::move(child), ply).get_future());
+                    if (++iterThread == iThreads.end())
+                        iterThread = iThreads.begin();
+                }
+                tryMoves.clear();
+                lk = std::nullopt;
+                for (auto& t : iThreads)
+                    t.start();
+                for (auto& future : futures)
+                    bestMoves.push_back(std::move(future.get()));
+                std::stable_sort(bestMoves.begin(), bestMoves.end(),
+                    [](auto const& m1, auto const& m2)
+                    {
+                        return m1.eval > m2.eval;
+                    });
+                for (auto const& m : bestMoves)
+                {
+                    std::cout << "(ply " << ply << ") " << to_string(*m.move) << ": " << *m.eval << std::endl;
+                }
             }
             auto const bestMoveEval = *bestMoves[0].eval;
-            bool const bestMoveIsMate = bestMoveEval > std::numeric_limits<int64_t>::max();
-            if (bestMoveIsMate)
+            constexpr double MATE_CUTOFF = 1.0e10;
+            bool const bestMoveIsMate = (bestMoveEval > MATE_CUTOFF);
+            if (bestMoveIsMate || true)
             {
                 iRootNode = std::move(bestMoves[0]);
                 return &*iRootNode;
             }
             auto const decimator = 0.125 * (iPosition.moveHistory.size() + 1); // todo: involve difficulty level?
             auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
-                [bestMoveEval, bestMoveIsMate, decimator](auto const& m)
+                [bestMoveEval, decimator](auto const& m)
                 {
                     return static_cast<int64_t>(*m.eval * decimator) != static_cast<int64_t>(bestMoveEval * decimator);
                 });

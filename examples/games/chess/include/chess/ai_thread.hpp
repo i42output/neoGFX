@@ -38,14 +38,14 @@ namespace chess
         {
             position_type position;
             game_tree_node node;
+            int32_t ply;
             std::promise<game_tree_node> result;
         };
     public:
         ai_thread();
         ~ai_thread();
     public:
-        void set_ply_depth(int32_t aPlyDepth);
-        std::promise<game_tree_node>& eval(position_type const& aPosition, game_tree_node&& aNode);
+        std::promise<game_tree_node>& eval(position_type const& aPosition, game_tree_node&& aNode, int32_t aPly);
         void start();
     private:
         void process();
@@ -55,7 +55,6 @@ namespace chess
         std::mutex iMutex;
         std::condition_variable iSignal;
         std::thread iThread;
-        int32_t iPlyDepth = 0;
         bool iFinished = false;
     };
 }

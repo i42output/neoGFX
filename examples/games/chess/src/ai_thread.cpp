@@ -35,12 +35,12 @@ namespace chess
     struct stack_node_stack_limit_exceeded : std::logic_error { stack_node_stack_limit_exceeded() : std::logic_error{ "chess::stack_node_stack_limit_exceeded" } {} };
 
     template <player Player, player Turn, typename Representation>
-    double negascout(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t startDepth, int32_t depth, double alpha, double beta)
+    double negascout(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha, double beta)
     {
         typedef game_tree_node stack_node_t;
         typedef std::vector<stack_node_t> stack_node_stack_t;
         thread_local stack_node_stack_t stackNodeStack;
-        auto const stackUsageDepth = startDepth - depth;
+        auto const stackUsageDepth = ply - depth;
         bool const useStack = stackUsageDepth >= USE_STACK_DEPTH;
         auto const stackStackIndex = stackUsageDepth - USE_STACK_DEPTH;
         if (useStack && stackNodeStack.size() <= stackStackIndex)
@@ -61,20 +61,17 @@ namespace chess
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
         {
-            auto result = eval<Representation, Turn>{}(tables, position, static_cast<double>(startDepth - depth)).eval;
-            if constexpr (Player == Turn)
-                return result;
-            else
-                return -result;
+            auto result = eval<Representation, Turn>{}(tables, position, static_cast<double>(ply - depth)).eval;
+            return result;
         }
         auto a = alpha;
         auto b = beta;
         for (auto& child : validMoves)
         {
             move_piece(position, *child.move);
-            double t = -negascout<Player, opponent_v<Turn>>(tables, position, child, startDepth, depth - 1, -b, -a);
+            double t = -negascout<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -b, -a);
             if (t > a && t < beta && &child != &validMoves[0] && depth > 1)
-                a = -negascout<Player, opponent_v<Turn>>(tables, position, child, startDepth, depth - 1, -beta, -t);
+                a = -negascout<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -t);
             undo(position);
             a = std::max(a, t);
             if (a >= beta)
@@ -103,17 +100,11 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    void ai_thread<Representation, Player>::set_ply_depth(int32_t aPlyDepth)
-    {
-        iPlyDepth = aPlyDepth;
-    }
-        
-    template <typename Representation, player Player>
-    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(position_type const& aPosition, game_tree_node&& aNode)
+    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(position_type const& aPosition, game_tree_node&& aNode, int32_t aPly)
     {
         {
             std::lock_guard<std::mutex> lk{ iMutex };
-            iQueue.emplace_back(aPosition, std::move(aNode));
+            iQueue.emplace_back(aPosition, std::move(aNode), aPly);
         }
         return iQueue.back().result;
     }
@@ -144,7 +135,8 @@ namespace chess
                 evalPosition = workItem.position;
                 auto& node = workItem.node;
                 move_piece(evalPosition, *node.move );
-                node.eval = negascout<Player, opponent_v<Player>>(iMoveTables, evalPosition, node, iPlyDepth, iPlyDepth, -std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity());
+                double const signCorrection = (workItem.ply % 2 == 1 ? -1.0 : 1.0);
+                node.eval = signCorrection * negascout<Player, opponent_v<Player>>(iMoveTables, evalPosition, node, workItem.ply, workItem.ply, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();
