@@ -60,15 +60,13 @@ namespace chess
             valid_moves<Turn>(tables, position, use);
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
-        {
-            auto result = eval<Representation, Turn>{}(tables, position, static_cast<double>(ply - depth)).eval;
-            return result;
-        }
+            return eval<Representation, Turn>{}(tables, position, static_cast<double>(ply - depth)).eval;
         auto a = alpha;
         auto b = beta;
         for (auto& child : validMoves)
         {
-            move_piece(position, *child.move);
+            auto const& move = *child.move;
+            move_piece(position, move);
             double t = -negascout<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -b, -a);
             if (t > a && t < beta && &child != &validMoves[0] && depth > 1)
                 a = -negascout<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -t);
@@ -76,20 +74,18 @@ namespace chess
             a = std::max(a, t);
             if (a >= beta)
                 return a;
-            b = a + std::numeric_limits<double>::epsilon();
+            auto const EPSILON = 0.000001;
+            b = a + EPSILON;
         }
         return a;
     }
 
-    template <player Player, player Turn, typename Representation>
+    template <player Player, typename Representation>
     double search(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply)
     {
         double constexpr alpha = -std::numeric_limits<double>::max();
         double constexpr beta = std::numeric_limits<double>::max();
-        auto result = negascout<Player, Turn, Representation>(tables, position, node, ply, ply, alpha, beta);
-        if (ply % 2 == 0)
-            result = -result;
-        return result;
+        return -negascout<Player, opponent_v<Player>, Representation>(tables, position, node, ply, ply, alpha, beta);
     }
         
     template <typename Representation, player Player>
@@ -146,7 +142,7 @@ namespace chess
                 evalPosition = workItem.position;
                 auto& node = workItem.node;
                 move_piece(evalPosition, *node.move );
-                node.eval = -search<Player, opponent_v<Player>>(iMoveTables, evalPosition, node, workItem.ply);
+                node.eval = search<Player>(iMoveTables, evalPosition, node, workItem.ply);
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();
