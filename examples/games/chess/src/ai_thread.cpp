@@ -81,6 +81,17 @@ namespace chess
         return a;
     }
 
+    template <player Player, player Turn, typename Representation>
+    double search(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply)
+    {
+        double constexpr alpha = -std::numeric_limits<double>::max();
+        double constexpr beta = std::numeric_limits<double>::max();
+        auto result = negascout<Player, Turn, Representation>(tables, position, node, ply, ply, alpha, beta);
+        if (ply % 2 == 0)
+            result = -result;
+        return result;
+    }
+        
     template <typename Representation, player Player>
     ai_thread<Representation, Player>::ai_thread() :
         iMoveTables{ generate_move_tables<representation_type>() },
@@ -135,8 +146,7 @@ namespace chess
                 evalPosition = workItem.position;
                 auto& node = workItem.node;
                 move_piece(evalPosition, *node.move );
-                double const signCorrection = (workItem.ply % 2 == 1 ? -1.0 : 1.0);
-                node.eval = signCorrection * negascout<Player, opponent_v<Player>>(iMoveTables, evalPosition, node, workItem.ply, workItem.ply, -std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+                node.eval = -search<Player, opponent_v<Player>>(iMoveTables, evalPosition, node, workItem.ply);
                 workItem.result.set_value(std::move(node));
             }
             iQueue.clear();
