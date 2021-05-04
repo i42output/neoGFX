@@ -191,35 +191,26 @@ namespace chess
         // todo: opening book and/or sensible white first move...
         if (children.size() > 0u)
         {
-            std::vector<game_tree_node> tryMoves{ std::move(children) };
             std::vector<game_tree_node> bestMoves;
-            for (int32_t ply = 1; ply <= iPly; ++ply)
+            std::vector<std::future<game_tree_node>> futures;
+            futures.reserve(children.size());
+            auto iterThread = iThreads.begin();
+            for (auto& child : children)
             {
-                if (tryMoves.empty())
-                    std::swap(tryMoves, bestMoves);
-                std::vector<std::future<game_tree_node>> futures;
-                futures.reserve(tryMoves.size());
-                auto iterThread = iThreads.begin();
-                for (auto& child : tryMoves)
-                {
-                    futures.emplace_back(iterThread->eval(iPosition, std::move(child), ply).get_future());
-                    if (++iterThread == iThreads.end())
-                        iterThread = iThreads.begin();
-                }
-                tryMoves.clear();
-                lk = std::nullopt;
-                for (auto& t : iThreads)
-                    t.start();
-                for (auto& future : futures)
-                    bestMoves.push_back(std::move(future.get()));
-                std::stable_sort(bestMoves.begin(), bestMoves.end(),
-                    [](auto const& m1, auto const& m2)
-                    {
-                        return m1.eval > m2.eval;
-                    });
-
-                // debug_moves(bestMoves, ply);
+                futures.emplace_back(iterThread->eval(iPosition, std::move(child), iPly).get_future());
+                if (++iterThread == iThreads.end())
+                    iterThread = iThreads.begin();
             }
+            lk = std::nullopt;
+            for (auto& t : iThreads)
+                t.start();
+            for (auto& future : futures)
+                bestMoves.push_back(std::move(future.get()));
+            std::stable_sort(bestMoves.begin(), bestMoves.end(),
+                [](auto const& m1, auto const& m2)
+                {
+                    return m1.eval > m2.eval;
+                });
             auto const bestMoveEval = *bestMoves[0].eval;
             constexpr double MATE_CUTOFF = 1.0e10;
             bool const bestMoveIsMate = (bestMoveEval > MATE_CUTOFF);
