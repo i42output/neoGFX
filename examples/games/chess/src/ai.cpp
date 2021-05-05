@@ -20,6 +20,42 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    namespace
+    {
+        template <typename T>
+        void debug_moves(T const& moves, int ply, bool extra = false)
+        {
+            std::vector<std::pair<const game_tree_node*, const game_tree_node*>> debug;
+            for (auto const& m : moves)
+                debug.push_back(std::make_pair(&m, &m));
+
+            std::sort(debug.begin(), debug.end(),
+                [](auto const& d1, auto const& d2)
+            {
+                return std::forward_as_tuple(d1.second->move->from, d1.second->move->to) <
+                    std::forward_as_tuple(d2.second->move->from, d2.second->move->to);
+            });
+
+            auto di = debug.begin();
+            for (auto const& m : moves)
+                (di++)->first = &m;
+
+            for (auto const& d : debug)
+            {
+                std::cout << "(ply " << ply << "): " << to_string(*d.first->move) << ":  " << std::setw(12) << *d.first->eval;
+                std::cout << "  " << to_string(*d.second->move) << ": " << std::setw(12) << *d.second->eval;
+                std::cout << std::endl;
+                if (extra)
+                {
+                    for (auto const& child : *d.first->children)
+                    {
+                        std::cout << "\t" << to_string(*child.move) << ":  " << std::setw(12) << *child.eval << std::endl;
+                    }
+                }
+            }
+        }
+    }
+
     template <typename Representation, player Player>
     ai<Representation, Player>::ai(int32_t aPly) :
         async_thread{ "chess::ai" },
@@ -121,42 +157,6 @@ namespace chess
         return didWork;
     }
 
-    namespace
-    {
-        template <typename T>
-        void debug_moves(T const& moves, bool extra = false)
-        {
-            std::vector<std::pair<const game_tree_node*, const game_tree_node*>> debug;
-            for (auto const& m : moves)
-                debug.push_back(std::make_pair(&m, &m));
-            
-            std::sort(debug.begin(), debug.end(),
-                [](auto const& d1, auto const& d2)
-            {
-                return std::forward_as_tuple(d1.second->move->from, d1.second->move->to) <
-                    std::forward_as_tuple(d2.second->move->from, d2.second->move->to);
-            });
-
-            auto di = debug.begin();
-            for (auto const& m : moves)
-                (di++)->first = &m;
-
-            for (auto const& d : debug)
-            {
-                std::cout << to_string(*d.first->move) << ":  " << std::setw(12) << *d.first->eval;
-                std::cout << "  " << to_string(*d.second->move) << ": " << std::setw(12) << *d.second->eval;
-                std::cout << std::endl;
-                if (extra)
-                {
-                    for (auto const& child : *d.first->children)
-                    {
-                        std::cout << "\t" << to_string(*child.move) << ":  " << std::setw(12) << *child.eval << std::endl;
-                    }
-                }
-            }
-        }
-    }
-
     template <typename Representation, player Player>
     game_tree_node const* ai<Representation, Player>::execute()
     {
@@ -213,7 +213,7 @@ namespace chess
                     return m1.eval > m2.eval;
                 });
 
-            debug_moves(bestMoves);
+            debug_moves(bestMoves, iPly);
 
             auto const bestMoveEval = *bestMoves[0].eval;
             constexpr double MATE_CUTOFF = 1.0e10;
