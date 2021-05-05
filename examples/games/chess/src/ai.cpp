@@ -25,9 +25,10 @@ namespace chess
         async_thread{ "chess::ai" },
         iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },
-        iPosition{ chess::setup_position<representation_type>() },
-        iThreads{ std::max(1u, std::thread::hardware_concurrency()) }
+        iPosition{ chess::setup_position<representation_type>() }
     {
+        for (unsigned int t = 1u; t <= std::thread::hardware_concurrency(); ++t)
+            iThreads.emplace_back(iPly);
         start();
         Decided([&](move const& aBestMove)
         {
@@ -123,28 +124,26 @@ namespace chess
     namespace
     {
         template <typename T>
-        void debug_moves(T const& moves, int32_t ply, bool extra = false)
+        void debug_moves(T const& moves, bool extra = false)
         {
             std::vector<std::pair<const game_tree_node*, const game_tree_node*>> debug;
             for (auto const& m : moves)
-            {
                 debug.push_back(std::make_pair(&m, &m));
-            }
+            
             std::sort(debug.begin(), debug.end(),
                 [](auto const& d1, auto const& d2)
             {
                 return std::forward_as_tuple(d1.second->move->from, d1.second->move->to) <
                     std::forward_as_tuple(d2.second->move->from, d2.second->move->to);
             });
+
             auto di = debug.begin();
             for (auto const& m : moves)
-            {
                 (di++)->first = &m;
-            }
 
             for (auto const& d : debug)
             {
-                std::cout << "(ply " << ply << ") " << to_string(*d.first->move) << ":  " << std::setw(12) << *d.first->eval;
+                std::cout << to_string(*d.first->move) << ":  " << std::setw(12) << *d.first->eval;
                 std::cout << "  " << to_string(*d.second->move) << ": " << std::setw(12) << *d.second->eval;
                 std::cout << std::endl;
                 if (extra)
@@ -197,20 +196,25 @@ namespace chess
             auto iterThread = iThreads.begin();
             for (auto& child : children)
             {
-                futures.emplace_back(iterThread->eval(iPosition, std::move(child), iPly).get_future());
+                futures.emplace_back(iterThread->eval(iPosition, std::move(child)).get_future());
                 if (++iterThread == iThreads.end())
                     iterThread = iThreads.begin();
             }
+            
             lk = std::nullopt;
             for (auto& t : iThreads)
                 t.start();
+            
             for (auto& future : futures)
                 bestMoves.push_back(std::move(future.get()));
-            std::stable_sort(bestMoves.begin(), bestMoves.end(),
+            std::sort(bestMoves.begin(), bestMoves.end(),
                 [](auto const& m1, auto const& m2)
                 {
                     return m1.eval > m2.eval;
                 });
+
+            debug_moves(bestMoves);
+
             auto const bestMoveEval = *bestMoves[0].eval;
             constexpr double MATE_CUTOFF = 1.0e10;
             bool const bestMoveIsMate = (bestMoveEval > MATE_CUTOFF);

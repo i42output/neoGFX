@@ -137,6 +137,11 @@ namespace chess
         return static_cast<T>(sPieceColorCardinals[static_cast<std::size_t>(p)]);
     }
 
+    inline bool operator<(piece lhs, piece rhs)
+    {
+        return static_cast<uint8_t>(lhs) < static_cast<uint8_t>(rhs);
+    }
+
     inline piece operator&(piece lhs, piece rhs)
     {
         return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));

@@ -64,7 +64,7 @@ namespace chess
         move_tables<representation_type> const iMoveTables;
         std::recursive_mutex iPositionMutex;
         basic_position<representation_type> iPosition;
-        std::vector<ai_thread<Representation, Player>> iThreads;
+        std::list<ai_thread<Representation, Player>> iThreads;
         std::mutex iSignalMutex;
         std::condition_variable iSignal;
         std::atomic<bool> iPlaying = false;

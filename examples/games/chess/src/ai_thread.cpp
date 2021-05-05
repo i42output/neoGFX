@@ -81,15 +81,35 @@ namespace chess
     }
 
     template <player Player, typename Representation>
-    double search(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply)
+    void search(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply)
     {
+        ply = 2;
+
         double constexpr alpha = -std::numeric_limits<double>::max();
         double constexpr beta = std::numeric_limits<double>::max();
-        return -negascout<Player, opponent_v<Player>, Representation>(tables, position, node, ply, ply, alpha, beta);
+        // iterative deepening
+        for (int32_t plyIteration = 1; plyIteration <= ply; ++plyIteration)
+        {
+            auto& candidateMoves = *node.children;
+            for (auto& candidateMove : candidateMoves)
+            {
+                move_piece(position, *candidateMove.move);
+                candidateMove.eval = -negascout<Player, opponent_v<Player>, Representation>(tables, position, candidateMove, plyIteration, plyIteration, alpha, beta);
+                undo(position);
+                if (candidateMove.children != std::nullopt)
+                    std::stable_sort(candidateMove.children->begin(), candidateMove.children->end(),
+                        [](auto const& m1, auto const& m2)
+                        {
+                            return m1.eval > m2.eval;
+                        });
+            }
+        }
     }
+            
         
     template <typename Representation, player Player>
-    ai_thread<Representation, Player>::ai_thread() :
+    ai_thread<Representation, Player>::ai_thread(int32_t aPly) :
+        iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },
         iThread{ [&]() { process(); } }
     {
@@ -107,11 +127,11 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(position_type const& aPosition, game_tree_node&& aNode, int32_t aPly)
+    std::promise<game_tree_node>& ai_thread<Representation, Player>::eval(position_type const& aPosition, game_tree_node&& aNode)
     {
         {
             std::lock_guard<std::mutex> lk{ iMutex };
-            iQueue.emplace_back(aPosition, std::move(aNode), aPly);
+            iQueue.emplace_back(aPosition, *aNode.move, std::move(aNode));
         }
         return iQueue.back().result;
     }
@@ -134,17 +154,38 @@ namespace chess
         {
             std::unique_lock<std::mutex> lk{ iMutex };
             iSignal.wait(lk, [&]() { return iFinished || !iQueue.empty(); });
+            
             if (iFinished)
                 return;
+
+            std::map<position_type, game_tree_node> work;
+            
             for (auto& workItem : iQueue)
             {
-                auto& evalPosition = eval_board<Representation>();
-                evalPosition = workItem.position;
-                auto& node = workItem.node;
-                move_piece(evalPosition, *node.move );
-                node.eval = search<Player>(iMoveTables, evalPosition, node, workItem.ply);
-                workItem.result.set_value(std::move(node));
+                if (work[workItem.position].children == std::nullopt)
+                    work[workItem.position].children.emplace();
+                work[workItem.position].children->push_back(std::move(workItem.node));
             }
+            
+            auto& evalPosition = eval_board<Representation>();
+            
+            for (auto& workGroup : work)
+            {
+                evalPosition = workGroup.first;
+                auto& node = workGroup.second;
+                search<Player>(iMoveTables, evalPosition, node, iPly);
+
+                for (auto& workItem : iQueue)
+                {
+                    if (workGroup.first == workItem.position)
+                    {
+                        for (auto& childNode : *node.children)
+                            if (workItem.move == childNode.move)
+                                workItem.result.set_value(std::move(childNode));
+                    }
+                }
+            }
+            
             iQueue.clear();
         }
     }

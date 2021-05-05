@@ -37,19 +37,20 @@ namespace chess
         struct work_item
         {
             position_type position;
+            move move;
             game_tree_node node;
-            int32_t ply;
             std::promise<game_tree_node> result;
         };
     public:
-        ai_thread();
+        ai_thread(int32_t aPly);
         ~ai_thread();
     public:
-        std::promise<game_tree_node>& eval(position_type const& aPosition, game_tree_node&& aNode, int32_t aPly);
+        std::promise<game_tree_node>& eval(position_type const& aPosition, game_tree_node&& aNode);
         void start();
     private:
         void process();
     private:
+        int32_t iPly;
         move_tables<representation_type> const iMoveTables;
         std::deque<work_item> iQueue;
         std::mutex iMutex;

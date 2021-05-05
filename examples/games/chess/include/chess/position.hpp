@@ -63,6 +63,12 @@ namespace chess
         return !(lhs == rhs);
     }
 
+    inline bool operator<(move const& lhs, move const& rhs)
+    {
+        // todo: consider castling state?
+        return std::forward_as_tuple(lhs.from, lhs.to, lhs.promoteTo) < std::forward_as_tuple(rhs.from, rhs.to, rhs.promoteTo);
+    }
+
     inline std::string to_string(move const& aMove)
     {
         return { static_cast<char>('a' + aMove.from.x), static_cast<char>('1' + aMove.from.y), static_cast<char>('a' + aMove.to.x), static_cast<char>('1' + aMove.to.y) };
@@ -86,6 +92,8 @@ namespace chess
         std::array<bitboard, PIECE_COLORS> byColor;
         std::array<bitboard, PIECES> byPiece;
         std::array<piece, 64u> bySquare;
+
+        std::strong_ordering operator<=>(bitboard_rep const&) const = default;
     };
 
     inline piece piece_at(mailbox_rep const& aRep, coordinates const& aCoordinates)
@@ -132,6 +140,8 @@ namespace chess
         player turn;
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
+
+        std::strong_ordering operator<=>(basic_position<Representation> const&) const = default;
     };
 
     using mailbox_position = basic_position<mailbox_rep>;
@@ -151,6 +161,13 @@ namespace chess
     inline bool operator!=(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
     {
         return !(lhs == rhs);
+    }
+
+    template <typename Representation>
+    inline bool operator<(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
+    {
+        return std::forward_as_tuple(lhs.rep, lhs.kings, lhs.turn, lhs.moveHistory) <
+            std::forward_as_tuple(rhs.rep, rhs.kings, rhs.turn, rhs.moveHistory);
     }
 
     using position = mailbox_position;
