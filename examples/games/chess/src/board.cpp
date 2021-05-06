@@ -745,6 +745,18 @@ namespace chess::gui
     void board::animate()
     {
         iAnimator.again();
+
+        double nodesPerSecond = static_cast<double>(white_player().type() == player_type::AI ? white_player().nodes_per_second() : black_player().nodes_per_second());
+        std::ostringstream oss;
+        oss << std::setprecision(2) << std::fixed;
+        if (nodesPerSecond < 1000.0)
+            oss << nodesPerSecond << " N/s";
+        else if (nodesPerSecond < 1000000.0)
+            oss << nodesPerSecond / 1000.0 << " kN/s";
+        else
+            oss << nodesPerSecond / 1000000.0 << " MN/s";
+        root().status_bar().set_message(ng::string{ oss.str() });
+
         if (iLastSelectionEventTime || !iAnimations.empty() || iFlashCheck)
         {
             if (!iAnimations.empty())

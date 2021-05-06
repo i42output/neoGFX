@@ -66,4 +66,9 @@ namespace chess
     void human::setup(mailbox_position const& aSetup)
     {
     }
+
+    uint64_t human::nodes_per_second() const
+    {
+        return 0;
+    }
 }

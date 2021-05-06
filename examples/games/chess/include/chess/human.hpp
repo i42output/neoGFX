@@ -40,6 +40,8 @@ namespace chess
         bool playing() const override;
         void undo() override;
         void setup(mailbox_position const& aSetup) override;
+    public:
+        uint64_t nodes_per_second() const override;
     private:
         ng::sink iSink;
         chess::player iPlayer;

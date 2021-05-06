@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    extern std::atomic<uint64_t> sNodeCounter;
+
     namespace
     {
         template <typename T>
@@ -99,7 +101,7 @@ namespace chess
     {
         iSink = aOpponent.moved([&](move const& aMove)
         {
-            std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
+            std::unique_lock lk{ iMutex };
             make(iPosition, aMove);
         });
     }
@@ -123,7 +125,7 @@ namespace chess
     template <typename Representation, player Player>
     bool ai<Representation, Player>::play(move const& aMove)
     {
-        std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
+        std::unique_lock lk{ iMutex };
         make(iPosition, aMove);
         Moved.trigger(aMove);
         return true;
@@ -160,7 +162,7 @@ namespace chess
     template <typename Representation, player Player>
     game_tree_node const* ai<Representation, Player>::execute()
     {
-        std::optional<std::lock_guard<std::recursive_mutex>> lk{ iPositionMutex };
+        std::unique_lock lk{ iMutex };
         if (!iRootNode)
         {
             if (iPosition.moveHistory.empty())
@@ -201,12 +203,23 @@ namespace chess
                     iterThread = iThreads.begin();
             }
             
-            lk = std::nullopt;
+            sNodeCounter = 0;
+            iNodesPerSecond = std::nullopt;
+            iStartTime = std::chrono::steady_clock::now();
+
+            lk.unlock();
+
             for (auto& t : iThreads)
                 t.start();
             
             for (auto& future : futures)
                 bestMoves.push_back(std::move(future.get()));
+
+            lk.lock();
+            iNodesPerSecond = nodes_per_second();
+            iStartTime = std::nullopt;
+            lk.unlock();
+
             std::sort(bestMoves.begin(), bestMoves.end(),
                 [](auto const& m1, auto const& m2)
                 {
@@ -249,12 +262,24 @@ namespace chess
     {
         if constexpr (std::is_same_v<representation_type, mailbox_rep>)
         {
-            std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
+            std::unique_lock lk{ iMutex };
             iRootNode = std::nullopt;
             iPosition = aSetup;
         }
         else
             ; // todo (convert to bitboard_rep representation)
+    }
+
+    template <typename Representation, player Player>
+    uint64_t ai<Representation, Player>::nodes_per_second() const
+    {
+        std::unique_lock lk{ iMutex };
+        if (iNodesPerSecond)
+            return *iNodesPerSecond;
+        else if (iStartTime)
+            return static_cast<uint64_t>(sNodeCounter / std::chrono::duration<double>(std::chrono::steady_clock::now() - *iStartTime).count());
+        else
+            return 0;
     }
 
     template class ai<mailbox_rep, player::White>;

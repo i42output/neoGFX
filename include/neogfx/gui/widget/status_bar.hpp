@@ -51,7 +51,6 @@ namespace neogfx
         {
             return static_cast<style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
         }
-        typedef uint32_t widget_index;
     private:
         class separator : public widget<>
         {
@@ -88,18 +87,18 @@ namespace neogfx
     public:
         status_bar(i_standard_layout_container& aContainer, style aStyle = style::DisplayMessage | style::DisplayKeyboardLocks | style::DisplaySizeGrip);
     public:
-        bool have_message() const;
-        i_string const& message() const;
-        void set_message(std::string const& aMessage);
-        void clear_message();
-        void add_normal_widget(i_widget& aWidget);
-        void add_normal_widget_at(widget_index aPosition, i_widget& aWidget);
-        void add_normal_widget(i_ref_ptr<i_widget> const &aWidget);
-        void add_normal_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget);
-        void add_permanent_widget(i_widget& aWidget);
-        void add_permanent_widget_at(widget_index aPosition, i_widget& aWidget);
-        void add_permanent_widget(i_ref_ptr<i_widget> const& aWidget);
-        void add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget);
+        bool have_message() const override;
+        i_string const& message() const override;
+        void set_message(i_string const& aMessage) override;
+        void clear_message() override;
+        void add_normal_widget(i_widget& aWidget) override;
+        void add_normal_widget_at(widget_index aPosition, i_widget& aWidget) override;
+        void add_normal_widget(i_ref_ptr<i_widget> const &aWidget) override;
+        void add_normal_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget) override;
+        void add_permanent_widget(i_widget& aWidget) override;
+        void add_permanent_widget_at(widget_index aPosition, i_widget& aWidget) override;
+        void add_permanent_widget(i_ref_ptr<i_widget> const& aWidget) override;
+        void add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget) override;
     public:
         i_layout& normal_layout();
         i_layout& permanent_layout();

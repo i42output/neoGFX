@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <vector>
 #include <random>
+#include <chrono>
 
 #include <neogfx/core/async_thread.hpp>
 #include <chess/i_player.hpp>
@@ -55,6 +56,8 @@ namespace chess
         bool playing() const override;
         void undo() override;
         void setup(mailbox_position const& aSetup) override;
+    public:
+        uint64_t nodes_per_second() const override;
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
@@ -62,7 +65,7 @@ namespace chess
     private:
         int32_t iPly;
         move_tables<representation_type> const iMoveTables;
-        std::recursive_mutex iPositionMutex;
+        mutable std::recursive_mutex iMutex;
         basic_position<representation_type> iPosition;
         std::list<ai_thread<Representation, Player>> iThreads;
         std::mutex iSignalMutex;
@@ -71,6 +74,8 @@ namespace chess
         std::atomic<bool> iFinished = false;
         std::optional<game_tree_node> iRootNode;
         ng::sink iSink;
+        std::optional<std::chrono::steady_clock::time_point> iStartTime;
+        std::optional<uint64_t> iNodesPerSecond;
     };
 
     extern template class ai<mailbox_rep, player::White>;

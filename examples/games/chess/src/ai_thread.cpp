@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
+    std::atomic<uint64_t> sNodeCounter;
+
     template <typename Representation>
     inline basic_position<Representation>& eval_board()
     {
@@ -43,6 +45,8 @@ namespace chess
     template <player Player, player Turn, typename Representation>
     double minimax(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth)
     {
+        ++sNodeCounter;
+
         typedef game_tree_node stack_node_t;
         typedef std::vector<stack_node_t> stack_node_stack_t;
         thread_local stack_node_stack_t stackNodeStack;
@@ -96,6 +100,8 @@ namespace chess
     template <player Player, player Turn, typename Representation>
     double quiesce(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
     {
+        ++sNodeCounter;
+
         double stand_pat = eval<Representation, opponent_v<Player>>{}(tables, position, static_cast<double>(ply - depth)).eval;
         if (depth == MAX_QUIESCE)
             return stand_pat;
@@ -107,6 +113,7 @@ namespace chess
             node.children.emplace();
         valid_moves<Turn>(tables, position, node);
         auto& validMoves = *node.children;
+        // todo: sort by capture value may improve performance?
         for (auto& child : validMoves)
         {
             auto const& move = *child.move;
@@ -126,6 +133,8 @@ namespace chess
     template <player Player, player Turn, typename Representation>
     double pvs(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
     {
+        ++sNodeCounter;
+
         typedef game_tree_node stack_node_t;
         typedef std::vector<stack_node_t> stack_node_stack_t;
         thread_local stack_node_stack_t stackNodeStack;

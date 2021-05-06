@@ -27,6 +27,7 @@ namespace neogfx
     {
     public:
         typedef i_status_bar abstract_type;
+        typedef uint32_t widget_index;
     public:
         virtual ~i_status_bar() = default;
     public:
@@ -34,5 +35,18 @@ namespace neogfx
         virtual i_widget& as_widget() = 0;
     public:
         virtual const i_widget& size_grip() const = 0;
+    public:
+        virtual bool have_message() const = 0;
+        virtual i_string const& message() const = 0;
+        virtual void set_message(i_string const& aMessage) = 0;
+        virtual void clear_message() = 0;
+        virtual void add_normal_widget(i_widget& aWidget) = 0;
+        virtual void add_normal_widget_at(widget_index aPosition, i_widget& aWidget) = 0;
+        virtual void add_normal_widget(i_ref_ptr<i_widget> const& aWidget) = 0;
+        virtual void add_normal_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget) = 0;
+        virtual void add_permanent_widget(i_widget& aWidget) = 0;
+        virtual void add_permanent_widget_at(widget_index aPosition, i_widget& aWidget) = 0;
+        virtual void add_permanent_widget(i_ref_ptr<i_widget> const& aWidget) = 0;
+        virtual void add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget) = 0;
     };
 }

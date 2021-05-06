@@ -88,7 +88,6 @@ int main(int argc, char* argv[])
 
         window.SizeChanged(update_toolbar);
 
-
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
         chess::default_player_factory playerFactory;
@@ -109,6 +108,8 @@ int main(int argc, char* argv[])
         redoMove.Triggered([&]() { board.redo(); });
         play.Triggered([&]() { board.play(); });
         stop.Triggered([&]() { board.stop(); });
+
+        ng::status_bar statusBar{ window };
 
         return app.exec();
     }

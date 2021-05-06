@@ -154,16 +154,22 @@ namespace neogfx
         throw no_message();
     }
 
-    void status_bar::set_message(std::string const& aMessage)
+    void status_bar::set_message(i_string const& aMessage)
     {
-        iMessage = aMessage;
-        update_widgets();
+        if (iMessage != aMessage)
+        {
+            iMessage = aMessage;
+            update_widgets();
+        }
     }
 
     void status_bar::clear_message()
     {
-        iMessage = std::nullopt;
-        update_widgets();
+        if (iMessage)
+        {
+            iMessage = std::nullopt;
+            update_widgets();
+        }
     }
 
     void status_bar::add_normal_widget(i_widget& aWidget)

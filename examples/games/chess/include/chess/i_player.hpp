@@ -47,6 +47,8 @@ namespace chess
         virtual bool playing() const = 0;
         virtual void undo() = 0;
         virtual void setup(mailbox_position const& aSetup) = 0;
+    public:
+        virtual uint64_t nodes_per_second() const = 0;
     };
 
     class i_player_factory
