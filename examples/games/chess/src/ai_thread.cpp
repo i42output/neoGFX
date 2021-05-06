@@ -33,13 +33,15 @@ namespace chess
     double constexpr BETA = std::numeric_limits<double>::max();
     double constexpr EPSILON = 0.0000001;
 
+    int32_t constexpr MAX_QUIESCE = -3;
+
     // use stack to limit RAM usage... (todo: make configurable?)
     constexpr int32_t USE_STACK_DEPTH = 4;
     constexpr std::size_t STACK_NODE_STACK_CAPACITY = 32; // todo: what should this hard limit be?
     struct stack_node_stack_limit_exceeded : std::logic_error { stack_node_stack_limit_exceeded() : std::logic_error{ "chess::stack_node_stack_limit_exceeded" } {} };
 
     template <player Player, player Turn, typename Representation>
-    double minimax(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node & node, int32_t ply, int32_t depth)
+    double minimax(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth)
     {
         typedef game_tree_node stack_node_t;
         typedef std::vector<stack_node_t> stack_node_stack_t;
@@ -71,9 +73,9 @@ namespace chess
             for (auto& child : validMoves)
             {
                 auto const& move = *child.move;
-                move_piece(position, move);
+                make(position, move);
                 value = std::max(value, minimax<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1));
-                undo(position);
+                unmake(position);
             }
             return value;
         }
@@ -83,12 +85,42 @@ namespace chess
             for (auto& child : validMoves)
             {
                 auto const& move = *child.move;
-                move_piece(position, move);
+                make(position, move);
                 value = std::min(value, minimax<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1));
-                undo(position);
+                unmake(position);
             }
             return value;
         }
+    }
+
+    template <player Player, player Turn, typename Representation>
+    double quiesce(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
+    {
+        double stand_pat = eval<Representation, opponent_v<Player>>{}(tables, position, static_cast<double>(ply - depth)).eval;
+        if (depth == MAX_QUIESCE)
+            return stand_pat;
+        if (stand_pat >= beta)
+            return beta;
+        if (alpha < stand_pat)
+            alpha = stand_pat;
+        if (node.children == std::nullopt)
+            node.children.emplace();
+        valid_moves<Turn>(tables, position, node);
+        auto& validMoves = *node.children;
+        for (auto& child : validMoves)
+        {
+            auto const& move = *child.move;
+            if (!*move.isCapture)
+                continue;
+            make(position, move);
+            auto score = -quiesce<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -alpha);
+            unmake(position);
+            if (score >= beta)
+                return beta;
+            if (score > alpha)
+                alpha = score;
+        }
+        return alpha;
     }
 
     template <player Player, player Turn, typename Representation>
@@ -117,12 +149,12 @@ namespace chess
             valid_moves<Turn>(tables, position, use);
         auto& validMoves = *use.children;
         if (depth == 0 || validMoves.empty())
-            return eval<Representation, opponent_v<Player>>{}(tables, position, static_cast<double>(ply - depth)).eval;
+            return quiesce<Player, Turn>(tables, position, node, ply, depth - 1);
         for (auto& child : validMoves)
         {
             double score;
             auto const& move = *child.move;
-            move_piece(position, move);
+            make(position, move);
             if (&child == &validMoves[0])
                 score = -pvs<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -alpha);
             else
@@ -131,7 +163,7 @@ namespace chess
                 if (alpha < score && score < beta)
                     score = -pvs<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -alpha);
             }
-            undo(position);
+            unmake(position);
             if (score >= beta)
                 return beta;
             if (score > alpha)
@@ -149,9 +181,9 @@ namespace chess
             auto& candidateMoves = *node.children;
             for (auto& candidateMove : candidateMoves)
             {
-                move_piece(position, *candidateMove.move);
+                make(position, *candidateMove.move);
                 candidateMove.eval = -pvs<Player, opponent_v<Player>, Representation>(tables, position, candidateMove, plyIteration, plyIteration);
-                undo(position);
+                unmake(position);
                 if (candidateMove.children != std::nullopt)
                     std::stable_sort(candidateMove.children->begin(), candidateMove.children->end(),
                         [](auto const& m1, auto const& m2)

@@ -60,7 +60,7 @@ namespace chess
     }
 
     template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<bitboard_rep> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult, bool aSort = false)
+    inline void valid_moves(move_tables<bitboard_rep> const& aTables, bitboard_position const& aPosition, ResultContainer& aResult)
     {
         // todo
         as_valid_moves(aResult).clear();

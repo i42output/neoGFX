@@ -38,6 +38,7 @@ namespace chess
     {
         coordinates from;
         coordinates to;
+        std::optional<bool> isCapture;
         std::optional<piece> promoteTo;
         piece capture = piece::None;
         enum class castling_piece_index : uint32_t
@@ -246,7 +247,7 @@ namespace chess
     }
 
     template <typename Representation>
-    inline std::optional<move> undo(basic_position<Representation>& aPosition)
+    inline std::optional<move> unmake(basic_position<Representation>& aPosition)
     {
         std::optional<move> lastMove;
         if (!aPosition.moveHistory.empty())
@@ -387,7 +388,7 @@ namespace chess
     }
 
     template <typename Representation>
-    inline void move_piece(basic_position<Representation>& aPosition, chess::move const& aMove)
+    inline void make(basic_position<Representation>& aPosition, chess::move const& aMove)
     {
         auto const movingPiece = piece_at(aPosition.rep, aMove.from);
         auto const targetPiece = piece_at(aPosition.rep, aMove.to);
@@ -395,7 +396,7 @@ namespace chess
         set_piece(aPosition.rep, aMove.to, destinationPiece);
         set_piece(aPosition.rep, aMove.from, piece::None);
         auto const currentMoveCount = aPosition.moveHistory.size();
-        aPosition.moveHistory.emplace_back(aMove.from, aMove.to, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aPosition.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
+        aPosition.moveHistory.emplace_back(aMove.from, aMove.to, aMove.isCapture, aMove.promoteTo, targetPiece, currentMoveCount > 0 ? aPosition.moveHistory[currentMoveCount - 1u].castlingState : move::castling_state{});
         auto& newMove = aPosition.moveHistory.back();
         switch (movingPiece)
         {

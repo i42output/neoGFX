@@ -462,7 +462,7 @@ namespace chess::gui
                 }
                 animating_to(aMove.to)->first->hold = false;
             }
-            current_player().play(chess::move{ aMove.from, aMove.to, promotion });
+            current_player().play(chess::move{ aMove.from, aMove.to, aMove.isCapture, promotion });
         }
         else
             edit(aMove);
@@ -497,7 +497,7 @@ namespace chess::gui
     {
         if (can_undo())
         {
-            iUndoneMoves.push_back(*chess::undo(iPosition));
+            iUndoneMoves.push_back(*unmake(iPosition));
             current_player().undo();
             next_player().undo();
             Changed.trigger();
@@ -623,7 +623,7 @@ namespace chess::gui
         std::cerr << to_string(aMove) << std::endl; // todo: remove
         if (current_player().type() != player_type::Human)
             animate_move(aMove);
-        move_piece(iPosition, aMove);
+        make(iPosition, aMove);
         if (iMoveValidator.in_check(iPosition.turn, iPosition))
             iFlashCheck = std::make_pair(false, std::chrono::steady_clock::now());
         display_eval();
@@ -673,11 +673,11 @@ namespace chess::gui
                         chess::move const candidateMove{ coordinates{ xFrom, yFrom }, coordinates{ xTo, yTo } };
                         if (iMoveValidator.can_move(queryBoard.turn, queryBoard, candidateMove))
                         {
-                            move_piece(queryBoard, candidateMove);
+                            make(queryBoard, candidateMove);
                             eval_info evalInfo;
                             double eval = iMoveValidator.eval(current_player().player(), queryBoard, evalInfo);
                             results.push_back(std::make_pair(candidateMove, evalInfo));
-                            chess::undo(queryBoard);
+                            unmake(queryBoard);
                         }
                     }
         std::sort(results.begin(), results.end(), [](auto const& lhs, auto const& rhs) { return lhs.second.eval > rhs.second.eval; });

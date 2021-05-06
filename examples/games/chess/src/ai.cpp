@@ -100,7 +100,7 @@ namespace chess
         iSink = aOpponent.moved([&](move const& aMove)
         {
             std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
-            move_piece(iPosition, aMove);
+            make(iPosition, aMove);
         });
     }
 
@@ -124,7 +124,7 @@ namespace chess
     bool ai<Representation, Player>::play(move const& aMove)
     {
         std::lock_guard<std::recursive_mutex> lk{ iPositionMutex };
-        move_piece(iPosition, aMove);
+        make(iPosition, aMove);
         Moved.trigger(aMove);
         return true;
     }
@@ -133,7 +133,7 @@ namespace chess
     void ai<Representation, Player>::undo()
     {
         iRootNode = std::nullopt;
-        chess::undo(iPosition);
+        unmake(iPosition);
     }
 
     template <typename Representation, player Player>

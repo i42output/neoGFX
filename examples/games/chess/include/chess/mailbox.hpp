@@ -190,8 +190,8 @@ namespace chess
         {
             mailbox_position lhsBoard = aPosition;
             mailbox_position rhsBoard = aPosition;
-            move_piece(lhsBoard, as_move(lhs));
-            move_piece(rhsBoard, as_move(rhs));
+            make(lhsBoard, as_move(lhs));
+            make(rhsBoard, as_move(rhs));
             return eval<mailbox_rep, Player>{}(aTables, lhsBoard, 2.0).eval < eval<mailbox_rep, Player>{}(aTables, rhsBoard, 2.0).eval;
         });
     }
@@ -209,8 +209,12 @@ namespace chess
                         if (can_move<>(aTables, Player, aPosition, candidateMove))
                         {
                             auto const movingPiece = piece_at(aPosition, candidateMove.from);
+                            auto const targetPiece = piece_at(aPosition, candidateMove.to);
+                            candidateMove.isCapture = static_cast<player>(targetPiece & piece::COLOR_MASK) == opponent_v<Player>;
                             if (piece_type(movingPiece) == piece::Pawn)
                             {
+                                if (candidateMove.from.x != candidateMove.to.x)
+                                    candidateMove.isCapture = true;
                                 auto const movingPieceColor = piece_color(movingPiece);
                                 if ((movingPieceColor == piece::White && candidateMove.to.y == promotion_rank_v<player::White>) ||
                                     (movingPieceColor == piece::Black && candidateMove.to.y == promotion_rank_v<player::Black>))

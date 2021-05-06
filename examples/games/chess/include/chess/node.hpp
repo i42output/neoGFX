@@ -25,9 +25,9 @@ namespace chess
 {
     struct game_tree_node
     {
-        std::optional<double> eval;
         std::optional<move> move;
         std::optional<std::vector<game_tree_node>> children;
+        std::optional<double> eval;
 
         game_tree_node()
         {
@@ -37,9 +37,9 @@ namespace chess
         {
         }
         game_tree_node(game_tree_node&& other) :
-            eval{ other.eval },
             move{ other.move },
-            children{ std::move(other.children) }
+            children{ std::move(other.children) },
+            eval{ other.eval }
         {
             if (children)
                 other.children->clear();
@@ -48,11 +48,11 @@ namespace chess
 
         game_tree_node& operator=(game_tree_node&& other)
         {
-            eval = other.eval;
             move = other.move;
             children = std::move(other.children);
             if (children)
                 other.children->clear();
+            eval = other.eval;
             return *this;
         }
         game_tree_node& operator=(game_tree_node const&) = delete;
