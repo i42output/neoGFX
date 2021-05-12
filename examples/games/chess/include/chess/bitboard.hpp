@@ -24,8 +24,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace chess
 {
     template<>
-    struct move_tables<bitboard_rep> : move_tables<mailbox_rep>
+    struct move_tables<bitboard_rep> : private move_tables<mailbox_rep>
     {
+        template <typename Rep>
+        friend void generate_move_tables();
+
         typedef move_tables<mailbox_rep> base_type;
 
         // todo

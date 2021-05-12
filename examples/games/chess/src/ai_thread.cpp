@@ -31,9 +31,9 @@ namespace chess
         return sEvalBoard;
     }
 
-    double constexpr ALPHA = -std::numeric_limits<double>::max();
-    double constexpr BETA = std::numeric_limits<double>::max();
-    double constexpr EPSILON = 0.0000001;
+    double constexpr ALPHA = -std::numeric_limits<double>::infinity();
+    double constexpr BETA = std::numeric_limits<double>::infinity();
+    double constexpr EPSILON = std::numeric_limits<double>::epsilon();
 
     int32_t constexpr MAX_QUIESCE = -3;
 
@@ -168,13 +168,13 @@ namespace chess
                 score = -pvs<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -alpha);
             else
             {
-                score = -pvs<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -alpha - EPSILON, -alpha);
+                score = -pvs<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -alpha - (std::abs(alpha) * EPSILON), -alpha);
                 if (alpha < score && score < beta)
                     score = -pvs<Player, opponent_v<Turn>>(tables, position, child, ply, depth - 1, -beta, -alpha);
             }
             unmake(position);
             if (score >= beta)
-                return beta;
+                return -*(use.eval = -beta);
             if (score > alpha)
                 alpha = score;
         }

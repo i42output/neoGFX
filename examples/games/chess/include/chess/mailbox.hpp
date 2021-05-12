@@ -44,8 +44,6 @@ namespace chess
         valid_moves validCaptureMoves;
     };
 
-    move_tables<mailbox_rep> generate_mailbox_move_tables();
-
     template <bool IntoCheckTest = false>
     inline bool in_check(move_tables<mailbox_rep> const& aTables, player aPlayer, mailbox_position const& aPosition);
         

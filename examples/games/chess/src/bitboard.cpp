@@ -27,9 +27,32 @@ namespace chess
     {
         static const bitboard_position position
         {
-            // todo
-            {},
-            {{
+            // same information structured differently based on how the bitboard algorithms use the information...
+            {
+                {{ // byColor
+                    { 0b0000000000000000000000000000000000000000000000001111111111111111ull }, // white
+                    { 0b1111111111111111000000000000000000000000000000000000000000000000ull }  // black
+                }},
+                {{ // byPiece
+                    { 0b0000000011111111000000000000000000000000000000001111111100000000ull }, // pawn
+                    { 0b0100001000000000000000000000000000000000000000000000000001000010ull }, // knight
+                    { 0b0010010000000000000000000000000000000000000000000000000000100100ull }, // bishop
+                    { 0b1000000100000000000000000000000000000000000000000000000010000001ull }, // rook
+                    { 0b0000100000000000000000000000000000000000000000000000000000001000ull }, // queen
+                    { 0b0001000000000000000000000000000000000000000000000000000000010000ull }  // king
+                }}, 
+                {{ // bySquare
+                    piece::WhiteRook, piece::WhiteKnight, piece::WhiteBishop, piece::WhiteQueen, piece::WhiteKing, piece::WhiteBishop, piece::WhiteKnight, piece::WhiteRook,
+                    piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn, piece::WhitePawn,
+                    {}, {}, {}, {}, {}, {}, {}, {},
+                    {}, {}, {}, {}, {}, {}, {}, {},
+                    {}, {}, {}, {}, {}, {}, {}, {},
+                    {}, {}, {}, {}, {}, {}, {}, {},
+                    piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn, piece::BlackPawn,
+                    piece::BlackRook, piece::BlackKnight, piece::BlackBishop, piece::BlackQueen, piece::BlackKing, piece::BlackBishop, piece::BlackKnight, piece::BlackRook,
+                }}
+            },
+            {{ // kings
                 { 4u, 0u }, { 4u, 7u }
             }},
             player::White
