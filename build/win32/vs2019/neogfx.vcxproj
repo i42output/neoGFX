@@ -110,7 +110,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;DEBUG_HID;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
@@ -140,7 +140,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -172,7 +172,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -204,7 +204,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -236,7 +236,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(DevDirSDL)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>

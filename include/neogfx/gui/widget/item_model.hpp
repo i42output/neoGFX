@@ -607,7 +607,7 @@ namespace neogfx
                 return *iColumns[aColumnIndex].defaultDataInfo;
             else
             {
-                static const item_cell_info sZero;
+                static const item_cell_info sZero = {};
                 return sZero;
             }
         }

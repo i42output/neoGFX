@@ -18,9 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <filesystem>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/core/string_utf.hpp>
-#include <boost/filesystem.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_LCD_FILTER_H
@@ -108,8 +108,10 @@ namespace neogfx
             {
 #ifdef WIN32
                 char szPath[MAX_PATH];
-                GetWindowsDirectoryA(szPath, MAX_PATH);
-                return neolib::tidy_path(szPath) + "/fonts";
+                if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_FONTS, NULL, 0, szPath)))
+                    return neolib::tidy_path(szPath);
+                else
+                    throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Error");
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Unknown system");
 #endif
@@ -119,8 +121,8 @@ namespace neogfx
             {
 #ifdef WIN32
                 char szPath[MAX_PATH];
-                if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, szPath)))
-                    return neolib::tidy_path(szPath) + "/../Local/Microsoft/Windows/Fonts";
+                if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPath)))
+                    return neolib::tidy_path(szPath) + "/Microsoft/Windows/Fonts";
                 else
                     throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Error");
 #else
@@ -131,7 +133,8 @@ namespace neogfx
             fallback_font_info default_fallback_font_info()
             {
 #ifdef WIN32
-                return fallback_font_info{ {"Segoe UI Symbol", "Arial Unicode MS" } };
+                // TODO: Use fallback font info from registry
+                return fallback_font_info{ { "Segoe UI Symbol", "Noto Sans CJK JP", "Arial Unicode MS" } };
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::default_fallback_font_info: Unknown system");
 #endif
@@ -289,13 +292,16 @@ namespace neogfx
     public:
         glyph_shapes(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun)
         {
-            font tryFont = aFont;
+            thread_local std::vector<font> fontsTried;
+            auto tryFont = aFont;
+            fontsTried.push_back(aFont);
             iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
             while (iGlyphsList.back().needs_fallback_font())
             {
-                if (tryFont.has_fallback() && tryFont.fallback() != tryFont)
+                if (tryFont.has_fallback() && std::find(fontsTried.begin(), fontsTried.end(), tryFont.fallback()) == fontsTried.end())
                 {
                     tryFont = tryFont.fallback();
+                    fontsTried.push_back(tryFont);
                     iGlyphsList.emplace_back(glyphs{ aParent, tryFont, aGlyphRun });
                 }
                 else
@@ -308,6 +314,7 @@ namespace neogfx
                     break;
                 }
             }
+            fontsTried.clear();
             auto const g = iGlyphsList.begin();
             iResults.reserve(g->glyph_count());
             for (uint32_t i = 0; i < g->glyph_count();)
@@ -801,26 +808,27 @@ namespace neogfx
             throw error_initializing_font_library();
         auto enumerate = [this](const std::string fontsDirectory)
         {
-            for (boost::filesystem::directory_iterator file(fontsDirectory); file != boost::filesystem::directory_iterator(); ++file)
-            {
-                if (!boost::filesystem::is_regular_file(file->status()))
-                    continue;
-                try
+            if (std::filesystem::exists(fontsDirectory))
+                for (std::filesystem::directory_iterator file(fontsDirectory); file != std::filesystem::directory_iterator(); ++file)
                 {
-                    if (is_font_file(string{ file->path().string() }))
+                    if (!std::filesystem::is_regular_file(file->status()))
+                        continue;
+                    try
                     {
-                        auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string());
-                        iFontFamilies[font->family_name()].push_back(font);
+                        if (is_font_file(string{ file->path().string() }))
+                        {
+                            auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, file->path().string());
+                            iFontFamilies[font->family_name()].push_back(font);
+                        }
+                    }
+                    catch (native_font::failed_to_load_font&)
+                    {
+                    }
+                    catch (...)
+                    {
+                        throw;
                     }
                 }
-                catch (native_font::failed_to_load_font&)
-                {
-                }
-                catch (...)
-                {
-                    throw;
-                }
-            }
         };
         enumerate(detail::platform_specific::get_system_font_directory());
         enumerate(detail::platform_specific::get_local_font_directory());
@@ -880,7 +888,7 @@ namespace neogfx
             virtual dimension ppi() const { return iResolution.magnitude() / std::sqrt(2.0); }
         } deviceResolution;
         deviceResolution.iResolution = size(aExistingFont.horizontal_dpi(), aExistingFont.vertical_dpi());
-        auto& fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style(), aExistingFont.size(), deviceResolution);
+        auto& fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style_name(), aExistingFont.size(), deviceResolution);
         return fallbackFont;
     }
 
