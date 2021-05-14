@@ -579,7 +579,7 @@ namespace neogfx
                 result |= neogfx::decoration::Dock;
             if ((aStyle & neogfx::decoration_style::DockAreas) == neogfx::decoration_style::DockAreas)
                 result |= neogfx::decoration::DockAreas;
-            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Dock)) != neogfx::decoration_style::None)
+            if ((aStyle & (neogfx::decoration_style::Window | neogfx::decoration_style::Dialog | neogfx::decoration_style::Dock)) != neogfx::decoration_style::None)
                 result |= neogfx::decoration::Border;
             return result;
         }                                      

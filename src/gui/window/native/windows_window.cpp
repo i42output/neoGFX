@@ -1284,13 +1284,13 @@ namespace neogfx
                 switch (wparam) 
                 {
                 case SIZE_MAXIMIZED:
-                    self.push_event(window_event{ window_event_type::Maximized, *self.iPosition });
+                    self.push_event(window_event{ window_event_type::Maximized, self.surface_position() });
                     break;
                 case SIZE_MINIMIZED:
-                    self.push_event(window_event{ window_event_type::Iconized, *self.iPosition });
+                    self.push_event(window_event{ window_event_type::Iconized, self.surface_position() });
                     break;
                 default:
-                    self.push_event(window_event{ window_event_type::Restored, *self.iPosition });
+                    self.push_event(window_event{ window_event_type::Restored, self.surface_position() });
                     break;
                 }
                 break;

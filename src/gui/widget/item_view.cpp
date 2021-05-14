@@ -1386,7 +1386,7 @@ namespace neogfx
     void item_view::update_hover(const optional_point& aPosition)
     {
         auto oldHoverCell = iHoverCell;
-        iHoverCell = item_at(*aPosition);
+        iHoverCell = aPosition ? item_at(*aPosition) : std::nullopt;
         if (iHoverCell != oldHoverCell || (iHoverCell && (presentation_model().cell_checkable(*iHoverCell))))
         {
             if (oldHoverCell)
