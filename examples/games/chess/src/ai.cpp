@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <atomic>
 #include <chess/ai.hpp>
 
 namespace chess
@@ -66,7 +67,7 @@ namespace chess
         iPosition{ chess::setup_position<representation_type>() }
     {
         for (unsigned int t = 1u; t <= std::thread::hardware_concurrency(); ++t)
-            iThreads.emplace_back(iPly);
+            iThreads.emplace_back(*this, iPly);
         start();
         Decided([&](move const& aBestMove)
         {
@@ -119,7 +120,15 @@ namespace chess
     template <typename Representation, player Player>
     void ai<Representation, Player>::stop()
     {
-        // todo
+        for (auto& thread : iThreads)
+            thread.stop();
+    }
+
+    template <typename Representation, player Player>
+    void ai<Representation, Player>::finish()
+    {
+        for (auto& thread : iThreads)
+            thread.finish();
     }
 
     template <typename Representation, player Player>
@@ -147,6 +156,7 @@ namespace chess
         if (!iFinished)
         {
             iSignal.wait_for(lk, std::chrono::seconds{ 1 }, [&]() { return iPlaying || iFinished; });
+            lk.unlock();
             if (iPlaying)
             {
                 auto bestMove = execute();

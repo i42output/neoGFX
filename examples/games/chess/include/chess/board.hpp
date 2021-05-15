@@ -57,6 +57,7 @@ namespace chess::gui
         struct no_player : std::logic_error { no_player() : std::logic_error{ "chess::gui::board::no_player" } {} };
     public:
         board(ng::i_layout& aLayout, i_move_validator const& aMoveValidator);
+        ~board();
     protected:
         void paint(ng::i_graphics_context& aGc) const override;
     protected:

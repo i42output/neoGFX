@@ -36,6 +36,7 @@ namespace chess
         void greet(i_player& aOpponent) override;
         void play() override;
         void stop() override;
+        void finish() override;
         bool play(move const& aMove) override;
         bool playing() const override;
         void undo() override;

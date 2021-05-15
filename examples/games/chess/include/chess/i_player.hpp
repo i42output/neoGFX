@@ -43,6 +43,7 @@ namespace chess
         virtual void greet(i_player& aOpponent) = 0;
         virtual void play() = 0;
         virtual void stop() = 0;
+        virtual void finish() = 0;
         virtual bool play(move const& aMove) = 0;
         virtual bool playing() const = 0;
         virtual void undo() = 0;

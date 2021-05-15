@@ -16,6 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <atomic>
 #include <chess/ai_thread.hpp>
 #include <chess/mailbox.hpp>
 #include <chess/bitboard.hpp>
@@ -29,6 +30,12 @@ namespace chess
     {
         thread_local basic_position<Representation> sEvalBoard = {};
         return sEvalBoard;
+    }
+
+    inline game_state& state()
+    {
+        thread_local game_state tGameState = {};
+        return tGameState;
     }
 
     double constexpr ALPHA = -std::numeric_limits<double>::infinity();
@@ -45,6 +52,9 @@ namespace chess
     template <player Player, player Turn, typename Representation>
     double minimax(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth)
     {
+        if (state().stopped)
+            return 0.0;
+
         ++sNodeCounter;
 
         typedef game_tree_node stack_node_t;
@@ -100,6 +110,9 @@ namespace chess
     template <player Player, player Turn, typename Representation>
     double quiesce(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
     {
+        if (state().stopped)
+            return 0.0;
+
         ++sNodeCounter;
 
         double stand_pat = eval<Representation, opponent_v<Player>>{}(tables, position, static_cast<double>(ply - depth)).eval;
@@ -133,6 +146,9 @@ namespace chess
     template <player Player, player Turn, typename Representation>
     double pvs(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
     {
+        if (state().stopped)
+            return 0.0;
+
         ++sNodeCounter;
 
         typedef game_tree_node stack_node_t;
@@ -204,7 +220,8 @@ namespace chess
     }
         
     template <typename Representation, player Player>
-    ai_thread<Representation, Player>::ai_thread(int32_t aPly) :
+    ai_thread<Representation, Player>::ai_thread(i_player const& aPlayer, int32_t aPly) :
+        iPlayer{ aPlayer },
         iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },
         iThread{ [&]() { process(); } }
@@ -216,7 +233,7 @@ namespace chess
     {
         {
             std::lock_guard<std::mutex> lk{ iMutex };
-            iFinished = true;
+            finish();
         }
         iSignal.notify_one();
         iThread.join();
@@ -235,6 +252,8 @@ namespace chess
     template <typename Representation, player Player>
     void ai_thread<Representation, Player>::start()
     {
+        if (iGameState)
+            iGameState.load()->stopped = false;
         {
             std::unique_lock<std::mutex> lk{ iMutex };
             if (iQueue.empty())
@@ -244,14 +263,31 @@ namespace chess
     }
 
     template <typename Representation, player Player>
+    void ai_thread<Representation, Player>::stop()
+    {
+        if (iGameState)
+            iGameState.load()->stopped = true;
+    }
+        
+    template <typename Representation, player Player>
+    void ai_thread<Representation, Player>::finish()
+    {
+        stop();
+        if (iGameState)
+            iGameState.load()->finished = true;
+    }
+
+    template <typename Representation, player Player>
     void ai_thread<Representation, Player>::process()
     {
+        iGameState.store(&state());
+
         for (;;)
         {
             std::unique_lock<std::mutex> lk{ iMutex };
-            iSignal.wait(lk, [&]() { return iFinished || !iQueue.empty(); });
+            iSignal.wait(lk, [&]() { return state().finished || !iQueue.empty(); });
             
-            if (iFinished)
+            if (state().finished)
                 return;
 
             std::map<position_type, game_tree_node> work;

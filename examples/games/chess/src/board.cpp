@@ -62,6 +62,12 @@ namespace chess::gui
         set_focus();
     }
 
+    board::~board()
+    {
+        white_player().finish();
+        black_player().finish();
+    }
+
     void board::paint(ng::i_graphics_context& aGc) const
     {
         if (iEditBoard)
@@ -745,6 +751,9 @@ namespace chess::gui
     void board::animate()
     {
         iAnimator.again();
+
+        if (!root().has_native_surface()) // todo: shouldn't need this check
+            return;
 
         double nodesPerSecond = static_cast<double>(white_player().type() == player_type::AI ? white_player().nodes_per_second() : black_player().nodes_per_second());
         std::ostringstream oss;

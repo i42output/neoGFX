@@ -47,6 +47,10 @@ namespace chess
     {
     }
 
+    void human::finish()
+    {
+    }
+
     bool human::play(move const& aMove)
     {
         iLastMove = aMove;
