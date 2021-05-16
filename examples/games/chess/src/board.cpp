@@ -416,7 +416,7 @@ namespace chess::gui
         Changed.trigger();
     }
 
-    void board::setup(chess::position const& aPosition)
+    void board::setup(chess::mailbox_position const& aPosition)
     {
         iPosition = aPosition;
         Changed.trigger();

@@ -75,7 +75,7 @@ namespace chess::gui
         void mouse_left() override;
     public:
         void new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer) override;
-        void setup(chess::position const& aPosition) override;
+        void setup(chess::mailbox_position const& aPosition) override;
         bool play(chess::move const& aMove) override;
         void edit(chess::move const& aMove) override;
         bool can_undo() const override;
@@ -112,7 +112,7 @@ namespace chess::gui
     private:
         ng::sink iSink;
         i_move_validator const& iMoveValidator;
-        chess::position iPosition;
+        chess::mailbox_position iPosition;
         std::unique_ptr<i_player> iWhitePlayer;
         std::unique_ptr<i_player> iBlackPlayer;
         std::vector<chess::move> iUndoneMoves;

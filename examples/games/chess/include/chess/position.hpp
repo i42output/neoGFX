@@ -34,6 +34,8 @@ namespace chess
     typedef neogfx::point_i32 coordinates_i32;
     typedef coordinates_i32::coordinate_type coordinate_i32;
 
+    std::size_t constexpr SQUARES = 64;
+
     struct move
     {
         coordinates from;
@@ -87,12 +89,13 @@ namespace chess
     typedef std::array<std::array<piece, 8>, 8> mailbox_rep;
     
     typedef uint64_t bitboard;
+    typedef uint64_t bitboard_index;
 
     struct bitboard_rep
     {
         std::array<bitboard, PIECE_COLORS> byColor;
         std::array<bitboard, PIECES> byPiece;
-        std::array<piece, 64u> bySquare;
+        std::array<piece, SQUARES> bySquare;
 
         std::strong_ordering operator<=>(bitboard_rep const&) const = default;
     };
@@ -114,7 +117,7 @@ namespace chess
 
     inline void set_piece(bitboard_rep& aRep, coordinates const& aCoordinates, piece aPiece)
     {
-        uint64_t const index = aCoordinates.y * 8u + aCoordinates.x;
+        bitboard_index const index = aCoordinates.y * 8u + aCoordinates.x;
         auto const oldPiece = aRep.bySquare[index];
         aRep.bySquare[index] = aPiece;
         if (aPiece == piece::None)
@@ -171,16 +174,21 @@ namespace chess
             std::forward_as_tuple(rhs.rep, rhs.kings, rhs.turn, rhs.moveHistory);
     }
 
-    using position = mailbox_position;
+    using position = bitboard_position;
 
-    inline constexpr coordinates coordinates_from_bit(bitboard aBits)
+    inline constexpr coordinates coordinates_from_bitboard_index(bitboard_index aIndex)
     {
-        return coordinates{ static_cast<uint32_t>(aBits % 8ull), static_cast<uint32_t>(aBits / 8ull) };
+        return coordinates{ static_cast<uint32_t>(aIndex % 8ull), static_cast<uint32_t>(aIndex / 8ull) };
+    }
+
+    inline constexpr bitboard_index bitboard_index_from_coordinates(coordinates const& aPosition)
+    {
+        return aPosition.x + aPosition.y * 8ull;
     }
 
     inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
     {
-        return aPosition.x + aPosition.y * 8ull;
+        return 1ull << bitboard_index_from_coordinates(aPosition);
     }
 
     inline std::string to_string(piece aPiece, std::string const& aNone = ".")

@@ -63,8 +63,23 @@ namespace chess
     template<>
     move_tables<bitboard_rep> generate_move_tables<bitboard_rep>()
     {
-        move_tables<bitboard_rep> result{ generate_move_tables<mailbox_rep>() };
-        // todo
+        auto const mailboxMoveTables = generate_move_tables<mailbox_rep>();
+
+        move_tables<bitboard_rep> result = {};
+
+        for (std::size_t pieceColorIndex = 0u; pieceColorIndex < PIECE_COLORS; ++pieceColorIndex)
+            for (std::size_t pieceIndex = 0u; pieceIndex < PIECES; ++pieceIndex)
+                for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
+                    for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
+                        for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
+                            for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
+                            {
+                                if (mailboxMoveTables.validMoves[pieceColorIndex][pieceIndex][yFrom][xFrom][yTo][xTo])
+                                    result.validMoves[pieceColorIndex][pieceIndex][bitboard_index_from_coordinates({ xFrom, yFrom })] |= bit_from_coordinates({ xTo, yTo });
+                                if (mailboxMoveTables.validCaptureMoves[pieceColorIndex][pieceIndex][yFrom][xFrom][yTo][xTo])
+                                    result.validCaptureMoves[pieceColorIndex][pieceIndex][bitboard_index_from_coordinates({ xFrom, yFrom })] |= bit_from_coordinates({ xTo, yTo });
+                            }
+
         return result;
     }
 

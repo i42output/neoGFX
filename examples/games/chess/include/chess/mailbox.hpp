@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <limits>
+#include <array>
 #include <chrono>
 
 #include <chess/primitives.hpp>
@@ -35,6 +36,7 @@ namespace chess
         typedef std::pair<std::size_t, std::array<move_coordinates, 8>> move_path;
         typedef std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u> trivial_moves;
         typedef std::array<std::array<std::array<std::array<move_path, 8u>, 8u>, 8u>, 8u> move_paths;
+
         unit_moves unitMoves;
         unit_moves unitCaptureMoves;
         can_move_multiple canMoveMultiple;

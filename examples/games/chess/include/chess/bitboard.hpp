@@ -18,25 +18,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <array>
 #include <chess/primitives.hpp>
 #include <chess/mailbox.hpp>
 
 namespace chess
 {
     template<>
-    struct move_tables<bitboard_rep> : private move_tables<mailbox_rep>
+    struct move_tables<bitboard_rep>
     {
-        template <typename Rep>
-        friend void generate_move_tables();
+        typedef std::array<std::array<std::array<bitboard, SQUARES>, PIECES>, PIECE_COLORS> valid_moves;
 
-        typedef move_tables<mailbox_rep> base_type;
-
-        // todo
-
-        move_tables(base_type const& aMailboxMoveTables) :
-            base_type{ aMailboxMoveTables }
-        {
-        }
+        valid_moves validMoves;
+        valid_moves validCaptureMoves;
     };
 
     template <bool IntoCheckTest = false>
