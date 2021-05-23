@@ -105,7 +105,8 @@ namespace chess
         auto const playerColorIndex = as_cardinal<>(Player);
         auto const opponentColorIndex = as_cardinal<>(opponent(Player));
         auto const playerPieces = aPosition.rep.byPieceColor[playerColorIndex];
-        auto const playerKing = aPosition.rep.byPieceType[as_cardinal<>(piece::King)] & playerPieces;
+        auto const playerKingBit = aPosition.rep.byPieceType[as_cardinal<>(piece::King)] & playerPieces;
+        auto const playerKing = bit_position_from_bit(playerKingBit);
 
         for (std::size_t opponentPieceTypeIndex = 0; opponentPieceTypeIndex < PIECE_TYPES; ++opponentPieceTypeIndex)
         {
@@ -114,8 +115,8 @@ namespace chess
             for (auto const& opponentPiece : bitboard_as_range{ opponentPieces })
             {
                 auto const opponentPieceCaptureMoves = aTables.validCaptureMoves[opponentColorIndex][opponentPieceTypeIndex][opponentPiece];
-                auto const captures = aPosition.rep.pieces & opponentPieceCaptureMoves & aTables.validPaths[opponentPiece][bit_position_from_bitboard(playerKing)];
-                if (captures == playerKing)
+                auto const captures = aPosition.rep.pieces & opponentPieceCaptureMoves & aTables.validPaths[opponentPiece][playerKing];
+                if (captures == playerKingBit)
                     return true;
             }
         }
@@ -160,7 +161,7 @@ namespace chess
                     auto const playerMovePath = aTables.validPaths[playerPiece][playerMoveTo];
                     if ((aPosition.rep.pieces & playerMovePath) == playerPieceBit)
                     {
-                        move const candidateMove{ playerPieceCoordinates, coordinates_from_bit_position(playerMoveTo) };
+                        move const candidateMove{ playerPieceCoordinates, coordinates_from_bit_position(playerMoveTo), false };
                         make(aPosition, candidateMove);
                         bool const inCheck = in_check<Player>(aTables, aPosition);
                         unmake(aPosition);
@@ -176,18 +177,19 @@ namespace chess
                 auto const playerPieceCaptureMoves = aTables.validCaptureMoves[playerColorIndex][playerPieceTypeIndex][playerPiece];
                 for (auto const& playerMoveTo : bitboard_as_range{ playerPieceCaptureMoves })
                 {
-                    auto const capture = aPosition.rep.byPieceColor[opponentColorIndex] & playerMoveTo;
-                    if (capture != playerMoveTo)
+                    auto const squareBit = bit_from_bit_position(playerMoveTo);
+                    auto const capture = aPosition.rep.byPieceColor[opponentColorIndex] & squareBit;
+                    if (capture != squareBit)
                     {
                         // todo: en passant
                         continue;
                     }
-                    if (aPosition.rep.byPieceType[as_cardinal<>(piece::King)] & playerMoveTo)
+                    if (aPosition.rep.byPieceType[as_cardinal<>(piece::King)] & squareBit)
                         continue;
                     auto const playerMovePath = aTables.validPaths[playerPiece][playerMoveTo];
-                    if ((aPosition.rep.pieces & playerMovePath) == (playerPieceBit | bit_from_bit_position(playerMoveTo)))
+                    if ((aPosition.rep.pieces & playerMovePath) == (playerPieceBit | squareBit))
                     {
-                        move const candidateMove{ playerPieceCoordinates, coordinates_from_bit_position(playerMoveTo) };
+                        move const candidateMove{ playerPieceCoordinates, coordinates_from_bit_position(playerMoveTo), true };
                         make(aPosition, candidateMove);
                         bool const inCheck = in_check<Player>(aTables, aPosition);
                         unmake(aPosition);

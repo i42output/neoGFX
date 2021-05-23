@@ -97,7 +97,7 @@ namespace chess
         return 1ull << aBitPosition;
     }
 
-    inline constexpr bit_position bit_position_from_bitboard(bitboard aBitboard)
+    inline constexpr bit_position bit_position_from_bit(bitboard aBitboard)
     {
         return static_cast<bit_position>(std::countr_zero(aBitboard));
     }

@@ -43,7 +43,7 @@ namespace chess
     public:
         typedef Representation representation_type;
     public:
-        ai(int32_t aPly = 6);
+        ai(int32_t aPly = 4);
         ~ai();
     public:
         player_type type() const override;

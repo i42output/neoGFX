@@ -277,7 +277,14 @@ namespace chess
             iPosition = aSetup;
         }
         else
-            ; // todo (convert to bitboard_rep representation)
+        {
+            std::unique_lock lk{ iMutex };
+            iRootNode = std::nullopt;
+            iPosition = bitboard_position{ {}, aSetup.turn, aSetup.moveHistory };
+            for (coordinate x = 0u; x <= 7u; ++x)
+                for (coordinate y = 0u; y <= 7u; ++y)
+                    set_piece(iPosition.rep, coordinates{ x, y }, aSetup.rep[y][x]);
+        }
     }
 
     template <typename Representation, player Player>
