@@ -37,7 +37,7 @@ namespace chess
         COUNT   = 0x06
     };
 
-    constexpr std::size_t PIECES = static_cast<std::size_t>(piece_cardinal::COUNT);
+    constexpr std::size_t PIECE_TYPES = static_cast<std::size_t>(piece_cardinal::COUNT);
 
     enum class piece_color_cardinal : uint8_t
     {
@@ -109,6 +109,24 @@ namespace chess
     inline T as_cardinal(piece p)
     {
         return static_cast<T>(sPieceCardinals[static_cast<std::size_t>(p)]);
+    }
+
+    std::array<piece, PIECE_TYPES> constexpr sCardinalPieceTypes = []()
+    {
+        std::array<piece, PIECE_TYPES> pieceTypes = {};
+        pieceTypes[static_cast<std::size_t>(piece_cardinal::Pawn)] = piece::Pawn;
+        pieceTypes[static_cast<std::size_t>(piece_cardinal::Knight)] = piece::Knight;
+        pieceTypes[static_cast<std::size_t>(piece_cardinal::Bishop)] = piece::Bishop;
+        pieceTypes[static_cast<std::size_t>(piece_cardinal::Rook)] = piece::Rook;
+        pieceTypes[static_cast<std::size_t>(piece_cardinal::Queen)] = piece::Queen;
+        pieceTypes[static_cast<std::size_t>(piece_cardinal::King)] = piece::King;
+        return pieceTypes;
+    }();
+
+    template <typename T>
+    inline piece cardinal_to_piece(T c)
+    {
+        return sCardinalPieceTypes[static_cast<std::size_t>(c)];
     }
 
     std::array<piece_color_cardinal, 256> constexpr sPieceColorCardinals = []()

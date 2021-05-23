@@ -36,9 +36,10 @@ namespace chess
         return static_cast<uint8_t>(lhs) < static_cast<uint8_t>(rhs);
     }
 
-    inline player next_player(player p)
+    template <typename T = std::size_t>
+    inline T as_cardinal(player p)
     {
-        return p == player::White ? player::Black : player::White;
+        return as_color_cardinal<T>(static_cast<piece>(p));
     }
 
     template <player Player>
@@ -47,4 +48,9 @@ namespace chess
     constexpr player opponent_v<player::White> = player::Black;
     template <>
     constexpr player opponent_v<player::Black> = player::White;
+
+    inline player opponent(player p)
+    {
+        return p == player::White ? opponent_v<player::White> : opponent_v<player::Black>;
+    }
 }

@@ -27,6 +27,7 @@ namespace chess
     {
         std::optional<move> move;
         std::optional<std::vector<game_tree_node>> children;
+        std::optional<bool> kingMobility;
         std::optional<double> eval;
 
         game_tree_node()
@@ -39,6 +40,7 @@ namespace chess
         game_tree_node(game_tree_node&& other) :
             move{ other.move },
             children{ std::move(other.children) },
+            kingMobility{ other.kingMobility },
             eval{ other.eval }
         {
             if (children)

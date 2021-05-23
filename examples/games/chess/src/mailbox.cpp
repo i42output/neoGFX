@@ -98,7 +98,7 @@ namespace chess
         };
         // all pieces
         for (std::size_t pieceColorIndex = 0u; pieceColorIndex < PIECE_COLORS; ++pieceColorIndex)
-            for (std::size_t pieceIndex = 0u; pieceIndex < PIECES; ++pieceIndex)
+            for (std::size_t pieceTypeIndex = 0u; pieceTypeIndex < PIECE_TYPES; ++pieceTypeIndex)
                 for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
                     for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
                         for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
@@ -108,18 +108,18 @@ namespace chess
                                 {
                                     aResult = false;
                                     auto const delta = move_coordinates{ static_cast<int32_t>(xTo), static_cast<int32_t>(yTo) } - move_coordinates{ static_cast<int32_t>(xFrom), static_cast<int32_t>(yFrom) };
-                                    auto const& unitMoves = aUnitMoves[pieceColorIndex][pieceIndex];
+                                    auto const& unitMoves = aUnitMoves[pieceColorIndex][pieceTypeIndex];
                                     if (std::find(unitMoves.begin(), unitMoves.end(), delta) != unitMoves.end())
                                         aResult = true;
-                                    else if (result.canMoveMultiple[pieceIndex] && (std::abs(delta.x) == std::abs(delta.y) || delta.x == 0 || delta.y == 0))
+                                    else if (result.canMoveMultiple[pieceTypeIndex] && (std::abs(delta.x) == std::abs(delta.y) || delta.x == 0 || delta.y == 0))
                                     {
                                         auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                                         if (std::find(unitMoves.begin(), unitMoves.end(), deltaUnity) != unitMoves.end())
                                             aResult = true;
                                     }
                                 };
-                                calc_validity(result.unitMoves, result.validMoves[pieceColorIndex][pieceIndex][yFrom][xFrom][yTo][xTo]);
-                                calc_validity(result.unitCaptureMoves, result.validCaptureMoves[pieceColorIndex][pieceIndex][yFrom][xFrom][yTo][xTo]);
+                                calc_validity(result.unitMoves, result.validMoves[pieceColorIndex][pieceTypeIndex][yFrom][xFrom][yTo][xTo]);
+                                calc_validity(result.unitCaptureMoves, result.validCaptureMoves[pieceColorIndex][pieceTypeIndex][yFrom][xFrom][yTo][xTo]);
                             }
         // pawn (first move)
         for (coordinate x = 0u; x <= 7u; ++x)
@@ -136,12 +136,16 @@ namespace chess
                         if (!can_move_trivial(coordinates_i32{ xFrom, yFrom }.as<coordinate>(), coordinates_i32{ xTo, yTo }.as<coordinate>(), aKnight))
                             continue;
                         result.trivialMoves[yFrom][xFrom][yTo][xTo] = true;
-                        if (aKnight)
-                            continue;
-                        auto const delta = move_tables<mailbox_rep>::move_coordinates{ xTo, yTo } - move_tables<mailbox_rep>::move_coordinates{ xFrom, yFrom };
-                        auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                         auto const start = coordinates_i32{ xFrom, yFrom };
                         auto const end = coordinates_i32{ xTo, yTo };
+                        if (aKnight)
+                        {
+                            result.movePaths[yFrom][xFrom][yTo][xTo].second[result.movePaths[yFrom][xFrom][yTo][xTo].first++] = start;
+                            result.movePaths[yFrom][xFrom][yTo][xTo].second[result.movePaths[yFrom][xFrom][yTo][xTo].first++] = end;
+                            continue;
+                        }
+                        auto const delta = move_tables<mailbox_rep>::move_coordinates{ xTo, yTo } - move_tables<mailbox_rep>::move_coordinates{ xFrom, yFrom };
+                        auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
                         auto pos = start;
                         for(;;)
                         {
@@ -157,7 +161,7 @@ namespace chess
     template <player Player>
     struct eval<mailbox_rep, Player>
     {
-        eval_result operator()(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
+        eval_result operator()(move_tables<mailbox_rep> const& aTables, mailbox_position& aPosition, double aPly, eval_info* aEvalInfo = nullptr)
         {
             auto const start = !aEvalInfo ? std::chrono::steady_clock::time_point{} : std::chrono::steady_clock::now();
 
@@ -297,7 +301,7 @@ namespace chess
 
             return result;
         }
-        eval_result operator()(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, double aPly, eval_info& aEvalInfo)
+        eval_result operator()(move_tables<mailbox_rep> const& aTables, mailbox_position& aPosition, double aPly, eval_info& aEvalInfo)
         {
             return eval{}(aTables, aPosition, aPly, &aEvalInfo);
         }

@@ -30,9 +30,9 @@ namespace chess
     struct move_tables<mailbox_rep>
     {
         typedef neogfx::point_i32 move_coordinates;
-        typedef std::array<std::array<std::vector<move_coordinates>, PIECES>, PIECE_COLORS> unit_moves;
-        typedef std::array<bool, PIECES> can_move_multiple;
-        typedef std::array<std::array<std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u>, PIECES>, PIECE_COLORS> valid_moves;
+        typedef std::array<std::array<std::vector<move_coordinates>, PIECE_TYPES>, PIECE_COLORS> unit_moves;
+        typedef std::array<bool, PIECE_TYPES> can_move_multiple;
+        typedef std::array<std::array<std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u>, PIECE_TYPES>, PIECE_COLORS> valid_moves;
         typedef std::pair<std::size_t, std::array<move_coordinates, 8>> move_path;
         typedef std::array<std::array<std::array<std::array<bool, 8u>, 8u>, 8u>, 8u> trivial_moves;
         typedef std::array<std::array<std::array<std::array<move_path, 8u>, 8u>, 8u>, 8u> move_paths;
@@ -169,7 +169,7 @@ namespace chess
     template <bool IntoCheckTest>
     inline bool in_check(move_tables<mailbox_rep> const& aTables, player aPlayer, mailbox_position const& aPosition)
     {
-        auto const opponent = next_player(aPlayer);
+        auto const opponent = chess::opponent(aPlayer);
         auto const kingPosition = king_position(aPosition, static_cast<piece>(aPlayer));
         for (coordinate yFrom = 0u; yFrom <= 7u; ++yFrom)
             for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)
@@ -196,8 +196,8 @@ namespace chess
         });
     }
 
-    template <player Player, typename ResultContainer>
-    inline void valid_moves(move_tables<mailbox_rep> const& aTables, mailbox_position const& aPosition, ResultContainer& aResult)
+    template <player Player>
+    inline void valid_moves(move_tables<mailbox_rep> const& aTables, mailbox_position& aPosition, game_tree_node& aResult)
     {
         as_valid_moves(aResult).clear();
         for (coordinate xFrom = 0u; xFrom <= 7u; ++xFrom)

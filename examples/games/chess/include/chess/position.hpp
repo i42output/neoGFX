@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <bit>
 #include <ostream>
 
 #include <neolib/core/static_vector.hpp>
@@ -89,12 +90,38 @@ namespace chess
     typedef std::array<std::array<piece, 8>, 8> mailbox_rep;
     
     typedef uint64_t bitboard;
-    typedef uint64_t bitboard_index;
+    typedef uint64_t bit_position;
+
+    inline constexpr bitboard bit_from_bit_position(bit_position aBitPosition)
+    {
+        return 1ull << aBitPosition;
+    }
+
+    inline constexpr bit_position bit_position_from_bitboard(bitboard aBitboard)
+    {
+        return static_cast<bit_position>(std::countr_zero(aBitboard));
+    }
+
+    inline constexpr coordinates coordinates_from_bit_position(bit_position aBitPosition)
+    {
+        return coordinates{ static_cast<uint32_t>(aBitPosition % 8ull), static_cast<uint32_t>(aBitPosition / 8ull) };
+    }
+
+    inline constexpr bit_position bit_position_from_coordinates(coordinates const& aPosition)
+    {
+        return aPosition.x + aPosition.y * 8ull;
+    }
+
+    inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
+    {
+        return bit_from_bit_position(bit_position_from_coordinates(aPosition));
+    }
 
     struct bitboard_rep
     {
-        std::array<bitboard, PIECE_COLORS> byColor;
-        std::array<bitboard, PIECES> byPiece;
+        bitboard pieces;
+        std::array<bitboard, PIECE_COLORS> byPieceColor;
+        std::array<bitboard, PIECE_TYPES> byPieceType;
         std::array<piece, SQUARES> bySquare;
 
         std::strong_ordering operator<=>(bitboard_rep const&) const = default;
@@ -107,7 +134,7 @@ namespace chess
 
     inline piece piece_at(bitboard_rep const& aRep, coordinates const& aCoordinates)
     {
-        return aRep.bySquare[aCoordinates.y * 8u + aCoordinates.x];
+        return aRep.bySquare[bit_position_from_coordinates(aCoordinates)];
     }
         
     inline void set_piece(mailbox_rep& aRep, coordinates const& aCoordinates, piece aPiece)
@@ -117,35 +144,51 @@ namespace chess
 
     inline void set_piece(bitboard_rep& aRep, coordinates const& aCoordinates, piece aPiece)
     {
-        bitboard_index const index = aCoordinates.y * 8u + aCoordinates.x;
-        auto const oldPiece = aRep.bySquare[index];
-        aRep.bySquare[index] = aPiece;
+        auto const square = bit_position_from_coordinates(aCoordinates);
+        auto const bit = bit_from_bit_position(square);
+        auto const oldPiece = aRep.bySquare[square];
+        aRep.bySquare[square] = aPiece;
         if (aPiece == piece::None)
         {
-            aRep.byColor[as_color_cardinal(piece::White)] &= ~index;
-            aRep.byColor[as_color_cardinal(piece::Black)] &= ~index;
-            aRep.byPiece[as_cardinal(oldPiece)] &= ~index;
+            aRep.pieces &= ~bit;
+            aRep.byPieceColor[as_color_cardinal(piece::White)] &= ~bit;
+            aRep.byPieceColor[as_color_cardinal(piece::Black)] &= ~bit;
+            aRep.byPieceType[as_cardinal(oldPiece)] &= ~bit;
         }
         else
         {
-            aRep.byColor[as_color_cardinal(aPiece)] |= index;
-            aRep.byColor[as_color_cardinal(piece_opponent_color(aPiece))] &= ~index;
+            aRep.pieces |= bit;
+            aRep.byPieceColor[as_color_cardinal(aPiece)] |= bit;
+            aRep.byPieceColor[as_color_cardinal(piece_opponent_color(aPiece))] &= ~bit;
             if (oldPiece != piece::None)
-                aRep.byPiece[as_cardinal(oldPiece)] &= ~index;
-            aRep.byPiece[as_cardinal(aPiece)] |= index;
+                aRep.byPieceType[as_cardinal(oldPiece)] &= ~bit;
+            aRep.byPieceType[as_cardinal(aPiece)] |= bit;
         }
     }
 
     template <typename Representation>
-    struct basic_position
+    struct basic_position;
+    
+    template <>
+    struct basic_position<mailbox_rep>
     {
-        Representation rep;
+        mailbox_rep rep;
         std::array<coordinates, PIECE_COLORS> kings;
         player turn;
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
 
-        std::strong_ordering operator<=>(basic_position<Representation> const&) const = default;
+        std::strong_ordering operator<=>(basic_position<mailbox_rep> const&) const = default;
+    };
+
+    template <>
+    struct basic_position<bitboard_rep>
+    {
+        bitboard_rep rep;
+        player turn;
+        std::vector<move> moveHistory;
+
+        std::strong_ordering operator<=>(basic_position<bitboard_rep> const&) const = default;
     };
 
     using mailbox_position = basic_position<mailbox_rep>;
@@ -175,21 +218,6 @@ namespace chess
     }
 
     using position = bitboard_position;
-
-    inline constexpr coordinates coordinates_from_bitboard_index(bitboard_index aIndex)
-    {
-        return coordinates{ static_cast<uint32_t>(aIndex % 8ull), static_cast<uint32_t>(aIndex / 8ull) };
-    }
-
-    inline constexpr bitboard_index bitboard_index_from_coordinates(coordinates const& aPosition)
-    {
-        return aPosition.x + aPosition.y * 8ull;
-    }
-
-    inline constexpr bitboard bit_from_coordinates(coordinates const& aPosition)
-    {
-        return 1ull << bitboard_index_from_coordinates(aPosition);
-    }
 
     inline std::string to_string(piece aPiece, std::string const& aNone = ".")
     {
@@ -300,7 +328,8 @@ namespace chess
                     }
                     break;
                 case piece::WhiteKing:
-                    aPosition.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMoveFrom;
+                    if constexpr (std::is_same_v<Representation, mailbox_rep>)
+                        aPosition.kings[as_color_cardinal<>(piece::WhiteKing)] = lastMoveFrom;
                     // castling (white)
                     if (lastMoveTo.x - lastMoveFrom.x == 2u)
                     {
@@ -314,7 +343,8 @@ namespace chess
                     }
                     break;
                 case piece::BlackKing:
-                    aPosition.kings[as_color_cardinal<>(piece::BlackKing)] = lastMoveFrom;
+                    if constexpr (std::is_same_v<Representation, mailbox_rep>)
+                        aPosition.kings[as_color_cardinal<>(piece::BlackKing)] = lastMoveFrom;
                     // castling (black)
                     if (lastMoveTo.x - lastMoveFrom.x == 2u)
                     {
@@ -332,7 +362,7 @@ namespace chess
                     break;
                 }
             }
-            aPosition.turn = next_player(aPosition.turn);
+            aPosition.turn = opponent(aPosition.turn);
         }
         return lastMove;
     }
@@ -410,7 +440,8 @@ namespace chess
         {
         case piece::WhiteKing:
         case piece::BlackKing:
-            aPosition.kings[as_color_cardinal<>(destinationPiece)] = aMove.to;
+            if constexpr (std::is_same_v<Representation, mailbox_rep>)
+                aPosition.kings[as_color_cardinal<>(destinationPiece)] = aMove.to;
             newMove.castlingState[as_color_cardinal<>(movingPiece)][static_cast<std::size_t>(move::castling_piece_index::King)] = true;
             if (aMove.from.x - aMove.to.x == 2)
             {
@@ -477,7 +508,7 @@ namespace chess
             // do nothing
             break;
         }
-        aPosition.turn = next_player(aPosition.turn);
+        aPosition.turn = opponent(aPosition.turn);
     }
 
     struct invalid_uci_move : std::runtime_error { invalid_uci_move() : std::runtime_error{ "chess::invalid_uci_move" } {} };
@@ -532,7 +563,7 @@ namespace chess
     template <typename Representation, player Player>
     struct eval
     {
-        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation> const& aPosition, double aPly, eval_info* aEvalInfo = nullptr);
-        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation> const& aPosition, double aPly, eval_info& aEvalInfo);
+        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation>& aPosition, double aPly, eval_info* aEvalInfo = nullptr);
+        eval_result operator()(move_tables<Representation> const& aTables, basic_position<Representation>& aPosition, double aPly, eval_info& aEvalInfo);
     };
 }
