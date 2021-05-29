@@ -40,16 +40,16 @@ namespace neogfx
     public:
         const i_layout& part(layout_position aPosition) const;
         i_layout& part(layout_position aPosition);
-        const vertical_layout& top() const;
-        vertical_layout& top();
-        const vertical_layout& left() const;
-        vertical_layout& left();
-        const stack_layout& center() const;
-        stack_layout& center();
-        const vertical_layout& right() const;
-        vertical_layout& right();
-        const vertical_layout& bottom() const;
-        vertical_layout& bottom();
+        const i_layout& top() const;
+        i_layout& top();
+        const i_layout& left() const;
+        i_layout& left();
+        const i_layout& center() const;
+        i_layout& center();
+        const i_layout& right() const;
+        i_layout& right();
+        const i_layout& bottom() const;
+        i_layout& bottom();
     public:
         i_spacer& add_spacer() override;
         i_spacer& add_spacer_at(layout_item_index aPosition) override;
@@ -61,15 +61,17 @@ namespace neogfx
     public:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+    public:
+        void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) override;
     private:
         void init();
     private:
         vertical_layout iRows;
-        vertical_layout iTop;
+        horizontal_layout iTop;
         horizontal_layout iMiddle;
         vertical_layout iLeft;
         stack_layout iCenter;
         vertical_layout iRight;
-        vertical_layout iBottom;
+        horizontal_layout iBottom;
     };
 }

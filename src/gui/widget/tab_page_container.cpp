@@ -53,7 +53,7 @@ namespace neogfx
             remove_tab(tab_count() - 1);
     }
 
-    stack_layout& tab_page_container::page_layout()
+    i_layout& tab_page_container::page_layout()
     {
         return iContainerLayout.center();
     }

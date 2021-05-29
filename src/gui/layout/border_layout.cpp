@@ -93,52 +93,52 @@ namespace neogfx
         return const_cast<i_layout&>(to_const(*this).part(aPosition));
     }
 
-    const vertical_layout& border_layout::top() const
+    const i_layout& border_layout::top() const
     {
         return iTop;
     }
 
-    vertical_layout& border_layout::top()
+    i_layout& border_layout::top()
     {
         return iTop;
     }
 
-    const vertical_layout& border_layout::left() const
+    const i_layout& border_layout::left() const
     {
         return iLeft;
     }
 
-    vertical_layout& border_layout::left()
+    i_layout& border_layout::left()
     {
         return iLeft;
     }
 
-    const stack_layout& border_layout::center() const
+    const i_layout& border_layout::center() const
     {
         return iCenter;
     }
 
-    stack_layout& border_layout::center()
+    i_layout& border_layout::center()
     {
         return iCenter;
     }
 
-    const vertical_layout& border_layout::right() const
+    const i_layout& border_layout::right() const
     {
         return iRight;
     }
 
-    vertical_layout& border_layout::right()
+    i_layout& border_layout::right()
     {
         return iRight;
     }
 
-    const vertical_layout& border_layout::bottom() const
+    const i_layout& border_layout::bottom() const
     {
         return iBottom;
     }
 
-    vertical_layout& border_layout::bottom()
+    i_layout& border_layout::bottom()
     {
         return iBottom;
     }
@@ -158,8 +158,8 @@ namespace neogfx
         if (!is_alive())
             return;
         iRows.invalidate(true);
-        iTop.invalidate(true);
         iMiddle.invalidate(true);
+        iTop.invalidate(true);
         iLeft.invalidate(true);
         iCenter.invalidate(true);
         iRight.invalidate(true);
@@ -203,6 +203,12 @@ namespace neogfx
         return result;
     }
 
+    void border_layout::set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout)
+    {
+        iRows.set_autoscale(aAutoscale, aUpdateLayout);
+        iMiddle.set_autoscale(aAutoscale, aUpdateLayout);
+    }
+
     void border_layout::init()
     {
         set_padding(neogfx::padding{});
@@ -224,12 +230,13 @@ namespace neogfx
         iBottom.set_spacing(neogfx::size{});
 
         set_size_policy(size_constraint::Expanding);
-        iRows.set_size_policy(neogfx::size_policy{ size_constraint::Expanding });
-        iTop.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iRows.set_size_policy(size_constraint::Expanding);
+        iTop.set_size_policy(size_constraint::Minimum);
         iMiddle.set_size_policy(size_constraint::Expanding);
-        iMiddle.set_minimum_size(neogfx::size{});
         iCenter.set_size_policy(size_constraint::Expanding);
-        iBottom.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iBottom.set_size_policy(size_constraint::Minimum);
+
+        iMiddle.set_minimum_size(neogfx::size{});
 
         set_alive();
         invalidate();

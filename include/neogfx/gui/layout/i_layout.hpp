@@ -168,6 +168,8 @@ namespace neogfx
         {
             switch (aDockArea)
             {
+            case dock_area::None:
+                return layout_position::None;
             case dock_area::Top:
                 return layout_position::Top;
             case dock_area::Bottom:

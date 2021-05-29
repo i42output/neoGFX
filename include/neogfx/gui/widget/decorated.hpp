@@ -392,9 +392,15 @@ namespace neogfx
             case standard_layout::Menu:
                 return *iMenuLayout;
             case standard_layout::Toolbar:
-                return iToolbarLayout->part(aPosition);
+                if (aPosition == layout_position::None)
+                    return *iToolbarLayout;
+                else
+                    return iToolbarLayout->part(aPosition);
             case standard_layout::Dock:
-                return iDockLayout->part(aPosition);
+                if (aPosition == layout_position::None)
+                    return *iDockLayout;
+                else
+                    return iDockLayout->part(aPosition);
             case standard_layout::StatusBar:
                 return *iStatusBarLayout;
             default:

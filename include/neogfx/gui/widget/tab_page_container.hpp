@@ -47,7 +47,7 @@ namespace neogfx
         tab_container_style style() const override;
         void set_style(tab_container_style aStyle) override;
     public:
-        stack_layout& page_layout() override;
+        i_layout& page_layout() override;
     public:
         bool has_tabs() const override;
         uint32_t tab_count() const override;
