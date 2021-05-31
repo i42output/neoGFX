@@ -250,7 +250,8 @@ namespace neogfx
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
-                surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
+                if (!mouse.grabber().mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers()))
+                    surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
                 surface_window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
@@ -278,7 +279,8 @@ namespace neogfx
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
-                surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
+                if (!mouse.grabber().mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers()))
+                    surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
                 surface_window().native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());

@@ -484,38 +484,12 @@ namespace neogfx
     void layout::layout_item_enabled(i_layout_item& aItem)
     {
         base_type::layout_item_enabled(aItem);
-        if (aItem.has_weight())
-        {
-            auto const totalChildWeight = total_child_weight(*this);
-            auto const previousWeightCoefficients = aItem.weight();
-            aItem.set_weight(totalChildWeight * previousWeightCoefficients, false);
-            for (auto& item : items())
-            {
-                if (!item.visible())
-                    continue;
-                if (&item.subject() != &aItem)
-                    item.set_weight(item.weight() * (size{ 1.0 } - previousWeightCoefficients), false);
-            }
-        }
         invalidate();
     }
     
     void layout::layout_item_disabled(i_layout_item& aItem)
     {
         base_type::layout_item_disabled(aItem);
-        if (has_weight())
-        {
-            auto const totalChildWeight = total_child_weight(*this);
-            auto const previousWeightCoefficients = aItem.weight() / totalChildWeight;
-            aItem.set_weight(previousWeightCoefficients, false);
-            for (auto& item : items())
-            {
-                if (!item.visible())
-                    continue;
-                if (&item.subject() != &aItem)
-                    item.set_weight(item.weight() / previousWeightCoefficients, false);
-            }
-        }
         invalidate();
     }
 

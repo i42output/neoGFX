@@ -138,6 +138,12 @@ namespace neogfx
         Raw
     };
 
+    class i_mouse_handler
+    {
+    public:
+        virtual bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
+    };
+
     class i_mouse : public i_hid_device, public i_service
     {
     public:
@@ -149,6 +155,8 @@ namespace neogfx
         struct not_capturing : std::logic_error { not_capturing() : std::logic_error{ "neogfx::i_mouse::not_capturing" } {} };
         struct already_capturing : std::logic_error { already_capturing() : std::logic_error{ "neogfx::i_mouse::already_capturing" } {} };
         struct bad_surface : std::logic_error { bad_surface() : std::logic_error{ "neogfx::i_mouse::bad_surface" } {} };
+        struct no_grab : std::logic_error { no_grab() : std::logic_error("neogfx::i_mouse::no_grab") {} };
+        struct already_grabbed : std::logic_error { already_grabbed() : std::logic_error("neogfx::i_mouse::already_grabbed") {} };
     public:
         virtual point position() const = 0;
         virtual mouse_button button_state() const = 0;
@@ -159,6 +167,13 @@ namespace neogfx
         virtual void capture(i_surface& aTarget) = 0;
         virtual void capture_raw(i_surface& aTarget) = 0;
         virtual void release_capture() = 0;
+    public:
+        virtual bool is_mouse_grabbed() const = 0;
+        virtual bool is_mouse_grabbed_by(i_mouse_handler& aMouseHandler) const = 0;
+        virtual bool is_front_grabber(i_mouse_handler& aMouseHandler) const = 0;
+        virtual void grab_mouse(i_mouse_handler& aMouseHandler) = 0;
+        virtual void ungrab_mouse(i_mouse_handler& aMouseHandler) = 0;
+        virtual i_mouse_handler& grabber() const = 0;
     public:
         bool is_button_pressed(mouse_button aButton) const
         {

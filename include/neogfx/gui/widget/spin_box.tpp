@@ -111,12 +111,15 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
+        {
             do_step(aDelta.dy > 0.0 ? step_direction::Up : step_direction::Down);
+            return true;
+        }
         else
-            base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            return base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
 
     template <typename T>

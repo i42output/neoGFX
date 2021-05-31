@@ -38,7 +38,7 @@ namespace neogfx
     class i_surface;
     class i_layout;
 
-    class i_widget : public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
+    class i_widget : public i_layout_item, public i_keyboard_handler, public i_mouse_handler, public virtual i_skinnable_item
     {
     public:
         declare_event(child_added, i_widget&)
@@ -218,7 +218,7 @@ namespace neogfx
         virtual bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const = 0;
         virtual void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) = 0;
         virtual neogfx::mouse_event_location mouse_event_location() const = 0;
-        virtual void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
+        virtual bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_released(mouse_button aButton, const point& aPosition) = 0;

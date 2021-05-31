@@ -177,15 +177,16 @@ namespace neogfx
         }
     }
 
-    void slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
         {
             neolib::scoped_flag sf{ iHandlingEvent };
             set_normalized_value(std::max(0.0, std::min(1.0, normalized_value() + (aDelta.dy * normalized_step_value()))));
+            return true;
         }
         else
-            widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            return widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
 
     void slider_impl::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)

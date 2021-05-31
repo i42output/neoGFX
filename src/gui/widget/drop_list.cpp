@@ -127,6 +127,8 @@ namespace neogfx
 
     drop_list_popup::~drop_list_popup()
     {
+        if (service<i_mouse>().is_mouse_grabbed_by(view()))
+            service<i_mouse>().ungrab_mouse(view());
     }
 
     const drop_list_view& drop_list_popup::view() const
@@ -165,11 +167,15 @@ namespace neogfx
             update_placement();
             if (!service<i_keyboard>().is_keyboard_grabbed_by(view()))
                 service<i_keyboard>().grab_keyboard(view());
+            if (!service<i_mouse>().is_mouse_grabbed_by(view()))
+                service<i_mouse>().grab_mouse(view());
         }
         else if (!aVisible)
         {
             if (service<i_keyboard>().is_keyboard_grabbed_by(view()))
                 service<i_keyboard>().ungrab_keyboard(view());
+            if (service<i_mouse>().is_mouse_grabbed_by(view()))
+                service<i_mouse>().ungrab_mouse(view());
         }
         return window::show(aVisible);
     }
