@@ -128,7 +128,7 @@ namespace neogfx
         };
     }
 
-    font_dialog::font_dialog(const neogfx::font& aCurrentFont, std::optional<text_appearance> const& aCurrentAppearance) :
+    font_dialog::font_dialog(const neogfx::font& aCurrentFont, optional<text_appearance> const& aCurrentAppearance) :
         dialog{ "Select Font"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
@@ -177,7 +177,7 @@ namespace neogfx
         init();
     }
 
-    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, std::optional<text_appearance> const& aCurrentAppearance) :
+    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, optional<text_appearance> const& aCurrentAppearance) :
         dialog{ aParent, "Select Font"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
@@ -240,12 +240,12 @@ namespace neogfx
         return iSelectedFont;
     }
 
-    std::optional<text_appearance> const& font_dialog::current_appearance() const
+    optional<text_appearance> const& font_dialog::current_appearance() const
     {
         return iCurrentAppearance;
     }
 
-    std::optional<text_appearance> const& font_dialog::selected_appearance() const
+    optional<text_appearance> const& font_dialog::selected_appearance() const
     {
         return iSelectedAppearance;
     }
@@ -256,12 +256,12 @@ namespace neogfx
         update_selected_font(*this);
     }
 
-    void font_dialog::set_default_ink(const std::optional<color>& aColor)
+    void font_dialog::set_default_ink(const optional<color>& aColor)
     {
         iDefaultInk = aColor;
     }
 
-    void font_dialog::set_default_paper(const std::optional<color>& aColor)
+    void font_dialog::set_default_paper(const optional<color>& aColor)
     {
         iDefaultPaper = aColor;
     }
@@ -483,7 +483,7 @@ namespace neogfx
                     else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
                         iInkGradient.check();
                 }
-                if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
+                if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != std::nullopt)
                 {
                     iPaperBox.check_box().check();
                     if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
@@ -544,14 +544,14 @@ namespace neogfx
         {
             if (iPaperColor.is_checked())
             {
-                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == std::nullopt)
                     iSelectedAppearance->set_paper(iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background));
                 else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
                     iSelectedAppearance->set_paper(std::get<gradient>(*iSelectedAppearance->paper()).color_at(0.0));
             }
             else if (iPaperGradient.is_checked())
             {
-                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == std::nullopt)
                     iSelectedAppearance->set_paper(gradient{ iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background) });
                 else if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
                     iSelectedAppearance->set_paper(gradient{ std::get<color>(*iSelectedAppearance->paper()) });

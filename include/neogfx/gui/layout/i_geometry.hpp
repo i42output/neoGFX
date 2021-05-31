@@ -301,22 +301,54 @@ namespace neogfx
         }
     };
 
-    struct size_hint
+    class i_size_hint
     {
-        std::string primaryHint;
-        std::string secondaryHint;
+    public:
+        typedef i_size_hint abstract_type;
+    public:
+        virtual ~i_size_hint() = default;
+    public:
+        virtual i_string const& primary_hint() const = 0;
+        virtual i_string const& secondary_hint() const = 0;
+    };
 
+    class size_hint : public i_size_hint
+    {
+    public:
+        size_hint(i_size_hint const& aOther) :
+            iPrimaryHint{ aOther.primary_hint() },
+            iSecondaryHint{ aOther.secondary_hint() }
+        {
+        }
+        size_hint(string const& aPrimaryHint = {}, string const& aSecondaryHint = {}) :
+            iPrimaryHint{ aPrimaryHint },
+            iSecondaryHint{ aSecondaryHint }
+        {
+        }
+    public:
         operator bool() const
         {
-            return !primaryHint.empty() || !secondaryHint.empty();
+            return !iPrimaryHint.empty() || !iSecondaryHint.empty();
         }
         bool operator==(const size_hint& aOther) const
         {
-            return primaryHint == aOther.primaryHint && secondaryHint == aOther.secondaryHint;
+            return iPrimaryHint == aOther.iPrimaryHint && iSecondaryHint == aOther.iSecondaryHint;
         }
         bool operator!=(const size_hint& aOther) const
         {
             return !(*this == aOther);
         }
+    public:
+        string const& primary_hint() const override
+        {
+            return iPrimaryHint;
+        }
+        string const& secondary_hint() const override
+        {
+            return iSecondaryHint;
+        }
+    private:
+        string iPrimaryHint;
+        string iSecondaryHint;
     };
 }

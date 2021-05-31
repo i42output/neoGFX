@@ -298,18 +298,18 @@ namespace neogfx
             if (multi_line())
             {
                 if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::minimum_size().cx - padding().size().cx).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::minimum_size().cx - padding().size().cx));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primary_hint(), font(), widget::minimum_size().cx - padding().size().cx).max(
+                        gc.multiline_text_extent(iSizeHint.secondary_hint(), font(), widget::minimum_size().cx - padding().size().cx));
                 else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::maximum_size().cx - padding().size().cx).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::maximum_size().cx - padding().size().cx));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primary_hint(), font(), widget::maximum_size().cx - padding().size().cx).max(
+                        gc.multiline_text_extent(iSizeHint.secondary_hint(), font(), widget::maximum_size().cx - padding().size().cx));
                 else
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font()).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font()));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primary_hint(), font()).max(
+                        gc.multiline_text_extent(iSizeHint.secondary_hint(), font()));
             }
             else
-                iSizeHintExtent = gc.text_extent(iSizeHint.primaryHint, font()).max(
-                    gc.text_extent(iSizeHint.secondaryHint, font()));
+                iSizeHintExtent = gc.text_extent(iSizeHint.primary_hint(), font()).max(
+                    gc.text_extent(iSizeHint.secondary_hint(), font()));
         }
         if (iSizeHintExtent->cy == 0.0)
             iSizeHintExtent->cy = font().height();

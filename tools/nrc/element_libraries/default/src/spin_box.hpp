@@ -81,10 +81,10 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<T> iMinimum;
-        std::optional<T> iMaximum;
-        std::optional<T> iStep;
-        std::optional<T> iValue;
+        neolib::optional<T> iMinimum;
+        neolib::optional<T> iMaximum;
+        neolib::optional<T> iStep;
+        neolib::optional<T> iValue;
     };
 
     typedef basic_spin_box<int32_t, ui_element_type::SpinBox> spin_box;

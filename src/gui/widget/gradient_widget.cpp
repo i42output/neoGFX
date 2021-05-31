@@ -303,7 +303,7 @@ namespace neogfx
             if (std::holds_alternative<gradient::color_stop_list::iterator>(stopIter))
             {
                 auto& stop = *static_variant_cast<gradient::color_stop_list::iterator>(stopIter);
-                auto const originalColor = stop.second();
+                sRGB_color const originalColor = stop.second();
                 color_dialog cd{ *this, stop.second() };
                 if (iCustomColors != std::nullopt)
                     cd.set_custom_colors(*iCustomColors);
@@ -379,7 +379,7 @@ namespace neogfx
                     selectColorAction->Triggered([this, iter]()
                     {
                         auto& stop = *iter;
-                        auto const originalColor = stop.second();
+                        sRGB_color const originalColor = stop.second();
                         color_dialog cd{ *this, stop.second() };
                         if (iCustomColors != std::nullopt)
                             cd.set_custom_colors(*iCustomColors);
@@ -419,7 +419,7 @@ namespace neogfx
                             ++next;
                         double p1 = (iter->first() + (prev)->first()) / 2.0;
                         double p2 = (iter->first() + (next)->first()) / 2.0;
-                        auto const c = iter->second();
+                        sRGB_color const c = iter->second();
                         set_current_color_stop(std::nullopt);
                         if (iter != prev && iter != next)
                             iSelection.color_stops().erase(iter);

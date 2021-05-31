@@ -125,8 +125,8 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<window_style> iStyle;
-        std::optional<string> iTitle;
-        std::optional<basic_size<length>> iDefaultSize;
+        neolib::optional<window_style> iStyle;
+        neolib::optional<string> iTitle;
+        neolib::optional<basic_size<length>> iDefaultSize;
     };
 }

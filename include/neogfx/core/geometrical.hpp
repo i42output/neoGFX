@@ -100,7 +100,7 @@ namespace neogfx
         }
     };
 
-    typedef std::optional<logical_coordinates> optional_logical_coordinates;
+    typedef neolib::optional<logical_coordinates> optional_logical_coordinates;
 
     template <typename CoordinateType>
     class basic_delta 
@@ -1331,7 +1331,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_point<T>>& aPoint)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::optional<basic_point<T>>& aPoint)
     {
         if (aPoint)
             return aStream << *aPoint;
@@ -1340,7 +1340,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_size<T>>& aSize)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::optional<basic_size<T>>& aSize)
     {
         if (aSize)
             return aStream << *aSize;
@@ -1349,7 +1349,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_delta<T>>& aDelta)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::optional<basic_delta<T>>& aDelta)
     {
         if (aDelta)
             return aStream << *aDelta;
@@ -1358,7 +1358,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_rect<T>>& aBoxAreas)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::optional<basic_rect<T>>& aBoxAreas)
     {
         if (aBoxAreas)
             return aStream << *aBoxAreas;
@@ -1367,7 +1367,7 @@ namespace neogfx
     }
 
     template <typename Elem, typename Traits, typename T>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const std::optional<basic_box_areas<T>>& aRect)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::optional<basic_box_areas<T>>& aRect)
     {
         if (aRect)
             return aStream << *aRect;

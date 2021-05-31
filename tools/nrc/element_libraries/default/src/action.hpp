@@ -93,12 +93,12 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<bool> iCheckable;
-        std::optional<bool> iChecked;
-        std::optional<neolib::string> iText;
-        std::optional<neolib::string> iImage;
-        std::optional<neolib::string> iShortcut;
-        std::optional<neolib::string> iCheckedImage;
+        neolib::optional<bool> iCheckable;
+        neolib::optional<bool> iChecked;
+        neolib::optional<neolib::string> iText;
+        neolib::optional<neolib::string> iImage;
+        neolib::optional<neolib::string> iShortcut;
+        neolib::optional<neolib::string> iCheckedImage;
     };
 
     class action_ref : public ui_element<>

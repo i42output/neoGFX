@@ -54,6 +54,7 @@ namespace neogfx
     public:
         color palette_color(color_role aColorRole) const override;
     public:
+        using base_type::show;
         bool show(bool aVisible) override;
     private:
         void init();

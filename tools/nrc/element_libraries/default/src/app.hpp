@@ -80,7 +80,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neolib::string> iName;
-        std::optional<neolib::string> iDefaultWindowIcon;
+        neolib::optional<neolib::string> iName;
+        neolib::optional<neolib::string> iDefaultWindowIcon;
     };
 }

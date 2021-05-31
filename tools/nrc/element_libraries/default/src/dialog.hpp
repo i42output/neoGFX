@@ -88,7 +88,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<basic_size<length>> iStandardLayout;
-        std::optional<standard_button> iButtonBox;
+        neolib::optional<basic_size<length>> iStandardLayout;
+        neolib::optional<standard_button> iButtonBox;
     };
 }

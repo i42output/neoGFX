@@ -66,7 +66,7 @@ namespace neogfx
     {
         namespace platform_specific
         {
-            std::optional<font_info> default_system_font_info(system_font_role aRole)
+            optional<font_info> default_system_font_info(system_font_role aRole)
             {
 #ifdef WIN32
 #if 0 // Has Microsoft (tm) changed their mind on this? (See VS2019 font usage)

@@ -346,7 +346,7 @@ namespace neogfx
             {
                 iHintedSize.emplace(font(), size{});
                 graphics_context gc{ *this, graphics_context::type::Unattached };
-                iHintedSize->second = gc.text_extent(size_hint().primaryHint, font()).max(gc.text_extent(size_hint().secondaryHint, font()));
+                iHintedSize->second = gc.text_extent(size_hint().primary_hint(), font()).max(gc.text_extent(size_hint().secondary_hint(), font()));
                 if (iHintedSize->second.cy == 0.0)
                     iHintedSize->second.cy = font().height();
             }

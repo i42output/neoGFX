@@ -90,7 +90,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<basic_size<length>> iSpacing;
+        neolib::optional<basic_size<length>> iSpacing;
     };
 
     class grid_layout : public basic_layout<ui_element_type::GridLayout>
@@ -121,8 +121,8 @@ namespace neogfx::nrc
             base_type::emit_body();
         }
     public:
-        std::optional<uint32_t> iRows;
-        std::optional<uint32_t> iColumns;
+        neolib::optional<uint32_t> iRows;
+        neolib::optional<uint32_t> iColumns;
     };
 
     typedef basic_layout<ui_element_type::VerticalLayout> vertical_layout;

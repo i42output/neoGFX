@@ -139,22 +139,12 @@ namespace neogfx
             return *this;
         }
     public:
-        bool operator==(const text_color& aOther) const
-        {
-            return static_cast<const color_or_gradient&>(*this) == static_cast<const color_or_gradient&>(aOther);
-        }
-        bool operator!=(const text_color& aOther) const
-        {
-            return static_cast<const color_or_gradient&>(*this) != static_cast<const color_or_gradient&>(aOther);
-        }
-        bool operator==(const neolib::none_t&) const
-        {
-            return static_cast<const color_or_gradient&>(*this) == neolib::none;
-        }
-        bool operator!=(const neolib::none_t&) const
-        {
-            return static_cast<const color_or_gradient&>(*this) != neolib::none;
-        }
+        using color_or_gradient::operator==;
+        using color_or_gradient::operator!=;
+        using color_or_gradient::operator<;
+        using color_or_gradient::operator<=;
+        using color_or_gradient::operator>;
+        using color_or_gradient::operator>=;
     public:
         color::component alpha() const
         {
@@ -173,7 +163,7 @@ namespace neogfx
                 return text_color{};
         }
     };
-    typedef std::optional<text_color> optional_text_color;
+    typedef neolib::optional<text_color> optional_text_color;
 
     enum class text_effect_type : uint32_t
     {
@@ -185,6 +175,8 @@ namespace neogfx
 
     class text_effect
     {
+    public:
+        typedef text_effect abstract_type; // todo
     public:
         typedef double auxiliary_parameter;
         typedef optional<auxiliary_parameter> optional_auxiliary_parameter;
@@ -321,13 +313,15 @@ namespace neogfx
         optional_auxiliary_parameter iAux1;
         bool iIgnoreEmoji;
     };
-    typedef std::optional<text_effect> optional_text_effect;
+    typedef neolib::optional<text_effect> optional_text_effect;
 
     class text_appearance
     {
     public:
         struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
         struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
+    public:
+        typedef text_appearance abstract_type; // todo
     public:
         text_appearance() :
             iIgnoreEmoji{ true },
@@ -508,5 +502,5 @@ namespace neogfx
         bool iBeingFiltered;
     };
 
-    typedef std::optional<text_appearance> optional_text_appearance;
+    typedef neolib::optional<text_appearance> optional_text_appearance;
 }

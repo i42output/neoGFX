@@ -71,7 +71,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<string> iTabStopHint;
-        std::optional<string> iHint;
+        neolib::optional<string> iTabStopHint;
+        neolib::optional<string> iHint;
     };
 }

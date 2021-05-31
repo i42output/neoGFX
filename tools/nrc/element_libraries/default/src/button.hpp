@@ -82,8 +82,8 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<button_checkable> iCheckable;
-        std::optional<bool> iChecked; // todo: tri-state
+        neolib::optional<button_checkable> iCheckable;
+        neolib::optional<bool> iChecked; // todo: tri-state
     };
 
     typedef basic_button<ui_element_type::PushButton> push_button;

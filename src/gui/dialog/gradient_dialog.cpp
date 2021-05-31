@@ -379,13 +379,13 @@ namespace neogfx
         auto update_hue_selection = [this]()
         {
             neolib::scoped_flag scope{ iIgnoreHueSliderChange };
-            iHueSlider.set_value(iGradientSelector.selected_color_stop()->second().to_hsv().hue());
+            iHueSlider.set_value(sRGB_color{ iGradientSelector.selected_color_stop()->second() }.to_hsv().hue());
             iHueSelection.clear();
             auto stopIter = iGradientSelector.gradient().color_stops().begin();
             for (std::size_t stopIndex = 0; stopIndex < iGradientSelector.gradient().color_stops().size(); ++stopIndex, ++stopIter)
             {
                 auto const& colorStop = *stopIter;
-                auto d = (colorStop.second().to_hsv().hue() - iHueSlider.value());
+                auto d = (sRGB_color{ colorStop.second() }.to_hsv().hue() - iHueSlider.value());
                 auto const tolerance_deg = 3.0; // todo: make this configurable
                 if (std::abs(d) < tolerance_deg)
                     iHueSelection.emplace_back(stopIndex, d);
@@ -433,7 +433,7 @@ namespace neogfx
             for (auto const& hs : iHueSelection)
             {
                 auto& colorStop = *std::next(newGradient.color_stops().begin(), hs.first);
-                auto newColor = colorStop.second().to_hsv();
+                auto newColor = sRGB_color{ colorStop.second() }.to_hsv();
                 newColor.set_hue(iHueSlider.value() + hs.second);
                 colorStop.second() = newColor.to_rgb<color>();
             }

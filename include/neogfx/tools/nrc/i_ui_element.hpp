@@ -397,7 +397,7 @@ namespace neogfx::nrc
             {
                 if (s != aArgument.color_stops().begin())
                     result << ", ";
-                result << "gradient::color_stop{ " << s->first() << ", color{ " << convert_emit_argument(s->second()) << " } }";
+                result << "gradient::color_stop{ " << s->first() << ", color{ " << convert_emit_argument(sRGB_color{ s->second() }) << " } }";
             }
             result << " }, " << enum_to_string<gradient_direction>("gradient_direction", aArgument.direction());
             return result.str();

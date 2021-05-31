@@ -107,7 +107,7 @@ namespace neogfx
             do_create_gradient(aOther, aColorStops, aAlphaStops, result);
             return result;
         }
-        neolib::ref_ptr<i_gradient> create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection = gradient_direction::Vertical)
+        neolib::ref_ptr<i_gradient> create_gradient(neolib::i_vector<sRGB_color::abstract_type> const& aColors, gradient_direction aDirection = gradient_direction::Vertical)
         {
             neolib::ref_ptr<i_gradient> result;
             do_create_gradient(aColors, aDirection, result);
@@ -130,7 +130,7 @@ namespace neogfx
         virtual void do_create_gradient(i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
         virtual void do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
         virtual void do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
-        virtual void do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
+        virtual void do_create_gradient(neolib::i_vector<sRGB_color::abstract_type> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x15d5c3b1, 0x195e, 0x4e90, 0x9b65, { 0x46, 0x70, 0x7e, 0xb9, 0x6e, 0xd5 } }; return sIid; }
     };
