@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
@@ -507,6 +508,7 @@ namespace neogfx
                 }
                 iDockLayout.emplace(*iDockLayoutContainer);
                 iDockLayout->set_padding(neogfx::padding{});
+                iDockLayout->center().set_padding(service<i_app>().current_style().padding(padding_role::Dock));
             }
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
             {

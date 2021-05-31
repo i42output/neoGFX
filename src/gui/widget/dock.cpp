@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -161,9 +162,9 @@ namespace neogfx
         iParentLayoutSizePolicyDelegate.emplace(
             get_property(parent_layout(), "SizePolicy"), SizePolicy,
             [this]() -> optional_size_policy { return size_policy(); });
-        set_padding((area() & dock_area::Vertical) != dock_area::None ? neogfx::padding{ 1.5_mm, 0, 1.5_mm, 0 } : neogfx::padding{ 1.5_mm, 1.5_mm, 1.5_mm, 1.5_mm });
+        set_padding(service<i_app>().current_style().padding(padding_role::Dock));
         layout().set_padding(neogfx::padding{}, false);
-        layout().set_spacing(padding().top_left().to_vec2(), false);
+        layout().set_spacing(padding().top_left().to_vec2() * 2.0, false);
         set_background_opacity(1.0);
         update_layout();
     }
