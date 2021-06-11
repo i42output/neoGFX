@@ -126,13 +126,13 @@ namespace neogfx
         return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
-    i_tab& tab_bar::add_tab(std::string const& aTabText)
+    i_tab& tab_bar::add_tab(i_string const& aTabText)
     {
         iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
         return *iTabs.back();
     }
 
-    i_tab& tab_bar::insert_tab(tab_index aTabIndex, std::string const& aTabText)
+    i_tab& tab_bar::insert_tab(tab_index aTabIndex, i_string const& aTabText)
     {
         iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
         return *iTabs.back();

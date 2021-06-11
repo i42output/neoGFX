@@ -91,8 +91,8 @@ namespace neogfx::DesignStudio
             });
             iSink += aElement.context_menu([&](i_menu& aMenu)
             {
-                auto noteColor = std::make_shared<action>("Sticky Note Color...");
-                auto noteBackground = std::make_shared<action>("Sticky Note Background...");
+                auto noteColor = make_ref<action>("Sticky Note Color...");
+                auto noteBackground = make_ref<action>("Sticky Note Background...");
                 noteColor->Triggered([&]()
                 {
                     auto oldColor = background_color();
@@ -119,8 +119,8 @@ namespace neogfx::DesignStudio
             iSink += iDefaultItem->ContextMenu([&](i_menu& aMenu)
             {
                 aElement.context_menu().trigger(aMenu);
-                auto fontFormat = std::make_shared<action>("Font...");
-                auto paragraphFormat = std::make_shared<action>("Paragraph...");
+                auto fontFormat = make_ref<action>("Font...");
+                auto paragraphFormat = make_ref<action>("Paragraph...");
                 fontFormat->Triggered([&]()
                 {
                     font_dialog fontPicker{ *this, *iDefaultItem->current_style().character().font(), iDefaultItem->current_style().character().as_text_appearance() };

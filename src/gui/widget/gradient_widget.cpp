@@ -351,7 +351,7 @@ namespace neogfx
         widget::mouse_button_released(aButton, aPosition);
         if (aButton == mouse_button::Right)
         {
-            auto moreAction = std::make_shared<action>("More..."_t);
+            auto moreAction = make_ref<action>("More..."_t);
             moreAction->Triggered([this]()
             {
                 neogfx::gradient const originalGradient = gradient();
@@ -375,7 +375,7 @@ namespace neogfx
                 if (std::holds_alternative<gradient::color_stop_list::iterator>(stopIter))
                 {
                     auto iter = static_variant_cast<gradient::color_stop_list::iterator>(stopIter);
-                    auto selectColorAction = std::make_shared<action>("Select stop color..."_t);
+                    auto selectColorAction = make_ref<action>("Select stop color..."_t);
                     selectColorAction->Triggered([this, iter]()
                     {
                         auto& stop = *iter;
@@ -408,7 +408,7 @@ namespace neogfx
                             update_stop(originalColor);
                         iCustomColors = cd.custom_colors();
                     });
-                    auto splitStopAction = std::make_shared<action>("Split stop"_t);
+                    auto splitStopAction = make_ref<action>("Split stop"_t);
                     splitStopAction->Triggered([this, iter]()
                     {
                         auto prev = iter;
@@ -430,7 +430,7 @@ namespace neogfx
                         update();
                         GradientChanged.trigger();
                     });
-                    auto deleteStopAction = std::make_shared<action>("Delete stop"_t);
+                    auto deleteStopAction = make_ref<action>("Delete stop"_t);
                     deleteStopAction->Triggered([this, iter]()
                     {
                         set_current_color_stop(std::nullopt);
@@ -452,7 +452,7 @@ namespace neogfx
                 else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
                 {
                     auto iter = static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
-                    auto selectAlphaAction = std::make_shared<action>("Select stop alpha (opacity level)..."_t);
+                    auto selectAlphaAction = make_ref<action>("Select stop alpha (opacity level)..."_t);
                     selectAlphaAction->Triggered([this, stopIter]()
                     {
                         auto& stop = *static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter);
@@ -464,7 +464,7 @@ namespace neogfx
                             GradientChanged.trigger();
                         }
                     });
-                    auto splitStopAction = std::make_shared<action>("Split stop"_t);
+                    auto splitStopAction = make_ref<action>("Split stop"_t);
                     splitStopAction->Triggered([this, iter]()
                     {
                         auto prev = iter;
@@ -486,7 +486,7 @@ namespace neogfx
                         update();
                         GradientChanged.trigger();
                     });
-                    auto deleteStopAction = std::make_shared<action>("Delete stop");
+                    auto deleteStopAction = make_ref<action>("Delete stop");
                     deleteStopAction->Triggered([this, stopIter]()
                     {
                         if (iCurrentAlphaStop != std::nullopt && *iCurrentAlphaStop == static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter))

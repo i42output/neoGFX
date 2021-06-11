@@ -145,12 +145,12 @@ namespace neogfx
         return widget::visible();
     }
 
-    std::string const& text_widget::text() const
+    i_string const& text_widget::text() const
     {
         return iText;
     }
 
-    void text_widget::set_text(std::string const& aText)
+    void text_widget::set_text(i_string const& aText)
     {
         if (iText != aText)
         {

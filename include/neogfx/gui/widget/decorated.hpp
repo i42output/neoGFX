@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
@@ -505,6 +506,11 @@ namespace neogfx
                     iDockLayoutContainer.emplace(has_layout(standard_layout::Toolbar) ?
                         toolbar_layout(layout_position::Center) : non_client_layout());
                     iDockLayoutContainer->set_padding(neogfx::padding{});
+                    iDockLayoutContainer->painted([&](i_graphics_context& aGc)
+                    {
+                        service<i_skin_manager>().active_skin().draw_separators(aGc, *iDockLayoutContainer, dock_layout(dock_area::East).parent_layout());
+                        service<i_skin_manager>().active_skin().draw_separators(aGc, *iDockLayoutContainer, dock_layout(dock_area::North).parent_layout());
+                    });
                 }
                 iDockLayout.emplace(*iDockLayoutContainer);
                 iDockLayout->set_padding(neogfx::padding{});

@@ -36,7 +36,7 @@ namespace neogfx
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
-        define_event(TextFilter, text_filter, std::string const&, bool&)
+        define_event(TextFilter, text_filter, i_string const&, bool&)
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)
         define_event(ContextMenu, context_menu, i_menu&)
@@ -48,7 +48,7 @@ namespace neogfx
             SingleLine,
             MultiLine
         };
-        typedef std::optional<std::string> optional_password_mask;
+        typedef std::optional<string> optional_password_mask;
         class character_style
         {
         public:
@@ -469,7 +469,7 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(std::string const& aText) override;
+        bool text_input(i_string const& aText) override;
     public:
         neogfx::scrolling_disposition scrolling_disposition() const override;
         using framed_scrollable_widget::update_scrollbar_visibility;
@@ -496,10 +496,10 @@ namespace neogfx
     public:
         void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;
     public:
-        std::string plain_text() const override;
-        bool set_plain_text(std::string const& aPlainText) override;
-        std::string rich_text(rich_text_format aFormat = rich_text_format::Html) const override;
-        bool set_rich_text(std::string const& aRichText, rich_text_format aFormat = rich_text_format::Html) override;
+        i_string const& plain_text() const override;
+        bool set_plain_text(i_string const& aPlainText) override;
+        i_string const& rich_text(rich_text_format aFormat = rich_text_format::Html) const override;
+        bool set_rich_text(i_string const& aRichText, rich_text_format aFormat = rich_text_format::Html) override;
     public:
         void paste_plain_text() override;
         void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) override;
@@ -510,8 +510,8 @@ namespace neogfx
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
         bool password() const;
-        string const& password_mask() const;
-        void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F");
+        i_string const& password_mask() const;
+        void set_password(bool aPassword, i_string const& aMask = string{ "\xE2\x97\x8F" });
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
         const style& default_style() const;
@@ -524,15 +524,15 @@ namespace neogfx
         style next_style() const;
     public:
         void clear();
-        std::string const& text() const;
-        std::size_t set_text(std::string const& aText);
-        std::size_t set_text(std::string const& aText, const style& aStyle);
-        std::size_t append_text(std::string const& aText, bool aMoveCursor = false);
-        std::size_t append_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false);
-        std::size_t insert_text(std::string const& aText, bool aMoveCursor = false);
-        std::size_t insert_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false);
-        std::size_t insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor = false);
-        std::size_t insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor = false);
+        i_string const& text() const;
+        std::size_t set_text(i_string const& aText);
+        std::size_t set_text(i_string const& aText, const style& aStyle);
+        std::size_t append_text(i_string const& aText, bool aMoveCursor = false);
+        std::size_t append_text(i_string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(i_string const& aText, bool aMoveCursor = false);
+        std::size_t insert_text(i_string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, i_string const& aText, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor = false);
         void delete_text(position_type aStart, position_type aEnd);
         std::size_t columns() const;
         void set_columns(std::size_t aColumnCount);
@@ -545,7 +545,7 @@ namespace neogfx
         const neogfx::size_hint& size_hint() const;
         void set_size_hint(const neogfx::size_hint& aSizeHint);
         dimension tab_stops() const;
-        void set_tab_stop_hint(std::string const& aTabStopHint = "0000");
+        void set_tab_stop_hint(i_string const& aTabStopHint = string{ "0000" });
         void set_tab_stops(const optional_dimension& aTabStops);
     public:
         position_type document_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
@@ -577,7 +577,7 @@ namespace neogfx
         void init();
         document_glyphs const& glyphs() const;
         document_glyphs& glyphs();
-        std::size_t do_insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
+        std::size_t do_insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
@@ -611,7 +611,7 @@ namespace neogfx
         std::u32string iNormalizedTextBuffer;
         document_text iPreviousText;
         document_text iText;
-        mutable std::optional<std::string> iUtf8TextCache;
+        mutable std::optional<string> iUtf8TextCache;
         mutable std::optional<document_glyphs> iGlyphs;
         glyph_paragraphs iGlyphParagraphs;
         glyph_columns iGlyphColumns;
@@ -630,7 +630,7 @@ namespace neogfx
         neogfx::size_hint iSizeHint;
         mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
         optional_dimension iTabStops;
-        std::string iTabStopHint;
+        string iTabStopHint;
         basic_point<std::optional<dimension>> iCursorHint;
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         neolib::callback_timer iAnimator;

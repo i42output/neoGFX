@@ -362,6 +362,11 @@ namespace neogfx
         return transformation(true) * units_converter(*this).from_device_units(adjustedPadding);
     }
 
+    layout_direction layout::direction() const
+    {
+        return layout_direction::Unknown;
+    }
+
     bool layout::has_spacing() const
     {
         return iSpacing != std::nullopt;

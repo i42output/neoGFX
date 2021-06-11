@@ -87,10 +87,10 @@ namespace neogfx
         void toggle() override;
         // button
     public:
-        std::string const& text() const;
-        void set_text(std::string const& aText);
+        i_string const& text() const;
+        void set_text(i_string const& aText);
         const texture& image() const;
-        void set_image(std::string const& aImageUri);
+        void set_image(i_string const& aImageUri);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
         void set_image_extents(const optional_size& aImageExtents);

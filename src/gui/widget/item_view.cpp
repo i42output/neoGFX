@@ -695,7 +695,7 @@ namespace neogfx
         return handled;
     }
 
-    bool item_view::text_input(std::string const& aText)
+    bool item_view::text_input(i_string const& aText)
     {
         bool handled = base_type::text_input(aText);
         if (editing() == std::nullopt && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
@@ -1017,7 +1017,7 @@ namespace neogfx
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
             auto cellFont = presentation_model().cell_font(newIndex);
             textEdit.set_default_style(text_edit::character_style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
-            textEdit.set_text(presentation_model().cell_to_string(newIndex));
+            textEdit.set_text(string{ presentation_model().cell_to_string(newIndex) });
             textEdit.Focus([this, newIndex](neogfx::focus_event fe, neogfx::focus_reason)
             {
                 if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))

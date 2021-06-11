@@ -787,12 +787,12 @@ namespace neogfx
         return base_type::scrolling_disposition(aChildWidget);
     }
 
-    std::string const& window::title_text() const
+    i_string const& window::title_text() const
     {
         return iTitleText;
     }
 
-    void window::set_title_text(std::string const& aTitleText)
+    void window::set_title_text(i_string const& aTitleText)
     {
         if (iTitleText != aTitleText)
         {

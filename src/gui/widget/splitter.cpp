@@ -21,6 +21,7 @@
 #include <neogfx/gui/widget/splitter.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/hid/i_surface.hpp>
 
 namespace neogfx
@@ -187,6 +188,11 @@ namespace neogfx
     {
     }
 
+    void splitter::paint(i_graphics_context& aGc) const
+    {
+        service<i_skin_manager>().active_skin().draw_separators(aGc, *this, layout());
+    }
+
     void splitter::init()
     {
         set_padding(neogfx::padding{ 0.0 });
@@ -200,28 +206,8 @@ namespace neogfx
     std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const
     {
         for (uint32_t i = 1u; i < layout().count(); ++i)
-        {
-            rect r1(layout().get_widget_at(i - 1u).position(), layout().get_widget_at(i - 1u).extents());
-            rect r2(layout().get_widget_at(i).position(), layout().get_widget_at(i).extents());
-            if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
-            {
-                rect r3(point(r1.right(), r1.top()), size(r2.left() - r1.right(), r1.height()));
-                rect r4 = r3;
-                r4.x -= r3.width();
-                r4.cx *= 3.0;
-                if (r4.contains(aPosition))
+            if (separator_rect(layout(), {i - 1u, i}).contains(aPosition))
                     return separator_type{ i - 1u, i };
-            }
-            else
-            {
-                rect r3(point(r1.left(), r1.bottom()), size(r2.width(), r2.top() - r1.bottom()));
-                rect r4 = r3;
-                r4.y -= r3.height();
-                r4.cy *= 3.0;
-                if (r4.contains(aPosition))
-                    return separator_type{ i - 1u, i };
-            }
-        }
-        return std::optional<separator_type>();
+        return {};
     }
 }

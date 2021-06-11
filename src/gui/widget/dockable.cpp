@@ -31,7 +31,7 @@ namespace neogfx
     {
         set_weight(size{ 1.0 });
         create_title_bar();
-        title_bar().set_title(aTitle);
+        title_bar().set_title(string{ aTitle });
         set_client(docked_widget());
         set_padding(neogfx::padding{});
     }

@@ -64,7 +64,7 @@ namespace neogfx::nrc
         {
             ui_element<>::emit_body();
             if (iTabStopHint)
-                emit("   %1%.input_box().set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
+                emit("   %1%.input_box().set_tab_stop_hint(\"%2%\"_s);\n", id(), *iTabStopHint);
             if (iHint)
                 emit("   %1%.hint().set_text(\"%2%\"_t);\n", id(), *iHint);
         }

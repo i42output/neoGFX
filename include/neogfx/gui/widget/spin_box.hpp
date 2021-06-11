@@ -50,7 +50,7 @@ namespace neogfx
         basic_spin_box(i_widget& aParent);
         basic_spin_box(i_layout& aLayout);
     public:
-        std::string const& text();
+        i_string const& text();
         const line_edit& text_box() const;
         line_edit& text_box();
     public:
@@ -87,7 +87,7 @@ namespace neogfx
         void update_arrows();
     private:
         sink iSink;
-        std::string iText;
+        string iText;
         cursor::position_type iTextCursorPos;
         horizontal_layout iPrimaryLayout;
         line_edit iTextBox;

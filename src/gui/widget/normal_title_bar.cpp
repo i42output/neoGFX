@@ -74,12 +74,12 @@ namespace neogfx
         return *this;
     }
 
-    std::string const& normal_title_bar::title() const
+    i_string const& normal_title_bar::title() const
     {
         return iTitle.text();
     }
 
-    void normal_title_bar::set_title(std::string const& aTitle)
+    void normal_title_bar::set_title(i_string const& aTitle)
     {
         iTitle.set_text(aTitle);
     }

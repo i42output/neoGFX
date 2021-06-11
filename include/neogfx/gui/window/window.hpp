@@ -128,8 +128,8 @@ namespace neogfx
     public:
         neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
     public:
-        std::string const& title_text() const override;
-        void set_title_text(std::string const& aTitleText) override;
+        i_string const& title_text() const override;
+        void set_title_text(i_string const& aTitleText) override;
     public:
         bool is_active() const override;
         void activate() override;
@@ -211,7 +211,7 @@ namespace neogfx
         sink iSink;
         std::unique_ptr<i_surface_window> iSurfaceWindow;
         bool iReadyToRender;
-        std::string iTitleText;
+        string iTitleText;
         window_style iStyle;
         int32_t iCountedEnable;
         i_widget* iEnteredWidget;

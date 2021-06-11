@@ -1898,13 +1898,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::text_input(std::string const&)
+    bool widget<Interface>::text_input(i_string const&)
     {
         return false;
     }
 
     template <typename Interface>
-    bool widget<Interface>::sys_text_input(std::string const&)
+    bool widget<Interface>::sys_text_input(i_string const&)
     {
         return false;
     }

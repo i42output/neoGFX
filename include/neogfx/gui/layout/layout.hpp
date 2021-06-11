@@ -115,6 +115,7 @@ namespace neogfx
     public:
         neogfx::padding padding() const override;
     public:
+        layout_direction direction() const override;
         bool has_spacing() const override;
         size spacing() const override;
         void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;

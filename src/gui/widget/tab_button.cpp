@@ -272,12 +272,12 @@ namespace neogfx
         set_selected_state(true);
     }
 
-    std::string const& tab_button::text() const
+    i_string const& tab_button::text() const
     {
         return push_button::text();
     }
 
-    void tab_button::set_text(std::string const& aText)
+    void tab_button::set_text(i_string const& aText)
     {
         push_button::set_text(aText);
     }

@@ -1184,6 +1184,6 @@ namespace neogfx
         if (&aUpdatingWidget != &iA.second)
             iA.second.set_value(selected_color_in_color_space()[3] * color_space_coefficient());
         if (&aUpdatingWidget != &iRgb)
-            iRgb.set_text(selected_color().to_hex_string());
+            iRgb.set_text(string{ selected_color().to_hex_string() });
     }
 }

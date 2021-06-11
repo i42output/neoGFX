@@ -42,8 +42,8 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:
-        std::string const& title() const override;
-        void set_title(std::string const& aTitle) override;
+        i_string const& title() const override;
+        void set_title(i_string const& aTitle) override;
     protected:
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     protected:

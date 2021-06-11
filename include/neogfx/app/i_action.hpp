@@ -28,8 +28,10 @@
 
 namespace neogfx
 {
-    class i_action
+    class i_action : public i_reference_counted
     {
+    public:
+        typedef i_action abstract_type;
     public:
         declare_event(triggered)
         declare_event(hovered)
@@ -114,7 +116,7 @@ namespace neogfx
         {
             return set_help_text(to_abstract(aHelpText));
         }
-        i_action& set_image(string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
+        i_action& set_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
         {
             return set_image(texture{ neogfx::image{aUri, aDpiScaleFactor, aSampling} });
         }
@@ -122,7 +124,7 @@ namespace neogfx
         {
             return set_image(texture{ aImage });
         }
-        i_action& set_checked_image(string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
+        i_action& set_checked_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
         {
             return set_checked_image(texture{ neogfx::image{ aUri, aDpiScaleFactor, aSampling } });
         }
@@ -130,9 +132,9 @@ namespace neogfx
         {
             return set_checked_image(texture{ aImage });
         }
-        i_action& set_shortcut(string const& aShortcut)
+        i_action& set_shortcut(std::string const& aShortcut)
         {
-            return set_shortcut(to_abstract(aShortcut));
+            return set_shortcut(string(aShortcut));
         }
     };
 
@@ -140,6 +142,6 @@ namespace neogfx
     {
     public:
         virtual i_action& add_action(i_action& aAction) = 0;
-        virtual i_action& add_action(std::shared_ptr<i_action> aAction) = 0;
+        virtual i_action& add_action(i_ref_ptr<i_action> const& aAction) = 0;
     };
 }

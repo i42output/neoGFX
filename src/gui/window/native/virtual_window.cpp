@@ -518,7 +518,7 @@ namespace neogfx
         }
     }
 
-    void virtual_window::set_title_text(std::string const& aTitleText)
+    void virtual_window::set_title_text(i_string const& aTitleText)
     {
     }
 

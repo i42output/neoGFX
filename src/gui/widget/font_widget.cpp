@@ -252,7 +252,7 @@ namespace neogfx
             else
                 for (uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
                     iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, iSelectedFont.fixed_size(fsi));
-            iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
+            iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
         }
         if (&aUpdatingWidget == this)
         {
@@ -265,7 +265,7 @@ namespace neogfx
             auto size = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(iSelectedFont.size()));
             if (size != std::nullopt)
                 iSizePicker.selection_model().set_current_index(*size);
-            iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
+            iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
         }
         else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
         {

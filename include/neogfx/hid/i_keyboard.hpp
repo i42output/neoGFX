@@ -610,8 +610,8 @@ namespace neogfx
     public:
         virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
         virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
-        virtual bool text_input(std::string const& aText) = 0;
-        virtual bool sys_text_input(std::string const& aText) = 0;
+        virtual bool text_input(i_string const& aText) = 0;
+        virtual bool sys_text_input(i_string const& aText) = 0;
     };
 
     enum class keyboard_locks : uint32_t
@@ -790,7 +790,7 @@ namespace neogfx
         {
             return matches(0, aKeyCode, aKeyModifiers);
         }
-        const std::string as_text() const
+        const i_string& as_text() const
         {
             return iText;
         }
@@ -810,7 +810,7 @@ namespace neogfx
                 return match::No;
         }
     private:
-        std::string iText;
+        string iText;
         sequence_type iSequence;
     };
 

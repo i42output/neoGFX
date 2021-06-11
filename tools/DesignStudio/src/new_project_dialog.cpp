@@ -28,12 +28,12 @@ namespace neogfx::DesignStudio
         new_project_dialog{ aParent },
         namingConvention{ naming_convention::Neogfx }
     {
-        projectLocation.set_text(neolib::user_documents_directory());
+        projectLocation.set_text(string{ neolib::user_documents_directory() });
         browseProjectLocation.Clicked([&]()
         {
             auto newLocation = neogfx::select_folder_dialog(*this, "Project Location"_t, projectLocation.text());
             if (newLocation)
-                projectLocation.set_text(*newLocation);
+                projectLocation.set_text(string{ *newLocation });
         });
         auto updateNamespace = [this]()
         {
@@ -63,7 +63,7 @@ namespace neogfx::DesignStudio
                     projectNamespace.set_focus();
             }
         });
-        projectName.set_text("Project1");
+        projectName.set_text("Project1"_s);
         projectName.select_all();
     }
 }

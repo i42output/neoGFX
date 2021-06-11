@@ -112,10 +112,10 @@ namespace neogfx
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
     public:
-        std::string const& text() const;
-        void set_text(std::string const& aText);
+        i_string const& text() const;
+        void set_text(i_string const& aText);
         const texture& image() const;
-        void set_image(std::string const& aImageUri);
+        void set_image(i_string const& aImageUri);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
         label_placement placement() const;

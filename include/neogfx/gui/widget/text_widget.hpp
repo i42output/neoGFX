@@ -68,8 +68,8 @@ namespace neogfx
     public:
         bool visible() const override;
     public:
-        std::string const& text() const;
-        void set_text(std::string const& aText);
+        i_string const& text() const;
+        void set_text(i_string const& aText);
         void set_size_hint(const size_hint& aSizeHint);
         bool multi_line() const;
         text_widget_flags flags() const;
@@ -90,7 +90,7 @@ namespace neogfx
         const neogfx::glyph_text& glyph_text() const;
         void reset_cache();
     private:
-        std::string iText;
+        string iText;
         mutable std::optional<neogfx::glyph_text> iGlyphText;
         mutable optional_size iTextExtent;
         size_hint iSizeHint;

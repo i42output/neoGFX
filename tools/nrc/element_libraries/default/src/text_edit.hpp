@@ -90,7 +90,7 @@ namespace neogfx::nrc
                     emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t, \"%3%\"_t });\n", id(), iSizeHint->primary_hint(), iSizeHint->secondary_hint());
             }
             if (iTabStopHint)
-                emit("   %1%.set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
+                emit("   %1%.set_tab_stop_hint(\"%2%\"_s);\n", id(), *iTabStopHint);
             if (iTextColor || iPaperColor)
                 emit("   text_edit::style %1%DefaultStyle;\n", id());
             if (iTextColor)

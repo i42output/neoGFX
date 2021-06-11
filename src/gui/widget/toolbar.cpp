@@ -87,7 +87,7 @@ namespace neogfx
         return aAction;
     }
 
-    i_action& toolbar::add_action(std::shared_ptr<i_action> aAction)
+    i_action& toolbar::add_action(i_ref_ptr<i_action> const& aAction)
     {
         insert_action(button_count(), aAction);
         return *aAction;
@@ -107,7 +107,7 @@ namespace neogfx
         return aAction;
     }
 
-    i_action& toolbar::insert_action(button_index aButtonIndex, std::shared_ptr<i_action> aAction)
+    i_action& toolbar::insert_action(button_index aButtonIndex, i_ref_ptr<i_action> const& aAction)
     {
         if (aButtonIndex > iButtons.size())
             throw bad_button_index();

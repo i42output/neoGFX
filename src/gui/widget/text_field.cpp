@@ -96,12 +96,12 @@ namespace neogfx
         init();
     }
 
-    std::string const& text_field::text() const
+    i_string const& text_field::text() const
     {
         return input_box().text();
     }
 
-    void text_field::set_text(std::string const& aText)
+    void text_field::set_text(i_string const& aText)
     {
         input_box().set_text(aText);
     }

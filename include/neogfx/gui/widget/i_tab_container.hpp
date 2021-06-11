@@ -74,8 +74,8 @@ namespace neogfx
         virtual bool is_tab_selected() const = 0;
         virtual const i_tab& selected_tab() const = 0;
         virtual i_tab& selected_tab() = 0;
-        virtual i_tab& add_tab(std::string const& aTabText) = 0;
-        virtual i_tab& insert_tab(tab_index aTabIndex, std::string const& aTabText) = 0;
+        virtual i_tab& add_tab(i_string const& aTabText) = 0;
+        virtual i_tab& insert_tab(tab_index aTabIndex, i_string const& aTabText) = 0;
         virtual void remove_tab(tab_index aTabIndex) = 0;
         virtual void show_tab(tab_index aTabIndex) = 0;
         virtual void hide_tab(tab_index aTabIndex) = 0;

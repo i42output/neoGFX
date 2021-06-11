@@ -52,8 +52,8 @@ namespace neogfx
         bool is_tab_selected() const override;
         const i_tab& selected_tab() const override;
         i_tab& selected_tab() override;
-        i_tab& add_tab(std::string const& aTabText) override;
-        i_tab& insert_tab(tab_index aTabIndex, std::string const& aTabText) override;
+        i_tab& add_tab(i_string const& aTabText) override;
+        i_tab& insert_tab(tab_index aTabIndex, i_string const& aTabText) override;
         void remove_tab(tab_index aTabIndex) override;
         void show_tab(tab_index aTabIndex) override;
         void hide_tab(tab_index aTabIndex) override;

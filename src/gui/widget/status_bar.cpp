@@ -86,13 +86,13 @@ namespace neogfx
             aTimer.again();
             auto const& keyboard = service<i_keyboard>();
             insertLock->set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
-                "Insert" : std::string{});
+                "Insert" : string{});
             capsLock->set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
-                "CAP" : std::string{});
+                "CAP" : string{});
             numLock->set_text((keyboard.locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock ?
-                "NUM" : std::string{});
+                "NUM" : string{});
             scrlLock->set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
-                "SCRL" : std::string{});
+                "SCRL" : string{});
         }, std::chrono::milliseconds{ 100 });
     }
 
@@ -296,7 +296,7 @@ namespace neogfx
         auto update_size_grip = [this](style_aspect)
         {
             auto ink1 = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));
-            ink1 = ink1.shaded(0x40);
+            ink1 = ink1.shaded(0x60);
             auto ink2 = ink1.darker(0x30);
             if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
             {
@@ -372,7 +372,7 @@ namespace neogfx
     void status_bar::update_widgets()
     {
         bool showMessage = (iStyle & style::DisplayMessage) == style::DisplayMessage && have_message();
-        iMessageWidget.set_text(have_message() ? message() : std::string{});
+        iMessageWidget.set_text(have_message() ? string{ message() } : string{});
         iMessageWidget.show(showMessage);
         iIdleWidget.show(!showMessage);
         iNormalWidgetContainer.show(!showMessage);

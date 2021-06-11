@@ -158,14 +158,14 @@ namespace neogfx
         return const_cast<i_tab_page&>(to_const(*this).selected_tab_page());
     }
 
-    i_tab& tab_page_container::add_tab(std::string const& aTabText)
+    i_tab& tab_page_container::add_tab(i_string const& aTabText)
     {
         auto& newTab = iTabBar.add_tab(aTabText);
         iTabs.emplace(&newTab, tab_page_pointer());
         return newTab;
     }
 
-    i_tab& tab_page_container::insert_tab(tab_index aTabIndex, std::string const& aTabText)
+    i_tab& tab_page_container::insert_tab(tab_index aTabIndex, i_string const& aTabText)
     {
         auto& newTab = iTabBar.insert_tab(aTabIndex, aTabText);
         iTabs.emplace(&newTab, tab_page_pointer());
@@ -211,12 +211,12 @@ namespace neogfx
         iTabBar.select_previous_tab();
     }
 
-    i_tab_page& tab_page_container::add_tab_page(std::string const& aTabText)
+    i_tab_page& tab_page_container::add_tab_page(i_string const& aTabText)
     {
         return add_tab_page(add_tab(aTabText));
     }
 
-    i_tab_page& tab_page_container::insert_tab_page(tab_index aTabIndex, std::string const& aTabText)
+    i_tab_page& tab_page_container::insert_tab_page(tab_index aTabIndex, i_string const& aTabText)
     {
         return add_tab_page(insert_tab(aTabIndex, aTabText));
     }
@@ -239,21 +239,10 @@ namespace neogfx
 
     i_tab_page& tab_page_container::add_tab_page(i_tab& aTab, i_tab_page& aWidget)
     {
-        auto existingTab = iTabs.find(&aTab);
-        if (existingTab == iTabs.end())
-            throw tab_not_found();
-        existingTab->second = tab_page_pointer{ tab_page_pointer{}, &aWidget };
-        if (aTab.is_selected())
-        {
-            existingTab->second->as_widget().show();
-            iContainerLayout.invalidate();
-        }
-        else
-            existingTab->second->as_widget().hide();
-        return *existingTab->second;
+        return add_tab_page(aTab, tab_page_pointer{ tab_page_pointer{}, &aWidget });
     }
 
-    i_tab_page& tab_page_container::add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget)
+    i_tab_page& tab_page_container::add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget)
     {
         auto existingTab = iTabs.find(&aTab);
         if (existingTab == iTabs.end())

@@ -224,13 +224,13 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    std::string const& button<ButtonInterface>::text() const
+    i_string const& button<ButtonInterface>::text() const
     {
         return label().text();
     }
 
     template <typename ButtonInterface>
-    void button<ButtonInterface>::set_text(std::string const& aText)
+    void button<ButtonInterface>::set_text(i_string const& aText)
     {
         label().set_text(aText);
     }
@@ -242,7 +242,7 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    void button<ButtonInterface>::set_image(std::string const& aImageUri)
+    void button<ButtonInterface>::set_image(i_string const& aImageUri)
     {
         label().set_image(neogfx::image{ aImageUri });
     }

@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include "app.hpp"
 
-using namespace neolib::string_literals;
+using namespace neogfx::string_literals;
 
 int main(int argc, char* argv[])
 {

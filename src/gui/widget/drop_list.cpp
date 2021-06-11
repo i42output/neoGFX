@@ -441,11 +441,11 @@ namespace neogfx
                 push_button::set_image(aImage);
                 push_button::image_widget().show(!aImage.is_empty());
             }
-            std::string const& text() const override
+            i_string const& text() const override
             {
                 return push_button::text();
             }
-            void set_text(std::string const& aText) override
+            void set_text(i_string const& aText) override
             {
                 return push_button::set_text(aText);
             }
@@ -521,11 +521,11 @@ namespace neogfx
                 iImage.set_image(aImage);
                 iImage.show(!aImage.is_empty());
             }
-            std::string const& text() const override
+            i_string const& text() const override
             {
                 return iEditor.text();
             }
-            void set_text(std::string const& aText) override
+            void set_text(i_string const& aText) override
             {
                 iEditor.set_text(aText);
             }
@@ -678,7 +678,7 @@ namespace neogfx
             {
                 neolib::scoped_flag sf{ iChangingText };
                 texture image;
-                std::string text;
+                string text;
                 if (aCurrentIndex != std::nullopt)
                 {
                     auto const& maybeImage = presentation_model().cell_image(*aCurrentIndex);
@@ -1056,7 +1056,7 @@ namespace neogfx
                 input_widget().accept(*this);
 
             texture image;
-            std::string text;
+            string text;
             if (selection_model().has_current_index())
             {
                 auto const& maybeImage = presentation_model().cell_image(selection_model().current_index());
@@ -1165,7 +1165,7 @@ namespace neogfx
         if (!editable() && aUpdateEditor)
         {
             texture image;
-            std::string text;
+            string text;
             if (iSelection)
             {
                 auto const& maybeImage = presentation_model().cell_image(presentation_model().from_item_model_index(*iSelection));

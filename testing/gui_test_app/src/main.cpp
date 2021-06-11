@@ -35,6 +35,7 @@
 #include "test.ui.hpp"
 
 namespace ng = neogfx;
+using namespace ng::string_literals;
 using namespace ng::unit_literals;
 
 class my_item_model : public ng::basic_item_model<void*, 9u>
@@ -280,7 +281,7 @@ int main(int argc, char* argv[])
         {
             auto const& files = static_cast<ng::i_drag_drop_file_list const&>(aObject);
             std::ifstream file{ files.file_paths()[0].to_std_string() };
-            window.textEdit.set_plain_text(std::string{ std::istreambuf_iterator<char>{file}, {} });
+            window.textEdit.set_plain_text(ng::string{ std::istreambuf_iterator<char>{file}, {} });
         });
 
         app.actionArcadeMode.checked([&]() { neolib::service<neolib::i_power>().enable_turbo_mode(); });
@@ -295,7 +296,7 @@ int main(int argc, char* argv[])
             if (textFile)
             {
                 std::ifstream file{ (*textFile)[0] };
-                window.textEdit.set_plain_text(std::string{ std::istreambuf_iterator<char>{file}, {} });
+                window.textEdit.set_plain_text(ng::string{ std::istreambuf_iterator<char>{file}, {} });
             }
         });
 
@@ -311,7 +312,7 @@ int main(int argc, char* argv[])
             window.statusBar.hide();
         });
 
-        app.add_action("Goldenrod Style").set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
+        app.add_action("Goldenrod Style"_s).set_shortcut("Ctrl+Alt+Shift+G").triggered([]()
         {
             ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, ng::color::LightGoldenrod);
         });
@@ -346,14 +347,14 @@ int main(int argc, char* argv[])
         neolib::random menuPrng{ 0 };
         for (int i = 1; i <= 5; ++i)
         {
-            auto& sm = window.menuFavourites.add_sub_menu("More_" + boost::lexical_cast<std::string>(i));
+            auto& sm = window.menuFavourites.add_sub_menu(ng::string{ "More_" + boost::lexical_cast<std::string>(i) });
             for (int j = 1; j <= 5; ++j)
             {
-                auto& sm2 = sm.add_sub_menu("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j));
+                auto& sm2 = sm.add_sub_menu(ng::string{ "More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) });
                 int n = menuPrng(100);
                 for (int k = 1; k < n; ++k)
                 {
-                    auto& action = app.add_action("More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k), ":/closed/resources/caw_toolbar.zip#favourite.png");
+                    auto& action = app.add_action(ng::string{ "More_" + boost::lexical_cast<std::string>(i) + "_" + boost::lexical_cast<std::string>(j) + "_" + boost::lexical_cast<std::string>(k) }, ":/closed/resources/caw_toolbar.zip#favourite.png"_s);
                     sm2.add_action(action);
                     action.triggered([&]()
                     {
@@ -381,7 +382,7 @@ int main(int argc, char* argv[])
         {
             std::ostringstream oss;
             oss << aController.product_name() << " {" << aController.product_id() << "} " << (aConnected ? " connected." : " disconnected.") << std::endl;
-            window.textEdit.append_text(oss.str(), true);
+            window.textEdit.append_text(ng::string{ oss.str() }, true);
         };
         for (auto const& controller : ng::service<ng::i_game_controllers>().controllers())
             display_controller_info(*controller, true);
@@ -459,10 +460,10 @@ int main(int argc, char* argv[])
             window.dropList4.set_editable(!window.dropList4.editable());
         });
         window.buttonGenerateUuid.clicked([&]() { window.textEdit.set_text(to_string(neolib::generate_uuid())); });
-        window.dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(aIndex != std::nullopt ? window.dropList.model().cell_data(*aIndex).to_string() : std::string{}); });
-        window.dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(aIndex != std::nullopt ? window.dropList2.model().cell_data(*aIndex).to_string() : std::string{}); });
-        window.dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(aIndex != std::nullopt ? window.dropList3.model().cell_data(*aIndex).to_string() : std::string{}); });
-        window.dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(aIndex != std::nullopt ? window.dropList4.model().cell_data(*aIndex).to_string() : std::string{}); });
+        window.dropList.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList.model().cell_data(*aIndex).to_string() : std::string{} }); });
+        window.dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList2.model().cell_data(*aIndex).to_string() : std::string{} }); });
+        window.dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList3.model().cell_data(*aIndex).to_string() : std::string{} }); });
+        window.dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList4.model().cell_data(*aIndex).to_string() : std::string{} }); });
         ng::layout_as_same_size(window.textField1.label(), window.textField2.label());
         window.textField1.input_box().TextChanged([&window]()
         {
@@ -536,12 +537,12 @@ int main(int argc, char* argv[])
         });
         window.checkPassword.checked([&]()
         {
-            window.textField2.hint().set_text("Enter password");
+            window.textField2.hint().set_text("Enter password"_s);
             window.textField2.input_box().set_password(true);
         });
         window.checkPassword.Unchecked([&]()
         {
-            window.textField2.hint().set_text("Enter text");
+            window.textField2.hint().set_text("Enter text"_s);
             window.textField2.input_box().set_password(false);
         });
         window.checkGroupBoxCheckable.checked([&window]()
@@ -636,7 +637,7 @@ int main(int argc, char* argv[])
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
-            window.textEditSmall.set_text(oss.str());
+            window.textEditSmall.set_text(ng::string{ oss.str() });
         });
         window.effectAux1Slider.ValueChanged([&]()
         {
@@ -649,7 +650,7 @@ int main(int argc, char* argv[])
             window.textEdit.set_default_style(s);
             std::ostringstream oss;
             oss << window.effectWidthSlider.value() << std::endl << window.effectAux1Slider.value() << std::endl;
-            window.textEditSmall.set_text(oss.str());
+            window.textEditSmall.set_text(ng::string{ oss.str() });
         });
         window.editShadow.checked([&]()
         {
@@ -770,7 +771,7 @@ int main(int argc, char* argv[])
 
             std::ostringstream oss;
             oss << window.fps() << "/" << window.potential_fps() << " FPS/PFPS";
-            window.labelFPS.set_text(oss.str());
+            window.labelFPS.set_text(ng::string{ oss.str() });
 
             if (colorCycle)
             {
@@ -815,7 +816,7 @@ int main(int argc, char* argv[])
                 result = ng::message_box::error(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (window.radioMessageBoxIconCritical.is_checked())
                 result = ng::message_box::critical(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
-            window.labelMessageBoxResult.set_text("Result = " + ng::dialog_button_box::standard_button_details(result).second);
+            window.labelMessageBoxResult.set_text("Result = "_s + ng::dialog_button_box::standard_button_details(result).second);
         });
 
         // Item Views

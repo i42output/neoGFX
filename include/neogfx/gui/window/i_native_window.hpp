@@ -83,8 +83,8 @@ namespace neogfx
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;
         virtual double rendering_priority() const = 0;
-        virtual std::string const& title_text() const = 0;
-        virtual void set_title_text(std::string const& aTitleText) = 0;
+        virtual i_string const& title_text() const = 0;
+        virtual void set_title_text(i_string const& aTitleText) = 0;
         virtual padding border_thickness() const = 0;
     };
 }

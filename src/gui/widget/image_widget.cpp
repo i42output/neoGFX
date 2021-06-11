@@ -102,7 +102,7 @@ namespace neogfx
         return iColor;
     }
 
-    void image_widget::set_image(std::string const& aImageUri)
+    void image_widget::set_image(i_string const& aImageUri)
     {
         set_image(neogfx::image{ aImageUri });
     }

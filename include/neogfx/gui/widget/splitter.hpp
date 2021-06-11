@@ -66,6 +66,8 @@ namespace neogfx
     public:
         virtual void panes_resized();
         virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>());
+    protected:
+        void paint(i_graphics_context& aGc) const override;
     private:
         void init();
         std::optional<separator_type> separator_at(const point& aPosition) const;

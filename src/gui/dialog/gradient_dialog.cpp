@@ -603,8 +603,8 @@ namespace neogfx
         }
         else
         {
-            iTileWidth.text_box().set_text("");
-            iTileHeight.text_box().set_text("");
+            iTileWidth.text_box().set_text(string{ "" });
+            iTileHeight.text_box().set_text(string{ "" });
         }
         iTileAligned.set_checked(gradient().tile() != std::nullopt ? gradient().tile()->aligned : false);
         iTileWidthLabel.enable(gradient().tile() != std::nullopt);
@@ -642,8 +642,8 @@ namespace neogfx
         }
         else
         {
-            iMExponentSpinBox.text_box().set_text("");
-            iNExponentSpinBox.text_box().set_text("");
+            iMExponentSpinBox.text_box().set_text(""_s);
+            iNExponentSpinBox.text_box().set_text(""_s);
         }
         iLinkedExponents.enable(specifyExponents);
         iMExponent.enable(specifyExponents);
@@ -659,8 +659,8 @@ namespace neogfx
         }
         else
         {
-            iXCenterSpinBox.text_box().set_text("");
-            iYCenterSpinBox.text_box().set_text("");
+            iXCenterSpinBox.text_box().set_text(""_s);
+            iYCenterSpinBox.text_box().set_text(""_s);
         }
         iCenterGroupBox.check_box().set_checked(specifyCenter);
         iXCenter.enable(specifyCenter);

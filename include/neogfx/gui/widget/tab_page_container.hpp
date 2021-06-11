@@ -36,7 +36,7 @@ namespace neogfx
         define_declared_event(StyleChanged, style_changed)
         define_declared_event(SelectedTabPageChanged, selected_tab_page_changed, i_tab_page&)
     private:
-        typedef std::shared_ptr<i_tab_page> tab_page_pointer;
+        typedef ref_ptr<i_tab_page> tab_page_pointer;
         typedef std::map<const i_tab*, tab_page_pointer> tab_list;
     public:
         tab_page_container(bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
@@ -62,8 +62,8 @@ namespace neogfx
         i_tab& selected_tab() override;
         const i_tab_page& selected_tab_page() const override;
         i_tab_page& selected_tab_page() override;
-        i_tab& add_tab(std::string const& aTabText) override;
-        i_tab& insert_tab(tab_index aTabIndex, std::string const& aTabText) override;
+        i_tab& add_tab(i_string const& aTabText) override;
+        i_tab& insert_tab(tab_index aTabIndex, i_string const& aTabText) override;
         void remove_tab(tab_index aTabIndex) override;
         void show_tab(tab_index aTabIndex) override;
         void hide_tab(tab_index aTabIndex) override;
@@ -72,11 +72,11 @@ namespace neogfx
         void select_next_tab() override;
         void select_previous_tab() override;
     public:
-        i_tab_page& add_tab_page(std::string const& aTabText) override;
-        i_tab_page& insert_tab_page(tab_index aTabIndex, std::string const& aTabText) override;
+        i_tab_page& add_tab_page(i_string const& aTabText) override;
+        i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText) override;
         i_tab_page& add_tab_page(i_tab& aTab) override;
         i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) override;
-        i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) override;
+        i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget) override;
     public:
         void adding_tab(i_tab& aTab) override;
         void selecting_tab(i_tab& aTab) override;

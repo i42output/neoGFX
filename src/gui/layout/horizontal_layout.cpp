@@ -48,6 +48,11 @@ namespace neogfx
     {
     }
 
+    layout_direction horizontal_layout::direction() const
+    {
+        return layout_direction::Horizontal;
+    }
+
     i_spacer& horizontal_layout::add_spacer()
     {
         auto s = make_ref<horizontal_spacer>();

@@ -68,8 +68,8 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:
-        std::string const& title() const override;
-        void set_title(std::string const& aTitle) override;
+        i_string const& title() const override;
+        void set_title(i_string const& aTitle) override;
     public:
         const image_widget& icon_widget() const;
         image_widget& icon_widget();

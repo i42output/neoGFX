@@ -128,7 +128,7 @@ namespace neogfx
             void release_capture() override;
             void non_client_set_capture() override;
             void non_client_release_capture() override;
-            void set_title_text(std::string const& aTitleText) override;
+            void set_title_text(i_string const& aTitleText) override;
             padding border_thickness() const override;
         protected:
             void set_destroying() override;

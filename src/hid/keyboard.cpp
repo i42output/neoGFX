@@ -42,7 +42,7 @@ namespace neogfx
         return false;
     }
 
-    bool keyboard_grabber::text_input(std::string const& aText)
+    bool keyboard_grabber::text_input(i_string const& aText)
     {
         for (auto& g : iKeyboard.iGrabs)
             if (g->text_input(aText))
@@ -50,7 +50,7 @@ namespace neogfx
         return false;
     }
 
-    bool keyboard_grabber::sys_text_input(std::string const& aText)
+    bool keyboard_grabber::sys_text_input(i_string const& aText)
     {
         for (auto& g : iKeyboard.iGrabs)
             if (g->sys_text_input(aText))

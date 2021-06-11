@@ -99,8 +99,8 @@ namespace neogfx
         virtual window_style style() const = 0;
         virtual void set_style(window_style aStyle) = 0;
     public:
-        virtual std::string const& title_text() const = 0;
-        virtual void set_title_text(std::string const& aTitleText) = 0;
+        virtual i_string const& title_text() const = 0;
+        virtual void set_title_text(i_string const& aTitleText) = 0;
     public:
         virtual bool is_active() const = 0;
         virtual void activate() = 0;

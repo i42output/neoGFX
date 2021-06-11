@@ -47,7 +47,7 @@ namespace neogfx
     public:
         const texture& image() const;
         const color_or_gradient& image_color() const;
-        void set_image(std::string const& aImageUri);
+        void set_image(i_string const& aImageUri);
         void set_image(const i_image& aImage);
         void set_image(const i_texture& aImage);
         void set_image_color(const color_or_gradient& aImageColor);

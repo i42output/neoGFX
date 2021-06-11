@@ -737,7 +737,7 @@ namespace neogfx
             }
         }
 
-        void window::set_title_text(std::string const& aTitleText)
+        void window::set_title_text(i_string const& aTitleText)
         {
             ::SetWindowText(iHandle, reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aTitleText).c_str()));
         }
@@ -891,7 +891,7 @@ namespace neogfx
                 break;
             case WM_SETTEXT:
                 result = wndproc(hwnd, msg, wparam, lparam);
-                self.native_window::set_title_text(neolib::utf16_to_utf8(std::u16string{ (const char16_t*)lparam }));
+                self.native_window::set_title_text(string{ neolib::utf16_to_utf8(std::u16string{ (const char16_t*)lparam }) });
                 self.handle_event(window_event{ window_event_type::TitleTextChanged });
                 break;
             case WM_NCPAINT:
@@ -1387,7 +1387,7 @@ namespace neogfx
             title.resize(titleLength + 1);
             ::GetWindowText(iHandle, reinterpret_cast<LPWSTR>(&title[0]), titleLength + 1);
             title.resize(titleLength);
-            native_window::set_title_text(neolib::utf16_to_utf8(title));
+            native_window::set_title_text(string{ neolib::utf16_to_utf8(title) });
 
             HWND hwnd = iHandle;
             ::SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, NULL);

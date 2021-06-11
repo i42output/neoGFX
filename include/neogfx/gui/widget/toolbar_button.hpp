@@ -29,11 +29,11 @@ namespace neogfx
     {
     public:
         toolbar_button(i_action& aAction);
-        toolbar_button(std::shared_ptr<i_action> aAction);
+        toolbar_button(ref_ptr<i_action> aAction);
         toolbar_button(i_widget& aParent, i_action& aAction);
-        toolbar_button(i_widget& aParent, std::shared_ptr<i_action> aAction);
+        toolbar_button(i_widget& aParent, ref_ptr<i_action> aAction);
         toolbar_button(i_layout& aLayout, i_action& aAction);
-        toolbar_button(i_layout& aLayout, std::shared_ptr<i_action> aAction);
+        toolbar_button(i_layout& aLayout, ref_ptr<i_action> aAction);
         ~toolbar_button();
     protected:
         virtual void layout_items_completed();
@@ -59,7 +59,7 @@ namespace neogfx
         void init();
         void update_state();
     private:
-        std::shared_ptr<i_action> iAction;
+        ref_ptr<i_action> iAction;
         sink iSink;
     };
 }
