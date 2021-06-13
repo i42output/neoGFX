@@ -361,7 +361,7 @@ namespace neogfx
                     iIcon.set_fixed_size(size{});
                 iText.set_text(menu_item().action().menu_text());
                 if (menu().type() != menu_type::MenuBar)
-                    iShortcutText.set_text(menu_item().action().shortcut() != std::nullopt ? menu_item().action().shortcut()->as_text() : string{});
+                    iShortcutText.set_text(menu_item().action().shortcut() != std::nullopt ? string{ menu_item().action().shortcut()->as_text() } : string{});
                 iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != std::nullopt && menu().type() != menu_type::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
                 enable(menu_item().action().is_enabled());
             };
