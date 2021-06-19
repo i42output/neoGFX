@@ -61,7 +61,7 @@ namespace neogfx
 
     size tab_page::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (has_minimum_size() || (iTab.container().style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
+        if (has_minimum_size() || (iTab.container().tab_container_style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         else
             return size{};
@@ -79,7 +79,7 @@ namespace neogfx
     {
         if (iTab.is_selected())
         {
-            switch (iTab.container().style() & tab_container_style::TabAlignmentMask)
+            switch (iTab.container().tab_container_style() & tab_container_style::TabAlignmentMask)
             {
             case tab_container_style::TabAlignmentTop:
             case tab_container_style::TabAlignmentBottom:

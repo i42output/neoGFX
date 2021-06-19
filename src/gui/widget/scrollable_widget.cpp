@@ -26,6 +26,5 @@ namespace neogfx
 {
     template class scrollable_widget<>;
     template class scrollable_widget<framed_widget<widget<>>>;
-    template class scrollable_widget<view_container>;
 }
 

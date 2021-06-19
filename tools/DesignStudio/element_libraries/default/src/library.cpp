@@ -190,7 +190,7 @@ namespace neogfx::DesignStudio
             MAKE_ELEMENT_FACTORY_FUNCTION(menu_bar)
             MAKE_ELEMENT_FACTORY_FUNCTION(menu)
             MAKE_ELEMENT_FACTORY_FUNCTION(toolbar)
-            MAKE_ELEMENT_FACTORY_FUNCTION(tab_page_container)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(tab_page_container, tab_page_container<>)
             MAKE_ELEMENT_FACTORY_FUNCTION(tab_page)
             MAKE_ELEMENT_FACTORY_FUNCTION(canvas)
             MAKE_ELEMENT_FACTORY_FUNCTION(push_button)

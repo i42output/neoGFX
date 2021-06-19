@@ -1647,6 +1647,12 @@
     <None Include="..\..\..\include\neogfx\gfx\text\glyph.tpp">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.tpp">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\include\neogfx\gui\view\view_container.tpp">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\src\resources\gamecontrollerdb.txt">

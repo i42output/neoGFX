@@ -306,7 +306,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect result = push_button::path_bounding_rect();
-        switch (container().style() & tab_container_style::TabAlignmentMask)
+        switch (container().tab_container_style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
             result.extents() += size{ 0.0, 5.0 };
@@ -341,7 +341,7 @@ namespace neogfx
         neogfx::padding result = push_button::padding();
         if (has_padding())
             return result;
-        switch (container().style() & tab_container_style::TabAlignmentMask)
+        switch (container().tab_container_style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
             result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, 0.5_mm, is_selected() ? 0.5_mm : 0.0_mm });

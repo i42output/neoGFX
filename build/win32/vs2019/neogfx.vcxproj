@@ -836,6 +836,7 @@
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
     <None Include="..\..\..\include\neogfx\gfx\text\glyph.tpp" />
+    <None Include="..\..\..\include\neogfx\gui\view\view_container.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\button.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.tpp" />
@@ -853,6 +854,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
     </CustomBuild>
+    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\widget.tpp" />
     <None Include="..\..\..\src\gui\layout\flow_layout.inl" />
     <None Include="..\..\..\src\gui\layout\layout.inl" />

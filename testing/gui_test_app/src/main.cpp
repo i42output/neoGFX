@@ -419,14 +419,14 @@ int main(int argc, char* argv[])
 
         window.button1.clicked([&window]()
         {
-            if ((window.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentTop)
-                window.tabPages.set_style(ng::tab_container_style::TabAlignmentBottom);
-            else if ((window.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentBottom)
-                window.tabPages.set_style(ng::tab_container_style::TabAlignmentLeft);
-            else if ((window.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentLeft)
-                window.tabPages.set_style(ng::tab_container_style::TabAlignmentRight);
-            else if ((window.tabPages.style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentRight)
-                window.tabPages.set_style(ng::tab_container_style::TabAlignmentTop);
+            if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentTop)
+                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentBottom);
+            else if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentBottom)
+                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentLeft);
+            else if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentLeft)
+                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentRight);
+            else if ((window.tabPages.tab_container_style() & ng::tab_container_style::TabAlignmentMask) == ng::tab_container_style::TabAlignmentRight)
+                window.tabPages.set_tab_container_style(ng::tab_container_style::TabAlignmentTop);
         });
         window.buttonChina.clicked([&window]() 
         { 
