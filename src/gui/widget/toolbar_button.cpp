@@ -139,6 +139,8 @@ namespace neogfx
 
     focus_policy toolbar_button::focus_policy() const
     {
+        if (has_focus_policy())
+            return push_button::focus_policy();
         return neogfx::focus_policy::NoFocus;
     }
 

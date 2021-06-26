@@ -34,6 +34,8 @@ namespace neogfx
 
     inline focus_policy view_stack::focus_policy() const
     {
+        if (base_type::has_focus_policy())
+            return base_type::focus_policy();
         return neogfx::focus_policy::StrongFocus;
     }
 

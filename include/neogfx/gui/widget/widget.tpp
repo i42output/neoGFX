@@ -1669,13 +1669,21 @@ namespace neogfx
     }
 
     template <typename Interface>
-    focus_policy widget<Interface>::focus_policy() const
+    bool widget<Interface>::has_focus_policy() const
     {
-        return FocusPolicy;
+        return FocusPolicy != std::nullopt;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_focus_policy(neogfx::focus_policy aFocusPolicy)
+    focus_policy widget<Interface>::focus_policy() const
+    {
+        if (has_focus_policy())
+            return *FocusPolicy;
+        return neogfx::focus_policy::NoFocus;
+    }
+
+    template <typename Interface>
+    void widget<Interface>::set_focus_policy(optional_focus_policy const& aFocusPolicy)
     {
         FocusPolicy = aFocusPolicy;
     }

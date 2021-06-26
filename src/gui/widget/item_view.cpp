@@ -401,6 +401,8 @@ namespace neogfx
 
     neogfx::focus_policy item_view::focus_policy() const
     {
+        if (base_type::has_focus_policy())
+            return base_type::focus_policy();
         auto result = base_type::focus_policy();
         if (editing() != std::nullopt)
             result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);

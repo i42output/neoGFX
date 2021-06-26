@@ -207,7 +207,7 @@ namespace neogfx
     inline i_tab& tab_page_container<Base>::add_tab(i_string const& aTabText)
     {
         auto& newTab = iTabBar.add_tab(aTabText);
-        iTabs.emplace(&newTab, tab_page_pointer());
+        iTabs.emplace(&newTab, tab_page_pointer{});
         return newTab;
     }
 
@@ -215,7 +215,7 @@ namespace neogfx
     inline i_tab& tab_page_container<Base>::insert_tab(tab_index aTabIndex, i_string const& aTabText)
     {
         auto& newTab = iTabBar.insert_tab(aTabIndex, aTabText);
-        iTabs.emplace(&newTab, tab_page_pointer());
+        iTabs.emplace(&newTab, tab_page_pointer{});
         return newTab;
     }
 
@@ -280,18 +280,7 @@ namespace neogfx
     template <typename Base>
     inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab)
     {
-        auto existingTab = iTabs.find(&aTab);
-        if (existingTab == iTabs.end())
-            throw tab_not_found();
-        existingTab->second = tab_page_pointer{ new neogfx::tab_page{ page_layout(), aTab } };
-        if (aTab.is_selected())
-        {
-            existingTab->second->as_widget().show();
-            iContainerLayout.invalidate();
-        }
-        else
-            existingTab->second->as_widget().hide();
-        return *existingTab->second;
+        return add_tab_page(aTab, tab_page_pointer{ new neogfx::tab_page{ page_layout(), aTab } });
     }
 
     template <typename Base>
@@ -310,6 +299,8 @@ namespace neogfx
         if (aTab.is_selected())
         {
             existingTab->second->as_widget().show();
+            if ((focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
+                existingTab->second->as_widget().set_focus();
             iContainerLayout.invalidate();
         }
         else
@@ -320,7 +311,7 @@ namespace neogfx
     template <typename Base>
     inline void tab_page_container<Base>::adding_tab(i_tab& aTab)
     {
-        iTabs.emplace(&aTab, tab_page_pointer());
+        iTabs.emplace(&aTab, tab_page_pointer{});
         if (iTabs.size() == 1)
             aTab.select();
     }
@@ -332,7 +323,11 @@ namespace neogfx
             if (tab.second != nullptr)
             {
                 if (tab.first == &aTab)
+                {
                     tab.second->as_widget().show();
+                    if ((focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
+                        tab.second->as_widget().set_focus();
+                }
                 else
                     tab.second->as_widget().hide();
             }
@@ -376,6 +371,14 @@ namespace neogfx
     inline i_widget& tab_page_container<Base>::as_widget()
     {
         return *this;
+    }
+
+    template <typename Base>
+    inline focus_policy tab_page_container<Base>::focus_policy() const
+    {
+        if (base_type::has_focus_policy())
+            return base_type::focus_policy();
+        return neogfx::focus_policy::StrongFocus;
     }
 
     template <typename Base>

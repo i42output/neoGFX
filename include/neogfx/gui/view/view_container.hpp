@@ -35,6 +35,7 @@ namespace neogfx
 {
     class view_stack : public drag_drop_target<framed_scrollable_widget>
     {
+        typedef drag_drop_target<framed_scrollable_widget> base_type;
     public:
         view_stack(i_layout& aLayout, i_view_container& aParent);
     public:

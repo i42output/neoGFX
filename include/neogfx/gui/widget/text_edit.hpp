@@ -36,6 +36,8 @@ namespace neogfx
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
+        define_event(CanAcceptText, can_accept_text, i_string const&, bool&)
+        define_event(AcceptText, accept_text, i_string const&)
         define_event(TextFilter, text_filter, i_string const&, bool&)
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)

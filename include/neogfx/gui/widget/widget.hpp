@@ -236,8 +236,9 @@ namespace neogfx
         void non_client_release_capture() override;
         void captured() override;
         void capture_released() override;
+        bool has_focus_policy() const override;
         neogfx::focus_policy focus_policy() const override;
-        void set_focus_policy(neogfx::focus_policy aFocusPolicy) override;
+        void set_focus_policy(const optional_focus_policy& aFocusPolicy) override;
         bool can_set_focus(focus_reason aFocusReason) const override;
         bool has_focus() const override;
         bool child_has_focus() const override;
@@ -334,7 +335,7 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)
         define_property(property_category::hard_geometry, bool, Visible, visible, true)
         define_property(property_category::other_appearance, bool, Enabled, enabled, true)
-        define_property(property_category::other, neogfx::focus_policy, FocusPolicy, focus_policy, neogfx::focus_policy::NoFocus)
+        define_property(property_category::other, optional_focus_policy, FocusPolicy, focus_policy)
         define_property(property_category::other_appearance, double, Opacity, opacity, 1.0)
         define_property(property_category::other_appearance, optional<double>, BackgroundOpacity, background_opacity)
         define_property(property_category::other_appearance, optional<neogfx::palette>, Palette, palette)

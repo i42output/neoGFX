@@ -557,12 +557,25 @@ namespace neogfx
             }
             break;
         case ScanCode_RETURN:
-            if (!read_only() && iType == MultiLine)
+            if (!read_only())
             {
-                multiple_text_changes mtc{ *this };
-                delete_any_selection();
-                insert_text(string{ "\n" }, next_style());
-                cursor().set_position(cursor().position() + 1);
+                if (aKeyModifiers == KeyModifier_NONE)
+                {
+                    bool canAccept = false;
+                    CanAcceptText.trigger(text(), canAccept);
+                    if (canAccept)
+                    {
+                        AcceptText.trigger(text());
+                        break;
+                    }
+                }
+                if (iType == MultiLine)
+                {
+                    multiple_text_changes mtc{ *this };
+                    delete_any_selection();
+                    insert_text(string{ "\n" }, next_style());
+                    cursor().set_position(cursor().position() + 1);
+                }
             }
             else
                 handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);

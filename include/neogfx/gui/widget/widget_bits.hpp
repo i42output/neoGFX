@@ -129,6 +129,8 @@ namespace neogfx
         ConsumeReturnKey  = 0x20000000,
         IgnoreNonClient   = 0x40000000
     };
+
+    typedef optional<focus_policy> optional_focus_policy;
 }
 
 begin_declare_enum(neogfx::widget_part_e)

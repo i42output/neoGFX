@@ -125,6 +125,8 @@ namespace neogfx
 
     focus_policy tool_title_bar::focus_policy() const
     {
+        if (has_focus_policy())
+            return widget::focus_policy();
         return neogfx::focus_policy::ClickFocus;
     }
 
