@@ -72,6 +72,30 @@ namespace neogfx
         init();
     }
 
+    label::label(std::string const& aText, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+        widget{},
+        iAlignment{ aAlignment },
+        iPlacement{ aPlacement },
+        iLayout{ *this },
+        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ iLayout, aTexture },
+        iCenterSpacer{ nullptr }
+    {
+        init();
+    }
+
+    label::label(std::string const& aText, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+        widget{},
+        iAlignment{ aAlignment },
+        iPlacement{ aPlacement },
+        iLayout{ *this },
+        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ iLayout, aImage },
+        iCenterSpacer{ nullptr }
+    {
+        init();
+    }
+
     label::label(i_widget& aParent, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aParent }, 
         iAlignment{ aAlignment }, 
@@ -120,6 +144,30 @@ namespace neogfx
         init();
     }
 
+    label::label(i_widget& aParent, std::string const& aText, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+        widget{ aParent },
+        iAlignment{ aAlignment },
+        iPlacement{ aPlacement },
+        iLayout{ *this },
+        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ iLayout, aTexture },
+        iCenterSpacer{ nullptr }
+    {
+        init();
+    }
+
+    label::label(i_widget& aParent, std::string const& aText, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+        widget{ aParent },
+        iAlignment{ aAlignment },
+        iPlacement{ aPlacement },
+        iLayout{ *this },
+        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ iLayout, aImage },
+        iCenterSpacer{ nullptr }
+    {
+        init();
+    }
+
     label::label(i_layout& aLayout, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
         widget{ aLayout }, 
         iAlignment{ aAlignment }, 
@@ -162,6 +210,30 @@ namespace neogfx
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
         iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ iLayout, aImage },
+        iCenterSpacer{ nullptr }
+    {
+        init();
+    }
+
+    label::label(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+        widget{ aLayout },
+        iAlignment{ aAlignment },
+        iPlacement{ aPlacement },
+        iLayout{ *this },
+        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ iLayout, aTexture },
+        iCenterSpacer{ nullptr }
+    {
+        init();
+    }
+
+    label::label(i_layout& aLayout, std::string const& aText, const i_image& aImage, label_type aType, neogfx::alignment aAlignment, label_placement aPlacement) :
+        widget{ aLayout },
+        iAlignment{ aAlignment },
+        iPlacement{ aPlacement },
+        iLayout{ *this },
+        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
         iImage{ iLayout, aImage },
         iCenterSpacer{ nullptr }
     {

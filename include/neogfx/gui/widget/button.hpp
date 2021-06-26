@@ -56,14 +56,20 @@ namespace neogfx
         button(std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(std::string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(std::string const& aText, const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, std::string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, std::string const& aText, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, std::string const& aText, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         ~button();
         // widget
     public:

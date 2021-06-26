@@ -1410,11 +1410,15 @@ namespace neogfx
     void text_edit::clear()
     {
         cursor().set_position(0);
+        iPreviousText = iText;
         iText.clear();
         glyphs().clear();
         iGlyphParagraphs.clear();
         for (std::size_t i = 0; i < iGlyphColumns.size(); ++i)
             iGlyphColumns[i].lines().clear();
+        iUtf8TextCache = std::nullopt;
+        if (iPreviousText != iText)
+            notify_text_changed();
     }
 
     i_string const& text_edit::text() const
