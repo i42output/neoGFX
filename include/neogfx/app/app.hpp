@@ -93,8 +93,8 @@ namespace neogfx
     public:
         static app& instance();
     public:
-        const i_program_options& program_options() const override;
-        std::string const& name() const override;
+        const i_program_options& program_options() const noexcept override;
+        std::string const& name() const noexcept override;
         void set_name(std::string const& aName) override;
         int exec(bool aQuitWhenLastWindowClosed = true) override;
         bool in_exec() const override;

@@ -41,6 +41,7 @@ namespace neogfx
     public:
         neogfx::tab_container_style tab_container_style() const override;
         void set_tab_container_style(neogfx::tab_container_style aStyle) override;
+        void set_tab_icon_size(const size& aIconSize) override;
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
@@ -86,6 +87,7 @@ namespace neogfx
         i_tab_container& iContainer;
         bool iClosableTabs;
         neogfx::tab_container_style iStyle;
+        size iIconSize = size{ 16.0, 16.0 };
         tab_list iTabs;
         std::optional<horizontal_layout> iHorizontalLayout;
         std::optional<vertical_layout> iVerticalLayout;

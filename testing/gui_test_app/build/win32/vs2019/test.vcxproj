@@ -125,7 +125,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;Crypt32.lib;neolibd.lib;neogfxd.lib;zlibstaticd.lib;libpng16_staticd.lib;libglew32d.lib;opengl32.lib;Imm32.lib;version.lib;freetype.lib;harfbuzzd.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Program Files\OpenSSL\lib\libssl.lib;C:\Program Files\OpenSSL\lib\libcrypto.lib;Crypt32.lib;neolibd.lib;neogfxd.lib;zlibstaticd.lib;libpng16_staticd.lib;libglew32d.lib;opengl32.lib;Imm32.lib;version.lib;freetype.lib;harfbuzzd.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <StackReserveSize>100000000</StackReserveSize>
     </Link>
@@ -154,7 +154,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;Crypt32.lib;neolib.lib;neogfx.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Program Files\OpenSSL\lib\libssl.lib;C:\Program Files\OpenSSL\lib\libcrypto.lib;Crypt32.lib;neolib.lib;neogfx.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <StackReserveSize>100000000</StackReserveSize>
@@ -184,7 +184,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;Crypt32.lib;neolib.lib;neogfx.lib;libcrypto64MT.lib;libssl64MT.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;SDL2-static.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Program Files\OpenSSL\lib\libssl.lib;C:\Program Files\OpenSSL\lib\libcrypto.lib;Crypt32.lib;neolib.lib;neogfx.lib;libcrypto64MT.lib;libssl64MT.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;SDL2-static.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <StackReserveSize>100000000</StackReserveSize>
@@ -213,7 +213,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;Crypt32.lib;neolib.lib;neogfx.lib;libcrypto64MT.lib;libssl64MT.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;SDL2-static.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Program Files\OpenSSL\lib\libssl.lib;C:\Program Files\OpenSSL\lib\libcrypto.lib;Crypt32.lib;neolib.lib;neogfx.lib;libcrypto64MT.lib;libssl64MT.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;SDL2-static.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <StackReserveSize>100000000</StackReserveSize>
@@ -243,7 +243,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(DevDir3rdParty)\lib;$(DevDirNeogfx)\3rdparty\lib;$(DevDirNeogfx)\lib;/usr/local/lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcrypto64MT.lib;libssl64MT.lib;Crypt32.lib;neolib.lib;neogfx.lib;libcrypto64MT.lib;libssl64MT.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;SDL2-static.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\Program Files\OpenSSL\lib\libssl.lib;C:\Program Files\OpenSSL\lib\libcrypto.lib;Crypt32.lib;neolib.lib;neogfx.lib;libcrypto64MT.lib;libssl64MT.lib;zlibstatic.lib;libpng16_static.lib;libglew32.lib;opengl32.lib;SDL2-static.lib;Imm32.lib;version.lib;freetype.lib;harfbuzz.lib;winmm.lib;D2d1.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
       <StackReserveSize>100000000</StackReserveSize>

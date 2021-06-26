@@ -65,6 +65,7 @@ namespace neogfx
     public:
         virtual neogfx::tab_container_style tab_container_style() const = 0;
         virtual void set_tab_container_style(neogfx::tab_container_style aStyle) = 0;
+        virtual void set_tab_icon_size(const size& aIconSize) = 0;
     public:
         virtual bool has_tabs() const = 0;
         virtual uint32_t tab_count() const = 0;

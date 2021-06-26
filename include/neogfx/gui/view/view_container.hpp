@@ -65,6 +65,8 @@ namespace neogfx
         const neogfx::view_stack& view_stack() const override;
         neogfx::view_stack& view_stack() override;
     public:
+        i_layout& page_layout() override;
+    public:
         view_container_style style() const override;
         void change_style(view_container_style aNewStyle) override;
     public:

@@ -65,6 +65,18 @@ namespace neogfx
         }
     }
 
+    void tab_bar::set_tab_icon_size(const size& aIconSize)
+    {
+        if (iIconSize != aIconSize)
+        {
+            iIconSize = aIconSize;
+            for (auto& t : iTabs)
+            {
+                t->set_image_extents(iIconSize);
+            }
+        }
+    }
+
     size_policy tab_bar::size_policy() const
     {
         if (has_size_policy())
@@ -138,13 +150,15 @@ namespace neogfx
     i_tab& tab_bar::add_tab(i_string const& aTabText)
     {
         iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
+        iTabs.back()->set_image_extents(iIconSize);
         return *iTabs.back();
     }
 
     i_tab& tab_bar::insert_tab(tab_index aTabIndex, i_string const& aTabText)
     {
-        iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
-        return *iTabs.back();
+        auto result = iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
+        (**result).set_image_extents(iIconSize);
+        return **result;
     }
 
     void tab_bar::remove_tab(tab_index aTabIndex)

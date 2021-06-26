@@ -142,7 +142,7 @@ namespace chess
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
 
-        std::strong_ordering operator<=>(basic_position<Representation> const&) const = default;
+        std::weak_ordering operator<=>(basic_position<Representation> const&) const = default;
     };
 
     using mailbox_position = basic_position<mailbox_rep>;

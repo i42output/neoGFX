@@ -414,7 +414,7 @@ namespace neogfx
             }
             x += column.width();
         }
-        if (has_focus())
+        if (has_focus() && !read_only())
             draw_cursor(aGc);
     }
 
@@ -548,6 +548,7 @@ namespace neogfx
         switch (aScanCode)
         {
         case ScanCode_TAB:
+            if (!read_only())
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
@@ -556,7 +557,7 @@ namespace neogfx
             }
             break;
         case ScanCode_RETURN:
-            if (iType == MultiLine)
+            if (!read_only() && iType == MultiLine)
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
@@ -567,7 +568,7 @@ namespace neogfx
                 handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         case ScanCode_BACKSPACE:
-            if (cursor().position() == cursor().anchor())
+            if (!read_only() && cursor().position() == cursor().anchor())
             {
                 if (cursor().position() > 0)
                 {
@@ -580,7 +581,7 @@ namespace neogfx
                 delete_any_selection();
             break;
         case ScanCode_DELETE:
-            if (cursor().position() == cursor().anchor())
+            if (!read_only() && cursor().position() == cursor().anchor())
             {
                 if (cursor().position() < glyphs().size())
                 {
@@ -646,7 +647,7 @@ namespace neogfx
         case ScanCode_ESCAPE:
             if (cursor().anchor() != cursor().position())
                 cursor().set_anchor(cursor().position());
-            else if (iType == SingleLine)
+            else if (!read_only() && iType == SingleLine)
                 set_text(string{});
             break;
         default:
@@ -670,9 +671,12 @@ namespace neogfx
             else
                 return framed_scrollable_widget::text_input(aText);
         }
-        multiple_text_changes mtc{ *this };
-        delete_any_selection();
-        insert_text(aText, next_style(), true);
+        if (!read_only())
+        {
+            multiple_text_changes mtc{ *this };
+            delete_any_selection();
+            insert_text(aText, next_style(), true);
+        }
         return true;
     }
 
@@ -2021,6 +2025,17 @@ namespace neogfx
                 }
             }
             iTextExtents.cy = pos.y;
+            if (iTextExtents.cy < client_rect(false).cy)
+            {
+                auto const space = client_rect(false).cy - iTextExtents.cy;
+                auto const adjust = 
+                    ((Alignment & alignment::Vertical) == alignment::Bottom) ? space : 
+                        ((Alignment & alignment::Vertical) == alignment::VCenter) ? std::floor(space / 2.0) : 0.0;
+                if (adjust != 0.0)
+                    for (auto& column : iGlyphColumns)
+                        for (auto& line : column.lines())
+                            line.ypos += adjust;
+            }
         }
         catch (std::bad_alloc)
         {

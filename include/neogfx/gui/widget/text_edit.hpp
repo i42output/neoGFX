@@ -533,6 +533,14 @@ namespace neogfx
         std::size_t insert_text(i_string const& aText, const style& aStyle, bool aMoveCursor = false);
         std::size_t insert_text(position_type aPosition, i_string const& aText, bool aMoveCursor = false);
         std::size_t insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t set_text(std::string const& aText) { return set_text(string{ aText }); }
+        std::size_t set_text(std::string const& aText, const style& aStyle) { return set_text(string{ aText }, aStyle); }
+        std::size_t append_text(std::string const& aText, bool aMoveCursor = false) { return append_text(string{ aText }, aMoveCursor); }
+        std::size_t append_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false) { return append_text(string{ aText }, aStyle, aMoveCursor); }
+        std::size_t insert_text(std::string const& aText, bool aMoveCursor = false) { return insert_text(string{ aText }, aMoveCursor); }
+        std::size_t insert_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false) { return insert_text(string{ aText }, aStyle, aMoveCursor); }
+        std::size_t insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor = false) { return insert_text(string{ aText }, aMoveCursor); }
+        std::size_t insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor = false) { return insert_text(string{ aText }, aStyle, aMoveCursor); }
         void delete_text(position_type aStart, position_type aEnd);
         std::size_t columns() const;
         void set_columns(std::size_t aColumnCount);

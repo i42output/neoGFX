@@ -90,6 +90,12 @@ namespace neogfx
     }
 
     template <typename Base>
+    inline i_layout& view_container<Base>::page_layout()
+    {
+        return view_stack().layout();
+    }
+
+    template <typename Base>
     inline view_container_style view_container<Base>::style() const
     {
         return iStyle;

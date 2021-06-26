@@ -322,12 +322,12 @@ namespace neogfx
         return *instance;
     }
 
-    const i_program_options& app::program_options() const
+    const i_program_options& app::program_options() const noexcept
     {
         return iProgramOptions;
     }
 
-    std::string const& app::name() const
+    std::string const& app::name() const noexcept
     {
         return iName;
     }

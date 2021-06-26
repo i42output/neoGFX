@@ -50,6 +50,7 @@ namespace neogfx
     public:
         neogfx::tab_container_style tab_container_style() const override;
         void set_tab_container_style(neogfx::tab_container_style aStyle) override;
+        void set_tab_icon_size(const size& aIconSize) override;
     public:
         i_layout& page_layout() override;
     public:

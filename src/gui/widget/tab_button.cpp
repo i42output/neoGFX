@@ -277,19 +277,22 @@ namespace neogfx
         return push_button::text();
     }
 
-    void tab_button::set_text(i_string const& aText)
+    i_tab& tab_button::set_text(i_string const& aText)
     {
         push_button::set_text(aText);
+        return *this;
     }
 
-    void tab_button::set_image(const i_texture& aTexture)
+    i_tab& tab_button::set_image(const i_texture& aTexture)
     {
         push_button::set_image(aTexture);
+        return *this;
     }
 
-    void tab_button::set_image(const i_image& aImage)
+    i_tab& tab_button::set_image(const i_image& aImage)
     {
         push_button::set_image(aImage);
+        return *this;
     }
 
     const i_widget& tab_button::as_widget() const

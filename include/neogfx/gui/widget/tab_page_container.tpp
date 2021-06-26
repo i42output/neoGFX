@@ -92,6 +92,12 @@ namespace neogfx
     }
 
     template <typename Base>
+    inline void tab_page_container<Base>::set_tab_icon_size(const size& aIconSize)
+    {
+        iTabBar.set_tab_icon_size(aIconSize);
+    }
+
+    template <typename Base>
     inline bool tab_page_container<Base>::has_tabs() const
     {
         return !iTabs.empty();
