@@ -21,6 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/i_property.hpp>
+#include <neogfx/gui/layout/anchor.hpp>
+#include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/layout/i_anchorable.hpp>
 
@@ -43,6 +45,7 @@ namespace neogfx
 
     class i_layout_item : public i_reference_counted, public i_property_owner, public i_geometry, public i_anchorable
     {
+        friend class layout_item_cache;
     public:
         typedef i_layout_item abstract_type;
     public:
@@ -116,5 +119,6 @@ namespace neogfx
                 return *existing;
             throw ancestor_layout_type_not_found();
         }
+    public:
     };
 }

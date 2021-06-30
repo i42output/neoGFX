@@ -34,6 +34,12 @@ namespace neogfx::nrc
             add_header("neogfx/gui/widget/text_edit.hpp");
             add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
         }
+        text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t, ui_element_type aElementType = ui_element_type::TextEdit) :
+            ui_element<>{ aParser, aParent, member_element, aElementType }
+        {
+            add_header("neogfx/gui/widget/text_edit.hpp");
+            add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
+        }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {

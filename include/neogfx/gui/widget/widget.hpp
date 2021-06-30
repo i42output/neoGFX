@@ -149,7 +149,6 @@ namespace neogfx
         bool has_logical_coordinate_system() const override;
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
-        point origin() const override;
         rect non_client_rect() const override;
         rect client_rect(bool aIncludePadding = true) const override;
         void move(const point& aPosition) override;
@@ -326,7 +325,6 @@ namespace neogfx
         class layout_timer;
         std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
-        mutable optional_point iOrigin;
         optional_point iCapturePosition;
         int32_t iLayer;
         std::optional<int32_t> iRenderLayer;

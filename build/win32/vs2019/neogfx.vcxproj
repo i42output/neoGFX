@@ -261,7 +261,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\neolib\include\neolib\timer_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\clipboard.hpp" />
@@ -280,7 +279,6 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource_manager.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\app\i_service_factory.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_shared_menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\modal_task.hpp" />
@@ -304,7 +302,6 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\simd.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp" />
@@ -317,18 +314,14 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_power.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object_type.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\power.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\swizzle_array.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\units.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
@@ -447,7 +440,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchors.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item_cache.hpp" />
@@ -467,7 +459,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\view\i_controller.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\controller.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widgets.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\color_widget.hpp" />

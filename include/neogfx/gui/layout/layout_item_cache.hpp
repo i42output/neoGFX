@@ -78,6 +78,8 @@ namespace neogfx
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:
+        point origin() const override;
+        void reset_origin() const override;
         point position() const override;
         void set_position(const point& aPosition) override;
         size extents() const override;
@@ -104,6 +106,9 @@ namespace neogfx
         bool has_padding() const override;
         neogfx::padding padding() const override;
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
+    protected:
+        point unconstrained_origin() const override;
+        point unconstrained_position() const override;
     protected:
         void layout_item_enabled(i_layout_item& aItem) override;
         void layout_item_disabled(i_layout_item& aItem) override;

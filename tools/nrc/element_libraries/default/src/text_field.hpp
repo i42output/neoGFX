@@ -31,7 +31,7 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, aElementType }
         {
             add_header("neogfx/gui/widget/text_field.hpp");
-            add_data_names({ "label", "hint" });
+            add_data_names({ "label", "input_box", "hint" });
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override

@@ -148,6 +148,9 @@ namespace neogfx::nrc
                     case ui_element_type::Label:
                         iAnonymousId = parent().id() + ".label()";
                         break;
+                    case ui_element_type::LineEdit:
+                        iAnonymousId = parent().id() + ".input_box()";
+                        break;
                     case ui_element_type::TextWidget:
                         iAnonymousId = parent().id() + ".text_widget()";
                         break;

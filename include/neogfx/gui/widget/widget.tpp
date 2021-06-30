@@ -235,7 +235,7 @@ namespace neogfx
     {
         if (!is_root())
         {
-            iOrigin = std::nullopt;
+            as_widget().reset_origin();
             as_widget().update_layout();
         }
     }
@@ -809,24 +809,6 @@ namespace neogfx
     }
 
     template <typename Interface>
-    point widget<Interface>::origin() const
-    {
-        if (iOrigin == std::nullopt)
-        {
-            if (!is_root() || root().is_nested())
-            {
-                if (has_parent())
-                    iOrigin = as_widget().position() + parent().origin();
-                else
-                    iOrigin = as_widget().position();
-            }
-            else
-                iOrigin = point{};
-        }
-        return *iOrigin;
-    }
-
-    template <typename Interface>
     void widget<Interface>::move(const point& aPosition)
     {
 #ifdef NEOGFX_DEBUG
@@ -842,7 +824,7 @@ namespace neogfx
         if (!is_root() || root().is_nested())
         {
             update(true);
-            iOrigin = std::nullopt;
+            as_widget().reset_origin();
             update(true);
             for (auto& child : iChildren)
                 child->parent_moved();
@@ -860,7 +842,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::parent_moved()
     {
-        iOrigin = std::nullopt;
+        as_widget().reset_origin();
         for (auto& child : iChildren)
             child->parent_moved();
         ParentPositionChanged.trigger();
@@ -899,7 +881,7 @@ namespace neogfx
     template <typename Interface>
     rect widget<Interface>::non_client_rect() const
     {
-        return rect{origin(), as_widget().extents()};
+        return rect{as_widget().origin(), as_widget().extents()};
     }
 
     template <typename Interface>
@@ -1160,7 +1142,7 @@ namespace neogfx
                 auto const& childWidget = **iterChild;
                 if ((childWidget.widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
                     continue;
-                rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - origin());
+                rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - as_widget().origin());
                 if (intersection.empty() && !childWidget.is_root())
                     continue;
                 childWidget.render(aGc);
@@ -1171,22 +1153,22 @@ namespace neogfx
             const rect clipRect = default_clip_rect().intersection(updateRect);
 
             aGc.set_extents(client_rect().extents());
-            aGc.set_origin(origin());
+            aGc.set_origin(as_widget().origin());
 
 #ifdef NEOGFX_DEBUG
             if (debug::renderItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << endl;
+                service<debug::logger>() << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << as_widget().origin() << endl;
 #endif // NEOGFX_DEBUG
 
             scoped_scissor scissor(aGc, clipRect);
 
-            scoped_coordinate_system scs1(aGc, origin(), as_widget().extents(), logical_coordinate_system());
+            scoped_coordinate_system scs1(aGc, as_widget().origin(), as_widget().extents(), logical_coordinate_system());
 
             Painting.trigger(aGc);
 
             paint(aGc);
 
-            scoped_coordinate_system scs2(aGc, origin(), as_widget().extents(), logical_coordinate_system());
+            scoped_coordinate_system scs2(aGc, as_widget().origin(), as_widget().extents(), logical_coordinate_system());
 
             PaintingChildren.trigger(aGc);
 
@@ -1224,15 +1206,15 @@ namespace neogfx
             }
 
             aGc.set_extents(client_rect().extents());
-            aGc.set_origin(origin());
+            aGc.set_origin(as_widget().origin());
 
-            scoped_coordinate_system scs3(aGc, origin(), as_widget().extents(), logical_coordinate_system());
+            scoped_coordinate_system scs3(aGc, as_widget().origin(), as_widget().extents(), logical_coordinate_system());
 
             Painted.trigger(aGc);
         }
 
         aGc.set_extents(as_widget().extents());
-        aGc.set_origin(origin());
+        aGc.set_origin(as_widget().origin());
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
             paint_non_client_after(aGc);
@@ -1851,7 +1833,7 @@ namespace neogfx
     template <typename Interface>
     point widget<Interface>::mouse_position() const
     {
-        return root().mouse_position() - origin();
+        return root().mouse_position() - as_widget().origin();
     }
 
     template <typename Interface>
@@ -1920,7 +1902,7 @@ namespace neogfx
     template <typename Interface>
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
-        auto const clientPosition = aPosition - origin();
+        auto const clientPosition = aPosition - as_widget().origin();
         const i_widget* result = nullptr;
         if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
         {

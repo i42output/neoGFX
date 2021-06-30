@@ -22,8 +22,6 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/layout/anchor.hpp>
-#include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/layout_item_cache.hpp>
 
 namespace neogfx
@@ -136,20 +134,54 @@ namespace neogfx
                 as_layout_item().layout_owner().layout_root(aDeferLayout);
         }
     public:
+        point origin() const override
+        {
+            if (iOrigin == std::nullopt)
+            {
+                auto& self = as_layout_item();
+                if (!self.is_widget())
+                {
+                    if (has_parent_layout_item())
+                        iOrigin = parent_layout_item().origin();
+                    else
+                        iOrigin = point{};
+                }
+                else
+                {
+                    if (!self.as_widget().is_root() || self.as_widget().root().is_nested())
+                    {
+                        if (self.as_widget().has_parent())
+                            iOrigin = self.as_widget().position() + self.as_widget().parent().origin();
+                        else
+                            iOrigin = self.as_widget().position();
+                    }
+                    else
+                        iOrigin = point{};
+                }
+            }
+            return *iOrigin;
+        }
+        void reset_origin() const override
+        {
+            iOrigin = std::nullopt;
+        }
         point position() const override
         {
-            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) * 
-                units_converter(*this).from_device_units(Position);
+            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) *
+                units_converter(*this).from_device_units(!Anchor_Position.active() ? 
+                    static_cast<point>(Position) : static_cast<point>(Position) + Anchor_Position.evaluate_constraints() - unconstrained_origin());
         }
         void set_position(const point& aPosition) override
         {
+            reset_origin();
             if (Position != units_converter(*this).to_device_units(aPosition))
                 Position.assign(units_converter(*this).to_device_units(aPosition), false);
         }
         size extents() const override
         {
-            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) * 
-                units_converter(*this).from_device_units(Size);
+            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) *
+                units_converter(*this).from_device_units(!Anchor_Size.active() ? 
+                    static_cast<size>(Size) : Anchor_Size.evaluate_constraints());
         }
         void set_extents(const size& aExtents) override
         {
@@ -338,6 +370,34 @@ namespace neogfx
                     update_layout();
             }
         }
+    protected:
+        point unconstrained_origin() const override
+        {
+            auto& self = as_layout_item();
+            if (!self.is_widget())
+            {
+                if (has_parent_layout_item())
+                    return parent_layout_item().origin();
+                else
+                    return {};
+            }
+            else
+            {
+                if (!self.as_widget().is_root() || self.as_widget().root().is_nested())
+                {
+                    if (self.as_widget().has_parent())
+                        return self.as_widget().unconstrained_position() + self.as_widget().parent().origin();
+                    else
+                        return self.as_widget().unconstrained_position();
+                }
+                else
+                    return {};
+            }
+        }
+        point unconstrained_position() const override
+        {
+            return Position;
+        }
     public:
         void invalidate_combined_transformation() override
         {
@@ -428,7 +488,7 @@ namespace neogfx
         }
         // properties / anchors
     public:
-        // todo: declarations for these in i_layout_item when supported
+        // todo: declare_property
         define_property(property_category::soft_geometry, point, Position, position)
         define_property(property_category::soft_geometry, size, Size, extents)
         define_property(property_category::hard_geometry, optional_padding, Padding, padding)
@@ -438,13 +498,15 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
         define_property(property_category::hard_geometry, optional_size, FixedSize, fixed_size)
         define_property(property_category::hard_geometry, optional_mat33, Transformation, transformation)
-        define_anchor(Position)
+        // todo: declare_anchor
+        define_anchor_ex(Position, unconstrained_origin)
         define_anchor(Size)
         define_anchor(Padding)
         define_anchor(MinimumSize)
         define_anchor(MaximumSize)
     private:
         string iId;
+        mutable optional_point iOrigin;
         ref_ptr<i_layout_item_cache> iCache;
         mutable optional_mat33 iCombinedTransformation;
     };

@@ -48,7 +48,7 @@ namespace neogfx
                 throw anchor_not_found(aLhsAnchor);
             if (rhsAnchor == aRhs.anchors().end())
                 throw anchor_not_found(aRhsAnchor);
-            lhsAnchor->second()->constrain(*rhsAnchor->second(), aLhsFunction, aRhsFunction);
+            rhsAnchor->second()->constrain(*lhsAnchor->second(), aLhsFunction, aRhsFunction);
         }
         // state
     public:

@@ -58,4 +58,29 @@ namespace neogfx
     {
         aFirst.anchor_to(aSecond, string{ "MinimumSize" }, anchor_constraint_function::Max, string{ "MinimumSize" }, anchor_constraint_function::Max);
     }
+
+    inline void layout_as_same_width(i_anchorable& aFirst, i_anchorable& aSecond)
+    {
+        aFirst.anchor_to(aSecond, string{ "MinimumSize" }, anchor_constraint_function::MaxX, string{ "MinimumSize" }, anchor_constraint_function::MaxX);
+    }
+
+    inline void layout_as_same_height(i_anchorable& aFirst, i_anchorable& aSecond)
+    {
+        aFirst.anchor_to(aSecond, string{ "MinimumSize" }, anchor_constraint_function::MaxY, string{ "MinimumSize" }, anchor_constraint_function::MaxY);
+    }
+
+    inline void layout_as_same_size_min_max(i_anchorable& aFirst, i_anchorable& aSecond)
+    {
+        aFirst.anchor_to(aSecond, string{ "MinimumSize" }, anchor_constraint_function::Min, string{ "MinimumSize" }, anchor_constraint_function::Max);
+    }
+
+    inline void layout_as_same_width_min_max(i_anchorable& aFirst, i_anchorable& aSecond)
+    {
+        aFirst.anchor_to(aSecond, string{ "MinimumSize" }, anchor_constraint_function::MinX, string{ "MinimumSize" }, anchor_constraint_function::MaxX);
+    }
+
+    inline void layout_as_same_height_min_max(i_anchorable& aFirst, i_anchorable& aSecond)
+    {
+        aFirst.anchor_to(aSecond, string{ "MinimumSize" }, anchor_constraint_function::MinY, string{ "MinimumSize" }, anchor_constraint_function::MaxY);
+    }
 }

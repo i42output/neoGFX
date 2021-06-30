@@ -310,6 +310,16 @@ namespace neogfx
         return parent_layout().device_metrics();
     }
 
+    point layout_item_cache::origin() const
+    {
+        return subject().origin();
+    }
+
+    void layout_item_cache::reset_origin() const
+    {
+        subject().reset_origin();
+    }
+
     point layout_item_cache::position() const
     {
         return subject().position();
@@ -580,6 +590,16 @@ namespace neogfx
     void layout_item_cache::set_padding(optional_padding const& aPadding, bool aUpdateLayout)
     {
         subject().set_padding(aPadding, aUpdateLayout);
+    }
+
+    point layout_item_cache::unconstrained_origin() const
+    {
+        return subject().unconstrained_origin();
+    }
+
+    point layout_item_cache::unconstrained_position() const
+    {
+        return subject().unconstrained_position();
     }
 
     void layout_item_cache::layout_item_enabled(i_layout_item& aItem)

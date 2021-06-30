@@ -33,6 +33,11 @@ namespace neogfx::nrc
         {
             add_header("neogfx/gui/widget/line_edit.hpp");
         }
+        line_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t) :
+            text_edit{ aParser, aParent, member_element, ui_element_type::LineEdit }
+        {
+            add_header("neogfx/gui/widget/line_edit.hpp");
+        }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
@@ -48,7 +53,8 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  %1% %2%;\n", type_name(), id());
+            if (!is_member_element())
+                emit("  %1% %2%;\n", type_name(), id());
             text_edit::emit_preamble();
         }
         void emit_ctor() const override

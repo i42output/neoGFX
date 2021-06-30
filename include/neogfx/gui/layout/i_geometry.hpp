@@ -208,7 +208,11 @@ namespace neogfx
 
     class i_geometry : public i_units_context
     {
+        template <typename>
+        friend class layout_item;
     public:
+        virtual point origin() const = 0;
+        virtual void reset_origin() const = 0;
         virtual point position() const = 0;
         virtual void set_position(const point& aPosition) = 0;
         virtual size extents() const = 0;
@@ -235,6 +239,9 @@ namespace neogfx
         virtual bool has_padding() const = 0;
         virtual neogfx::padding padding() const = 0;
         virtual void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) = 0;
+    protected:
+        virtual point unconstrained_origin() const = 0;
+        virtual point unconstrained_position() const = 0;
         // helpers
     public:
         size apply_fixed_size(size const& aResult) const
