@@ -62,6 +62,7 @@ namespace neogfx::nrc
     struct element_not_found : std::runtime_error { element_not_found(std::string const& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
     struct element_ill_formed : std::runtime_error { element_ill_formed(std::string const& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
     struct unsupported_member_element : std::runtime_error { unsupported_member_element() : std::runtime_error{ "Unsupported member element." } {} };
+    struct unknown_data_type : std::runtime_error { unknown_data_type() : std::runtime_error{ "Unknown data type." } {} };
 
     class i_ui_element : public neolib::i_reference_counted
     {

@@ -436,12 +436,7 @@ int main(int argc, char* argv[])
             else 
                 window.buttonChina.set_maximum_size(ng::size{ 128_dip, 64_dip });
         });
-        window.dropList.model().insert_item(window.dropList.model().end(), "Red");
-        window.dropList.model().insert_item(window.dropList.model().end(), "Green");
-        window.dropList.model().insert_item(window.dropList.model().end(), "Blue");
-        window.dropList2.model().insert_item(window.dropList2.model().end(), "Square");
-        window.dropList2.model().insert_item(window.dropList2.model().end(), "Triangle");
-        window.dropList2.model().insert_item(window.dropList2.model().end(), "Circle");
+
         for (int32_t i = 1; i <= 100; ++i)
             window.dropList3.model().insert_item(window.dropList3.model().end(), "Example_"_t + boost::lexical_cast<std::string>(i));
         neolib::random prng;

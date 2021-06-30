@@ -550,7 +550,7 @@ namespace neogfx
         };
     }
 
-    drop_list::drop_list(style aStyle) :
+    drop_list::drop_list(drop_list_style aStyle) :
         iStyle { aStyle },
         iLayout0{ *this },
         iLayout1{ iLayout0 },
@@ -564,7 +564,7 @@ namespace neogfx
         init();
     }
 
-    drop_list::drop_list(i_widget& aParent, style aStyle) :
+    drop_list::drop_list(i_widget& aParent, drop_list_style aStyle) :
         widget{ aParent },
         iStyle{ aStyle },
         iLayout0{ *this },
@@ -579,7 +579,7 @@ namespace neogfx
         init();
     }
 
-    drop_list::drop_list(i_layout& aLayout, style aStyle) :
+    drop_list::drop_list(i_layout& aLayout, drop_list_style aStyle) :
         widget{ aLayout },
         iStyle{ aStyle },
         iLayout0{ *this },
@@ -753,7 +753,7 @@ namespace neogfx
         iListProxy.show_view();
         if (editable() && !accepting_selection())
         {
-            if ((iStyle & style::NoFilter) != style::NoFilter)
+            if ((iStyle & drop_list_style::NoFilter) != drop_list_style::NoFilter)
                 presentation_model().filter_by(0, input_widget().text());
             else if (presentation_model().rows() > 0)
             {
@@ -812,9 +812,23 @@ namespace neogfx
         handle_cancel_selection(true);
     }
 
+    drop_list_style drop_list::style() const
+    {
+        return iStyle;
+    }
+
+    void drop_list::set_style(drop_list_style aStyle)
+    {
+        if (iStyle != aStyle)
+        {
+            iStyle = aStyle;
+            update_widgets();
+        }
+    }
+
     bool drop_list::editable() const
     {
-        return (iStyle & style::Editable) == style::Editable;
+        return (iStyle & drop_list_style::Editable) == drop_list_style::Editable;
     }
 
     void drop_list::set_editable(bool aEditable)
@@ -822,16 +836,16 @@ namespace neogfx
         if (editable() != aEditable)
         {
             if (aEditable)
-                iStyle = (iStyle | style::Editable);
+                iStyle = (iStyle | drop_list_style::Editable);
             else
-                iStyle = (iStyle & ~style::Editable);
+                iStyle = (iStyle & ~drop_list_style::Editable);
             update_widgets();
         }
     }
 
     bool drop_list::list_always_visible() const
     {
-        return (iStyle & style::ListAlwaysVisible) == style::ListAlwaysVisible;
+        return (iStyle & drop_list_style::ListAlwaysVisible) == drop_list_style::ListAlwaysVisible;
     }
 
     void drop_list::set_list_always_visible(bool aListAlwaysVisible)
@@ -839,9 +853,9 @@ namespace neogfx
         if (list_always_visible() != aListAlwaysVisible)
         {
             if (aListAlwaysVisible)
-                iStyle = (iStyle | style::ListAlwaysVisible);
+                iStyle = (iStyle | drop_list_style::ListAlwaysVisible);
             else
-                iStyle = (iStyle & ~style::ListAlwaysVisible);
+                iStyle = (iStyle & ~drop_list_style::ListAlwaysVisible);
             if (view_created())
                 hide_view();
             update_widgets();
@@ -850,7 +864,7 @@ namespace neogfx
 
     bool drop_list::filter_enabled() const
     {
-        return (iStyle & style::NoFilter) != style::NoFilter;
+        return (iStyle & drop_list_style::NoFilter) != drop_list_style::NoFilter;
     }
 
     void drop_list::enable_filter(bool aEnableFilter)
@@ -858,9 +872,9 @@ namespace neogfx
         if (filter_enabled() != aEnableFilter)
         {
             if (!aEnableFilter)
-                iStyle = (iStyle | style::NoFilter);
+                iStyle = (iStyle | drop_list_style::NoFilter);
             else
-                iStyle = (iStyle & ~style::NoFilter);
+                iStyle = (iStyle & ~drop_list_style::NoFilter);
             // todo
         }
     }
@@ -1242,7 +1256,7 @@ namespace neogfx
                 return true;
             case ScanCode_HOME:
             case ScanCode_END:
-                if ((iStyle & style::Editable) != style::Editable || (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
+                if ((iStyle & drop_list_style::Editable) != drop_list_style::Editable || (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
                 {
                     if (view_created())
                         delegate_to_proxy(aEvent);

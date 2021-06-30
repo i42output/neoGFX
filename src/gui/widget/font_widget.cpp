@@ -137,9 +137,9 @@ namespace neogfx
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
         iLayout0{ *this },
-        iFamilyPicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
-        iStylePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
-        iSizePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter }
+        iFamilyPicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
+        iStylePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
+        iSizePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter }
     {
         init();
     }
@@ -150,9 +150,9 @@ namespace neogfx
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
         iLayout0{ *this },
-        iFamilyPicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
-        iStylePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
-        iSizePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter }
+        iFamilyPicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
+        iStylePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
+        iSizePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter }
     {
         init();
     }
@@ -163,9 +163,9 @@ namespace neogfx
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
         iLayout0{ *this },
-        iFamilyPicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
-        iStylePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter },
-        iSizePicker{ iLayout0, drop_list::style::Editable | drop_list::style::NoFilter }
+        iFamilyPicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
+        iStylePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
+        iSizePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter }
     {
         init();
     }
