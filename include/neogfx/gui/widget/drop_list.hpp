@@ -217,10 +217,12 @@ namespace neogfx
             ~list_proxy();
         public:
             bool view_created() const;
+            bool view_visible() const;
             drop_list_view& view() const;
         public:
             void show_view();
             void hide_view();
+            void close_view();
             void update_view_placement();
         private:
             drop_list& iDropList;
@@ -255,8 +257,10 @@ namespace neogfx
         const item_model_index& selection() const;
     public:
         bool view_created() const;
+        bool view_visible() const;
         void show_view();
         void hide_view();
+        void close_view();
         drop_list_view& view() const;
         void accept_selection();
         void cancel_selection();

@@ -87,6 +87,7 @@ namespace neogfx
 
     const i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent) const
     {
+        const i_surface* match = nullptr;
         for (auto s = iSurfaces.begin(); s != iSurfaces.end(); ++s)
         {
             auto const& surface = **s;
@@ -94,7 +95,7 @@ namespace neogfx
                 continue;
             if (aForMouseEvent)
             {
-                if (!surface.as_surface_window().native_window().is_nested())
+                if (!surface.as_surface_window().native_window().enabled())
                     continue;
                 auto const location = aProgenitor.as_surface_window().current_mouse_event_location();
                 if (location == mouse_event_location::None ||
@@ -104,8 +105,13 @@ namespace neogfx
             }
             rect const surfaceRect{ surface.as_surface_window().surface_position(), surface.as_surface_window().surface_extents() };
             if (surfaceRect.contains(aPosition))
-                return surface;
+            {
+                if (match == nullptr || match->is_owner_of(surface))
+                    match = &surface;
+            }
         }
+        if (match != nullptr)
+            return *match;
         return aProgenitor;
     }
 

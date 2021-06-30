@@ -1780,7 +1780,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
-        if (has_parent())
+        if (has_parent() && same_surface(parent()))
             return parent().mouse_wheel_scrolled(aWheel, aPosition + as_widget().position(), aDelta, aKeyModifiers);
         return false;
     }

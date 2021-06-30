@@ -1125,7 +1125,7 @@ namespace neogfx
             for (std::size_t i = 0; i < window_manager().window_count();)
             {
                 i_window& w = window_manager().window(i);
-                if (!w.dismissed() && is_owner_of(w) && w.can_dismiss(aClickedWidget))
+                if (w.as_widget().visible() && !w.dismissed() && is_owner_of(w) && w.can_dismiss(aClickedWidget))
                 {
                     if (w.dismissal_type() == CloseOnDismissal)
                         i = 0;

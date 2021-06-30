@@ -502,7 +502,9 @@ namespace neogfx
     void surface_window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
-        if (w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event())))
+        if (w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event())) &&
+            !w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers) &&
+            &w.surface() == this)
             widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
     }
 

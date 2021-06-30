@@ -325,6 +325,11 @@ namespace neogfx
         return iPopup != std::nullopt || iView != std::nullopt;
     }
 
+    bool drop_list::list_proxy::view_visible() const
+    {
+        return (iPopup != std::nullopt && iPopup->visible()) || (iView != std::nullopt && iView->visible());
+    }
+
     drop_list_view& drop_list::list_proxy::view() const
     {
         if (iPopup != std::nullopt)
@@ -346,7 +351,7 @@ namespace neogfx
                 iViewContainer->layout().set_padding(neogfx::padding{});
                 iView.emplace(iViewContainer->layout(), iDropList);
             }
-            else
+            else if (!iDropList.model().empty())
             {
                 iPopup.emplace(iDropList);
                 iSink = iPopup->Closed([this]()
@@ -357,10 +362,29 @@ namespace neogfx
                 update_view_placement();
             }
         }
+        else
+        {
+            if (iPopup != std::nullopt)
+            {
+                update_view_placement();
+                iPopup->show();
+            }
+            else if (iViewContainer != std::nullopt)
+                iViewContainer->show();
+        }
     }
 
     void drop_list::list_proxy::hide_view()
     {
+        if (iPopup != std::nullopt)
+            iPopup->hide();
+        else if (iViewContainer != std::nullopt)
+            iViewContainer->hide();
+    }
+
+    void drop_list::list_proxy::close_view()
+    {
+        hide_view();
         if (iPopup != std::nullopt)
             iPopup->close();
         else if (iView != std::nullopt)
@@ -748,6 +772,11 @@ namespace neogfx
         return iListProxy.view_created();
     }
 
+    bool drop_list::view_visible() const
+    {
+        return iListProxy.view_visible();
+    }
+
     void drop_list::show_view()
     {
         iListProxy.show_view();
@@ -770,6 +799,12 @@ namespace neogfx
     {
         if (!list_always_visible())
             iListProxy.hide_view();
+    }
+
+    void drop_list::close_view()
+    {
+        if (!list_always_visible())
+            iListProxy.close_view();
     }
 
     drop_list_view& drop_list::view() const
@@ -857,7 +892,7 @@ namespace neogfx
             else
                 iStyle = (iStyle & ~drop_list_style::ListAlwaysVisible);
             if (view_created())
-                hide_view();
+                close_view();
             update_widgets();
         }
     }
@@ -1139,7 +1174,7 @@ namespace neogfx
 
     void drop_list::handle_clicked()
     {
-        if (!view_created())
+        if (!view_visible())
         {
             if (selection_model().has_current_index())
                 iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
