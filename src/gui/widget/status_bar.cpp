@@ -291,7 +291,9 @@ namespace neogfx
         iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetContainer.set_padding(neogfx::padding{});
+        iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetLayout.set_padding(neogfx::padding{});
+        iNormalWidgetLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iPermanentWidgetLayout.set_padding(neogfx::padding{});
         auto update_size_grip = [this](style_aspect)
         {
@@ -364,7 +366,7 @@ namespace neogfx
         iSink += service<i_surface_manager>().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
         iSink += service<i_app>().current_style_changed(update_size_grip);
         update_size_grip(style_aspect::Color);
-        iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets();    });
+        iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets(); });
         iSink += service<i_app>().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
         update_widgets();
     }

@@ -146,7 +146,7 @@ namespace neogfx
         i_event_processing_context& event_processing_context() override;
     protected:
         void idle() override;
-    protected:
+    public:
         bool discover(const uuid& aId, void*& aObject) override;
     private:
         bool do_process_events();

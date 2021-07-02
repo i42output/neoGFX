@@ -65,6 +65,8 @@ namespace neogfx
     using neolib::reinterpret_pointer_cast;
     using neolib::dynamic_pointer_cast;
 
+    using neolib::i_discoverable;
+
     using neolib::to_abstract;
     using neolib::abstract_t;
 
