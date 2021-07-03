@@ -270,8 +270,8 @@ namespace neogfx
             auto const sepRect = separator_rect(aLayout, { i - 1u, i });
             if (aLayout.direction() == layout_direction::Horizontal)
             {
-                rect const thumbRect{ (sepRect.center() - point{ 1.0_dip, 8.5_dip }).ceil(), size{ 2.0_dip, 17.0_dip } };
-                for (auto s = thumbRect.top_left(); s.y < thumbRect.bottom_left().y; s += point{ 0.0, 3.0_dip, })
+                rect const gripRect{ (sepRect.center() - point{ 1.0_dip, 8.5_dip }).ceil(), size{ 2.0_dip, 17.0_dip } };
+                for (auto s = gripRect.top_left(); s.y < gripRect.bottom_left().y; s += point{ 0.0, 3.0_dip, })
                 {
                     aGc.fill_rect(rect{ s, size{ 2.0_dip, 2.0_dip } }, ink1);
                     aGc.fill_rect(rect{ s, size{ 1.0_dip, 1.0_dip } }, ink2);
@@ -279,8 +279,8 @@ namespace neogfx
             }
             else
             {
-                rect const thumbRect{ (sepRect.center() - point{ 8.5_dip, 1.0_dip }).ceil(), size{ 17.0_dip, 2.0_dip } };
-                for (auto s = thumbRect.top_left(); s.x < thumbRect.top_right().x; s += point{ 3.0_dip, 0.0 })
+                rect const gripRect{ (sepRect.center() - point{ 8.5_dip, 1.0_dip }).ceil(), size{ 17.0_dip, 2.0_dip } };
+                for (auto s = gripRect.top_left(); s.x < gripRect.top_right().x; s += point{ 3.0_dip, 0.0 })
                 {
                     aGc.fill_rect(rect{ s, size{ 2.0_dip, 2.0_dip } }, ink1);
                     aGc.fill_rect(rect{ s, size{ 1.0_dip, 1.0_dip } }, ink2);

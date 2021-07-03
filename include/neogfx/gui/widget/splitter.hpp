@@ -24,22 +24,23 @@
 
 namespace neogfx
 {
-    enum class splitter_type : uint32_t
+    enum class splitter_style : uint32_t
     {
-        None                = 0x0000,
-        Horizontal          = 0x0001,
-        Vertical            = 0x0002,
-        ResizeSinglePane    = 0x1000
+        None                = 0x00000000,
+        Horizontal          = 0x00000001,
+        Vertical            = 0x00000002,
+        ResizeSinglePane    = 0x00001000,
+        DrawGrip            = 0x10000000
     };
 
-    inline constexpr splitter_type operator|(splitter_type aLhs, splitter_type aRhs)
+    inline constexpr splitter_style operator|(splitter_style aLhs, splitter_style aRhs)
     {
-        return static_cast<splitter_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<splitter_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
     }
 
-    inline constexpr splitter_type operator&(splitter_type aLhs, splitter_type aRhs)
+    inline constexpr splitter_style operator&(splitter_style aLhs, splitter_style aRhs)
     {
-        return static_cast<splitter_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<splitter_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
     class splitter : public widget<>
@@ -47,9 +48,9 @@ namespace neogfx
     private:
         typedef std::pair<uint32_t, uint32_t> separator_type;
     public:
-        splitter(splitter_type aType = splitter_type::Horizontal);
-        splitter(i_widget& aParent, splitter_type aType = splitter_type::Horizontal);
-        splitter(i_layout& aLayout, splitter_type aType = splitter_type::Horizontal);
+        splitter(splitter_style aStyle = splitter_style::Horizontal | splitter_style::DrawGrip);
+        splitter(i_widget& aParent, splitter_style aStyle = splitter_style::Horizontal | splitter_style::DrawGrip);
+        splitter(i_layout& aLayout, splitter_style aStyle = splitter_style::Horizontal | splitter_style::DrawGrip);
         ~splitter();
     public:
         neogfx::size_policy size_policy() const override;
@@ -72,7 +73,7 @@ namespace neogfx
         void init();
         std::optional<separator_type> separator_at(const point& aPosition) const;
     private:
-        splitter_type iType;
+        splitter_style iStyle;
         std::optional<separator_type> iTracking;
         std::pair<size, size> iSizeBeforeTracking;
         point iTrackFrom;

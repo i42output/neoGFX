@@ -26,22 +26,22 @@
 
 namespace neogfx
 {
-    splitter::splitter(splitter_type aType) :
-        iType{ aType }
+    splitter::splitter(splitter_style aStyle) :
+        iStyle{ aStyle }
     {
         init();
     }
 
-    splitter::splitter(i_widget& aParent, splitter_type aType) : 
+    splitter::splitter(i_widget& aParent, splitter_style aStyle) : 
         widget{ aParent },
-        iType{ aType }
+        iStyle{ aStyle }
     {
         init();
     }
 
-    splitter::splitter(i_layout& aLayout, splitter_type aType) :
+    splitter::splitter(i_layout& aLayout, splitter_style aStyle) :
         widget{ aLayout },
-        iType{ aType }
+        iStyle{ aStyle }
     {
         init();
     }
@@ -56,7 +56,7 @@ namespace neogfx
             return widget::size_policy();
         else if (has_fixed_size())
             return size_constraint::Fixed;
-        else if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+        else if ((iStyle & splitter_style::Horizontal) == splitter_style::Horizontal)
             return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
         else
             return neogfx::size_policy{size_constraint::Minimum, size_constraint::Expanding};
@@ -112,9 +112,9 @@ namespace neogfx
         {
             auto& firstWidget = layout().get_widget_at(iTracking->first);
             auto& secondWidget = layout().get_widget_at(iTracking->second);
-            bool const resizeBothPanes = (iType & splitter_type::ResizeSinglePane) == splitter_type::None || 
+            bool const resizeBothPanes = (iStyle & splitter_style::ResizeSinglePane) == splitter_style::None || 
                 service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT);
-            if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+            if ((iStyle & splitter_style::Horizontal) == splitter_style::Horizontal)
             {
                 auto const delta = aPosition.x - iTrackFrom.x;
                 if (delta == 0.0)
@@ -168,7 +168,7 @@ namespace neogfx
     {
         auto s = separator_at(mouse_position());
         if (s != std::nullopt || iTracking != std::nullopt)
-            return (iType & splitter_type::Horizontal) == splitter_type::Horizontal ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
+            return (iStyle & splitter_style::Horizontal) == splitter_style::Horizontal ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
         else
             return widget::mouse_cursor();
     }
@@ -190,13 +190,14 @@ namespace neogfx
 
     void splitter::paint(i_graphics_context& aGc) const
     {
-        service<i_skin_manager>().active_skin().draw_separators(aGc, *this, layout());
+        if ((iStyle & splitter_style::DrawGrip) == splitter_style::DrawGrip)
+            service<i_skin_manager>().active_skin().draw_separators(aGc, *this, layout());
     }
 
     void splitter::init()
     {
         set_padding(neogfx::padding{ 0.0 });
-        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+        if ((iStyle & splitter_style::Horizontal) == splitter_style::Horizontal)
             set_layout(make_ref<horizontal_layout>());
         else
             set_layout(make_ref<vertical_layout>());
