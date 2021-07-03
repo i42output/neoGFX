@@ -121,10 +121,7 @@ namespace neogfx
             return;
         iModel = aModel;
         if (has_presentation_model())
-        {
-            iSectionWidths.resize(presentation_model().columns());
-            presentation_model().set_item_model(model());
-        }
+             presentation_model().set_item_model(model());
         request_full_update();
         update();
     }
@@ -337,8 +334,9 @@ namespace neogfx
                 request_full_update();
         });
         iUpdater.emplace(service<i_async_task>(), 
-            [this](neolib::callback_timer&) 
+            [this](neolib::callback_timer& aTimer) 
         { 
+            aTimer.again();
             if (iUpdateNeeded)
                 full_update(); 
         }, std::chrono::milliseconds{ 20 }, true);
@@ -348,10 +346,13 @@ namespace neogfx
     {
         if (!has_presentation_model())
             return;
-        for (auto& sw : iSectionWidths)
-            sw.calculated = 0.0;
         layout().set_spacing(size{ separator_width() }, false);
         iSectionWidths.resize(presentation_model().columns());
+        for (auto& sw : iSectionWidths)
+        {
+            sw.calculated = 0.0;
+            sw.max = 0.0;
+        }
         while (layout().count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
             layout().remove_at(layout().count() - 1);
         while (layout().count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
@@ -440,9 +441,7 @@ namespace neogfx
             else if (!expand_last_column())
             {
                 button.set_text(string{});
-                button.set_size_policy(iType == header_view_type::Horizontal ?
-                    neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } :
-                    neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+                button.set_size_policy(size_constraint::Expanding);
                 button.set_minimum_size(size{});
                 button.enable(false);
             }
