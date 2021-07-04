@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <vector>
 #include <neolib/task/timer.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/i_async_layout.hpp>
@@ -33,7 +34,12 @@ namespace neogfx
         {
             destroyed_flag destroyed;
             i_widget* widget;
-            pause_rendering pauseRendering;
+
+            entry(destroyed_flag&& destroyed, i_widget* widget) :
+                destroyed{ std::move(destroyed) }, widget{ widget }
+            {}
+            entry(entry&&) = default;
+            entry& operator=(entry&&) = default;
         };
         typedef std::vector<entry> entry_queue;
     public:
@@ -42,8 +48,8 @@ namespace neogfx
         void defer_layout(i_widget& aWidget) override;
         void validate(i_widget& aWidget) override;
     private:
-        std::optional<entry_queue::iterator> pending(i_widget const& aWidget);
-        std::optional<entry_queue::iterator> processing(i_widget const& aWidget);
+        std::optional<entry_queue::iterator> pending(i_widget& aWidget);
+        std::optional<entry_queue::iterator> processing(i_widget& aWidget);
         void process();
     private:
         neolib::callback_timer iTimer;

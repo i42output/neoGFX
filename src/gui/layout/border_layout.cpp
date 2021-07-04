@@ -153,7 +153,7 @@ namespace neogfx
         throw not_implemented();
     }
 
-    void border_layout::invalidate(bool aDeferLayout)
+    void border_layout::invalidate(bool aDeferLayout, bool aAncestors)
     {
         if (!is_alive())
             return;
@@ -164,7 +164,7 @@ namespace neogfx
         iCenter.invalidate(true);
         iRight.invalidate(true);
         iBottom.invalidate(true);
-        layout::invalidate(aDeferLayout);
+        layout::invalidate(aDeferLayout, aAncestors);
     }
 
     void border_layout::layout_items(const point& aPosition, const size& aSize)

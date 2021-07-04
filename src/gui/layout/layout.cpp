@@ -508,7 +508,7 @@ namespace neogfx
         return iInvalidated;
     }
 
-    void layout::invalidate(bool aDeferLayout)
+    void layout::invalidate(bool aDeferLayout, bool aAncestors)
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -523,8 +523,8 @@ namespace neogfx
             return;
         }
         iInvalidated = true;
-        if (has_parent_layout())
-            parent_layout().invalidate(aDeferLayout);
+        if (aAncestors && has_parent_layout())
+            parent_layout().invalidate(aDeferLayout, aAncestors);
         if (has_layout_owner())
         {
             if (layout_owner().is_managing_layout())
@@ -535,7 +535,7 @@ namespace neogfx
                 w = &w->parent();
                 if (w->has_layout())
                 {
-                    w->layout().invalidate(aDeferLayout);
+                    w->layout().invalidate(aDeferLayout, aAncestors);
                     if (w->is_managing_layout())
                     {
                         w->layout_items(aDeferLayout);

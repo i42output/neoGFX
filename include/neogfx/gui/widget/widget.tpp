@@ -103,10 +103,10 @@ namespace neogfx
     {
         static auto invalidate_layout = [](i_widget& self) 
         { 
-            if (self.has_parent_layout() && !self.layout_items_in_progress())
+            if (self.has_parent_layout()/* && !self.layout_items_in_progress() */)
             {
                 self.parent_layout().validate();
-                self.parent_layout().invalidate();
+                self.parent_layout().invalidate(true, true);
             }
         };
         static auto invalidate_canvas = [](i_widget& self) 

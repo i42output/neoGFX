@@ -132,7 +132,7 @@ namespace neogfx
         void disable() override;
         bool enabled() const override;
         bool invalidated() const override;
-        void invalidate(bool aDeferLayout = true) override;
+        void invalidate(bool aDeferLayout = true, bool aAncestors = false) override;
         void validate() override;
     public:
         void set_extents(const size& aExtents) override;

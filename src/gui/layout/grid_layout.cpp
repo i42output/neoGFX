@@ -206,14 +206,14 @@ namespace neogfx
         throw not_a_layout();
     }
 
-    void grid_layout::invalidate(bool aDeferLayout)
+    void grid_layout::invalidate(bool aDeferLayout, bool aAncestors)
     {
         if (!is_alive())
             return;
-        layout::invalidate(aDeferLayout);
         iRowLayout.invalidate(aDeferLayout);
         for (auto& row : iRows)
             row->invalidate(aDeferLayout);
+        layout::invalidate(aDeferLayout, aAncestors);
     }
 
     size grid_layout::minimum_size(optional_size const& aAvailableSpace) const
