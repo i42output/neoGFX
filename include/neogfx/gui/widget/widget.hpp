@@ -320,10 +320,9 @@ namespace neogfx
         i_widget* iLinkBefore;
         i_widget* iLinkAfter;
         i_layout* iParentLayout;
+        bool iLayoutPending;
         uint32_t iLayoutInProgress;
         ref_ptr<i_layout> iLayout;
-        class layout_timer;
-        std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         optional_point iCapturePosition;
         int32_t iLayer;

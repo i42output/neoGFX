@@ -281,14 +281,14 @@ namespace neogfx
         size totalExpanderWeight;
         for (auto const& item : items())
         {
-            if (!item.visible() && !ignore_visibility())
-                continue;
-            if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
-                continue;
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == &item.subject())
                 service<debug::logger>() << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
+            if (!item.visible() && !ignore_visibility())
+                continue;
+            if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
+                continue;
             auto& disposition = item.as_layout_item_cache().cached_disposition();
             disposition = layout_item_disposition::Unknown;
             if (AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Minimum)

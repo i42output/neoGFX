@@ -191,7 +191,10 @@ namespace neogfx
     {
     public:
         pause_rendering(i_window& aWindow);
+        pause_rendering(pause_rendering&& aOther);
         ~pause_rendering();
+    public:
+        pause_rendering& operator=(pause_rendering&& aOther);
     private:
         i_surface* iSurface;
         neolib::optional_destroyed_flag iSurfaceDestroyed;

@@ -23,6 +23,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/layout/i_async_layout.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/i_layout_item_cache.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -31,19 +32,6 @@
 namespace neogfx
 {
     template <typename Interface>
-    class widget<Interface>::layout_timer : public pause_rendering, neolib::callback_timer
-    {
-    public:
-        layout_timer(i_window& aWindow, i_async_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
-            pause_rendering{ aWindow }, neolib::callback_timer{ aIoTask, aCallback, std::chrono::seconds{} }
-        {
-        }
-        ~layout_timer()
-        {
-        }
-    };
-
-    template <typename Interface>
     widget<Interface>::widget() :
         iSingular{ false },
         iParent{ nullptr },
@@ -51,6 +39,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
     {
@@ -66,6 +55,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
     {
@@ -82,6 +72,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
     {
@@ -110,9 +101,22 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::property_changed(i_property& aProperty)
     {
-        static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); };
-        static auto invalidate_canvas = [](i_widget& self) { self.update(true); };
-        static auto invalidate_window_canvas = [](i_widget& self) { self.root().as_widget().update(true); };
+        static auto invalidate_layout = [](i_widget& self) 
+        { 
+            if (self.has_parent_layout() && !self.layout_items_in_progress())
+            {
+                self.parent_layout().validate();
+                self.parent_layout().invalidate();
+            }
+        };
+        static auto invalidate_canvas = [](i_widget& self) 
+        { 
+            self.update(true); 
+        };
+        static auto invalidate_window_canvas = [](i_widget& self) 
+        { 
+            self.root().as_widget().update(true); 
+        };
         static auto ignore = [](i_widget&) {};
         static const std::unordered_map<std::type_index, std::function<void(i_widget&)>> sActions =
         {
@@ -679,8 +683,8 @@ namespace neogfx
             return;
         if (!aDefer)
         {
-            if (iLayoutTimer != nullptr)
-                iLayoutTimer.reset();
+            service<i_async_layout>().validate(*this);
+            iLayoutPending = false;
             if (has_layout())
             {
                 layout_items_started();
@@ -723,18 +727,8 @@ namespace neogfx
         }
         else if (can_defer_layout())
         {
-            if (has_root() && !iLayoutTimer)
-            {
-                iLayoutTimer = std::make_unique<layout_timer>(root(), service<i_async_task>(), [this](neolib::callback_timer&)
-                {
-                    if (root().has_native_window())
-                    {
-                        auto t = std::move(iLayoutTimer);
-                        layout_items();
-                        update();
-                    }
-                });
-            }
+            service<i_async_layout>().defer_layout(*this);
+            iLayoutPending = true;
         }
         else if (as_widget().has_layout_manager())
         {
@@ -1106,7 +1100,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::ready_to_render() const
     {
-        return iLayoutTimer == nullptr;
+        return !iLayoutPending;
     }
 
     template <typename Interface>
@@ -1504,13 +1498,7 @@ namespace neogfx
                 {
                     root().release_focused_widget(root().focused_widget());
                 }
-            }
-            else
-            {
-                if (has_parent_layout())
-                    parent_layout().invalidate();
-                update(true);
-            }
+            }   
             return true;
         }
         return false;

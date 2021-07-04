@@ -77,10 +77,27 @@ namespace neogfx
         }
     }
 
+    pause_rendering::pause_rendering(pause_rendering&& aOther) :
+        iSurface{ aOther.iSurface },
+        iSurfaceDestroyed{ aOther.iSurfaceDestroyed },
+        iWindowDestroyed{ aOther.iWindowDestroyed }
+    {
+        aOther.iSurface = nullptr;
+    }
+
     pause_rendering::~pause_rendering()
     {
         if (iSurface != nullptr && !*iWindowDestroyed && !*iSurfaceDestroyed)
             iSurface->resume_rendering();
+    }
+
+    pause_rendering& pause_rendering::operator=(pause_rendering&& aOther)
+    {
+        iSurface = aOther.iSurface;
+        aOther.iSurface = nullptr;
+        iSurfaceDestroyed = std::move(aOther.iSurfaceDestroyed);
+        iWindowDestroyed = std::move(aOther.iWindowDestroyed);
+        return *this;
     }
 
     class window::client : public framed_scrollable_widget

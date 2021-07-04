@@ -510,6 +510,10 @@ namespace neogfx
 
     void layout::invalidate(bool aDeferLayout)
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << endl;
+#endif
         if (!enabled())
             return;
         if (invalidated())
@@ -525,20 +529,29 @@ namespace neogfx
         {
             if (layout_owner().is_managing_layout())
                 layout_owner().layout_items(aDeferLayout);
-            i_widget* w = iOwner;
+            i_widget* w = &layout_owner();
             while (w != nullptr && w->has_parent())
             {
                 w = &w->parent();
                 if (w->has_layout())
-                    break;
+                {
+                    w->layout().invalidate(aDeferLayout);
+                    if (w->is_managing_layout())
+                    {
+                        w->layout_items(aDeferLayout);
+                        break;
+                    }
+                }
             }
-            if (w != nullptr && w != iOwner && w->has_layout())
-                w->layout().invalidate(aDeferLayout);
         }
     }
 
     void layout::validate()
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::validate()" << endl;
+#endif
         if (!invalidated())
             return;
         iInvalidated = false;
