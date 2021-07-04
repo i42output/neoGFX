@@ -34,10 +34,15 @@ namespace neogfx
         {
             destroyed_flag destroyed;
             i_widget* widget;
+            bool validated;
+            std::optional<pause_rendering> pauseRendering;
 
             entry(destroyed_flag&& destroyed, i_widget* widget) :
-                destroyed{ std::move(destroyed) }, widget{ widget }
-            {}
+                destroyed{ std::move(destroyed) }, widget{ widget }, validated{ false }
+            {
+                if (!widget->is_root())
+                    pauseRendering.emplace(widget->root());
+            }
             entry(entry&&) = default;
             entry& operator=(entry&&) = default;
         };

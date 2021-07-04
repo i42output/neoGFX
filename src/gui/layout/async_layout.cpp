@@ -46,14 +46,14 @@ namespace neogfx
     void async_layout::validate(i_widget& aWidget)
     {
         if (auto existing = pending(aWidget))
-            (**existing).widget = nullptr;
+            (**existing).validated = true;
         else if (existing = processing(aWidget))
-            (**existing).widget = nullptr;
+            (**existing).validated = true;
     }
 
     std::optional<async_layout::entry_queue::iterator> async_layout::pending(i_widget& aWidget)
     {
-        auto existing = std::find_if(iPending.begin(), iPending.end(), [&](auto const& e) { return e.widget && e.widget->is_ancestor_of(aWidget); });
+        auto existing = std::find_if(iPending.begin(), iPending.end(), [&](auto const& e) { return e.widget == &aWidget; });
         if (existing != iPending.end())
             return existing;
         else
@@ -62,7 +62,7 @@ namespace neogfx
 
     std::optional<async_layout::entry_queue::iterator> async_layout::processing(i_widget& aWidget)
     {
-        auto existing = std::find_if(iProcessing.begin(), iProcessing.end(), [&](auto const& e) { return e.widget && e.widget->is_ancestor_of(aWidget); });
+        auto existing = std::find_if(iProcessing.begin(), iProcessing.end(), [&](auto const& e) { return e.widget == &aWidget; });
         if (existing != iProcessing.end())
             return existing;
         else
@@ -75,7 +75,7 @@ namespace neogfx
 
         for (auto& e : iProcessing)
         {
-            if (e.widget == nullptr || e.destroyed)
+            if (e.validated || e.destroyed)
                 continue;
             auto& next = *e.widget;
 #ifdef NEOGFX_DEBUG
