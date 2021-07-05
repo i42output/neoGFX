@@ -1934,13 +1934,23 @@ namespace neogfx
                         if (split != paragraphEnd)
                         {
                             std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraphEnd);
-                            lineEnd = wordBreak.first;
-                            next = wordBreak.second;
                             if (wordBreak.first == wordBreak.second)
                             {
-                                while (lineEnd != lineStart && (lineEnd - 1)->source == wordBreak.first->source)
-                                    --lineEnd;
-                                next = lineEnd;
+                                auto previousLineEnd = wordBreak.first;
+                                while (previousLineEnd != lineStart && (previousLineEnd - 1)->source == wordBreak.first->source)
+                                    --previousLineEnd;
+                                if (previousLineEnd != lineStart)
+                                {
+                                    lineEnd = wordBreak.first;
+                                    next = previousLineEnd;
+                                }
+                                else
+                                    next = lineEnd = split;
+                            }
+                            else
+                            {
+                                lineEnd = wordBreak.first;
+                                next = wordBreak.second;
                             }
                         }
                         else
