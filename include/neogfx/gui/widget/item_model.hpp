@@ -509,6 +509,14 @@ namespace neogfx
         {
             return insert_item(index_to_iterator(aIndex), aCellData);
         }
+        i_item_model::iterator append_item(const value_type& aValue) override
+        {
+            return insert_item(item_model_index{ rows(), 0 }, aValue);
+        }
+        i_item_model::iterator append_item(const value_type& aValue, const item_cell_data& aCellData) override
+        {
+            return insert_item(item_model_index{ rows(), 0 }, aValue, aCellData);
+        }
         i_item_model::iterator append_item(i_item_model::const_iterator aParent, const value_type& aValue) override
         {
             if constexpr (container_traits::is_tree)
@@ -553,6 +561,10 @@ namespace neogfx
             auto result = base_iterator{ iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>()) };
             return result;
         }
+        i_item_model::iterator erase(item_model_index const& aIndex) override
+        {
+            return erase(index_to_iterator(aIndex));
+        }
         void insert_cell_data(i_item_model::iterator aItem, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData) override
         {
             if (do_insert_cell_data(aItem, aColumnIndex, aCellData))
@@ -566,6 +578,10 @@ namespace neogfx
         {
             insert_cell_data(index_to_iterator(aIndex), aIndex.column(), aCellData);
         }
+        void update_cell_data(i_item_model::const_iterator aPosition, item_model_index::value_type aColumnIndex, const item_cell_data& aCellData) override
+        {
+            update_cell_data(iterator_to_index(aPosition).with_column(aColumnIndex), aCellData);
+        }
         void update_cell_data(item_model_index const& aIndex, const item_cell_data& aCellData) override
         {
             if (std::holds_alternative<string>(aCellData) && std::get<string>(aCellData).empty())
@@ -573,6 +589,8 @@ namespace neogfx
                 update_cell_data(aIndex, {});
                 return;
             }
+            if (row(aIndex).cells.size() <= aIndex.column())
+                row(aIndex).cells.resize(aIndex.column() + 1u);
             if (row(aIndex).cells[aIndex.column()] == aCellData)
                 return;
             row(aIndex).cells[aIndex.column()] = aCellData;

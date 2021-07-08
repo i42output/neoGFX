@@ -329,8 +329,10 @@ namespace neogfx
         virtual iterator append_item(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
         virtual void clear() = 0;
         virtual iterator erase(const_iterator aPosition) = 0;
-        virtual void insert_cell_data(const_iterator aItem, item_model_index::column_type aColumnIndex, item_cell_data const& aCellData) = 0;
+        virtual iterator erase(item_model_index const& aIndex) = 0;
+        virtual void insert_cell_data(const_iterator aPosition, item_model_index::column_type aColumnIndex, item_cell_data const& aCellData) = 0;
         virtual void insert_cell_data(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
+        virtual void update_cell_data(const_iterator aPosition, item_model_index::column_type aColumnIndex, item_cell_data const& aCellData) = 0;
         virtual void update_cell_data(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
     public:
         virtual const item_cell_info& cell_info(item_model_index const& aIndex) const = 0;

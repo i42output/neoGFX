@@ -374,14 +374,6 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline focus_policy tab_page_container<Base>::focus_policy() const
-    {
-        if (base_type::has_focus_policy())
-            return base_type::focus_policy();
-        return neogfx::focus_policy::StrongFocus;
-    }
-
-    template <typename Base>
     inline bool tab_page_container<Base>::is_managing_layout() const
     {
         return true;

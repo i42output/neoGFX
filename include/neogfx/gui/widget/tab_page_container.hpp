@@ -93,8 +93,6 @@ namespace neogfx
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     protected:
-        neogfx::focus_policy focus_policy() const override;
-    protected:
         bool is_managing_layout() const override;
     private:
         void init();

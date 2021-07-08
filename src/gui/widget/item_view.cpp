@@ -373,7 +373,8 @@ namespace neogfx
                         aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage);
                     auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGc);
-                    aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
+                    if (!editing() || editing() != itemIndex)
+                        aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
                 }
                 if (currentCell)
                 {
