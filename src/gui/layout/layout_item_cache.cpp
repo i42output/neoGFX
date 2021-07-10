@@ -252,9 +252,9 @@ namespace neogfx
         return *this;
     }
 
-    void layout_item_cache::update_layout(bool aDeferLayout)
+    void layout_item_cache::update_layout(bool aDeferLayout, bool aAncestors)
     {
-        subject().update_layout(aDeferLayout);
+        subject().update_layout(aDeferLayout, aAncestors);
     }
 
     void layout_item_cache::layout_as(const point& aPosition, const size& aSize)

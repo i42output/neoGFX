@@ -302,12 +302,6 @@ namespace neogfx
                 parent().send_child_to_back(*this);
         }
     public:
-        void layout_root(bool aDefer = false)
-        {
-            if (has_root())
-                root().as_widget().layout_items(aDefer);
-        }
-    public:
         point to_window_coordinates(const point& aClientCoordinates) const
         {
             return aClientCoordinates + non_client_rect().top_left();

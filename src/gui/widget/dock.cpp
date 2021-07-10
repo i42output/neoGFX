@@ -62,7 +62,7 @@ namespace neogfx
         if (iArea != aArea)
         {
             iArea = aArea;
-            update_layout(false);
+            update_layout(false, false);
         }
     }
 

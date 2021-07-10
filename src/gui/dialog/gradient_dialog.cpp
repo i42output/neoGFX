@@ -583,7 +583,7 @@ namespace neogfx
         
         update_widgets();
 
-        layout().invalidate();
+        update_layout();
         center_on_parent();
         set_ready_to_render(true);
     }

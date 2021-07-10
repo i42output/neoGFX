@@ -50,11 +50,15 @@ namespace neogfx
     public:
         async_layout();
     public:
-        void defer_layout(i_widget& aWidget) override;
+        bool exists(i_widget& aWidget) const noexcept override;
+        bool defer_layout(i_widget& aWidget) override;
         void validate(i_widget& aWidget) override;
+        void invalidate(i_widget& aWidget) override;
     private:
-        std::optional<entry_queue::iterator> pending(i_widget& aWidget);
-        std::optional<entry_queue::iterator> processing(i_widget& aWidget);
+        std::optional<entry_queue::const_iterator> pending(i_widget& aWidget) const noexcept;
+        std::optional<entry_queue::iterator> pending(i_widget& aWidget) noexcept;
+        std::optional<entry_queue::const_iterator> processing(i_widget& aWidget) const noexcept;
+        std::optional<entry_queue::iterator> processing(i_widget& aWidget) noexcept;
         void process();
     private:
         neolib::callback_timer iTimer;

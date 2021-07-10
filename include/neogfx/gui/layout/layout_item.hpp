@@ -59,16 +59,25 @@ namespace neogfx
     public:
         bool has_parent_layout_item() const override
         {
-            return as_layout_item().has_parent_layout() || (as_layout_item().is_widget() && as_layout_item().as_widget().has_parent());
+            auto& self = as_layout_item();
+            if (self.has_parent_layout() && self.same_layout_owner_as(self.parent_layout()))
+                return true;
+            else if (self.is_layout() && self.has_layout_owner())
+                return true;
+            else if (self.is_widget() && self.as_widget().has_parent())
+                return true;
+            return false;
         }
         const i_layout_item& parent_layout_item() const override
         {
-            if (as_layout_item().has_parent_layout() && &as_layout_item().parent_layout().layout_owner() == &as_layout_item().layout_owner())
-                return as_layout_item().parent_layout();
-            else if (as_layout_item().is_layout())
-                return as_layout_item().layout_owner();
-            else
-                return as_layout_item().as_widget().parent();
+            auto& self = as_layout_item();
+            if (self.has_parent_layout() && self.same_layout_owner_as(self.parent_layout()))
+                return self.parent_layout();
+            else if (self.is_layout() && self.has_layout_owner())
+                return self.layout_owner();
+            else if (self.is_widget() && self.as_widget().has_parent())
+                return self.as_widget().parent();
+            throw no_parent_layout_item();
         }
         i_layout_item& parent_layout_item() override
         {
@@ -77,9 +86,10 @@ namespace neogfx
     public:
         bool has_layout_manager() const override
         {
-            if (!as_layout_item().has_layout_owner())
+            auto& self = as_layout_item();
+            if (!self.has_layout_owner())
                 return false;
-            const i_widget* w = &as_layout_item().layout_owner();
+            const i_widget* w = &self.layout_owner();
             if (w->is_managing_layout())
                 return true;
             while (w->has_parent())
@@ -92,7 +102,8 @@ namespace neogfx
         }
         const i_widget& layout_manager() const override
         {
-            const i_widget* w = &as_layout_item().layout_owner();
+            auto& self = as_layout_item();
+            const i_widget* w = &self.layout_owner();
             if (w->is_managing_layout())
                 return *w;
             while (w->has_parent())
@@ -120,18 +131,19 @@ namespace neogfx
             return *iCache;
         }
     public:
-        void update_layout(bool aDeferLayout = true) override
+        void update_layout(bool aDeferLayout = true, bool aAncestors = false) override
         {
+            auto& self = as_layout_item();
+            if (self.has_parent_layout_item())
+                self.parent_layout_item().update_layout(aDeferLayout, aAncestors);
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << "widget:update_layout(" << aDeferLayout << ")" << endl;
+                service<debug::logger>() << "layout_item::update_layout(" << aDeferLayout << ", " << aAncestors << ")" << endl;
 #endif // NEOGFX_DEBUG
-            if (as_layout_item().is_widget() && as_layout_item().has_layout_manager())
-                as_layout_item().layout_manager().layout_items(aDeferLayout);
-            else if (as_layout_item().is_layout())
-                as_layout_item().as_layout().invalidate(aDeferLayout);
-            else if (as_layout_item().has_layout_owner())
-                as_layout_item().layout_owner().layout_root(aDeferLayout);
+            if (self.is_widget() && (!aDeferLayout || self.as_widget().can_defer_layout()))
+                self.as_widget().layout_items(aDeferLayout);
+            else if (self.is_layout())
+                self.as_layout().invalidate(aDeferLayout);
         }
     public:
         point origin() const override
@@ -167,7 +179,8 @@ namespace neogfx
         }
         point position() const override
         {
-            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) *
+            auto& self = as_layout_item();
+            return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
                 units_converter(*this).from_device_units(!Anchor_Position.active() ? 
                     static_cast<point>(Position) : static_cast<point>(Position) + Anchor_Position.evaluate_constraints() - unconstrained_origin());
         }
@@ -179,7 +192,8 @@ namespace neogfx
         }
         size extents() const override
         {
-            return (has_parent_layout_item() ? parent_layout_item().transformation(true) : mat33::identity()) *
+            auto& self = as_layout_item();
+            return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
                 units_converter(*this).from_device_units(!Anchor_Size.active() ? 
                     static_cast<size>(Size) : Anchor_Size.evaluate_constraints());
         }
@@ -471,11 +485,7 @@ namespace neogfx
         void anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
-            auto& self = static_cast<i_layout_item&>(*this);
-            if (self.is_layout())
-                self.as_layout().invalidate();
-            else if (self.has_parent_layout())
-                self.parent_layout().invalidate();
+            update_layout(true, true);
         }
     private:
         i_layout_item const& as_layout_item() const

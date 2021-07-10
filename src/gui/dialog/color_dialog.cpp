@@ -1035,7 +1035,7 @@ namespace neogfx
 
         update_widgets(*this);
 
-        layout().invalidate();
+        update_layout();
         center_on_parent(true);
         set_ready_to_render(true);
     }

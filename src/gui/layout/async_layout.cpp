@@ -37,10 +37,22 @@ namespace neogfx
     {
     }
 
-    void async_layout::defer_layout(i_widget& aWidget)
+    bool async_layout::exists(i_widget& aWidget) const noexcept
     {
-        if (aWidget.has_root() && !pending(aWidget) && !processing(aWidget))
-            iPending.emplace_back(aWidget, &aWidget);
+        return pending(aWidget) || processing(aWidget);
+    }
+
+    bool async_layout::defer_layout(i_widget& aWidget)
+    {
+        if (aWidget.has_root())
+        {
+            if (!exists(aWidget))
+                iPending.emplace_back(aWidget, &aWidget);
+            else
+                invalidate(aWidget);
+            return true;
+        }
+        return false;
     }
 
     void async_layout::validate(i_widget& aWidget)
@@ -51,18 +63,44 @@ namespace neogfx
             (**existing).validated = true;
     }
 
-    std::optional<async_layout::entry_queue::iterator> async_layout::pending(i_widget& aWidget)
+    void async_layout::invalidate(i_widget& aWidget)
     {
-        auto existing = std::find_if(iPending.begin(), iPending.end(), [&](auto const& e) { return e.widget == &aWidget; });
+        if (auto existing = pending(aWidget))
+            (**existing).validated = false;
+        else if (existing = processing(aWidget))
+            (**existing).validated = false;
+    }
+
+    std::optional<async_layout::entry_queue::const_iterator> async_layout::pending(i_widget& aWidget) const noexcept
+    {
+        auto existing = std::find_if(iPending.begin(), iPending.end(), [&](auto const& e) { return !e.destroyed && e.widget == &aWidget; });
         if (existing != iPending.end())
             return existing;
         else
             return std::nullopt;
     }
 
-    std::optional<async_layout::entry_queue::iterator> async_layout::processing(i_widget& aWidget)
+    std::optional<async_layout::entry_queue::iterator> async_layout::pending(i_widget& aWidget) noexcept
     {
-        auto existing = std::find_if(iProcessing.begin(), iProcessing.end(), [&](auto const& e) { return e.widget == &aWidget; });
+        auto existing = std::find_if(iPending.begin(), iPending.end(), [&](auto const& e) { return !e.destroyed && e.widget == &aWidget; });
+        if (existing != iPending.end())
+            return existing;
+        else
+            return std::nullopt;
+    }
+
+    std::optional<async_layout::entry_queue::const_iterator> async_layout::processing(i_widget& aWidget) const noexcept
+    {
+        auto existing = std::find_if(iProcessing.begin(), iProcessing.end(), [&](auto const& e) { return !e.destroyed && e.widget == &aWidget; });
+        if (existing != iProcessing.end())
+            return existing;
+        else
+            return std::nullopt;
+    }
+
+    std::optional<async_layout::entry_queue::iterator> async_layout::processing(i_widget& aWidget) noexcept
+    {
+        auto existing = std::find_if(iProcessing.begin(), iProcessing.end(), [&](auto const& e) { return !e.destroyed && e.widget == &aWidget; });
         if (existing != iProcessing.end())
             return existing;
         else

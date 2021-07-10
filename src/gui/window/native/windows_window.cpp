@@ -781,6 +781,10 @@ namespace neogfx
             if (mapEntry == sHandleMap.end())
                 return DefWindowProc(hwnd, msg, wparam, lparam);
             auto& self = *mapEntry->second;
+#ifdef NEOGFX_DEBUG
+            if (debug::item == &self)
+                service<debug::logger>() << typeid(self).name() << ": Windows message (0x" << std::hex << msg << ")" << endl;
+#endif
             LRESULT result = 0;
             bool const CUSTOM_DECORATION = (self.surface_window().style() & window_style::TitleBar) == window_style::TitleBar;
             switch (msg)

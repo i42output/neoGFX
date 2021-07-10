@@ -178,6 +178,11 @@ namespace neogfx
 
     dialog_result dialog::exec()
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::item == this)
+            service<debug::logger>() << typeid(*this).name() << "::exec()" << endl;
+#endif
+
         destroyed_flag destroyed{ surface() };
         event_processing_context epc(service<i_async_task>(), "neogfx::dialog");
         while (iResult == std::nullopt)

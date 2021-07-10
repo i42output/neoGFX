@@ -285,8 +285,6 @@ namespace neogfx
         using base_type::is_sibling_of;
         using base_type::remove;
     public:
-        using base_type::layout_root;
-    public:
         using base_type::to_window_coordinates;
         using base_type::to_client_coordinates;
     public:

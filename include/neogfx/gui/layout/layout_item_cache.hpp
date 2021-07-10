@@ -115,7 +115,7 @@ namespace neogfx
     public:
         bool visible() const override;
     public:
-        void update_layout(bool aDeferLayout = true) override;
+        void update_layout(bool aDeferLayout = true, bool aAncestors = true) override;
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
         void invalidate_combined_transformation() override;

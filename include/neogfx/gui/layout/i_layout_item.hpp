@@ -37,6 +37,7 @@ namespace neogfx
     struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::not_a_widget") {} };
     struct not_a_spacer : std::logic_error { not_a_spacer() : std::logic_error("neogfx::not_a_spacer") {} };
     struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::no_parent_layout") {} };
+    struct no_parent_layout_item : std::logic_error { no_parent_layout_item() : std::logic_error("neogfx::no_parent_layout_item") {} };
     struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::no_layout_owner") {} };
     struct no_layout_manager : std::logic_error { no_layout_manager() : std::logic_error("neogfx::no_layout_manager") {} };
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
@@ -83,7 +84,7 @@ namespace neogfx
         virtual const i_layout_item_cache& as_layout_item_cache() const = 0;
         virtual i_layout_item_cache& as_layout_item_cache() = 0;
     public:
-        virtual void update_layout(bool aDeferLayout = true) = 0;
+        virtual void update_layout(bool aDeferLayout = true, bool aAncestors = false) = 0;
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;
     public:
         virtual void invalidate_combined_transformation() = 0;
@@ -118,6 +119,10 @@ namespace neogfx
             if (existing != nullptr)
                 return *existing;
             throw ancestor_layout_type_not_found();
+        }
+        bool same_layout_owner_as(i_layout_item const& aOther) const
+        {
+            return has_layout_owner() && aOther.has_layout_owner() && &layout_owner() == &aOther.layout_owner();
         }
     public:
     };

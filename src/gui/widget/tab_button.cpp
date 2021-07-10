@@ -435,7 +435,7 @@ namespace neogfx
                 image_widget().set_maximum_size({});
                 image_widget().set_aspect_ratio(aspect_ratio::Keep);
             }
-            label().layout().invalidate();
+            label().update_layout();
         };
         iSink += service<i_surface_manager>().dpi_changed([this, update_image](i_surface&) { update_image(); });
         update_image();

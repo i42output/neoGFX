@@ -150,7 +150,7 @@ namespace neogfx
             {
                 iStyle = aStyle;
                 as_widget().update();
-                as_widget().layout().invalidate();
+                as_widget().update_layout();
             }
         }
         neogfx::decoration decoration() const
@@ -420,7 +420,7 @@ namespace neogfx
             if (resizing_context().has_parent_layout())
             {
                 resizing_context().parent_layout().fix_weightings(aRecalculate);
-                resizing_context().parent_layout().update_layout(false);
+                resizing_context().parent_layout().update_layout(false, false);
             }
         }
     protected:

@@ -29,8 +29,10 @@ namespace neogfx
     public:
         virtual ~i_async_layout() = default;
     public:
-        virtual void defer_layout(i_widget& aWidget) = 0;
+        virtual bool exists(i_widget& aWidget) const noexcept = 0;
+        virtual bool defer_layout(i_widget& aWidget) = 0;
         virtual void validate(i_widget& aWidget) = 0;
+        virtual void invalidate(i_widget& aWidget) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x3e50d155, 0xa8a, 0x4867, 0xacf8, { 0x42, 0xab, 0xd3, 0x34, 0xc0, 0xab } }; return sIid; }
     };

@@ -352,7 +352,7 @@ namespace neogfx
         layout().set_padding(neogfx::padding{});
         layout().set_spacing(size{});
         for (auto& tab : iTabs)
-            tab.get()->layout().invalidate();
+            tab.get()->update_layout();
         update_layout();
     }
 }

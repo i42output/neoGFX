@@ -161,12 +161,8 @@ namespace neogfx
             if (oldSize != minimum_size())
             {
                 TextGeometryChanged.trigger();
-                if (has_parent_layout() && (visible() || parent_layout().ignore_visibility()))
-                {
-                    parent_layout().invalidate();
-                    if (has_layout_manager())
-                        layout_manager().layout_items();
-                }
+                if (visible() || parent_layout().ignore_visibility())
+                    update_layout();
             }
             update();
         }
@@ -179,11 +175,8 @@ namespace neogfx
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
             reset_cache();
-            bool const canLayout = has_parent_layout() && (visible() || !parent_layout().ignore_visibility());
-            if (canLayout)
-                parent_layout().invalidate();
-            if (oldSize != minimum_size() && canLayout && has_layout_manager())
-                layout_manager().layout_items();
+            if (visible() || !parent_layout().ignore_visibility())
+                update_layout();
         }
     }
 
@@ -213,7 +206,7 @@ namespace neogfx
         {
             iAlignment = aAlignment;
             if (aUpdateLayout)
-                layout_root(true);
+                update_layout();
         }
     }
 
@@ -323,8 +316,7 @@ namespace neogfx
         auto style_changed = [&]()
         {
             reset_cache();
-            if (has_parent_layout())
-                parent_layout().invalidate();
+            update_layout();
             update();
         };
         iSink += service<i_app>().current_style_changed([this, style_changed](style_aspect aAspect)

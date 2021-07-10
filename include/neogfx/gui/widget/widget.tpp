@@ -103,11 +103,7 @@ namespace neogfx
     {
         static auto invalidate_layout = [](i_widget& self) 
         { 
-            if (self.has_parent_layout()/* && !self.layout_items_in_progress() */)
-            {
-                self.parent_layout().validate();
-                self.parent_layout().invalidate(true, true);
-            }
+            self.update_layout();
         };
         static auto invalidate_canvas = [](i_widget& self) 
         { 
@@ -683,8 +679,17 @@ namespace neogfx
             return;
         if (!aDefer)
         {
-            service<i_async_layout>().validate(*this);
+#ifdef NEOGFX_DEBUG
+            if (debug::layoutItem == this)
+            {
+                if (!iLayoutPending)
+                    service<debug::logger>() << "widget:layout_items: layout now" << endl;
+                else
+                    service<debug::logger>() << "widget:layout_items: layout a deferred layout now" << endl;
+            }
             iLayoutPending = false;
+#endif
+            service<i_async_layout>().validate(*this);
             if (has_layout())
             {
                 layout_items_started();
@@ -727,8 +732,14 @@ namespace neogfx
         }
         else if (can_defer_layout())
         {
-            service<i_async_layout>().defer_layout(*this);
-            iLayoutPending = true;
+            if (!iLayoutPending)
+            {
+#ifdef NEOGFX_DEBUG
+                if (debug::layoutItem == this)
+                    service<debug::logger>() << "widget:layout_items: deferred layout" << endl;
+#endif
+                iLayoutPending = service<i_async_layout>().defer_layout(*this);
+            }
         }
         else if (as_widget().has_layout_manager())
         {

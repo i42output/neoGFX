@@ -301,7 +301,7 @@ namespace neogfx
             existingTab->second->as_widget().show();
             if ((focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
                 existingTab->second->as_widget().set_focus();
-            iContainerLayout.invalidate();
+            iContainerLayout.update_layout();
         }
         else
             existingTab->second->as_widget().hide();
@@ -331,7 +331,7 @@ namespace neogfx
                 else
                     tab.second->as_widget().hide();
             }
-        iContainerLayout.invalidate();
+        iContainerLayout.update_layout();
     }
 
     template <typename Base>

@@ -481,7 +481,7 @@ namespace neogfx
         if ((autoscale() & neogfx::autoscale::Active) == neogfx::autoscale::Active)
         {
             neolib::scoped_object<neogfx::autoscale> so{ iAutoscale, iAutoscale & ~neogfx::autoscale::Active };
-            update_layout(false);
+            update_layout(false, false);
         }
         base_type::fix_weightings(aRecalculate);
     }
@@ -508,41 +508,19 @@ namespace neogfx
         return iInvalidated;
     }
 
-    void layout::invalidate(bool aDeferLayout, bool aAncestors)
+    void layout::invalidate(bool aDeferLayout, bool aUpdateOwnerLayout)
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << endl;
+            service<debug::logger>() << typeid(*this).name() << "::invalidate(" << aDeferLayout << ", " << aUpdateOwnerLayout << ")" << endl;
 #endif
         if (!enabled())
             return;
-        if (invalidated())
+        if (!iInvalidated)
         {
-            if (!aDeferLayout && has_layout_owner() && layout_owner().is_managing_layout())
-                layout_owner().layout_items(aDeferLayout);
-            return;
-        }
-        iInvalidated = true;
-        if (aAncestors && has_parent_layout())
-            parent_layout().invalidate(aDeferLayout, aAncestors);
-        if (has_layout_owner())
-        {
-            if (layout_owner().is_managing_layout())
-                layout_owner().layout_items(aDeferLayout);
-            i_widget* w = &layout_owner();
-            while (w != nullptr && w->has_parent())
-            {
-                w = &w->parent();
-                if (w->has_layout())
-                {
-                    w->layout().invalidate(aDeferLayout, aAncestors);
-                    if (w->is_managing_layout())
-                    {
-                        w->layout_items(aDeferLayout);
-                        break;
-                    }
-                }
-            }
+            iInvalidated = true;
+            if (aUpdateOwnerLayout && has_layout_owner() && layout_owner().is_managing_layout())
+                layout_owner().update_layout(aDeferLayout);
         }
     }
 
@@ -596,7 +574,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             MinimumSize = newMinimumSize;
             if (aUpdateLayout)
-                invalidate();
+                update_layout();
         }
     }
 
@@ -611,7 +589,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             MaximumSize = newMaximumSize;
             if (aUpdateLayout)
-                invalidate();
+                update_layout();
         }
     }
 
@@ -726,8 +704,8 @@ namespace neogfx
                 aItem->set_parent_layout(nullptr);
                 aItem->set_layout_owner(nullptr);
             }
+            update_layout();
         }
-        invalidate();
     }
 
     uint32_t layout::items_visible(item_type_e aItemType) const

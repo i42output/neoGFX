@@ -68,7 +68,7 @@ namespace neogfx
         i_widget& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
         i_layout& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
     public:
-        void invalidate(bool aDeferLayout = true, bool aAncestors = false) override;
+        void invalidate(bool aDeferLayout = true, bool aUpdateOwnerLayout = false) override;
     public:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
