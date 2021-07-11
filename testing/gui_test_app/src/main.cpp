@@ -459,7 +459,6 @@ int main(int argc, char* argv[])
         window.dropList2.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList2.model().cell_data(*aIndex).to_string() : std::string{} }); });
         window.dropList3.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList3.model().cell_data(*aIndex).to_string() : std::string{} }); });
         window.dropList4.SelectionChanged([&](const ng::optional_item_model_index& aIndex) { window.textEdit.set_text(ng::string{ aIndex != std::nullopt ? window.dropList4.model().cell_data(*aIndex).to_string() : std::string{} }); });
-        ng::layout_as_same_size(window.textField1.label(), window.textField2.label());
         window.textField1.input_box().TextChanged([&window]()
         {
             window.button1.set_text(window.textField1.input_box().text());

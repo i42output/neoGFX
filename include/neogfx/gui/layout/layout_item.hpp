@@ -136,10 +136,12 @@ namespace neogfx
             auto& self = as_layout_item();
             if (self.has_parent_layout_item())
                 self.parent_layout_item().update_layout(aDeferLayout, aAncestors);
+
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
                 service<debug::logger>() << "layout_item::update_layout(" << aDeferLayout << ", " << aAncestors << ")" << endl;
 #endif // NEOGFX_DEBUG
+
             if (self.is_widget() && (!aDeferLayout || self.as_widget().can_defer_layout()))
                 self.as_widget().layout_items(aDeferLayout);
             else if (self.is_layout())

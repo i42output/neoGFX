@@ -260,7 +260,7 @@ namespace neogfx
     void layout_item_cache::layout_as(const point& aPosition, const size& aSize)
     {
         point adjustedPosition = aPosition;
-        size adjustedSize = aSize.min(maximum_size());
+        size adjustedSize = aSize.min(maximum_size(aSize));
         if (adjustedSize != aSize)
         {
             adjustedPosition += point{
@@ -411,8 +411,8 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size{};
-        auto& cachedMinSize = iMinimumSize.second;
-        if (iMinimumSize.first != global_layout_id())
+        auto& cachedMinSize = iMinimumSize.second.second;
+        if (iMinimumSize.first != global_layout_id() || iMinimumSize.second.first != aAvailableSpace)
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
@@ -450,6 +450,7 @@ namespace neogfx
             }
             cachedMinSize = subject().apply_fixed_size(cachedMinSize);
             iMinimumSize.first = global_layout_id();
+            iMinimumSize.second.first = aAvailableSpace;
         }
         auto const result = transformation() * cachedMinSize;
 #ifdef NEOGFX_DEBUG
@@ -463,7 +464,7 @@ namespace neogfx
     {
         subject().set_minimum_size(aMinimumSize, aUpdateLayout);
         if (aMinimumSize != std::nullopt)
-            iMinimumSize.second = *aMinimumSize;
+            iMinimumSize.second.second = *aMinimumSize;
     }
 
     bool layout_item_cache::has_maximum_size() const
@@ -479,8 +480,8 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size::max_size();
-        auto& cachedMaxSize = iMaximumSize.second;
-        if (iMaximumSize.first != global_layout_id())
+        auto& cachedMaxSize = iMaximumSize.second.second;
+        if (iMaximumSize.first != global_layout_id() || iMaximumSize.second.first != aAvailableSpace)
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
@@ -488,6 +489,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             cachedMaxSize = subject().apply_fixed_size(subject().maximum_size(aAvailableSpace));
             iMaximumSize.first = global_layout_id();
+            iMaximumSize.second.first = aAvailableSpace;
         }
         auto const result = transformation() * cachedMaxSize;
 #ifdef NEOGFX_DEBUG
@@ -501,7 +503,7 @@ namespace neogfx
     {
         subject().set_maximum_size(aMaximumSize, aUpdateLayout);
         if (aMaximumSize != std::nullopt)
-            iMaximumSize.second = *aMaximumSize;
+            iMaximumSize.second.second = *aMaximumSize;
     }
 
     bool layout_item_cache::has_fixed_size() const
@@ -515,8 +517,8 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << "layout_item_cache::fixed_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
-        auto& cachedFixedSize = iFixedSize.second;
-        if (iFixedSize.first != global_layout_id())
+        auto& cachedFixedSize = iFixedSize.second.second;
+        if (iFixedSize.first != global_layout_id() || iFixedSize.second.first != aAvailableSpace)
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
@@ -524,6 +526,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             cachedFixedSize = subject().fixed_size(aAvailableSpace);
             iFixedSize.first = global_layout_id();
+            iFixedSize.second.first = aAvailableSpace;
         }
         auto const result = transformation() * cachedFixedSize;
 #ifdef NEOGFX_DEBUG
@@ -537,7 +540,7 @@ namespace neogfx
     {
         subject().set_fixed_size(aFixedSize, aUpdateLayout);
         if (aFixedSize != std::nullopt)
-            iFixedSize.second = *aFixedSize;
+            iFixedSize.second.second = *aFixedSize;
     }
 
     bool layout_item_cache::has_transformation() const

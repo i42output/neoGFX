@@ -137,9 +137,9 @@ namespace neogfx
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
         mutable std::pair<uint32_t, size> iWeight;
-        mutable std::pair<uint32_t, size> iMinimumSize;
-        mutable std::pair<uint32_t, size> iMaximumSize;
-        mutable std::pair<uint32_t, size> iFixedSize;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iMinimumSize;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iMaximumSize;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iFixedSize;
         mutable std::pair<uint32_t, mat33> iTransformation;
         mutable std::pair<uint32_t, mat33> iCombinedTransformation;
         mutable std::optional<const i_anchor*> iMinimumSizeAnchor;

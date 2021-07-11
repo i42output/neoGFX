@@ -1248,8 +1248,8 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         // todo: move to debug::layoutItem function/service
-        if (debug::layoutItem == this || debug::layoutItem != nullptr && has_layout() && debug::layoutItem->is_layout() &&
-            (debug::layoutItem == &layout() || static_cast<i_layout const*>(debug::layoutItem)->is_descendent_of(layout())))
+        if (debug::renderItem == this || debug::layoutItem == this || (debug::layoutItem != nullptr && has_layout() && debug::layoutItem->is_layout() &&
+            (debug::layoutItem == &layout() || static_cast<i_layout const*>(debug::layoutItem)->is_descendent_of(layout()))))
         {
             neogfx::font debugFont1 = service<i_app>().current_style().font().with_size(16);
             neogfx::font debugFont2 = service<i_app>().current_style().font().with_size(8);
@@ -1270,7 +1270,14 @@ namespace neogfx
             aGc.line_stipple_on(1.0, 0x5555);
             aGc.draw_rect(nonClientRect, pen{ color::Green, 3.0 });
             aGc.line_stipple_off();
-            if (debug::layoutItem != this || has_layout())
+            if (nonClientRect != client_rect(false))
+            {
+                aGc.draw_rect(client_rect(false), pen{ color::White, 1.0 });
+                aGc.line_stipple_on(1.0, 0x5555);
+                aGc.draw_rect(client_rect(false), pen{ color::Red, 1.0 });
+                aGc.line_stipple_off();
+            }
+            if (debug::layoutItem != nullptr && (debug::layoutItem != this || has_layout()))
             {
                 i_layout const& debugLayout = (debug::layoutItem == this ? layout() : *static_cast<i_layout const*>(debug::layoutItem));
                 if (debug::renderGeometryText)
