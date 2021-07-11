@@ -121,6 +121,7 @@ namespace neogfx
         i_layout& layout() override;
         bool can_defer_layout() const override;
         bool is_managing_layout() const override;
+        optional<neogfx::layout_reason>& layout_reason() override;
         void layout_items(bool aDefer = false) override;
         void layout_items_started() override;
         bool layout_items_in_progress() const override;
@@ -320,6 +321,7 @@ namespace neogfx
         i_layout* iParentLayout;
         bool iLayoutPending;
         uint32_t iLayoutInProgress;
+        optional<neogfx::layout_reason> iLayoutReason;
         ref_ptr<i_layout> iLayout;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         optional_point iCapturePosition;

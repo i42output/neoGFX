@@ -122,6 +122,7 @@ namespace neogfx
 #endif
             if (next.root().has_native_window())
             {
+                neolib::scoped_optional_if soi{ next.layout_reason(), layout_reason::Async };
                 next.layout_items();
                 next.update();
             }

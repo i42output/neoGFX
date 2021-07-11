@@ -68,6 +68,8 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
+        void layout_items_completed() override;
+    public:
         bool can_close() const override;
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;

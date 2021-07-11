@@ -38,6 +38,13 @@ namespace neogfx
     class i_surface;
     class i_layout;
 
+    enum class layout_reason
+    {
+        Explicit,
+        Async,
+        Resize
+    };
+
     class i_widget : public i_layout_item, public i_keyboard_handler, public i_mouse_handler, public virtual i_skinnable_item
     {
     public:
@@ -125,6 +132,7 @@ namespace neogfx
         virtual bool has_parent_layout() const = 0;
         virtual const i_layout& parent_layout() const = 0;
         virtual i_layout& parent_layout() = 0;
+        virtual i_optional<neogfx::layout_reason>& layout_reason() = 0;
         virtual void layout_items(bool aDefer = false) = 0;
         virtual void layout_items_started() = 0;
         virtual bool layout_items_in_progress() const = 0;

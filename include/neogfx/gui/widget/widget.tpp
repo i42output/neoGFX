@@ -673,6 +673,12 @@ namespace neogfx
     }
 
     template <typename Interface>
+    optional<neogfx::layout_reason>& widget<Interface>::layout_reason()
+    {
+        return iLayoutReason;
+    }
+
+    template <typename Interface>
     void widget<Interface>::layout_items(bool aDefer)
     {
         if (layout_items_in_progress())
@@ -875,6 +881,7 @@ namespace neogfx
     void widget<Interface>::resized()
     {
         SizeChanged.trigger();
+        neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Resize };
         layout_items();
         if ((widget_type() & neogfx::widget_type::Floating) == neogfx::widget_type::Floating)
         {
@@ -1044,7 +1051,10 @@ namespace neogfx
         if (as_widget().extents() != aSize)
             resize(aSize);
         else if (has_layout() && layout().invalidated())
+        {
+            neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Explicit };
             layout_items();
+        }
     }
 
     template <typename Interface>
