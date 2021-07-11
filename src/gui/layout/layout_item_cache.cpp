@@ -418,18 +418,7 @@ namespace neogfx
             if (&subject() == debug::layoutItem)
                 service<debug::logger>() << "layout_item_cache::minimum_size(" << aAvailableSpace << ") (cache invalid)" << endl;
 #endif // NEOGFX_DEBUG
-            if (iMinimumSizeAnchor == std::nullopt)
-            {   
-                auto anchorIter = anchors().find(string{ "MinimumSize" });
-                if (anchorIter != anchors().end())
-                    iMinimumSizeAnchor.emplace(anchorIter->second());
-                else
-                    iMinimumSizeAnchor = nullptr;
-            }
-            if (*iMinimumSizeAnchor == nullptr)
-                cachedMinSize = subject().minimum_size(aAvailableSpace);
-            else // todo: this cast is probably UB; remove it once we have anchor virtuals in i_layout_item
-                cachedMinSize = static_cast<const i_anchor_t<decltype(layout_item<object<i_layout>>::MinimumSize)>*>(*iMinimumSizeAnchor)->evaluate_constraints(aAvailableSpace);
+            cachedMinSize = subject().minimum_size(aAvailableSpace);
             if (effective_size_policy().maintain_aspect_ratio())
             {
                 auto const& aspectRatio = effective_size_policy().aspect_ratio();

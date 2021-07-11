@@ -261,10 +261,12 @@ namespace neogfx
         {
             return MinimumSize != std::nullopt;
         }
-        size minimum_size(optional_size const&) const override
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override
         {
             size result;
-            if (has_minimum_size())
+            if (Anchor_MinimumSize.active())
+                result = units_converter(*this).from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
+            else if (has_minimum_size())
                 result = units_converter(*this).from_device_units(*MinimumSize);
             else
                 result = {};
@@ -288,10 +290,12 @@ namespace neogfx
         {
             return MaximumSize != std::nullopt;
         }
-        size maximum_size(optional_size const&) const override
+        size maximum_size(optional_size const& aAvailableSpace = {}) const override
         {
             size result;
-            if (has_maximum_size())
+            if (Anchor_MaximumSize.active())
+                result = units_converter(*this).from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
+            else if (has_maximum_size())
                 result = units_converter(*this).from_device_units(*MaximumSize);
             else
                 result = size::max_size();

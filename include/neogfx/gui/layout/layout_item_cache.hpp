@@ -142,6 +142,5 @@ namespace neogfx
         mutable std::pair<uint32_t, std::pair<optional_size, size>> iFixedSize;
         mutable std::pair<uint32_t, mat33> iTransformation;
         mutable std::pair<uint32_t, mat33> iCombinedTransformation;
-        mutable std::optional<const i_anchor*> iMinimumSizeAnchor;
     };
 }

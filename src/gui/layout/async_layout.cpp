@@ -123,7 +123,6 @@ namespace neogfx
             if (next.root().has_native_window())
             {
                 neolib::scoped_optional_if soi{ next.layout_reason(), layout_reason::Async };
-                scoped_layout_items layoutItems{ true };
                 next.layout_items();
                 next.update();
             }
