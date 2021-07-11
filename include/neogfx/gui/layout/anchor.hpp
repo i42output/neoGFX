@@ -44,12 +44,12 @@ namespace neogfx
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
         anchor(i_anchorable& aOwner, i_property& aProperty) :
-            iOwnerDestroying{ aOwner.as_object() }, iOwner { aOwner }, iProperty{ aProperty }
+            iOwnerDestroying{ aOwner.as_object() }, iOwner { aOwner }, iProperty{ aProperty }, iCalculating{ false }
         {
             iOwner.anchors()[name()] = this;
         }
         anchor(i_anchorable& aOwner, i_property& aProperty, calculator_function_type aCalculatorOverride) :
-            iOwnerDestroying{ aOwner.as_object() }, iOwner{ aOwner }, iProperty{ aProperty }, iCalculatorOverride{ aCalculatorOverride }
+            iOwnerDestroying{ aOwner.as_object() }, iOwner{ aOwner }, iProperty{ aProperty }, iCalculatorOverride{ aCalculatorOverride }, iCalculating{ false }
         {
             iOwner.anchors()[name()] = this;
         }
@@ -79,13 +79,17 @@ namespace neogfx
         {
             return iProperty;
         }
-        bool active() const override
+        bool active() const noexcept override
         {
             return !iConstraints.empty();
         }
-        bool calculator_overriden() const override
+        bool calculator_overriden() const noexcept override
         {
             return iCalculatorOverride != std::nullopt;
+        }
+        bool calculating() const noexcept override
+        {
+            return iCalculating;
         }
     public:
         void constrain(i_anchor& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) override
@@ -181,6 +185,7 @@ namespace neogfx
         }
         value_type calculate(const CalculatorArgs&... aArgs) const override
         {
+            neolib::scoped_flag sf{ iCalculating };
             if (calculator_overriden())
                 return (static_cast<Context&>(iOwner).**iCalculatorOverride)(aArgs...);
             else if (property_set())
@@ -194,6 +199,7 @@ namespace neogfx
         i_property& iProperty;
         constraint_entries_t iConstraints;
         std::optional<calculator_function_type> iCalculatorOverride;
+        mutable bool iCalculating;
     };
 
     namespace detail

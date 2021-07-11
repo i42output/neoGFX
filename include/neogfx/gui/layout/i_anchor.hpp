@@ -251,8 +251,9 @@ namespace neogfx
         virtual const i_string& name() const = 0;
         virtual const i_property& property() const = 0;
         virtual i_property& property() = 0;
-        virtual bool active() const = 0;
-        virtual bool calculator_overriden() const = 0;
+        virtual bool active() const noexcept = 0;
+        virtual bool calculator_overriden() const noexcept = 0;
+        virtual bool calculating() const noexcept = 0;
         // operations
     public:
         virtual void constrain(i_anchor& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) = 0;

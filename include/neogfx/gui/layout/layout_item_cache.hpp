@@ -84,26 +84,28 @@ namespace neogfx
         void set_position(const point& aPosition) override;
         size extents() const override;
         void set_extents(const size& aExtents) override;
-        bool has_size_policy() const override;
+        bool has_size_policy() const noexcept override;
         neogfx::size_policy size_policy() const override;
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        bool has_weight() const override;
+        bool has_weight() const noexcept override;
         size weight() const override;
         void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const override;
+        bool has_minimum_size() const noexcept override;
+        bool is_minimum_size_constrained() const noexcept override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const override;
+        bool has_maximum_size() const noexcept override;
+        bool is_maximum_size_constrained() const noexcept override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override;
-        bool has_fixed_size() const override;
+        bool has_fixed_size() const noexcept override;
         size fixed_size(optional_size const& aAvailableSpace = {}) const override;
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override;
-        bool has_transformation() const override;
+        bool has_transformation() const noexcept override;
         mat33 const& transformation(bool aCombineAncestorTransformations = false) const override;
         void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override;
     public:
-        bool has_padding() const override;
+        bool has_padding() const noexcept override;
         neogfx::padding padding() const override;
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
     protected:

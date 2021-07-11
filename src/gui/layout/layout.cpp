@@ -448,7 +448,7 @@ namespace neogfx
 
     void layout::enable()
     {
-        if (!enabled())
+        if (!iEnabled)
         {
             iEnabled = true;
             if (has_parent_layout())
@@ -458,7 +458,7 @@ namespace neogfx
 
     void layout::disable()
     {
-        if (enabled())
+        if (iEnabled)
         {
             iEnabled = false;
             if (has_parent_layout())
@@ -500,7 +500,7 @@ namespace neogfx
 
     bool layout::visible() const
     {
-        return enabled();
+        return iEnabled;
     }
 
     bool layout::invalidated() const
@@ -508,20 +508,17 @@ namespace neogfx
         return iInvalidated;
     }
 
-    void layout::invalidate(bool aDeferLayout, bool aUpdateOwnerLayout)
+    void layout::invalidate(bool aDeferLayout)
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::invalidate(" << aDeferLayout << ", " << aUpdateOwnerLayout << ")" << endl;
+            service<debug::logger>() << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << endl;
 #endif
-        if (!enabled())
+        if (!iEnabled)
             return;
-        if (!iInvalidated)
-        {
-            iInvalidated = true;
-            if (aUpdateOwnerLayout && has_layout_owner() && layout_owner().is_managing_layout())
-                layout_owner().update_layout(aDeferLayout);
-        }
+        if (iInvalidated)
+            return;
+        iInvalidated = true;
     }
 
     void layout::validate()
@@ -530,7 +527,7 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << typeid(*this).name() << "::validate()" << endl;
 #endif
-        if (!invalidated())
+        if (!iInvalidated)
             return;
         iInvalidated = false;
     }
@@ -538,7 +535,7 @@ namespace neogfx
     void layout::set_extents(const size& aExtents)
     {
         base_type::set_extents(aExtents);
-        if (enabled() && (autoscale() & neogfx::autoscale::LockFixedSize) == neogfx::autoscale::LockFixedSize)
+        if (iEnabled && (autoscale() & neogfx::autoscale::LockFixedSize) == neogfx::autoscale::LockFixedSize)
             FixedSize = extents();
     }
 

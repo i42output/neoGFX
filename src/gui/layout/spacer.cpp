@@ -181,7 +181,7 @@ namespace neogfx
         return result;
     }
 
-    bool spacer::has_padding() const
+    bool spacer::has_padding() const noexcept
     {
         return false;
     }

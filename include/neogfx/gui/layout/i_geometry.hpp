@@ -217,26 +217,28 @@ namespace neogfx
         virtual void set_position(const point& aPosition) = 0;
         virtual size extents() const = 0;
         virtual void set_extents(const size& aExtents) = 0;
-        virtual bool has_size_policy() const = 0;
+        virtual bool has_size_policy() const noexcept = 0;
         virtual neogfx::size_policy size_policy() const = 0;
         virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) = 0;
-        virtual bool has_weight() const = 0;
+        virtual bool has_weight() const noexcept = 0;
         virtual size weight() const = 0;
         virtual void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) = 0;
-        virtual bool has_minimum_size() const = 0;
+        virtual bool has_minimum_size() const noexcept = 0;
+        virtual bool is_minimum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size minimum_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) = 0;
-        virtual bool has_maximum_size() const = 0;
+        virtual bool has_maximum_size() const noexcept = 0;
+        virtual bool is_maximum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size maximum_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) = 0;
-        virtual bool has_fixed_size() const = 0;
+        virtual bool has_fixed_size() const noexcept = 0;
         virtual size fixed_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) = 0;
-        virtual bool has_transformation() const = 0;
+        virtual bool has_transformation() const noexcept = 0;
         virtual mat33 const& transformation(bool aCombineAncestorTransformations = false) const = 0;
         virtual void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) = 0;
     public:
-        virtual bool has_padding() const = 0;
+        virtual bool has_padding() const noexcept = 0;
         virtual neogfx::padding padding() const = 0;
         virtual void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) = 0;
     protected:

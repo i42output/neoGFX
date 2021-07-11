@@ -135,7 +135,10 @@ namespace neogfx
         {
             auto& self = as_layout_item();
             if (self.has_parent_layout_item())
-                self.parent_layout_item().update_layout(aDeferLayout, aAncestors);
+            {
+                if (!self.is_widget() || !self.as_widget().is_managing_layout() || aAncestors)
+                    self.parent_layout_item().update_layout(aDeferLayout, aAncestors);
+            }
 
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
@@ -203,7 +206,7 @@ namespace neogfx
         {
             Size.assign(units_converter(*this).to_device_units(aExtents), false);
         }
-        bool has_size_policy() const override
+        bool has_size_policy() const noexcept override
         {
             return SizePolicy != std::nullopt;
         }
@@ -234,7 +237,7 @@ namespace neogfx
                     update_layout();
             }
         }
-        bool has_weight() const override
+        bool has_weight() const noexcept override
         {
             return Weight != std::nullopt;
         }
@@ -257,17 +260,21 @@ namespace neogfx
                     update_layout();
             }
         }
-        bool has_minimum_size() const override
+        bool has_minimum_size() const noexcept override
         {
             return MinimumSize != std::nullopt;
+        }
+        bool is_minimum_size_constrained() const noexcept override
+        {
+            return Anchor_MinimumSize.active();
         }
         size minimum_size(optional_size const& aAvailableSpace = {}) const override
         {
             size result;
-            if (Anchor_MinimumSize.active())
-                result = units_converter(*this).from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
-            else if (has_minimum_size())
+            if (has_minimum_size())
                 result = units_converter(*this).from_device_units(*MinimumSize);
+            else if (Anchor_MinimumSize.active())
+                result = units_converter(*this).from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = {};
             return result;
@@ -286,17 +293,21 @@ namespace neogfx
                     update_layout();
             }
         }
-        bool has_maximum_size() const override
+        bool has_maximum_size() const noexcept override
         {
             return MaximumSize != std::nullopt;
+        }
+        bool is_maximum_size_constrained() const noexcept override
+        {
+            return Anchor_MaximumSize.active();
         }
         size maximum_size(optional_size const& aAvailableSpace = {}) const override
         {
             size result;
-            if (Anchor_MaximumSize.active())
-                result = units_converter(*this).from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
-            else if (has_maximum_size())
+            if (has_maximum_size())
                 result = units_converter(*this).from_device_units(*MaximumSize);
+            else if (Anchor_MaximumSize.active())
+                result = units_converter(*this).from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = size::max_size();
             return result;
@@ -315,7 +326,7 @@ namespace neogfx
                     update_layout();
             }
         }
-        bool has_fixed_size() const override
+        bool has_fixed_size() const noexcept override
         {
             return FixedSize != std::nullopt;
         }
@@ -339,7 +350,7 @@ namespace neogfx
                     update_layout();
             }
         }
-        bool has_transformation() const override
+        bool has_transformation() const noexcept override
         {
             return Transformation != std::nullopt;
         }
@@ -376,7 +387,7 @@ namespace neogfx
             }
         }
     public:
-        bool has_padding() const override
+        bool has_padding() const noexcept override
         {
             return Padding != std::nullopt;
         }

@@ -340,7 +340,7 @@ namespace neogfx
         subject().set_extents(aExtents);
     }
 
-    bool layout_item_cache::has_size_policy() const
+    bool layout_item_cache::has_size_policy() const noexcept
     {
         return subject().has_size_policy();
     }
@@ -369,7 +369,7 @@ namespace neogfx
         subject().set_size_policy(aSizePolicy, aUpdateLayout);
     }
 
-    bool layout_item_cache::has_weight() const
+    bool layout_item_cache::has_weight() const noexcept
     {
         return subject().has_weight();
     }
@@ -398,9 +398,14 @@ namespace neogfx
         subject().set_weight(aWeight, aUpdateLayout);
     }
 
-    bool layout_item_cache::has_minimum_size() const
+    bool layout_item_cache::has_minimum_size() const noexcept
     {
         return subject().has_minimum_size();
+    }
+
+    bool layout_item_cache::is_minimum_size_constrained() const noexcept
+    {
+        return subject().is_minimum_size_constrained();
     }
 
     size layout_item_cache::minimum_size(optional_size const& aAvailableSpace) const
@@ -412,7 +417,7 @@ namespace neogfx
         if (!visible())
             return size{};
         auto& cachedMinSize = iMinimumSize.second.second;
-        if (iMinimumSize.first != global_layout_id() || iMinimumSize.second.first != aAvailableSpace)
+        if (iMinimumSize.first != global_layout_id() || iMinimumSize.second.first != aAvailableSpace || is_minimum_size_constrained())
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
@@ -456,9 +461,14 @@ namespace neogfx
             iMinimumSize.second.second = *aMinimumSize;
     }
 
-    bool layout_item_cache::has_maximum_size() const
+    bool layout_item_cache::has_maximum_size() const noexcept
     {
         return subject().has_maximum_size();
+    }
+
+    bool layout_item_cache::is_maximum_size_constrained() const noexcept
+    {
+        return subject().is_maximum_size_constrained();
     }
 
     size layout_item_cache::maximum_size(optional_size const& aAvailableSpace) const
@@ -470,7 +480,7 @@ namespace neogfx
         if (!visible())
             return size::max_size();
         auto& cachedMaxSize = iMaximumSize.second.second;
-        if (iMaximumSize.first != global_layout_id() || iMaximumSize.second.first != aAvailableSpace)
+        if (iMaximumSize.first != global_layout_id() || iMaximumSize.second.first != aAvailableSpace || is_maximum_size_constrained())
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
@@ -495,7 +505,7 @@ namespace neogfx
             iMaximumSize.second.second = *aMaximumSize;
     }
 
-    bool layout_item_cache::has_fixed_size() const
+    bool layout_item_cache::has_fixed_size() const noexcept
     {
         return subject().has_fixed_size();
     }
@@ -532,7 +542,7 @@ namespace neogfx
             iFixedSize.second.second = *aFixedSize;
     }
 
-    bool layout_item_cache::has_transformation() const
+    bool layout_item_cache::has_transformation() const noexcept
     {
         return subject().has_transformation();
     }
@@ -569,7 +579,7 @@ namespace neogfx
         iCombinedTransformation.second = subject().transformation(true);
     }
 
-    bool layout_item_cache::has_padding() const
+    bool layout_item_cache::has_padding() const noexcept
     {
         return subject().has_padding();
     }

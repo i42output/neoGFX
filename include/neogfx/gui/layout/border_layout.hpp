@@ -54,7 +54,7 @@ namespace neogfx
         i_spacer& add_spacer() override;
         i_spacer& add_spacer_at(layout_item_index aPosition) override;
     public:
-        void invalidate(bool aDeferLayout = true, bool aUpdateOwnerLayout = false) override;
+        void invalidate(bool aDeferLayout = true) override;
     public:
         void layout_items(const point& aPosition, const size& aSize) override;
         void fix_weightings(bool aRecalculate = true) override;
