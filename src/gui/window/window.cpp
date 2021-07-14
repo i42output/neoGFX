@@ -216,6 +216,7 @@ namespace neogfx
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },
+        iCentering{ false },
         iClosed{ false },
         iReadyToRender{ (aStyle & window_style::InitiallyRenderable) == window_style::InitiallyRenderable },
         iTitleText{ aWindowTitle ? *aWindowTitle : service<i_app>().name() },
@@ -510,6 +511,9 @@ namespace neogfx
     void window::layout_items_completed()
     {
         base_type::layout_items_completed();
+        if (has_native_window() && !native_window().placement_changed_explicitly() && 
+            (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
+            center_on_parent((style() & window_style::Resize) != window_style::Resize);
         if (iEnteredWidget != nullptr)
         {
             i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
@@ -680,14 +684,17 @@ namespace neogfx
 
     void window::center_on_parent(bool aSetMinimumSize)
     {
+        if (iCentering)
+            return;
+        neolib::scoped_flag sf{ iCentering };
         if (has_parent_window())
         {
             layout_items();
             if (aSetMinimumSize)
                 resize(minimum_size());
-            rect desktopRect{ window_manager().desktop_rect(*this) };
-            rect parentRect{ window_manager().window_rect(parent_window()) };
-            rect ourRect{ window_manager().window_rect(*this) };
+            rect const desktopRect{ window_manager().desktop_rect(*this) };
+            rect const parentRect{ window_manager().window_rect(parent_window()) };
+            rect const ourRect{ window_manager().window_rect(*this) };
             point position = point{ (parentRect.extents() - ourRect.extents()) / 2.0 } + parentRect.top_left();
             if (position.x < 0.0)
                 position.x = 0.0;

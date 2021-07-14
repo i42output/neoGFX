@@ -97,6 +97,8 @@ namespace neogfx
         std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const override;
     public:
         void close(bool aForce = false) override;
+        bool placement_changed_explicitly() const override;
+        void set_placement_changed_explicitly() override;
         bool visible() const override;
         void show(bool aActivate = false) override;
         void hide() override;

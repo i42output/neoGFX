@@ -58,6 +58,8 @@ namespace neogfx
         virtual bool processing_event() const = 0;
         virtual i_surface_window& surface_window() const = 0;
         virtual void close(bool aForce = false) = 0;
+        virtual bool placement_changed_explicitly() const = 0;
+        virtual void set_placement_changed_explicitly() = 0;
         virtual bool visible() const = 0;
         virtual void show(bool aActivate = false) = 0;
         virtual void hide() = 0;

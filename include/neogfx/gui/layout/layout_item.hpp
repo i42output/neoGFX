@@ -31,6 +31,9 @@ namespace neogfx
     {
         typedef layout_item<Base> self_type;
         typedef anchorable<reference_counted<Base>> base_type;
+        // events
+    public:
+        define_event(AnchorUpdated, anchor_updated, i_anchor&)
         // types
     public:
         typedef i_layout_item abstract_type;
@@ -189,12 +192,6 @@ namespace neogfx
                 units_converter(*this).from_device_units(!Anchor_Position.active() ? 
                     static_cast<point>(Position) : static_cast<point>(Position) + Anchor_Position.evaluate_constraints() - unconstrained_origin());
         }
-        void set_position(const point& aPosition) override
-        {
-            reset_origin();
-            if (Position != units_converter(*this).to_device_units(aPosition))
-                Position.assign(units_converter(*this).to_device_units(aPosition), false);
-        }
         size extents() const override
         {
             auto& self = as_layout_item();
@@ -202,10 +199,19 @@ namespace neogfx
                 units_converter(*this).from_device_units(!Anchor_Size.active() ? 
                     static_cast<size>(Size) : Anchor_Size.evaluate_constraints());
         }
+    protected:
+        void set_position(const point& aPosition) override
+        {
+            reset_origin();
+            if (Position != units_converter(*this).to_device_units(aPosition))
+                Position.assign(units_converter(*this).to_device_units(aPosition), false);
+        }
         void set_extents(const size& aExtents) override
         {
-            Size.assign(units_converter(*this).to_device_units(aExtents), false);
+            if (Size != units_converter(*this).to_device_units(aExtents))
+                Size.assign(units_converter(*this).to_device_units(aExtents), false);
         }
+    public:
         bool has_size_policy() const noexcept override
         {
             return SizePolicy != std::nullopt;
@@ -499,10 +505,12 @@ namespace neogfx
         {
         }
     public:
-        void anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        i_anchor& anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
-            base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
+            auto& lhsAnchor = base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
+            AnchorUpdated.trigger(lhsAnchor);
             update_layout(true, true);
+            return lhsAnchor;
         }
     private:
         i_layout_item const& as_layout_item() const

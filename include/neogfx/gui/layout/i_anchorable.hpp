@@ -41,14 +41,14 @@ namespace neogfx
         virtual i_object& as_object() = 0;
         // operations
     public:
-        virtual void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) = 0;
+        virtual i_anchor& anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) = 0;
         // state
     public:
         virtual const anchor_map_type& anchors() const = 0;
         virtual anchor_map_type& anchors() = 0;
         // helpers
     public:
-        void anchor_to(i_anchorable& aRhs, std::string const& aLhsAnchor, anchor_constraint_function aLhsFunction, std::string const& aRhsAnchor, anchor_constraint_function aRhsFunction)
+        i_anchor& anchor_to(i_anchorable& aRhs, std::string const& aLhsAnchor, anchor_constraint_function aLhsFunction, std::string const& aRhsAnchor, anchor_constraint_function aRhsFunction)
         {
             return anchor_to(aRhs, string{ aLhsAnchor }, aLhsFunction, string{ aRhsAnchor }, aRhsFunction);
         }

@@ -104,6 +104,8 @@ namespace neogfx
             std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const override;
         public:
             void close(bool aForce = false) override;
+            bool placement_changed_explicitly() const override;
+            void set_placement_changed_explicitly() override;
             bool visible() const override;
             void show(bool aActivate = false) override;
             void hide() override;
@@ -150,14 +152,16 @@ namespace neogfx
             static window* sNewWindow;
             mutable optional_point iPosition;
             mutable optional_size iExtents;
-            bool iVisible;
-            bool iMouseEntered;
-            bool iCapturingMouse;
-            bool iNonClientCapturing;
-            bool iReady;
+            bool iInMoveResizeCall = false;
+            bool iPlacementChangedExplicitly = false;
+            bool iVisible = false;
+            bool iMouseEntered = false;
+            bool iCapturingMouse = false;
+            bool iNonClientCapturing = false;
+            bool iReady = false;
             mutable padding iBorderThickness;
-            widget_part_e iClickedWidgetPart;
-            bool iSystemMenuOpen;
+            widget_part_e iClickedWidgetPart = widget_part::Nowhere;
+            bool iSystemMenuOpen = false;
         };
     }
 }

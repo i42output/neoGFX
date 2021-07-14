@@ -203,20 +203,6 @@ namespace neogfx
         return size_constraint::Minimum;
     }
 
-    void dialog::layout_items_completed()
-    {
-        window::layout_items_completed();
-        /// @todo not entirely happy with this...
-        thread_local bool inHere = false;
-        if (inHere)
-            return;
-        neolib::scoped_flag sf{ inHere };
-        /// @todo or this...
-        if (layout_reason() == neogfx::layout_reason::Async &&
-            (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
-            center_on_parent();
-    }
-
     bool dialog::can_close() const
     {
         bool canReject = true;

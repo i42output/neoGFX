@@ -207,6 +207,7 @@ namespace neogfx
         i_window_manager& iWindowManager;
         i_window* iParentWindow;
         mutable neogfx::window_placement iPlacement;
+        bool iCentering;
         bool iClosed;
         sink iSink;
         std::unique_ptr<i_surface_window> iSurfaceWindow;

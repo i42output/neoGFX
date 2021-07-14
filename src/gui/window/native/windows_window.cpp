@@ -184,15 +184,10 @@ namespace neogfx
             iParent{},
             iStyle{ aStyle },
             iHandle{},
-            iHdc{},
-            iVisible{ false },
-            iMouseEntered{ false },
-            iCapturingMouse{ false },
-            iNonClientCapturing{ false },
-            iReady{ false },
-            iClickedWidgetPart{ widget_part::Nowhere },
-            iSystemMenuOpen{ false }
+            iHdc{}
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
+
             sNewWindow = this;
 
             iHandle = ::CreateWindowEx(
@@ -224,15 +219,10 @@ namespace neogfx
             iParent{},
             iStyle{ aStyle },
             iHandle{},
-            iHdc{},
-            iVisible{ false },
-            iMouseEntered{ false },
-            iCapturingMouse{ false },
-            iNonClientCapturing{ false },
-            iReady{ false },
-            iClickedWidgetPart{ widget_part::Nowhere },
-            iSystemMenuOpen{ false }
+            iHdc{}
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
+
             sNewWindow = this;
 
             iHandle = ::CreateWindowEx(
@@ -262,15 +252,10 @@ namespace neogfx
             iParent{},
             iStyle(aStyle),
             iHandle{},
-            iHdc{},
-            iVisible{ false },
-            iMouseEntered{ false },
-            iCapturingMouse{ false },
-            iNonClientCapturing{ false },
-            iReady{ false },
-            iClickedWidgetPart{ widget_part::Nowhere },
-            iSystemMenuOpen{ false }
+            iHdc{}
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
+
             sNewWindow = this;
 
             iHandle = ::CreateWindowEx(
@@ -300,15 +285,10 @@ namespace neogfx
             iParent{ &aParent },
             iStyle{ aStyle },
             iHandle{},
-            iHdc{},
-            iVisible{ false },
-            iMouseEntered{ false },
-            iCapturingMouse{ false },
-            iNonClientCapturing{ false },
-            iReady{ false },
-            iClickedWidgetPart{ widget_part::Nowhere },
-            iSystemMenuOpen{ false }
+            iHdc{}
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
+
             sNewWindow = this;
 
             iHandle = ::CreateWindowEx(
@@ -340,15 +320,10 @@ namespace neogfx
             iParent{ &aParent },
             iStyle{ aStyle },
             iHandle{},
-            iHdc{},
-            iVisible{ false },
-            iMouseEntered{ false },
-            iCapturingMouse{ false },
-            iNonClientCapturing{ false },
-            iReady{ false },
-            iClickedWidgetPart{ widget_part::Nowhere },
-            iSystemMenuOpen{ false }
+            iHdc{}
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
+
             sNewWindow = this;
 
             iHandle = ::CreateWindowEx(
@@ -379,15 +354,10 @@ namespace neogfx
             iStyle{ aStyle },
             iHandle{},
             iHdc{},
-            iPixelFormat{},
-            iVisible{ false },
-            iMouseEntered{ false },
-            iCapturingMouse{ false },
-            iNonClientCapturing{ false },
-            iReady{ false },
-            iClickedWidgetPart{ widget_part::Nowhere },
-            iSystemMenuOpen{ false }
+            iPixelFormat{}
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
+
             sNewWindow = this;
 
             iHandle = ::CreateWindowEx(
@@ -499,6 +469,7 @@ namespace neogfx
 
         void window::move_surface(const point& aPosition)
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
             ::SetWindowPos(iHandle, HWND_NOTOPMOST, static_cast<int>(aPosition.x), static_cast<int>(aPosition.y), 0, 0, SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOACTIVATE);
         }
 
@@ -515,6 +486,7 @@ namespace neogfx
 
         void window::resize_surface(const size& aExtents)
         {
+            neolib::scoped_flag sf{ iInMoveResizeCall };
             ::SetWindowPos(iHandle, HWND_NOTOPMOST, 0, 0, static_cast<int>(aExtents.cx), static_cast<int>(aExtents.cy), SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
         }
 
@@ -557,6 +529,16 @@ namespace neogfx
                 ::ReleaseDC(iHandle, iHdc);
                 ::DestroyWindow(iHandle);
             }
+        }
+
+        bool window::placement_changed_explicitly() const
+        {
+            return iPlacementChangedExplicitly;
+        }
+
+        void window::set_placement_changed_explicitly()
+        {
+            iPlacementChangedExplicitly = true;
         }
 
         bool window::visible() const
@@ -1262,12 +1244,25 @@ namespace neogfx
                 break;
             case WM_WINDOWPOSCHANGED:
                 {
-                    RECT rect;
-                    ::GetWindowRect(hwnd, &rect);
-                    self.iPosition.emplace(rect.left, rect.top);
-                    self.iExtents.emplace(rect.right - rect.left, rect.bottom - rect.top);
-                    self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
-                    self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
+                    auto const& wpc = *reinterpret_cast<WINDOWPOS const*>(lparam);
+                    bool placementChanged = false;
+                    if (self.iPosition != basic_point<int>{ wpc.x, wpc.y }.as<scalar>())
+                    {
+                        self.iPosition.emplace(wpc.x, wpc.y);
+                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
+                        placementChanged = true;
+                    }
+                    if (self.iExtents != basic_size<int>{ wpc.cx, wpc.cy }.as<scalar>())
+                    {
+                        self.iExtents.emplace(wpc.cx, wpc.cy);
+                        self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
+                        placementChanged = true;
+                    }
+                    if (placementChanged)
+                    {
+                        if (!self.iInMoveResizeCall)
+                            self.iPlacementChangedExplicitly = true;
+                    }
                     if (!self.initialising())
                     {
                         ::InvalidateRect(hwnd, NULL, FALSE);
@@ -1318,6 +1313,8 @@ namespace neogfx
                                 basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
                         }
                         result = wndproc(hwnd, msg, wparam, lparam);
+                        if (!self.iInMoveResizeCall)
+                            self.iPlacementChangedExplicitly = true;
                         self.handle_event(window_event(window_event_type::Resizing, self.surface_extents()));
                     }
                 }
