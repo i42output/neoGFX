@@ -472,9 +472,8 @@ namespace neogfx
         Unchecked.set_trigger_type(event_trigger_type::Asynchronous);
         Indeterminate.set_trigger_type(event_trigger_type::Asynchronous);
 
-        set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        as_widget().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         as_widget().layout().set_padding(0.0);
-
         as_widget().set_focus_policy(focus_policy::TabFocus);
 
         auto label_text_updated = [this]()

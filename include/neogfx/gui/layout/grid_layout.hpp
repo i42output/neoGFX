@@ -67,6 +67,7 @@ namespace neogfx
         i_layout_item& item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
         i_widget& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
         i_layout& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        void remove_all() override;
     public:
         void invalidate(bool aDeferLayout = true) override;
     public:

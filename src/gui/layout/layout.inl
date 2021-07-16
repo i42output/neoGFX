@@ -416,8 +416,6 @@ namespace neogfx
                 AxisPolicy::y(alignmentAdjust) = AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s);
                 break;
             case alignment::VCenter:
-                AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s)) / 2.0);
-                break;
             case alignment::Center:
                 AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s)) / 2.0);
                 break;
