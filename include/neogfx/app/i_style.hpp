@@ -43,6 +43,7 @@ namespace neogfx
         Window  = 0x0002,
         Dialog  = 0x0003,
         Menu    = 0x0004,
+        Dock    = 0x0005,
 
         COUNT
     };

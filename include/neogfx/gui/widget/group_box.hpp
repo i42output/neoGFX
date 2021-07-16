@@ -54,8 +54,8 @@ namespace neogfx
         group_box(i_widget& aParent, std::string const& aText = std::string());
         group_box(i_layout& aLayout, std::string const& aText = std::string());
     public:
-        std::string const& text() const;
-        void set_text(std::string const& aText);
+        i_string const& text() const;
+        void set_text(i_string const& aText);
         bool is_checkable() const;
         void set_checkable(bool aCheckable, bool aUpdateItemsEnabledState = false);
         const neogfx::label& label() const;

@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/i_reference_counted.hpp>
 #include <neogfx/core/i_event.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_tab_container.hpp>
@@ -41,10 +42,10 @@ namespace neogfx
         virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;
         virtual const i_tab_page& selected_tab_page() const = 0;
         virtual i_tab_page& selected_tab_page() = 0;
-        virtual i_tab_page& add_tab_page(std::string const& aTabText) = 0;
-        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, std::string const& aTabText) = 0;
+        virtual i_tab_page& add_tab_page(i_string const& aTabText) = 0;
+        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText) = 0;
         virtual i_tab_page& add_tab_page(i_tab& aTab) = 0;
         virtual i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) = 0;
-        virtual i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget) = 0;
     };
 }

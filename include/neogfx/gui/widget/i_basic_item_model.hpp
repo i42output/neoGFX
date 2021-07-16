@@ -34,6 +34,8 @@ namespace neogfx
         virtual iterator insert_item(const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) = 0;
         virtual iterator insert_item(item_model_index const& aIndex, const value_type& aValue) = 0;
         virtual iterator insert_item(item_model_index const& aIndex, const value_type& aValue, const item_cell_data& aCellData) = 0;
+        virtual iterator append_item(const value_type& aValue) = 0;
+        virtual iterator append_item(const value_type& aValue, const item_cell_data& aCellData) = 0;
         virtual iterator append_item(const_iterator aParent, const value_type& aValue) = 0;
         virtual iterator append_item(const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) = 0;
         virtual iterator append_item(item_model_index const& aIndex, const value_type& aValue) = 0;

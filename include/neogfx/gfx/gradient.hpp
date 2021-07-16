@@ -53,7 +53,7 @@ namespace neogfx
         basic_gradient(const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops, gradient_direction aDirection = gradient_direction::Vertical);
         basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops);
         basic_gradient(const basic_gradient& aOther, const abstract_color_stop_list& aColorStops, const abstract_alpha_stop_list& aAlphaStops);
-        basic_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
+        basic_gradient(const neolib::i_vector<sRGB_color::abstract_type>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
         basic_gradient(const std::initializer_list<sRGB_color>& aColors, gradient_direction aDirection = gradient_direction::Vertical);
     public:
         basic_gradient& operator=(const i_gradient& aOther) override;
@@ -145,9 +145,9 @@ namespace neogfx
     using unique_gradient = basic_gradient<gradient_sharing::Unique>;
     using gradient = shared_gradient;
 
-    typedef std::optional<gradient> optional_gradient;
+    typedef neolib::optional<gradient> optional_gradient;
     typedef neolib::variant<color, gradient> color_or_gradient;
-    typedef std::optional<color_or_gradient> optional_color_or_gradient;
+    typedef neolib::optional<color_or_gradient> optional_color_or_gradient;
 
     inline void apply_bounding_box(color_or_gradient& aColorOrGradient, rect const& aBoundingBox)
     {
@@ -185,7 +185,7 @@ namespace neogfx
         aStream << std::setprecision(4) << "[";
         aStream << "(";
         for (auto const& stop : aGradient.color_stops())
-            aStream << (&stop != &aGradient.color_stops()[0] ? ", " : "") << stop.first() << ", " << stop.second();
+            aStream << (&stop != &aGradient.color_stops()[0] ? ", " : "") << stop.first() << ", " << sRGB_color{ stop.second() };
         aStream << ")";
         aStream << ", (";
         for (auto const& stop : aGradient.alpha_stops())
@@ -323,16 +323,6 @@ namespace neogfx
             aStream << static_variant_cast<color const&>(aColorOrGradient) << std::endl;
         else if (std::holds_alternative<gradient>(aColorOrGradient))
             aStream << static_variant_cast<gradient const&>(aColorOrGradient) << std::endl;
-        else
-            aStream << "(none)" << std::endl;
-        return aStream;
-    }
-
-    template <typename Elem, typename Traits>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const optional_color_or_gradient& aOptionalColorOrGradient)
-    {
-        if (aOptionalColorOrGradient != std::nullopt)
-            aStream << *aOptionalColorOrGradient << std::endl;
         else
             aStream << "(none)" << std::endl;
         return aStream;

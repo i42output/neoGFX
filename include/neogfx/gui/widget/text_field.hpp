@@ -57,8 +57,8 @@ namespace neogfx
         text_field(i_widget& aParent, std::string const& aLabel = std::string{}, std::string const& aHint = std::string{}, text_field_placement aPlacement = text_field_placement::LabelAbove, frame_style aFrameStyle = frame_style::SolidFrame);
         text_field(i_layout& aLayout, std::string const& aLabel = std::string{}, std::string const& aHint = std::string{}, text_field_placement aPlacement = text_field_placement::LabelAbove, frame_style aFrameStyle = frame_style::SolidFrame);
     public:
-        std::string const& text() const;
-        void set_text(std::string const& aText);
+        i_string const& text() const;
+        void set_text(i_string const& aText);
         const neogfx::label& label() const;
         neogfx::label& label();
         const line_edit& input_box() const;

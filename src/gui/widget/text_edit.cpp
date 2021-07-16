@@ -346,7 +346,7 @@ namespace neogfx
             {
                 iHintedSize.emplace(font(), size{});
                 graphics_context gc{ *this, graphics_context::type::Unattached };
-                iHintedSize->second = gc.text_extent(size_hint().primaryHint, font()).max(gc.text_extent(size_hint().secondaryHint, font()));
+                iHintedSize->second = gc.text_extent(size_hint().primary_hint(), font()).max(gc.text_extent(size_hint().secondary_hint(), font()));
                 if (iHintedSize->second.cy == 0.0)
                     iHintedSize->second.cy = font().height();
             }
@@ -414,7 +414,7 @@ namespace neogfx
             }
             x += column.width();
         }
-        if (has_focus())
+        if (has_focus() && !read_only())
             draw_cursor(aGc);
     }
 
@@ -499,8 +499,8 @@ namespace neogfx
             iMenu->menu().add_action(service<i_app>().action_copy());
             iMenu->menu().add_action(service<i_app>().action_paste());
             auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
-            auto pastePlainText = std::make_shared<action>("Plain Text"_t);
-            auto pasteRichText = std::make_shared<action>("Rich Text (HTML)"_t);
+            auto pastePlainText = make_ref<action>("Plain Text"_t);
+            auto pasteRichText = make_ref<action>("Rich Text (HTML)"_t);
             pastePlainText->Triggered([this]() { paste_plain_text(); });
             pasteRichText->Triggered([this]() { paste_rich_text(); });
             sink pasteAsSink;
@@ -548,26 +548,40 @@ namespace neogfx
         switch (aScanCode)
         {
         case ScanCode_TAB:
+            if (!read_only())
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
-                insert_text("\t", next_style());
+                insert_text(string{ "\t" }, next_style());
                 cursor().set_position(cursor().position() + 1);
             }
             break;
         case ScanCode_RETURN:
-            if (iType == MultiLine)
+            if (!read_only())
             {
-                multiple_text_changes mtc{ *this };
-                delete_any_selection();
-                insert_text("\n", next_style());
-                cursor().set_position(cursor().position() + 1);
+                if (aKeyModifiers == KeyModifier_NONE)
+                {
+                    bool canAccept = false;
+                    CanAcceptText.trigger(text(), canAccept);
+                    if (canAccept)
+                    {
+                        AcceptText.trigger(text());
+                        break;
+                    }
+                }
+                if (iType == MultiLine)
+                {
+                    multiple_text_changes mtc{ *this };
+                    delete_any_selection();
+                    insert_text(string{ "\n" }, next_style());
+                    cursor().set_position(cursor().position() + 1);
+                }
             }
             else
                 handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         case ScanCode_BACKSPACE:
-            if (cursor().position() == cursor().anchor())
+            if (!read_only() && cursor().position() == cursor().anchor())
             {
                 if (cursor().position() > 0)
                 {
@@ -580,7 +594,7 @@ namespace neogfx
                 delete_any_selection();
             break;
         case ScanCode_DELETE:
-            if (cursor().position() == cursor().anchor())
+            if (!read_only() && cursor().position() == cursor().anchor())
             {
                 if (cursor().position() < glyphs().size())
                 {
@@ -646,8 +660,8 @@ namespace neogfx
         case ScanCode_ESCAPE:
             if (cursor().anchor() != cursor().position())
                 cursor().set_anchor(cursor().position());
-            else if (iType == SingleLine)
-                set_text(std::string{});
+            else if (!read_only() && iType == SingleLine)
+                set_text(string{});
             break;
         default:
             handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -661,7 +675,7 @@ namespace neogfx
         return false;
     }
 
-    bool text_edit::text_input(std::string const& aText)
+    bool text_edit::text_input(i_string const& aText)
     {
         if (aText[0] == '\r' || aText[0] == '\n' || aText[0] == '\t') // handled in key_pressed()
         {
@@ -670,9 +684,12 @@ namespace neogfx
             else
                 return framed_scrollable_widget::text_input(aText);
         }
-        multiple_text_changes mtc{ *this };
-        delete_any_selection();
-        insert_text(aText, next_style(), true);
+        if (!read_only())
+        {
+            multiple_text_changes mtc{ *this };
+            delete_any_selection();
+            insert_text(aText, next_style(), true);
+        }
         return true;
     }
 
@@ -823,7 +840,7 @@ namespace neogfx
             auto selectionStart = std::min(cursor().position(), cursor().anchor());
             auto selectionEnd = std::max(cursor().position(), cursor().anchor());
             selectedText.assign(iText.begin() + selectionStart, iText.begin() + selectionEnd);
-            aClipboard.set_text(neolib::utf32_to_utf8(selectedText));
+            aClipboard.set_text(string{ neolib::utf32_to_utf8(selectedText) });
         }
     }
 
@@ -1002,23 +1019,23 @@ namespace neogfx
         }
     }
 
-    std::string text_edit::plain_text() const
+    i_string const& text_edit::plain_text() const
     {
         return text();
     }
 
-    bool text_edit::set_plain_text(std::string const& aPlainText)
+    bool text_edit::set_plain_text(i_string const& aPlainText)
     {
         return set_text(aPlainText) != 0 || aPlainText.empty();
     }
 
-    std::string text_edit::rich_text(rich_text_format aFormat) const
+    i_string const& text_edit::rich_text(rich_text_format aFormat) const
     {
         // todo
         return text();
     }
 
-    bool text_edit::set_rich_text(std::string const& aRichText, rich_text_format aFormat)
+    bool text_edit::set_rich_text(i_string const& aRichText, rich_text_format aFormat)
     {
         // todo
         return set_text(aRichText) != 0 || aRichText.empty();
@@ -1065,12 +1082,12 @@ namespace neogfx
         return Password;
     }
 
-    string const& text_edit::password_mask() const
+    i_string const& text_edit::password_mask() const
     {
         return PasswordMask;
     }
 
-    void text_edit::set_password(bool aPassword, std::string const& aMask)
+    void text_edit::set_password(bool aPassword, i_string const& aMask)
     {
         if (Password != aPassword || PasswordMask != aMask)
         {
@@ -1149,7 +1166,7 @@ namespace neogfx
         std::u32string part;
         part.assign(iText.begin() + aStart, iText.begin() + aEnd);
         delete_text(aStart, aEnd);
-        insert_text(aStart, neolib::utf32_to_utf8(part), aStyle);
+        insert_text(aStart, string{ neolib::utf32_to_utf8(part) }, aStyle);
     }
 
     text_edit::style text_edit::next_style() const
@@ -1393,14 +1410,18 @@ namespace neogfx
     void text_edit::clear()
     {
         cursor().set_position(0);
+        iPreviousText = iText;
         iText.clear();
         glyphs().clear();
         iGlyphParagraphs.clear();
         for (std::size_t i = 0; i < iGlyphColumns.size(); ++i)
             iGlyphColumns[i].lines().clear();
+        iUtf8TextCache = std::nullopt;
+        if (iPreviousText != iText)
+            notify_text_changed();
     }
 
-    std::string const& text_edit::text() const
+    i_string const& text_edit::text() const
     {
         if (iUtf8TextCache == std::nullopt)
         {
@@ -1410,42 +1431,42 @@ namespace neogfx
         return *iUtf8TextCache;
     }
 
-    std::size_t text_edit::set_text(std::string const& aText)
+    std::size_t text_edit::set_text(i_string const& aText)
     {
         return set_text(aText, default_style());
     }
 
-    std::size_t text_edit::set_text(std::string const& aText, const style& aStyle)
+    std::size_t text_edit::set_text(i_string const& aText, const style& aStyle)
     {
         return do_insert_text(0, aText, aStyle, true, true);
     }
 
-    std::size_t text_edit::append_text(std::string const& aText, bool aMoveCursor)
+    std::size_t text_edit::append_text(i_string const& aText, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
     }
 
-    std::size_t text_edit::append_text(std::string const& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::append_text(i_string const& aText, const style& aStyle, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(std::string const& aText, bool aMoveCursor)
+    std::size_t text_edit::insert_text(i_string const& aText, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(std::string const& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::insert_text(i_string const& aText, const style& aStyle, bool aMoveCursor)
     {
         return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor)
+    std::size_t text_edit::insert_text(position_type aPosition, i_string const& aText, bool aMoveCursor)
     {
         return do_insert_text(aPosition, aText, default_style(), aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor)
     {
         return do_insert_text(aPosition, aText, aStyle, aMoveCursor, false);
     }
@@ -1584,7 +1605,7 @@ namespace neogfx
         return iCalculatedTabStops->second;
     }
 
-    void text_edit::set_tab_stop_hint(std::string const& aTabStopHint)
+    void text_edit::set_tab_stop_hint(i_string const& aTabStopHint)
     {
         if (iTabStopHint != aTabStopHint)
         {
@@ -1658,7 +1679,7 @@ namespace neogfx
         return const_cast<document_glyphs&>(to_const(*this).glyphs());
     }
 
-    std::size_t text_edit::do_insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
+    std::size_t text_edit::do_insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
         TextFilter.trigger(aText, accept);
@@ -1913,13 +1934,23 @@ namespace neogfx
                         if (split != paragraphEnd)
                         {
                             std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraphEnd);
-                            lineEnd = wordBreak.first;
-                            next = wordBreak.second;
                             if (wordBreak.first == wordBreak.second)
                             {
-                                while (lineEnd != lineStart && (lineEnd - 1)->source == wordBreak.first->source)
-                                    --lineEnd;
-                                next = lineEnd;
+                                auto previousLineEnd = wordBreak.first;
+                                while (previousLineEnd != lineStart && (previousLineEnd - 1)->source == wordBreak.first->source)
+                                    --previousLineEnd;
+                                if (previousLineEnd != lineStart)
+                                {
+                                    lineEnd = wordBreak.first;
+                                    next = previousLineEnd;
+                                }
+                                else
+                                    next = lineEnd = split;
+                            }
+                            else
+                            {
+                                lineEnd = wordBreak.first;
+                                next = wordBreak.second;
                             }
                         }
                         else
@@ -2021,6 +2052,17 @@ namespace neogfx
                 }
             }
             iTextExtents.cy = pos.y;
+            if (iTextExtents.cy < client_rect(false).cy)
+            {
+                auto const space = client_rect(false).cy - iTextExtents.cy;
+                auto const adjust = 
+                    ((Alignment & alignment::Vertical) == alignment::Bottom) ? space : 
+                        ((Alignment & alignment::Vertical) == alignment::VCenter) ? std::floor(space / 2.0) : 0.0;
+                if (adjust != 0.0)
+                    for (auto& column : iGlyphColumns)
+                        for (auto& line : column.lines())
+                            line.ypos += adjust;
+            }
         }
         catch (std::bad_alloc)
         {

@@ -129,7 +129,7 @@ namespace neogfx
         // types
     public:
         typedef i_gradient abstract_type;
-        typedef neolib::i_pair<scalar, sRGB_color> color_stop;
+        typedef neolib::i_pair<scalar, sRGB_color::abstract_type> color_stop;
         typedef neolib::i_pair<scalar, sRGB_color::view_component> alpha_stop;
         typedef neolib::i_vector<color_stop> color_stop_list;
         typedef neolib::i_vector<alpha_stop> alpha_stop_list;

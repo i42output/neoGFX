@@ -408,8 +408,12 @@ namespace neogfx
 
     void color_dialog::x_picker::update_cursors()
     {
+        parent().update(parent().to_client_coordinates(iLeftCursor.to_window_coordinates(iLeftCursor.client_rect(true))));
+        parent().update(parent().to_client_coordinates(iRightCursor.to_window_coordinates(iRightCursor.client_rect(true))));
         iLeftCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_left() + point{ -iLeftCursor.extents().cx - effective_frame_width(), -std::floor(iLeftCursor.client_rect().center().y) });
         iRightCursor.move(dpi_scale(current_cursor_position()) + position() + client_rect(false).top_right() + point{ effective_frame_width(), -std::floor(iLeftCursor.client_rect().center().y) });
+        parent().update(parent().to_client_coordinates(iLeftCursor.to_window_coordinates(iLeftCursor.client_rect(true))));
+        parent().update(parent().to_client_coordinates(iRightCursor.to_window_coordinates(iRightCursor.client_rect(true))));
     }
 
     point color_dialog::x_picker::current_cursor_position() const
@@ -1031,7 +1035,7 @@ namespace neogfx
 
         update_widgets(*this);
 
-        layout().invalidate();
+        update_layout();
         center_on_parent(true);
         set_ready_to_render(true);
     }
@@ -1184,6 +1188,6 @@ namespace neogfx
         if (&aUpdatingWidget != &iA.second)
             iA.second.set_value(selected_color_in_color_space()[3] * color_space_coefficient());
         if (&aUpdatingWidget != &iRgb)
-            iRgb.set_text(selected_color().to_hex_string());
+            iRgb.set_text(string{ selected_color().to_hex_string() });
     }
 }

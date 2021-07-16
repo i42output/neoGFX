@@ -43,7 +43,7 @@ namespace neogfx
         sink iSink;
         group_box iControllerSelectorGroupBox;
         drop_list iControllerSelector;
-        tab_page_container iTabs;
+        tab_page_container<> iTabs;
         tab_page iCalibrateTab;
         tab_page iTestTab;
         vertical_layout iLayout1;

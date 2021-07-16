@@ -86,7 +86,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<expansion_policy> iExpansionPolicy;
+        neolib::optional<expansion_policy> iExpansionPolicy;
     };
 
     typedef basic_spacer<ui_element_type::Spacer> spacer;

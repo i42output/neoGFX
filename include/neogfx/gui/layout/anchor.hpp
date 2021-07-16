@@ -44,7 +44,12 @@ namespace neogfx
         typedef std::vector<constraint_entry_t> constraint_entries_t;
     public:
         anchor(i_anchorable& aOwner, i_property& aProperty) :
-            iOwnerDestroying{ aOwner.as_object() }, iOwner { aOwner }, iProperty{ aProperty }
+            iOwnerDestroying{ aOwner.as_object() }, iOwner { aOwner }, iProperty{ aProperty }, iCalculating{ false }
+        {
+            iOwner.anchors()[name()] = this;
+        }
+        anchor(i_anchorable& aOwner, i_property& aProperty, calculator_function_type aCalculatorOverride) :
+            iOwnerDestroying{ aOwner.as_object() }, iOwner{ aOwner }, iProperty{ aProperty }, iCalculatorOverride{ aCalculatorOverride }, iCalculating{ false }
         {
             iOwner.anchors()[name()] = this;
         }
@@ -58,6 +63,10 @@ namespace neogfx
             }
         }
     public:
+        i_anchorable& owner() const override
+        {
+            return iOwner;
+        }
         const i_string& name() const override
         {
             return property().name();
@@ -69,6 +78,18 @@ namespace neogfx
         i_property& property() override
         {
             return iProperty;
+        }
+        bool active() const noexcept override
+        {
+            return !iConstraints.empty();
+        }
+        bool calculator_overriden() const noexcept override
+        {
+            return iCalculatorOverride != std::nullopt;
+        }
+        bool calculating() const noexcept override
+        {
+            return iCalculating;
         }
     public:
         void constrain(i_anchor& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) override
@@ -83,14 +104,38 @@ namespace neogfx
             case anchor_constraint_function::Identity:
                 add_constraint(constraint::identity, static_cast<abstract_type&>(aOther));
                 break;
+            case anchor_constraint_function::IdentityX:
+                add_constraint(constraint::identity_x, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::IdentityY | anchor_constraint_function::Y:
+                add_constraint(constraint::identity_y, static_cast<abstract_type&>(aOther));
+                break;
             case anchor_constraint_function::Equal:
                 add_constraint(constraint::equal, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::EqualX:
+                add_constraint(constraint::equal_x, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::EqualY:
+                add_constraint(constraint::equal_y, static_cast<abstract_type&>(aOther));
                 break;
             case anchor_constraint_function::Min:
                 add_constraint(constraint::min, static_cast<abstract_type&>(aOther));
                 break;
+            case anchor_constraint_function::MinX | anchor_constraint_function::X:
+                add_constraint(constraint::min_x, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::MinY | anchor_constraint_function::Y:
+                add_constraint(constraint::min_y, static_cast<abstract_type&>(aOther));
+                break;
             case anchor_constraint_function::Max:
                 add_constraint(constraint::max, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::MaxX | anchor_constraint_function::X:
+                add_constraint(constraint::max_x, static_cast<abstract_type&>(aOther));
+                break;
+            case anchor_constraint_function::MaxY | anchor_constraint_function::Y:
+                add_constraint(constraint::max_y, static_cast<abstract_type&>(aOther));
                 break;
             case anchor_constraint_function::Custom:
                 // todo
@@ -120,29 +165,41 @@ namespace neogfx
         {
             return const_cast<value_type&>(to_const(*this).property_value());
         }
-        void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) override
+        void add_constraint(constraint const& aConstraint, abstract_type& aOtherAnchor) override
         {
             add_constraint(aConstraint, std::shared_ptr<abstract_type>{ std::shared_ptr<abstract_type>{}, &aOtherAnchor });
         }
-        void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) override
+        void add_constraint(constraint const& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) override
         {
             iConstraints.push_back(constraint_entry_t{ aConstraint, aOtherAnchor });
         }
-        value_type evaluate_constraints(const CalculatorArgs&... aArgs) const override
+        value_type evaluate_constraints(CalculatorArgs const&... aArgs) const override
         {
-            auto result = (property_set() ? property_value() : property().calculate<context_type, calculator_function_type>(aArgs...));
+            auto result = calculate(aArgs...);
             for (auto const& c : iConstraints)
             {
                 auto const& otherAnchor = static_cast<abstract_type&>(*c.second);
-                result = c.first(result, (otherAnchor.property_set() ? otherAnchor.property_value() : otherAnchor.property().calculate<context_type, calculator_function_type>(aArgs...)));
+                result = c.first(result, otherAnchor.calculate(aArgs...));
             }
             return result;
+        }
+        value_type calculate(const CalculatorArgs&... aArgs) const override
+        {
+            neolib::scoped_flag sf{ iCalculating };
+            if (calculator_overriden())
+                return (static_cast<Context&>(iOwner).**iCalculatorOverride)(aArgs...);
+            else if (property_set())
+                return property_value();
+            else
+                return property().calculate<context_type, calculator_function_type>(aArgs...);
         }
     private:
         destroying_flag iOwnerDestroying;
         i_anchorable& iOwner;
         i_property& iProperty;
         constraint_entries_t iConstraints;
+        std::optional<calculator_function_type> iCalculatorOverride;
+        mutable bool iCalculating;
     };
 
     namespace detail
@@ -173,4 +230,5 @@ namespace neogfx
     using anchor_t = typename detail::anchor_callable_function_cracker<anchor, Context, PVT, Callable>::type;
 
     #define define_anchor( name ) neogfx::anchor_t<property_context_type, typename decltype(name)::value_type, typename decltype(name)::calculator_function_type> Anchor_##name = { *this, name };
+    #define define_anchor_ex( name, calculator_override ) neogfx::anchor_t<property_context_type, typename decltype(name)::value_type, typename decltype(name)::calculator_function_type> Anchor_##name = { *this, name, &property_context_type::##calculator_override };
 }

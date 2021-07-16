@@ -49,7 +49,6 @@ int main(int argc, char* argv[])
         saveGame.enable(false);
         disconnect.enable(false);
 
-        window.toolbar_layout().add_spacer();
         ng::horizontal_layout ourToolbarLayout{ window.toolbar_layout() };
         ourToolbarLayout.set_size_policy(ng::size_constraint::Expanding, ng::size_constraint::Minimum);
         ourToolbarLayout.add_spacer();

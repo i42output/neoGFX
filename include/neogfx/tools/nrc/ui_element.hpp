@@ -49,6 +49,7 @@ namespace neogfx::nrc
         typedef neolib::vector<element_ptr_t> children_t;
         using i_ui_element::data_t;
         using i_ui_element::array_data_t;
+        typedef neolib::vector<neolib::simple_variant> concrete_array_data_t;
     protected:
         typedef std::set<std::string> data_names_t;
     public:
@@ -147,6 +148,9 @@ namespace neogfx::nrc
                     {
                     case ui_element_type::Label:
                         iAnonymousId = parent().id() + ".label()";
+                        break;
+                    case ui_element_type::LineEdit:
+                        iAnonymousId = parent().id() + ".input_box()";
                         break;
                     case ui_element_type::TextWidget:
                         iAnonymousId = parent().id() + ".text_widget()";

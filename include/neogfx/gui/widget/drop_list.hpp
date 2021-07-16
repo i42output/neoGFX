@@ -90,7 +90,7 @@ namespace neogfx
     private:
         drop_list& iDropList;
     };
-    
+
     class drop_list_popup : public window
     {
         friend class drop_list;
@@ -153,35 +153,48 @@ namespace neogfx
         virtual void set_spacing(const size& aSpacing) = 0;
         virtual const i_texture& image() const = 0;
         virtual void set_image(const i_texture& aImage) = 0;
-        virtual std::string const& text() const = 0;
-        virtual void set_text(std::string const& aText) = 0;
+        virtual i_string const& text() const = 0;
+        virtual void set_text(i_string const& aText) = 0;
     };
+
+    enum class drop_list_style : uint32_t
+    {
+        Normal              = 0x0000,
+        Editable            = 0x0001,
+        ListAlwaysVisible   = 0x0002,
+        NoFilter            = 0x0004
+    };
+}
+
+begin_declare_enum(neogfx::drop_list_style)
+declare_enum_string(neogfx::drop_list_style, Normal)
+declare_enum_string(neogfx::drop_list_style, Editable)
+declare_enum_string(neogfx::drop_list_style, ListAlwaysVisible)
+declare_enum_string(neogfx::drop_list_style, NoFilter)
+end_declare_enum(neogfx::drop_list_style)
+
+namespace neogfx
+{
+    inline drop_list_style operator|(drop_list_style aLhs, drop_list_style aRhs)
+    {
+        return static_cast<drop_list_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline drop_list_style operator&(drop_list_style aLhs, drop_list_style aRhs)
+    {
+        return static_cast<drop_list_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    inline drop_list_style operator~(drop_list_style aLhs)
+    {
+        return static_cast<drop_list_style>(~static_cast<uint32_t>(aLhs));
+    }
 
     class drop_list : public widget<>, private i_drop_list_input_widget::i_visitor
     {
         friend class drop_list_view;
     public:
         define_event(SelectionChanged, selection_changed, optional_item_model_index)
-    public:
-        enum class style : uint32_t
-        {
-            Normal                = 0x0000,
-            Editable            = 0x0001,
-            ListAlwaysVisible    = 0x0002,
-            NoFilter            = 0x0004
-        };
-        friend style operator|(style aLhs, style aRhs)
-        {
-            return static_cast<style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-        }
-        friend style operator&(style aLhs, style aRhs)
-        {
-            return static_cast<style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-        }
-        friend style operator~(style aLhs)
-        {
-            return static_cast<style>(~static_cast<uint32_t>(aLhs));
-        }
     public:
         struct no_selection : std::runtime_error { no_selection() : std::runtime_error("neogfx::drop_list::no_selection") {} };
     private:
@@ -204,10 +217,12 @@ namespace neogfx
             ~list_proxy();
         public:
             bool view_created() const;
+            bool view_visible() const;
             drop_list_view& view() const;
         public:
             void show_view();
             void hide_view();
+            void close_view();
             void update_view_placement();
         private:
             drop_list& iDropList;
@@ -217,9 +232,9 @@ namespace neogfx
             sink iSink;
         };
     public:
-        drop_list(style aStyle = style::Normal);
-        drop_list(i_widget& aParent, style aStyle = style::Normal);
-        drop_list(i_layout& aLayout, style aStyle = style::Normal);
+        drop_list(drop_list_style aStyle = drop_list_style::Normal);
+        drop_list(i_widget& aParent, drop_list_style aStyle = drop_list_style::Normal);
+        drop_list(i_layout& aLayout, drop_list_style aStyle = drop_list_style::Normal);
         ~drop_list();
     public:
         bool has_model() const;
@@ -242,13 +257,17 @@ namespace neogfx
         const item_model_index& selection() const;
     public:
         bool view_created() const;
+        bool view_visible() const;
         void show_view();
         void hide_view();
+        void close_view();
         drop_list_view& view() const;
         void accept_selection();
         void cancel_selection();
         void cancel_and_restore_selection();
     public:
+        drop_list_style style() const;
+        void set_style(drop_list_style aStyle);
         bool editable() const;
         void set_editable(bool aEditable);
         bool list_always_visible() const;
@@ -276,7 +295,7 @@ namespace neogfx
         void handle_cancel_selection(bool aRestoreSavedSelection, bool aUpdateEditor = true);
         bool handle_proxy_key_event(const neogfx::keyboard_event& aEvent);
     private:
-        style iStyle;
+        drop_list_style iStyle;
         vertical_layout iLayout0;
         horizontal_layout iLayout1;
         std::unique_ptr<i_drop_list_input_widget> iInputWidget;

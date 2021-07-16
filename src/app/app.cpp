@@ -322,12 +322,12 @@ namespace neogfx
         return *instance;
     }
 
-    const i_program_options& app::program_options() const
+    const i_program_options& app::program_options() const noexcept
     {
         return iProgramOptions;
     }
 
-    std::string const& app::name() const
+    std::string const& app::name() const noexcept
     {
         return iName;
     }
@@ -525,56 +525,56 @@ namespace neogfx
 
     i_action& app::add_action(i_action& aAction)
     {
-        auto a = iActions.emplace(aAction.text(), std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction});
-        return *a->second;
+        auto& a = iActions.emplace(aAction.text(), ref_ptr<i_action>{ref_ptr<i_action>{}, &aAction});
+        return *a.second();
     }
 
-    i_action& app::add_action(std::shared_ptr<i_action> aAction)
+    i_action& app::add_action(i_ref_ptr<i_action> const& aAction)
     {
-        auto a = iActions.emplace(aAction->text(), aAction);
-        return *a->second;
+        auto& a = iActions.emplace(aAction->text(), aAction);
+        return *a.second();
     }
 
-    i_action& app::add_action(std::string const& aText)
+    i_action& app::add_action(i_string const& aText)
     {
-        auto a = iActions.emplace(aText, std::make_shared<action>(aText));
-        return *a->second;
+        auto& a = iActions.emplace(aText, make_ref<action>(aText));
+        return *a.second();
     }
 
-    i_action& app::add_action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
+    i_action& app::add_action(i_string const& aText, i_string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
-        auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImageUri, aDpiScaleFactor, aSampling));
-        return *a->second;
+        auto& a = iActions.emplace(aText, make_ref<action>(aText, aImageUri, aDpiScaleFactor, aSampling));
+        return *a.second();
     }
 
-    i_action& app::add_action(std::string const& aText, const i_texture& aImage)
+    i_action& app::add_action(i_string const& aText, const i_texture& aImage)
     {
-        auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImage));
-        return *a->second;
+        auto& a = iActions.emplace(aText, make_ref<action>(aText, aImage));
+        return *a.second();
     }
 
-    i_action& app::add_action(std::string const& aText, const i_image& aImage)
+    i_action& app::add_action(i_string const& aText, const i_image& aImage)
     {
-        auto a = iActions.emplace(aText, std::make_shared<action>(aText, aImage));
-        return *a->second;
+        auto& a = iActions.emplace(aText, make_ref<action>(aText, aImage));
+        return *a.second();
     }
 
     void app::remove_action(i_action& aAction)
     {
         for (auto i = iActions.begin(); i != iActions.end(); ++i)
-            if (&*i->second == &aAction)
+            if (&*i->second() == &aAction)
             {
                 iActions.erase(i);
                 break;
             }
     }
 
-    i_action& app::find_action(std::string const& aText)
+    i_action& app::find_action(i_string const& aText)
     {
         auto a = iActions.find(aText);
         if (a == iActions.end())
             throw action_not_found();
-        return *a->second;
+        return *a->second();
     }
 
     void app::add_mnemonic(i_mnemonic& aMnemonic)
@@ -757,17 +757,17 @@ namespace neogfx
         bool partialMatches = false;
         iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifiers));
         for (auto& a : iActions)
-            if (a.second->is_enabled() && a.second->shortcut() != std::nullopt)
+            if (a.second()->is_enabled() && a.second()->shortcut() != std::nullopt)
             {
-                auto matchResult = a.second->shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
+                auto matchResult = a.second()->shortcut()->matches(iKeySequence.begin(), iKeySequence.end());
                 if (matchResult == key_sequence::match::Full)
                 {
                     iKeySequence.clear();
                     if (service<i_keyboard>().is_front_grabber(*this))
                     {
-                        a.second->triggered().trigger();
-                        if (a.second->is_checkable())
-                            a.second->toggle();
+                        a.second()->triggered().trigger();
+                        if (a.second()->is_checkable())
+                            a.second()->toggle();
                         return true;
                     }
                     else
@@ -820,12 +820,12 @@ namespace neogfx
         };
     }
 
-    bool app::text_input(std::string const&)
+    bool app::text_input(i_string const&)
     {
         return false;
     }
 
-    bool app::sys_text_input(std::string const& aInput)
+    bool app::sys_text_input(i_string const& aInput)
     {
         static boost::locale::generator gen;
         static std::locale loc = gen("en_US.UTF-8");
@@ -842,7 +842,7 @@ namespace neogfx
             {
                 continue;
             }
-            if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput, loc))
+            if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput.to_std_string(), loc))
             {
                 m->mnemonic_execute();
                 return true;

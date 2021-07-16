@@ -140,7 +140,7 @@ namespace neogfx
         {
             fix();
         }
-        gradient_object(gradient_id aId, const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection) :
+        gradient_object(gradient_id aId, const neolib::i_vector<sRGB_color::abstract_type>& aColors, gradient_direction aDirection) :
             iId{ aId },
             iDirection{ aDirection }
         {
@@ -149,8 +149,8 @@ namespace neogfx
             double pos = 0.0;
             for (auto const& c : aColors)
             {
-                tempColors.push_back(color_stop{ pos, c.with_alpha(255_u8) });
-                tempAlphas.push_back(alpha_stop{ pos, c.alpha() });
+                tempColors.push_back(color_stop{ pos, sRGB_color{c}.with_alpha(255_u8) });
+                tempAlphas.push_back(alpha_stop{ pos, sRGB_color{c}.alpha() });
                 if (aColors.size() > 1)
                     pos += (1.0 / (aColors.size() - 1));
             }
@@ -311,7 +311,6 @@ namespace neogfx
         {
             if (aPos < 0.0 || aPos > 1.0)
                 throw bad_position();
-            sRGB_color::view_component red{}, green{}, blue{}, alpha{};
             auto colorStop = std::lower_bound(color_stops().begin(), color_stops().end(), color_stop{ aPos, sRGB_color{} },
                 [](const color_stop& aLeft, const color_stop& aRight)
             {
@@ -327,10 +326,11 @@ namespace neogfx
                 --right;
             aPos = std::min(std::max(left->first(), aPos), right->first());
             double nc = (left != right ? (aPos - left->first()) / (right->first() - left->first()) : 0.0);
-            red = lerp(left->second().red(), right->second().red(), nc);
-            green = lerp(left->second().green(), right->second().green(), nc);
-            blue = lerp(left->second().blue(), right->second().blue(), nc);
-            alpha = lerp(left->second().alpha(), right->second().alpha(), nc);
+            sRGB_color::base_component red{}, green{}, blue{}, alpha{};
+            red = lerp(left->second()[0], right->second()[0], nc);
+            green = lerp(left->second()[1], right->second()[1], nc);
+            blue = lerp(left->second()[2], right->second()[2], nc);
+            alpha = lerp(left->second()[3], right->second()[3], nc);
             return sRGB_color{ red, green, blue, alpha };
         }
         sRGB_color color_at(scalar aPos, scalar aStart, scalar aEnd) const override
@@ -377,7 +377,7 @@ namespace neogfx
         {
             alpha_stops() = alpha_stop_list{ alpha_stop{0.0, aAlpha}, alpha_stop{1.0, aAlpha} };
             for (auto& stop : color_stops())
-                stop.second().set_alpha(255);
+                stop.second()[3] = 1.0;
             return *this;
         }
         i_gradient& set_combined_alpha(sRGB_color::view_component aAlpha) override
@@ -738,7 +738,7 @@ namespace neogfx
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aOther, aColorStops, aAlphaStops));
     }
 
-    void gradient_manager::do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
+    void gradient_manager::do_create_gradient(neolib::i_vector<sRGB_color::abstract_type> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult)
     {
         aResult = add_gradient(make_ref<gradient_object>(allocate_gradient_id(), aColors, aDirection));
     }

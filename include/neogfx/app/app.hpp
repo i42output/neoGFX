@@ -23,6 +23,7 @@
 #include <map>
 #include <optional>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/core/map.hpp>
 #include <neolib/task/timer.hpp>
 #include <neolib/app/application.hpp>
 #include <neogfx/core/async_thread.hpp>
@@ -76,7 +77,7 @@ namespace neogfx
         };
     private:
         typedef std::map<std::string, style> style_list;
-        typedef std::multimap<std::string, std::shared_ptr<i_action>> action_list;
+        typedef neolib::multimap<string, ref_ptr<i_action>> action_list;
         typedef std::vector<i_mnemonic*> mnemonic_list;
     public:
         struct no_instance : std::logic_error { no_instance() : std::logic_error("neogfx::app::no_instance") {} };
@@ -92,8 +93,8 @@ namespace neogfx
     public:
         static app& instance();
     public:
-        const i_program_options& program_options() const override;
-        std::string const& name() const override;
+        const i_program_options& program_options() const noexcept override;
+        std::string const& name() const noexcept override;
         void set_name(std::string const& aName) override;
         int exec(bool aQuitWhenLastWindowClosed = true) override;
         bool in_exec() const override;
@@ -126,13 +127,13 @@ namespace neogfx
         i_action& action_delete() override;
         i_action& action_select_all() override;
         i_action& add_action(i_action& aAction) override;
-        i_action& add_action(std::shared_ptr<i_action> aAction) override;
-        i_action& add_action(std::string const& aText) override;
-        i_action& add_action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
-        i_action& add_action(std::string const& aText, const i_texture& aImage) override;
-        i_action& add_action(std::string const& aText, const i_image& aImage) override;
+        i_action& add_action(i_ref_ptr<i_action> const& aAction) override;
+        i_action& add_action(i_string const& aText) override;
+        i_action& add_action(i_string const& aText, i_string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) override;
+        i_action& add_action(i_string const& aText, const i_texture& aImage) override;
+        i_action& add_action(i_string const& aText, const i_image& aImage) override;
         void remove_action(i_action& aAction) override;
-        i_action& find_action(std::string const& aText) override;
+        i_action& find_action(i_string const& aText) override;
         void add_mnemonic(i_mnemonic& aMnemonic) override;
         void remove_mnemonic(i_mnemonic& aMnemonic) override;
     public:
@@ -145,15 +146,15 @@ namespace neogfx
         i_event_processing_context& event_processing_context() override;
     protected:
         void idle() override;
-    protected:
+    public:
         bool discover(const uuid& aId, void*& aObject) override;
     private:
         bool do_process_events();
     private:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(std::string const& aText) override;
-        bool sys_text_input(std::string const& aText) override;
+        bool text_input(i_string const& aText) override;
+        bool sys_text_input(i_string const& aText) override;
     private:
         neogfx::program_options iProgramOptions;
         std::unique_ptr<loader> iLoader;

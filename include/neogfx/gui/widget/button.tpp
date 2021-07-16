@@ -54,6 +54,20 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
+    button<ButtonInterface>::button(std::string const& aText, const i_texture& aTexture, alignment aAlignment) :
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+    {
+        init();
+    }
+
+    template <typename ButtonInterface>
+    button<ButtonInterface>::button(std::string const& aText, const i_image& aImage, alignment aAlignment) :
+        base_type{}, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+    {
+        init();
+    }
+
+    template <typename ButtonInterface>
     button<ButtonInterface>::button(i_widget& aParent, alignment aAlignment) :
         base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
     {
@@ -82,6 +96,20 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
+    button<ButtonInterface>::button(i_widget& aParent, std::string const& aText, const i_texture& aTexture, alignment aAlignment) :
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+    {
+        init();
+    }
+
+    template <typename ButtonInterface>
+    button<ButtonInterface>::button(i_widget& aParent, std::string const& aText, const i_image& aImage, alignment aAlignment) :
+        base_type{ aParent }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
+    {
+        init();
+    }
+
+    template <typename ButtonInterface>
     button<ButtonInterface>::button(i_layout& aLayout, alignment aAlignment) :
         base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, label_type::MultiLine, aAlignment }
     {
@@ -105,6 +133,20 @@ namespace neogfx
     template <typename ButtonInterface>
     button<ButtonInterface>::button(i_layout& aLayout, const i_image& aImage, alignment aAlignment) :
         base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aImage, label_type::MultiLine, aAlignment }
+    {
+        init();
+    }
+
+    template <typename ButtonInterface>
+    button<ButtonInterface>::button(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, alignment aAlignment) :
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
+    {
+        init();
+    }
+
+    template <typename ButtonInterface>
+    button<ButtonInterface>::button(i_layout& aLayout, std::string const& aText, const i_image& aImage, alignment aAlignment) :
+        base_type{ aLayout }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
     }
@@ -224,13 +266,13 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    std::string const& button<ButtonInterface>::text() const
+    i_string const& button<ButtonInterface>::text() const
     {
         return label().text();
     }
 
     template <typename ButtonInterface>
-    void button<ButtonInterface>::set_text(std::string const& aText)
+    void button<ButtonInterface>::set_text(i_string const& aText)
     {
         label().set_text(aText);
     }
@@ -242,7 +284,7 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    void button<ButtonInterface>::set_image(std::string const& aImageUri)
+    void button<ButtonInterface>::set_image(i_string const& aImageUri)
     {
         label().set_image(neogfx::image{ aImageUri });
     }
@@ -430,9 +472,8 @@ namespace neogfx
         Unchecked.set_trigger_type(event_trigger_type::Asynchronous);
         Indeterminate.set_trigger_type(event_trigger_type::Asynchronous);
 
-        set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        as_widget().set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         as_widget().layout().set_padding(0.0);
-
         as_widget().set_focus_policy(focus_policy::TabFocus);
 
         auto label_text_updated = [this]()

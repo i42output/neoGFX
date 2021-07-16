@@ -64,10 +64,10 @@ namespace neogfx
         virtual const toolbar_button& button(button_index aButtonIndex) const;
         virtual toolbar_button& button(button_index aButtonIndex);
         i_action& add_action(i_action& aAction) override;
-        i_action& add_action(std::shared_ptr<i_action> aAction) override;
+        i_action& add_action(i_ref_ptr<i_action> const& aAction) override;
         virtual void add_separator();
         virtual i_action& insert_action(button_index aButtonIndex, i_action& aAction);
-        virtual i_action& insert_action(button_index aButtonIndex, std::shared_ptr<i_action> aAction);
+        virtual i_action& insert_action(button_index aButtonIndex, i_ref_ptr<i_action> const& aAction);
         virtual void insert_separator(button_index aButtonIndex);
     private:
         toolbar_style iStyle;

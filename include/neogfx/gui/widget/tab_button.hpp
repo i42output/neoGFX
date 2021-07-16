@@ -48,10 +48,10 @@ namespace neogfx
         bool is_deselected() const override;
         void select() override;
     public:
-        std::string const& text() const override;
-        void set_text(std::string const& aText) override;
-        void set_image(const i_texture& aTexture) override;
-        void set_image(const i_image& aImage) override;
+        i_string const& text() const override;
+        i_tab& set_text(i_string const& aText) override;
+        i_tab& set_image(const i_texture& aTexture) override;
+        i_tab& set_image(const i_image& aImage) override;
     public:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;

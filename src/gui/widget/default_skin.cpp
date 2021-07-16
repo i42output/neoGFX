@@ -255,4 +255,37 @@ namespace neogfx
         else
             aGc.fill_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
     }
+
+    void default_skin::draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const
+    {
+        auto ink1 = (aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Base));
+        ink1 = ink1.shaded(0x60);
+        auto ink2 = ink1.darker(0x30);
+        for (uint32_t i = 1u; i < aLayout.count(); ++i)
+        {
+            if (aLayout.item_at(i - 1u).is_layout() && (!aLayout.item_at(i - 1u).as_layout().enabled() || aLayout.item_at(i - 1u).as_layout().count() == 0))
+                continue;
+            if (aLayout.item_at(i).is_layout() && (!aLayout.item_at(i).as_layout().enabled() || aLayout.item_at(i).as_layout().count() == 0))
+                continue;
+            auto const sepRect = separator_rect(aLayout, { i - 1u, i });
+            if (aLayout.direction() == layout_direction::Horizontal)
+            {
+                rect const gripRect{ (sepRect.center() - point{ 1.0_dip, 8.5_dip }).ceil(), size{ 2.0_dip, 17.0_dip } };
+                for (auto s = gripRect.top_left(); s.y < gripRect.bottom_left().y; s += point{ 0.0, 3.0_dip, })
+                {
+                    aGc.fill_rect(rect{ s, size{ 2.0_dip, 2.0_dip } }, ink1);
+                    aGc.fill_rect(rect{ s, size{ 1.0_dip, 1.0_dip } }, ink2);
+                }
+            }
+            else
+            {
+                rect const gripRect{ (sepRect.center() - point{ 8.5_dip, 1.0_dip }).ceil(), size{ 17.0_dip, 2.0_dip } };
+                for (auto s = gripRect.top_left(); s.x < gripRect.top_right().x; s += point{ 3.0_dip, 0.0 })
+                {
+                    aGc.fill_rect(rect{ s, size{ 2.0_dip, 2.0_dip } }, ink1);
+                    aGc.fill_rect(rect{ s, size{ 1.0_dip, 1.0_dip } }, ink2);
+                }
+            }
+        }
+    }
 }

@@ -50,8 +50,6 @@ namespace neogfx
     class header_view : public splitter
     {
     private:
-        class updater;
-    private:
         struct section_dimension
         {
             optional_dimension manual;
@@ -101,6 +99,8 @@ namespace neogfx
     private:
         void init();
         void update_buttons();
+        void request_full_update();
+        void full_update();
         void update_from_row(uint32_t aRow, i_graphics_context& aGc);
         bool update_section_width(uint32_t aColumn, const size& aCellExtents, i_graphics_context& aGc);
     private:
@@ -114,6 +114,7 @@ namespace neogfx
         bool iExpandLastColumn;
         optional_dimension iSeparatorWidth;
         std::vector<section_dimension> iSectionWidths;
-        std::unique_ptr<updater> iUpdater;
+        std::optional<neolib::callback_timer> iUpdater;
+        bool iUpdateNeeded;
     };
 }

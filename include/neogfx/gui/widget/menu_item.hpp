@@ -32,12 +32,12 @@ namespace neogfx
         define_declared_event(Selected, selected)
         define_declared_event(Deselected, deselected)
     private:
-        typedef std::shared_ptr<i_action> action_pointer;
+        typedef ref_ptr<i_action> action_pointer;
         typedef std::shared_ptr<i_menu> menu_pointer;
         typedef std::variant<std::monostate, action_pointer, menu_pointer> contents;
     public:
         menu_item(i_action& aAction);
-        menu_item(std::shared_ptr<i_action> aAction);
+        menu_item(i_ref_ptr<i_action> const& aAction);
         menu_item(i_menu& aSubMenu);
         menu_item(std::shared_ptr<i_menu> aSubMenu);
     public:

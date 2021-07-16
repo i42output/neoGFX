@@ -132,10 +132,10 @@ namespace neogfx
         rect native_window_widget_part_rect(widget_part_e aWidgetPart) const override;
         void native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         void native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        void native_window_text_input(std::string const& aText) override;
-        void native_window_sys_text_input(std::string const& aText) override;
+        void native_window_text_input(i_string const& aText) override;
+        void native_window_sys_text_input(i_string const& aText) override;
         neogfx::mouse_cursor native_window_mouse_cursor() const override;
-        void native_window_title_text_changed(std::string const& aTitleText) override;
+        void native_window_title_text_changed(i_string const& aTitleText) override;
     public:
         window_style style() const override;
         void set_style(window_style aStyle) override;

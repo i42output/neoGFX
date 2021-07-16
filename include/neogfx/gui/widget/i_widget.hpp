@@ -38,7 +38,14 @@ namespace neogfx
     class i_surface;
     class i_layout;
 
-    class i_widget : public i_layout_item, public i_keyboard_handler, public virtual i_skinnable_item
+    enum class layout_reason
+    {
+        Explicit,
+        Async,
+        Resize
+    };
+
+    class i_widget : public i_layout_item, public i_keyboard_handler, public i_mouse_handler, public virtual i_skinnable_item
     {
     public:
         declare_event(child_added, i_widget&)
@@ -125,6 +132,7 @@ namespace neogfx
         virtual bool has_parent_layout() const = 0;
         virtual const i_layout& parent_layout() const = 0;
         virtual i_layout& parent_layout() = 0;
+        virtual i_optional<neogfx::layout_reason>& layout_reason() = 0;
         virtual void layout_items(bool aDefer = false) = 0;
         virtual void layout_items_started() = 0;
         virtual bool layout_items_in_progress() const = 0;
@@ -133,8 +141,6 @@ namespace neogfx
         virtual bool has_logical_coordinate_system() const = 0;
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) = 0;
-        virtual point position() const = 0;
-        virtual point origin() const = 0;
         virtual rect non_client_rect() const = 0;
         virtual rect client_rect(bool aIncludePadding = true) const = 0;
         virtual void move(const point& aPosition) = 0;
@@ -201,8 +207,9 @@ namespace neogfx
         virtual void non_client_release_capture() = 0;
         virtual void captured() = 0;
         virtual void capture_released() = 0;
+        virtual bool has_focus_policy() const = 0;
         virtual neogfx::focus_policy focus_policy() const = 0;
-        virtual void set_focus_policy(neogfx::focus_policy aFocusPolicy) = 0;
+        virtual void set_focus_policy(const optional_focus_policy& aFocusPolicy) = 0;
         virtual bool can_set_focus(focus_reason aFocusReason) const = 0;
         virtual bool has_focus() const = 0;
         virtual bool child_has_focus() const = 0;
@@ -218,7 +225,7 @@ namespace neogfx
         virtual bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const = 0;
         virtual void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) = 0;
         virtual neogfx::mouse_event_location mouse_event_location() const = 0;
-        virtual void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
+        virtual bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) = 0;
         virtual void mouse_button_released(mouse_button aButton, const point& aPosition) = 0;
@@ -301,12 +308,6 @@ namespace neogfx
         {
             if (has_parent())
                 parent().send_child_to_back(*this);
-        }
-    public:
-        void layout_root(bool aDefer = false)
-        {
-            if (has_root())
-                root().as_widget().layout_items(aDefer);
         }
     public:
         point to_window_coordinates(const point& aClientCoordinates) const

@@ -36,7 +36,7 @@ namespace neogfx
         layout_item_cache(const layout_item_cache& aOther);
         ~layout_item_cache();
     public:
-        void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
+        i_anchor& anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
         const anchor_map_type& anchors() const override;
         anchor_map_type& anchors() override;
     public:
@@ -78,39 +78,46 @@ namespace neogfx
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:
+        point origin() const override;
+        void reset_origin() const override;
         point position() const override;
         void set_position(const point& aPosition) override;
         size extents() const override;
         void set_extents(const size& aExtents) override;
-        bool has_size_policy() const override;
+        bool has_size_policy() const noexcept override;
         neogfx::size_policy size_policy() const override;
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        bool has_weight() const override;
+        bool has_weight() const noexcept override;
         size weight() const override;
         void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const override;
+        bool has_minimum_size() const noexcept override;
+        bool is_minimum_size_constrained() const noexcept override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const override;
+        bool has_maximum_size() const noexcept override;
+        bool is_maximum_size_constrained() const noexcept override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override;
-        bool has_fixed_size() const override;
+        bool has_fixed_size() const noexcept override;
         size fixed_size(optional_size const& aAvailableSpace = {}) const override;
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override;
-        bool has_transformation() const override;
+        bool has_transformation() const noexcept override;
         mat33 const& transformation(bool aCombineAncestorTransformations = false) const override;
         void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override;
     public:
-        bool has_padding() const override;
+        bool has_padding() const noexcept override;
         neogfx::padding padding() const override;
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
+    protected:
+        point unconstrained_origin() const override;
+        point unconstrained_position() const override;
     protected:
         void layout_item_enabled(i_layout_item& aItem) override;
         void layout_item_disabled(i_layout_item& aItem) override;
     public:
         bool visible() const override;
     public:
-        void update_layout(bool aDeferLayout = true) override;
+        void update_layout(bool aDeferLayout = true, bool aAncestors = true) override;
         void layout_as(const point& aPosition, const size& aSize) override;
     public:
         void invalidate_combined_transformation() override;
@@ -132,11 +139,10 @@ namespace neogfx
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
         mutable std::pair<uint32_t, size> iWeight;
-        mutable std::pair<uint32_t, size> iMinimumSize;
-        mutable std::pair<uint32_t, size> iMaximumSize;
-        mutable std::pair<uint32_t, size> iFixedSize;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iMinimumSize;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iMaximumSize;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iFixedSize;
         mutable std::pair<uint32_t, mat33> iTransformation;
         mutable std::pair<uint32_t, mat33> iCombinedTransformation;
-        mutable std::optional<const i_anchor*> iMinimumSizeAnchor;
     };
 }

@@ -48,6 +48,11 @@ namespace neogfx
     {
     }
 
+    layout_direction vertical_layout::direction() const
+    {
+        return layout_direction::Vertical;
+    }
+
     i_spacer& vertical_layout::add_spacer()
     {
         auto s = make_ref<vertical_spacer>();

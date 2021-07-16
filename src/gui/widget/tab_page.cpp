@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     tab_page::tab_page(i_tab_page_container& aContainer, std::string const& aTabText) :
-        tab_page{ aContainer, aContainer.add_tab(aTabText) }
+        tab_page{ aContainer, aContainer.add_tab(string{ aTabText }) }
     {
         set_background_opacity(1.0);
     }
@@ -61,7 +61,7 @@ namespace neogfx
 
     size tab_page::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (has_minimum_size() || (iTab.container().style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
+        if (has_minimum_size() || (iTab.container().tab_container_style() & tab_container_style::ResizeToTabs) == tab_container_style::ResizeToTabs)
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         else
             return size{};
@@ -79,7 +79,7 @@ namespace neogfx
     {
         if (iTab.is_selected())
         {
-            switch (iTab.container().style() & tab_container_style::TabAlignmentMask)
+            switch (iTab.container().tab_container_style() & tab_container_style::TabAlignmentMask)
             {
             case tab_container_style::TabAlignmentTop:
             case tab_container_style::TabAlignmentBottom:

@@ -80,8 +80,8 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neolib::string> iTab;
-        std::optional<neolib::string> iTabText;
-        std::optional<neolib::string> iTabImage;
+        neolib::optional<neolib::string> iTab;
+        neolib::optional<neolib::string> iTabText;
+        neolib::optional<neolib::string> iTabImage;
     };
 }

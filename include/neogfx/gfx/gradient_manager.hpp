@@ -139,7 +139,7 @@ namespace neogfx
         void do_create_gradient(i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) override;
         void do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, neolib::i_ref_ptr<i_gradient>& aResult) override;
         void do_create_gradient(i_gradient const& aOther, i_gradient::color_stop_list const& aColorStops, i_gradient::alpha_stop_list const& aAlphaStops, neolib::i_ref_ptr<i_gradient>& aResult) override;
-        void do_create_gradient(neolib::i_vector<sRGB_color> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) override;
+        void do_create_gradient(neolib::i_vector<sRGB_color::abstract_type> const& aColors, gradient_direction aDirection, neolib::i_ref_ptr<i_gradient>& aResult) override;
     private:
         shader_array<avec4u8>& samplers();
         std::vector<gradient_sampler>& free_samplers();

@@ -34,6 +34,12 @@ namespace neogfx::nrc
             add_header("neogfx/gui/widget/text_edit.hpp");
             add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
         }
+        text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t, ui_element_type aElementType = ui_element_type::TextEdit) :
+            ui_element<>{ aParser, aParent, member_element, aElementType }
+        {
+            add_header("neogfx/gui/widget/text_edit.hpp");
+            add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
+        }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
@@ -84,13 +90,13 @@ namespace neogfx::nrc
             ui_element<>::emit_body();
             if (iSizeHint)
             {
-                if (iSizeHint->secondaryHint.empty())
-                    emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t });\n", id(), iSizeHint->primaryHint);
+                if (iSizeHint->secondary_hint().empty())
+                    emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t });\n", id(), iSizeHint->primary_hint());
                 else
-                    emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t, \"%3%\"_t });\n", id(), iSizeHint->primaryHint, iSizeHint->secondaryHint);
+                    emit("   %1%.set_size_hint(size_hint{ \"%2%\"_t, \"%3%\"_t });\n", id(), iSizeHint->primary_hint(), iSizeHint->secondary_hint());
             }
             if (iTabStopHint)
-                emit("   %1%.set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
+                emit("   %1%.set_tab_stop_hint(\"%2%\"_s);\n", id(), *iTabStopHint);
             if (iTextColor || iPaperColor)
                 emit("   text_edit::style %1%DefaultStyle;\n", id());
             if (iTextColor)
@@ -113,9 +119,9 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<size_hint> iSizeHint;
-        std::optional<string> iTabStopHint;
-        std::optional<color_or_gradient> iTextColor;
-        std::optional<color_or_gradient> iPaperColor;
+        neolib::optional<size_hint> iSizeHint;
+        neolib::optional<string> iTabStopHint;
+        neolib::optional<color_or_gradient> iTextColor;
+        neolib::optional<color_or_gradient> iPaperColor;
     };
 }

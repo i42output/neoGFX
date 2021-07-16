@@ -96,12 +96,12 @@ namespace neogfx
         init();
     }
 
-    std::string const& text_field::text() const
+    i_string const& text_field::text() const
     {
         return input_box().text();
     }
 
-    void text_field::set_text(std::string const& aText)
+    void text_field::set_text(i_string const& aText)
     {
         input_box().set_text(aText);
     }
@@ -218,7 +218,7 @@ namespace neogfx
 
         auto size_hint_updater = [this]()
         {
-            input_box().set_size_hint(size_hint{ input_box().size_hint().primaryHint, hint().text() });
+            input_box().set_size_hint(size_hint{ input_box().size_hint().primary_hint(), hint().text() });
         };
         hint().TextChanged(size_hint_updater);
         size_hint_updater();

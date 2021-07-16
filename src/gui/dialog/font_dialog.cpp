@@ -128,7 +128,7 @@ namespace neogfx
         };
     }
 
-    font_dialog::font_dialog(const neogfx::font& aCurrentFont, std::optional<text_appearance> const& aCurrentAppearance) :
+    font_dialog::font_dialog(const neogfx::font& aCurrentFont, optional<text_appearance> const& aCurrentAppearance) :
         dialog{ "Select Font"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
@@ -138,15 +138,15 @@ namespace neogfx
         iLayout0{ client_layout() },
         iLayout1{ iLayout0 },
         iFamilyLabel{ iLayout1, "Family:"_t },
-        iFamilyPicker{ iLayout1, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iFamilyPicker{ iLayout1, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayout2{ iLayout0 },
         iLayout3{ iLayout2 },
         iLayout4{ iLayout3 },
         iStyleLabel{ iLayout4, "Style:"_t },
-        iStylePicker{ iLayout4, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iStylePicker{ iLayout4, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayout5{ iLayout3 },
         iSizeLabel{ iLayout5, "Size:"_t },
-        iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iSizePicker{ iLayout5, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayoutEffects{ client_layout(), neogfx::alignment::Top },
         iEffectsBox{ iLayoutEffects, "Effects"_t, },
         iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
@@ -177,7 +177,7 @@ namespace neogfx
         init();
     }
 
-    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, std::optional<text_appearance> const& aCurrentAppearance) :
+    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, optional<text_appearance> const& aCurrentAppearance) :
         dialog{ aParent, "Select Font"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
@@ -187,15 +187,15 @@ namespace neogfx
         iLayout0{ client_layout() },
         iLayout1{ iLayout0 },
         iFamilyLabel{ iLayout1, "Family:"_t },
-        iFamilyPicker{ iLayout1, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iFamilyPicker{ iLayout1, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayout2{ iLayout0 },
         iLayout3{ iLayout2 },
         iLayout4{ iLayout3 },
         iStyleLabel{ iLayout4, "Style:"_t },
-        iStylePicker{ iLayout4, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iStylePicker{ iLayout4, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayout5{ iLayout3 },
         iSizeLabel{ iLayout5, "Size:"_t },
-        iSizePicker{ iLayout5, drop_list::style::Editable | drop_list::style::ListAlwaysVisible | drop_list::style::NoFilter },
+        iSizePicker{ iLayout5, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayoutEffects{ client_layout(), neogfx::alignment::Top },
         iEffectsBox{ iLayoutEffects, "Effects"_t, },
         iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
@@ -240,12 +240,12 @@ namespace neogfx
         return iSelectedFont;
     }
 
-    std::optional<text_appearance> const& font_dialog::current_appearance() const
+    optional<text_appearance> const& font_dialog::current_appearance() const
     {
         return iCurrentAppearance;
     }
 
-    std::optional<text_appearance> const& font_dialog::selected_appearance() const
+    optional<text_appearance> const& font_dialog::selected_appearance() const
     {
         return iSelectedAppearance;
     }
@@ -256,12 +256,12 @@ namespace neogfx
         update_selected_font(*this);
     }
 
-    void font_dialog::set_default_ink(const std::optional<color>& aColor)
+    void font_dialog::set_default_ink(const optional<color>& aColor)
     {
         iDefaultInk = aColor;
     }
 
-    void font_dialog::set_default_paper(const std::optional<color>& aColor)
+    void font_dialog::set_default_paper(const optional<color>& aColor)
     {
         iDefaultPaper = aColor;
     }
@@ -400,7 +400,7 @@ namespace neogfx
             else
                 for (uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
                     iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, iSelectedFont.fixed_size(fsi));
-            iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
+            iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
         }
         if (&aUpdatingWidget == this)
         {
@@ -417,7 +417,7 @@ namespace neogfx
             auto size = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(iSelectedFont.size()));
             if (size != std::nullopt)
                 iSizePicker.selection_model().set_current_index(*size);
-            iSizePicker.input_widget().set_text(boost::lexical_cast<std::string>(iSelectedFont.size()));
+            iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
         }
         else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
         {
@@ -483,7 +483,7 @@ namespace neogfx
                     else if (std::holds_alternative<gradient>(iSelectedAppearance->ink()))
                         iInkGradient.check();
                 }
-                if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != neolib::none)
+                if (iSelectedAppearance->paper() && iSelectedAppearance->paper() != std::nullopt)
                 {
                     iPaperBox.check_box().check();
                     if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
@@ -544,14 +544,14 @@ namespace neogfx
         {
             if (iPaperColor.is_checked())
             {
-                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == std::nullopt)
                     iSelectedAppearance->set_paper(iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background));
                 else if (std::holds_alternative<gradient>(*iSelectedAppearance->paper()))
                     iSelectedAppearance->set_paper(std::get<gradient>(*iSelectedAppearance->paper()).color_at(0.0));
             }
             else if (iPaperGradient.is_checked())
             {
-                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == neolib::none)
+                if (!iSelectedAppearance->paper() || iSelectedAppearance->paper() == std::nullopt)
                     iSelectedAppearance->set_paper(gradient{ iDefaultPaper ? *iDefaultPaper : service<i_app>().current_style().palette().color(color_role::Background) });
                 else if (std::holds_alternative<color>(*iSelectedAppearance->paper()))
                     iSelectedAppearance->set_paper(gradient{ std::get<color>(*iSelectedAppearance->paper()) });

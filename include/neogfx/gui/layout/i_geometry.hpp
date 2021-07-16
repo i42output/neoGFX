@@ -208,33 +208,42 @@ namespace neogfx
 
     class i_geometry : public i_units_context
     {
+        template <typename>
+        friend class layout_item;
     public:
+        virtual point origin() const = 0;
+        virtual void reset_origin() const = 0;
         virtual point position() const = 0;
         virtual void set_position(const point& aPosition) = 0;
         virtual size extents() const = 0;
         virtual void set_extents(const size& aExtents) = 0;
-        virtual bool has_size_policy() const = 0;
+        virtual bool has_size_policy() const noexcept = 0;
         virtual neogfx::size_policy size_policy() const = 0;
         virtual void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) = 0;
-        virtual bool has_weight() const = 0;
+        virtual bool has_weight() const noexcept = 0;
         virtual size weight() const = 0;
         virtual void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) = 0;
-        virtual bool has_minimum_size() const = 0;
+        virtual bool has_minimum_size() const noexcept = 0;
+        virtual bool is_minimum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size minimum_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) = 0;
-        virtual bool has_maximum_size() const = 0;
+        virtual bool has_maximum_size() const noexcept = 0;
+        virtual bool is_maximum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size maximum_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) = 0;
-        virtual bool has_fixed_size() const = 0;
+        virtual bool has_fixed_size() const noexcept = 0;
         virtual size fixed_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) = 0;
-        virtual bool has_transformation() const = 0;
+        virtual bool has_transformation() const noexcept = 0;
         virtual mat33 const& transformation(bool aCombineAncestorTransformations = false) const = 0;
         virtual void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) = 0;
     public:
-        virtual bool has_padding() const = 0;
+        virtual bool has_padding() const noexcept = 0;
         virtual neogfx::padding padding() const = 0;
         virtual void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) = 0;
+    protected:
+        virtual point unconstrained_origin() const = 0;
+        virtual point unconstrained_position() const = 0;
         // helpers
     public:
         size apply_fixed_size(size const& aResult) const
@@ -301,22 +310,54 @@ namespace neogfx
         }
     };
 
-    struct size_hint
+    class i_size_hint
     {
-        std::string primaryHint;
-        std::string secondaryHint;
+    public:
+        typedef i_size_hint abstract_type;
+    public:
+        virtual ~i_size_hint() = default;
+    public:
+        virtual i_string const& primary_hint() const = 0;
+        virtual i_string const& secondary_hint() const = 0;
+    };
 
+    class size_hint : public i_size_hint
+    {
+    public:
+        size_hint(i_size_hint const& aOther) :
+            iPrimaryHint{ aOther.primary_hint() },
+            iSecondaryHint{ aOther.secondary_hint() }
+        {
+        }
+        size_hint(string const& aPrimaryHint = {}, string const& aSecondaryHint = {}) :
+            iPrimaryHint{ aPrimaryHint },
+            iSecondaryHint{ aSecondaryHint }
+        {
+        }
+    public:
         operator bool() const
         {
-            return !primaryHint.empty() || !secondaryHint.empty();
+            return !iPrimaryHint.empty() || !iSecondaryHint.empty();
         }
         bool operator==(const size_hint& aOther) const
         {
-            return primaryHint == aOther.primaryHint && secondaryHint == aOther.secondaryHint;
+            return iPrimaryHint == aOther.iPrimaryHint && iSecondaryHint == aOther.iSecondaryHint;
         }
         bool operator!=(const size_hint& aOther) const
         {
             return !(*this == aOther);
         }
+    public:
+        string const& primary_hint() const override
+        {
+            return iPrimaryHint;
+        }
+        string const& secondary_hint() const override
+        {
+            return iSecondaryHint;
+        }
+    private:
+        string iPrimaryHint;
+        string iSecondaryHint;
     };
 }

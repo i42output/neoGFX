@@ -79,6 +79,6 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<basic_size<length>> iButtonImageExtents;
+        neolib::optional<basic_size<length>> iButtonImageExtents;
     };
 }

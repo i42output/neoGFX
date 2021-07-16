@@ -53,81 +53,32 @@ namespace neogfx
         header_view& iParent;
     };
 
-    class header_view::updater : public neolib::callback_timer
-    {
-    public:
-        updater(header_view& aParent) :
-            neolib::callback_timer{ service<i_async_task>(), [this, &aParent](neolib::callback_timer&)
-            {
-                destroyed_flag destroyed{ *this };
-                destroyed_flag surfaceDestroyed{ aParent.surface() };
-                if (destroyed || surfaceDestroyed)
-                    return;
-                if (!aParent.has_presentation_model())
-                {
-                    again();
-                    return;
-                }
-                for (auto& sw : aParent.iSectionWidths)
-                {
-                    sw.calculated = 0.0;
-                    sw.max = 0.0;
-                }
-                if (iRow == 0)
-                    aParent.update_buttons();
-                uint64_t since = neolib::thread::program_elapsed_ms();
-                event_processing_context epc{ service<i_async_task>(), "neogfx::header_view::updater" };
-                graphics_context gc{ aParent, graphics_context::type::Unattached };
-                for (uint32_t c = 0; c < 1000 && iRow < aParent.presentation_model().rows(); ++c, ++iRow)
-                {
-                    aParent.update_from_row(iRow, gc);
-                    if (c % 25 == 0 && neolib::thread::program_elapsed_ms() - since > 20)
-                    {
-                        aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
-                        service<i_app>().process_events(epc);
-                        if (destroyed || surfaceDestroyed)
-                            return;
-                        since = neolib::thread::program_elapsed_ms();
-                    }
-                }
-                if (iRow == aParent.presentation_model().rows())
-                    aParent.iOwner.header_view_updated(aParent, header_view_update_reason::FullUpdate);
-                else
-                    again();
-            }, std::chrono::milliseconds{ 10 } },
-            iRow{ 0 }
-        {
-        }
-        ~updater()
-        {
-            cancel();
-        }
-        uint32_t iRow;
-    };
-
     header_view::header_view(i_header_view_owner& aOwner, header_view_type aType) :
-        splitter{ splitter_type::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_type::Horizontal : splitter_type::Vertical) },
+        splitter{ splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false }
+        iExpandLastColumn{ false },
+        iUpdateNeeded{ false }
     {
         init();
     }
 
     header_view::header_view(i_widget& aParent, i_header_view_owner& aOwner, header_view_type aType) :
-        splitter{ aParent, splitter_type::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_type::Horizontal : splitter_type::Vertical) },
+        splitter{ aParent, splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false }
+        iExpandLastColumn{ false },
+        iUpdateNeeded{ false }
     {
         init();
     }
 
     header_view::header_view(i_layout& aLayout, i_header_view_owner& aOwner, header_view_type aType) :
-        splitter{ aLayout, splitter_type::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_type::Horizontal : splitter_type::Vertical) },
+        splitter{ aLayout, splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false }
+        iExpandLastColumn{ false },
+        iUpdateNeeded{ false }
     {
         init();
     }
@@ -170,12 +121,8 @@ namespace neogfx
             return;
         iModel = aModel;
         if (has_presentation_model())
-        {
-            iSectionWidths.resize(presentation_model().columns());
-            presentation_model().set_item_model(model());
-        }
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+             presentation_model().set_item_model(model());
+        request_full_update();
         update();
     }
 
@@ -234,47 +181,39 @@ namespace neogfx
         if (iExpandLastColumn != aExpandLastColumn)
         {
             iExpandLastColumn = aExpandLastColumn;
-            iUpdater.reset();
-            iUpdater.reset(new updater(*this));
+            request_full_update();
         }
     }
 
     void header_view::column_info_changed(item_presentation_model_index::column_type)
     {
-        update_buttons();
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     void header_view::item_model_changed(const i_item_model&)
     {
-        iSectionWidths.resize(presentation_model().columns());
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     void header_view::item_added(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
         /* todo : optimize (don't do full update) */
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     void header_view::item_changed(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
         /* todo : optimize (don't do full update) */
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     void header_view::item_removed(item_presentation_model_index const&)
     {
         iSectionWidths.resize(presentation_model().columns());
         /* todo : optimize (don't do full update) */
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     void header_view::items_sorting()
@@ -283,8 +222,7 @@ namespace neogfx
 
     void header_view::items_sorted()
     {
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     void header_view::items_filtering()
@@ -293,8 +231,7 @@ namespace neogfx
 
     void header_view::items_filtered()
     {
-        iUpdater.reset();
-        iUpdater.reset(new updater(*this));
+        request_full_update();
     }
 
     dimension header_view::separator_width() const
@@ -394,21 +331,28 @@ namespace neogfx
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
             if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
-            {
-                iUpdater.reset();
-                iUpdater.reset(new updater(*this));
-            }
+                request_full_update();
         });
+        iUpdater.emplace(service<i_async_task>(), 
+            [this](neolib::callback_timer& aTimer) 
+        { 
+            aTimer.again();
+            if (iUpdateNeeded)
+                full_update(); 
+        }, std::chrono::milliseconds{ 20 }, true);
     }
 
     void header_view::update_buttons()
     {
         if (!has_presentation_model())
             return;
-        for (auto& sw : iSectionWidths)
-            sw.calculated = 0.0;
         layout().set_spacing(size{ separator_width() }, false);
         iSectionWidths.resize(presentation_model().columns());
+        for (auto& sw : iSectionWidths)
+        {
+            sw.calculated = 0.0;
+            sw.max = 0.0;
+        }
         while (layout().count() > presentation_model().columns() + (expand_last_column() ? 0 : 1))
             layout().remove_at(layout().count() - 1);
         while (layout().count() < presentation_model().columns() + (expand_last_column() ? 0 : 1))
@@ -426,7 +370,7 @@ namespace neogfx
             }
             if (i < presentation_model().columns())
             {
-                button.set_text(presentation_model().column_heading_text(i));
+                button.set_text(string{ presentation_model().column_heading_text(i) });
                 button.set_minimum_size({});
                 button.set_maximum_size({});
                 if (!expand_last_column() || i != presentation_model().columns() - 1)
@@ -496,10 +440,8 @@ namespace neogfx
             }
             else if (!expand_last_column())
             {
-                button.set_text(std::string());
-                button.set_size_policy(iType == header_view_type::Horizontal ?
-                    neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum } :
-                    neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+                button.set_text(string{});
+                button.set_size_policy(size_constraint::Expanding);
                 button.set_minimum_size(size{});
                 button.enable(false);
             }
@@ -510,6 +452,23 @@ namespace neogfx
             updated = update_section_width(col, size{ iSectionWidths[col].max }, gc) || updated;
         if (updated)
             layout_items();
+        iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
+    }
+
+    void header_view::request_full_update()
+    {
+        iUpdateNeeded = true;
+    }
+
+    void header_view::full_update()
+    {
+        if (!iUpdateNeeded)
+            return;
+        iUpdateNeeded = false;
+        update_buttons();
+        graphics_context gc{ *this, graphics_context::type::Unattached };
+        for (uint32_t row = 0; row < presentation_model().rows(); ++row)
+            update_from_row(row, gc);
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
     }
 

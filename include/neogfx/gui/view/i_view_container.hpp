@@ -29,6 +29,8 @@ namespace neogfx
 
     class i_widget;
 
+    class i_tab_container;
+
     enum class view_container_style
     {
         SDI,
@@ -47,6 +49,8 @@ namespace neogfx
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
+        virtual const i_tab_container& tab_container() const = 0;
+        virtual i_tab_container& tab_container() = 0;
         virtual const i_widget& view_stack() const = 0;
         virtual i_widget& view_stack() = 0;
     public:

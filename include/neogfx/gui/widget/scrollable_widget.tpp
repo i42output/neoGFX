@@ -136,7 +136,7 @@ namespace neogfx
     }
 
     template <typename Base>
-    void scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         bool handledVertical = false;
         bool handledHorizontal = false;
@@ -154,7 +154,9 @@ namespace neogfx
         mouse_wheel passOn = static_cast<mouse_wheel>(
             aWheel & ((handledVertical ? ~verticalSense : verticalSense) | (handledHorizontal ? ~horizontalSense : horizontalSense)));
         if (passOn != mouse_wheel::None)
-            base_type::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifiers);
+            return base_type::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifiers);
+        else
+            return true;
     }
 
     template <typename Base>

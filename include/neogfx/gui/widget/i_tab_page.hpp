@@ -27,8 +27,10 @@ namespace neogfx
 {
     class i_tab;
 
-    class i_tab_page
+    class i_tab_page : public i_reference_counted
     {
+    public:
+        typedef i_tab_page abstract_type;
     public:
         declare_event(selected)
         declare_event(deselected)

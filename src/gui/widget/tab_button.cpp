@@ -272,24 +272,27 @@ namespace neogfx
         set_selected_state(true);
     }
 
-    std::string const& tab_button::text() const
+    i_string const& tab_button::text() const
     {
         return push_button::text();
     }
 
-    void tab_button::set_text(std::string const& aText)
+    i_tab& tab_button::set_text(i_string const& aText)
     {
         push_button::set_text(aText);
+        return *this;
     }
 
-    void tab_button::set_image(const i_texture& aTexture)
+    i_tab& tab_button::set_image(const i_texture& aTexture)
     {
         push_button::set_image(aTexture);
+        return *this;
     }
 
-    void tab_button::set_image(const i_image& aImage)
+    i_tab& tab_button::set_image(const i_image& aImage)
     {
         push_button::set_image(aImage);
+        return *this;
     }
 
     const i_widget& tab_button::as_widget() const
@@ -306,7 +309,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect result = push_button::path_bounding_rect();
-        switch (container().style() & tab_container_style::TabAlignmentMask)
+        switch (container().tab_container_style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
             result.extents() += size{ 0.0, 5.0 };
@@ -341,7 +344,7 @@ namespace neogfx
         neogfx::padding result = push_button::padding();
         if (has_padding())
             return result;
-        switch (container().style() & tab_container_style::TabAlignmentMask)
+        switch (container().tab_container_style() & tab_container_style::TabAlignmentMask)
         {
         case tab_container_style::TabAlignmentTop:
             result += ceil_rasterized(neogfx::padding{ 0.5_mm, 0.5_mm, 0.5_mm, is_selected() ? 0.5_mm : 0.0_mm });
@@ -432,7 +435,7 @@ namespace neogfx
                 image_widget().set_maximum_size({});
                 image_widget().set_aspect_ratio(aspect_ratio::Keep);
             }
-            label().layout().invalidate();
+            label().update_layout();
         };
         iSink += service<i_surface_manager>().dpi_changed([this, update_image](i_surface&) { update_image(); });
         update_image();

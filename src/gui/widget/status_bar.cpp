@@ -86,13 +86,13 @@ namespace neogfx
             aTimer.again();
             auto const& keyboard = service<i_keyboard>();
             insertLock->set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
-                "Insert" : std::string{});
+                "Insert" : string{});
             capsLock->set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
-                "CAP" : std::string{});
+                "CAP" : string{});
             numLock->set_text((keyboard.locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock ?
-                "NUM" : std::string{});
+                "NUM" : string{});
             scrlLock->set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
-                "SCRL" : std::string{});
+                "SCRL" : string{});
         }, std::chrono::milliseconds{ 100 });
     }
 
@@ -291,12 +291,14 @@ namespace neogfx
         iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetContainer.set_padding(neogfx::padding{});
+        iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetLayout.set_padding(neogfx::padding{});
+        iNormalWidgetLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iPermanentWidgetLayout.set_padding(neogfx::padding{});
         auto update_size_grip = [this](style_aspect)
         {
             auto ink1 = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));
-            ink1 = ink1.shaded(0x40);
+            ink1 = ink1.shaded(0x60);
             auto ink2 = ink1.darker(0x30);
             if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
             {
@@ -364,7 +366,7 @@ namespace neogfx
         iSink += service<i_surface_manager>().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
         iSink += service<i_app>().current_style_changed(update_size_grip);
         update_size_grip(style_aspect::Color);
-        iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets();    });
+        iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets(); });
         iSink += service<i_app>().help().help_deactivated([this](const i_help_source&) { update_widgets(); });
         update_widgets();
     }
@@ -372,7 +374,7 @@ namespace neogfx
     void status_bar::update_widgets()
     {
         bool showMessage = (iStyle & style::DisplayMessage) == style::DisplayMessage && have_message();
-        iMessageWidget.set_text(have_message() ? message() : std::string{});
+        iMessageWidget.set_text(have_message() ? string{ message() } : string{});
         iMessageWidget.show(showMessage);
         iIdleWidget.show(!showMessage);
         iNormalWidgetContainer.show(!showMessage);

@@ -108,12 +108,12 @@ namespace neogfx
         virtual i_action& action_delete() = 0;
         virtual i_action& action_select_all() = 0;
         using i_action_container::add_action;
-        virtual i_action& add_action(std::string const& aText) = 0;
-        virtual i_action& add_action(std::string const& aText, std::string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) = 0;
-        virtual i_action& add_action(std::string const& aText, const i_texture& aImage) = 0;
-        virtual i_action& add_action(std::string const& aText, const i_image& aImage) = 0;
+        virtual i_action& add_action(i_string const& aText) = 0;
+        virtual i_action& add_action(i_string const& aText, i_string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Normal) = 0;
+        virtual i_action& add_action(i_string const& aText, const i_texture& aImage) = 0;
+        virtual i_action& add_action(i_string const& aText, const i_image& aImage) = 0;
         virtual void remove_action(i_action& aAction) = 0;
-        virtual i_action& find_action(std::string const& aText) = 0;
+        virtual i_action& find_action(i_string const& aText) = 0;
         virtual void add_mnemonic(i_mnemonic& aMnemonic) = 0;
         virtual void remove_mnemonic(i_mnemonic& aMnemonic) = 0;
     public:

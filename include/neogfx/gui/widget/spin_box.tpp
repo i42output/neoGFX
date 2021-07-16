@@ -111,12 +111,15 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
+        {
             do_step(aDelta.dy > 0.0 ? step_direction::Up : step_direction::Down);
+            return true;
+        }
         else
-            base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            return base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
     }
 
     template <typename T>
@@ -137,7 +140,7 @@ namespace neogfx
     }
 
     template <typename T>
-    std::string const& basic_spin_box<T>::text()
+    i_string const& basic_spin_box<T>::text()
     {
         return iText;
     }
@@ -213,7 +216,7 @@ namespace neogfx
 
         iSink += iTextBox.TextChanged([this]()
         {
-            auto text = iTextBox.text();
+            auto const& text = iTextBox.text();
             auto result = string_to_value(text);
             if (result != std::nullopt)
             {
@@ -407,7 +410,7 @@ namespace neogfx
         std::string text;
         try { text = boost::str(boost::format(iFormat) % minimum()); } catch (...) {}
         if (text_box().text().empty())
-            text_box().set_text(text);
+            text_box().set_text(string{ text });
         ConstraintsChanged.trigger();
         if (iValue < minimum())
             set_value(minimum());
@@ -458,12 +461,12 @@ namespace neogfx
         {
             iValue = aValue;
             if (!iDontSetText)
-                iTextBox.set_text(value_to_string());
+                iTextBox.set_text(string{ value_to_string() });
             if (aNotify && (!text().empty() || value() != minimum()))
                 ValueChanged.trigger();
         }
         else if (!iDontSetText && iTextBox.text().empty())
-            iTextBox.set_text(value_to_string());
+            iTextBox.set_text(string{ value_to_string() });
     }
 
     template <typename T>

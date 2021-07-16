@@ -181,7 +181,7 @@ namespace neogfx
         return result;
     }
 
-    bool spacer::has_padding() const
+    bool spacer::has_padding() const noexcept
     {
         return false;
     }
@@ -210,6 +210,10 @@ namespace neogfx
 
     void spacer::layout_as(const point&, const size& aSize)
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << "spacer::layout_as(..., " << aSize << ")" << endl;
+#endif
         set_extents(aSize);
     }
 

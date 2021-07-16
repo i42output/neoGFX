@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
+    tab_bar::tab_bar(i_tab_container& aContainer, bool aClosableTabs, neogfx::tab_container_style aStyle) :
         framed_scrollable_widget{ scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
         set_padding(neogfx::padding{});
@@ -34,7 +34,7 @@ namespace neogfx
         set_background_opacity(1.0);
     }
 
-    tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
+    tab_bar::tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs, neogfx::tab_container_style aStyle) :
         framed_scrollable_widget{ aParent, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
         set_padding(neogfx::padding{});
@@ -42,7 +42,7 @@ namespace neogfx
         set_background_opacity(1.0);
     }
 
-    tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs, tab_container_style aStyle) :
+    tab_bar::tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs, neogfx::tab_container_style aStyle) :
         framed_scrollable_widget{ aLayout, scrollbar_style::Scroller, frame_style::NoFrame }, iContainer{ aContainer }, iClosableTabs{ aClosableTabs }, iStyle{ aStyle }
     {
         set_padding(neogfx::padding{});
@@ -50,12 +50,12 @@ namespace neogfx
         set_background_opacity(1.0);
     }
 
-    tab_container_style tab_bar::style() const
+    tab_container_style tab_bar::tab_container_style() const
     {
         return iStyle;
     }
     
-    void tab_bar::set_style(tab_container_style aStyle)
+    void tab_bar::set_tab_container_style(neogfx::tab_container_style aStyle)
     {
         if (iStyle != aStyle)
         {
@@ -63,6 +63,27 @@ namespace neogfx
             update_placement();
             StyleChanged.trigger();
         }
+    }
+
+    void tab_bar::set_tab_icon_size(const size& aIconSize)
+    {
+        if (iIconSize != aIconSize)
+        {
+            iIconSize = aIconSize;
+            for (auto& t : iTabs)
+            {
+                t->set_image_extents(iIconSize);
+            }
+        }
+    }
+
+    size_policy tab_bar::size_policy() const
+    {
+        if (has_size_policy())
+            return framed_scrollable_widget::size_policy();
+        return (tab_container_style() & neogfx::tab_container_style::TabOrientationHorizontal) == neogfx::tab_container_style::TabOrientationHorizontal ?
+            neogfx::size_policy{ size_constraint::MinimumExpanding, size_constraint::Minimum } : 
+            neogfx::size_policy{ size_constraint::Minimum, size_constraint::MinimumExpanding };
     }
 
     size tab_bar::minimum_size(optional_size const& aAvailableSpace) const
@@ -126,16 +147,18 @@ namespace neogfx
         return const_cast<i_tab&>(to_const(*this).selected_tab());
     }
 
-    i_tab& tab_bar::add_tab(std::string const& aTabText)
+    i_tab& tab_bar::add_tab(i_string const& aTabText)
     {
         iTabs.push_back(std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
+        iTabs.back()->set_image_extents(iIconSize);
         return *iTabs.back();
     }
 
-    i_tab& tab_bar::insert_tab(tab_index aTabIndex, std::string const& aTabText)
+    i_tab& tab_bar::insert_tab(tab_index aTabIndex, i_string const& aTabText)
     {
-        iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
-        return *iTabs.back();
+        auto result = iTabs.insert(iTabs.begin() + aTabIndex, std::make_unique<tab_button>(layout(), *this, aTabText, iClosableTabs));
+        (**result).set_image_extents(iIconSize);
+        return **result;
     }
 
     void tab_bar::remove_tab(tab_index aTabIndex)
@@ -286,10 +309,10 @@ namespace neogfx
 
     void tab_bar::update_placement()
     {
-        switch (style() & tab_container_style::TabAlignmentMask)
+        switch (tab_container_style() & neogfx::tab_container_style::TabAlignmentMask)
         {
-        case tab_container_style::TabAlignmentTop:
-        case tab_container_style::TabAlignmentBottom:
+        case neogfx::tab_container_style::TabAlignmentTop:
+        case neogfx::tab_container_style::TabAlignmentBottom:
             if (iHorizontalLayout == std::nullopt)
             {
                 iHorizontalLayout.emplace(*this);
@@ -299,8 +322,8 @@ namespace neogfx
             if (iVerticalLayout != std::nullopt)
                 iVerticalLayout = std::nullopt;
             break;
-        case tab_container_style::TabAlignmentLeft:
-        case tab_container_style::TabAlignmentRight:
+        case neogfx::tab_container_style::TabAlignmentLeft:
+        case neogfx::tab_container_style::TabAlignmentRight:
             if (iVerticalLayout == std::nullopt)
             {
                 iVerticalLayout.emplace(*this);
@@ -311,25 +334,25 @@ namespace neogfx
                 iHorizontalLayout = std::nullopt;
             break;
         }
-        switch (style() & tab_container_style::TabAlignmentMask)
+        switch (tab_container_style() & neogfx::tab_container_style::TabAlignmentMask)
         {
-        case tab_container_style::TabAlignmentTop:
+        case neogfx::tab_container_style::TabAlignmentTop:
             layout().set_alignment(alignment::Bottom);
             break;
-        case tab_container_style::TabAlignmentBottom:
+        case neogfx::tab_container_style::TabAlignmentBottom:
             layout().set_alignment(alignment::Top);
             break;
-        case tab_container_style::TabAlignmentLeft:
+        case neogfx::tab_container_style::TabAlignmentLeft:
             layout().set_alignment(alignment::Right);
             break;
-        case tab_container_style::TabAlignmentRight:
+        case neogfx::tab_container_style::TabAlignmentRight:
             layout().set_alignment(alignment::Left);
             break;
         }
         layout().set_padding(neogfx::padding{});
         layout().set_spacing(size{});
         for (auto& tab : iTabs)
-            tab.get()->layout().invalidate();
+            tab.get()->update_layout();
         update_layout();
     }
 }

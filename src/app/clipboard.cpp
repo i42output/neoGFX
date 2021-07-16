@@ -60,9 +60,9 @@ namespace neogfx
         return iSystemClipboard.has_text();
     }
 
-    void clipboard::text(i_string& aResult) const
+    i_string const& clipboard::text() const
     {
-        aResult = iSystemClipboard.text();
+       return iSystemClipboard.text();
     }
 
     void clipboard::set_text(i_string const& aText)

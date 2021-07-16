@@ -25,11 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     menu_item::menu_item(i_action& aAction) : 
-        iContents{ std::shared_ptr<i_action>{std::shared_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
+        iContents{ ref_ptr<i_action>{ ref_ptr<i_action>{}, &aAction } }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }
 
-    menu_item::menu_item(std::shared_ptr<i_action> aAction) : 
+    menu_item::menu_item(i_ref_ptr<i_action> const& aAction) : 
         iContents{ aAction }, iOpenAnySubMenu{ true }, iWidget{ nullptr }
     {
     }

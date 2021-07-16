@@ -30,8 +30,8 @@ namespace neogfx
     public:
         virtual ~i_title_bar() = default;
     public:
-        virtual std::string const& title() const = 0;
-        virtual void set_title(std::string const& aTitle) = 0;
+        virtual i_string const& title() const = 0;
+        virtual void set_title(i_string const& aTitle) = 0;
         // todo: get/set icon
     public:
     };

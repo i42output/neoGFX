@@ -32,10 +32,10 @@ namespace neogfx
     class i_text_document : public i_document
     {
     public:
-        virtual std::string plain_text() const = 0;
-        virtual bool set_plain_text(std::string const& aPlainText) = 0;
-        virtual std::string rich_text(rich_text_format aFormat = rich_text_format::Html) const = 0;
-        virtual bool set_rich_text(std::string const& aRichText, rich_text_format aFormat = rich_text_format::Html) = 0;
+        virtual i_string const& plain_text() const = 0;
+        virtual bool set_plain_text(i_string const& aPlainText) = 0;
+        virtual i_string const& rich_text(rich_text_format aFormat = rich_text_format::Html) const = 0;
+        virtual bool set_rich_text(i_string const& aRichText, rich_text_format aFormat = rich_text_format::Html) = 0;
     public:
         virtual void paste_plain_text() = 0;
         virtual void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) = 0;

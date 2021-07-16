@@ -26,8 +26,10 @@
 
 namespace neogfx
 {
-    class action : public i_action
+    class action : public reference_counted<i_action>
     {
+    public:
+        typedef i_action abstract_type;
     public:
         define_declared_event(Triggered, triggered)
         define_declared_event(Hovered, hovered)
@@ -109,7 +111,7 @@ namespace neogfx
         public:
             action_ref(i_action_container& aContainer)
             {
-                aContainer.add_action(std::make_shared<action>());
+                aContainer.add_action(make_ref<action>());
             }
             action_ref(i_action_container& aContainer, i_action& aAction)
             {

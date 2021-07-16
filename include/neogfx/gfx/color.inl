@@ -221,6 +221,12 @@ namespace neogfx
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
+    inline bool basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::operator==(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aOther) const
+    {
+        return base_type::operator==(aOther);
+    }
+
+    template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline bool basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::operator<(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aOther) const
     {
         hsv_color left = to_hsv();

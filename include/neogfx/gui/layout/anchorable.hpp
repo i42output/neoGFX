@@ -40,7 +40,7 @@ namespace neogfx
         }
     public:
         using base_type::anchor_to;
-        void anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
+        i_anchor& anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             auto lhsAnchor = anchors().find(aLhsAnchor);
             auto rhsAnchor = aRhs.anchors().find(aRhsAnchor);
@@ -48,7 +48,8 @@ namespace neogfx
                 throw anchor_not_found(aLhsAnchor);
             if (rhsAnchor == aRhs.anchors().end())
                 throw anchor_not_found(aRhsAnchor);
-            lhsAnchor->second()->constrain(*rhsAnchor->second(), aLhsFunction, aRhsFunction);
+            rhsAnchor->second()->constrain(*lhsAnchor->second(), aLhsFunction, aRhsFunction);
+            return *lhsAnchor->second();
         }
         // state
     public:

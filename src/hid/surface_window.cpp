@@ -502,7 +502,9 @@ namespace neogfx
     void surface_window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
-        if (w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event())))
+        if (w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event())) &&
+            !w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers) &&
+            &w.surface() == this)
             widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
     }
 
@@ -724,9 +726,9 @@ namespace neogfx
             as_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
     }
 
-    void surface_window::native_window_text_input(std::string const& aText)
+    void surface_window::native_window_text_input(i_string const& aText)
     {
-        auto send = [this](std::string const& aText)
+        auto send = [this](i_string const& aText)
         {
             auto can_consume = [&aText](i_widget& aWidget)
             {
@@ -754,13 +756,13 @@ namespace neogfx
         {
             char16_t utf16[] = { static_cast<char16_t>(*iSurrogatePairPart), static_cast<char16_t>(neolib::utf8_to_utf32(aText)[0]) };
             iSurrogatePairPart = std::nullopt;
-            send(neolib::utf16_to_utf8(std::u16string(&utf16[0], 2)));
+            send(to_string(neolib::utf16_to_utf8(std::u16string(&utf16[0], 2))));
         }
         else
             send(aText);
     }
 
-    void surface_window::native_window_sys_text_input(std::string const& aText)
+    void surface_window::native_window_sys_text_input(i_string const& aText)
     {
         if (as_window().has_focused_widget())
         {
@@ -783,7 +785,7 @@ namespace neogfx
         return widgetUnderMouse.mouse_cursor();
     }
 
-    void surface_window::native_window_title_text_changed(std::string const& aTitleText)
+    void surface_window::native_window_title_text_changed(i_string const& aTitleText)
     {
         as_window().set_title_text(aTitleText);
     }

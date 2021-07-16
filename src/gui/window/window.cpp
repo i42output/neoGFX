@@ -77,10 +77,27 @@ namespace neogfx
         }
     }
 
+    pause_rendering::pause_rendering(pause_rendering&& aOther) :
+        iSurface{ aOther.iSurface },
+        iSurfaceDestroyed{ aOther.iSurfaceDestroyed },
+        iWindowDestroyed{ aOther.iWindowDestroyed }
+    {
+        aOther.iSurface = nullptr;
+    }
+
     pause_rendering::~pause_rendering()
     {
         if (iSurface != nullptr && !*iWindowDestroyed && !*iSurfaceDestroyed)
             iSurface->resume_rendering();
+    }
+
+    pause_rendering& pause_rendering::operator=(pause_rendering&& aOther)
+    {
+        iSurface = aOther.iSurface;
+        aOther.iSurface = nullptr;
+        iSurfaceDestroyed = std::move(aOther.iSurfaceDestroyed);
+        iWindowDestroyed = std::move(aOther.iWindowDestroyed);
+        return *this;
     }
 
     class window::client : public framed_scrollable_widget
@@ -199,6 +216,7 @@ namespace neogfx
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },
         iPlacement{ aPlacement },
+        iCentering{ false },
         iClosed{ false },
         iReadyToRender{ (aStyle & window_style::InitiallyRenderable) == window_style::InitiallyRenderable },
         iTitleText{ aWindowTitle ? *aWindowTitle : service<i_app>().name() },
@@ -493,6 +511,9 @@ namespace neogfx
     void window::layout_items_completed()
     {
         base_type::layout_items_completed();
+        if (has_native_window() && !native_window().placement_changed_explicitly() && 
+            (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
+            center_on_parent((style() & window_style::Resize) != window_style::Resize);
         if (iEnteredWidget != nullptr)
         {
             i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());
@@ -663,14 +684,17 @@ namespace neogfx
 
     void window::center_on_parent(bool aSetMinimumSize)
     {
+        if (iCentering)
+            return;
+        neolib::scoped_flag sf{ iCentering };
         if (has_parent_window())
         {
             layout_items();
             if (aSetMinimumSize)
                 resize(minimum_size());
-            rect desktopRect{ window_manager().desktop_rect(*this) };
-            rect parentRect{ window_manager().window_rect(parent_window()) };
-            rect ourRect{ window_manager().window_rect(*this) };
+            rect const desktopRect{ window_manager().desktop_rect(*this) };
+            rect const parentRect{ window_manager().window_rect(parent_window()) };
+            rect const ourRect{ window_manager().window_rect(*this) };
             point position = point{ (parentRect.extents() - ourRect.extents()) / 2.0 } + parentRect.top_left();
             if (position.x < 0.0)
                 position.x = 0.0;
@@ -787,12 +811,12 @@ namespace neogfx
         return base_type::scrolling_disposition(aChildWidget);
     }
 
-    std::string const& window::title_text() const
+    i_string const& window::title_text() const
     {
         return iTitleText;
     }
 
-    void window::set_title_text(std::string const& aTitleText)
+    void window::set_title_text(i_string const& aTitleText)
     {
         if (iTitleText != aTitleText)
         {
@@ -1125,7 +1149,7 @@ namespace neogfx
             for (std::size_t i = 0; i < window_manager().window_count();)
             {
                 i_window& w = window_manager().window(i);
-                if (!w.dismissed() && is_owner_of(w) && w.can_dismiss(aClickedWidget))
+                if (w.as_widget().visible() && !w.dismissed() && is_owner_of(w) && w.can_dismiss(aClickedWidget))
                 {
                     if (w.dismissal_type() == CloseOnDismissal)
                         i = 0;

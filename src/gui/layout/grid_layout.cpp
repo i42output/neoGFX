@@ -206,14 +206,25 @@ namespace neogfx
         throw not_a_layout();
     }
 
+    void grid_layout::remove_all()
+    {
+        layout::remove_all();
+        iRowLayout.remove_all();
+        iRows.clear();
+        iCells.clear();
+        iDimensions = {};
+        iCursor = {};
+        iSpans.clear();
+    }
+
     void grid_layout::invalidate(bool aDeferLayout)
     {
         if (!is_alive())
             return;
-        layout::invalidate(aDeferLayout);
         iRowLayout.invalidate(aDeferLayout);
         for (auto& row : iRows)
             row->invalidate(aDeferLayout);
+        layout::invalidate(aDeferLayout);
     }
 
     size grid_layout::minimum_size(optional_size const& aAvailableSpace) const
@@ -447,7 +458,10 @@ namespace neogfx
         iCursor = cell_coordinates{};
         layout::remove(aItem);
         if (count() == 0)
-            iRows.clear();
+        {
+            auto temp = iRows.back();
+            iRows.pop_back();
+        }
     }
 
     uint32_t grid_layout::visible_rows() const
@@ -590,6 +604,7 @@ namespace neogfx
         iRowLayout.set_padding(neogfx::padding{});
         iRowLayout.set_spacing(spacing());
         iRowLayout.set_always_use_spacing(true);
+        iRowLayout.set_size_policy(neogfx::size_constraint::Expanding);
 
         set_alive();
         invalidate();

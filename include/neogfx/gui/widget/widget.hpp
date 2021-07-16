@@ -121,6 +121,7 @@ namespace neogfx
         i_layout& layout() override;
         bool can_defer_layout() const override;
         bool is_managing_layout() const override;
+        optional<neogfx::layout_reason>& layout_reason() override;
         void layout_items(bool aDefer = false) override;
         void layout_items_started() override;
         bool layout_items_in_progress() const override;
@@ -149,7 +150,6 @@ namespace neogfx
         bool has_logical_coordinate_system() const override;
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) override;
-        point origin() const override;
         rect non_client_rect() const override;
         rect client_rect(bool aIncludePadding = true) const override;
         void move(const point& aPosition) override;
@@ -236,8 +236,9 @@ namespace neogfx
         void non_client_release_capture() override;
         void captured() override;
         void capture_released() override;
+        bool has_focus_policy() const override;
         neogfx::focus_policy focus_policy() const override;
-        void set_focus_policy(neogfx::focus_policy aFocusPolicy) override;
+        void set_focus_policy(const optional_focus_policy& aFocusPolicy) override;
         bool can_set_focus(focus_reason aFocusReason) const override;
         bool has_focus() const override;
         bool child_has_focus() const override;
@@ -253,7 +254,7 @@ namespace neogfx
         bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const override;
         void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) override;
         neogfx::mouse_event_location mouse_event_location() const override;
-        void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
@@ -265,8 +266,8 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(std::string const& aText) override;
-        bool sys_text_input(std::string const& aText) override;
+        bool text_input(i_string const& aText) override;
+        bool sys_text_input(i_string const& aText) override;
     public:
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
@@ -284,8 +285,6 @@ namespace neogfx
         using base_type::is_descendent_of;
         using base_type::is_sibling_of;
         using base_type::remove;
-    public:
-        using base_type::layout_root;
     public:
         using base_type::to_window_coordinates;
         using base_type::to_client_coordinates;
@@ -320,12 +319,11 @@ namespace neogfx
         i_widget* iLinkBefore;
         i_widget* iLinkAfter;
         i_layout* iParentLayout;
+        bool iLayoutPending;
         uint32_t iLayoutInProgress;
+        optional<neogfx::layout_reason> iLayoutReason;
         ref_ptr<i_layout> iLayout;
-        class layout_timer;
-        std::unique_ptr<layout_timer> iLayoutTimer;
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
-        mutable optional_point iOrigin;
         optional_point iCapturePosition;
         int32_t iLayer;
         std::optional<int32_t> iRenderLayer;
@@ -334,7 +332,7 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)
         define_property(property_category::hard_geometry, bool, Visible, visible, true)
         define_property(property_category::other_appearance, bool, Enabled, enabled, true)
-        define_property(property_category::other, neogfx::focus_policy, FocusPolicy, focus_policy, neogfx::focus_policy::NoFocus)
+        define_property(property_category::other, optional_focus_policy, FocusPolicy, focus_policy)
         define_property(property_category::other_appearance, double, Opacity, opacity, 1.0)
         define_property(property_category::other_appearance, optional<double>, BackgroundOpacity, background_opacity)
         define_property(property_category::other_appearance, optional<neogfx::palette>, Palette, palette)

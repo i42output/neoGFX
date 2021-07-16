@@ -250,7 +250,8 @@ namespace neogfx
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
-                surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
+                if (!mouse.grabber().mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers()))
+                    surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
                 surface_window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
@@ -278,7 +279,8 @@ namespace neogfx
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
-                surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
+                if (!mouse.grabber().mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers()))
+                    surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
                 surface_window().native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
@@ -320,17 +322,17 @@ namespace neogfx
                 }
                 break;
             case keyboard_event_type::TextInput:
-                if (!keyboard.grabber().text_input(keyboardEvent.text()))
+                if (!keyboard.grabber().text_input(string{ keyboardEvent.text() }))
                 {
                     keyboard.text_input().trigger(keyboardEvent.text());
-                    surface_window().native_window_text_input(keyboardEvent.text());
+                    surface_window().native_window_text_input(string{ keyboardEvent.text() });
                 }
                 break;
             case keyboard_event_type::SysTextInput:
-                if (!keyboard.grabber().sys_text_input(keyboardEvent.text()))
+                if (!keyboard.grabber().sys_text_input(string{ keyboardEvent.text() }))
                 {
                     keyboard.sys_text_input().trigger(keyboardEvent.text());
-                    surface_window().native_window_sys_text_input(keyboardEvent.text());
+                    surface_window().native_window_sys_text_input(string{ keyboardEvent.text() });
                 }
                 break;
             default:
@@ -358,12 +360,12 @@ namespace neogfx
         return surface_window().native_window_rendering_priority();
     }
 
-    std::string const& native_window::title_text() const
+    i_string const& native_window::title_text() const
     {
         return iTitleText;
     }
 
-    void native_window::set_title_text(std::string const& aTitleText)
+    void native_window::set_title_text(i_string const& aTitleText)
     {
         iTitleText = aTitleText;
     }

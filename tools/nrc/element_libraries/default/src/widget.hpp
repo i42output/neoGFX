@@ -47,7 +47,7 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            emit("  %1% %2%;\n", type_name(), id());
+            emit("  %1%<> %2%;\n", type_name(), id());
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override

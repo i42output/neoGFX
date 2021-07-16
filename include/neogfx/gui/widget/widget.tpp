@@ -23,6 +23,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/layout/i_async_layout.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/i_layout_item_cache.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
@@ -31,19 +32,6 @@
 namespace neogfx
 {
     template <typename Interface>
-    class widget<Interface>::layout_timer : public pause_rendering, neolib::callback_timer
-    {
-    public:
-        layout_timer(i_window& aWindow, i_async_task& aIoTask, std::function<void(callback_timer&)> aCallback) :
-            pause_rendering{ aWindow }, neolib::callback_timer{ aIoTask, aCallback, std::chrono::seconds{} }
-        {
-        }
-        ~layout_timer()
-        {
-        }
-    };
-
-    template <typename Interface>
     widget<Interface>::widget() :
         iSingular{ false },
         iParent{ nullptr },
@@ -51,6 +39,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
     {
@@ -66,6 +55,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
     {
@@ -82,6 +72,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
     {
@@ -110,9 +101,18 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::property_changed(i_property& aProperty)
     {
-        static auto invalidate_layout = [](i_widget& self) { if (self.has_parent_layout()) self.parent_layout().invalidate(); };
-        static auto invalidate_canvas = [](i_widget& self) { self.update(true); };
-        static auto invalidate_window_canvas = [](i_widget& self) { self.root().as_widget().update(true); };
+        static auto invalidate_layout = [](i_widget& self) 
+        { 
+            self.update_layout();
+        };
+        static auto invalidate_canvas = [](i_widget& self) 
+        { 
+            self.update(true); 
+        };
+        static auto invalidate_window_canvas = [](i_widget& self) 
+        { 
+            self.root().as_widget().update(true); 
+        };
         static auto ignore = [](i_widget&) {};
         static const std::unordered_map<std::type_index, std::function<void(i_widget&)>> sActions =
         {
@@ -233,10 +233,12 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::parent_changed()
     {
+        auto& self = as_widget();
+
         if (!is_root())
         {
-            iOrigin = std::nullopt;
-            as_widget().update_layout();
+            self.reset_origin();
+            self.update_layout();
         }
     }
 
@@ -663,40 +665,59 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::set_layout_owner(i_widget* aOwner)
     {
+        auto& self = as_widget();
+
         if (aOwner != nullptr && !has_parent())
         {
             auto itemIndex = parent_layout().find(*this);
             if (itemIndex == std::nullopt)
                 throw i_layout::item_not_found();
-            aOwner->add(dynamic_pointer_cast<i_widget>(as_widget().as_layout_item_cache().subject_ptr()));
+            aOwner->add(dynamic_pointer_cast<i_widget>(self.as_layout_item_cache().subject_ptr()));
         }
+    }
+
+    template <typename Interface>
+    optional<neogfx::layout_reason>& widget<Interface>::layout_reason()
+    {
+        return iLayoutReason;
     }
 
     template <typename Interface>
     void widget<Interface>::layout_items(bool aDefer)
     {
+        auto& self = as_widget();
+
         if (layout_items_in_progress())
             return;
         if (!aDefer)
         {
-            if (iLayoutTimer != nullptr)
-                iLayoutTimer.reset();
+#ifdef NEOGFX_DEBUG
+            if (debug::layoutItem == this)
+            {
+                if (!iLayoutPending)
+                    service<debug::logger>() << "widget:layout_items: layout now" << endl;
+                else
+                    service<debug::logger>() << "widget:layout_items: layout a deferred layout now" << endl;
+            }
+            iLayoutPending = false;
+#endif
+            service<i_async_layout>().validate(*this);
             if (has_layout())
             {
                 layout_items_started();
                 if (is_root() && size_policy() != size_constraint::Manual)
                 {
-                    size desiredSize = as_widget().extents();
+                    size desiredSize = self.extents();
                     switch (size_policy().horizontal_size_policy())
                     {
                     case size_constraint::Fixed:
-                        desiredSize.cx = as_widget().has_fixed_size() ? as_widget().fixed_size().cx : minimum_size(as_widget().extents()).cx;
+                        desiredSize.cx = self.has_fixed_size() ? self.fixed_size().cx : minimum_size(self.extents()).cx;
                         break;
                     case size_constraint::Minimum:
-                        desiredSize.cx = minimum_size(as_widget().extents()).cx;
+                        desiredSize.cx = minimum_size(self.extents()).cx;
                         break;
                     case size_constraint::Maximum:
-                        desiredSize.cx = maximum_size(as_widget().extents()).cx;
+                        desiredSize.cx = maximum_size(self.extents()).cx;
                         break;
                     default:
                         break;
@@ -704,13 +725,13 @@ namespace neogfx
                     switch (size_policy().vertical_size_policy())
                     {
                     case size_constraint::Fixed:
-                        desiredSize.cy = as_widget().has_fixed_size() ? as_widget().fixed_size().cy : minimum_size(as_widget().extents()).cy;
+                        desiredSize.cy = self.has_fixed_size() ? self.fixed_size().cy : minimum_size(self.extents()).cy;
                         break;
                     case size_constraint::Minimum:
-                        desiredSize.cy = minimum_size(as_widget().extents()).cy;
+                        desiredSize.cy = minimum_size(self.extents()).cy;
                         break;
                     case size_constraint::Maximum:
-                        desiredSize.cy = maximum_size(as_widget().extents()).cy;
+                        desiredSize.cy = maximum_size(self.extents()).cy;
                         break;
                     default:
                         break;
@@ -723,20 +744,16 @@ namespace neogfx
         }
         else if (can_defer_layout())
         {
-            if (has_root() && !iLayoutTimer)
+            if (!iLayoutPending)
             {
-                iLayoutTimer = std::make_unique<layout_timer>(root(), service<i_async_task>(), [this](neolib::callback_timer&)
-                {
-                    if (root().has_native_window())
-                    {
-                        auto t = std::move(iLayoutTimer);
-                        layout_items();
-                        update();
-                    }
-                });
+#ifdef NEOGFX_DEBUG
+                if (debug::layoutItem == this)
+                    service<debug::logger>() << "widget:layout_items: deferred layout" << endl;
+#endif
+                iLayoutPending = service<i_async_layout>().defer_layout(*this);
             }
         }
-        else if (as_widget().has_layout_manager())
+        else if (self.has_layout_manager())
         {
             throw widget_cannot_defer_layout();
         }
@@ -809,40 +826,26 @@ namespace neogfx
     }
 
     template <typename Interface>
-    point widget<Interface>::origin() const
-    {
-        if (iOrigin == std::nullopt)
-        {
-            if (!is_root() || root().is_nested())
-            {
-                if (has_parent())
-                    iOrigin = as_widget().position() + parent().origin();
-                else
-                    iOrigin = as_widget().position();
-            }
-            else
-                iOrigin = point{};
-        }
-        return *iOrigin;
-    }
-
-    template <typename Interface>
     void widget<Interface>::move(const point& aPosition)
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << "widget<Interface>::move(" << aPosition << ")" << endl;
 #endif // NEOGFX_DEBUG
-        as_widget().set_position(aPosition);
+        self.set_position(aPosition);
     }
 
     template <typename Interface>
     void widget<Interface>::moved()
     {
+        auto& self = as_widget();
+
         if (!is_root() || root().is_nested())
         {
             update(true);
-            iOrigin = std::nullopt;
+            self.reset_origin();
             update(true);
             for (auto& child : iChildren)
                 child->parent_moved();
@@ -853,14 +856,16 @@ namespace neogfx
             }
         }
         if (is_root())
-            root().surface().move_surface(!root().is_nested() ? as_widget().position() : as_widget().origin());
+            root().surface().move_surface(!root().is_nested() ? self.position() : self.origin());
         PositionChanged.trigger();
     }
 
     template <typename Interface>
     void widget<Interface>::parent_moved()
     {
-        iOrigin = std::nullopt;
+        auto& self = as_widget();
+
+        self.reset_origin();
         for (auto& child : iChildren)
             child->parent_moved();
         ParentPositionChanged.trigger();
@@ -869,6 +874,8 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::resize(const size& aSize)
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << "widget<Interface>::resize(" << aSize << ")" << endl;
@@ -876,7 +883,7 @@ namespace neogfx
         if (base_type::Size != units_converter(*this).to_device_units(aSize))
         {
             update(true);
-            as_widget().set_extents(aSize);
+            self.set_extents(aSize);
             if (is_root())
                 root().surface().resize_surface(aSize);
             update(true);
@@ -888,6 +895,7 @@ namespace neogfx
     void widget<Interface>::resized()
     {
         SizeChanged.trigger();
+        neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Resize };
         layout_items();
         if ((widget_type() & neogfx::widget_type::Floating) == neogfx::widget_type::Floating)
         {
@@ -899,16 +907,20 @@ namespace neogfx
     template <typename Interface>
     rect widget<Interface>::non_client_rect() const
     {
-        return rect{origin(), as_widget().extents()};
+        auto& self = as_widget();
+
+        return rect{self.origin(), self.extents()};
     }
 
     template <typename Interface>
     rect widget<Interface>::client_rect(bool aIncludePadding) const
     {
+        auto& self = as_widget();
+
         if (!aIncludePadding)
-            return rect{ padding().top_left(), as_widget().extents() - padding().size() };
+            return rect{ padding().top_left(), self.extents() - padding().size() };
         else
-            return rect{ point{}, as_widget().extents() };
+            return rect{ point{}, self.extents() };
     }
 
     template <typename Interface>
@@ -967,13 +979,15 @@ namespace neogfx
     template <typename Interface>
     size_policy widget<Interface>::size_policy() const
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << typeid(*this).name() << "::size_policy()" << endl;
 #endif // NEOGFX_DEBUG
-        if (as_widget().has_size_policy())
+        if (self.has_size_policy())
             return base_type::size_policy();
-        else if (as_widget().has_fixed_size())
+        else if (self.has_fixed_size())
             return size_constraint::Fixed;
         else
             return size_constraint::Expanding;
@@ -982,13 +996,15 @@ namespace neogfx
     template <typename Interface>
     size widget<Interface>::minimum_size(optional_size const& aAvailableSpace) const
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
         size result;
-        if (as_widget().has_minimum_size())
-            result = units_converter{ *this }.from_device_units(*base_type::MinimumSize);
+        if (self.has_minimum_size() || (base_type::Anchor_MinimumSize.active() && !base_type::Anchor_MinimumSize.calculating()))
+            result = base_type::minimum_size(aAvailableSpace);
         else if (has_layout())
         {
             result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
@@ -1009,13 +1025,15 @@ namespace neogfx
     template <typename Interface>
     size widget<Interface>::maximum_size(optional_size const& aAvailableSpace) const
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
         size result;
-        if (as_widget().has_maximum_size())
-            result = units_converter(*this).from_device_units(*base_type::MaximumSize);
+        if (self.has_maximum_size() || (base_type::Anchor_MaximumSize.active() && !base_type::Anchor_MaximumSize.calculating()))
+            result = base_type::maximum_size(aAvailableSpace);
         else if (size_policy() == size_constraint::Minimum)
             result = minimum_size(aAvailableSpace);
         else if (has_layout())
@@ -1042,22 +1060,29 @@ namespace neogfx
     template <typename Interface>
     padding widget<Interface>::padding() const
     {
-        auto const& adjustedPadding = (as_widget().has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
-        return as_widget().transformation() * units_converter(*this).from_device_units(adjustedPadding);
+        auto& self = as_widget();
+
+        auto const& adjustedPadding = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
+        return self.transformation() * units_converter(*this).from_device_units(adjustedPadding);
     }
 
     template <typename Interface>
     void widget<Interface>::layout_as(const point& aPosition, const size& aSize)
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         move(aPosition);
-        if (as_widget().extents() != aSize)
+        if (self.extents() != aSize)
             resize(aSize);
         else if (has_layout() && layout().invalidated())
+        {
+            neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Explicit };
             layout_items();
+        }
     }
 
     template <typename Interface>
@@ -1124,12 +1149,14 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::ready_to_render() const
     {
-        return iLayoutTimer == nullptr;
+        return !iLayoutPending;
     }
 
     template <typename Interface>
     void widget<Interface>::render(i_graphics_context& aGc) const
     {
+        auto& self = as_widget();
+
         if (effectively_hidden())
             return;
         if (!requires_update())
@@ -1145,8 +1172,8 @@ namespace neogfx
             service<debug::logger>() << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << endl;
 #endif // NEOGFX_DEBUG
 
-        aGc.set_extents(as_widget().extents());
-        aGc.set_origin(as_widget().origin());
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
 
         scoped_snap_to_pixel snap{ aGc };
         scoped_opacity sc{ aGc, effectively_enabled() ? opacity() : opacity() * 0.75 };
@@ -1160,7 +1187,7 @@ namespace neogfx
                 auto const& childWidget = **iterChild;
                 if ((childWidget.widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
                     continue;
-                rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - origin());
+                rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - self.origin());
                 if (intersection.empty() && !childWidget.is_root())
                     continue;
                 childWidget.render(aGc);
@@ -1171,22 +1198,22 @@ namespace neogfx
             const rect clipRect = default_clip_rect().intersection(updateRect);
 
             aGc.set_extents(client_rect().extents());
-            aGc.set_origin(origin());
+            aGc.set_origin(self.origin());
 
 #ifdef NEOGFX_DEBUG
             if (debug::renderItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << origin() << endl;
+                service<debug::logger>() << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << self.origin() << endl;
 #endif // NEOGFX_DEBUG
 
             scoped_scissor scissor(aGc, clipRect);
 
-            scoped_coordinate_system scs1(aGc, origin(), as_widget().extents(), logical_coordinate_system());
+            scoped_coordinate_system scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
             Painting.trigger(aGc);
 
             paint(aGc);
 
-            scoped_coordinate_system scs2(aGc, origin(), as_widget().extents(), logical_coordinate_system());
+            scoped_coordinate_system scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
             PaintingChildren.trigger(aGc);
 
@@ -1224,15 +1251,15 @@ namespace neogfx
             }
 
             aGc.set_extents(client_rect().extents());
-            aGc.set_origin(origin());
+            aGc.set_origin(self.origin());
 
-            scoped_coordinate_system scs3(aGc, origin(), as_widget().extents(), logical_coordinate_system());
+            scoped_coordinate_system scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
             Painted.trigger(aGc);
         }
 
-        aGc.set_extents(as_widget().extents());
-        aGc.set_origin(origin());
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
             paint_non_client_after(aGc);
@@ -1242,17 +1269,21 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::paint_non_client(i_graphics_context& aGc) const
     {
-        if (as_widget().has_background_color() || !as_widget().background_is_transparent())
-            aGc.fill_rect(update_rect(), as_widget().background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0));
+        auto& self = as_widget();
+
+        if (self.has_background_color() || !self.background_is_transparent())
+            aGc.fill_rect(update_rect(), self.background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0));
     }
 
     template <typename Interface>
     void widget<Interface>::paint_non_client_after(i_graphics_context& aGc) const
     {
+        auto& self = as_widget();
+
 #ifdef NEOGFX_DEBUG
         // todo: move to debug::layoutItem function/service
-        if (debug::layoutItem == this || debug::layoutItem != nullptr && has_layout() && debug::layoutItem->is_layout() &&
-            (debug::layoutItem == &layout() || static_cast<i_layout const*>(debug::layoutItem)->is_descendent_of(layout())))
+        if (debug::renderItem == this || debug::layoutItem == this || (debug::layoutItem != nullptr && has_layout() && debug::layoutItem->is_layout() &&
+            (debug::layoutItem == &layout() || static_cast<i_layout const*>(debug::layoutItem)->is_descendent_of(layout()))))
         {
             neogfx::font debugFont1 = service<i_app>().current_style().font().with_size(16);
             neogfx::font debugFont2 = service<i_app>().current_style().font().with_size(8);
@@ -1260,12 +1291,12 @@ namespace neogfx
             {
                 if (debug::layoutItem == this)
                 {
-                    aGc.draw_text(as_widget().position(), typeid(*this).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    aGc.draw_text(self.position(), typeid(*this).name(), debugFont1, text_appearance{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     std::ostringstream oss;
                     oss << "sizepol: " << size_policy();
                     oss << " minsize: " << minimum_size() << " maxsize: " << maximum_size();
-                    oss << " fixsize: " << (as_widget().has_fixed_size() ? as_widget().fixed_size() : optional_size{}) << " weight: " << as_widget().weight() << " extents: " << as_widget().extents();
-                    aGc.draw_text(as_widget().position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    oss << " fixsize: " << (self.has_fixed_size() ? self.fixed_size() : optional_size{}) << " weight: " << self.weight() << " extents: " << self.extents();
+                    aGc.draw_text(self.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_appearance{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
             }
             rect const nonClientRect = to_client_coordinates(non_client_rect());
@@ -1273,7 +1304,14 @@ namespace neogfx
             aGc.line_stipple_on(1.0, 0x5555);
             aGc.draw_rect(nonClientRect, pen{ color::Green, 3.0 });
             aGc.line_stipple_off();
-            if (debug::layoutItem != this || has_layout())
+            if (nonClientRect != client_rect(false))
+            {
+                aGc.draw_rect(client_rect(false), pen{ color::White, 1.0 });
+                aGc.line_stipple_on(1.0, 0x5555);
+                aGc.draw_rect(client_rect(false), pen{ color::Red, 1.0 });
+                aGc.line_stipple_off();
+            }
+            if (debug::layoutItem != nullptr && (debug::layoutItem != this || has_layout()))
             {
                 i_layout const& debugLayout = (debug::layoutItem == this ? layout() : *static_cast<i_layout const*>(debug::layoutItem));
                 if (debug::renderGeometryText)
@@ -1468,10 +1506,12 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::set_font(optional_font const& aFont)
     {
+        auto& self = as_widget();
+
         if (Font != aFont)
         {
             Font = aFont;
-            as_widget().update_layout();
+            self.update_layout();
             update(true);
         }
     }
@@ -1522,13 +1562,7 @@ namespace neogfx
                 {
                     root().release_focused_widget(root().focused_widget());
                 }
-            }
-            else
-            {
-                if (has_parent_layout())
-                    parent_layout().invalidate();
-                update(true);
-            }
+            }   
             return true;
         }
         return false;
@@ -1605,12 +1639,14 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::set_capture(capture_reason aReason, const optional_point& aPosition)
     {
+        auto& self = as_widget();
+
         if (can_capture())
         {
             switch (aReason)
             {
             case capture_reason::MouseEvent:
-                if (!as_widget().mouse_event_is_non_client())
+                if (!self.mouse_event_is_non_client())
                     surface().as_surface_window().set_capture(*this);
                 else
                     surface().as_surface_window().non_client_set_capture(*this);
@@ -1628,10 +1664,12 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::release_capture(capture_reason aReason)
     {
+        auto& self = as_widget();
+
         switch (aReason)
         {
         case capture_reason::MouseEvent:
-            if (!as_widget().mouse_event_is_non_client())
+            if (!self.mouse_event_is_non_client())
                 surface().as_surface_window().release_capture(*this);
             else
                 surface().as_surface_window().non_client_release_capture(*this);
@@ -1669,13 +1707,21 @@ namespace neogfx
     }
 
     template <typename Interface>
-    focus_policy widget<Interface>::focus_policy() const
+    bool widget<Interface>::has_focus_policy() const
     {
-        return FocusPolicy;
+        return FocusPolicy != std::nullopt;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_focus_policy(neogfx::focus_policy aFocusPolicy)
+    focus_policy widget<Interface>::focus_policy() const
+    {
+        if (has_focus_policy())
+            return *FocusPolicy;
+        return neogfx::focus_policy::NoFocus;
+    }
+
+    template <typename Interface>
+    void widget<Interface>::set_focus_policy(optional_focus_policy const& aFocusPolicy)
     {
         FocusPolicy = aFocusPolicy;
     }
@@ -1788,17 +1834,22 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
-        if (has_parent())
-            parent().mouse_wheel_scrolled(aWheel, aPosition + as_widget().position(), aDelta, aKeyModifiers);
+        auto& self = as_widget();
+
+        if (has_parent() && same_surface(parent()))
+            return parent().mouse_wheel_scrolled(aWheel, aPosition + self.position(), aDelta, aKeyModifiers);
+        return false;
     }
 
     template <typename Interface>
     void widget<Interface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
+        auto& self = as_widget();
+
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_pressed(aButton, aPosition + as_widget().position(), aKeyModifiers);
+            parent().mouse_button_pressed(aButton, aPosition + self.position(), aKeyModifiers);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
@@ -1806,8 +1857,10 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
+        auto& self = as_widget();
+
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_double_clicked(aButton, aPosition + as_widget().position(), aKeyModifiers);
+            parent().mouse_button_double_clicked(aButton, aPosition + self.position(), aKeyModifiers);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
@@ -1815,8 +1868,10 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
+        auto& self = as_widget();
+
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_released(aButton, aPosition + as_widget().position());
+            parent().mouse_button_released(aButton, aPosition + self.position());
         else if (capturing())
             release_capture(capture_reason::MouseEvent);
     }
@@ -1842,7 +1897,9 @@ namespace neogfx
     template <typename Interface>
     point widget<Interface>::mouse_position() const
     {
-        return root().mouse_position() - origin();
+        auto& self = as_widget();
+
+        return root().mouse_position() - self.origin();
     }
 
     template <typename Interface>
@@ -1897,13 +1954,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::text_input(std::string const&)
+    bool widget<Interface>::text_input(i_string const&)
     {
         return false;
     }
 
     template <typename Interface>
-    bool widget<Interface>::sys_text_input(std::string const&)
+    bool widget<Interface>::sys_text_input(i_string const&)
     {
         return false;
     }
@@ -1911,7 +1968,9 @@ namespace neogfx
     template <typename Interface>
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
-        auto const clientPosition = aPosition - origin();
+        auto& self = as_widget();
+
+        auto const clientPosition = aPosition - self.origin();
         const i_widget* result = nullptr;
         if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
         {

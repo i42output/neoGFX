@@ -20,6 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/border_layout.hpp>
@@ -148,7 +150,7 @@ namespace neogfx
             {
                 iStyle = aStyle;
                 as_widget().update();
-                as_widget().layout().invalidate();
+                as_widget().update_layout();
             }
         }
         neogfx::decoration decoration() const
@@ -392,9 +394,15 @@ namespace neogfx
             case standard_layout::Menu:
                 return *iMenuLayout;
             case standard_layout::Toolbar:
-                return iToolbarLayout->part(aPosition);
+                if (aPosition == layout_position::None)
+                    return *iToolbarLayout;
+                else
+                    return iToolbarLayout->part(aPosition);
             case standard_layout::Dock:
-                return iDockLayout->part(aPosition);
+                if (aPosition == layout_position::None)
+                    return *iDockLayout;
+                else
+                    return iDockLayout->part(aPosition);
             case standard_layout::StatusBar:
                 return *iStatusBarLayout;
             default:
@@ -412,7 +420,7 @@ namespace neogfx
             if (resizing_context().has_parent_layout())
             {
                 resizing_context().parent_layout().fix_weightings(aRecalculate);
-                resizing_context().parent_layout().update_layout(false);
+                resizing_context().parent_layout().update_layout(false, false);
             }
         }
     protected:
@@ -498,9 +506,15 @@ namespace neogfx
                     iDockLayoutContainer.emplace(has_layout(standard_layout::Toolbar) ?
                         toolbar_layout(layout_position::Center) : non_client_layout());
                     iDockLayoutContainer->set_padding(neogfx::padding{});
+                    iDockLayoutContainer->painted([&](i_graphics_context& aGc)
+                    {
+                        service<i_skin_manager>().active_skin().draw_separators(aGc, *iDockLayoutContainer, dock_layout(dock_area::East).parent_layout());
+                        service<i_skin_manager>().active_skin().draw_separators(aGc, *iDockLayoutContainer, dock_layout(dock_area::North).parent_layout());
+                    });
                 }
                 iDockLayout.emplace(*iDockLayoutContainer);
                 iDockLayout->set_padding(neogfx::padding{});
+                iDockLayout->center().set_padding(service<i_app>().current_style().padding(padding_role::Dock));
             }
             if ((decoration() & neogfx::decoration::StatusBar) == neogfx::decoration::StatusBar)
             {

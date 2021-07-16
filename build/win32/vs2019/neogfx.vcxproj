@@ -9,10 +9,6 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Tools - Debug|x64">
-      <Configuration>Tools - Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Tools_Debug|x64">
       <Configuration>Tools_Debug</Configuration>
       <Platform>x64</Platform>
@@ -53,13 +49,6 @@
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <WholeProgramOptimization>false</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -79,9 +68,6 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -95,10 +81,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
     <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">
-    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
-    <TargetName>$(ProjectName)d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
     <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
@@ -196,38 +178,6 @@
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
     </Lib>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <Optimization>Disabled</Optimization>
-      <FunctionLevelLinking>false</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
-      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <ConformanceMode>true</ConformanceMode>
-      <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <BufferSecurityCheck>true</BufferSecurityCheck>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
-    </Link>
-    <Lib>
-      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
-    </Lib>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
@@ -261,7 +211,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\neolib\include\neolib\timer_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\action.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\app.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\clipboard.hpp" />
@@ -280,7 +229,6 @@
     <ClInclude Include="..\..\..\include\neogfx\app\i_palette.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_resource_manager.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\app\i_service_factory.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_shared_menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\i_style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\modal_task.hpp" />
@@ -304,7 +252,6 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\simd.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp" />
@@ -317,18 +264,14 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_plugin_property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_power.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_properties.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_property.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object_type.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\power.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\swizzle_array.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\units.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\numerical.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\property.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\swizzle.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\easing.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\aabb_quadtree.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\game\animation.hpp" />
@@ -447,15 +390,16 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchors.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item_cache.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_async_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_geometry.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item_cache.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\layout\async_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\stack_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\vertical_layout.hpp" />
@@ -467,7 +411,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\view\i_controller.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\view\controller.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widgets.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\check_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\color_widget.hpp" />
@@ -668,7 +611,6 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">false</ShowIncludes>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ShowIncludes>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp" />
@@ -705,6 +647,7 @@
     <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\layout_item_cache.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\async_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\spacer.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\vertical_layout.cpp" />
@@ -784,31 +727,26 @@
     <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Tools\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -818,14 +756,12 @@
     </ClCompile>
     <ClCompile Include="x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -836,6 +772,7 @@
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
     <None Include="..\..\..\include\neogfx\gfx\text\glyph.tpp" />
+    <None Include="..\..\..\include\neogfx\gui\view\view_container.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\button.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\slider.tpp" />
@@ -845,14 +782,13 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
     </CustomBuild>
+    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.tpp" />
     <None Include="..\..\..\include\neogfx\gui\widget\widget.tpp" />
     <None Include="..\..\..\src\gui\layout\flow_layout.inl" />
     <None Include="..\..\..\src\gui\layout\layout.inl" />
@@ -861,12 +797,10 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools - Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
     </CustomBuild>
   </ItemGroup>

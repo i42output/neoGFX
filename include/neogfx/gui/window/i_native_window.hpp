@@ -58,6 +58,8 @@ namespace neogfx
         virtual bool processing_event() const = 0;
         virtual i_surface_window& surface_window() const = 0;
         virtual void close(bool aForce = false) = 0;
+        virtual bool placement_changed_explicitly() const = 0;
+        virtual void set_placement_changed_explicitly() = 0;
         virtual bool visible() const = 0;
         virtual void show(bool aActivate = false) = 0;
         virtual void hide() = 0;
@@ -83,8 +85,8 @@ namespace neogfx
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;
         virtual double rendering_priority() const = 0;
-        virtual std::string const& title_text() const = 0;
-        virtual void set_title_text(std::string const& aTitleText) = 0;
+        virtual i_string const& title_text() const = 0;
+        virtual void set_title_text(i_string const& aTitleText) = 0;
         virtual padding border_thickness() const = 0;
     };
 }

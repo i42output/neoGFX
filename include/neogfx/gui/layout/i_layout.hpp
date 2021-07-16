@@ -168,6 +168,8 @@ namespace neogfx
         {
             switch (aDockArea)
             {
+            case dock_area::None:
+                return layout_position::None;
             case dock_area::Top:
                 return layout_position::Top;
             case dock_area::Bottom:
@@ -201,6 +203,28 @@ namespace neogfx
     inline constexpr autoscale operator&(autoscale aLhs, autoscale aRhs)
     {
         return static_cast<autoscale>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    enum class layout_direction : uint32_t
+    {
+        Unknown     = 0x00000000,
+        Horizontal  = 0x00000001,
+        Vertical    = 0x00000002
+    };
+
+    inline constexpr layout_direction operator~(layout_direction aLhs)
+    {
+        return static_cast<layout_direction>(~static_cast<uint32_t>(aLhs));
+    }
+
+    inline constexpr layout_direction operator|(layout_direction aLhs, layout_direction aRhs)
+    {
+        return static_cast<layout_direction>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr layout_direction operator&(layout_direction aLhs, layout_direction aRhs)
+    {
+        return static_cast<layout_direction>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
     class i_layout : public i_layout_item
@@ -241,6 +265,7 @@ namespace neogfx
         virtual const i_layout& get_layout_at(layout_item_index aIndex) const = 0;
         virtual i_layout& get_layout_at(layout_item_index aIndex) = 0;
     public:
+        virtual layout_direction direction() const = 0;
         virtual bool has_spacing() const = 0;
         virtual size spacing() const = 0;
         virtual void set_spacing(optional_size const& sSpacing, bool aUpdateLayout = true) = 0;
@@ -413,10 +438,10 @@ namespace neogfx
     class scoped_layout_items : private neolib::scoped_flag
     {
     public:
-        scoped_layout_items() : 
+        scoped_layout_items(bool aForceRefresh = false) : 
             neolib::scoped_flag{ global_layout_state::instance().in_progress() }
         {
-            if (!saved())
+            if (!saved() || aForceRefresh)
                 global_layout_state::instance().increment_id();
         }
         ~scoped_layout_items()

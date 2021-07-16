@@ -24,36 +24,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace neogfx
 {
     toolbar_button::toolbar_button(i_action& aAction) : 
-        push_button{ aAction.button_text(), push_button_style::Toolbar }, iAction{ std::shared_ptr<i_action>{}, &aAction }
+        push_button{ aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction }
     {
         init();
     }
 
-    toolbar_button::toolbar_button(std::shared_ptr<i_action> aAction) :
+    toolbar_button::toolbar_button(ref_ptr<i_action> aAction) :
         push_button{ aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_widget& aParent, i_action& aAction) :
-        push_button{ aParent, aAction.button_text(), push_button_style::Toolbar }, iAction{ std::shared_ptr<i_action>{}, &aAction }
+        push_button{ aParent, aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction }
     {
         init();
     }
 
-    toolbar_button::toolbar_button(i_widget& aParent, std::shared_ptr<i_action> aAction) :
+    toolbar_button::toolbar_button(i_widget& aParent, ref_ptr<i_action> aAction) :
         push_button{ aParent, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction }
     {
         init();
     }
 
     toolbar_button::toolbar_button(i_layout& aLayout, i_action& aAction) :
-        push_button{ aLayout, aAction.button_text(), push_button_style::Toolbar }, iAction{ std::shared_ptr<i_action>{}, &aAction }
+        push_button{ aLayout, aAction.button_text(), push_button_style::Toolbar }, iAction{ ref_ptr<i_action>{}, &aAction }
     {
         init();
     }
 
-    toolbar_button::toolbar_button(i_layout& aLayout, std::shared_ptr<i_action> aAction) :
+    toolbar_button::toolbar_button(i_layout& aLayout, ref_ptr<i_action> aAction) :
         push_button{ aLayout, aAction->button_text(), push_button_style::Toolbar }, iAction{ aAction }
     {
         init();
@@ -139,6 +139,8 @@ namespace neogfx
 
     focus_policy toolbar_button::focus_policy() const
     {
+        if (has_focus_policy())
+            return push_button::focus_policy();
         return neogfx::focus_policy::NoFocus;
     }
 

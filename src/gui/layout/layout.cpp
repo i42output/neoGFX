@@ -362,6 +362,11 @@ namespace neogfx
         return transformation(true) * units_converter(*this).from_device_units(adjustedPadding);
     }
 
+    layout_direction layout::direction() const
+    {
+        return layout_direction::Unknown;
+    }
+
     bool layout::has_spacing() const
     {
         return iSpacing != std::nullopt;
@@ -443,7 +448,7 @@ namespace neogfx
 
     void layout::enable()
     {
-        if (!enabled())
+        if (!iEnabled)
         {
             iEnabled = true;
             if (has_parent_layout())
@@ -453,7 +458,7 @@ namespace neogfx
 
     void layout::disable()
     {
-        if (enabled())
+        if (iEnabled)
         {
             iEnabled = false;
             if (has_parent_layout())
@@ -476,7 +481,7 @@ namespace neogfx
         if ((autoscale() & neogfx::autoscale::Active) == neogfx::autoscale::Active)
         {
             neolib::scoped_object<neogfx::autoscale> so{ iAutoscale, iAutoscale & ~neogfx::autoscale::Active };
-            update_layout(false);
+            update_layout(false, false);
         }
         base_type::fix_weightings(aRecalculate);
     }
@@ -484,44 +489,18 @@ namespace neogfx
     void layout::layout_item_enabled(i_layout_item& aItem)
     {
         base_type::layout_item_enabled(aItem);
-        if (aItem.has_weight())
-        {
-            auto const totalChildWeight = total_child_weight(*this);
-            auto const previousWeightCoefficients = aItem.weight();
-            aItem.set_weight(totalChildWeight * previousWeightCoefficients, false);
-            for (auto& item : items())
-            {
-                if (!item.visible())
-                    continue;
-                if (&item.subject() != &aItem)
-                    item.set_weight(item.weight() * (size{ 1.0 } - previousWeightCoefficients), false);
-            }
-        }
         invalidate();
     }
     
     void layout::layout_item_disabled(i_layout_item& aItem)
     {
         base_type::layout_item_disabled(aItem);
-        if (has_weight())
-        {
-            auto const totalChildWeight = total_child_weight(*this);
-            auto const previousWeightCoefficients = aItem.weight() / totalChildWeight;
-            aItem.set_weight(previousWeightCoefficients, false);
-            for (auto& item : items())
-            {
-                if (!item.visible())
-                    continue;
-                if (&item.subject() != &aItem)
-                    item.set_weight(item.weight() / previousWeightCoefficients, false);
-            }
-        }
         invalidate();
     }
 
     bool layout::visible() const
     {
-        return enabled();
+        return iEnabled;
     }
 
     bool layout::invalidated() const
@@ -531,36 +510,24 @@ namespace neogfx
 
     void layout::invalidate(bool aDeferLayout)
     {
-        if (!enabled())
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << endl;
+#endif
+        if (!iEnabled)
             return;
-        if (invalidated())
-        {
-            if (!aDeferLayout && has_layout_owner() && layout_owner().is_managing_layout())
-                layout_owner().layout_items(aDeferLayout);
+        if (iInvalidated)
             return;
-        }
         iInvalidated = true;
-        if (has_parent_layout())
-            parent_layout().invalidate(aDeferLayout);
-        if (has_layout_owner())
-        {
-            if (layout_owner().is_managing_layout())
-                layout_owner().layout_items(aDeferLayout);
-            i_widget* w = iOwner;
-            while (w != nullptr && w->has_parent())
-            {
-                w = &w->parent();
-                if (w->has_layout())
-                    break;
-            }
-            if (w != nullptr && w != iOwner && w->has_layout())
-                w->layout().invalidate(aDeferLayout);
-        }
     }
 
     void layout::validate()
     {
-        if (!invalidated())
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::validate()" << endl;
+#endif
+        if (!iInvalidated)
             return;
         iInvalidated = false;
     }
@@ -568,12 +535,16 @@ namespace neogfx
     void layout::set_extents(const size& aExtents)
     {
         base_type::set_extents(aExtents);
-        if (enabled() && (autoscale() & neogfx::autoscale::LockFixedSize) == neogfx::autoscale::LockFixedSize)
+        if (iEnabled && (autoscale() & neogfx::autoscale::LockFixedSize) == neogfx::autoscale::LockFixedSize)
             FixedSize = extents();
     }
 
     size_policy layout::size_policy() const
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << typeid(*this).name() << "::size_policy()" << endl;
+#endif
         if (has_size_policy())
             return base_type::size_policy();
         neogfx::size_policy result{ size_constraint::Minimum, size_constraint::Minimum };
@@ -604,7 +575,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             MinimumSize = newMinimumSize;
             if (aUpdateLayout)
-                invalidate();
+                update_layout();
         }
     }
 
@@ -619,7 +590,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             MaximumSize = newMaximumSize;
             if (aUpdateLayout)
-                invalidate();
+                update_layout();
         }
     }
 
@@ -734,8 +705,8 @@ namespace neogfx
                 aItem->set_parent_layout(nullptr);
                 aItem->set_layout_owner(nullptr);
             }
+            update_layout();
         }
-        invalidate();
     }
 
     uint32_t layout::items_visible(item_type_e aItemType) const

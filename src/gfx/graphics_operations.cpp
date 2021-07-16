@@ -93,6 +93,12 @@ namespace neogfx
             return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
         }
 
+        template <typename T>
+        inline bool batchable(const optional<T>& lhs, const optional<T>& rhs)
+        {
+            return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
+        }
+
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs)
         {
             // either whitespace?

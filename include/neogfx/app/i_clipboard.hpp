@@ -81,7 +81,7 @@ namespace neogfx
         virtual void deactivate(i_clipboard_sink& aSink) = 0;
     public:
         virtual bool has_text() const = 0;
-        virtual void text(i_string& aResult) const = 0;
+        virtual const i_string& text() const = 0;
         virtual void set_text(i_string const& aText) = 0;
         virtual bool has_image() const = 0;
         virtual neogfx::image image() const = 0;
@@ -94,17 +94,5 @@ namespace neogfx
         virtual void select_all() = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x441eee78, 0x6c80, 0x464b, 0xb733, { 0x18, 0x91, 0x90, 0xa8, 0x39, 0xb9 } }; return sIid; }
-    public:
-        std::string text() const
-        {
-            string result;
-            text(result);
-            return result;
-        }
-        void set_text(std::string const& aText)
-        {
-            string temp{ aText };
-            set_text(temp);
-        }
     };
 }

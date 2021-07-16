@@ -136,7 +136,7 @@ namespace neogfx
         void mouse_left() override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool text_input(std::string const& aText) override;
+        bool text_input(i_string const& aText) override;
     protected:
         using framed_scrollable_widget::scrolling_disposition;
         neogfx::scrolling_disposition scrolling_disposition() const override;

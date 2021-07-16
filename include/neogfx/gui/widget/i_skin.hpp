@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
@@ -47,5 +48,30 @@ namespace neogfx
         virtual void draw_check_box(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
         virtual void draw_radio_button(i_graphics_context& aGc, const i_skinnable_item& aItem, const button_checked_state& aCheckedState) const = 0;
         virtual void draw_tree_expander(i_graphics_context& aGc, const i_skinnable_item& aItem, bool aExpandedState) const = 0;
+        virtual void draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const = 0;
     };
+
+    typedef std::pair<uint32_t, uint32_t> separator_index;
+
+    inline rect separator_rect(const i_layout& aLayout, separator_index aSeparator)
+    {
+        rect r1(aLayout.item_at(aSeparator.first).position(), aLayout.item_at(aSeparator.first).extents());
+        rect r2(aLayout.item_at(aSeparator.second).position(), aLayout.item_at(aSeparator.second).extents());
+        if (aLayout.direction() == layout_direction::Horizontal)
+        {
+            rect r3(point(r1.right(), r1.top()), size(r2.left() - r1.right(), r1.height()));
+            rect r4 = r3;
+            r4.x -= r3.width();
+            r4.cx *= 3.0;
+            return r4;
+        }
+        else
+        {
+            rect r3(point(r1.left(), r1.bottom()), size(r2.width(), r2.top() - r1.bottom()));
+            rect r4 = r3;
+            r4.y -= r3.height();
+            r4.cy *= 3.0;
+            return r4;
+        }
+    }
 }

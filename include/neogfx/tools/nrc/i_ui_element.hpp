@@ -62,6 +62,7 @@ namespace neogfx::nrc
     struct element_not_found : std::runtime_error { element_not_found(std::string const& aElement) : std::runtime_error{ "Element '" + aElement + "' not found." } {} };
     struct element_ill_formed : std::runtime_error { element_ill_formed(std::string const& aElement) : std::runtime_error{ "Element '" + aElement + "' ill-formed." } {} };
     struct unsupported_member_element : std::runtime_error { unsupported_member_element() : std::runtime_error{ "Unsupported member element." } {} };
+    struct unknown_data_type : std::runtime_error { unknown_data_type() : std::runtime_error{ "Unknown data type." } {} };
 
     class i_ui_element : public neolib::i_reference_counted
     {
@@ -397,7 +398,7 @@ namespace neogfx::nrc
             {
                 if (s != aArgument.color_stops().begin())
                     result << ", ";
-                result << "gradient::color_stop{ " << s->first() << ", color{ " << convert_emit_argument(s->second()) << " } }";
+                result << "gradient::color_stop{ " << s->first() << ", color{ " << convert_emit_argument(sRGB_color{ s->second() }) << " } }";
             }
             result << " }, " << enum_to_string<gradient_direction>("gradient_direction", aArgument.direction());
             return result.str();

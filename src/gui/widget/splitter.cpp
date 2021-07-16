@@ -21,26 +21,27 @@
 #include <neogfx/gui/widget/splitter.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/hid/i_surface.hpp>
 
 namespace neogfx
 {
-    splitter::splitter(splitter_type aType) :
-        iType{ aType }
+    splitter::splitter(splitter_style aStyle) :
+        iStyle{ aStyle }
     {
         init();
     }
 
-    splitter::splitter(i_widget& aParent, splitter_type aType) : 
+    splitter::splitter(i_widget& aParent, splitter_style aStyle) : 
         widget{ aParent },
-        iType{ aType }
+        iStyle{ aStyle }
     {
         init();
     }
 
-    splitter::splitter(i_layout& aLayout, splitter_type aType) :
+    splitter::splitter(i_layout& aLayout, splitter_style aStyle) :
         widget{ aLayout },
-        iType{ aType }
+        iStyle{ aStyle }
     {
         init();
     }
@@ -55,7 +56,7 @@ namespace neogfx
             return widget::size_policy();
         else if (has_fixed_size())
             return size_constraint::Fixed;
-        else if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+        else if ((iStyle & splitter_style::Horizontal) == splitter_style::Horizontal)
             return neogfx::size_policy{size_constraint::Expanding, size_constraint::Minimum};
         else
             return neogfx::size_policy{size_constraint::Minimum, size_constraint::Expanding};
@@ -111,9 +112,9 @@ namespace neogfx
         {
             auto& firstWidget = layout().get_widget_at(iTracking->first);
             auto& secondWidget = layout().get_widget_at(iTracking->second);
-            bool const resizeBothPanes = (iType & splitter_type::ResizeSinglePane) == splitter_type::None || 
+            bool const resizeBothPanes = (iStyle & splitter_style::ResizeSinglePane) == splitter_style::None || 
                 service<i_keyboard>().is_key_pressed(ScanCode_LSHIFT) || service<i_keyboard>().is_key_pressed(ScanCode_RSHIFT);
-            if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+            if ((iStyle & splitter_style::Horizontal) == splitter_style::Horizontal)
             {
                 auto const delta = aPosition.x - iTrackFrom.x;
                 if (delta == 0.0)
@@ -167,7 +168,7 @@ namespace neogfx
     {
         auto s = separator_at(mouse_position());
         if (s != std::nullopt || iTracking != std::nullopt)
-            return (iType & splitter_type::Horizontal) == splitter_type::Horizontal ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
+            return (iStyle & splitter_style::Horizontal) == splitter_style::Horizontal ? mouse_system_cursor::SizeWE : mouse_system_cursor::SizeNS;
         else
             return widget::mouse_cursor();
     }
@@ -187,10 +188,16 @@ namespace neogfx
     {
     }
 
+    void splitter::paint(i_graphics_context& aGc) const
+    {
+        if ((iStyle & splitter_style::DrawGrip) == splitter_style::DrawGrip)
+            service<i_skin_manager>().active_skin().draw_separators(aGc, *this, layout());
+    }
+
     void splitter::init()
     {
         set_padding(neogfx::padding{ 0.0 });
-        if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
+        if ((iStyle & splitter_style::Horizontal) == splitter_style::Horizontal)
             set_layout(make_ref<horizontal_layout>());
         else
             set_layout(make_ref<vertical_layout>());
@@ -200,28 +207,8 @@ namespace neogfx
     std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const
     {
         for (uint32_t i = 1u; i < layout().count(); ++i)
-        {
-            rect r1(layout().get_widget_at(i - 1u).position(), layout().get_widget_at(i - 1u).extents());
-            rect r2(layout().get_widget_at(i).position(), layout().get_widget_at(i).extents());
-            if ((iType & splitter_type::Horizontal) == splitter_type::Horizontal)
-            {
-                rect r3(point(r1.right(), r1.top()), size(r2.left() - r1.right(), r1.height()));
-                rect r4 = r3;
-                r4.x -= r3.width();
-                r4.cx *= 3.0;
-                if (r4.contains(aPosition))
+            if (separator_rect(layout(), {i - 1u, i}).contains(aPosition))
                     return separator_type{ i - 1u, i };
-            }
-            else
-            {
-                rect r3(point(r1.left(), r1.bottom()), size(r2.width(), r2.top() - r1.bottom()));
-                rect r4 = r3;
-                r4.y -= r3.height();
-                r4.cy *= 3.0;
-                if (r4.contains(aPosition))
-                    return separator_type{ i - 1u, i };
-            }
-        }
-        return std::optional<separator_type>();
+        return {};
     }
 }

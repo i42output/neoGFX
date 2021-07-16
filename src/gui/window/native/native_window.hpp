@@ -66,8 +66,8 @@ namespace neogfx
         void handle_event() override;
         bool processing_event() const override;
         double rendering_priority() const override;
-        std::string const& title_text() const override;
-        void set_title_text(std::string const& aTitleText) override;
+        i_string const& title_text() const override;
+        void set_title_text(i_string const& aTitleText) override;
     public:
         i_rendering_engine& rendering_engine() const;
         i_surface_manager& surface_manager() const;
@@ -95,7 +95,7 @@ namespace neogfx
         event_queue iEventQueue;
         native_event iCurrentEvent;
         uint32_t iProcessingEvent;
-        std::string iTitleText;
+        string iTitleText;
         bool iNonClientEntered;
         neolib::callback_timer iUpdater;
         uint32_t iPaused;

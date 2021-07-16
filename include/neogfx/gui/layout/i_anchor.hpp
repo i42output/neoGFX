@@ -29,12 +29,66 @@ namespace neogfx
 {
     enum class anchor_constraint_function : uint32_t
     {
-        Identity,
-        Equal,
-        Min,
-        Max,
-        Custom // todo
+        Invalid         = 0x00000000,
+
+        Identity        = 0x00000001,
+        Equal           = 0x00000002,
+        Min             = 0x00000003,
+        Max             = 0x00000004,
+        Custom          = 0x00001000, // todo
+
+        X               = 0x00010000,
+        Y               = 0x00020000,
+        Z               = 0x00040000,
+        W               = 0x00080000,
+
+        CX              = X,
+        CY              = Y,
+
+        IdentityX       = Identity | X,
+        IdentityY       = Identity | Y,
+        IdentityZ       = Identity | Z,
+        IdentityW       = Identity | W,
+        EqualX          = Equal | X,
+        EqualY          = Equal | Y,
+        EqualZ          = Equal | Z,
+        EqualW          = Equal | W,
+        MinX            = Min | X,
+        MinY            = Min | Y,
+        MinZ            = Min | Z,
+        MinW            = Min | W,
+        MaxX            = Max | X,
+        MaxY            = Max | Y,
+        MaxZ            = Max | Z,
+        MaxW            = Max | W,
+
+        IdentityCX      = Identity | CX,
+        IdentityCY      = Identity | CY,
+        EqualCX         = Equal | CX,
+        EqualCY         = Equal | CY,
+        MinCX           = Min | CX,
+        MinCY           = Min | CY,
+        MaxCX           = Max | CX,
+        MaxCY           = Max | CY,
+
+        FUNCTION_MASK   = 0x0000FFFF,
+        ARGUMENT_MASK   = 0x00FF0000
     };
+
+    inline constexpr anchor_constraint_function operator~(anchor_constraint_function lhs)
+    {
+        return static_cast<anchor_constraint_function>(~static_cast<uint32_t>(lhs));
+    }
+
+    inline constexpr anchor_constraint_function operator&(anchor_constraint_function lhs, anchor_constraint_function rhs)
+    {
+        return static_cast<anchor_constraint_function>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+    }
+
+    inline constexpr anchor_constraint_function operator|(anchor_constraint_function lhs, anchor_constraint_function rhs)
+    {
+        return static_cast<anchor_constraint_function>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+    }
 }
 
 begin_declare_enum(neogfx::anchor_constraint_function)
@@ -57,21 +111,134 @@ namespace neogfx
         using base_type::base_type;
     public:
         static anchor_constraint<T> identity;
+        static anchor_constraint<T> identity_x;
+        static anchor_constraint<T> identity_y;
         static anchor_constraint<T> equal;
+        static anchor_constraint<T> equal_x;
+        static anchor_constraint<T> equal_y;
         static anchor_constraint<T> min;
+        static anchor_constraint<T> min_x;
+        static anchor_constraint<T> min_y;
         static anchor_constraint<T> max;
+        static anchor_constraint<T> max_x;
+        static anchor_constraint<T> max_y;
     };
 
     template <typename T>
-    anchor_constraint<T> anchor_constraint<T>::identity = [](const T& lhs, const T&) -> T { return lhs; };
+    inline T constraint_x(const T& value)
+    {
+        return value;
+    }
+
     template <typename T>
-    anchor_constraint<T> anchor_constraint<T>::equal = [](const T&, const T& rhs) -> T { return rhs; };
+    inline T constraint_y(const T& value)
+    {
+        return value;
+    }
+
     template <typename T>
-    anchor_constraint<T> anchor_constraint<T>::min = [](const T& lhs, const T& rhs) -> T { return std::min(lhs, rhs); };
+    inline T constraint_x(const basic_point<T>& value)
+    {
+        return value.x;
+    }
+
     template <typename T>
-    anchor_constraint<T> anchor_constraint<T>::max = [](const T& lhs, const T& rhs) -> T { return std::max(lhs, rhs); };
+    inline T constraint_y(const basic_point<T>& value)
+    {
+        return value.y;
+    }
+
+    template <typename T>
+    inline T constraint_x(const basic_size<T>& value)
+    {
+        return value.cx;
+    }
+
+    template <typename T>
+    inline T constraint_y(const basic_size<T>& value)
+    {
+        return value.cy;
+    }
+
+    template <typename T>
+    inline T constraint_x(const basic_box_areas<T>& value)
+    {
+        return value.size().cx;
+    }
+
+    template <typename T>
+    inline T constraint_y(const basic_box_areas<T>& value)
+    {
+        return value.size().cy;
+    }
+
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::identity = [](const T& lhs, const T&) -> T 
+    { 
+        return lhs; 
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::identity_x = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ constraint_x(lhs), constraint_y(rhs) };
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::identity_y = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ constraint_x(rhs), constraint_y(lhs) };
+    };
+
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::equal = [](const T&, const T& rhs) -> T 
+    { 
+        return rhs; 
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::equal_x = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ constraint_x(rhs), constraint_y(lhs) };
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::equal_y = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ constraint_x(lhs), constraint_y(rhs) };
+    };
+
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::min = [](const T& lhs, const T& rhs) -> T 
+    { 
+        return std::min(lhs, rhs); 
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::min_x = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ std::min(constraint_x(lhs), constraint_x(rhs)), constraint_y(lhs) };
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::min_y = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ constraint_x(lhs), std::min(constraint_y(lhs), constraint_y(rhs)) };
+    };
+
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::max = [](const T& lhs, const T& rhs) -> T 
+    { 
+        return std::max(lhs, rhs);
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::max_x = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ std::max(constraint_x(lhs), constraint_x(rhs)), constraint_y(lhs) };
+    };
+    template <typename T>
+    anchor_constraint<T> anchor_constraint<T>::max_y = [](const T& lhs, const T& rhs) -> T
+    {
+        return T{ constraint_x(lhs), std::max(constraint_y(lhs), constraint_y(rhs)) };
+    };
 
     struct anchor_property_has_no_value : std::logic_error { anchor_property_has_no_value() : std::logic_error{ "neogfx::anchor_property_has_no_value" } {} };
+
+    class i_anchorable;
 
     class i_anchor
     {
@@ -80,9 +247,13 @@ namespace neogfx
         virtual ~i_anchor() = default;
         // meta
     public:
+        virtual i_anchorable& owner() const = 0;
         virtual const i_string& name() const = 0;
         virtual const i_property& property() const = 0;
         virtual i_property& property() = 0;
+        virtual bool active() const noexcept = 0;
+        virtual bool calculator_overriden() const noexcept = 0;
+        virtual bool calculating() const noexcept = 0;
         // operations
     public:
         virtual void constrain(i_anchor& aRhs, anchor_constraint_function aLhsFunction, anchor_constraint_function aRhsFunction) = 0;
@@ -106,6 +277,7 @@ namespace neogfx
         virtual void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) = 0;
     public:
         virtual value_type evaluate_constraints(const CalculatorArgs&... aArgs) const = 0;
+        virtual value_type calculate(const CalculatorArgs&... aArgs) const = 0;
     };
 
     namespace detail

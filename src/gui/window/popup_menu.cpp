@@ -314,7 +314,7 @@ namespace neogfx
         return true;
     }
 
-    bool popup_menu::text_input(std::string const&)
+    bool popup_menu::text_input(i_string const&)
     {
         service<i_basic_services>().system_beep();
         return true;

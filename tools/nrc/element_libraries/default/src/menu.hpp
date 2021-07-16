@@ -91,7 +91,7 @@ namespace neogfx::nrc
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<neolib::string> iTitle;
-        std::optional<neolib::string> iImage;
+        neolib::optional<neolib::string> iTitle;
+        neolib::optional<neolib::string> iImage;
     };
 }

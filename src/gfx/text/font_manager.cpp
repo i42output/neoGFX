@@ -66,10 +66,10 @@ namespace neogfx
     {
         namespace platform_specific
         {
-            std::optional<font_info> default_system_font_info(system_font_role aRole)
+            optional<font_info> default_system_font_info(system_font_role aRole)
             {
 #ifdef WIN32
-#if 0 // Has Microsoft (tm) changed their mind on this? (See VS2019 font usage)
+#if 1 // Has Microsoft (tm) changed their mind on this? (See VS2019 font usage)
                 if (service<i_font_manager>().has_font("Segoe UI", "Regular") && (aRole == system_font_role::Caption || aRole == system_font_role::Menu || aRole == system_font_role::StatusBar))
                     return font_info{ "Segoe UI", "Regular", 9 };
 #endif

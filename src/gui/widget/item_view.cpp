@@ -373,7 +373,8 @@ namespace neogfx
                         aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage);
                     auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGc);
-                    aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
+                    if (!editing() || editing() != itemIndex)
+                        aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
                 }
                 if (currentCell)
                 {
@@ -401,6 +402,8 @@ namespace neogfx
 
     neogfx::focus_policy item_view::focus_policy() const
     {
+        if (base_type::has_focus_policy())
+            return base_type::focus_policy();
         auto result = base_type::focus_policy();
         if (editing() != std::nullopt)
             result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
@@ -695,7 +698,7 @@ namespace neogfx
         return handled;
     }
 
-    bool item_view::text_input(std::string const& aText)
+    bool item_view::text_input(i_string const& aText)
     {
         bool handled = base_type::text_input(aText);
         if (editing() == std::nullopt && selection_model().has_current_index() && aText[0] != '\r' && aText[0] != '\n' && aText[0] != '\t')
@@ -1017,7 +1020,7 @@ namespace neogfx
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);
             auto cellFont = presentation_model().cell_font(newIndex);
             textEdit.set_default_style(text_edit::character_style{ cellFont ? *cellFont : presentation_model().default_font(), *textColor, backgroundColor != std::nullopt ? color_or_gradient{ *backgroundColor } : color_or_gradient{} });
-            textEdit.set_text(presentation_model().cell_to_string(newIndex));
+            textEdit.set_text(string{ presentation_model().cell_to_string(newIndex) });
             textEdit.Focus([this, newIndex](neogfx::focus_event fe, neogfx::focus_reason)
             {
                 if (fe == neogfx::focus_event::FocusLost && !has_focus() && (!root().has_focused_widget() || !root().focused_widget().is_descendent_of(*this) || !selection_model().has_current_index() || selection_model().current_index() != newIndex))

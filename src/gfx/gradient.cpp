@@ -102,7 +102,7 @@ namespace neogfx
     }
 
     template <gradient_sharing Sharing>
-    basic_gradient<Sharing>::basic_gradient(const neolib::i_vector<sRGB_color>& aColors, gradient_direction aDirection) :
+    basic_gradient<Sharing>::basic_gradient(const neolib::i_vector<sRGB_color::abstract_type>& aColors, gradient_direction aDirection) :
         iObject{ service<i_gradient_manager>().create_gradient(aColors, aDirection) }
     {
     }

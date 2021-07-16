@@ -31,7 +31,7 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, aElementType }
         {
             add_header("neogfx/gui/widget/text_field.hpp");
-            add_data_names({ "label", "hint" });
+            add_data_names({ "label", "input_box", "hint" });
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
@@ -64,14 +64,14 @@ namespace neogfx::nrc
         {
             ui_element<>::emit_body();
             if (iTabStopHint)
-                emit("   %1%.input_box().set_tab_stop_hint(\"%2%\");\n", id(), *iTabStopHint);
+                emit("   %1%.input_box().set_tab_stop_hint(\"%2%\"_s);\n", id(), *iTabStopHint);
             if (iHint)
                 emit("   %1%.hint().set_text(\"%2%\"_t);\n", id(), *iHint);
         }
     protected:
         using ui_element<>::emit;
     private:
-        std::optional<string> iTabStopHint;
-        std::optional<string> iHint;
+        neolib::optional<string> iTabStopHint;
+        neolib::optional<string> iHint;
     };
 }

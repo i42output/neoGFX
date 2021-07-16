@@ -27,7 +27,7 @@ namespace neogfx
 {
     style::style(std::string const& aName) :
         iName{ aName },
-        iPadding{ 2.0, 2.0, 4.0, 4.0, 4.0 },
+        iPadding{ 2.0, 2.0, 4.0, 4.0, 4.0, 4.0 },
         iSpacing{ 2.0, 2.0 }
     {
         iPalette.Changed([this]() { handle_change(style_aspect::Color); });

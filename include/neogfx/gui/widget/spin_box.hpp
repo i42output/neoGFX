@@ -50,7 +50,7 @@ namespace neogfx
         basic_spin_box(i_widget& aParent);
         basic_spin_box(i_layout& aLayout);
     public:
-        std::string const& text();
+        i_string const& text();
         const line_edit& text_box() const;
         line_edit& text_box();
     public:
@@ -76,7 +76,7 @@ namespace neogfx
     protected:
         color frame_color() const override;
     protected:
-        void mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     private:
@@ -87,7 +87,7 @@ namespace neogfx
         void update_arrows();
     private:
         sink iSink;
-        std::string iText;
+        string iText;
         cursor::position_type iTextCursorPos;
         horizontal_layout iPrimaryLayout;
         line_edit iTextBox;

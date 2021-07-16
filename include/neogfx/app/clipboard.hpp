@@ -43,7 +43,7 @@ namespace neogfx
         using i_clipboard::text;
         using i_clipboard::set_text;
         bool has_text() const override;
-        void text(i_string& aResult) const override;
+        i_string const& text() const override;
         void set_text(i_string const& aText) override;
         bool has_image() const override;
         neogfx::image image() const override;

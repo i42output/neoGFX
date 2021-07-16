@@ -91,12 +91,12 @@ namespace neogfx
         iGroup = aGroup;
     }
 
-    std::string const& menu::title() const
+    i_string const& menu::title() const
     {
         return iTitle;
     }
 
-    void menu::set_title(std::string const& aTitle)
+    void menu::set_title(i_string const& aTitle)
     {
         iTitle = aTitle;
         MenuChanged.trigger();
@@ -107,7 +107,7 @@ namespace neogfx
         return iImage;
     }
 
-    void menu::set_image(std::string const& aUri)
+    void menu::set_image(i_string const& aUri)
     {
         iImage = neogfx::image{aUri};
         MenuChanged.trigger();
@@ -159,7 +159,7 @@ namespace neogfx
         insert_sub_menu_at(ideal_insert_index(aSubMenu), aSubMenu);
     }
 
-    i_menu& menu::add_sub_menu(std::string const& aSubMenuTitle, uuid const& aGroup)
+    i_menu& menu::add_sub_menu(i_string const& aSubMenuTitle, uuid const& aGroup)
     {
         return insert_sub_menu_at(ideal_insert_index(aGroup), aSubMenuTitle);
     }
@@ -170,7 +170,7 @@ namespace neogfx
         return aAction;
     }
 
-    i_action& menu::add_action(std::shared_ptr<i_action> aAction)
+    i_action& menu::add_action(i_ref_ptr<i_action> const& aAction)
     {
         insert_action_at(ideal_insert_index(*aAction), aAction);
         return *aAction;
@@ -189,7 +189,7 @@ namespace neogfx
         ItemAdded.trigger(aItemIndex);
     }
 
-    i_menu& menu::insert_sub_menu_at(item_index aItemIndex, std::string const& aSubMenuTitle, uuid const& aGroup)
+    i_menu& menu::insert_sub_menu_at(item_index aItemIndex, i_string const& aSubMenuTitle, uuid const& aGroup)
     {
         auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(std::make_shared<menu>(aSubMenuTitle)));
         newItem.sub_menu().set_parent(*this);
@@ -201,18 +201,19 @@ namespace neogfx
 
     void menu::insert_action_at(item_index aItemIndex, i_action& aAction)
     {
-        insert_action_at(aItemIndex, std::shared_ptr<i_action>(std::shared_ptr<i_action>(), &aAction));
+        insert_action_at(aItemIndex, ref_ptr<i_action>{ref_ptr<i_action>{}, &aAction });
     }
     
-    void menu::insert_action_at(item_index aItemIndex, std::shared_ptr<i_action> aAction)
+    void menu::insert_action_at(item_index aItemIndex, i_ref_ptr<i_action> const& aAction)
     {
         iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
         aItemIndex = update_grouping_separators(aItemIndex);
         ItemAdded.trigger(aItemIndex);
-        aAction->changed([this, aAction]()
+        auto insertedAction = ref_ptr<i_action>{ aAction };
+        aAction->changed([this, insertedAction]()
         {
             for (item_index i = 0; i < iItems.size(); ++i)
-                if (iItems[i]->type() == menu_item_type::Action && &(iItems[i]->action()) == &*aAction)
+                if (iItems[i]->type() == menu_item_type::Action && &(iItems[i]->action()) == &*insertedAction)
                 {
                     ItemChanged.trigger(i);
                     return;

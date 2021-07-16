@@ -145,12 +145,12 @@ namespace neogfx
         return widget::visible();
     }
 
-    std::string const& text_widget::text() const
+    i_string const& text_widget::text() const
     {
         return iText;
     }
 
-    void text_widget::set_text(std::string const& aText)
+    void text_widget::set_text(i_string const& aText)
     {
         if (iText != aText)
         {
@@ -161,12 +161,8 @@ namespace neogfx
             if (oldSize != minimum_size())
             {
                 TextGeometryChanged.trigger();
-                if (has_parent_layout() && (visible() || parent_layout().ignore_visibility()))
-                {
-                    parent_layout().invalidate();
-                    if (has_layout_manager())
-                        layout_manager().layout_items();
-                }
+                if (visible() || parent_layout().ignore_visibility())
+                    update_layout();
             }
             update();
         }
@@ -179,11 +175,8 @@ namespace neogfx
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
             reset_cache();
-            bool const canLayout = has_parent_layout() && (visible() || !parent_layout().ignore_visibility());
-            if (canLayout)
-                parent_layout().invalidate();
-            if (oldSize != minimum_size() && canLayout && has_layout_manager())
-                layout_manager().layout_items();
+            if (visible() || !parent_layout().ignore_visibility())
+                update_layout();
         }
     }
 
@@ -213,7 +206,7 @@ namespace neogfx
         {
             iAlignment = aAlignment;
             if (aUpdateLayout)
-                layout_root(true);
+                update_layout();
         }
     }
 
@@ -298,18 +291,18 @@ namespace neogfx
             if (multi_line())
             {
                 if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::minimum_size().cx - padding().size().cx).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::minimum_size().cx - padding().size().cx));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primary_hint(), font(), widget::minimum_size().cx - padding().size().cx).max(
+                        gc.multiline_text_extent(iSizeHint.secondary_hint(), font(), widget::minimum_size().cx - padding().size().cx));
                 else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font(), widget::maximum_size().cx - padding().size().cx).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font(), widget::maximum_size().cx - padding().size().cx));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primary_hint(), font(), widget::maximum_size().cx - padding().size().cx).max(
+                        gc.multiline_text_extent(iSizeHint.secondary_hint(), font(), widget::maximum_size().cx - padding().size().cx));
                 else
-                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primaryHint, font()).max(
-                        gc.multiline_text_extent(iSizeHint.secondaryHint, font()));
+                    iSizeHintExtent = gc.multiline_text_extent(iSizeHint.primary_hint(), font()).max(
+                        gc.multiline_text_extent(iSizeHint.secondary_hint(), font()));
             }
             else
-                iSizeHintExtent = gc.text_extent(iSizeHint.primaryHint, font()).max(
-                    gc.text_extent(iSizeHint.secondaryHint, font()));
+                iSizeHintExtent = gc.text_extent(iSizeHint.primary_hint(), font()).max(
+                    gc.text_extent(iSizeHint.secondary_hint(), font()));
         }
         if (iSizeHintExtent->cy == 0.0)
             iSizeHintExtent->cy = font().height();
@@ -323,8 +316,7 @@ namespace neogfx
         auto style_changed = [&]()
         {
             reset_cache();
-            if (has_parent_layout())
-                parent_layout().invalidate();
+            update_layout();
             update();
         };
         iSink += service<i_app>().current_style_changed([this, style_changed](style_aspect aAspect)

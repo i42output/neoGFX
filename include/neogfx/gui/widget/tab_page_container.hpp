@@ -30,24 +30,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class tab_page_container : public widget<>, public i_tab_page_container
+    template <typename Base = widget<>>
+    class tab_page_container : public Base, public i_tab_page_container
     {
+        typedef Base base_type;
     public:
         define_declared_event(StyleChanged, style_changed)
         define_declared_event(SelectedTabPageChanged, selected_tab_page_changed, i_tab_page&)
     private:
-        typedef std::shared_ptr<i_tab_page> tab_page_pointer;
+        typedef ref_ptr<i_tab_page> tab_page_pointer;
         typedef std::map<const i_tab*, tab_page_pointer> tab_list;
     public:
-        tab_page_container(bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
-        tab_page_container(i_widget& aParent, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
-        tab_page_container(i_layout& aLayout, bool aClosableTabs = false, tab_container_style aStyle = tab_container_style::TabAlignmentTop);
+        tab_page_container(bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
+        tab_page_container(i_widget& aParent, bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
+        tab_page_container(i_widget& aParent, i_layout& aTabBarLayout, bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
+        tab_page_container(i_layout& aLayout, bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
+        tab_page_container(i_layout& aLayout, i_layout& aTabBarLayout, bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
         ~tab_page_container();
     public:
-        tab_container_style style() const override;
-        void set_style(tab_container_style aStyle) override;
+        neogfx::tab_container_style tab_container_style() const override;
+        void set_tab_container_style(neogfx::tab_container_style aStyle) override;
+        void set_tab_icon_size(const size& aIconSize) override;
     public:
-        stack_layout& page_layout() override;
+        i_layout& page_layout() override;
     public:
         bool has_tabs() const override;
         uint32_t tab_count() const override;
@@ -62,8 +67,8 @@ namespace neogfx
         i_tab& selected_tab() override;
         const i_tab_page& selected_tab_page() const override;
         i_tab_page& selected_tab_page() override;
-        i_tab& add_tab(std::string const& aTabText) override;
-        i_tab& insert_tab(tab_index aTabIndex, std::string const& aTabText) override;
+        i_tab& add_tab(i_string const& aTabText) override;
+        i_tab& insert_tab(tab_index aTabIndex, i_string const& aTabText) override;
         void remove_tab(tab_index aTabIndex) override;
         void show_tab(tab_index aTabIndex) override;
         void hide_tab(tab_index aTabIndex) override;
@@ -72,11 +77,11 @@ namespace neogfx
         void select_next_tab() override;
         void select_previous_tab() override;
     public:
-        i_tab_page& add_tab_page(std::string const& aTabText) override;
-        i_tab_page& insert_tab_page(tab_index aTabIndex, std::string const& aTabText) override;
+        i_tab_page& add_tab_page(i_string const& aTabText) override;
+        i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText) override;
         i_tab_page& add_tab_page(i_tab& aTab) override;
         i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) override;
-        i_tab_page& add_tab_page(i_tab& aTab, std::shared_ptr<i_tab_page> aWidget) override;
+        i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget) override;
     public:
         void adding_tab(i_tab& aTab) override;
         void selecting_tab(i_tab& aTab) override;
@@ -85,15 +90,16 @@ namespace neogfx
         bool has_parent_container() const override;
         const i_tab_container& parent_container() const override;
         i_tab_container& parent_container() override;
-        const widget<>& as_widget() const override;
-        widget<>& as_widget() override;
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
     protected:
         bool is_managing_layout() const override;
     private:
+        void init();
         void update_tab_bar_placement();
     private:
+        tab_list iTabs;
         border_layout iContainerLayout;
         tab_bar iTabBar;
-        tab_list iTabs;
     };
 }
