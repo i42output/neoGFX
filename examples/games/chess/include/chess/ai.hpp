@@ -77,6 +77,7 @@ namespace chess
         ng::sink iSink;
         std::optional<std::chrono::steady_clock::time_point> iStartTime;
         std::optional<uint64_t> iNodesPerSecond;
+        bool iUseDecimator = false;
     };
 
     extern template class ai<mailbox_rep, player::White>;

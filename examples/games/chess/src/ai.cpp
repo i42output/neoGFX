@@ -26,7 +26,7 @@ namespace chess
     namespace
     {
         template <typename T>
-        void debug_moves(T const& moves, int ply, bool extra = false)
+        void debug_moves(T const& moves, int ply, bool extra = false, bool extraExtra = false)
         {
             std::vector<std::pair<const game_tree_node*, const game_tree_node*>> debug;
             for (auto const& m : moves)
@@ -53,6 +53,13 @@ namespace chess
                     for (auto const& child : *d.first->children)
                     {
                         std::cout << "\t" << to_string(*child.move) << ":  " << std::setw(12) << *child.eval << std::endl;
+                        if (extraExtra)
+                        {
+                            for (auto const& childChild : *child.children)
+                            {
+                                std::cout << "\t\t" << to_string(*childChild.move) << ":  " << std::setw(12) << *childChild.eval << std::endl;
+                            }
+                        }
                     }
                 }
             }
@@ -241,21 +248,24 @@ namespace chess
             auto const bestMoveEval = *bestMoves[0].eval;
             constexpr double MATE_CUTOFF = 1.0e10;
             bool const bestMoveIsMate = (bestMoveEval > MATE_CUTOFF);
-            if (bestMoveIsMate)
+            if (bestMoveIsMate || !iUseDecimator)
             {
                 iRootNode = std::move(bestMoves[0]);
                 return &*iRootNode;
             }
-            auto const decimator = 0.125 * (iPosition.moveHistory.size() + 1); // todo: involve difficulty level?
-            auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
-                [bestMoveEval, decimator](auto const& m)
-                {
-                    return static_cast<int64_t>(*m.eval * decimator) != static_cast<int64_t>(bestMoveEval * decimator);
-                });
-            thread_local std::random_device tEntropy;
-            thread_local std::mt19937 tGenerator{ tEntropy() };
-            std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) - 1 };
-            iRootNode = std::move(bestMoves[options(tGenerator)]);
+            else
+            {
+                auto const decimator = 0.125 * (iPosition.moveHistory.size() + 1); // todo: involve difficulty level?
+                auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
+                    [bestMoveEval, decimator](auto const& m)
+                    {
+                        return static_cast<int64_t>(*m.eval * decimator) != static_cast<int64_t>(bestMoveEval * decimator);
+                    });
+                thread_local std::random_device tEntropy;
+                thread_local std::mt19937 tGenerator{ tEntropy() };
+                std::uniform_int_distribution<std::ptrdiff_t> options{ 0, std::distance(bestMoves.begin(), similarEnd) - 1 };
+                iRootNode = std::move(bestMoves[options(tGenerator)]);
+            }
             return &*iRootNode;
         }
         return nullptr;
@@ -285,6 +295,7 @@ namespace chess
                 for (coordinate y = 0u; y <= 7u; ++y)
                     set_piece(iPosition.rep, coordinates{ x, y }, aSetup.rep[y][x]);
         }
+        iUseDecimator = (iPosition == chess::setup_position<representation_type>());
     }
 
     template <typename Representation, player Player>

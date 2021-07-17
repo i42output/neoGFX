@@ -178,7 +178,7 @@ namespace chess
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
 
-        std::strong_ordering operator<=>(basic_position<mailbox_rep> const&) const = default;
+        std::weak_ordering operator<=>(basic_position<mailbox_rep> const&) const = default;
     };
 
     template <>
@@ -188,7 +188,7 @@ namespace chess
         player turn;
         std::vector<move> moveHistory;
 
-        std::strong_ordering operator<=>(basic_position<bitboard_rep> const&) const = default;
+        std::weak_ordering operator<=>(basic_position<bitboard_rep> const&) const = default;
     };
 
     using mailbox_position = basic_position<mailbox_rep>;

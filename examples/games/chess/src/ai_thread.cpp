@@ -115,7 +115,7 @@ namespace chess
 
         ++sNodeCounter;
 
-        double stand_pat = eval<Representation, opponent_v<Player>>{}(tables, position, static_cast<double>(ply - depth)).eval;
+        double stand_pat = eval<Representation, Turn>{}(tables, position, static_cast<double>(ply - depth)).eval;
         if (depth == MAX_QUIESCE)
             return stand_pat;
         if (stand_pat >= beta)
