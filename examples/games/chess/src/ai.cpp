@@ -71,7 +71,8 @@ namespace chess
         async_thread{ "chess::ai" },
         iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },
-        iPosition{ chess::setup_position<representation_type>() }
+        iPosition{ chess::setup_position<representation_type>() },
+        iTable{ DEFAULT_TABLE_SIZE, table_entry{} }
     {
         for (unsigned int t = 1u; t <= std::thread::hardware_concurrency(); ++t)
             iThreads.emplace_back(*this, iPly);

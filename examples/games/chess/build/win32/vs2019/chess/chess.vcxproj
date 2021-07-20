@@ -184,6 +184,8 @@
     <ClInclude Include="..\..\..\..\include\chess\player.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\position.hpp" />
     <ClInclude Include="..\..\..\..\include\chess\primitives.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\table.hpp" />
+    <ClInclude Include="..\..\..\..\include\chess\zobrist.hpp" />
     <ClInclude Include="Resource.h" />
   </ItemGroup>
   <ItemGroup>

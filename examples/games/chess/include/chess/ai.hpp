@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chess/bitboard.hpp>
 #include <chess/ai_thread.hpp>
 #include <chess/node.hpp>
+#include <chess/table.hpp>
 
 namespace chess
 {
@@ -68,6 +69,7 @@ namespace chess
         move_tables<representation_type> const iMoveTables;
         mutable std::recursive_mutex iMutex;
         basic_position<representation_type> iPosition;
+        table iTable;
         std::list<ai_thread<Representation, Player>> iThreads;
         std::mutex iSignalMutex;
         std::condition_variable iSignal;

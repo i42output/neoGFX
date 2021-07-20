@@ -29,14 +29,14 @@ namespace chess
         case player_type::Human:
             return std::make_unique<human>(aPlayer);
         case player_type::NetworkedHuman:
-            return nullptr; // todo
+            throw not_implemented_yet{ "default_player_factory::create_player" };
         case player_type::AI:
             if (aPlayer == chess::player::White)
                 return std::make_unique<ai<mailbox_rep, chess::player::White>>();
             else
                 return std::make_unique<ai<mailbox_rep, chess::player::Black>>();
         default:
-            return nullptr;
+            throw std::invalid_argument{ "default_player_factory::create_player" };
         }
     }
 }
