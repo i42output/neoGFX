@@ -304,6 +304,9 @@ namespace chess
             for (auto& workGroup : work)
             {
                 evalPosition = workGroup.first;
+
+                iHash = zobrist::hash(evalPosition);
+
                 auto& node = workGroup.second;
                 search<Player>(iMoveTables, evalPosition, node, iPly);
 

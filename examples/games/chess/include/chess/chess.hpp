@@ -26,3 +26,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 namespace ng = neogfx;
 using namespace ng::unit_literals;
 
+struct not_implemented_yet : std::logic_error { not_implemented_yet(std::string const& aWhat) : std::logic_error{ "not_implemented_yet: " + aWhat } {} };
+

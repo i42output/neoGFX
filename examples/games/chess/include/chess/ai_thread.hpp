@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <chess/primitives.hpp>
 #include <chess/i_player.hpp>
+#include <chess/zobrist.hpp>
 
 namespace chess
 {
@@ -67,5 +68,6 @@ namespace chess
         std::condition_variable iSignal;
         std::thread iThread;
         std::atomic<game_state*> iGameState = nullptr;
+        zobrist::hash_t iHash;
     };
 }

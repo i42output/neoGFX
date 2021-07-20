@@ -172,7 +172,7 @@ namespace neogfx
             placementRect.cx = clientRect.width();
             placementRect.cy = clientRect.height();
         }
-        else if (placementRect.width() >= placementRect.height())
+        else if (placementRect.height() >= placementRect.width())
         {
             switch (iAspectRatio)
             {
