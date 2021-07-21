@@ -299,7 +299,7 @@ namespace neogfx
         if (aTab.is_selected())
         {
             existingTab->second->as_widget().show();
-            if ((focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
+            if ((as_widget().focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
                 existingTab->second->as_widget().set_focus();
             iContainerLayout.update_layout();
         }
@@ -325,7 +325,7 @@ namespace neogfx
                 if (tab.first == &aTab)
                 {
                     tab.second->as_widget().show();
-                    if ((focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
+                    if ((as_widget().focus_policy() & neogfx::focus_policy::StrongFocus) != neogfx::focus_policy::NoFocus)
                         tab.second->as_widget().set_focus();
                 }
                 else
@@ -385,6 +385,8 @@ namespace neogfx
         base_type::set_padding(neogfx::padding{});
         iContainerLayout.set_padding(neogfx::padding{});
         update_tab_bar_placement();
+
+        base_type::set_focus_policy(neogfx::focus_policy::StrongFocus);
     }
 
     template <typename Base>

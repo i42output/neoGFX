@@ -23,17 +23,17 @@
 namespace neogfx
 {
     line_edit::line_edit(frame_style aFrameStyle) :
-        text_edit{ SingleLine, aFrameStyle }
+        text_edit{ text_edit_caps::SingleLine, aFrameStyle }
     {
     }
 
     line_edit::line_edit(i_widget& aParent, frame_style aFrameStyle) :
-        text_edit{ aParent, SingleLine, aFrameStyle }
+        text_edit{ aParent, text_edit_caps::SingleLine, aFrameStyle }
     {
     }
 
     line_edit::line_edit(i_layout& aLayout, frame_style aFrameStyle) :
-        text_edit{ aLayout, SingleLine, aFrameStyle }
+        text_edit{ aLayout, text_edit_caps::SingleLine, aFrameStyle }
     {
     }
 
