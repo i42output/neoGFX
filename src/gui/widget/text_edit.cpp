@@ -258,9 +258,9 @@ namespace neogfx
         text_edit & iOwner;
     };
 
-    text_edit::text_edit(type_e aType, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
-        iType{ aType },
+    text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
+        framed_scrollable_widget{ aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
@@ -277,9 +277,9 @@ namespace neogfx
         init();
     }
 
-    text_edit::text_edit(i_widget& aParent, type_e aType, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aParent, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
-        iType{ aType },
+    text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
+        framed_scrollable_widget{ aParent, aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
@@ -296,9 +296,9 @@ namespace neogfx
         init();
     }
 
-    text_edit::text_edit(i_layout& aLayout, type_e aType, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aLayout, aType == MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
-        iType{ aType },
+    text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
+        framed_scrollable_widget{ aLayout, aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
@@ -357,7 +357,7 @@ namespace neogfx
 
     size text_edit::maximum_size(optional_size const& aAvailableSpace) const
     {
-        if (iType == MultiLine || has_maximum_size())
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine || has_maximum_size())
             return framed_scrollable_widget::maximum_size(aAvailableSpace);
         return size{ framed_scrollable_widget::maximum_size(aAvailableSpace).cx, minimum_size(aAvailableSpace).cy };
     }
@@ -445,7 +445,7 @@ namespace neogfx
         neolib::service<neolib::i_power>().register_activity();
         service<i_clipboard>().activate(*this);
         iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
-        if (iType == SingleLine && aFocusReason == focus_reason::Tab)
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine && aFocusReason == focus_reason::Tab)
         {
             cursor().set_anchor(0);
             cursor().set_position(iText.size(), false);
@@ -461,7 +461,7 @@ namespace neogfx
             return;
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
-        if (iType == SingleLine)
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
             cursor().set_position(iText.size());
         update();
     }
@@ -568,8 +568,10 @@ namespace neogfx
                         AcceptText.trigger(text());
                         break;
                     }
+                    else if ((iCaps & text_edit_caps::ACCEPT_MASK) == text_edit_caps::OnlyAccept)
+                        break;
                 }
-                if (iType == MultiLine)
+                if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
                 {
                     multiple_text_changes mtc{ *this };
                     delete_any_selection();
@@ -606,7 +608,7 @@ namespace neogfx
                 delete_any_selection();
             break;
         case ScanCode_UP:
-            if (iType == MultiLine)
+            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -617,7 +619,7 @@ namespace neogfx
                 handled = false;
             break;
         case ScanCode_DOWN:
-            if (iType == MultiLine)
+            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -641,7 +643,7 @@ namespace neogfx
             break;
         case ScanCode_PAGEUP:
         case ScanCode_PAGEDOWN:
-            if (iType == MultiLine)
+            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
             {
                 if (aScanCode == ScanCode_PAGEUP && vertical_scrollbar().position() == vertical_scrollbar().minimum())
                     move_cursor(cursor::StartOfDocument, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
@@ -660,7 +662,7 @@ namespace neogfx
         case ScanCode_ESCAPE:
             if (cursor().anchor() != cursor().position())
                 cursor().set_anchor(cursor().position());
-            else if (!read_only() && iType == SingleLine)
+            else if (!read_only() && (iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
                 set_text(string{});
             break;
         default:
@@ -1646,7 +1648,7 @@ namespace neogfx
             refresh_paragraph(iText.begin(), 0);
         });
         auto focusPolicy = neogfx::focus_policy::ClickTabFocus;
-        if (iType == MultiLine)
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
         cursor().set_width(2.0);
@@ -1700,7 +1702,7 @@ namespace neogfx
             if (ch != U'\r')
                 iNormalizedTextBuffer.push_back(ch);
         auto eos = iNormalizedTextBuffer.size();
-        if (iType == SingleLine)
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
         {
             auto eol = iNormalizedTextBuffer.find(U'\n');
             if (eol != std::u32string::npos)

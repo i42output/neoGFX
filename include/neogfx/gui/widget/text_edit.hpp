@@ -33,6 +33,32 @@
 
 namespace neogfx
 {
+    enum class text_edit_caps : uint32_t
+    {
+        SingleLine      = 0x00000001,
+        MultiLine       = 0x00000002,
+
+        OnlyAccept      = 0x00010000,
+
+        LINES_MASK      = 0x0000000F,
+        ACCEPT_MASK     = 0x000F0000,
+    };
+
+    inline text_edit_caps operator~(text_edit_caps aLhs)
+    {
+        return static_cast<text_edit_caps>(~static_cast<uint32_t>(aLhs));
+    }
+
+    inline text_edit_caps operator&(text_edit_caps aLhs, text_edit_caps aRhs)
+    {
+        return static_cast<text_edit_caps>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    inline text_edit_caps operator|(text_edit_caps aLhs, text_edit_caps aRhs)
+    {
+        return static_cast<text_edit_caps>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
     public:
@@ -45,11 +71,6 @@ namespace neogfx
     private:
         typedef text_edit property_context_type;
     public:
-        enum type_e
-        {
-            SingleLine,
-            MultiLine
-        };
         typedef std::optional<string> optional_password_mask;
         class character_style
         {
@@ -438,9 +459,9 @@ namespace neogfx
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} }; 
         // text_edit
     public:
-        text_edit(type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
-        text_edit(i_widget& aParent, type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
-        text_edit(i_layout& aLayout, type_e aType = MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
+        text_edit(text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
+        text_edit(i_widget& aParent, text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
+        text_edit(i_layout& aLayout, text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
         ~text_edit();
         // scrollable_widget
     public:
@@ -611,7 +632,7 @@ namespace neogfx
         static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
     private:
         sink iSink;
-        type_e iType;
+        text_edit_caps iCaps;
         style iDefaultStyle;
         mutable std::optional<style> iNextStyle;
         bool iPersistDefaultStyle;
@@ -651,7 +672,7 @@ namespace neogfx
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
-        define_property(property_category::other, bool, WordWrap, word_wrap, iType == MultiLine)
+        define_property(property_category::other, bool, WordWrap, word_wrap, iCaps == text_edit_caps::MultiLine)
         define_property(property_category::other, bool, Password, password, false)
         define_property(property_category::other, string, PasswordMask, password_mask)
         define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)
