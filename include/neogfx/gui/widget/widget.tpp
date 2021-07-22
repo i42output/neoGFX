@@ -1563,6 +1563,7 @@ namespace neogfx
                     root().release_focused_widget(root().focused_widget());
                 }
             }   
+            as_widget().update_layout(true, true);
             return true;
         }
         return false;
