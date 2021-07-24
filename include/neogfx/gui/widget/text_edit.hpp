@@ -35,6 +35,8 @@ namespace neogfx
 {
     enum class text_edit_caps : uint32_t
     {
+        None            = 0x00000000,
+
         SingleLine      = 0x00000001,
         MultiLine       = 0x00000002,
 

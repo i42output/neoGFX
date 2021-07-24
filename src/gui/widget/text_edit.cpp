@@ -662,7 +662,7 @@ namespace neogfx
         case ScanCode_ESCAPE:
             if (cursor().anchor() != cursor().position())
                 cursor().set_anchor(cursor().position());
-            else if (!read_only() && (iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
+            else if (!read_only() && (iCaps & (text_edit_caps::SingleLine | text_edit_caps::OnlyAccept)) != text_edit_caps::None)
                 set_text(string{});
             break;
         default:
