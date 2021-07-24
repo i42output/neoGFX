@@ -278,6 +278,9 @@ namespace neogfx
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
         basic_size with_cx(dimension_type d) const { return basic_size{ d, cy }; }
         basic_size with_cy(dimension_type d) const { return basic_size{ cx, d }; }
+        basic_size aspect_ratio() const { return cx >= cy ? basic_size{ 1.0, cy / cx } : basic_size{ cx / cy, 1.0 }; }
+        basic_size with_aspect_ratio_min(const basic_size& aspectRatio) const { return basic_size{ std::min(cx, cy) } * aspectRatio; };
+        basic_size with_aspect_ratio_max(const basic_size& aspectRatio) const { return basic_size{ std::max(cx, cy) } * aspectRatio; };
     public:
         template <typename T>
         basic_size<T> as() const
