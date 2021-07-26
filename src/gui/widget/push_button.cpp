@@ -486,7 +486,7 @@ namespace neogfx
             label().text_widget().set_font_role(neogfx::font_role::Toolbar);
             break;
         case push_button_style::TitleBar:
-            set_padding(neogfx::padding{ 4.0_dip, 4.0_dip });
+            set_padding(neogfx::padding{});
             label().text_widget().set_font_role(neogfx::font_role::Caption);
             break;
         case push_button_style::SpinBox:

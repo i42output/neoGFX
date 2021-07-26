@@ -125,6 +125,7 @@ namespace neogfx
         StrongFocus       = ClickTabFocus,
         WheelFocus        = 0x00000004, // todo
         PointerFocus      = 0x00000008, // todo
+        KeepChildFocus    = 0x00010000,
         ConsumeTabKey     = 0x10000000,
         ConsumeReturnKey  = 0x20000000,
         IgnoreNonClient   = 0x40000000
@@ -169,6 +170,7 @@ declare_enum_string(neogfx::focus_policy, ClickTabFocus)
 declare_enum_string(neogfx::focus_policy, StrongFocus)
 declare_enum_string(neogfx::focus_policy, WheelFocus)
 declare_enum_string(neogfx::focus_policy, PointerFocus)
+declare_enum_string(neogfx::focus_policy, KeepChildFocus)
 declare_enum_string(neogfx::focus_policy, ConsumeTabKey)
 declare_enum_string(neogfx::focus_policy, ConsumeReturnKey)
 declare_enum_string(neogfx::focus_policy, IgnoreNonClient)

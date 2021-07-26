@@ -386,7 +386,7 @@ namespace neogfx
         iContainerLayout.set_padding(neogfx::padding{});
         update_tab_bar_placement();
 
-        base_type::set_focus_policy(neogfx::focus_policy::StrongFocus);
+        base_type::set_focus_policy(neogfx::focus_policy::StrongFocus | neogfx::focus_policy::KeepChildFocus);
     }
 
     template <typename Base>

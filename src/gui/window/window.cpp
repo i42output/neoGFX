@@ -1166,8 +1166,13 @@ namespace neogfx
     void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)
     {
         bool const childHasFocus = has_focused_widget() && focused_widget().is_descendent_of(aCandidateWidget);
-        if (childHasFocus && focused_widget().client_rect().contains(aClickPos - focused_widget().origin()))
-            return;
+        if (childHasFocus)
+        {
+            if (focused_widget().client_rect().contains(aClickPos - focused_widget().origin()))
+                return;
+            if ((aCandidateWidget.focus_policy() & focus_policy::KeepChildFocus) == focus_policy::KeepChildFocus)
+                return;
+        }
         bool const inClientArea = (aCandidateWidget.hit_test(aClickPos - aCandidateWidget.origin()).part == widget_part::Client);
         bool const ignoreNonClientArea = (aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient;
         focus_reason const focusReason = (inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);

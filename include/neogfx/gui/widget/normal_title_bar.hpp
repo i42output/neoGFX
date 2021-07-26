@@ -44,13 +44,16 @@ namespace neogfx
             non_client_item(Args&&... aArgs) : 
                 WidgetType{ std::forward<Args>(aArgs)... }
             {
-                WidgetType::set_ignore_non_client_mouse_events(false);
             }
         public:
             widget_part hit_test(const point&) const override
             {
                 return widget_part{ WidgetType::root().as_widget(), WidgetPart };
             }
+            bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const override
+            {
+                return false;
+            };
         };
     private:
         enum texture_index_e
@@ -84,9 +87,11 @@ namespace neogfx
         void init();
         void update_textures();
     private:
-        horizontal_layout iLayout;
+        horizontal_layout iOuterLayout;
+        horizontal_layout iInnerLayout;
         non_client_item<image_widget, widget_part::SystemMenu> iIcon;
         non_client_item<text_widget, widget_part::TitleBar> iTitle;
+        horizontal_spacer iSpacer;
         non_client_item<push_button, widget_part::MinimizeButton> iMinimizeButton;
         non_client_item<push_button, widget_part::MaximizeButton> iMaximizeButton;
         non_client_item<push_button, widget_part::MaximizeButton> iRestoreButton;

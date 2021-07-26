@@ -27,39 +27,45 @@ namespace neogfx
 {
     normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
-        iLayout{ *this },
-        iIcon{ iLayout, service<i_app>().default_window_icon() },
-        iTitle{ iLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
-        iMinimizeButton{ iLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iLayout, push_button_style::TitleBar },
-        iRestoreButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
+        iOuterLayout{ *this },
+        iInnerLayout{ iOuterLayout },
+        iIcon{ iInnerLayout, service<i_app>().default_window_icon() },
+        iTitle{ iInnerLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
+        iSpacer{ iOuterLayout },
+        iMinimizeButton{ iOuterLayout, push_button_style::TitleBar },
+        iMaximizeButton{ iOuterLayout, push_button_style::TitleBar },
+        iRestoreButton{ iOuterLayout, push_button_style::TitleBar },
+        iCloseButton{ iOuterLayout, push_button_style::TitleBar }
     {
         init();
     }
 
     normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_texture& aIcon, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
-        iLayout{ *this },
-        iIcon{ iLayout, aIcon },
-        iTitle{ iLayout, aTitle },
-        iMinimizeButton{ iLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iLayout, push_button_style::TitleBar },
-        iRestoreButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
+        iOuterLayout{ *this },
+        iInnerLayout{ iOuterLayout },
+        iIcon{ iInnerLayout, aIcon },
+        iTitle{ iInnerLayout, aTitle },
+        iSpacer{ iOuterLayout },
+        iMinimizeButton{ iOuterLayout, push_button_style::TitleBar },
+        iMaximizeButton{ iOuterLayout, push_button_style::TitleBar },
+        iRestoreButton{ iOuterLayout, push_button_style::TitleBar },
+        iCloseButton{ iOuterLayout, push_button_style::TitleBar }
     {
         init();
     }
 
     normal_title_bar::normal_title_bar(i_standard_layout_container& aContainer, const i_image& aIcon, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
-        iLayout{ *this },
-        iIcon{ iLayout, aIcon },
-        iTitle{ iLayout, aTitle },
-        iMinimizeButton{ iLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iLayout, push_button_style::TitleBar },
-        iRestoreButton{ iLayout, push_button_style::TitleBar },
-        iCloseButton{ iLayout, push_button_style::TitleBar }
+        iOuterLayout{ *this },
+        iInnerLayout{ iOuterLayout },
+        iIcon{ iInnerLayout, aIcon },
+        iTitle{ iInnerLayout, aTitle },
+        iSpacer{ iOuterLayout },
+        iMinimizeButton{ iOuterLayout, push_button_style::TitleBar },
+        iMaximizeButton{ iOuterLayout, push_button_style::TitleBar },
+        iRestoreButton{ iOuterLayout, push_button_style::TitleBar },
+        iCloseButton{ iOuterLayout, push_button_style::TitleBar }
     {
         init();
     }
@@ -127,8 +133,10 @@ namespace neogfx
     void normal_title_bar::init()
     {
         set_padding(neogfx::padding{});
-        iLayout.set_padding(neogfx::padding{ 4.0, 4.0, 4.0, 4.0 });
-        iLayout.set_spacing(size{ 8.0 });
+        iOuterLayout.set_padding(neogfx::padding{});
+        iOuterLayout.set_spacing(size{});
+        iInnerLayout.set_padding(neogfx::padding{ 4.0, 4.0, 4.0, 4.0 });
+        iInnerLayout.set_spacing(size{ 8.0 });
         icon_widget().set_ignore_mouse_events(false);
         size iconSize{ 24.0_dip };
         if (icon_widget().image().is_empty())
@@ -138,10 +146,14 @@ namespace neogfx
         title_widget().set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
         title_widget().set_font_role(neogfx::font_role::Caption);
-        iMinimizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
-        iMaximizeButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
-        iRestoreButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
-        iCloseButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
+        iMinimizeButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
+        iMaximizeButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
+        iRestoreButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
+        iCloseButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
+        iMinimizeButton.set_size_policy(size_constraint::Fixed);
+        iMaximizeButton.set_size_policy(size_constraint::Fixed);
+        iRestoreButton.set_size_policy(size_constraint::Fixed);
+        iCloseButton.set_size_policy(size_constraint::Fixed);
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
         {
             size iconSize{ 24.0_dip };

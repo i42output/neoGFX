@@ -58,7 +58,7 @@ namespace neogfx::DesignStudio
             thread_local std::uniform_real_distribution<> tDistribution(0.0, 360.0);
             set_background_color(color::from_hsl(tDistribution(tGenerator), 1.0, 0.9));
             set_minimum_size(size{ 128.0_dip, 128.0_dip });
-            iDefaultItem = make_ref<sticky_note_text>(*this, text_edit::MultiLine, frame_style::NoFrame);
+            iDefaultItem = make_ref<sticky_note_text>(*this, text_edit_caps::MultiLine, frame_style::NoFrame);
             iDefaultItem->vertical_scrollbar().set_auto_hide(true);
             iDefaultItem->horizontal_scrollbar().set_auto_hide(true);
             iDefaultItem->set_ignore_non_client_mouse_events(false);
