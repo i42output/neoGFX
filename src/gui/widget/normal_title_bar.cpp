@@ -146,10 +146,10 @@ namespace neogfx
         title_widget().set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
         title_widget().set_font_role(neogfx::font_role::Caption);
-        iMinimizeButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
-        iMaximizeButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
-        iRestoreButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
-        iCloseButton.set_fixed_size(size{ 32.0_dip, 24.0_dip });
+        iMinimizeButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
+        iMaximizeButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
+        iRestoreButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
+        iCloseButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
         iMinimizeButton.set_size_policy(size_constraint::Fixed);
         iMaximizeButton.set_size_policy(size_constraint::Fixed);
         iRestoreButton.set_size_policy(size_constraint::Fixed);

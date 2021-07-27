@@ -934,6 +934,7 @@ namespace neogfx
         iSurfaceDestroyed.emplace(surface().native_surface());
 
         base_type::init();
+
         set_decoration_style(window_style_to_decoration_style(iStyle));
 
         if (is_fullscreen() || (service<i_app>().program_options().nest() && &ultimate_ancestor() == this))
@@ -952,8 +953,6 @@ namespace neogfx
             create_title_bar();
             title_bar().set_title(title_text());
         }
-
-        set_padding({});
 
         resize(native_surface().surface_extents());
 

@@ -357,7 +357,7 @@ namespace neogfx
             {
                 if (iParentWidget != nullptr)
                 {
-                    rect menuBarRect = iParentWidget->non_client_rect() + wm.window_rect(parent_window()).position();
+                    rect menuBarRect = iParentWidget->to_window_coordinates(iParentWidget->client_rect(false)) + wm.window_rect(parent_window()).position();
                     if (!ourRect.intersection(menuBarRect).empty())
                     {
                         if (desktopRect.bottom() - menuBarRect.bottom() > ourRect.height())

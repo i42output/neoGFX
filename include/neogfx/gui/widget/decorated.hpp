@@ -480,9 +480,12 @@ namespace neogfx
             if ((decoration_style() & neogfx::decoration_style::Window) == neogfx::decoration_style::Window && !as_widget().is_root())
                 return; // surface not yet created
 
+            as_widget().set_padding(neogfx::padding{});
+
             iNonClientLayout.emplace(*this);
             non_client_layout().set_padding(neogfx::padding{});
             non_client_layout().set_spacing(size{});
+
             if ((decoration() & neogfx::decoration::TitleBar) == neogfx::decoration::TitleBar)
             {
                 iTitleBarLayout.emplace(non_client_layout());

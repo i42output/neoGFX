@@ -278,7 +278,7 @@ namespace neogfx
 
     void status_bar::init()
     {
-        set_padding(neogfx::padding{});
+        set_padding({});
         iLayout.set_padding(neogfx::padding{});
         iLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalLayout.set_padding(neogfx::padding{});
