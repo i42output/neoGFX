@@ -33,9 +33,9 @@ namespace neogfx
 {
     class i_window_manager;
 
-    class window : public decorated<framed_scrollable_widget, i_window>
+    class window : public decorated<scrollable_widget<framed_widget<widget<i_window>>>>
     {
-        typedef decorated<framed_scrollable_widget, i_window> base_type;
+        typedef decorated<scrollable_widget<framed_widget<widget<i_window>>>> base_type;
     public:
         define_declared_event(Window, window_event, neogfx::window_event&)
         define_declared_event(DismissingChildren, dismissing_children, const i_widget*)
@@ -96,9 +96,6 @@ namespace neogfx
     public:
         color frame_color() const override;
     public:
-        bool is_root() const override;
-        const i_window& root() const override;
-        i_window& root() override;
         void set_parent(i_widget& aParent) override;
         bool is_managing_layout() const override;
         void layout_items_completed() override;

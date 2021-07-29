@@ -24,11 +24,14 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 
 namespace neogfx
 {
+    constexpr dimension DEFAULT_DPI = 96.0;
+
     surface_window::surface_window(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator) :
         iWindow{ aWindow }, 
         iRenderingEngine{ service<i_rendering_engine>() },
@@ -61,17 +64,17 @@ namespace neogfx
 
     dimension surface_window::horizontal_dpi() const
     {
-        return native_window().horizontal_dpi();
+        return has_native_window() ? native_window().horizontal_dpi() : DEFAULT_DPI;
     }
 
     dimension surface_window::vertical_dpi() const
     {
-        return native_window().vertical_dpi();
+        return has_native_window() ? native_window().vertical_dpi() : DEFAULT_DPI;
     }
 
     dimension surface_window::ppi() const
     {
-        return native_window().ppi();
+        return has_native_window() ? native_window().ppi() : DEFAULT_DPI;
     }
 
     bool surface_window::metrics_available() const
@@ -81,7 +84,7 @@ namespace neogfx
 
     size surface_window::extents() const
     {
-        return native_window().extents();
+        return has_native_window() ? native_window().extents() : size{};
     }
 
     dimension surface_window::em_size() const

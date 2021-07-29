@@ -27,6 +27,7 @@
 #include <neogfx/gui/window/window_bits.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 
 namespace neogfx
@@ -35,10 +36,9 @@ namespace neogfx
     class i_native_window;
     class i_nested_window;
     class i_nest;
-    class i_widget;
     class i_drag_drop_target;
 
-    class i_window : public virtual i_standard_layout_container
+    class i_window : public i_widget, public virtual i_standard_layout_container
     {
     public:
         declare_event(window_event, neogfx::window_event&)
@@ -135,7 +135,7 @@ namespace neogfx
     public:
         virtual point mouse_position() const = 0;
     public:
-        virtual padding border() const = 0;
+        virtual neogfx::padding border() const = 0;
         virtual rect widget_part_rect(widget_part_e aWidgetPart) const = 0;
     public:
         virtual const i_widget& client_widget() const = 0;

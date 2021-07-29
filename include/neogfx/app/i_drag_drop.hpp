@@ -24,6 +24,7 @@
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/item_index.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
 #include <neogfx/game/i_ecs.hpp>
 

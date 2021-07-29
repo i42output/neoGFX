@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/layout_item_cache.hpp>
 
 namespace neogfx

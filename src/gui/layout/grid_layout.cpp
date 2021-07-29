@@ -352,8 +352,25 @@ namespace neogfx
         availableSize.cx -= padding().size().cx;
         availableSize.cy -= padding().size().cy;
         iRowLayout.layout_items(availablePos, availableSize);
-        std::vector<dimension> maxRowHeight(iDimensions.cy);
-        std::vector<dimension> maxColWidth(iDimensions.cx);
+
+        struct stack_entry
+        {
+            std::vector<dimension> maxRowHeight;
+            std::vector<dimension> maxColWidth;
+        };
+        typedef std::vector<std::unique_ptr<stack_entry>> calc_stack_t;
+        thread_local calc_stack_t stack;
+        thread_local std::size_t stackIndex;
+        neolib::scoped_counter<std::size_t> stackCounter{ stackIndex };
+        if (stack.size() < stackIndex)
+            stack.push_back(std::make_unique<stack_entry>());
+        auto& maxRowHeight = stack[stackIndex - 1]->maxRowHeight;
+        auto& maxColWidth = stack[stackIndex - 1]->maxColWidth;
+        maxRowHeight.clear();
+        maxColWidth.clear();
+        maxRowHeight.resize(iDimensions.cy);
+        maxColWidth.resize(iDimensions.cx);
+
         bool first = true;
         for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
         {

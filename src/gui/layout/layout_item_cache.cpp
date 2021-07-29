@@ -65,14 +65,7 @@ namespace neogfx
     {
     }
 
-    const i_layout_item& layout_item_cache::subject() const
-    {
-        if (iSubject->is_layout_item_cache())
-            return iSubject->as_layout_item_cache().subject();
-        return *iSubject;
-    }
-
-    i_layout_item& layout_item_cache::subject()
+    i_layout_item& layout_item_cache::subject() const
     {
         if (iSubject->is_layout_item_cache())
             return iSubject->as_layout_item_cache().subject();

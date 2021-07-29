@@ -34,6 +34,7 @@ namespace neogfx
     class widget : public layout_item<object<Interface>>
     {
         typedef layout_item<object<Interface>> base_type;
+        typedef widget<Interface> self_type;
     public:
         define_declared_event(ChildAdded, child_added, i_widget&)
         define_declared_event(ChildRemoved, child_removed, i_widget&)
@@ -85,6 +86,11 @@ namespace neogfx
         bool has_root() const override;
         const i_window& root() const override;
         i_window& root() override;
+        void set_root(i_window& aRoot) override;
+        bool has_surface() const override;
+        bool is_surface() const override;
+        const i_surface& surface() const override;
+        i_surface& surface() override;
         bool has_parent() const override;
         const i_widget& parent() const override;
         i_widget& parent() override;
@@ -187,6 +193,8 @@ namespace neogfx
     public:
         layer_t render_layer() const override;
         void set_render_layer(const std::optional<layer_t>& aLayer) override;
+        bool can_update() const override;
+        bool update(bool aIncludeNonClient = false) override;        
         bool update(const rect& aUpdateRect) override;
         bool requires_update() const override;
         rect update_rect() const override;
@@ -314,6 +322,7 @@ namespace neogfx
         bool iSingular;
         i_widget* iParent;
         mutable std::optional<const i_window*> iRoot;
+        mutable std::optional<const i_device_metrics*> iDeviceMetrics;
         widget_list iChildren;
         bool iAddingChild;
         i_widget* iLinkBefore;

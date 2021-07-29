@@ -106,7 +106,7 @@ namespace chess::zobrist
         bitstring_t castling[4];
     };
 
-    inline keys const& create_keys()
+    inline keys create_keys()
     {
         keys result;
         

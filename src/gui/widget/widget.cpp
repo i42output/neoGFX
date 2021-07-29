@@ -23,6 +23,7 @@
 #include <neogfx/gui/widget/i_push_button.hpp>
 #include <neogfx/gui/widget/i_title_bar.hpp>
 #include <neogfx/gui/widget/i_status_bar.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
 {
@@ -31,5 +32,6 @@ namespace neogfx
     template class widget<i_push_button>;
     template class widget<i_title_bar>;
     template class widget<i_status_bar>;
+    template class widget<i_window>;
 }
 

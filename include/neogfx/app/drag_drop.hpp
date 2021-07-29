@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/vector.hpp>
 #include <neogfx/app/i_drag_drop.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
 {

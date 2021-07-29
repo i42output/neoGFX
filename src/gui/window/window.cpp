@@ -226,6 +226,8 @@ namespace neogfx
         iFocusedWidget{ nullptr },
         iDismissingChildren{ false }
     {
+        set_root(*this);
+
         if (aParent)
             set_parent(*aParent);
 
@@ -325,14 +327,14 @@ namespace neogfx
 
     bool window::has_surface() const
     {
-        if (is_surface())
+        if (window::is_surface())
             return true;
         return find_surface() != nullptr;
     }
 
     const i_surface_window& window::surface() const
     {
-        if (is_surface())
+        if (window::is_surface())
             return *iSurfaceWindow;
         auto s = find_surface();
         if (s != nullptr)
@@ -347,34 +349,34 @@ namespace neogfx
 
     bool window::has_native_surface() const
     {
-        return is_surface() && !*iSurfaceDestroyed;
+        return window::is_surface() && !*iSurfaceDestroyed;
     }
 
     const i_native_surface& window::native_surface() const
     {
-        if (!has_native_surface())
+        if (!window::has_native_surface())
             throw no_native_surface();
         return surface().native_surface();
     }
 
     i_native_surface& window::native_surface()
     {
-        return const_cast<i_native_surface&>(to_const(*this).native_surface());
+        return const_cast<i_native_surface&>(to_const(*this).window::native_surface());
     }
 
     bool window::has_native_window() const
     {
-        return has_native_surface() && surface().surface_type() == neogfx::surface_type::Window;
+        return window::has_native_surface() && window::surface().surface_type() == neogfx::surface_type::Window;
     }
 
     const i_native_window& window::native_window() const
     {
-        return static_cast<const i_native_window&>(native_surface());
+        return static_cast<const i_native_window&>(window::native_surface());
     }
 
     i_native_window& window::native_window()
     {
-        return const_cast<i_native_window&>(to_const(*this).native_window());
+        return const_cast<i_native_window&>(to_const(*this).window::native_window());
     }
 
     bool window::has_parent_window() const
@@ -391,7 +393,7 @@ namespace neogfx
 
     i_window& window::parent_window()
     {
-        return const_cast<i_window&>(to_const(*this).parent_window());
+        return const_cast<i_window&>(to_const(*this).window::parent_window());
     }
 
     bool window::is_parent_of(const i_window& aChildWindow) const
@@ -479,21 +481,6 @@ namespace neogfx
         }
         else
             return base_type::frame_color().with_alpha(is_active() ? 1.0 : 0.25);
-    }
-
-    bool window::is_root() const
-    {
-        return true;
-    }
-
-    const i_window& window::root() const
-    {
-        return *this;
-    }
-
-    i_window& window::root()
-    {
-        return *this;
     }
 
     void window::set_parent(i_widget& aParent)

@@ -355,12 +355,20 @@ namespace neogfx
         iSink = base_type::ChildAdded([&](i_widget& aWidget)
         {
             if (!iScrollbarUpdater)
-                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) { update_scrollbar_visibility(); }, std::chrono::seconds{});
+                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) 
+            { 
+                if (base_type::has_root() && base_type::root().has_native_surface())
+                    update_scrollbar_visibility(); 
+            }, std::chrono::seconds{});
         });
         iSink += base_type::ChildRemoved([&](i_widget& aWidget)
         {
             if (!iScrollbarUpdater)
-                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) { update_scrollbar_visibility(); }, std::chrono::seconds{});
+                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) 
+            { 
+                if (base_type::has_root() && base_type::root().has_native_surface())
+                    update_scrollbar_visibility();
+            }, std::chrono::seconds{});
         });
         init_scrollbars();
     }
@@ -485,8 +493,9 @@ namespace neogfx
         {
             neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
             update_scrollbar_visibility(UsvStageInit);
-            if (as_widget().client_rect().cx > vertical_scrollbar().width() &&
-                as_widget().client_rect().cy > horizontal_scrollbar().width())
+            auto const& cr = as_widget().client_rect();
+            if (cr.cx > vertical_scrollbar().width() &&
+                cr.cy > horizontal_scrollbar().width())
             {
                 update_scrollbar_visibility(UsvStageCheckVertical1);
                 update_scrollbar_visibility(UsvStageCheckHorizontal);
@@ -581,28 +590,30 @@ namespace neogfx
                 min = min.min({});
                 if (as_widget().has_layout())
                 {
+                    auto const& ourLayout = as_widget().layout();
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
                     {
-                        min.x += as_widget().layout().padding().right;
-                        max.x += as_widget().layout().padding().right;
+                        min.x += ourLayout.padding().right;
+                        max.x += ourLayout.padding().right;
                     }
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
                     {
-                        min.y += as_widget().layout().padding().bottom;
-                        max.y += as_widget().layout().padding().bottom;
+                        min.y += ourLayout.padding().bottom;
+                        max.y += ourLayout.padding().bottom;
                     }
                 }
+                auto const& cr = as_widget().client_rect();
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
                 {
                     vertical_scrollbar().set_minimum(min.y);
                     vertical_scrollbar().set_maximum(max.y);
-                    vertical_scrollbar().set_page(units_converter{ *this }.to_device_units(as_widget().client_rect()).height());
+                    vertical_scrollbar().set_page(units_converter{ *this }.to_device_units(cr).height());
                 }
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
                 {
                     horizontal_scrollbar().set_minimum(min.x);
                     horizontal_scrollbar().set_maximum(max.x);
-                    horizontal_scrollbar().set_page(units_converter{ *this }.to_device_units(as_widget().client_rect()).width());
+                    horizontal_scrollbar().set_page(units_converter{ *this }.to_device_units(cr).width());
                 }
             }
             break;

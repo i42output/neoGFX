@@ -38,8 +38,7 @@ namespace neogfx
     {
         friend class layout;
     public:
-        virtual const i_layout_item& subject() const = 0;
-        virtual i_layout_item& subject() = 0;
+        virtual i_layout_item& subject() const = 0;
         virtual i_ref_ptr<i_layout_item>& subject_ptr() = 0;
     public:
         virtual layout_item_disposition& cached_disposition() const = 0;

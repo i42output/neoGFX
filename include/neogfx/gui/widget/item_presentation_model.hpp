@@ -29,6 +29,7 @@
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_drag_drop.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>

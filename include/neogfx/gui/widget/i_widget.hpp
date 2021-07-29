@@ -27,7 +27,6 @@
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/app/i_style.hpp>
 #include <neogfx/app/palette.hpp>
-#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
@@ -37,6 +36,7 @@ namespace neogfx
 {
     class i_surface;
     class i_layout;
+    class i_window;
 
     enum class layout_reason
     {
@@ -85,10 +85,15 @@ namespace neogfx
     public:
         virtual bool is_singular() const = 0;
         virtual void set_singular(bool aSingular) = 0;
-        virtual bool has_root() const = 0;
         virtual bool is_root() const = 0;
+        virtual bool has_root() const = 0;
         virtual const i_window& root() const = 0;
         virtual i_window& root() = 0;
+        virtual void set_root(i_window& aRoot) = 0;
+        virtual bool has_surface() const = 0;
+        virtual bool is_surface() const = 0;
+        virtual const i_surface& surface() const = 0;
+        virtual i_surface& surface() = 0;
         virtual bool has_parent() const = 0;
         virtual const i_widget& parent() const = 0;
         virtual i_widget& parent() = 0;
@@ -158,6 +163,8 @@ namespace neogfx
     public:
         virtual layer_t render_layer() const = 0;
         virtual void set_render_layer(const std::optional<layer_t>& aLayer) = 0;
+        virtual bool can_update() const = 0;
+        virtual bool update(bool aIncludeNonClient = false) = 0;
         virtual bool update(const rect& aUpdateRect) = 0;
         virtual bool requires_update() const = 0;
         virtual rect update_rect() const = 0;
@@ -247,22 +254,6 @@ namespace neogfx
             return *newWidget;
         }
     public:
-        bool is_surface() const
-        {
-            return is_root() && root().is_surface();
-        }
-        bool has_surface() const
-        {
-            return has_root() && root().has_surface();
-        }
-        const i_surface& surface() const
-        {
-            return root().surface();
-        }
-        i_surface& surface()
-        {
-            return root().surface();
-        }
         bool same_surface(const i_widget& aWidget) const
         {
             return has_surface() && aWidget.has_surface() &&
@@ -325,17 +316,6 @@ namespace neogfx
         rect to_client_coordinates(const rect& aWindowCoordinates) const
         {
             return aWindowCoordinates - non_client_rect().top_left();
-        }
-    public:
-        bool can_update() const
-        {
-            return has_root() && root().has_native_surface() && !effectively_hidden() && !layout_items_in_progress();
-        }
-        bool update(bool aIncludeNonClient = false)
-        {
-            if (!can_update())
-                return false;
-            return update(aIncludeNonClient ? to_client_coordinates(non_client_rect()) : client_rect());
         }
     public:
         bool show()

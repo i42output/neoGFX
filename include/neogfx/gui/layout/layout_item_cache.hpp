@@ -123,8 +123,7 @@ namespace neogfx
         void invalidate_combined_transformation() override;
         void fix_weightings(bool aRecalculate = true) override;
     public:
-        const i_layout_item& subject() const override;
-        i_layout_item& subject() override;
+        i_layout_item& subject() const override;
         i_ref_ptr<i_layout_item>& subject_ptr() override;
     public:
         layout_item_disposition& cached_disposition() const override;

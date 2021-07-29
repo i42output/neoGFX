@@ -39,8 +39,9 @@ namespace neogfx
         iCloseButton{ iLayout, push_button_style::TitleBar },
         iStateActive{ false }
     {
-        set_padding(neogfx::padding{2.0_dip});
-        layout().set_padding(neogfx::padding{});
+        set_padding(neogfx::padding{});
+        layout().set_padding(neogfx::padding{ 4.0_dip, 2.0_dip, 4.0_dip, 2.0_dip });
+        layout().set_spacing(4.0_dip);
 
         set_background_opacity(1.0);
 
@@ -52,7 +53,6 @@ namespace neogfx
         iCloseButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
 
         iPinButton.hide();
-        iUnpinButton.hide();
 
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
         {
@@ -143,44 +143,98 @@ namespace neogfx
         auto paper = background_color();
         static std::string const sCloseTexturePattern
         {
-            "[8,8]"
+            "[10,10]"
             "{0,paper}"
             "{1,ink}"
             "{2,ink_with_alpha}"
 
-            "12000021"
-            "21200212"
-            "02122120"
-            "00211200"
-            "00211200"
-            "02122120"
-            "21200212"
-            "12000021"
+            "0000000000"
+            "0120000210"
+            "0212002120"
+            "0021221200"
+            "0002112000"
+            "0002112000"
+            "0021221200"
+            "0212002120"
+            "0120000210"
+            "0000000000"
+        };
+        static std::string const sUnpinTexturePattern
+        {
+            "[11,11]"
+            "{0,paper}"
+            "{1,ink}"
+            "{2,ink_with_alpha}"
+
+            "00000000000"
+            "00011111000"
+            "00010011000"
+            "00010011000"
+            "00010011000"
+            "00010011000"
+            "00111111100"
+            "00000100000"
+            "00000100000"
+            "00000100000"
+            "00000000000"
         };
         static std::string const sCloseHighDpiTexturePattern
         {
-            "[16,16]"
+            "[20,20]"
             "{0,paper}"
             "{1,ink}"
             "{2,ink_with_alpha}"
 
-            "1120000000000211"
-            "1112000000002111"
-            "2111200000021112"
-            "0211120000211120"
-            "0021112002111200"
-            "0002111221112000"
-            "0000211111120000"
-            "0000021111200000"
-            "0000021111200000"
-            "0000211111120000"
-            "0002111221112000"
-            "0021112002111200"
-            "0211120000211120"
-            "2111200000021112"
-            "1112000000002111"
-            "1120000000000211"
+            "00000000000000000000"
+            "00000000000000000000"
+            "00112000000000021100"
+            "00111200000000211100"
+            "00211120000002111200"
+            "00021112000021112000"
+            "00002111200211120000"
+            "00000211122111200000"
+            "00000021111112000000"
+            "00000002111120000000"
+            "00000002111120000000"
+            "00000021111112000000"
+            "00000211122111200000"
+            "00002111200211120000"
+            "00021112000021112000"
+            "00211120000002111200"
+            "00111200000000211100"
+            "00112000000000021100"
+            "00000000000000000000"
+            "00000000000000000000"
+        };
+        static std::string const sUnpinHighDpiTexturePattern
+        {
+            "[22,22]"
+            "{0,paper}"
+            "{1,ink}"
+            "{2,ink_with_alpha}"
 
+            "0000000000000000000000"
+            "0000000000000000000000"
+            "0000001111111111000000"
+            "0000001111111111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000001100001111000000"
+            "0000111111111111110000"
+            "0000111111111111110000"
+            "0000000000110000000000"
+            "0000000000110000000000"
+            "0000000000110000000000"
+            "0000000000110000000000"
+            "0000000000110000000000"
+            "0000000000110000000000"
+            "0000000000000000000000"
+            "0000000000000000000000"
         };
         if (iCloseTexture == std::nullopt || iCloseTexture->first != ink)
         {
@@ -195,6 +249,19 @@ namespace neogfx
                         sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
         }
         iCloseButton.set_image(iCloseTexture->second);
+        if (iUnpinTexture == std::nullopt || iUnpinTexture->first != ink)
+        {
+            iUnpinTexture.emplace(
+                ink,
+                !high_dpi() ?
+                neogfx::image{
+                        "neogfx::tool_title_bar::iUnpinTexture::" + ink.to_string(),
+                        sUnpinTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0.5) } } } :
+                    neogfx::image{
+                        "neogfx::tool_title_bar::iUnpinHighDpiTexture::" + ink.to_string(),
+                        sUnpinHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+        }
+        iUnpinButton.set_image(iUnpinTexture->second);
         update();
     }
 

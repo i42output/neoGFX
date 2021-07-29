@@ -131,14 +131,19 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::device_metrics_available() const
     {
-        return has_root() && root().has_native_window();
+        if (iDeviceMetrics == std::nullopt)
+        {
+            if (self_type::has_root() && self_type::root().has_native_window())
+                iDeviceMetrics = &self_type::surface();
+        }
+        return iDeviceMetrics != std::nullopt;
     }
 
     template <typename Interface>
     const i_device_metrics& widget<Interface>::device_metrics() const
     {
-        if (device_metrics_available())
-            return surface();
+        if (self_type::device_metrics_available())
+            return **iDeviceMetrics;
         throw no_device_metrics();
     }
 
@@ -164,7 +169,10 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::is_root() const
     {
-        return false;
+        if constexpr (std::is_base_of_v<i_window, Interface>)
+            return iRoot == this;
+        else
+            return false;
     }
 
     template <typename Interface>
@@ -184,15 +192,50 @@ namespace neogfx
     template <typename Interface>
     const i_window& widget<Interface>::root() const
     {
-        if (has_root())
-            return **iRoot;
-        throw no_root();
+        if constexpr (std::is_base_of_v<i_window, Interface>)
+            return *this;
+        else
+        {
+            if (self_type::has_root())
+                return **iRoot;
+            throw no_root();
+        }
     }
 
     template <typename Interface>
     i_window& widget<Interface>::root()
     {
-        return const_cast<i_window&>(to_const(*this).root());
+        return const_cast<i_window&>(to_const(*this).self_type::root());
+    }
+
+    template <typename Interface>
+    void widget<Interface>::set_root(i_window& aRoot)
+    {
+        iRoot = &aRoot;
+    }
+
+    template <typename Interface>
+    bool widget<Interface>::has_surface() const
+    {
+        return self_type::has_root() && self_type::root().has_surface();
+    }
+
+    template <typename Interface>
+    bool widget<Interface>::is_surface() const
+    {
+        return self_type::is_root() && self_type::root().is_surface();
+    }
+
+    template <typename Interface>
+    const i_surface& widget<Interface>::surface() const
+    {
+        return self_type::root().surface();
+    }
+
+    template <typename Interface>
+    i_surface& widget<Interface>::surface()
+    {
+        return self_type::root().surface();
     }
 
     template <typename Interface>
@@ -220,7 +263,9 @@ namespace neogfx
     {
         if (iParent != &aParent)
         {
-            if ((is_root() && !root().is_nested()) || aParent.adding_child())
+            if (aParent.has_root())
+                iRoot = &aParent.root();
+            if ((self_type::is_root() && !self_type::root().is_nested()) || aParent.adding_child())
             {
                 iParent = &aParent;
                 parent_changed();
@@ -235,7 +280,7 @@ namespace neogfx
     {
         auto& self = as_widget();
 
-        if (!is_root())
+        if (!self_type::is_root())
         {
             self.reset_origin();
             self.update_layout();
@@ -267,8 +312,8 @@ namespace neogfx
         iChildren.push_back(child);
         child->set_parent(*this);
         child->set_singular(false);
-        if (has_root())
-            root().widget_added(*child);
+        if (self_type::has_root())
+            self_type::root().widget_added(*child);
         ChildAdded.trigger(*child);
         return *child;
     }
@@ -285,8 +330,8 @@ namespace neogfx
             keep->set_singular(true);
         if (has_layout())
             layout().remove(aChild);
-        if (has_root())
-            root().widget_removed(aChild);
+        if (self_type::has_root())
+            self_type::root().widget_removed(aChild);
         ChildRemoved.trigger(*keep);
         aChildRef = keep;
     }
@@ -705,7 +750,7 @@ namespace neogfx
             if (has_layout())
             {
                 layout_items_started();
-                if (is_root() && size_policy() != size_constraint::Manual)
+                if (self_type::is_root() && size_policy() != size_constraint::Manual)
                 {
                     size desiredSize = self.extents();
                     switch (size_policy().horizontal_size_policy())
@@ -793,7 +838,7 @@ namespace neogfx
     bool widget<Interface>::high_dpi() const
     {
         return device_metrics_available() ?
-            root().surface().ppi() >= 150.0 : 
+            self_type::root().surface().ppi() >= 150.0 : 
             service<i_surface_manager>().display().metrics().ppi() >= 150.0;
     }
 
@@ -801,7 +846,7 @@ namespace neogfx
     dimension widget<Interface>::dpi_scale_factor() const
     {
         return device_metrics_available() ?
-            default_dpi_scale_factor(root().surface().ppi()) :
+            default_dpi_scale_factor(self_type::root().surface().ppi()) :
             service<i_app>().default_dpi_scale_factor();
     }
 
@@ -842,7 +887,7 @@ namespace neogfx
     {
         auto& self = as_widget();
 
-        if (!is_root() || root().is_nested())
+        if (!self_type::is_root() || self_type::root().is_nested())
         {
             update(true);
             self.reset_origin();
@@ -855,8 +900,8 @@ namespace neogfx
                 parent().layout_items_completed();
             }
         }
-        if (is_root())
-            root().surface().move_surface(!root().is_nested() ? self.position() : self.origin());
+        if (self_type::is_root())
+            self_type::root().surface().move_surface(!self_type::root().is_nested() ? self.position() : self.origin());
         PositionChanged.trigger();
     }
 
@@ -884,8 +929,8 @@ namespace neogfx
         {
             update(true);
             self.set_extents(aSize);
-            if (is_root())
-                root().surface().resize_surface(aSize);
+            if (self_type::is_root())
+                self_type::root().surface().resize_surface(aSize);
             update(true);
             resized();
         }
@@ -1062,7 +1107,7 @@ namespace neogfx
     {
         auto& self = as_widget();
 
-        auto const& adjustedPadding = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
+        auto const& adjustedPadding = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(self_type::is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
         return self.transformation() * units_converter(*this).from_device_units(adjustedPadding);
     }
 
@@ -1104,6 +1149,20 @@ namespace neogfx
     }
 
     template <typename Interface>
+    bool widget<Interface>::can_update() const
+    {
+        return self_type::has_root() && self_type::root().has_native_surface() && !effectively_hidden() && !layout_items_in_progress();
+    }
+
+    template <typename Interface>
+    bool widget<Interface>::update(bool aIncludeNonClient)
+    {
+        if (!can_update())
+            return false;
+        return update(aIncludeNonClient ? to_client_coordinates(non_client_rect()) : client_rect());
+    }
+
+    template <typename Interface>
     bool widget<Interface>::update(const rect& aUpdateRect)
     {
 #ifdef NEOGFX_DEBUG
@@ -1141,7 +1200,7 @@ namespace neogfx
         rect clipRect = to_client_coordinates(non_client_rect());
         if (!aIncludeNonClient)
             clipRect = clipRect.intersection(client_rect());
-        if (!is_root())
+        if (!self_type::is_root())
             clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         return *(cachedRect = clipRect);
     }
@@ -1525,7 +1584,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::effectively_visible() const
     {
-        return visible() && (is_root() || !has_parent() || parent().effectively_visible());
+        return visible() && (self_type::is_root() || !has_parent() || parent().effectively_visible());
     }
 
     template <typename Interface>
@@ -1549,18 +1608,18 @@ namespace neogfx
             Visible = aVisible;
             if (!visible() && isEntered)
             {
-                if (!is_root())
-                    root().as_widget().mouse_entered(root().mouse_position());
+                if (!self_type::is_root())
+                    self_type::root().as_widget().mouse_entered(self_type::root().mouse_position());
                 else
                     mouse_left();
             }
             VisibilityChanged.trigger();
             if (effectively_hidden())
             {
-                if (has_root() && root().has_focused_widget() &&
-                    (root().focused_widget().is_descendent_of(*this) || &root().focused_widget() == this))
+                if (self_type::has_root() && self_type::root().has_focused_widget() &&
+                    (self_type::root().focused_widget().is_descendent_of(*this) || &self_type::root().focused_widget() == this))
                 {
-                    root().release_focused_widget(root().focused_widget());
+                    self_type::root().release_focused_widget(self_type::root().focused_widget());
                 }
             }   
             as_widget().update_layout(true, true);
@@ -1578,7 +1637,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::effectively_enabled() const
     {
-        return enabled() && (is_root() || !has_parent() || parent().effectively_enabled());
+        return enabled() && (self_type::is_root() || !has_parent() || parent().effectively_enabled());
     }
     
     template <typename Interface>
@@ -1602,8 +1661,8 @@ namespace neogfx
             Enabled = aEnable;
             if (!enabled() && isEntered)
             {
-                if (!is_root())
-                    root().as_widget().mouse_entered(root().mouse_position());
+                if (!self_type::is_root())
+                    self_type::root().as_widget().mouse_entered(self_type::root().mouse_position());
                 else
                     mouse_left();
             }
@@ -1616,7 +1675,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::entered(bool aChildEntered) const
     {
-        return has_root() && root().has_entered_widget() && (&root().entered_widget() == this || (aChildEntered && root().entered_widget().is_descendent_of(*this)));
+        return self_type::has_root() && self_type::root().has_entered_widget() && (&self_type::root().entered_widget() == this || (aChildEntered && self_type::root().entered_widget().is_descendent_of(*this)));
     }
 
     template <typename Interface>
@@ -1752,25 +1811,25 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::has_focus() const
     {
-        return has_root() && root().is_active() && root().has_focused_widget() && &root().focused_widget() == this;
+        return self_type::has_root() && self_type::root().is_active() && self_type::root().has_focused_widget() && &self_type::root().focused_widget() == this;
     }
 
     template <typename Interface>
     bool widget<Interface>::child_has_focus() const
     {
-        return has_root() && root().is_active() && root().has_focused_widget() && root().focused_widget().is_descendent_of(*this);
+        return self_type::has_root() && self_type::root().is_active() && self_type::root().has_focused_widget() && self_type::root().focused_widget().is_descendent_of(*this);
     }
 
     template <typename Interface>
     void widget<Interface>::set_focus(focus_reason aFocusReason)
     {
-        root().set_focused_widget(*this, aFocusReason);
+        self_type::root().set_focused_widget(*this, aFocusReason);
     }
 
     template <typename Interface>
     void widget<Interface>::release_focus()
     {
-        root().release_focused_widget(*this);
+        self_type::root().release_focused_widget(*this);
     }
 
     template <typename Interface>
@@ -1828,7 +1887,7 @@ namespace neogfx
     template <typename Interface>
     mouse_event_location widget<Interface>::mouse_event_location() const
     {
-        if (has_root() && root().has_native_surface())
+        if (self_type::has_root() && self_type::root().has_native_surface())
             return surface().as_surface_window().current_mouse_event_location();
         else
             return neogfx::mouse_event_location::None;
@@ -1900,7 +1959,7 @@ namespace neogfx
     {
         auto& self = as_widget();
 
-        return root().mouse_position() - self.origin();
+        return self_type::root().mouse_position() - self.origin();
     }
 
     template <typename Interface>
@@ -1973,10 +2032,10 @@ namespace neogfx
 
         auto const clientPosition = aPosition - self.origin();
         const i_widget* result = nullptr;
-        if (is_root() && (root().style() & window_style::Resize) == window_style::Resize)
+        if (self_type::is_root() && (self_type::root().style() & window_style::Resize) == window_style::Resize)
         {
             auto const outerRect = to_client_coordinates(non_client_rect());
-            auto const innerRect = outerRect.deflated(root().border());
+            auto const innerRect = outerRect.deflated(self_type::root().border());
             if (outerRect.contains(clientPosition) && !innerRect.contains(clientPosition))
                 result = this;
         }

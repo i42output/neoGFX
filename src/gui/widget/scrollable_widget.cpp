@@ -21,10 +21,12 @@
 #include <neogfx/gui/widget/scrollable_widget.tpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/view/view_container.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
 {
     template class scrollable_widget<>;
     template class scrollable_widget<framed_widget<widget<>>>;
+    template class scrollable_widget<framed_widget<widget<i_window>>>;
 }
 

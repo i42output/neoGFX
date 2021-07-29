@@ -26,14 +26,15 @@
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/app/i_palette.hpp>
 #include <neogfx/gui/widget/i_button.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 #include <neogfx/gui/widget/i_item_model.hpp>
-#include <neogfx/app/i_palette.hpp>
 
 namespace neogfx
 {
     class i_drag_drop_item;
+    class i_drag_drop_target;
 
     enum class item_cell_flags : uint32_t
     {
