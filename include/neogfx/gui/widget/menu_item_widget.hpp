@@ -83,7 +83,7 @@ namespace neogfx
         text_widget iText;
         horizontal_spacer iSpacer;
         text_widget iShortcutText;
-        std::optional<std::unique_ptr<neolib::callback_timer>> iSubMenuOpener;
+        std::optional<std::unique_ptr<widget_timer>> iSubMenuOpener;
         mutable std::optional<std::pair<color, texture>> iSubMenuArrow;
     };
 }

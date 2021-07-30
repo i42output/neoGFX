@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
-#include <neolib/task/timer.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/i_async_layout.hpp>
 

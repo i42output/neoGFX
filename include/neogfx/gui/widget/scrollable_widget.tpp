@@ -355,19 +355,17 @@ namespace neogfx
         iSink = base_type::ChildAdded([&](i_widget& aWidget)
         {
             if (!iScrollbarUpdater)
-                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) 
+                iScrollbarUpdater.emplace(*this, [this](widget_timer&) 
             { 
-                if (base_type::has_root() && base_type::root().has_native_surface())
-                    update_scrollbar_visibility(); 
+                update_scrollbar_visibility(); 
             }, std::chrono::seconds{});
         });
         iSink += base_type::ChildRemoved([&](i_widget& aWidget)
         {
             if (!iScrollbarUpdater)
-                iScrollbarUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer&) 
+                iScrollbarUpdater.emplace(*this, [this](widget_timer&) 
             { 
-                if (base_type::has_root() && base_type::root().has_native_surface())
-                    update_scrollbar_visibility();
+                update_scrollbar_visibility();
             }, std::chrono::seconds{});
         });
         init_scrollbars();

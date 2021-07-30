@@ -596,13 +596,18 @@ namespace neogfx
 
     bool layout::device_metrics_available() const
     {
-        return has_layout_owner() && layout_owner().device_metrics_available();
+        if (iDeviceMetrics == std::nullopt)
+        {
+            if (has_layout_owner() && layout_owner().device_metrics_available())
+                iDeviceMetrics = &layout_owner().device_metrics();
+        }
+        return iDeviceMetrics != std::nullopt;
     }
 
     const i_device_metrics& layout::device_metrics() const
     {
-        if (device_metrics_available())
-            return layout_owner().device_metrics();
+        if (layout::device_metrics_available())
+            return **iDeviceMetrics;
         throw no_device_metrics();
     }
 

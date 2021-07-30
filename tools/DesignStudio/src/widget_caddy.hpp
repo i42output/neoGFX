@@ -105,7 +105,7 @@ namespace neogfx::DesignStudio
         i_project& iProject;
         weak_ref_ptr<i_element> iElement;
         weak_ref_ptr<i_layout_item> iItem;
-        neolib::callback_timer iAnimator;
+        widget_timer iAnimator;
         std::optional<drag_info> iDragInfo;
     };
 }

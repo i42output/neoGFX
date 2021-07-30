@@ -182,6 +182,7 @@ namespace neogfx
     private:
         i_layout* iParent;
         mutable i_widget* iOwner;
+        mutable std::optional<const i_device_metrics*> iDeviceMetrics;
         optional_size iSpacing;
         bool iAlwaysUseSpacing;
         neogfx::alignment iAlignment;

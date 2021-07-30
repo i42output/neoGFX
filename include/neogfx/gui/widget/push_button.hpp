@@ -87,7 +87,7 @@ namespace neogfx
     private:
         void init();
     private:
-        neolib::callback_timer iAnimator;
+        widget_timer iAnimator;
         uint32_t iAnimationFrame;
         push_button_style iStyle;
         optional_color iFaceColor;

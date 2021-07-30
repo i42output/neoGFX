@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/optional.hpp>
-#include <neolib/task/timer.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
@@ -88,8 +88,9 @@ namespace neogfx
     public:
         static dimension width(scrollbar_style aStyle);
     public:
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
+        bool is_widget() const final;
+        const i_widget& as_widget() const final;
+        i_widget& as_widget();
     public:
         rect element_rect(skin_element aElement) const override;
     private:
@@ -109,7 +110,7 @@ namespace neogfx
         std::optional<value_type> iLockedPosition;
         scrollbar_element iClickedElement;
         scrollbar_element iHoverElement;
-        std::optional<std::shared_ptr<neolib::callback_timer>> iTimer;
+        std::optional<std::shared_ptr<widget_timer>> iTimer;
         bool iPaused;
         point iThumbClickedPosition;
         value_type iThumbClickedValue;

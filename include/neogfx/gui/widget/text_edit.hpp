@@ -666,8 +666,8 @@ namespace neogfx
         string iTabStopHint;
         basic_point<std::optional<dimension>> iCursorHint;
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
-        neolib::callback_timer iAnimator;
-        std::optional<neolib::callback_timer> iDragger;
+        widget_timer iAnimator;
+        std::optional<widget_timer> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;

@@ -213,7 +213,7 @@ namespace neogfx::game
 
     void canvas::init()
     {
-        iUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
+        iUpdater.emplace(*this, [this](widget_timer& aTimer)
         {
             aTimer.again();
             if (!have_ecs())

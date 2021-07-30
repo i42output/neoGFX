@@ -120,7 +120,7 @@ namespace neogfx
         preview_box(gradient_dialog& aOwner) :
             base_type(aOwner.iPreviewGroupBox.item_layout()),
             iOwner(aOwner),
-            iAnimationTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
+            iAnimationTimer{ *this, [this](widget_timer& aTimer)
             {
                 aTimer.again();
                 animate();
@@ -189,7 +189,7 @@ namespace neogfx
     private:
         gradient_dialog& iOwner;
         neolib::sink iSink;
-        neolib::callback_timer iAnimationTimer;
+        widget_timer iAnimationTimer;
         bool iTracking;
     };
 

@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/task/timer.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/property.hpp>
 #include <neogfx/app/palette.hpp>
@@ -80,22 +80,22 @@ namespace neogfx
         void property_changed(i_property& aProperty) override;
         // i_widget
     public:
-        bool is_singular() const override;
-        void set_singular(bool aSingular) override;
-        bool is_root() const override;
-        bool has_root() const override;
-        const i_window& root() const override;
-        i_window& root() override;
-        void set_root(i_window& aRoot) override;
-        bool has_surface() const override;
+        bool is_singular() const final;
+        void set_singular(bool aSingular) final;
+        bool is_root() const final;
+        bool has_root() const final;
+        const i_window& root() const final;
+        i_window& root() final;
+        void set_root(i_window& aRoot) final;
         bool is_surface() const override;
+        bool has_surface() const override;
         const i_surface& surface() const override;
         i_surface& surface() override;
-        bool has_parent() const override;
-        const i_widget& parent() const override;
-        i_widget& parent() override;
+        bool has_parent() const final;
+        const i_widget& parent() const final;
+        i_widget& parent() final;
         void set_parent(i_widget& aParent) override;
-        void parent_changed() override;
+        void parent_changed() final;
         bool adding_child() const override;
         i_widget& add(i_widget& aChild) override;
         i_widget& add(const i_ref_ptr<i_widget>& aChild) override;

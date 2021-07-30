@@ -94,7 +94,7 @@ namespace neogfx
         vertical_layout iSecondaryLayout;
         push_button iStepUpButton;
         push_button iStepDownButton;
-        std::optional<neolib::callback_timer> iStepper;
+        std::optional<widget_timer> iStepper;
         mutable std::optional<std::pair<color, texture>> iUpArrow;
         mutable std::optional<std::pair<color, texture>> iDownArrow;
         value_type iMinimum;

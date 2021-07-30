@@ -39,7 +39,7 @@ namespace chess::gui
         iColorWhitePiece{ ng::color::Gray90 },
         iColorBlackPiece{ ng::color::Gray10 },
         iColorizePieces{ true },
-        iAnimator{ ng::service<ng::i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
+        iAnimator{ *this, [this](ng::widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 } },
         iSquareIdentification{ square_identification::None },
         iShowValidMoves{ false },
         iEditBoard{ false }

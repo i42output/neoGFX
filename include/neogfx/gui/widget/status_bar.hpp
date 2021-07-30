@@ -70,7 +70,7 @@ namespace neogfx
             neogfx::size_policy size_policy() const override;
         private:
             horizontal_layout iLayout;
-            std::unique_ptr<neolib::callback_timer> iUpdater;
+            std::unique_ptr<widget_timer> iUpdater;
         };
         class size_grip_widget : public image_widget
         {

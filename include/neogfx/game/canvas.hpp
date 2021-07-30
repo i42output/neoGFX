@@ -66,7 +66,7 @@ namespace neogfx::game
         std::shared_ptr<game::i_ecs> iEcs;
         std::vector<bool> iLayers;
         sink iSink;
-        std::optional<neolib::callback_timer> iUpdater;
+        std::optional<widget_timer> iUpdater;
         bool iEcsPaused;
     };
 }

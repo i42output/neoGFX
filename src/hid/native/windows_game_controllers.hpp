@@ -30,7 +30,7 @@
 #include <xinput.h>
 #pragma comment(lib, "Xinput.lib")
 #include <neolib/core/map.hpp>
-#include <neolib/task/timer.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/hid/game_controllers.hpp>
 
 namespace neogfx

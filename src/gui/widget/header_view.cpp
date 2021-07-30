@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/task/timer.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neolib/core/lifetime.hpp>
 #include <neolib/task/thread.hpp>
 #include <neogfx/app/i_app.hpp>
@@ -333,8 +333,8 @@ namespace neogfx
             if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
                 request_full_update();
         });
-        iUpdater.emplace(service<i_async_task>(), 
-            [this](neolib::callback_timer& aTimer) 
+        iUpdater.emplace(*this, 
+            [this](widget_timer& aTimer) 
         { 
             aTimer.again();
             if (iUpdateNeeded)

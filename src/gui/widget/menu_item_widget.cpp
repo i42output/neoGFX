@@ -392,7 +392,7 @@ namespace neogfx
             {
                 if (!iSubMenuOpener)
                 {
-                    iSubMenuOpener = std::make_unique<neolib::callback_timer>(service<i_async_task>(), [this](neolib::callback_timer&)
+                    iSubMenuOpener = std::make_unique<widget_timer>(*this, [this](widget_timer&)
                     {
                         destroyed_flag destroyed{ *this };
                         if (!menu_item().sub_menu().is_open())

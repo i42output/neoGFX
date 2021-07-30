@@ -23,7 +23,7 @@
 #include <unordered_set>
 #include <boost/lexical_cast.hpp>
 #include <neolib/core/string_utils.hpp>
-#include <neolib/task/timer.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include "../../../gfx/native/opengl.hpp"

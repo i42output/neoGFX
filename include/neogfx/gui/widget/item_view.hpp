@@ -186,7 +186,7 @@ namespace neogfx
         ref_ptr<i_item_selection_model> iSelectionModel;
         bool iHotTracking;
         bool iIgnoreNextMouseMove;
-        std::optional<neolib::callback_timer> iMouseTracker;
+        std::optional<widget_timer> iMouseTracker;
         optional_item_presentation_model_index iEditing;
         std::shared_ptr<i_item_editor> iEditor;
         bool iBeginningEdit;

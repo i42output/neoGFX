@@ -123,7 +123,7 @@ namespace chess::gui
         ng::color iColorBlackPiece;
         std::unordered_map<piece, ng::texture> iPieceTextures;
         bool iColorizePieces;
-        neolib::callback_timer iAnimator;
+        ng::widget_timer iAnimator;
         std::optional<coordinates> iCursor;
         std::optional<coordinates> iSelection;
         std::optional<ng::point> iSelectionPosition;

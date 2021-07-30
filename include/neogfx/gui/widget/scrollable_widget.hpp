@@ -159,7 +159,7 @@ namespace neogfx
         void init();
     private:
         sink iSink;
-        std::optional<neolib::callback_timer> iScrollbarUpdater;
+        std::optional<widget_timer> iScrollbarUpdater;
         neogfx::scrollbar_style iScrollbarStyle;
         scrollbar iVerticalScrollbar;
         scrollbar iHorizontalScrollbar;

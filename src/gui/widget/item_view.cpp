@@ -453,7 +453,7 @@ namespace neogfx
                     {
                         if (!drag_drop_enabled())
                         {
-                            iMouseTracker.emplace(service<i_async_task>(), [this, aKeyModifiers](neolib::callback_timer& aTimer)
+                            iMouseTracker.emplace(*this, [this, aKeyModifiers](widget_timer& aTimer)
                             {
                                 aTimer.again();
                                 auto const pos = mouse_position();

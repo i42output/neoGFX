@@ -41,7 +41,7 @@ namespace neogfx
 
     push_button::push_button(push_button_style aStyle) :
         button{ default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -50,7 +50,7 @@ namespace neogfx
 
     push_button::push_button(std::string const& aText, push_button_style aStyle) :
         button{ aText, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -59,7 +59,7 @@ namespace neogfx
 
     push_button::push_button(const i_texture& aTexture, push_button_style aStyle) :
         button{ aTexture, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -68,7 +68,7 @@ namespace neogfx
 
     push_button::push_button(const i_image& aImage, push_button_style aStyle) :
         button{ aImage, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -77,7 +77,7 @@ namespace neogfx
     
     push_button::push_button(std::string const& aText, const i_texture& aTexture, push_button_style aStyle) :
         button{ aText, aTexture, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -86,7 +86,7 @@ namespace neogfx
 
     push_button::push_button(std::string const& aText, const i_image& aImage, push_button_style aStyle) :
         button{ aText, aImage, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -95,7 +95,7 @@ namespace neogfx
 
     push_button::push_button(i_widget& aParent, push_button_style aStyle) :
         button{ aParent, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -104,7 +104,7 @@ namespace neogfx
 
     push_button::push_button(i_widget& aParent, std::string const& aText, push_button_style aStyle) :
         button{ aParent, aText, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -113,7 +113,7 @@ namespace neogfx
 
     push_button::push_button(i_widget& aParent, const i_texture& aTexture, push_button_style aStyle) :
         button{ aParent, aTexture, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -122,7 +122,7 @@ namespace neogfx
 
     push_button::push_button(i_widget& aParent, const i_image& aImage, push_button_style aStyle) :
         button{ aParent, aImage, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -131,7 +131,7 @@ namespace neogfx
 
     push_button::push_button(i_widget& aParent, std::string const& aText, const i_texture& aTexture, push_button_style aStyle) :
         button{ aParent, aText, aTexture, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -140,7 +140,7 @@ namespace neogfx
 
     push_button::push_button(i_widget& aParent, std::string const& aText, const i_image& aImage, push_button_style aStyle) :
         button{ aParent, aText, aImage, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -149,7 +149,7 @@ namespace neogfx
 
     push_button::push_button(i_layout& aLayout, push_button_style aStyle) :
         button{ aLayout, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -158,7 +158,7 @@ namespace neogfx
 
     push_button::push_button(i_layout& aLayout, std::string const& aText, push_button_style aStyle) :
         button{ aLayout, aText, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -167,7 +167,7 @@ namespace neogfx
 
     push_button::push_button(i_layout& aLayout, const i_texture& aTexture, push_button_style aStyle) :
         button{ aLayout, aTexture, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -176,7 +176,7 @@ namespace neogfx
 
     push_button::push_button(i_layout& aLayout, const i_image& aImage, push_button_style aStyle) :
         button{ aLayout, aImage, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -185,7 +185,7 @@ namespace neogfx
 
     push_button::push_button(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, push_button_style aStyle) :
         button{ aLayout, aText, aTexture, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {
@@ -194,7 +194,7 @@ namespace neogfx
 
     push_button::push_button(i_layout& aLayout, std::string const& aText, const i_image& aImage, push_button_style aStyle) :
         button{ aLayout, aText, aImage, default_push_button_alignment(aStyle) },
-        iAnimator{ service<i_async_task>(), [this](neolib::callback_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
+        iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
         iStyle{ aStyle }
     {

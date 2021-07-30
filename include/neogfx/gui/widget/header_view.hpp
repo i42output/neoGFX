@@ -114,7 +114,7 @@ namespace neogfx
         bool iExpandLastColumn;
         optional_dimension iSeparatorWidth;
         std::vector<section_dimension> iSectionWidths;
-        std::optional<neolib::callback_timer> iUpdater;
+        std::optional<widget_timer> iUpdater;
         bool iUpdateNeeded;
     };
 }

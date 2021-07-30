@@ -27,7 +27,7 @@ namespace neogfx
     tool_title_bar::tool_title_bar(i_standard_layout_container& aContainer, std::string const& aTitle) :
         widget{ aContainer.title_bar_layout() },
         iContainer{ aContainer },
-        iUpdater{service<i_async_task>(), [this](neolib::callback_timer& aTimer)
+        iUpdater{*this, [this](widget_timer& aTimer)
         {
             aTimer.again();
             update_state();

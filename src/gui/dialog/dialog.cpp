@@ -257,7 +257,7 @@ namespace neogfx
 
     void dialog::init()
     {
-        iUpdater.emplace(service<i_async_task>(), [this](neolib::callback_timer& aTimer)
+        iUpdater.emplace(*this, [this](widget_timer& aTimer)
         {
             aTimer.again();
             if (iButtonBox)
