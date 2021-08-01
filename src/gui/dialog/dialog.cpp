@@ -183,6 +183,36 @@ namespace neogfx
             service<debug::logger>() << typeid(*this).name() << "::exec()" << endl;
 #endif
 
+        if (!iButtonBox)
+        {
+            iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifiers_e)
+            {
+                if (root().is_active())
+                {
+                    switch (aScanCode)
+                    {
+                    case ScanCode_RETURN:
+                        if (!root().has_focused_widget() ||
+                            (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeReturnKey)
+                        {
+                            accept();
+                        }
+                        break;
+                    case ScanCode_ESCAPE:
+                        if (!root().has_focused_widget() ||
+                            (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeEscapeKey)
+                        {
+                            if ((style() & window_style::Close) == window_style::Close)
+                                reject();
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            });
+        }
+
         destroyed_flag destroyed{ surface() };
         event_processing_context epc(service<i_async_task>(), "neogfx::dialog");
         while (iResult == std::nullopt)
@@ -191,6 +221,7 @@ namespace neogfx
             if (destroyed && result() == dialog_result::NoResult)
                 set_result(dialog_result::Rejected);
         }
+
         return *iResult;
     }
 
@@ -212,20 +243,7 @@ namespace neogfx
 
     bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
-        if (iButtonBox) // delegate to button box
-            return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-        switch (aScanCode)
-        {
-        case ScanCode_RETURN:
-            accept();
-            return true;
-        case ScanCode_ESCAPE:
-            if ((style() & window_style::Close) == window_style::Close)
-                reject();
-            return true;
-        default:
-            return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-        }
+        return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
     }
 
     bool dialog::has_layout(standard_layout aStandardLayout) const

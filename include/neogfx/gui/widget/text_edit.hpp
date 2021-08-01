@@ -35,17 +35,28 @@ namespace neogfx
 {
     enum class text_edit_caps : uint32_t
     {
-        None            = 0x00000000,
+        None        = 0x00000000,
 
-        SingleLine      = 0x00000001,
-        MultiLine       = 0x00000002,
+        SingleLine  = 0x00000001,
+        MultiLine   = 0x00000002,
 
-        OnlyAccept      = 0x00010000,
+        Password    = 0x00000100,
 
-        LINES_MASK      = 0x0000000F,
-        ACCEPT_MASK     = 0x000F0000,
+        OnlyAccept  = 0x00010000,
+
+        LINES_MASK  = SingleLine | MultiLine
     };
+}
 
+begin_declare_enum(neogfx::text_edit_caps)
+declare_enum_string(neogfx::text_edit_caps, SingleLine)
+declare_enum_string(neogfx::text_edit_caps, MultiLine)
+declare_enum_string(neogfx::text_edit_caps, Password)  
+declare_enum_string(neogfx::text_edit_caps, OnlyAccept)
+end_declare_enum(neogfx::text_edit_caps)
+
+namespace neogfx
+{
     inline text_edit_caps operator~(text_edit_caps aLhs)
     {
         return static_cast<text_edit_caps>(~static_cast<uint32_t>(aLhs));

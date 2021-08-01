@@ -84,5 +84,6 @@ namespace neogfx
         vertical_layout iButtonBoxLayout;
         std::optional<dialog_button_box> iButtonBox;
         std::optional<dialog_result> iResult;
+        sink iSink;
     };
 }

@@ -32,18 +32,20 @@ namespace neogfx::nrc
             ui_element<>{ aParser, aParent, aElementType }
         {
             add_header("neogfx/gui/widget/text_edit.hpp");
-            add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
+            add_data_names({ "caps", "size_hint", "tab_stop_hint", "text_color", "paper_color" });
         }
         text_edit(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t, ui_element_type aElementType = ui_element_type::TextEdit) :
             ui_element<>{ aParser, aParent, member_element, aElementType }
         {
             add_header("neogfx/gui/widget/text_edit.hpp");
-            add_data_names({ "size_hint", "tab_stop_hint", "text_color", "paper_color" });
+            add_data_names({ "caps", "size_hint", "tab_stop_hint", "text_color", "paper_color" });
         }
     public:
         void parse(const neolib::i_string& aName, const data_t& aData) override
         {
-            if (aName == "size_hint")
+            if (aName == "caps")
+                iCaps = get_enum<text_edit_caps>(aData);
+            else if (aName == "size_hint")
                 iSizeHint = size_hint{ aData.get<neolib::i_string>().to_std_string() };
             else if (aName == "tab_stop_hint")
                 iTabStopHint = aData.get<neolib::i_string>();
@@ -56,7 +58,9 @@ namespace neogfx::nrc
         }
         void parse(const neolib::i_string& aName, const array_data_t& aData) override
         {
-            if (aName == "size_hint")
+            if (aName == "caps")
+                iCaps = get_enum<text_edit_caps>(aData);
+            else if (aName == "size_hint")
             {
                 if (aData.size() == 1)
                     iSizeHint = size_hint{ aData[0].get<neolib::i_string>().to_std_string() };
@@ -77,7 +81,12 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             if (type() == ui_element_type::TextEdit)
-                emit("  %1% %2%;\n", type_name(), id());
+            {
+                if (!iCaps)
+                    emit("  %1% %2%;\n", type_name(), id());
+                else
+                    emit("  %1% %2%{ %3 };\n", type_name(), id(), enum_to_string("text_edit_caps", *iCaps));
+            }
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
@@ -115,9 +124,13 @@ namespace neogfx::nrc
             }
             if (iTextColor || iPaperColor)
                 emit("   %1%.set_default_style(%1%DefaultStyle);\n", id());
+            if (iCaps && (*iCaps & text_edit_caps::Password) == text_edit_caps::Password)
+                emit("   %1%.set_password(true);\n", id());
         }
     protected:
         using ui_element<>::emit;
+    protected:
+        neolib::optional<text_edit_caps> iCaps;
     private:
         neolib::optional<size_hint> iSizeHint;
         neolib::optional<string> iTabStopHint;

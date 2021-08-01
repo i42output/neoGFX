@@ -128,6 +128,7 @@ namespace neogfx
         KeepChildFocus    = 0x00010000,
         ConsumeTabKey     = 0x10000000,
         ConsumeReturnKey  = 0x20000000,
+        ConsumeEscapeKey  = 0x20000000,
         IgnoreNonClient   = 0x40000000
     };
 
@@ -173,6 +174,7 @@ declare_enum_string(neogfx::focus_policy, PointerFocus)
 declare_enum_string(neogfx::focus_policy, KeepChildFocus)
 declare_enum_string(neogfx::focus_policy, ConsumeTabKey)
 declare_enum_string(neogfx::focus_policy, ConsumeReturnKey)
+declare_enum_string(neogfx::focus_policy, ConsumeEscapeKey)
 declare_enum_string(neogfx::focus_policy, IgnoreNonClient)
 end_declare_enum(neogfx::focus_policy)
 

@@ -27,12 +27,14 @@ namespace neogfx
 {
     enum class text_field_placement : uint32_t
     {
-        LabelLeft,
-        LabelAbove
+        NoLabel     = 0x00000000,
+        LabelLeft   = 0x00000001,
+        LabelAbove  = 0x00000002
     };
 }
 
 begin_declare_enum(neogfx::text_field_placement)
+declare_enum_string(neogfx::text_field_placement, NoLabel)
 declare_enum_string(neogfx::text_field_placement, LabelLeft)
 declare_enum_string(neogfx::text_field_placement, LabelAbove)
 end_declare_enum(neogfx::text_field_placement)
@@ -53,12 +55,15 @@ namespace neogfx
             color palette_color(color_role aColorRole) const override;
         };
     public:
+        struct no_label : std::logic_error { no_label() : std::logic_error{ "neogfx::text_field::no_label" } {} };
+    public:
         text_field(std::string const& aLabel = std::string{}, std::string const& aHint = std::string{}, text_field_placement aPlacement = text_field_placement::LabelAbove, frame_style aFrameStyle = frame_style::SolidFrame);
         text_field(i_widget& aParent, std::string const& aLabel = std::string{}, std::string const& aHint = std::string{}, text_field_placement aPlacement = text_field_placement::LabelAbove, frame_style aFrameStyle = frame_style::SolidFrame);
         text_field(i_layout& aLayout, std::string const& aLabel = std::string{}, std::string const& aHint = std::string{}, text_field_placement aPlacement = text_field_placement::LabelAbove, frame_style aFrameStyle = frame_style::SolidFrame);
     public:
         i_string const& text() const;
         void set_text(i_string const& aText);
+        bool has_label() const;
         const neogfx::label& label() const;
         neogfx::label& label();
         const line_edit& input_box() const;
@@ -80,7 +85,7 @@ namespace neogfx
         sink iSink;
         text_field_placement iPlacement;
         vertical_layout iLayout;
-        neogfx::label iLabel;
+        std::optional<neogfx::label> iLabel;
         horizontal_layout iInputLayout;
         input_box_container iInputBoxContainer;
         horizontal_layout iInputBoxContainerLayout;

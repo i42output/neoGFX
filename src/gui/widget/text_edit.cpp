@@ -568,7 +568,7 @@ namespace neogfx
                         AcceptText.trigger(text());
                         break;
                     }
-                    else if ((iCaps & text_edit_caps::ACCEPT_MASK) == text_edit_caps::OnlyAccept)
+                    else if ((iCaps & text_edit_caps::OnlyAccept) == text_edit_caps::OnlyAccept)
                         break;
                 }
                 if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
@@ -1629,6 +1629,9 @@ namespace neogfx
 
     void text_edit::init()
     {
+        if ((iCaps & text_edit_caps::Password) == text_edit_caps::Password)
+            set_password(true);
+
         iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
         {
             if (has_focus())

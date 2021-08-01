@@ -54,7 +54,12 @@ namespace neogfx::nrc
         void emit_preamble() const override
         {
             if (!is_member_element())
-                emit("  %1% %2%;\n", type_name(), id());
+            {
+                if (!iCaps)
+                    emit("  %1% %2%;\n", type_name(), id());
+                else
+                    emit("  %1% %2%{ %3 };\n", type_name(), id(), enum_to_string("text_edit_caps", *iCaps));
+            }
             text_edit::emit_preamble();
         }
         void emit_ctor() const override
