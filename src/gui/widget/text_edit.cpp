@@ -1445,12 +1445,12 @@ namespace neogfx
 
     std::size_t text_edit::append_text(i_string const& aText, bool aMoveCursor)
     {
-        return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
+        return do_insert_text(iText.size(), aText, default_style(), aMoveCursor, false);
     }
 
     std::size_t text_edit::append_text(i_string const& aText, const style& aStyle, bool aMoveCursor)
     {
-        return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
+        return do_insert_text(iText.size(), aText, aStyle, aMoveCursor, false);
     }
 
     std::size_t text_edit::insert_text(i_string const& aText, bool aMoveCursor)
