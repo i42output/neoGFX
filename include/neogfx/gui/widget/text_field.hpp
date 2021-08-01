@@ -76,9 +76,11 @@ namespace neogfx
         text_widget& help();
     protected:
         neogfx::size_policy size_policy() const override;
-    public:
+    protected:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;  
+    protected:
+        void focus_gained(focus_reason aFocusReason) override;
     private:
         void init();
     private:
