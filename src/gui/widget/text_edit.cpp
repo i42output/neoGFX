@@ -679,9 +679,16 @@ namespace neogfx
 
     bool text_edit::text_input(i_string const& aText)
     {
-        if (aText[0] == '\r' || aText[0] == '\n' || aText[0] == '\t') // handled in key_pressed()
+        if (aText[0] == '\r' || aText[0] == '\n') // handled in key_pressed()
         {
             if ((focus_policy() & neogfx::focus_policy::ConsumeReturnKey) == neogfx::focus_policy::ConsumeReturnKey)
+                return true;
+            else
+                return framed_scrollable_widget::text_input(aText);
+        }
+        else if (aText[0] == '\t') // handled in key_pressed()
+        {
+            if ((focus_policy() & neogfx::focus_policy::ConsumeTabKey) == neogfx::focus_policy::ConsumeTabKey)
                 return true;
             else
                 return framed_scrollable_widget::text_input(aText);
