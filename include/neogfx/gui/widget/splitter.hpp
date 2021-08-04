@@ -66,7 +66,7 @@ namespace neogfx
         void capture_released() override;
     public:
         virtual void panes_resized();
-        virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = std::optional<uint32_t>());
+        virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = {});
     protected:
         void paint(i_graphics_context& aGc) const override;
     private:
