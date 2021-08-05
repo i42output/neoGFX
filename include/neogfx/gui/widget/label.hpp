@@ -115,6 +115,8 @@ namespace neogfx
         using widget::set_size_policy;
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
     public:
+        void set_font_role(const optional_font_role& aFontRole) override;
+    public:
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);
     public:

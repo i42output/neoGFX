@@ -51,7 +51,7 @@ namespace neogfx
         {
             return static_cast<style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
         }
-    private:
+    public:
         class separator : public widget<>
         {
         public:
@@ -62,6 +62,7 @@ namespace neogfx
         public:
             void paint(i_graphics_context& aGc) const override;
         };
+    private:
         class keyboard_lock_status : public widget<>
         {
         public:
@@ -100,8 +101,9 @@ namespace neogfx
         void add_permanent_widget(i_ref_ptr<i_widget> const& aWidget) override;
         void add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget) override;
     public:
-        i_layout& normal_layout();
-        i_layout& permanent_layout();
+        i_layout& normal_layout() override;
+        i_layout& permanent_layout() override;
+    public:
         label& message_widget();
         label& idle_widget();
     protected:

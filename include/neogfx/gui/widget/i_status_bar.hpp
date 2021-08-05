@@ -48,5 +48,37 @@ namespace neogfx
         virtual void add_permanent_widget_at(widget_index aPosition, i_widget& aWidget) = 0;
         virtual void add_permanent_widget(i_ref_ptr<i_widget> const& aWidget) = 0;
         virtual void add_permanent_widget_at(widget_index aPosition, i_ref_ptr<i_widget> const& aWidget) = 0;
+    public:
+        virtual i_layout& normal_layout() = 0;
+        virtual i_layout& permanent_layout() = 0;
+    public:
+        template<typename WidgetType>
+        WidgetType& add_normal_widget()
+        {
+            auto w = make_ref<WidgetType>();
+            add_normal_widget(w);
+            return *w;
+        }
+        template<typename WidgetType>
+        WidgetType& add_normal_widget_at(widget_index aPosition, i_widget& aWidget)
+        {
+            auto w = make_ref<WidgetType>();
+            add_normal_widget_at(aPosition, w);
+            return *w;
+        }
+        template<typename WidgetType>
+        WidgetType& add_permanent_widget(i_widget& aWidget)
+        {
+            auto w = make_ref<WidgetType>();
+            add_permanent_widget(w);
+            return *w;
+        }
+        template<typename WidgetType>
+        WidgetType& add_permanent_widget_at(widget_index aPosition, i_widget& aWidget)
+        {
+            auto w = make_ref<WidgetType>();
+            add_permanent_widget_at(aPosition, w);
+            return *w;
+        }
     };
 }

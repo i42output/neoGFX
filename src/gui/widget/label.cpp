@@ -271,6 +271,12 @@ namespace neogfx
         image_widget().set_size_policy(aSizePolicy, aUpdateLayout);
     }
 
+    void label::set_font_role(const optional_font_role& aFontRole)
+    {
+        text_widget().set_font_role(aFontRole);
+        image_widget().set_font_role(aFontRole);
+    }
+
     alignment label::alignment() const
     {
         return iAlignment;
