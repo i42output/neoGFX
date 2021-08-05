@@ -150,6 +150,30 @@ namespace neogfx
     };
     typedef std::optional<item_presentation_model_index> optional_item_presentation_model_index;
 
+    class i_item_sort_predicate
+    {
+    public:
+        virtual ~i_item_sort_predicate() = default;
+    public:
+        virtual bool compare(item_model_index aLhs, item_model_index aRhs) const noexcept = 0;
+    };
+
+    class item_sort_predicate : public i_item_sort_predicate
+    {
+    public:
+        item_sort_predicate(std::function<bool(item_model_index aLhs, item_model_index aRhs)> const& aPredicate) :
+            iPredicate{ aPredicate }
+        {
+        }
+    public:
+        bool compare(item_model_index aLhs, item_model_index aRhs) const noexcept override
+        {
+            return iPredicate(aLhs, aRhs);
+        }
+    private:
+        std::function<bool(item_model_index aLhs, item_model_index aRhs)> iPredicate;
+    };
+
     class i_item_presentation_model : public i_reference_counted, public i_property_owner
     {
     public:
@@ -198,8 +222,8 @@ namespace neogfx
             Descending
         };
         typedef std::optional<sort_direction> optional_sort_direction;
-        typedef std::pair<item_presentation_model_index::column_type, sort_direction> sort;
-        typedef std::optional<sort> optional_sort;
+        typedef std::pair<item_presentation_model_index::column_type, sort_direction> sort_by_param;
+        typedef std::optional<sort_by_param> optional_sort_by_param;
         typedef std::string filter_search_key;
         enum class filter_search_type
         {
@@ -289,9 +313,10 @@ namespace neogfx
         virtual size cell_extents(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
         virtual dimension indent(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
     public:
+        virtual void sort(i_item_sort_predicate const& aPredicate) = 0;
         virtual bool sortable() const = 0;
         virtual void set_sortable(bool aSortable) = 0;
-        virtual optional_sort sorting_by() const = 0;
+        virtual optional_sort_by_param sorting_by() const = 0;
         virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, optional_sort_direction const& aSortDirection = optional_sort_direction{}) = 0;
         virtual void reset_sort() = 0;
     public:

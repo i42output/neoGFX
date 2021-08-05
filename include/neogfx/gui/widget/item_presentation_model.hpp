@@ -69,14 +69,14 @@ namespace neogfx
     public:
         using typename base_type::sort_direction;
         using typename base_type::optional_sort_direction;
-        using typename base_type::sort;
-        using typename base_type::optional_sort;
+        using typename base_type::sort_by_param;
+        using typename base_type::optional_sort_by_param;
         using typename base_type::filter_search_key;
         using typename base_type::filter_search_type;
         using typename base_type::case_sensitivity;
     private:
         typedef ItemModel item_model_type;
-        typedef typename item_model_type::container_traits::template rebind<item_presentation_model_index::row_type, cell_meta_type, true>::other container_traits;
+        typedef typename item_model_type::container_traits::template rebind<item_model_index::row_type, cell_meta_type, true>::other container_traits;
         typedef typename container_traits::row_cell_array row_cell_array;
         typedef typename container_traits::container_type container_type;
         typedef typename container_traits::const_skip_iterator const_iterator;
@@ -816,6 +816,18 @@ namespace neogfx
             }
         }
     public:
+        void sort(i_item_sort_predicate const& aPredicate) override
+        {
+            iSortOrder.clear();
+            ItemsSorting.trigger();
+            if constexpr (container_traits::is_flat)
+                std::sort(iRows.begin(), iRows.end(), [&](auto const& lhs, auto const& rhs) { return aPredicate.compare(lhs.value, rhs.value); });
+            else
+                iRows.sort([&](auto const& lhs, auto const& rhs) { return aPredicate.compare(lhs.value, rhs.value); });
+            reset_maps();
+            reset_position_meta(0);
+            ItemsSorted.trigger();
+        }
         bool sortable() const override
         {
             return iSortable;
@@ -824,16 +836,16 @@ namespace neogfx
         {
             iSortable = aSortable;
         }
-        optional_sort sorting_by() const override
+        optional_sort_by_param sorting_by() const override
         {
             if (!iSortOrder.empty())
                 return iSortOrder.front();
             else
-                return optional_sort{};
+                return optional_sort_by_param{};
         }
         void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) override
         {
-            iSortOrder.push_front(sort{ aColumnIndex, aSortDirection == std::nullopt ? sort_direction::Ascending : *aSortDirection });
+            iSortOrder.push_front(sort_by_param{ aColumnIndex, aSortDirection == std::nullopt ? sort_direction::Ascending : *aSortDirection });
             for (auto i = std::next(iSortOrder.begin()); i != iSortOrder.end(); ++i)
             {
                 if (i->first == aColumnIndex)
@@ -1126,7 +1138,13 @@ namespace neogfx
                         mapCol = col;
                 if (!mapCol)
                 {
-                    auto const newColumn = columns();
+                    auto newColumn = columns();
+                    for (item_presentation_model_index::column_type col = 0; col < columns(); ++col)
+                        if (iColumns[col].modelColumn == std::nullopt)
+                        {
+                            newColumn = col;
+                            break;
+                        }
                     column(newColumn).modelColumn = aColumnIndex;
                     mapCol = newColumn;
                 }
@@ -1263,7 +1281,7 @@ namespace neogfx
         mutable std::optional<i_scrollbar::value_type> iTotalHeight;
         mutable neolib::segmented_array<optional_position, 256> iPositions;
         bool iAlternatingRowColor;
-        std::deque<sort> iSortOrder;
+        std::deque<sort_by_param> iSortOrder;
         std::vector<filter> iFilters;
         sink iSink;
         bool iInitializing;

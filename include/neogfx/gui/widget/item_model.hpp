@@ -632,7 +632,10 @@ namespace neogfx
         item_cell_info& default_cell_info(item_model_index::column_type aColumnIndex)
         {
             if (iColumns.size() < aColumnIndex + 1)
+            {
                 iColumns.resize(aColumnIndex + 1);
+                ColumnInfoChanged.trigger(aColumnIndex);
+            }
             if (iColumns[aColumnIndex].defaultDataInfo == std::nullopt)
                 iColumns[aColumnIndex].defaultDataInfo = item_cell_info{};
             return *iColumns[aColumnIndex].defaultDataInfo;
@@ -651,6 +654,7 @@ namespace neogfx
             if (iColumns.size() < aColumnIndex + 1)
             {
                 iColumns.resize(aColumnIndex + 1);
+                ColumnInfoChanged.trigger(aColumnIndex);
                 changed = true;
             }
             if (default_cell_info(aColumnIndex).dataType == item_data_type::Unknown)
