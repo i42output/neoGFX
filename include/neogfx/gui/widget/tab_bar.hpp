@@ -39,19 +39,21 @@ namespace neogfx
         tab_bar(i_widget& aParent, i_tab_container& aContainer, bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
         tab_bar(i_layout& aLayout, i_tab_container& aContainer, bool aClosableTabs = false, neogfx::tab_container_style aStyle = neogfx::tab_container_style::TabAlignmentTop);
     public:
-        neogfx::tab_container_style tab_container_style() const override;
+        bool closable_tabs() const noexcept override;
+        void set_closable_tabs(bool aClosableTabs) override;
+        neogfx::tab_container_style tab_container_style() const noexcept override;
         void set_tab_container_style(neogfx::tab_container_style aStyle) override;
         void set_tab_icon_size(const size& aIconSize) override;
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        bool has_tabs() const override;
-        uint32_t tab_count() const override;
+        bool has_tabs() const noexcept override;
+        uint32_t tab_count() const noexcept override;
         tab_index index_of(const i_tab& aTab) const override;
         const i_tab& tab(tab_index aTabIndex) const override;
         i_tab& tab(tab_index aTabIndex) override;
-        bool is_tab_selected() const override;
+        bool is_tab_selected() const noexcept override;
         const i_tab& selected_tab() const override;
         i_tab& selected_tab() override;
         i_tab& add_tab(i_string const& aTabText) override;

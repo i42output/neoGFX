@@ -122,7 +122,7 @@ namespace neogfx
         {
             ImageGeometryChanged.trigger();
             if (has_parent_layout() && (visible() || parent_layout().ignore_visibility()))
-                update_layout();
+                update_layout(true, true);
         }
         update();
     }

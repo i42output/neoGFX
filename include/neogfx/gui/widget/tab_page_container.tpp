@@ -75,7 +75,19 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline tab_container_style tab_page_container<Base>::tab_container_style() const
+    bool tab_page_container<Base>::closable_tabs() const noexcept
+    {
+        return iTabBar.closable_tabs();
+    }
+
+    template <typename Base>
+    void tab_page_container<Base>::set_closable_tabs(bool aClosableTabs)
+    {
+        iTabBar.set_closable_tabs(aClosableTabs);
+    }
+
+    template <typename Base>
+    inline tab_container_style tab_page_container<Base>::tab_container_style() const noexcept
     {
         return iTabBar.tab_container_style();
     }
@@ -98,13 +110,13 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline bool tab_page_container<Base>::has_tabs() const
+    inline bool tab_page_container<Base>::has_tabs() const noexcept
     {
         return !iTabs.empty();
     }
 
     template <typename Base>
-    inline uint32_t tab_page_container<Base>::tab_count() const
+    inline uint32_t tab_page_container<Base>::tab_count() const noexcept
     {
         return static_cast<uint32_t>(iTabs.size());
     }
@@ -161,7 +173,7 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline bool tab_page_container<Base>::is_tab_selected() const
+    inline bool tab_page_container<Base>::is_tab_selected() const noexcept
     {
         for (auto& tab : iTabs)
             if (tab.first->is_selected())

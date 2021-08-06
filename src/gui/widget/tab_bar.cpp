@@ -50,11 +50,23 @@ namespace neogfx
         set_background_opacity(1.0);
     }
 
-    tab_container_style tab_bar::tab_container_style() const
+    bool tab_bar::closable_tabs() const noexcept
+    {
+        return iClosableTabs;
+    }
+
+    void tab_bar::set_closable_tabs(bool aClosableTabs)
+    {
+        iClosableTabs = aClosableTabs;
+        for (auto& tab : iTabs)
+            tab->set_closable(aClosableTabs);
+    }
+
+    tab_container_style tab_bar::tab_container_style() const noexcept
     {
         return iStyle;
     }
-    
+
     void tab_bar::set_tab_container_style(neogfx::tab_container_style aStyle)
     {
         if (iStyle != aStyle)
@@ -94,12 +106,12 @@ namespace neogfx
         return result;
     }
 
-    bool tab_bar::has_tabs() const
+    bool tab_bar::has_tabs() const noexcept
     {
         return !iTabs.empty();
     }
 
-    uint32_t tab_bar::tab_count() const
+    uint32_t tab_bar::tab_count() const noexcept
     {
         return static_cast<uint32_t>(iTabs.size());
     }
@@ -126,7 +138,7 @@ namespace neogfx
         return *iTabs[aTabIndex];
     }
 
-    bool tab_bar::is_tab_selected() const
+    bool tab_bar::is_tab_selected() const noexcept
     {
         for (auto& tab : iTabs)
             if (tab->is_selected())

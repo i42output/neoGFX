@@ -162,7 +162,7 @@ namespace neogfx
             {
                 TextGeometryChanged.trigger();
                 if (visible() || parent_layout().ignore_visibility())
-                    update_layout();
+                    update_layout(true, true);
             }
             update();
         }
