@@ -246,6 +246,8 @@ namespace neogfx
         virtual ~i_item_presentation_model() = default;
     public:
         virtual bool initializing() const = 0;
+        virtual void begin_update() = 0;
+        virtual void end_update() = 0;
         virtual bool has_item_model() const = 0;
         virtual i_item_model& item_model() const = 0;
         virtual void set_item_model(i_item_model& aItemModel) = 0;

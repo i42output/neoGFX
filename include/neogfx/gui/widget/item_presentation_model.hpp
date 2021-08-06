@@ -126,6 +126,17 @@ namespace neogfx
         {
             return iInitializing;
         }
+        void begin_update() override
+        {
+            iInitializing = true;
+        }
+        void end_update() override
+        {
+            iInitializing = false;
+            reset_row_map(false);
+            reset_meta();
+            reset_sort();
+        }
         bool has_item_model() const override
         {
             return iItemModel != nullptr;
@@ -331,7 +342,7 @@ namespace neogfx
                     std::next(begin(), aIndex.row()).unskip_children();
                 else
                     std::next(begin(), aIndex.row()).skip_children();
-                reset_maps();
+                reset_row_map();
                 reset_meta();
                 if (cell_meta(indexFirstColumn).expanded)
                     ItemExpanded.trigger(aIndex);
@@ -824,7 +835,7 @@ namespace neogfx
                 std::sort(iRows.begin(), iRows.end(), [&](auto const& lhs, auto const& rhs) { return aPredicate.compare(lhs.value, rhs.value); });
             else
                 iRows.sort([&](auto const& lhs, auto const& rhs) { return aPredicate.compare(lhs.value, rhs.value); });
-            reset_maps();
+            reset_row_map();
             reset_position_meta(0);
             ItemsSorted.trigger();
         }
@@ -977,7 +988,7 @@ namespace neogfx
                 std::sort(iRows.begin(), iRows.end(), sortPredicate);
             else
                 iRows.sort(sortPredicate);
-            reset_maps();
+            reset_row_map();
             reset_position_meta(0);
             ItemsSorted.trigger();
         }
@@ -1015,7 +1026,7 @@ namespace neogfx
                 if (matches)
                     item_added(item_model_index{ row });
             }
-            reset_maps();
+            reset_row_map();
             reset_cell_meta();
             reset_position_meta(0);
             ItemsFiltered.trigger();
@@ -1058,7 +1069,7 @@ namespace neogfx
             }
 
             if (!iInitializing || container_traits::is_tree)
-                reset_maps(aItemIndex);
+                reset_row_map(aItemIndex);
 
             if (!iInitializing)
             {
@@ -1073,7 +1084,7 @@ namespace neogfx
                 return;
             if (!iInitializing)
             {
-                reset_maps();
+                reset_row_map();
                 reset_meta();
                 execute_sort();
                 auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
@@ -1093,15 +1104,27 @@ namespace neogfx
             for (auto& row : iRows)
                 if (row.value >= aItemIndex.row())
                     --row.value;
-            reset_maps(aItemIndex);
+            reset_row_map(aItemIndex);
             reset_position_meta(0);
         }
     private:
         void reset_maps(const item_model_index& aFrom = {}) const
         {
+            reset_row_map(aFrom);
+            reset_column_map();
+        }
+        void reset_row_map(const item_model_index& aFrom = {}) const
+        {
             if (aFrom.row() < iRowMap.size() && (iRowMapDirtyFrom == std::nullopt || *iRowMapDirtyFrom > aFrom.row()))
                 iRowMapDirtyFrom = aFrom.row();
-            iColumnMap.clear();
+        }
+        void reset_column_map(bool aClear = true) const
+        {
+            if (aClear)
+                iColumnMap.clear();
+            if (has_item_model())
+                for (item_model_index::column_type col = 0; col < item_model().columns(); ++col)
+                    mapped_column(col);
         }
         item_presentation_model_index::row_type mapped_row(item_model_index::row_type aRowIndex) const
         {
@@ -1154,6 +1177,9 @@ namespace neogfx
         item_model_index::column_type model_column(item_presentation_model_index::column_type aColumnIndex) const
         {
             auto const& col = column(aColumnIndex);
+            if (col.modelColumn)
+                return *col.modelColumn;
+            reset_column_map(false);
             if (col.modelColumn)
                 return *col.modelColumn;
             throw bad_index();
