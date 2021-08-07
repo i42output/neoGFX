@@ -74,11 +74,13 @@ namespace neogfx
         void set_selected_state(bool aSelectedState);
     private:
         void init();
+        void update_appearance();
     private:
-        sink iSink;
         i_tab_container& iContainer;
         std::unique_ptr<close_button> iCloseButton;
         bool iStandardImageSize;
         bool iSelectedState;
+        widget_timer iUpdater;
+        sink iSink;
     };
 }

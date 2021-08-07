@@ -57,6 +57,8 @@ namespace neogfx
         define_declared_event(ItemChecked, item_checked, item_presentation_model_index const&)
         define_declared_event(ItemUnchecked, item_unchecked, item_presentation_model_index const&)
         define_declared_event(ItemIndeterminate, item_indeterminate, item_presentation_model_index const&)
+        define_declared_event(ItemsUpdating, items_updating)
+        define_declared_event(ItemsUpdated, items_updated)
         define_declared_event(ItemsSorting, items_sorting)
         define_declared_event(ItemsSorted, items_sorted)
         define_declared_event(ItemsFiltering, items_filtering)
@@ -129,6 +131,7 @@ namespace neogfx
         void begin_update() override
         {
             iInitializing = true;
+            ItemsUpdating.trigger();
         }
         void end_update() override
         {
@@ -136,6 +139,7 @@ namespace neogfx
             reset_row_map(false);
             reset_meta();
             reset_sort();
+            ItemsUpdated.trigger();
         }
         bool has_item_model() const override
         {

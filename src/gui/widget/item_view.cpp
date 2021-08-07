@@ -150,6 +150,8 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
             iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
             iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
+            iPresentationModelSink += presentation_model().items_updating([this]() { /* todo: hourglass */ });
+            iPresentationModelSink += presentation_model().items_updated([this]() { update(); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
             iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
             iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });

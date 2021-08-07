@@ -31,25 +31,30 @@ namespace neogfx
         enum texture_index_e
         {
             Unknown = -1,
-            TextureOff = 0,
-            TextureOn,
-            TextureOnOver
+            TextureNormal,
+            TextureHover
         };
     public:
-        close_button(i_tab& aParent) :
-            push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }, iUpdater{ *this, [this](widget_timer& aTimer) { aTimer.again(); update_appearance(); }, std::chrono::milliseconds{ 20 } }
+        close_button(tab_button& aParent) :
+            push_button{ aParent.as_widget().layout() }, iParent{ aParent }, iTextureState{ Unknown }
         {
             set_padding(neogfx::padding{ 2.0 });
             iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) { if ((aAspect & style_aspect::Color) == style_aspect::Color) update_textures(); });
-            iSink += aParent.selected([this]() { update_state(); });
-            iSink += aParent.deselected([this]() { update_state(); });
+            iSink += aParent.selected([this]() { update_appearance(); });
+            iSink += aParent.deselected([this]() { update_appearance(); });
             update_textures();
-            update_state();
+            update_appearance();
         }
     public:
-        void update_state()
+        void update_appearance()
         {
-            update_appearance();
+            auto oldState = iTextureState;
+            if (entered())
+                iTextureState = TextureHover;
+            else
+                iTextureState = TextureNormal;
+            if (iTextureState != oldState)
+                set_image(iTextures[iTextureState]->second);
         }
     protected:
         size minimum_size(optional_size const& aAvailableSpace) const
@@ -129,92 +134,79 @@ namespace neogfx
                 "1112000000002111"
                 "1120000000000211"
             };
-            if (iTextures[TextureOff] == std::nullopt || iTextures[TextureOff]->first != ink)
+            if (iTextures[TextureNormal] == std::nullopt || iTextures[TextureNormal]->first != ink)
             {
-                iTextures[TextureOff].emplace(
+                iTextures[TextureNormal].emplace(
                     ink,
                     !high_dpi() ?
                         neogfx::image{
-                            "neogfx::tab_button::close_button::iTextures[TextureOff]::" + ink.to_string(),
-                            sTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0.375) }, { "ink2", ink.with_alpha(0.1875) } } } :
-                        neogfx::image{
-                            "neogfx::tab_button::close_button::iHighDpiTextures[TextureOff]::" + ink.to_string(),
-                            sHighDpiTexture, { { "paper", color{} },{ "ink1", ink.with_alpha(0.375) },{ "ink2", ink.with_alpha(0.1875) } }, 2.0 });
-            }
-            if (iTextures[TextureOn] == std::nullopt || iTextures[TextureOn]->first != ink)
-            {
-                iTextures[TextureOn].emplace(
-                    ink,
-                    !high_dpi() ?
-                        neogfx::image{
-                            "neogfx::tab_button::close_button::iTextures[TextureOn]::" + ink.to_string(),
+                            "neogfx::tab_button::close_button::iTextures[TextureNormal]::" + ink.to_string(),
                             sTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0.5) } } } :
                         neogfx::image{
-                            "neogfx::tab_button::close_button::iHighDpiTextures[TextureOn]::" + ink.to_string(),
+                            "neogfx::tab_button::close_button::iHighDpiTextures[TextureNormal]::" + ink.to_string(),
                             sHighDpiTexture, { { "paper", color{} }, { "ink1", ink }, { "ink2", ink.with_alpha(0.5) } }, 2.0 });
             }
-            if (iTextures[TextureOnOver] == std::nullopt || iTextures[TextureOnOver]->first != ink)
+            if (iTextures[TextureHover] == std::nullopt || iTextures[TextureHover]->first != ink)
             {
-                iTextures[TextureOnOver].emplace(
+                iTextures[TextureHover].emplace(
                     ink,
                     !high_dpi() ?
                         neogfx::image{
-                            "neogfx::tab_button::close_button::iTextures[TextureOnOver]::" + paper.to_string(),
+                            "neogfx::tab_button::close_button::iTextures[TextureHover]::" + paper.to_string(),
                             sTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0.5) } } } :
                         neogfx::image{
-                            "neogfx::tab_button::close_button::iHighDpiTextures[TextureOnOver]::" + paper.to_string(),
+                            "neogfx::tab_button::close_button::iHighDpiTextures[TextureHover]::" + paper.to_string(),
                             sHighDpiTexture, { { "paper", color{} }, { "ink1", paper }, { "ink2", paper.with_alpha(0.5) } }, 2.0 });
             }
             iTextureState = Unknown;
             update_appearance();
         }
-        void update_appearance()
-        {
-            auto oldState = iTextureState;
-            if (entered())
-                iTextureState = TextureOnOver;
-            else if (iParent.is_selected() || iParent.as_widget().entered() || (has_root() && root().has_entered_widget() && root().entered_widget().is_descendent_of(iParent.as_widget())))
-                iTextureState = TextureOn;
-            else
-                iTextureState = TextureOff;
-            if (iTextureState != oldState)
-                set_image(iTextures[iTextureState]->second);
-        }
     protected:
         void mouse_entered(const point& aPosition) override
         {
             push_button::mouse_entered(aPosition);
-            update_state();
+            update_appearance();
         }
         void mouse_left() override
         {
             push_button::mouse_left();
-            update_state();
+            update_appearance();
         }
     private:
-        i_tab & iParent;
+        tab_button& iParent;
         sink iSink;
         mutable std::optional<std::pair<color, texture>> iTextures[3];
         texture_index_e iTextureState;
-        widget_timer iUpdater;
     };
 
     tab_button::tab_button(i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
-        push_button{ aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
+        push_button{ aText, push_button_style::Tab }, 
+        iContainer{ aContainer }, 
+        iStandardImageSize{ aStandardImageSize }, 
+        iSelectedState{ false },
+        iUpdater{ *this, [this](widget_timer& aTimer) { aTimer.again(); update_appearance(); }, std::chrono::milliseconds{ 20 }, true }
     {
         init();
         set_closable(aClosable);
     }
 
     tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
-        push_button{ aParent, aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
+        push_button{ aParent, aText, push_button_style::Tab }, 
+        iContainer{ aContainer }, 
+        iStandardImageSize{ aStandardImageSize }, 
+        iSelectedState{ false },
+        iUpdater{ *this, [this](widget_timer& aTimer) { aTimer.again(); update_appearance(); }, std::chrono::milliseconds{ 20 }, true }
     {
         init();
         set_closable(aClosable);
     }
 
     tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
-        push_button{ aLayout, aText, push_button_style::Tab }, iContainer{ aContainer }, iStandardImageSize{ aStandardImageSize }, iSelectedState{ false }
+        push_button{ aLayout, aText, push_button_style::Tab }, 
+        iContainer{ aContainer }, 
+        iStandardImageSize{ aStandardImageSize }, 
+        iSelectedState{ false },
+        iUpdater{ *this, [this](widget_timer& aTimer) { aTimer.again(); update_appearance(); }, std::chrono::milliseconds{ 20 }, true }
     {
         init();
         set_closable(aClosable);
@@ -391,15 +383,13 @@ namespace neogfx
     void tab_button::mouse_entered(const point& aPosition)
     {
         push_button::mouse_entered(aPosition);
-        if (closable())
-            iCloseButton->update_state();
+        update_appearance();
     }
 
     void tab_button::mouse_left()
     {
         push_button::mouse_left();
-        if (closable())
-            iCloseButton->update_state();
+        update_appearance();
     }
 
     void tab_button::set_selected_state(bool aSelectedState)
@@ -409,6 +399,7 @@ namespace neogfx
             if (aSelectedState)
                 iContainer.selecting_tab(*this);
             iSelectedState = aSelectedState;
+            update_appearance();
             update_layout();
             update();
             if (is_selected())
@@ -440,5 +431,23 @@ namespace neogfx
         iSink += service<i_surface_manager>().dpi_changed([this, update_image](i_surface&) { update_image(); });
         update_image();
         iContainer.adding_tab(*this);
+    }
+
+    void tab_button::update_appearance()
+    {
+        if (entered() || is_selected() || (has_root() && root().has_entered_widget() && root().entered_widget().is_descendent_of(*this)))
+        {
+            text_widget().set_opacity(1.0);
+            if (iCloseButton)
+                iCloseButton->set_opacity(1.0);
+        }
+        else
+        {
+            text_widget().set_opacity(0.65);
+            if (iCloseButton)
+                iCloseButton->set_opacity(0.65);
+        }
+        if (iCloseButton)
+            iCloseButton->update_appearance();
     }
 }

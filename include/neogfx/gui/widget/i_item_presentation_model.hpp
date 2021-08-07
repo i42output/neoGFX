@@ -191,6 +191,8 @@ namespace neogfx
         declare_event(item_checked, item_presentation_model_index const&)
         declare_event(item_unchecked, item_presentation_model_index const&)
         declare_event(item_indeterminate, item_presentation_model_index const&)
+        declare_event(items_updating)
+        declare_event(items_updated)
         declare_event(items_sorting)
         declare_event(items_sorted)
         declare_event(items_filtering)
