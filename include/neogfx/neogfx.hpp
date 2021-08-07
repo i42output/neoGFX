@@ -107,7 +107,7 @@ namespace neogfx
     using neolib::logger::endl;
     using neolib::logger::flush;
 
-    // convert strings with different traits and/or character types to std::string
+    // convert strings with different traits and/or character types to neolib::string
     template <typename CharT, typename Traits, typename Allocator>
     inline const string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)
     {
@@ -115,12 +115,13 @@ namespace neogfx
         return string{ reinterpret_cast<const char*>(aString.c_str()), aString.size() };
     }
 
-    // convert character array to std::string
+    // convert character array (primarily for UTF-8 string literals) to neolib::string
     template <typename CharT, std::size_t Size>
     inline const string to_string(const CharT (&aString)[Size])
     {
         static_assert(sizeof(CharT) == sizeof(char));
-        return string{ reinterpret_cast<const char*>(&aString[0]), Size };
+        auto const correctedSize = (aString[Size - 1] == '\0' ? Size - 1 : Size);
+        return correctedSize > 0 ? string{ reinterpret_cast<const char*>(&aString[0]), correctedSize } : string{};
     }
 
     struct not_yet_implemented : std::runtime_error

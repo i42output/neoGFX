@@ -175,8 +175,8 @@ namespace neogfx
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
             reset_cache();
-            if (visible() || !parent_layout().ignore_visibility())
-                update_layout();
+            if (visible() || parent_layout().ignore_visibility())
+                update_layout(true, true);
         }
     }
 
@@ -316,7 +316,7 @@ namespace neogfx
         auto style_changed = [&]()
         {
             reset_cache();
-            update_layout();
+            update_layout(true, true);
             update();
         };
         iSink += service<i_app>().current_style_changed([this, style_changed](style_aspect aAspect)
