@@ -87,6 +87,7 @@ namespace neogfx
         if (has_model())
         {
             iModelSink += model().column_info_changed([this](item_model_index::value_type aColumnIndex) { column_info_changed(aColumnIndex); });
+            iModelSink += model().updated([this]() { item_model_updated(); });
             iModelSink += model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
             iModelSink += model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
             iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
@@ -779,6 +780,12 @@ namespace neogfx
         update();
         if (editing() != std::nullopt && !presentation_model().cell_editable(*editing()))
             end_edit(false);
+    }
+
+    void item_view::item_model_updated()
+    {
+        update_scrollbar_visibility();
+        update();
     }
 
     void item_view::item_added(const item_model_index&)

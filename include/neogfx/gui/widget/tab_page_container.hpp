@@ -36,6 +36,8 @@ namespace neogfx
         typedef Base base_type;
     public:
         define_declared_event(StyleChanged, style_changed)
+        define_declared_event(TabPageAdded, tab_page_added, i_tab_page&)
+        define_declared_event(TabPageRemoved, tab_page_removed, i_tab_page&)
         define_declared_event(SelectedTabPageChanged, selected_tab_page_changed, i_tab_page&)
     private:
         typedef ref_ptr<i_tab_page> tab_page_pointer;
@@ -84,6 +86,7 @@ namespace neogfx
         i_tab_page& add_tab_page(i_tab& aTab) override;
         i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) override;
         i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget) override;
+        void remove_tab_page(i_tab_page& aPage) override;
     public:
         void adding_tab(i_tab& aTab) override;
         void selecting_tab(i_tab& aTab) override;

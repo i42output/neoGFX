@@ -317,7 +317,16 @@ namespace neogfx
         }
         else
             existingTab->second->as_widget().hide();
+        TabPageAdded.trigger(*aWidget);
         return *existingTab->second;
+    }
+
+    template <typename Base>
+    inline void tab_page_container<Base>::remove_tab_page(i_tab_page& aPage)
+    {
+        auto existingTab = iTabs.find(&aPage.tab());
+        if (existingTab != iTabs.end())
+            remove_tab(index_of(aPage.tab()));
     }
 
     template <typename Base>
@@ -352,7 +361,9 @@ namespace neogfx
         auto existingTab = iTabs.find(&aTab);
         if (existingTab == iTabs.end())
             throw tab_not_found();
+        auto temp = existingTab->second;
         iTabs.erase(existingTab);
+        TabPageRemoved.trigger(*temp);
     }
 
     template <typename Base>
