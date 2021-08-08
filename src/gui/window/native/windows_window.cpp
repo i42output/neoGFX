@@ -916,7 +916,7 @@ namespace neogfx
                 {
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-                    self.push_event(keyboard_event{ keyboard_event_type::SysTextInput, text });
+                    self.push_event(keyboard_event{ keyboard_event_type::SysTextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
                 }
                 break;
             case WM_MENUCHAR:
@@ -934,7 +934,7 @@ namespace neogfx
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
                     if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
-                        self.push_event(keyboard_event{ keyboard_event_type::TextInput, text });
+                        self.push_event(keyboard_event{ keyboard_event_type::TextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
                 }
                 break;
             case WM_KEYDOWN:

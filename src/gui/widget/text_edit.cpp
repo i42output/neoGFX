@@ -559,7 +559,7 @@ namespace neogfx
         case ScanCode_RETURN:
             if (!read_only())
             {
-                if (aKeyModifiers == KeyModifier_NONE)
+                if ((aKeyModifiers & KeyModifier_CTRL) == KeyModifier_NONE)
                 {
                     bool canAccept = false;
                     CanAcceptText.trigger(text(), canAccept);

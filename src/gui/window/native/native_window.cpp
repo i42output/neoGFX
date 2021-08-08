@@ -308,32 +308,40 @@ namespace neogfx
             switch (keyboardEvent.type())
             {
             case keyboard_event_type::KeyPressed:
+                keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
                     keyboard.key_pressed().trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                     surface_window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                 }
+                keyboard.clear_event_modifiers();
                 break;
             case keyboard_event_type::KeyReleased:
+                keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
                     keyboard.key_released().trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                     surface_window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                 }
+                keyboard.clear_event_modifiers();
                 break;
             case keyboard_event_type::TextInput:
+                keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().text_input(string{ keyboardEvent.text() }))
                 {
                     keyboard.text_input().trigger(keyboardEvent.text());
                     surface_window().native_window_text_input(string{ keyboardEvent.text() });
                 }
+                keyboard.clear_event_modifiers();
                 break;
             case keyboard_event_type::SysTextInput:
+                keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().sys_text_input(string{ keyboardEvent.text() }))
                 {
                     keyboard.sys_text_input().trigger(keyboardEvent.text());
                     surface_window().native_window_sys_text_input(string{ keyboardEvent.text() });
                 }
+                keyboard.clear_event_modifiers();
                 break;
             default:
                 /* do nothing */

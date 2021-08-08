@@ -53,6 +53,10 @@ namespace neogfx
     public:
         keyboard(const i_string& aName = string{ "Generic Keyboard" });
     public:
+        key_modifiers_e event_modifiers() const override;
+        void set_event_modifiers(key_modifiers_e aModifiers) override;
+        void clear_event_modifiers() override;
+    public:
         bool is_keyboard_grabbed() const override;
         bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const override;
         bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const override;
@@ -62,5 +66,6 @@ namespace neogfx
     private:
         mutable keyboard_grabber iGrabber;
         std::deque<i_keyboard_handler*> iGrabs;
+        std::optional<key_modifiers_e> iEventModifiers;
     };
 }

@@ -234,6 +234,8 @@ namespace neogfx
             return result;
         }
 
+        // TODO: modifiers for current keyboard event
+
         key_modifiers_e keyboard::modifiers() const
         {
             key_modifiers_e modifiers = KeyModifier_NONE;

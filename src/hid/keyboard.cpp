@@ -59,8 +59,26 @@ namespace neogfx
     }
 
     keyboard::keyboard(const i_string& aName) :
-        hid_device<i_keyboard>{ hid_device_type::Input, hid_device_class::Keyboard, hid_device_subclass::Keyboard }, iGrabber { *this }
+        hid_device<i_keyboard>{ hid_device_type::Input, hid_device_class::Keyboard, hid_device_subclass::Keyboard }, 
+        iGrabber { *this }
     {
+    }
+
+    key_modifiers_e keyboard::event_modifiers() const
+    {
+        if (iEventModifiers)
+            return *iEventModifiers;
+        return modifiers();
+    }
+
+    void keyboard::set_event_modifiers(key_modifiers_e aModifiers)
+    {
+        iEventModifiers = aModifiers;
+    }
+
+    void keyboard::clear_event_modifiers()
+    {
+        iEventModifiers = std::nullopt;
     }
 
     bool keyboard::is_keyboard_grabbed() const
