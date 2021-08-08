@@ -1077,7 +1077,7 @@ namespace neogfx
 
             if (!iInitializing)
             {
-                reset_meta();
+                reset_meta(); // todo: optimize
                 execute_sort();
                 ItemAdded.trigger(from_item_model_index(aItemIndex, true));
             }
@@ -1089,7 +1089,7 @@ namespace neogfx
             if (!iInitializing)
             {
                 reset_row_map();
-                reset_meta();
+                reset_meta(); // todo: optimize
                 execute_sort();
                 auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
                 cellMeta.text = std::nullopt;
@@ -1109,7 +1109,7 @@ namespace neogfx
                 if (row.value >= aItemIndex.row())
                     --row.value;
             reset_row_map(aItemIndex);
-            reset_position_meta(0);
+            reset_meta(); // todo: optimize
         }
     private:
         void reset_maps(const item_model_index& aFrom = {}) const
