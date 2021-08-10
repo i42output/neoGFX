@@ -557,8 +557,12 @@ namespace neogfx
         }
         i_item_model::iterator erase(i_item_model::const_iterator aPosition) override
         {
+            auto containerIterator = aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>();
+            if constexpr (container_traits::is_tree)
+                while (containerIterator.rbegin() != containerIterator.rend())
+                    erase(const_base_iterator{ --containerIterator.rbegin().base() });
             ItemRemoved.trigger(iterator_to_index(aPosition));
-            auto result = base_iterator{ iItems.erase(aPosition.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>()) };
+            auto result = base_iterator{ iItems.erase(containerIterator) };
             return result;
         }
         i_item_model::iterator erase(item_model_index const& aIndex) override
