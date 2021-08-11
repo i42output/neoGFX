@@ -121,7 +121,7 @@ namespace neogfx
         return result;
     }
 
-    bool scrollbar::set_position(value_type aPosition, const optional_easing& aTransition, double aTransitionDuration)
+    bool scrollbar::set_position(value_type aPosition)
     {
         aPosition = std::max(std::min(aPosition, maximum() - page()), minimum());
         if (iIntegerPositions)
@@ -130,23 +130,8 @@ namespace neogfx
         if (Position != aPosition)
         {
             changed = true;
-            if (aTransition == std::nullopt || *aTransition == easing::One || std::abs(aPosition - Position.value()) < page())
-            {
-                if (have_transition())
-                {
-                    if (transition().active())
-                        transition().reset(easing::One);
-                    else if (!transition().paused())
-                        transition().disable();
-                }
-            }
-            else
-            {
-                if (!iTransition)
-                    iTransition = service<i_animator>().add_transition(Position, *aTransition, aTransitionDuration);
-                else
-                    transition().reset(*aTransition);
-            }
+            auto const scrollAmount = std::abs(aPosition - Position.value());
+            start_transition(scrollAmount);
             Position = aPosition;
         }
         return changed;
@@ -639,9 +624,27 @@ namespace neogfx
         }
     }
 
-    bool scrollbar::have_transition() const
+    bool scrollbar::transition_set() const noexcept
     {
-        return iTransition != std::nullopt;
+        return iTransitionEasing != std::nullopt;
+    }
+
+    void scrollbar::set_transition(easing aTransition, double aTransitionDuration, bool aOnlyWhenPaging)
+    {
+        iTransitionEasing = aTransition;
+        iTransitionDuration = aTransitionDuration;
+        iOnlyTransitionWhenPaging = aOnlyWhenPaging;
+    }
+
+    void scrollbar::clear_transition()
+    {
+        iTransitionEasing = std::nullopt;
+    }
+
+    bool scrollbar::can_transition(double aScrollAmount) const noexcept
+    {
+        return transition_set() &&
+            *iTransitionEasing != easing::One && (aScrollAmount >= page() || !iOnlyTransitionWhenPaging);
     }
 
     i_transition& scrollbar::transition() const
@@ -649,5 +652,31 @@ namespace neogfx
         if (have_transition())
             return service<i_animator>().transition(*iTransition);
         throw no_transition();
+    }
+
+    bool scrollbar::have_transition() const noexcept
+    {
+        return iTransition != std::nullopt;
+    }
+
+    void scrollbar::start_transition(double aScrollAmount)
+    {
+        if (!can_transition(aScrollAmount))
+        {
+            if (have_transition())
+            {
+                if (transition().active())
+                    transition().reset(easing::One);
+                else if (!transition().paused())
+                    transition().disable();
+            }
+        }
+        else
+        {
+            if (!have_transition())
+                iTransition = service<i_animator>().add_transition(Position, *iTransitionEasing, iTransitionDuration);
+            else
+                transition().reset(*iTransitionEasing);
+        }
     }
 }

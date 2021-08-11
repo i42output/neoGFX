@@ -54,7 +54,7 @@ namespace neogfx
         void set_auto_hide(bool aAutoHide) override;
         bool auto_hidden() const override;
         value_type position() const override;
-        bool set_position(value_type aPosition, const optional_easing& aTransition = {}, double aTransitionDuration = 0.5) override;
+        bool set_position(value_type aPosition) override;
         value_type minimum() const override;
         void set_minimum(value_type aMinimum) override;
         value_type maximum() const override;
@@ -93,9 +93,15 @@ namespace neogfx
         i_widget& as_widget();
     public:
         rect element_rect(skin_element aElement) const override;
+    public:
+        bool transition_set() const noexcept override;
+        void set_transition(easing aTransition, double aTransitionDuration = 0.5, bool aOnlyWhenPaging = true) override;
+        void clear_transition() override;
     private:
-        bool have_transition() const;
+        bool have_transition() const noexcept;
         i_transition& transition() const;
+        bool can_transition(double aScrollAmount) const noexcept;
+        void start_transition(double aScrollAmount);
     private:
         i_scrollbar_container& iContainer;
         scrollbar_type iType;
@@ -115,6 +121,9 @@ namespace neogfx
         point iThumbClickedPosition;
         value_type iThumbClickedValue;
         optional_point iScrollTrackPosition;
+        optional_easing iTransitionEasing;
+        double iTransitionDuration = 1.0;
+        bool iOnlyTransitionWhenPaging = true;
         std::optional<transition_id> iTransition;
         // properties / anchors
     public:

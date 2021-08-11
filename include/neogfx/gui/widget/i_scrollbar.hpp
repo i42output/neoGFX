@@ -57,6 +57,8 @@ namespace neogfx
         Thumb            = 0x06
     };
 
+    class i_transition;
+
     class i_scrollbar_container;
 
     class i_scrollbar : public i_property_owner
@@ -92,7 +94,7 @@ namespace neogfx
         virtual void set_auto_hide(bool aAutoHide) = 0;
         virtual bool auto_hidden() const = 0;
         virtual value_type position() const = 0;
-        virtual bool set_position(value_type aPosition, const optional_easing& aTransition = {}, double aTransitionDuration = 0.5) = 0;
+        virtual bool set_position(value_type aPosition) = 0;
         virtual value_type minimum() const = 0;
         virtual void set_minimum(value_type aMinimum) = 0;
         virtual value_type maximum() const = 0;
@@ -110,7 +112,7 @@ namespace neogfx
         virtual void render(i_graphics_context& aGc) const = 0;
     public:
         virtual rect element_geometry(scrollbar_element aElement) const = 0;
-        virtual scrollbar_element element_at(const point& aPosition) const = 0;
+        virtual scrollbar_element element_at(point const& aPosition) const = 0;
     public:
         virtual void update(const update_params_t& aUpdateParams = update_params_t()) = 0;
         virtual scrollbar_element clicked_element() const = 0;
@@ -123,6 +125,10 @@ namespace neogfx
         virtual void resume() = 0;
         virtual void track() = 0;
         virtual void untrack() = 0;
+    public:
+        virtual bool transition_set() const noexcept = 0;
+        virtual void set_transition(easing aTransition, double aTransitionDuration = 0.5, bool aOnlyWhenPaging = true) = 0;
+        virtual void clear_transition() = 0;
     };
 
     class i_scrollbar_container

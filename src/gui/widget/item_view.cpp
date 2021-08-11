@@ -30,19 +30,19 @@
 namespace neogfx
 {
     item_view::item_view(frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+        base_type{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
 
     item_view::item_view(i_widget& aParent, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
 
     item_view::item_view(i_layout& aLayout, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }, iDefaultTransitionDuration{ 0.5 }
+        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
@@ -210,22 +210,6 @@ namespace neogfx
         selection_model_changed();
         update_scrollbar_visibility();
         update();
-    }
-
-    const optional_easing& item_view::default_transition() const
-    {
-        return iDefaultTransition;
-    }
-
-    double item_view::default_transition_duration() const
-    {
-        return iDefaultTransitionDuration;
-    }
-
-    void item_view::set_default_transition(const optional_easing& aTransition, double aTransitionDuration)
-    {
-        iDefaultTransition = aTransition;
-        iDefaultTransitionDuration = aTransitionDuration;
     }
 
     std::pair<item_presentation_model_index::value_type, coordinate> item_view::first_visible_item(i_graphics_context& aGc) const
@@ -917,11 +901,9 @@ namespace neogfx
         return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
-    bool item_view::make_visible(item_presentation_model_index const& aItemIndex, const optional_easing& aTransition, const std::optional<double>& aTransitionDuration)
+    bool item_view::make_visible(item_presentation_model_index const& aItemIndex)
     {
         bool changed = false;
-        auto const& transition = (aTransition == std::nullopt ? default_transition() : aTransition);
-        auto const transitionDuration = (aTransitionDuration == std::nullopt ? default_transition_duration() : *aTransitionDuration);
         graphics_context gc{ *this, graphics_context::type::Unattached };
         auto const& cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
         auto const& displayRect = item_display_rect();
@@ -929,16 +911,16 @@ namespace neogfx
         if (intersectRect.height() < cellRect.height())
         {
             if (cellRect.top() < displayRect.top())
-                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top()), transition, transitionDuration) || changed;
+                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top())) || changed;
             else if (cellRect.bottom() > displayRect.bottom() && cellRect.height() <= displayRect.height())
-                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom()), transition, transitionDuration) || changed;
+                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom())) || changed;
         }
         if (intersectRect.width() < cellRect.width())
         {
             if (cellRect.left() < displayRect.left())
-                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left()), transition, transitionDuration) || changed;
+                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left())) || changed;
             else if (cellRect.right() > displayRect.right() && cellRect.width() <= displayRect.width())
-                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right()), transition, transitionDuration) || changed;
+                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right())) || changed;
         }
         return changed;
     }

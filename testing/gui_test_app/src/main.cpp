@@ -974,7 +974,7 @@ int main(int argc, char* argv[])
         ng::basic_item_model<ng::easing> easingItemModelUpperTableView;
         window.dropListEasingUpperTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex) 
         { 
-            tableView1.set_default_transition(easingItemModelUpperTableView.item(*aIndex), 0.75); 
+            tableView1.vertical_scrollbar().set_transition(easingItemModelUpperTableView.item(*aIndex), 0.75); 
         });
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModelUpperTableView.insert_item(easingItemModelUpperTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
@@ -988,7 +988,7 @@ int main(int argc, char* argv[])
         ng::basic_item_model<ng::easing> easingItemModelLowerTableView;
         window.dropListEasingLowerTableView.SelectionChanged([&](const ng::optional_item_model_index& aIndex)
         {
-            tableView2.set_default_transition(easingItemModelLowerTableView.item(*aIndex), 0.75);
+            tableView2.vertical_scrollbar().set_transition(easingItemModelLowerTableView.item(*aIndex), 0.75);
         });
         for (auto i = 0; i < ng::standard_easings().size(); ++i)
             easingItemModelLowerTableView.insert_item(easingItemModelLowerTableView.end(), ng::standard_easings()[i], ng::to_string(ng::standard_easings()[i]));
