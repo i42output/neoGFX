@@ -62,42 +62,13 @@ namespace neogfx
         bool iPaused;
     };
 
-    class property_transition : public transition, private neolib::i_event_filter
-    {
-    public:
-        property_transition(i_animator& aAnimator, i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true);
-        ~property_transition();
-    public:
-        bool can_apply() const override;
-        void apply() override;
-        bool finished() const override;
-    public:
-        void clear() override;
-    public:
-        i_property& property() const;
-        const property_variant& from() const;
-        const property_variant& to() const;
-    public:
-        bool property_destroyed() const;
-    private:
-        void pre_filter_event(const neolib::i_event& aEvent) override;
-        void filter_event(const neolib::i_event& aEvent) override;
-    private:
-        i_property& iProperty;
-        destroyed_flag iPropertyDestroyed;
-        property_variant iFrom;
-        property_variant iTo;
-        bool iUpdatingProperty;
-        destroyed_flag iEventQueueDestroyed;
-    };
-
     class animator : public i_animator
     {
     public:
         animator();
     public:
         i_transition& transition(transition_id aTransitionId) override;
-        transition_id add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) override;
+        transition_id add_transition(i_transition& aTransition) override;
         void remove_transition(transition_id aTransitionId) override;
         void stop() override;
     public:

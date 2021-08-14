@@ -1067,6 +1067,15 @@ namespace neogfx
     using color = sRGB_color;
 
     typedef optional<color> optional_color;
+
+    inline color mix(const color& aLhs, const color& aRhs, double aMixValue)
+    {
+        return color{
+            mix(aLhs.red<double>(), aRhs.red<double>(), aMixValue),
+            mix(aLhs.green<double>(), aRhs.green<double>(), aMixValue),
+            mix(aLhs.blue<double>(), aRhs.blue<double>(), aMixValue),
+            mix(aLhs.alpha<double>(), aRhs.alpha<double>(), aMixValue) };
+    }
 }
 
 define_setting_type(neogfx::color)

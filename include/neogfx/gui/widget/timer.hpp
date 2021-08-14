@@ -22,11 +22,11 @@
 #include <neogfx/neogfx.hpp>
 #include <neolib/task/timer.hpp>
 #include <neogfx/core/async_task.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
-#include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
 {
+    class i_widget;
+
     class widget_timer : public neolib::callback_timer
     {
     public:

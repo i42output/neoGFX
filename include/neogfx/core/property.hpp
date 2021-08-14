@@ -24,6 +24,7 @@
 #include <neolib/core/optional.hpp>
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_property.hpp>
+#include <neogfx/core/transition_animator.hpp>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -32,13 +33,113 @@
 
 namespace neogfx
 {
+    template <typename T, typename Category, class Context, typename Calculator>
+    class property;
+
+    template <typename T, typename Category, class Context, typename Calculator>
+    class property_transition : public transition
+    {
+    public:
+        typedef property<T, Category, Context, Calculator> property_type;
+        typedef T value_type;
+    public:
+        property_transition(i_animator& aAnimator, property_type& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) :
+            transition{ aAnimator, aEasingFunction, aDuration, aEnabled },
+            iProperty{ aProperty }
+        {
+        }
+        ~property_transition()
+        {
+        }
+    public:
+        void start_if()
+        {
+            if (iProperty.iPreviousValue != std::nullopt)
+            {
+                iFrom = iProperty.iPreviousValue;
+                iTo = iProperty.iValue;
+                reset(true, disable_when_finished());
+                apply();
+            }
+        }
+        bool started() const
+        {
+            return iFrom != std::nullopt;
+        }
+        value_type const& from() const
+        {
+            return iFrom.value();
+        }
+        value_type const& to() const
+        {
+            return iTo.value();
+        }
+        value_type const& mix() const
+        {
+            return iMix.value();
+        }
+        bool updating_property() const
+        {
+            return iUpdatingProperty;
+        }
+    public:
+        bool property_transition::can_apply() const override
+        {
+            return !finished() && enabled() && !paused();
+        }
+        void apply() override
+        {
+            if (!can_apply())
+                throw cannot_apply();
+            if (!animation_finished())
+            {
+                iMix = neogfx::mix(iFrom, iTo, mix_value());
+                if constexpr (std::is_scalar_v<value_type>)
+                    std::cerr << "<1> " << *iMix << std::endl;
+                neolib::scoped_flag sf{ iUpdatingProperty };
+                iProperty = mix();
+            }
+            else
+            {
+                iMix = (easing_function() != easing::Zero ? *iTo : *iFrom);
+                if constexpr (std::is_scalar_v<value_type>)
+                    std::cerr << "<2> " << *iMix << std::endl;
+                neolib::scoped_flag sf{ iUpdatingProperty };
+                iProperty = mix();
+                clear();
+                if (disable_when_finished())
+                    disable();
+            }
+        }
+        bool finished() const override
+        {
+            return iFrom == std::nullopt;
+        }
+    public:
+        void clear() override
+        {
+            iFrom = std::nullopt;
+            iTo = std::nullopt;
+            iMix = std::nullopt;
+        }
+    private:
+        property_type& iProperty;
+        std::optional<value_type> iFrom;
+        std::optional<value_type> iTo;
+        std::optional<value_type> iMix;
+        bool iUpdatingProperty = false;
+    };
+
     template <typename T, typename Category, class Context, typename Calculator = T(*)()>
     class property : public i_property, public neolib::lifetime<>
     {
         typedef property<T, Category, Context, Calculator> self_type;
+        template <typename, typename, class, typename>
+        friend class property_transition;
     public:
         typedef T value_type;
         typedef Context context_type;
+        typedef property_transition<T, Category, Context, Calculator> transition_type;
     public:
         define_declared_event(PropertyChanged, property_changed, const property_variant&)
         define_declared_event(PropertyChangedFromTo, property_changed_from_to, const property_variant&, const property_variant&)
@@ -135,22 +236,6 @@ namespace neogfx
             else
                 return value();
         }
-        property_variant get_new_as_variant() const override
-        {
-            if (iNewValue != std::nullopt)
-            {
-                if constexpr (neolib::is_optional_v<T>)
-                {
-                    if (*iNewValue != std::nullopt)
-                        return **iNewValue;
-                    else
-                        return neolib::none;
-                }
-                else
-                    return *iNewValue;
-            }
-            throw no_new_value();
-        }
         void set_from_variant(const property_variant& aValue) override
         {
             std::visit([this](auto&& arg)
@@ -160,6 +245,24 @@ namespace neogfx
                 else
                     *this = std::forward<decltype(arg)>(arg);
             }, aValue);
+        }
+        bool have_transition() const override
+        {
+            return iTransition != nullptr;
+        }
+        transition_type& transition() const override
+        {
+            if (iTransition != nullptr)
+                return *iTransition;
+            throw std::logic_error( "neogfx::property: no transition!" );
+        }
+        void set_transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true) override
+        {
+            iTransition = std::make_unique<transition_type>(aAnimator, *this, aEasingFunction, aDuration, aEnabled);
+        }
+        void clear_transition() override
+        {
+            iTransition = nullptr;
         }
         bool has_delegate() const override
         {
@@ -183,40 +286,37 @@ namespace neogfx
         {
             iDelegate = nullptr;
         }
-        void discard_change_events() override
-        {
-            iDiscardChangeEvents = true;
-        }
     public:
         const value_type& value() const
         {
-            if (!has_delegate())
-                return iValue;
-            std::visit([this](auto&& arg)
+            if (has_delegate())
             {
-                typedef std::decay_t<decltype(arg)> try_type;
-                if constexpr (std::is_same_v<try_type, value_type>)
-                    iValue = arg;
-                else if constexpr (std::is_same_v<try_type, custom_type>)
+                std::visit([this](auto&& arg)
                 {
-                    if constexpr (!neolib::is_optional_v<value_type>)
-                        iValue = neolib::any_cast<const value_type&>(arg);
+                    typedef std::decay_t<decltype(arg)> try_type;
+                    if constexpr (std::is_same_v<try_type, value_type>)
+                        iValue = arg;
+                    else if constexpr (std::is_same_v<try_type, custom_type>)
+                    {
+                        if constexpr (!neolib::is_optional_v<value_type>)
+                            iValue = neolib::any_cast<const value_type&>(arg);
+                        else
+                            iValue = neolib::any_cast<const neolib::optional_t<value_type>&>(arg);
+                    }
+                    else if constexpr (std::is_same_v<try_type, neolib::none_t> || std::is_same_v<try_type, std::monostate>)
+                    {
+                        if constexpr (!neolib::is_optional_v<value_type>)
+                            iValue = {};
+                        else
+                            iValue = std::nullopt;
+                    }
                     else
-                        iValue = neolib::any_cast<const neolib::optional_t<value_type>&>(arg);
-                }
-                else if constexpr (std::is_same_v<try_type, neolib::none_t> || std::is_same_v<try_type, std::monostate>)
-                {
-                    if constexpr (!neolib::is_optional_v<value_type>)
-                        iValue = {};
-                    else
-                        iValue = std::nullopt;
-                }
-                else
-                {
-                    // [[unreachable]]
-                    throw invalid_type();
-                }
-            }, delegate().get(*this));
+                    {
+                        // [[unreachable]]
+                        throw invalid_type();
+                    }
+                }, delegate().get(*this));
+            }
             return iValue;
         }
         template <typename T2>
@@ -313,71 +413,60 @@ namespace neogfx
         template <typename T2>
         self_type& do_assign(T2&& aValue, bool aOwnerNotify = true)
         {
+            if (have_transition() && !transition().updating_property() && 
+                transition().started() && aValue == transition().to())
+                return *this;
+
             if (mutable_value() != aValue)
             {
-                iNewValue = std::forward<T2>(aValue);
-                destroyed_flag destroyed{ *this };
-                try
-                {
-                    PropertyChanged.pre_trigger();
-                    if (destroyed)
-                        return *this;
-                    PropertyChangedFromTo.pre_trigger();
-                    if (destroyed)
-                        return *this;
-                    Changed.pre_trigger();
-                    if (destroyed)
-                        return *this;
-                    ChangedFromTo.pre_trigger();
-                    if (destroyed)
-                        return *this;
-                }
-                catch (...)
-                {
-                    iDiscardChangeEvents = false;
-                    throw;
-                }
-                auto const previousValue = mutable_value();
-                mutable_value() = std::forward<T2>(aValue);
-                iNewValue = std::nullopt;
-                if (iDiscardChangeEvents)
-                {
-                    iDiscardChangeEvents = false;
-                    return *this;
-                }
-                if (aOwnerNotify)
-                    iOwner.property_changed(*this);
-                if (destroyed)
-                    return *this;
-                bool const discardChanged = !PropertyChanged.trigger(get_as_variant());
-                if (destroyed)
-                    return *this;
-                bool discardChangedFromTo = false;
-                if constexpr (!neolib::is_optional_v<T>)
-                    discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ previousValue }, get_as_variant());
-                else
-                    discardChangedFromTo = !PropertyChangedFromTo.trigger(previousValue != std::nullopt ? property_variant{ *previousValue } : property_variant{ neolib::none }, get_as_variant());
-                if (destroyed)
-                    return *this;
-                if (!discardChanged && !Changed.trigger(value()))
-                    return *this;
-                if (destroyed)
-                    return *this;
-                if (!discardChangedFromTo && !ChangedFromTo.trigger(previousValue, value()))
-                    return *this;
-                if (destroyed)
-                    return *this;
+                iPreviousValue = value();
+                mutable_value() = aValue;
+                if (have_transition() && !transition().updating_property())
+                    transition().start_if();
+                update(aOwnerNotify);
             }
+
             return *this;
+        }
+        void update(bool aOwnerNotify = true)
+        {
+            destroyed_flag destroyed{ *this };
+
+            if (aOwnerNotify)
+                iOwner.property_changed(*this);
+            if (destroyed)
+                return;
+
+            bool const discardChanged = !PropertyChanged.trigger(get_as_variant());
+            if (destroyed)
+                return;
+
+            bool discardChangedFromTo = false;
+            if constexpr (!neolib::is_optional_v<T>)
+                discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ *iPreviousValue }, get_as_variant());
+            else
+                discardChangedFromTo = !PropertyChangedFromTo.trigger(*iPreviousValue != std::nullopt ? property_variant{ **iPreviousValue } : property_variant{ neolib::none }, get_as_variant());
+            if (destroyed)
+                return;
+
+            if (!discardChanged && !Changed.trigger(value()))
+                return;
+            if (destroyed)
+                return;
+
+            if (!discardChangedFromTo && !ChangedFromTo.trigger(*iPreviousValue, value()))
+                return;
+            if (destroyed)
+                return;
         }
     private:
         i_property_owner& iOwner;
         string iName;
         calculator_function_type iCalculator;
         mutable value_type iValue;
-        neolib::optional<value_type> iNewValue;
+        std::optional<value_type> iPreviousValue;
+        std::unique_ptr<transition_type> iTransition;
         i_property_delegate* iDelegate = nullptr;
-        bool iDiscardChangeEvents = false;
     };
 
     namespace property_category

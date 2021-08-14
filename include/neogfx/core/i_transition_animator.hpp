@@ -20,9 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/easing.hpp>
-#include <neogfx/core/i_property.hpp>
 
 namespace neogfx
 {
@@ -72,7 +70,7 @@ namespace neogfx
         friend class neogfx::transition;
     public:
         virtual i_transition& transition(transition_id aTransitionId) = 0;
-        virtual transition_id add_transition(i_property& aProperty, easing aEasingFunction, double aDuration, bool aEnabled = true) = 0;
+        virtual transition_id add_transition(i_transition& aTransition) = 0;
         virtual void remove_transition(transition_id aTransitionId) = 0;
         virtual void stop() = 0;
     public:
@@ -82,58 +80,4 @@ namespace neogfx
     public:
         static uuid const& iid() { static uuid const sIid{ 0x182ccd2e, 0xd7dd, 0x4a6c, 0x9ac, { 0x72, 0xfd, 0x81, 0x24, 0x7a, 0xe9 } }; return sIid; }
     };
-
-    template <typename T>
-    inline T mix(const T& aLhs, const T&, double)
-    {
-        return aLhs;
-    }
-
-    template <typename T1, typename T2>
-    inline T1 mix(const T1& aLhs, const T2&, double)
-    {
-        return aLhs;
-    }
-    
-    template <typename T>
-    inline T mix(const std::optional<T>& aLhs, const std::optional<T>& aRhs, double aMixValue)
-    {
-        if (!aLhs.has_value() && !aRhs.has_value())
-            return T{};
-        else if (aLhs.has_value() && !aRhs.has_value())
-            return *aLhs;
-        else if (!aLhs.has_value() && aRhs.has_value())
-            return *aRhs;
-        else
-            return mix(*aLhs, *aRhs, aMixValue);
-    }
-
-    inline double mix(double aLhs, double aRhs, double aMixValue)
-    {
-        return aLhs * (1.0 - aMixValue) + aRhs * aMixValue;
-    }
-
-    inline point mix(const point& aLhs, const point& aRhs, double aMixValue)
-    {
-        return point{ mix(aLhs.x, aRhs.x, aMixValue), mix(aLhs.y, aRhs.y, aMixValue) };
-    }
-
-    inline vec2 mix(const vec2& aLhs, const vec2& aRhs, double aMixValue)
-    {
-        return vec2{ mix(aLhs.x, aRhs.x, aMixValue), mix(aLhs.y, aRhs.y, aMixValue) };
-    }
-
-    inline vec3 mix(const vec3& aLhs, const vec3& aRhs, double aMixValue)
-    {
-        return vec3{ mix(aLhs.x, aRhs.x, aMixValue), mix(aLhs.y, aRhs.y, aMixValue), mix(aLhs.z, aRhs.z, aMixValue) };
-    }
-
-    inline color mix(const color& aLhs, const color& aRhs, double aMixValue)
-    {
-        return color{ 
-            mix(aLhs.red<double>(), aRhs.red<double>(), aMixValue), 
-            mix(aLhs.green<double>(), aRhs.green<double>(), aMixValue),
-            mix(aLhs.blue<double>(), aRhs.blue<double>(), aMixValue),
-            mix(aLhs.alpha<double>(), aRhs.alpha<double>(), aMixValue) };
-    }
 }

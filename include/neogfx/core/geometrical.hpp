@@ -1262,6 +1262,21 @@ namespace neogfx
         return basic_box_areas<T>{ basic_point<T>{ aTransformation * aBoxAreas.top_left().to_vec3() }, basic_point<T>{ aTransformation * aBoxAreas.bottom_right().to_vec3() } };
     }
 
+    inline point mix(const point& aLhs, const point& aRhs, double aMixValue)
+    {
+        return point{ mix(aLhs.x, aRhs.x, aMixValue), mix(aLhs.y, aRhs.y, aMixValue) };
+    }
+
+    inline vec2 mix(const vec2& aLhs, const vec2& aRhs, double aMixValue)
+    {
+        return vec2{ mix(aLhs.x, aRhs.x, aMixValue), mix(aLhs.y, aRhs.y, aMixValue) };
+    }
+
+    inline vec3 mix(const vec3& aLhs, const vec3& aRhs, double aMixValue)
+    {
+        return vec3{ mix(aLhs.x, aRhs.x, aMixValue), mix(aLhs.y, aRhs.y, aMixValue), mix(aLhs.z, aRhs.z, aMixValue) };
+    }
+
     template <typename Elem, typename Traits, typename T>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_point<T>& aPoint)
     {

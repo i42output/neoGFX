@@ -106,4 +106,34 @@ namespace neogfx
                 result[column] = inf_add(result[column], inf_multiply(left[index], right[column][index]));
         return result;
     }
+
+    template <typename T>
+    inline T mix(const T& aLhs, const T&, double)
+    {
+        return aLhs;
+    }
+
+    template <typename T1, typename T2>
+    inline T1 mix(const T1& aLhs, const T2&, double)
+    {
+        return aLhs;
+    }
+
+    template <typename T>
+    inline T mix(const std::optional<T>& aLhs, const std::optional<T>& aRhs, double aMixValue)
+    {
+        if (!aLhs.has_value() && !aRhs.has_value())
+            return T{};
+        else if (aLhs.has_value() && !aRhs.has_value())
+            return *aLhs;
+        else if (!aLhs.has_value() && aRhs.has_value())
+            return *aRhs;
+        else
+            return mix(*aLhs, *aRhs, aMixValue);
+    }
+
+    inline double mix(double aLhs, double aRhs, double aMixValue)
+    {
+        return aLhs * (1.0 - aMixValue) + aRhs * aMixValue;
+    }
 }

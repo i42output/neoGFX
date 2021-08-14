@@ -121,6 +121,7 @@ namespace neogfx
         point iThumbClickedPosition;
         value_type iThumbClickedValue;
         optional_point iScrollTrackPosition;
+        bool iTransitionOK = true;
         optional_easing iTransitionEasing;
         double iTransitionDuration = 1.0;
         bool iOnlyTransitionWhenPaging = true;
