@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGFX", "neogfx.vcxproj", "{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc", "..\..\..\tools\nrc\build\win32\vs2019\nrc.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
 EndProject
@@ -48,6 +51,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "default", "..\..\..\tools\DesignStudio\element_libraries\default\build\win32\default\default.vcxproj", "{78562FD5-5659-4ADD-B6B0-A83A78D3510C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
+		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chess", "..\..\..\examples\games\chess\build\win32\vs2019\chess\chess.vcxproj", "{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}"

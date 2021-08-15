@@ -27,13 +27,13 @@
 #include FT_FREETYPE_H
 #ifdef u8
 #undef u8
-#include <hb.h>
-#include <hb-ft.h>
-#include <hb-ucdn\ucdn.h>
+#include <harfbuzz\hb.h>
+#include <harfbuzz\hb-ft.h>
+#include <harfbuzz\hb-ucdn\ucdn.h>
 #define u8
 #else
-#include <hb.h>
-#include <hb-ft.h>
+#include <harfbuzz\hb.h>
+#include <harfbuzz\hb-ft.h>
 #endif
 #include "..\..\native\opengl.hpp"
 #include <neolib/core/reference_counted.hpp>

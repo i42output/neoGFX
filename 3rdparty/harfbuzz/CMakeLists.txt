@@ -3,6 +3,8 @@ project(harfbuzz)
 
 message(WARN "HarfBuzz has a Meson port and tries to migrate all the other build systems to it, please consider using it as we might remove our cmake port soon.")
 
+add_definitions(-DBUILDING_HARFBUZZ -DHB_NO_OT_KERN)
+
 ## Limit framework build to Xcode generator
 if (BUILD_FRAMEWORK)
   # for a framework build on macOS, use:
