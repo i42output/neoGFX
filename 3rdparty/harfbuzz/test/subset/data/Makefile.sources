@@ -1,0 +1,47 @@
+TESTS = \
+	tests/basics.tests \
+	tests/cbdt.tests \
+	tests/cff-full-font.tests \
+	tests/cff-japanese.tests \
+	tests/cff.notoserifmyanmar.tests \
+	tests/cmap.tests \
+	tests/cmap14.tests \
+	tests/colr.tests \
+	tests/colr_with_components.tests \
+	tests/full-font.tests \
+	tests/glyf_bug_3131.tests \
+	tests/japanese.tests \
+	tests/layout.context.tests \
+	tests/layout.gdef-attachlist.tests \
+	tests/layout.gdef-varstore.tests \
+	tests/layout.gdef.tests \
+	tests/layout.gpos.tests \
+	tests/layout.gpos2.tests \
+	tests/layout.gpos3.tests \
+	tests/layout.gpos4.tests \
+	tests/layout.gpos5.tests \
+	tests/layout.gpos6.tests \
+	tests/layout.gpos8.tests \
+	tests/layout.gpos8.amiri.tests \
+	tests/layout.gpos9.tests \
+	tests/layout.gsub3.tests \
+	tests/layout.gsub5.tests \
+	tests/layout.gsub6.tests \
+	tests/layout.gsub8.tests \
+	tests/layout.khmer.tests \
+	tests/layout.notonastaliqurdu.tests \
+	tests/layout.tests \
+	tests/sbix.tests \
+	tests/variable.tests \
+	$(NULL)
+
+# TODO: re-enable once colrv1 subsetting is stabilized.
+#	tests/colrv1.notoemoji.tests
+#	tests/colrv1.tests
+
+
+XFAIL_TESTS = \
+	$(NULL)
+
+DISABLED_TESTS = \
+	$(NULL)
