@@ -48,6 +48,8 @@ namespace neogfx
 
     native_font::~native_font()
     {
+        if (iHarfbuzzBlob != nullptr)
+            hb_blob_destroy(iHarfbuzzBlob);
     }
 
     i_string const& native_font::family_name() const
@@ -127,46 +129,46 @@ namespace neogfx
 
     void native_font::register_face(FT_Long aFaceIndex)
     {
-        FT_Face face = open_face(aFaceIndex);
+        auto face = open_face(aFaceIndex);
         try
         {
             if (aFaceIndex == 0)
             {
-                iFaceCount = face->num_faces;
-                iFamilyName = face->family_name;
+                iFaceCount = face.first->num_faces;
+                iFamilyName = face.first->family_name;
             }
             font_style style = font_style::Invalid;
-            if (face->style_flags & FT_STYLE_FLAG_ITALIC)
+            if (face.first->style_flags & FT_STYLE_FLAG_ITALIC)
                 style = static_cast<font_style>(style | font_style::Italic);
-            if (face->style_flags & FT_STYLE_FLAG_BOLD)
+            if (face.first->style_flags & FT_STYLE_FLAG_BOLD)
                 style = static_cast<font_style>(style | font_style::Bold);
-            auto const searchKey = neolib::ci_string{ face->style_name };
+            auto const searchKey = neolib::ci_string{ face.first->style_name };
             if (searchKey.find("italic") != neolib::ci_string::npos)
                 style |= font_style::Italic;
             if (searchKey.find("bold") != neolib::ci_string::npos || searchKey.find("heavy") != neolib::ci_string::npos || searchKey.find("black") != neolib::ci_string::npos)
                 style |= font_style::Bold;
             if (style == font_style::Invalid)
                 style = font_style::Normal;
-            iStyleMap.emplace(std::make_pair(style, face->style_name), aFaceIndex);
+            iStyleMap.emplace(std::make_pair(style, face.first->style_name), aFaceIndex);
         }
         catch (...)
         {
-            close_face(face);
+            close_face(face.first);
             throw;
         }
-        close_face(face);
+        close_face(face.first);
     }
 
-    FT_Face native_font::open_face(FT_Long aFaceIndex)
+    std::pair<FT_Face, hb_face_t*> native_font::open_face(FT_Long aFaceIndex)
     {
-        FT_Face face;
+        std::pair<FT_Face, hb_face_t*> face;
         if (std::holds_alternative<filename_type>(iSource))
         {
             if (iCache.empty())
             {
                 std::size_t fileSize = static_cast<std::size_t>(boost::filesystem::file_size(static_variant_cast<const filename_type&>(iSource)));
                 iCache.resize(fileSize);
-                std::ifstream file{ static_variant_cast<const filename_type&>(iSource).c_str(), std::ios::in | std::ios::binary };
+                std::ifstream file{ std::get<filename_type>(iSource).c_str(), std::ios::in | std::ios::binary };
                 file.read(reinterpret_cast<char*>(&iCache[0]), fileSize);
             }
             FT_Error error = FT_New_Memory_Face(
@@ -174,20 +176,29 @@ namespace neogfx
                 static_cast<const FT_Byte*>(&iCache[0]),
                 static_cast<FT_Long>(iCache.size()),
                 aFaceIndex,
-                &face);
+                &face.first);
             if (error)
                 throw failed_to_load_font();
+            iHarfbuzzBlob = hb_blob_create_from_file_or_fail(std::get<filename_type>(iSource).c_str());
+            if (iHarfbuzzBlob == nullptr)
+                throw failed_to_load_font();
+            face.second = hb_face_create(iHarfbuzzBlob, aFaceIndex);
         }
         else
         {
+            auto const& memBlk = std::get<memory_block_type>(iSource);
             FT_Error error = FT_New_Memory_Face(
                 iFontLib,
-                static_cast<const FT_Byte*>(static_variant_cast<const memory_block_type&>(iSource).first),
-                static_cast<FT_Long>(static_variant_cast<const memory_block_type&>(iSource).second),
+                static_cast<const FT_Byte*>(memBlk.first),
+                static_cast<FT_Long>(memBlk.second),
                 aFaceIndex,
-                &face);
+                &face.first);
             if (error)
                 throw failed_to_load_font();
+            iHarfbuzzBlob = hb_blob_create_or_fail(static_cast<const char*>(memBlk.first), static_cast<unsigned int>(memBlk.second), hb_memory_mode_t::HB_MEMORY_MODE_READONLY, nullptr, nullptr);
+            if (iHarfbuzzBlob == nullptr)
+                throw failed_to_load_font();
+            face.second = hb_face_create(iHarfbuzzBlob, aFaceIndex);
         }
         return face;
     }
@@ -202,18 +213,18 @@ namespace neogfx
         auto existingFace = iFaces.find(std::make_tuple(aFaceIndex, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())));
         if (existingFace != iFaces.end())
             return existingFace->second;
-        FT_Face newFreetypeFace = open_face(aFaceIndex);
+        auto const& newFaceHandles = open_face(aFaceIndex);
         try
         {
             auto newFontId = service<i_font_manager>().allocate_font_id();
-            auto newFace = make_ref<native_font_face>(newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFreetypeFace);
+            auto newFace = make_ref<native_font_face>(newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFaceHandles.first, newFaceHandles.second);
             iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), newFace)).first;
             return newFace;
         }
         catch (...)
         {
-            if (newFreetypeFace != 0)
-                close_face(newFreetypeFace);
+            if (newFaceHandles.first != 0)
+                close_face(newFaceHandles.first);
             throw;
         }
     }

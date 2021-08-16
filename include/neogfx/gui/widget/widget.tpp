@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <unordered_map>
+#include <typeindex>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>

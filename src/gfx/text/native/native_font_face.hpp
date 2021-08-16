@@ -27,13 +27,13 @@
 #include FT_FREETYPE_H
 #ifdef u8
 #undef u8
-#include <hb.h>
-#include <hb-ft.h>
-#include <hb-ucdn\ucdn.h>
+#include <harfbuzz\hb.h>
+#include <harfbuzz\hb-ot.h>
+#include <harfbuzz\hb-ucdn\ucdn.h>
 #define u8
 #else
-#include <hb.h>
-#include <hb-ft.h>
+#include <harfbuzz\hb.h>
+#include <harfbuzz\hb-ot.h>
 #endif
 #include "..\..\native\opengl.hpp"
 #include <neolib/core/reference_counted.hpp>
@@ -94,6 +94,28 @@ namespace neogfx
         bool iPrevious;
     };
 
+    struct font_face_handle
+    {
+        FT_Face freetypeFace;
+        hb_face_t* harfbuzzFace;
+        hb_font_t* harfbuzzFont;
+        hb_buffer_t* harfbuzzBuf;
+        hb_unicode_funcs_t* harfbuzzUnicodeFuncs;
+        font_face_handle(FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
+            freetypeFace{ aFreetypeFace },
+            harfbuzzFace{ aHarfbuzzFace },
+            harfbuzzFont{ hb_font_create(aHarfbuzzFace) },
+            harfbuzzBuf{ hb_buffer_create() },
+            harfbuzzUnicodeFuncs{ hb_buffer_get_unicode_funcs(harfbuzzBuf) }
+        {
+        }
+        ~font_face_handle()
+        {
+            hb_font_destroy(harfbuzzFont);
+            hb_buffer_destroy(harfbuzzBuf);
+        }
+    };
+
     class native_font_face : public neolib::reference_counted<i_native_font_face>
     {
     private:
@@ -102,28 +124,10 @@ namespace neogfx
         typedef std::unordered_map<kerning_pair, dimension, boost::hash<kerning_pair>, std::equal_to<kerning_pair>,
             boost::fast_pool_allocator<std::pair<const kerning_pair, dimension>>> kerning_table;
     public:
-        struct hb_handle
-        {
-            hb_font_t* font;
-            hb_buffer_t* buf;
-            hb_unicode_funcs_t* unicodeFuncs;
-            hb_handle(const native_font_face& aFace) :
-                font(hb_ft_font_create(static_cast<FT_Face>(aFace.handle()), NULL)),
-                buf(hb_buffer_create()),
-                unicodeFuncs(hb_buffer_get_unicode_funcs(buf))
-            {
-            }
-            ~hb_handle()
-            {
-                hb_font_destroy(font);
-                hb_buffer_destroy(buf);
-            }
-        };
-    public:
         struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(std::string const& aError) : freetype_error(aError) {} };
         struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(std::string const& aError) : freetype_error(aError) {} };
     public:
-        native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle);
+        native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace);
         ~native_font_face();
     public:
         font_id id() const override;
@@ -140,6 +144,8 @@ namespace neogfx
         dimension underline_position() const override;
         dimension underline_thickness() const override;
         dimension line_spacing() const override;
+        neogfx::kerning_method kerning_method() const override;
+        void set_kerning_method(neogfx::kerning_method aKerningMethod) override;
         dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const override;
         bool is_bitmap_font() const override;
         uint32_t num_fixed_sizes() const override;
@@ -148,8 +154,6 @@ namespace neogfx
         bool fallback_cached() const override;
         i_native_font_face& fallback() const override;
         void* handle() const override;
-        void update_handle(void* aHandle) override;
-        void* aux_handle() const override;
         glyph_index_t glyph_index(char32_t aCodePoint) const override;
         i_glyph_texture& glyph_texture(const glyph& aGlyph) const override;
     private:
@@ -161,12 +165,12 @@ namespace neogfx
         string iStyleName;
         font::point_size iSize;
         neogfx::size iPixelDensityDpi;
-        FT_Face iHandle;
+        mutable font_face_handle iHandle;
         std::optional<FT_Size_Metrics> iMetrics;
-        mutable std::unique_ptr<hb_handle> iAuxHandle;
         mutable ref_ptr<i_native_font_face> iFallbackFont;
         mutable glyph_map iGlyphs;
-        bool iHasKerning;
+        bool iHasKerning = false;
+        neogfx::kerning_method iKerningMethod = neogfx::kerning_method::Harfbuzz;
         mutable kerning_table iKerningTable;
         mutable std::optional<bool> iHasFallback;
         mutable std::optional<neogfx::glyph_texture> iInvalidGlyph;

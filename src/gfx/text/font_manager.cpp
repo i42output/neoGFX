@@ -29,13 +29,13 @@
 #include FT_BITMAP_H
 #ifdef u8
 #undef u8
-#include <hb.h>
-#include <hb-ft.h>
-#include <hb-ucdn\ucdn.h>
+#include <harfbuzz\hb.h>
+#include <harfbuzz\hb-ft.h>
+#include <harfbuzz\hb-ucdn\ucdn.h>
 #define u8
 #else
-#include <hb.h>
-#include <hb-ft.h>
+#include <harfbuzz\hb.h>
+#include <harfbuzz\hb-ot.h>
 #endif
 #ifdef _WIN32
 #include <Shlobj.h>
@@ -197,15 +197,14 @@ namespace neogfx
         public:
             glyphs(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun) :
                 iParent{ aParent },
-                iFont{ static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->font },
+                iFont{ static_cast<font_face_handle*>(aFont.native_font_face().handle())->harfbuzzFont },
                 iGlyphRun{ aGlyphRun },
-                iBuf{ static_cast<native_font_face::hb_handle*>(aFont.native_font_face().aux_handle())->buf },
+                iBuf{ static_cast<font_face_handle*>(aFont.native_font_face().handle())->harfbuzzBuf },
                 iGlyphCount{ 0u },
                 iGlyphInfo{ nullptr },
                 iGlyphPos{ nullptr }
             {
                 scoped_kerning sk{ aFont.kerning() };
-                hb_ft_font_set_load_flags(iFont, aParent.is_subpixel_rendering_on() ? FT_LOAD_TARGET_LCD : FT_LOAD_TARGET_NORMAL);
                 hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
                 std::vector<uint32_t> reversed;
@@ -447,7 +446,7 @@ namespace neogfx
         const char32_t* runStart = &codePoints[0];
         std::u32string::size_type lastCodePointIndex = codePointCount - 1;
         font previousFont = aFontSelector.select_font(0);
-        hb_script_t previousScript = hb_unicode_script(static_cast<native_font_face::hb_handle*>(previousFont.native_font_face().aux_handle())->unicodeFuncs, codePoints[0]);
+        hb_script_t previousScript = hb_unicode_script(static_cast<font_face_handle*>(previousFont.native_font_face().handle())->harfbuzzUnicodeFuncs, codePoints[0]);
 
         std::deque<std::pair<text_direction, bool>> directionStack;
         const char32_t LRE = U'\u202A';
@@ -483,7 +482,7 @@ namespace neogfx
                 break;
             }
 
-            hb_unicode_funcs_t* unicodeFuncs = static_cast<native_font_face::hb_handle*>(currentFont.native_font_face().aux_handle())->unicodeFuncs;
+            hb_unicode_funcs_t* unicodeFuncs = static_cast<font_face_handle*>(currentFont.native_font_face().handle())->harfbuzzUnicodeFuncs;
             text_category currentCategory = get_text_category(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
             if (aContext.mnemonic_set() && codePoints[codePointIndex] == static_cast<char32_t>(aContext.mnemonic()))
                 currentCategory = text_category::Mnemonic;

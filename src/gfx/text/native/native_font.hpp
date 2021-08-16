@@ -25,6 +25,7 @@
 #include <neolib/core/variant.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <harfbuzz/hb.h>
 #include "i_native_font.hpp"
 #include "i_native_font_face.hpp"
 
@@ -56,13 +57,14 @@ namespace neogfx
         void create_face(i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) override;
     private:
         void register_face(FT_Long aFaceIndex);
-        FT_Face open_face(FT_Long aFaceIndex);
+        std::pair<FT_Face, hb_face_t*> open_face(FT_Long aFaceIndex);
         void close_face(FT_Face aFace);
         ref_ptr<i_native_font_face> create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice);
     private:
         FT_Library iFontLib;
         source_type iSource;
         std::vector<unsigned char> iCache;
+        hb_blob_t* iHarfbuzzBlob = nullptr;
         string iFamilyName;
         FT_Long iFaceCount;
         style_map iStyleMap;

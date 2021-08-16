@@ -31,6 +31,13 @@ namespace neogfx
     struct glyph;
     class i_glyph_texture;
 
+    enum class kerning_method
+    {
+        Freetype,
+        Harfbuzz,
+        Disabled
+    };
+
     class i_native_font_face : public neolib::i_reference_counted
     {
     public:
@@ -56,6 +63,8 @@ namespace neogfx
         virtual dimension underline_position() const = 0;
         virtual dimension underline_thickness() const = 0;
         virtual dimension line_spacing() const = 0;
+        virtual neogfx::kerning_method kerning_method() const = 0;
+        virtual void set_kerning_method(neogfx::kerning_method aKerningMethod) = 0;
         virtual dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const = 0;
         virtual bool is_bitmap_font() const = 0;
         virtual uint32_t num_fixed_sizes() const = 0;
@@ -64,8 +73,6 @@ namespace neogfx
         virtual bool fallback_cached() const = 0;
         virtual i_native_font_face& fallback() const = 0;
         virtual void* handle() const = 0;
-        virtual void update_handle(void* aHandle) = 0;
-        virtual void* aux_handle() const = 0;
         virtual glyph_index_t glyph_index(char32_t aCodePoint) const = 0;
         virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const = 0;
     };

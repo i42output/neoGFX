@@ -82,33 +82,18 @@ namespace neogfx
         tKerningEnabled = false;
     }
 
-    extern "C" FT_EXPORT(FT_Error)
-        neoGFX_Get_Kerning(FT_Face     face,
-            FT_UInt     left_glyph,
-            FT_UInt     right_glyph,
-            FT_UInt     kern_mode,
-            FT_Vector* akerning)
-    {
-        // Not currently used by Harfbuzz as we have disabled OT kerning in Harfbuzz.
-        auto result = FT_Get_Kerning(face, left_glyph, right_glyph, kern_mode, akerning);
-        if (!kerning_enabled())
-            *akerning = FT_Vector{};
-        return result;
-    }
-
-    native_font_face::native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aHandle) :
-        iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aHandle->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aHandle }, iHasKerning{ !!FT_HAS_KERNING(iHandle) }
+    native_font_face::native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
+        iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         set_metrics();
-        sGetAdvanceCache[iHandle] = get_advance_cache_face{};
+        sGetAdvanceCache[aFreetypeFace] = get_advance_cache_face{};
     }
 
     native_font_face::~native_font_face()
     {
-        if (iHandle != nullptr)
-            sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
-        iAuxHandle = nullptr;
-        FT_Done_Face(iHandle);
+        if (iHandle.freetypeFace != nullptr)
+            sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle.freetypeFace));
+        FT_Done_Face(iHandle.freetypeFace);
         if (iFallbackFont != nullptr)
             iFallbackFont->release();
     }
@@ -183,8 +168,8 @@ namespace neogfx
     dimension native_font_face::underline_thickness() const
     {
         auto result = 1.0;
-        if (FT_IS_SCALABLE(iHandle))
-            result = iHandle->underline_thickness / 64.0;
+        if (FT_IS_SCALABLE(iHandle.freetypeFace))
+            result = iHandle.freetypeFace->underline_thickness / 64.0;
         else
             result = static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_weight::Normal);
         if (result < 1.0 || (result > 1.0 && iSize < 20))
@@ -198,32 +183,42 @@ namespace neogfx
         return 0;
     }
 
+    kerning_method native_font_face::kerning_method() const
+    {
+        return iKerningMethod;
+    }
+
+    void native_font_face::set_kerning_method(neogfx::kerning_method aKerningMethod)
+    {
+        iKerningMethod = aKerningMethod;
+    }
+
     dimension native_font_face::kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const
     {
-        if (!iHasKerning)
+        if (!iHasKerning || kerning_method() != neogfx::kerning_method::Freetype)
             return 0.0;
         auto existing = iKerningTable.find(std::make_pair(aLeftGlyphIndex, aRightGlyphIndex));
         if (existing != iKerningTable.end())
             return existing->second;
         FT_Vector delta;
-        freetypeCheck(FT_Get_Kerning(iHandle, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_DEFAULT, &delta));
+        freetypeCheck(FT_Get_Kerning(iHandle.freetypeFace, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_DEFAULT, &delta));
         return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
     }
 
     bool native_font_face::is_bitmap_font() const
     {
-        return !FT_IS_SCALABLE(iHandle);
+        return !FT_IS_SCALABLE(iHandle.freetypeFace);
     }
 
     uint32_t native_font_face::num_fixed_sizes() const
     {
-        return iHandle->num_fixed_sizes;
+        return iHandle.freetypeFace->num_fixed_sizes;
     }
 
     font::point_size native_font_face::fixed_size(uint32_t aFixedSizeIndex) const
     {
         if (aFixedSizeIndex < num_fixed_sizes())
-            return iHandle->available_sizes[aFixedSizeIndex].size / 64.0;
+            return iHandle.freetypeFace->available_sizes[aFixedSizeIndex].size / 64.0;
         throw bad_fixed_size_index();
     }
 
@@ -250,31 +245,12 @@ namespace neogfx
     
     void* native_font_face::handle() const
     {
-        return iHandle;
-    }
-
-    void native_font_face::update_handle(void* aHandle) 
-    { 
-        if (iHandle != nullptr)
-            sGetAdvanceCache.erase(sGetAdvanceCache.find(iHandle));
-        iHandle = static_cast<FT_Face>(aHandle);
-        if (iHandle != nullptr)
-            sGetAdvanceCache[iHandle] = get_advance_cache_face{};
-        iAuxHandle.reset();
-        if (iHandle != nullptr)
-            set_metrics();
-    }
-
-    void* native_font_face::aux_handle() const
-    {
-        if (iAuxHandle == nullptr)
-            iAuxHandle = std::make_unique<hb_handle>(*this);
-        return &*iAuxHandle;
+        return &iHandle;
     }
 
     native_font_face::glyph_index_t native_font_face::glyph_index(char32_t aCodePoint) const
     {
-        return FT_Get_Char_Index(iHandle, aCodePoint);
+        return FT_Get_Char_Index(iHandle.freetypeFace, aCodePoint);
     }
 
     inline glyph_pixel_mode to_glyph_pixel_mode(unsigned char aFreeTypePixelMode)
@@ -310,7 +286,7 @@ namespace neogfx
         {
             try
             {
-                freetypeCheck(FT_Load_Glyph(iHandle, aGlyph.value, FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
             }
             catch (freetype_error fe)
             {
@@ -319,7 +295,7 @@ namespace neogfx
             }
             try
             {
-                freetypeCheck(FT_Render_Glyph(iHandle->glyph, FT_RENDER_MODE_LCD));
+                freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_LCD));
             }
             catch (freetype_error fe)
             {
@@ -334,7 +310,7 @@ namespace neogfx
             {
                 neolib::scoped_flag sf{ inHere };
                 glyph invalid = aGlyph;
-                auto const replacementGlyph = FT_Get_Char_Index(iHandle, 0xFFFD);
+                auto const replacementGlyph = FT_Get_Char_Index(iHandle.freetypeFace, 0xFFFD);
                 if (replacementGlyph != 0)
                 {
                     invalid.value = replacementGlyph;
@@ -358,7 +334,7 @@ namespace neogfx
 
         bool useSubpixelFiltering = true;
 
-        FT_Bitmap& bitmap = iHandle->glyph->bitmap;
+        FT_Bitmap& bitmap = iHandle.freetypeFace->glyph->bitmap;
 
         auto pixelMode = to_glyph_pixel_mode(bitmap.pixel_mode);
 
@@ -376,8 +352,8 @@ namespace neogfx
                 subTexture,
                 useSubpixelFiltering,
                 point{
-                    iHandle->glyph->metrics.horiBearingX / 64.0,
-                    (iHandle->glyph->metrics.horiBearingY - iHandle->glyph->metrics.height) / 64.0 },
+                    iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0,
+                    (iHandle.freetypeFace->glyph->metrics.horiBearingY - iHandle.freetypeFace->glyph->metrics.height) / 64.0 },
                 pixelMode })).first->second;
 
         thread_local std::vector<GLubyte> glyphTextureData;
@@ -440,33 +416,37 @@ namespace neogfx
         auto const size = ((style() & (font_style::Superscript | font_style::Subscript)) == font_style::Invalid) ? iSize : iSize * 0.58;
         if (!is_bitmap_font())
         {
-            freetypeCheck(FT_Set_Char_Size(iHandle, 0, static_cast<FT_F26Dot6>(size * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+            freetypeCheck(FT_Set_Char_Size(iHandle.freetypeFace, 0, static_cast<FT_F26Dot6>(size * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
         }
         else
         {
             auto requestedSize = size * iPixelDensityDpi.cy / 72.0;
-            auto availableSize = iHandle->available_sizes[0].size / 64.0;
+            auto availableSize = iHandle.freetypeFace->available_sizes[0].size / 64.0;
             FT_Int strikeIndex = 0;
-            for (FT_Int si = 0; si < iHandle->num_fixed_sizes; ++si)
+            for (FT_Int si = 0; si < iHandle.freetypeFace->num_fixed_sizes; ++si)
             {
-                auto nextAvailableSize = iHandle->available_sizes[si].size / 64.0;
+                auto nextAvailableSize = iHandle.freetypeFace->available_sizes[si].size / 64.0;
                 if (abs(requestedSize - nextAvailableSize) < abs(requestedSize - availableSize))
                 {
                     availableSize = nextAvailableSize;
                     strikeIndex = si;
                 }
             }
-            freetypeCheck(FT_Select_Size(iHandle, strikeIndex));
+            freetypeCheck(FT_Select_Size(iHandle.freetypeFace, strikeIndex));
         }
         if (iMetrics == std::nullopt)
-            iMetrics.emplace(iHandle->size->metrics);
-        for (const FT_CharMap* cm = iHandle->charmaps; cm != iHandle->charmaps + iHandle->num_charmaps; ++cm)
+            iMetrics.emplace(iHandle.freetypeFace->size->metrics);
+        for (const FT_CharMap* cm = iHandle.freetypeFace->charmaps; cm != iHandle.freetypeFace->charmaps + iHandle.freetypeFace->num_charmaps; ++cm)
         {
             if ((**cm).encoding == FT_ENCODING_UNICODE)
             {
-                freetypeCheck(FT_Select_Charmap(iHandle, FT_ENCODING_UNICODE));
+                freetypeCheck(FT_Select_Charmap(iHandle.freetypeFace, FT_ENCODING_UNICODE));
                 break;
             }
         }
+        hb_font_set_scale(
+            iHandle.harfbuzzFont, 
+            static_cast<int>(size * iPixelDensityDpi.cx / 72.0 * 64), 
+            static_cast<int>(size * iPixelDensityDpi.cy / 72.0 * 64));
     }
 }
