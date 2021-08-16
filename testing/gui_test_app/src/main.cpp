@@ -470,34 +470,34 @@ int main(int argc, char* argv[])
         window.button7.clicked([&app]() { app.actionMute.toggle(); });
         window.button8.clicked([&app]() { if (app.actionContacts.is_enabled()) app.actionContacts.disable(); else app.actionContacts.enable(); });
         prng.seed(3);
-        auto transitionPrng = prng;
-        std::vector<ng::transition_id> transitions;
+//        auto transitionPrng = prng;
+//        std::vector<ng::transition_id> transitions;
         for (uint32_t i = 0; i < 10; ++i)
         {
             auto& button = window.layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
             ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
             button.set_base_color(randomColor);
             button.clicked([&, randomColor]() { window.textEdit.set_palette_color(ng::color_role::Background, randomColor.same_lightness_as(app.current_style().palette().color(ng::color_role::Background))); });
-            transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
+//            transitions.push_back(ng::service<ng::i_animator>().add_transition(button.Position, ng::easing::OutBounce, transitionPrng.get(1.0, 2.0), false));
         }
-        ng::event<> startAnimation;
-        startAnimation([&window, &transitions, &transitionPrng]()
-        {
-            for (auto t : transitions)
-                ng::service<ng::i_animator>().transition(t).reset(true, true);
-            for (auto i = 0u; i < window.layout3.count(); ++i)
-            {
-                auto& button = window.layout3.get_widget_at(i);
-                auto finalPosition = button.position();
-                button.set_position(ng::point{ finalPosition.x, finalPosition.y - transitionPrng.get(600.0, 800.0) }.ceil());
-                button.set_position(finalPosition);
-            }
-        });
-        window.mainWindow.Window([&startAnimation](const ng::window_event& aEvent)
-        { 
-            if (aEvent.type() == ng::window_event_type::Resized)
-                startAnimation.async_trigger(); 
-        });
+//        ng::event<> startAnimation;
+//        startAnimation([&window, &transitions, &transitionPrng]()
+//        {
+//            for (auto t : transitions)
+//                ng::service<ng::i_animator>().transition(t).reset(true, true);
+//            for (auto i = 0u; i < window.layout3.count(); ++i)
+//            {
+//                auto& button = window.layout3.get_widget_at(i);
+//                auto finalPosition = button.position();
+//                button.set_position(ng::point{ finalPosition.x, finalPosition.y - transitionPrng.get(600.0, 800.0) }.ceil());
+//                button.set_position(finalPosition);
+//            }
+//        });
+//        window.mainWindow.Window([&startAnimation](const ng::window_event& aEvent)
+//        { 
+//            if (aEvent.type() == ng::window_event_type::Resized)
+//                startAnimation.async_trigger(); 
+//        });
         auto showHideTabs = [&window]()
         {
             if (window.checkTriState.is_checked())

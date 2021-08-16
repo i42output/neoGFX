@@ -157,6 +157,7 @@ namespace neogfx
         glyph_index_t glyph_index(char32_t aCodePoint) const override;
         i_glyph_texture& glyph_texture(const glyph& aGlyph) const override;
     private:
+        i_glyph_texture& invalid_glyph() const;
         void set_metrics();
     private:
         font_id iId;

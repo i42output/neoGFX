@@ -317,19 +317,7 @@ namespace neogfx
                     return glyph_texture(aGlyph);
                 }
             }
-            if (iInvalidGlyph == std::nullopt)
-            {
-                auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
-                    neogfx::size{ height(), height() }.ceil(),
-                    1.0, texture_sampling::Normal, texture_data_format::SubPixel);
-                iInvalidGlyph.emplace(
-                    subTexture,
-                    true,
-                    point{},
-                    glyph_pixel_mode::LCD);
-                // todo: render an invalid glyph symbol
-            }
-            return *iInvalidGlyph;
+            return invalid_glyph();
         }
 
         bool useSubpixelFiltering = true;
@@ -342,6 +330,9 @@ namespace neogfx
             useSubpixelFiltering = false;
 
         auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
+        if (subTextureWidth == 0)
+            return invalid_glyph();
+
         auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
             neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
             1.0, texture_sampling::Normal, pixelMode != glyph_pixel_mode::Mono ? texture_data_format::SubPixel : texture_data_format::Red);
@@ -409,6 +400,23 @@ namespace neogfx
         static_cast<i_native_texture&>(glyphTexture.texture().native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
 
         return glyphTexture;
+    }
+
+    i_glyph_texture& native_font_face::invalid_glyph() const
+    {
+        if (iInvalidGlyph == std::nullopt)
+        {
+            auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
+                neogfx::size{ height(), height() }.ceil(),
+                1.0, texture_sampling::Normal, texture_data_format::SubPixel);
+            iInvalidGlyph.emplace(
+                subTexture,
+                true,
+                point{},
+                glyph_pixel_mode::LCD);
+            // todo: render an invalid glyph symbol
+        }
+        return *iInvalidGlyph;
     }
 
     void native_font_face::set_metrics()
