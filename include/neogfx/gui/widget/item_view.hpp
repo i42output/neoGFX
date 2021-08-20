@@ -141,7 +141,6 @@ namespace neogfx
         void update_scrollbar_visibility(usv_stage_e aStage) override;
     protected:
         virtual void column_info_changed(item_model_index::value_type aColumnIndex);
-        virtual void item_model_updated();
         virtual void item_added(const item_model_index& aItemIndex);
         virtual void item_changed(const item_model_index& aItemIndex);
         virtual void item_removed(const item_model_index& aItemIndex);
@@ -150,6 +149,7 @@ namespace neogfx
         virtual void item_added(item_presentation_model_index const& aItemIndex);
         virtual void item_changed(item_presentation_model_index const& aItemIndex);
         virtual void item_removed(item_presentation_model_index const& aItemIndex);
+        virtual void items_updated();
         virtual void items_sorting();
         virtual void items_sorted();
         virtual void items_filtering();

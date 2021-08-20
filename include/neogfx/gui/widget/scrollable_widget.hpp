@@ -135,10 +135,10 @@ namespace neogfx
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     public:
-        virtual i_scrollbar const& vertical_scrollbar() const;
-        virtual i_scrollbar& vertical_scrollbar();
-        virtual i_scrollbar const& horizontal_scrollbar() const;
-        virtual i_scrollbar& horizontal_scrollbar();
+        virtual scrollbar const& vertical_scrollbar() const;
+        virtual scrollbar& vertical_scrollbar();
+        virtual scrollbar const& horizontal_scrollbar() const;
+        virtual scrollbar& horizontal_scrollbar();
         virtual neogfx::scrolling_disposition scrolling_disposition() const;
         virtual neogfx::scrolling_disposition scrolling_disposition(i_widget const& aChildWidget) const;
     public:

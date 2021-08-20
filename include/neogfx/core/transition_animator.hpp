@@ -30,6 +30,7 @@ namespace neogfx
     {
     public:
         transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true);
+        ~transition();
     public:
         transition_id id() const override;
         i_animator& animator() const override;

@@ -108,9 +108,12 @@ namespace neogfx
     }
 
     template <typename T>
-    inline T mix(const T& aLhs, const T&, double)
+    inline T mix(const T& aLhs, const T& aRhs, double aMixValue)
     {
-        return aLhs;
+        if constexpr (std::is_scalar_v<T>)
+            return static_cast<T>(static_cast<double>(aLhs) * (1.0 - aMixValue) + static_cast<double>(aRhs) * aMixValue);
+        else
+            return aLhs;
     }
 
     template <typename T1, typename T2>
@@ -130,10 +133,5 @@ namespace neogfx
             return *aRhs;
         else
             return mix(*aLhs, *aRhs, aMixValue);
-    }
-
-    inline double mix(double aLhs, double aRhs, double aMixValue)
-    {
-        return aLhs * (1.0 - aMixValue) + aRhs * aMixValue;
     }
 }

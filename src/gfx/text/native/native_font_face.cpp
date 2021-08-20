@@ -82,6 +82,20 @@ namespace neogfx
         tKerningEnabled = false;
     }
 
+    extern "C" FT_EXPORT(FT_Error)
+        neoGFX_Get_Kerning(FT_Face     face,
+            FT_UInt     left_glyph,
+            FT_UInt     right_glyph,
+            FT_UInt     kern_mode,
+            FT_Vector * akerning)
+    {
+        // Not currently used by Harfbuzz as we have disabled OT kerning in Harfbuzz.
+        auto result = FT_Get_Kerning(face, left_glyph, right_glyph, kern_mode, akerning);
+        if (!kerning_enabled())
+            *akerning = FT_Vector{};
+        return result;
+    }
+
     native_font_face::native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
         iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {

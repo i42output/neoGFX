@@ -636,6 +636,7 @@ namespace neogfx
         void animate();
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
+        void make_visible(position_info const& aGlyphPosition, point const& aPreview = {});
         style glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const;
         void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
         void draw_cursor(i_graphics_context const& aGc) const;

@@ -709,9 +709,14 @@ namespace neogfx
 
     void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
+        scoped_transition_suppression sts1{ vertical_scrollbar().Position };
+        scoped_transition_suppression sts2{ horizontal_scrollbar().Position };
+
         switch (aStage)
         {
         case UsvStageInit:
+            if (resizing())
+                vertical_scrollbar().push_zone();
             vertical_scrollbar().hide();
             horizontal_scrollbar().hide();
             refresh_lines();
@@ -761,7 +766,19 @@ namespace neogfx
             }
             break;
         case UsvStageDone:
-            make_cursor_visible();
+            if (has_focus() && !read_only())
+                make_cursor_visible();
+            else if (resizing())
+            {
+                auto zone = vertical_scrollbar().pop_zone();
+                if (zone == scrollbar_zone::Middle)
+                    make_visible(glyph_position(document_hit_test(column_rect(0).top_left()), true));
+                else if (zone == scrollbar_zone::Bottom)
+                {
+                    vertical_scrollbar().set_position(vertical_scrollbar().maximum());
+                    horizontal_scrollbar().set_position(0.0);
+                }
+            }
             break;
         default:
             break;
@@ -2100,22 +2117,24 @@ namespace neogfx
     void text_edit::make_cursor_visible(bool aForcePreviewScroll)
     {
         scoped_units su{ *this, units::Pixels };
-        auto p = glyph_position(cursor_glyph_position(), true);
-        auto e = (p.line != p.column->lines().end() ? 
-            size{ p.glyph != p.lineEnd ? advance(*p.glyph).cx : 0.0, p.line->extents.cy } :
+        make_visible(glyph_position(cursor_glyph_position(), true), aForcePreviewScroll ? point{ std::ceil(std::min(client_rect(false).width() / 3.0, 200.0)), 0.0 } : point{});
+    }
+
+    void text_edit::make_visible(position_info const& aGlyphPosition, point const& aPreview)
+    {
+        scoped_units su{ *this, units::Pixels };
+        auto e = (aGlyphPosition.line != aGlyphPosition.column->lines().end() ?
+            size{ aGlyphPosition.glyph != aGlyphPosition.lineEnd ? advance(*aGlyphPosition.glyph).cx : 0.0, aGlyphPosition.line->extents.cy } :
             size{ 0.0, font().height() });
         e.cy = std::min(e.cy, vertical_scrollbar().page());
-        if (p.pos.y < vertical_scrollbar().position())
-            vertical_scrollbar().set_position(p.pos.y);
-        else if (p.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
-            vertical_scrollbar().set_position(p.pos.y + e.cy - vertical_scrollbar().page());
-        dimension previewWidth = std::ceil(std::min(client_rect(false).width() / 3.0, 200.0));
-        if (p.pos.x < horizontal_scrollbar().position() || 
-            (aForcePreviewScroll && p.pos.x < horizontal_scrollbar().position() + previewWidth))
-            horizontal_scrollbar().set_position(p.pos.x - previewWidth);
-        else if (p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() || 
-            (aForcePreviewScroll && p.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - previewWidth))
-            horizontal_scrollbar().set_position(p.pos.x + e.cx + previewWidth - horizontal_scrollbar().page());
+        if (aGlyphPosition.pos.y < vertical_scrollbar().position())
+            vertical_scrollbar().set_position(aGlyphPosition.pos.y);
+        else if (aGlyphPosition.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
+            vertical_scrollbar().set_position(aGlyphPosition.pos.y + e.cy - vertical_scrollbar().page());
+        if (aGlyphPosition.pos.x < horizontal_scrollbar().position() + aPreview.x)
+            horizontal_scrollbar().set_position(aGlyphPosition.pos.x - aPreview.x);
+        else if (aGlyphPosition.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - aPreview.x)
+            horizontal_scrollbar().set_position(aGlyphPosition.pos.x + e.cx + aPreview.x - horizontal_scrollbar().page());
     }
 
     text_edit::style text_edit::glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const

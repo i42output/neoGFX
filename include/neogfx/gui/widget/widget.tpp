@@ -40,6 +40,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iResizing{ false },
         iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
@@ -56,6 +57,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iResizing{ false },
         iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
@@ -73,6 +75,7 @@ namespace neogfx
         iLinkBefore{ nullptr },
         iLinkAfter{ nullptr },
         iParentLayout{ nullptr },
+        iResizing{ false },
         iLayoutPending{ false },
         iLayoutInProgress{ 0 },
         iLayer{ LayerWidget }
@@ -918,9 +921,17 @@ namespace neogfx
     }
     
     template <typename Interface>
+    bool widget<Interface>::resizing() const
+    {
+        return iResizing;
+    }
+
+    template <typename Interface>
     void widget<Interface>::resize(const size& aSize)
     {
         auto& self = as_widget();
+
+        neolib::scoped_flag sf{ iResizing };
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)

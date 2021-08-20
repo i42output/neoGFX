@@ -152,6 +152,7 @@ namespace neogfx
         virtual void moved() = 0;
         virtual void parent_moved() = 0;
         virtual size extents() const = 0;
+        virtual bool resizing() const = 0;
         virtual void resize(const size& aSize) = 0;
         virtual void resized() = 0;
         virtual const i_widget& get_widget_at(const point& aPosition) const = 0;

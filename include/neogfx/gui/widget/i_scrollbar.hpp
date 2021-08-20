@@ -57,6 +57,15 @@ namespace neogfx
         Thumb            = 0x06
     };
 
+    enum class scrollbar_zone
+    {
+        Top,
+        Middle,
+        Bottom,
+        Left = Top,
+        Right = Bottom
+    };
+
     class i_transition;
 
     class i_scrollbar_container;
@@ -93,7 +102,11 @@ namespace neogfx
         virtual bool auto_hide() const = 0;
         virtual void set_auto_hide(bool aAutoHide) = 0;
         virtual bool auto_hidden() const = 0;
+        virtual scrollbar_zone zone() const = 0;
+        virtual void push_zone() = 0;
+        virtual scrollbar_zone pop_zone() = 0;
         virtual value_type position() const = 0;
+        virtual value_type effective_position() const = 0;
         virtual bool set_position(value_type aPosition) = 0;
         virtual value_type minimum() const = 0;
         virtual void set_minimum(value_type aMinimum) = 0;

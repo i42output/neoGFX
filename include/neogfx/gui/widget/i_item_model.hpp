@@ -268,8 +268,6 @@ namespace neogfx
         declare_event(item_added, item_model_index const&)
         declare_event(item_changed, item_model_index const&)
         declare_event(item_removed, item_model_index const&)
-        declare_event(updating)
-        declare_event(updated)
         declare_event(cleared)
     public:
         typedef i_item_model abstract_type;

@@ -138,6 +138,8 @@ namespace neogfx
     template <typename Base>
     bool scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
+        scoped_transition_suppression sts1{ iVerticalScrollbar.Position };
+        scoped_transition_suppression sts2{ iHorizontalScrollbar.Position };
         bool handledVertical = false;
         bool handledHorizontal = false;
         mouse_wheel verticalSense = mouse_wheel::Vertical;
@@ -316,25 +318,25 @@ namespace neogfx
     }
 
     template <typename Base>
-    const i_scrollbar& scrollable_widget<Base>::vertical_scrollbar() const
+    const scrollbar& scrollable_widget<Base>::vertical_scrollbar() const
     {
         return iVerticalScrollbar;
     }
 
     template <typename Base>
-    i_scrollbar& scrollable_widget<Base>::vertical_scrollbar()
+    scrollbar& scrollable_widget<Base>::vertical_scrollbar()
     {
         return iVerticalScrollbar;
     }
 
     template <typename Base>
-    const i_scrollbar& scrollable_widget<Base>::horizontal_scrollbar() const
+    const scrollbar& scrollable_widget<Base>::horizontal_scrollbar() const
     {
         return iHorizontalScrollbar;
     }
 
     template <typename Base>
-    i_scrollbar& scrollable_widget<Base>::horizontal_scrollbar()
+    scrollbar& scrollable_widget<Base>::horizontal_scrollbar()
     {
         return iHorizontalScrollbar;
     }

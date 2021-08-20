@@ -247,7 +247,7 @@ namespace neogfx
     public:
         virtual ~i_item_presentation_model() = default;
     public:
-        virtual bool initializing() const = 0;
+        virtual bool updating() const = 0;
         virtual void begin_update() = 0;
         virtual void end_update() = 0;
         virtual bool has_item_model() const = 0;
@@ -524,5 +524,21 @@ namespace neogfx
             else
                 set_cell_flags(aIndex, cell_flags(aIndex) & ~(item_cell_flags::Checkable | item_cell_flags::CheckableTriState));
         }
+    };
+
+    class scoped_item_update
+    {
+    public:
+        scoped_item_update(i_item_presentation_model& aPresentationModel) :
+            iPresentationModel{ aPresentationModel }
+        {
+            iPresentationModel.begin_update();
+        }
+        ~scoped_item_update()
+        {
+            iPresentationModel.end_update();
+        }
+    private:
+        i_item_presentation_model& iPresentationModel;
     };
 }

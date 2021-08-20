@@ -87,7 +87,6 @@ namespace neogfx
         if (has_model())
         {
             iModelSink += model().column_info_changed([this](item_model_index::value_type aColumnIndex) { column_info_changed(aColumnIndex); });
-            iModelSink += model().updated([this]() { item_model_updated(); });
             iModelSink += model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
             iModelSink += model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
             iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
@@ -152,7 +151,7 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
             iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_updating([this]() { /* todo: hourglass */ });
-            iPresentationModelSink += presentation_model().items_updated([this]() { update(); });
+            iPresentationModelSink += presentation_model().items_updated([this]() { items_updated(); });
             iPresentationModelSink += presentation_model().items_sorting([this]() { items_sorting(); });
             iPresentationModelSink += presentation_model().items_sorted([this]() { items_sorted(); });
             iPresentationModelSink += presentation_model().items_filtering([this]() { items_filtering(); });
@@ -766,12 +765,6 @@ namespace neogfx
             end_edit(false);
     }
 
-    void item_view::item_model_updated()
-    {
-        update_scrollbar_visibility();
-        update();
-    }
-
     void item_view::item_added(const item_model_index&)
     {
     }
@@ -805,6 +798,12 @@ namespace neogfx
         invalidate_item(aItemIndex);
     }
 
+    void item_view::items_updated()
+    {
+        update_scrollbar_visibility();
+        update();
+    }
+
     void item_view::items_sorting()
     {
         if (selection_model().has_current_index())
@@ -829,8 +828,7 @@ namespace neogfx
     {
         if (presentation_model().rows() != 0)
             select(item_presentation_model_index{});
-        update_scrollbar_visibility();
-        update();
+        items_updated();
     }
 
     void item_view::presentation_model_added(i_item_presentation_model&)

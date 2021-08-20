@@ -213,8 +213,6 @@ namespace neogfx
         define_declared_event(ItemAdded, item_added, const item_model_index&)
         define_declared_event(ItemChanged, item_changed, const item_model_index&)
         define_declared_event(ItemRemoved, item_removed, const item_model_index&)
-        define_declared_event(Updating, updating)
-        define_declared_event(Updated, updated)
         define_declared_event(Cleared, cleared)
     public:
         typedef ContainerTraits container_traits;

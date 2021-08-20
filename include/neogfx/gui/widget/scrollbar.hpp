@@ -53,7 +53,11 @@ namespace neogfx
         bool auto_hide() const override;
         void set_auto_hide(bool aAutoHide) override;
         bool auto_hidden() const override;
+        scrollbar_zone zone() const override;
+        void push_zone() override;
+        scrollbar_zone pop_zone() override;
         value_type position() const override;
+        value_type effective_position() const override;
         bool set_position(value_type aPosition) override;
         value_type minimum() const override;
         void set_minimum(value_type aMinimum) override;
@@ -86,6 +90,10 @@ namespace neogfx
         void track() override;
         void untrack() override;
     public:
+        bool transition_set() const noexcept override;
+        void set_transition(easing aTransition, double aTransitionDuration = 0.5, bool aOnlyWhenPaging = true) override;
+        void clear_transition() override;
+    public:
         static dimension width(scrollbar_style aStyle);
     public:
         bool is_widget() const final;
@@ -93,15 +101,6 @@ namespace neogfx
         i_widget& as_widget();
     public:
         rect element_rect(skin_element aElement) const override;
-    public:
-        bool transition_set() const noexcept override;
-        void set_transition(easing aTransition, double aTransitionDuration = 0.5, bool aOnlyWhenPaging = true) override;
-        void clear_transition() override;
-    private:
-        bool have_transition() const noexcept;
-        i_transition& transition() const;
-        bool can_transition(double aScrollAmount) const noexcept;
-        void start_transition(double aScrollAmount);
     private:
         i_scrollbar_container& iContainer;
         scrollbar_type iType;
@@ -120,12 +119,9 @@ namespace neogfx
         bool iPaused;
         point iThumbClickedPosition;
         value_type iThumbClickedValue;
-        optional_point iScrollTrackPosition;
-        bool iTransitionOK = true;
-        optional_easing iTransitionEasing;
-        double iTransitionDuration = 1.0;
         bool iOnlyTransitionWhenPaging = true;
-        std::optional<transition_id> iTransition;
+        optional_point iScrollTrackPosition;
+        std::vector<scrollbar_zone> iZoneStack;
         // properties / anchors
     public:
         define_property(property_category::interaction, value_type, Position, position)

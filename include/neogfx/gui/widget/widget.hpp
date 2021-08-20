@@ -161,6 +161,7 @@ namespace neogfx
         void move(const point& aPosition) override;
         void moved() override;
         void parent_moved() override;
+        bool resizing() const override;
         void resize(const size& aSize) override;
         void resized() override;
         const i_widget& get_widget_at(const point& aPosition) const override;
@@ -328,6 +329,7 @@ namespace neogfx
         i_widget* iLinkBefore;
         i_widget* iLinkAfter;
         i_layout* iParentLayout;
+        bool iResizing;
         bool iLayoutPending;
         uint32_t iLayoutInProgress;
         optional<neogfx::layout_reason> iLayoutReason;

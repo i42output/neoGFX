@@ -48,9 +48,6 @@ namespace neogfx
             iProperty{ aProperty }
         {
         }
-        ~property_transition()
-        {
-        }
     public:
         void start_if()
         {
@@ -94,16 +91,12 @@ namespace neogfx
             if (!animation_finished())
             {
                 iMix = neogfx::mix(iFrom, iTo, mix_value());
-                if constexpr (std::is_scalar_v<value_type>)
-                    std::cerr << "<1> " << *iMix << std::endl;
                 neolib::scoped_flag sf{ iUpdatingProperty };
                 iProperty = mix();
             }
             else
             {
                 iMix = (easing_function() != easing::Zero ? *iTo : *iFrom);
-                if constexpr (std::is_scalar_v<value_type>)
-                    std::cerr << "<2> " << *iMix << std::endl;
                 neolib::scoped_flag sf{ iUpdatingProperty };
                 iProperty = mix();
                 clear();
@@ -246,7 +239,7 @@ namespace neogfx
                     *this = std::forward<decltype(arg)>(arg);
             }, aValue);
         }
-        bool have_transition() const override
+        bool transition_set() const override
         {
             return iTransition != nullptr;
         }
@@ -263,6 +256,14 @@ namespace neogfx
         void clear_transition() override
         {
             iTransition = nullptr;
+        }
+        bool transition_suppressed() const override
+        {
+            return iTransitionSuppressed;
+        }
+        void suppress_transition(bool aSuppress) override
+        {
+            iTransitionSuppressed = aSuppress;
         }
         bool has_delegate() const override
         {
@@ -318,6 +319,13 @@ namespace neogfx
                 }, delegate().get(*this));
             }
             return iValue;
+        }
+        const value_type& effective_value() const
+        {
+            if (!transition_set() || !transition().started())
+                return value();
+            else
+                return transition().to();
         }
         template <typename T2>
         self_type& assign(T2&& aValue, bool aOwnerNotify = true)
@@ -413,7 +421,8 @@ namespace neogfx
         template <typename T2>
         self_type& do_assign(T2&& aValue, bool aOwnerNotify = true)
         {
-            if (have_transition() && !transition().updating_property() && 
+            if (transition_set() && !transition_suppressed() &&
+                !transition().updating_property() &&
                 transition().started() && aValue == transition().to())
                 return *this;
 
@@ -421,7 +430,7 @@ namespace neogfx
             {
                 iPreviousValue = value();
                 mutable_value() = aValue;
-                if (have_transition() && !transition().updating_property())
+                if (transition_set() && !transition_suppressed() && !transition().updating_property())
                     transition().start_if();
                 update(aOwnerNotify);
             }
@@ -466,6 +475,7 @@ namespace neogfx
         mutable value_type iValue;
         std::optional<value_type> iPreviousValue;
         std::unique_ptr<transition_type> iTransition;
+        bool iTransitionSuppressed = false;
         i_property_delegate* iDelegate = nullptr;
     };
 

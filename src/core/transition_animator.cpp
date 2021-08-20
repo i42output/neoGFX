@@ -41,6 +41,11 @@ namespace neogfx
     {
     }
 
+    transition::~transition()
+    {
+        animator().remove_transition(id());
+    }
+
     transition_id transition::id() const
     {
         return iId;
@@ -96,9 +101,7 @@ namespace neogfx
 
     double transition::mix_value() const
     {
-        auto result = ease(easing_function(), std::min(1.0, std::max(0.0, (animator().animation_time() - start_time()) / duration())));
-        std::cerr << "ease: " << result << std::endl;
-        return result;
+        return ease(easing_function(), std::min(1.0, std::max(0.0, (animator().animation_time() - start_time()) / duration())));
     }
 
     bool transition::animation_finished() const
@@ -128,7 +131,6 @@ namespace neogfx
 
     void transition::reset(bool aEnable, bool aDisableWhenFinished)
     {
-        std::cerr << "reset" << std::endl;
         iStartTime = std::nullopt;
         if (aEnable)
             enable(aDisableWhenFinished);

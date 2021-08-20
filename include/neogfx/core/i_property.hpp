@@ -137,10 +137,12 @@ namespace neogfx
         virtual bool optional() const = 0;
         virtual property_variant get_as_variant() const = 0;
         virtual void set_from_variant(const property_variant& aValue) = 0;
-        virtual bool have_transition() const = 0;
+        virtual bool transition_set() const = 0;
         virtual i_transition& transition() const = 0;
         virtual void set_transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true) = 0;
         virtual void clear_transition() = 0;
+        virtual bool transition_suppressed() const = 0;
+        virtual void suppress_transition(bool aSuppress) = 0;
         virtual bool has_delegate() const = 0;
         virtual i_property_delegate const& delegate() const = 0;
         virtual i_property_delegate& delegate() = 0;
@@ -238,5 +240,22 @@ namespace neogfx
     {
         return *static_cast<i_property_owner&>(Owner).properties().property_map().find(string{ aPropertyName })->second();
     }
+
+    class scoped_transition_suppression
+    {
+    public:
+        scoped_transition_suppression(i_property& aProperty) :
+            iProperty{ aProperty }, iWasSuppressed{ aProperty.transition_suppressed() }
+        {
+            iProperty.suppress_transition(true);
+        }
+        ~scoped_transition_suppression()
+        {
+            iProperty.suppress_transition(iWasSuppressed);
+        }
+    private:
+        i_property& iProperty;
+        bool iWasSuppressed;
+    };
 }
 
