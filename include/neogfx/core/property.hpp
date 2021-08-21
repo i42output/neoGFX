@@ -56,7 +56,8 @@ namespace neogfx
                 iFrom = iProperty.iPreviousValue;
                 iTo = iProperty.iValue;
                 reset(true, disable_when_finished());
-                apply();
+                neolib::scoped_flag sf{ iUpdatingProperty };
+                iProperty = *iFrom;
             }
         }
         bool started() const
@@ -90,7 +91,8 @@ namespace neogfx
                 throw cannot_apply();
             if (!animation_finished())
             {
-                iMix = neogfx::mix(iFrom, iTo, mix_value());
+                auto const mixValue = mix_value();
+                iMix = neogfx::mix(iFrom, iTo, mixValue);
                 neolib::scoped_flag sf{ iUpdatingProperty };
                 iProperty = mix();
             }

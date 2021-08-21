@@ -253,6 +253,8 @@ namespace neogfx
     void item_view::paint(i_graphics_context& aGc) const
     {
         base_type::paint(aGc);
+        if (presentation_model().updating())
+            return;
         auto first = first_visible_item(aGc);
         bool finished = false;
         rect clipRect = default_clip_rect().intersection(item_display_rect());
