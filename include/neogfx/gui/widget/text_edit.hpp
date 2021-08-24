@@ -560,6 +560,8 @@ namespace neogfx
         style next_style() const;
     public:
         void clear();
+        std::size_t paragraph_count() const;
+        void delete_paragraph(std::size_t aParagraphIndex);
         i_string const& text() const;
         std::size_t set_text(i_string const& aText);
         std::size_t set_text(i_string const& aText, const style& aStyle);

@@ -63,6 +63,11 @@ namespace neogfx
         return static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
+    inline constexpr font_style operator^(font_style aLhs, font_style aRhs)
+    {
+        return static_cast<font_style>(static_cast<uint32_t>(aLhs) ^ static_cast<uint32_t>(aRhs));
+    }
+
     inline constexpr font_style& operator|=(font_style& aLhs, font_style aRhs)
     {
         return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
@@ -71,6 +76,11 @@ namespace neogfx
     inline constexpr font_style& operator&=(font_style& aLhs, font_style aRhs)
     {
         return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr font_style& operator^=(font_style& aLhs, font_style aRhs)
+    {
+        return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) ^ static_cast<uint32_t>(aRhs));
     }
 }
 
@@ -150,6 +160,7 @@ namespace neogfx
         virtual void disable_kerning();
     public:
         font_info with_style(font_style aStyle) const;
+        font_info with_style_xor(font_style aStyle) const;
         font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
     public:

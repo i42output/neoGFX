@@ -298,6 +298,11 @@ namespace neogfx
         return font_info(iInstance->iFamilyName, aStyle, optional_style_name{}, iInstance->iSize);
     }
 
+    font_info font_info::with_style_xor(font_style aStyle) const
+    {
+        return font_info(iInstance->iFamilyName, iInstance->iStyle != std::nullopt ? *iInstance->iStyle ^ aStyle : aStyle, optional_style_name{}, iInstance->iSize);
+    }
+
     font_info font_info::with_underline(bool aUnderline) const
     {
         font_info result = *this;

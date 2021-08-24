@@ -53,9 +53,10 @@ namespace neogfx
         {
             if (iProperty.iPreviousValue != std::nullopt)
             {
+                bool alreadyActive = active();
                 iFrom = iProperty.iPreviousValue;
                 iTo = iProperty.iValue;
-                reset(true, disable_when_finished());
+                reset(true, disable_when_finished(), !alreadyActive);
                 neolib::scoped_flag sf{ iUpdatingProperty };
                 iProperty = *iFrom;
             }

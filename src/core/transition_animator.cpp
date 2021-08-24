@@ -101,7 +101,10 @@ namespace neogfx
 
     double transition::mix_value() const
     {
-        return ease(easing_function(), std::min(1.0, std::max(0.0, (animator().animation_time() - start_time()) / duration())));
+        auto const elapsed = animator().animation_time() - start_time();
+        auto const elapsedNormalized = elapsed / duration();
+        auto const result = ease(easing_function(), std::min(1.0, std::max(0.0, elapsedNormalized)));
+        return result;
     }
 
     bool transition::animation_finished() const
@@ -129,17 +132,18 @@ namespace neogfx
         iPaused = false;
     }
 
-    void transition::reset(bool aEnable, bool aDisableWhenFinished)
+    void transition::reset(bool aEnable, bool aDisableWhenFinished, bool aResetStartTime)
     {
-        iStartTime = std::nullopt;
+        if (aResetStartTime)
+            iStartTime = std::nullopt;
         if (aEnable)
             enable(aDisableWhenFinished);
     }
 
-    void transition::reset(easing aNewEasingFunction, bool aEnable, bool aDisableWhenFinished)
+    void transition::reset(easing aNewEasingFunction, bool aEnable, bool aDisableWhenFinished, bool aResetStartTime)
     {
         iEasingFunction = aNewEasingFunction;
-        reset(aEnable, aDisableWhenFinished);
+        reset(aEnable, aDisableWhenFinished, aResetStartTime);
         if (can_apply())
             apply();
     }

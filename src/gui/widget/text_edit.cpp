@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <boost/algorithm/string/find.hpp>
 #include <neolib/core/scoped.hpp>
 #include <neolib/task/thread.hpp>
 #include <neolib/app/i_power.hpp>
@@ -1447,6 +1448,24 @@ namespace neogfx
             notify_text_changed();
     }
 
+    std::size_t text_edit::paragraph_count() const
+    {
+        return std::count(text().begin(), text().end(), '\n') + 1;
+    }
+
+    void text_edit::delete_paragraph(std::size_t aParagraphIndex)
+    {
+        if (paragraph_count() > 1)
+        {
+            auto const start = aParagraphIndex > 0 ?
+                boost::find_nth(text(), "\n", static_cast<int>(aParagraphIndex - 1)).end() : text().begin();
+            auto const end = boost::find_nth(text(), "\n", static_cast<int>(aParagraphIndex)).end();
+            delete_text(std::distance(text().begin(), start), std::distance(text().begin(), end));
+        }
+        else
+            clear();
+    }
+
     i_string const& text_edit::text() const
     {
         if (iUtf8TextCache == std::nullopt)
@@ -1710,6 +1729,9 @@ namespace neogfx
 
     std::size_t text_edit::do_insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
+        if (aText.empty())
+            return 0;
+
         bool accept = true;
         TextFilter.trigger(aText, accept);
         if (!accept)
