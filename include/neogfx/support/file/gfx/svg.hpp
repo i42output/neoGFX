@@ -26,23 +26,123 @@
 #include <optional>
 #include <string>
 #include <neogfx/core/numerical.hpp>
+#include <neogfx/core/units.hpp>
 
 namespace neogfx::file
 {
     class svg
     {
     public:
+        typedef std::string url;
+        typedef std::variant<length, scalar> length_percentage;
+        struct basic_shape
+        {
+            enum class value
+            {
+                Inset,
+                Circle,
+                Ellipse,
+                Polygon,
+                Path
+            };
+
+            struct inset
+            {
+                // todo
+            };
+            struct circle
+            {
+                // todo
+            };
+            struct ellipse
+            {
+                // todo
+            };
+            struct polygon
+            {
+                // todo
+            };
+            struct path
+            {
+                // todo
+            };
+
+            typedef std::variant<inset, circle, ellipse, polygon, path> value_type;
+        };
+        struct geometry_box
+        {
+            enum class value
+            {
+                MarginBox,
+                BorderBox,
+                PaddingBox,
+                ContentBox,
+                FillBox,
+                StrokeBox,
+                ViewBox
+            };
+        };
+
         struct node;
         typedef std::vector<std::unique_ptr<node>> nodes;
         struct node
         {
             nodes children;
         };
-        struct attributes
+        struct attribute
         {
             struct presentation
             {
-
+                struct alignment_baseline
+                {
+                    enum class value
+                    {
+                        Auto,
+                        Baseline,
+                        BeforeEdge,
+                        TextBeforeEdge,
+                        Middle,
+                        Central,
+                        AfterEdge,
+                        TextAfterEdge,
+                        Ideographic,
+                        Alphabetic,
+                        Hanging,
+                        Mathematical,
+                        Top,
+                        Center,
+                        Bottom
+                    };
+                };
+                struct baseline_shift
+                {
+                    enum class value
+                    {
+                        LengthPercentage,
+                        Sub,
+                        Super
+                    };
+                    typedef std::variant<std::monostate, length_percentage> value_type;
+                };
+                struct clip
+                {
+                    enum class value
+                    {
+                        Auto,
+                        Rect
+                    };
+                    typedef std::variant<std::monostate, basic_rect<length>> value_type;
+                };
+                struct clip_path
+                {
+                    enum class value
+                    {
+                        Url,
+                        BasicShapeGeometryBox,
+                        None
+                    };
+                    typedef std::variant<std::monostate, url, std::pair<std::optional<basic_shape>, std::optional<geometry_box>>> value_type;
+                };
             };
         };
         struct group : node
