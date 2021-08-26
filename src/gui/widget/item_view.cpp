@@ -272,13 +272,14 @@ namespace neogfx
                 if (cellRect.bottom() < clipRect.y)
                     continue;
                 optional_color cellBackgroundColor = presentation_model().cell_color(itemIndex, color_role::Background);
-                if (!cellBackgroundColor)
+                bool const cellBackgroundSpecified = !!cellBackgroundColor;
+                if (!cellBackgroundSpecified)
                     cellBackgroundColor = selection_model().is_selected(itemIndex) ? 
                         service<i_app>().current_style().palette().color(color_role::Selection).to_hsv().with_saturation(0.2).to_rgb<color>().with_alpha(has_focus() ? 1.0 : 0.5) : 
                         service<i_app>().current_style().palette().color(presentation_model().alternating_row_color() ? row % 2 == 0 ? color_role::Base : color_role::AlternateBase : color_role::Base);
                 optional_color textColor = presentation_model().cell_color(itemIndex, color_role::Text);
                 if (!textColor)
-                    textColor = service<i_app>().current_style().palette().color(selection_model().is_selected(itemIndex) ? color_role::SelectedText : color_role::Text);
+                    textColor = service<i_app>().current_style().palette().color(!cellBackgroundSpecified && selection_model().is_selected(itemIndex) ? color_role::SelectedText : color_role::Text);
                 rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
