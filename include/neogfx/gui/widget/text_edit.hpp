@@ -39,6 +39,7 @@ namespace neogfx
 
         SingleLine  = 0x00000001,
         MultiLine   = 0x00000002,
+        GrowLines   = SingleLine | MultiLine,
 
         Password    = 0x00000100,
 

@@ -1729,9 +1729,6 @@ namespace neogfx
 
     std::size_t text_edit::do_insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
     {
-        if (aText.empty())
-            return 0;
-
         bool accept = true;
         TextFilter.trigger(aText, accept);
         if (!accept)
