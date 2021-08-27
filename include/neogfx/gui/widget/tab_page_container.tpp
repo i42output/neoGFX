@@ -69,6 +69,12 @@ namespace neogfx
     }
 
     template <typename Base>
+    inline i_tab_container& tab_page_container<Base>::tab_bar()
+    {
+        return iTabBar;
+    }
+
+    template <typename Base>
     inline i_layout& tab_page_container<Base>::page_layout()
     {
         return iContainerLayout.center();

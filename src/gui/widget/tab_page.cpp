@@ -77,7 +77,7 @@ namespace neogfx
 
     void tab_page::paint_non_client_after(i_graphics_context& aGc) const
     {
-        if (iTab.is_selected())
+        if (iTab.is_selected() && iTab.container().as_widget().effectively_visible())
         {
             switch (iTab.container().tab_container_style() & tab_container_style::TabAlignmentMask)
             {

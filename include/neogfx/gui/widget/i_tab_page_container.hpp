@@ -38,6 +38,8 @@ namespace neogfx
     public:
         struct tab_page_not_found : std::logic_error { tab_page_not_found() : std::logic_error("neogfx::i_tab_page_container::tab_page_not_found") {} };
     public:
+        virtual i_tab_container& tab_bar() = 0;
+    public:
         virtual i_layout& page_layout() = 0;
     public:
         virtual const i_tab_page& tab_page(tab_index aTabIndex) const = 0;

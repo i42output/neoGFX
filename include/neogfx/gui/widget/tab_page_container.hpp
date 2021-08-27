@@ -56,6 +56,8 @@ namespace neogfx
         void set_tab_container_style(neogfx::tab_container_style aStyle) override;
         void set_tab_icon_size(const size& aIconSize) override;
     public:
+        i_tab_container& tab_bar() override;
+    public:
         i_layout& page_layout() override;
     public:
         bool has_tabs() const noexcept override;
@@ -105,6 +107,6 @@ namespace neogfx
     private:
         tab_list iTabs;
         border_layout iContainerLayout;
-        tab_bar iTabBar;
+        neogfx::tab_bar iTabBar;
     };
 }
