@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/spin_box.tpp>
+#include <neogfx/gui/widget/spin_box.ipp>
 
 namespace neogfx
 {

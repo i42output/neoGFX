@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/view/view_container.tpp>
+#include <neogfx/gui/view/view_container.ipp>
 
 namespace neogfx
 {

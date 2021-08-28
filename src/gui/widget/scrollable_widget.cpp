@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/scrollable_widget.tpp>
+#include <neogfx/gui/widget/scrollable_widget.ipp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/view/view_container.hpp>
 #include <neogfx/gui/window/i_window.hpp>

@@ -774,12 +774,12 @@
     <None Include="..\..\..\include\neogfx\gfx\color.inl" />
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
-    <None Include="..\..\..\include\neogfx\gfx\text\glyph.tpp" />
-    <None Include="..\..\..\include\neogfx\gui\view\view_container.tpp" />
-    <None Include="..\..\..\include\neogfx\gui\widget\button.tpp" />
-    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.tpp" />
-    <None Include="..\..\..\include\neogfx\gui\widget\slider.tpp" />
-    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.tpp" />
+    <None Include="..\..\..\include\neogfx\gfx\text\glyph.ipp" />
+    <None Include="..\..\..\include\neogfx\gui\view\view_container.ipp" />
+    <None Include="..\..\..\include\neogfx\gui\widget\button.ipp" />
+    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.ipp" />
+    <None Include="..\..\..\include\neogfx\gui\widget\slider.ipp" />
+    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.ipp" />
     <CustomBuild Include="..\..\..\src\resources.nrc">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
@@ -791,8 +791,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/resources.res.cpp</Outputs>
     </CustomBuild>
-    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.tpp" />
-    <None Include="..\..\..\include\neogfx\gui\widget\widget.tpp" />
+    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.ipp" />
+    <None Include="..\..\..\include\neogfx\gui\widget\widget.ipp" />
     <None Include="..\..\..\src\gui\layout\flow_layout.inl" />
     <None Include="..\..\..\src\gui\layout\layout.inl" />
     <CustomBuild Include="..\..\..\src\icons.nrc">

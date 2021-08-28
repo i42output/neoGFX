@@ -1,4 +1,4 @@
-// tab_page_container.tpp
+// tab_page_container.ipp
 /*
 neogfx C++ App/Game Engine
 Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.

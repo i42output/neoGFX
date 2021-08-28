@@ -446,23 +446,15 @@ namespace neogfx
         }
     }
 
-    void layout::enable()
+    void layout::enable(bool aEnable)
     {
-        if (!iEnabled)
+        if (iEnabled != aEnable)
         {
-            iEnabled = true;
+            iEnabled = aEnable;
             if (has_parent_layout())
-                parent_layout().layout_item_enabled(*this);
-        }
-    }
-
-    void layout::disable()
-    {
-        if (iEnabled)
-        {
-            iEnabled = false;
-            if (has_parent_layout())
-                parent_layout().layout_item_disabled(*this);
+                enabled() ? 
+                    parent_layout().layout_item_enabled(*this) : 
+                    parent_layout().layout_item_disabled(*this);
         }
     }
 
@@ -551,6 +543,8 @@ namespace neogfx
         for (auto& i : items())
         {
             if (i.is_spacer())
+                continue;
+            if (!i.visible() && !ignore_visibility())
                 continue;
             if (i.effective_size_policy().horizontal_size_policy() == size_constraint::Expanding)
                 result.set_horizontal_size_policy(size_constraint::Expanding);

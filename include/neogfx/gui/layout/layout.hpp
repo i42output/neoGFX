@@ -128,8 +128,8 @@ namespace neogfx
         bool ignore_visibility() const override;
         void set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout = true) override;
     public:
-        void enable() override;
-        void disable() override;
+        using i_layout::enable;
+        void enable(bool aEnable) override;
         bool enabled() const override;
         bool invalidated() const override;
         void invalidate(bool aDeferLayout = true) override;

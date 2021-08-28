@@ -20,7 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/slider.hpp>
-#include <neogfx/gui/widget/slider.tpp>
+#include <neogfx/gui/widget/slider.ipp>
 
 namespace neogfx
 {

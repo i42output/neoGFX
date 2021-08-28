@@ -25,7 +25,7 @@
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
-#include <neogfx/gfx/text/glyph.tpp>
+#include <neogfx/gfx/text/glyph.ipp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/core/easing.hpp>

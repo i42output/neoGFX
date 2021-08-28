@@ -1620,28 +1620,28 @@
     <None Include="..\..\..\include\neogfx\gfx\color.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.tpp">
+    <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.tpp">
+    <None Include="..\..\..\include\neogfx\gui\widget\spin_box.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\slider.tpp">
+    <None Include="..\..\..\include\neogfx\gui\widget\slider.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\widget.tpp">
+    <None Include="..\..\..\include\neogfx\gui\widget\widget.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\button.tpp">
+    <None Include="..\..\..\include\neogfx\gui\widget\button.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gfx\text\glyph.tpp">
+    <None Include="..\..\..\include\neogfx\gfx\text\glyph.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.tpp">
+    <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gui\view\view_container.tpp">
+    <None Include="..\..\..\include\neogfx\gui\view\view_container.ipp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

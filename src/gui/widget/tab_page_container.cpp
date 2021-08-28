@@ -18,8 +18,8 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/tab_page_container.tpp>
-#include <neogfx/gui/widget/scrollable_widget.tpp>
+#include <neogfx/gui/widget/tab_page_container.ipp>
+#include <neogfx/gui/widget/scrollable_widget.ipp>
 #include <neogfx/gui/view/view_container.hpp>
 
 namespace neogfx

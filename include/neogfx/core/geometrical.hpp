@@ -260,7 +260,7 @@ namespace neogfx
         bool empty() const { return cx == 0 || cy == 0; }
         auto operator<=>(const basic_size&) const = default;
         basic_size operator-() const { throw_on_bad_size(*this); return basic_size{ -cx, -cy }; }
-        basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other);  cx += other.cx; cy += other.cy; return *this; }
+        basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other); cx += other.cx; cy += other.cy; return *this; }
         basic_size& operator+=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx += other.dx; cy += other.dy; return *this; }
         basic_size& operator+=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx += amount; cy += amount; return *this; }
         basic_size& operator-=(const basic_size& other) { throw_on_bad_size(other); cx -= other.cx; cy -= other.cy; return *this; }
@@ -270,9 +270,9 @@ namespace neogfx
         basic_size& operator*=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx *= amount; cy *= amount; return *this; }
         basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; return *this; }
         basic_size& operator/=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx /= amount; cy /= amount; return *this; }
-        basic_size ceil() const { return basic_size{ cx != max_dimension() ? std::ceil(cx) : cx, cy != max_dimension() ? std::ceil(cy) : cy }; }
-        basic_size floor() const { return basic_size{ cx != max_dimension() ? std::floor(cx) : cx, cy != max_dimension() ? std::floor(cy) : cy }; }
-        basic_size round() const { return basic_size{ cx != max_dimension() ? std::round(cx) : cx, cy != max_dimension() ? std::round(cy) : cy }; }
+        basic_size ceil() const { return basic_size{ !cx_inf() ? std::ceil(cx) : cx, !cy_inf() ? std::ceil(cy) : cy }; }
+        basic_size floor() const { return basic_size{ !cx_inf() ? std::floor(cx) : cx, !cy_inf() ? std::floor(cy) : cy }; }
+        basic_size round() const { return basic_size{ !cx_inf() ? std::round(cx) : cx, !cy_inf() ? std::round(cy) : cy }; }
         basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
         basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
@@ -287,8 +287,11 @@ namespace neogfx
         {
             return *this;
         }
+    public:
+        bool cx_inf() const { return cx == max_dimension(); }
+        bool cy_inf() const { return cy == max_dimension(); }
     private:
-        void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx == max_dimension()) || (rhs.cy != 0.0 && cy == max_dimension())) throw bad_size(); }
+        void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx_inf()) && (rhs.cy != 0.0 && cy_inf())) throw bad_size(); }
         // helpers
     public:
         static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::infinity(); }

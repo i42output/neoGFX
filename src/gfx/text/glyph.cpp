@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
-#include <neogfx/gfx/text/glyph.tpp>
+#include <neogfx/gfx/text/glyph.ipp>
 
 namespace neogfx
 {
