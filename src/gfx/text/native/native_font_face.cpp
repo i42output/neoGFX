@@ -300,7 +300,8 @@ namespace neogfx
         {
             try
             {
-                freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                // todo: remove FT_LOAD_NO_AUTOHINT when cause of crash in freetype 2.11 with certain fonts is resolved
+                freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_NO_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
             }
             catch (freetype_error fe)
             {
