@@ -199,8 +199,8 @@ namespace neogfx
         iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
         iStylePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
         iSizePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
-        iFamilyPicker.set_fixed_size(size{ 128.0_dip });
-        iStylePicker.set_fixed_size(size{ 96.0_dip });
+        iFamilyPicker.set_fixed_size(size{ 160.0_dip });
+        iStylePicker.set_fixed_size(size{ 128.0_dip });
         iSizePicker.set_fixed_size(size{ 48.0_dip });
 
         iFamilyPicker.set_presentation_model(make_ref<family_picker_presentation_model>());

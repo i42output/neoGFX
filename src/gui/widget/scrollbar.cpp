@@ -40,7 +40,7 @@ namespace neogfx
         iHoverElement{ scrollbar_element::None },
         iPaused{ false }
     {
-        Position.changed_from_to([this](const value_type& aFrom, const value_type& aTo)
+        Position.changed_from_to([this](value_type const& aFrom, value_type const& aTo)
         {
             update_reason_e updateReason = (aFrom < aTo ? ScrolledDown : ScrolledUp);
             iContainer.scrollbar_updated(*this, updateReason);

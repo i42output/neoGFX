@@ -271,7 +271,7 @@ namespace neogfx
         typedef anchor_constraint<value_type> constraint;
     public:
         virtual bool property_set() const = 0;
-        virtual const value_type& property_value() const = 0;
+        virtual value_type const& property_value() const = 0;
         virtual value_type& property_value() = 0;
         virtual void add_constraint(const constraint& aConstraint, abstract_type& aOtherAnchor) = 0;
         virtual void add_constraint(const constraint& aConstraint, std::shared_ptr<abstract_type> aOtherAnchor) = 0;

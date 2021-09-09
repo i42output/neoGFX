@@ -139,8 +139,8 @@ namespace neogfx
     public:
         define_declared_event(PropertyChanged, property_changed, const property_variant&)
         define_declared_event(PropertyChangedFromTo, property_changed_from_to, const property_variant&, const property_variant&)
-        define_event(Changed, changed, const value_type&)
-        define_event(ChangedFromTo, changed_from_to, const value_type&, const value_type&)
+        define_event(Changed, changed, value_type const&)
+        define_event(ChangedFromTo, changed_from_to, value_type const&, value_type const&)
     public:
         struct invalid_type : std::logic_error { invalid_type() : std::logic_error("neogfx::property::invalid_type") {} };
     public:
@@ -291,7 +291,7 @@ namespace neogfx
             iDelegate = nullptr;
         }
     public:
-        const value_type& value() const
+        value_type const& value() const
         {
             if (has_delegate())
             {
@@ -303,7 +303,7 @@ namespace neogfx
                     else if constexpr (std::is_same_v<try_type, custom_type>)
                     {
                         if constexpr (!neolib::is_optional_v<value_type>)
-                            iValue = neolib::any_cast<const value_type&>(arg);
+                            iValue = neolib::any_cast<value_type const&>(arg);
                         else
                             iValue = neolib::any_cast<const neolib::optional_t<value_type>&>(arg);
                     }
@@ -323,7 +323,7 @@ namespace neogfx
             }
             return iValue;
         }
-        const value_type& effective_value() const
+        value_type const& effective_value() const
         {
             if (!transition_set() || !transition().started())
                 return value();
@@ -355,7 +355,7 @@ namespace neogfx
         {
             return assign(std::forward<T2>(aValue));
         }
-        operator const value_type&() const
+        operator value_type const&() const
         {
             return value();
         }

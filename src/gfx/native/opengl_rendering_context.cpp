@@ -85,7 +85,7 @@ namespace neogfx
                     iNext += iSkipAmount;
                 return *this;
             }
-            const value_type& operator*() const
+            value_type const& operator*() const
             {
                 return *iNext;
             }

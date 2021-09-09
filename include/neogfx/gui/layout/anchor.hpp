@@ -152,7 +152,7 @@ namespace neogfx
             else
                 return property().get<property_value_type>() != std::nullopt;
         }
-        const value_type& property_value() const override
+        value_type const& property_value() const override
         {
             if constexpr (!neolib::is_optional_v<property_value_type>)
                 return property().get<property_value_type>();
