@@ -653,14 +653,24 @@ namespace neogfx
     {
         if (iModel == aModel)
             return;
+
         iModel = aModel;
+
         if (has_model())
         {
             if (has_presentation_model())
                 presentation_model().set_item_model(*aModel);
+
+            iSink += model().item_removed([&](item_model_index const& aItem)
+            {
+                if (has_selection() && selection() == aItem)
+                    cancel_and_restore_selection(true);
+            });
         }
+        
         if (view_created())
             view().set_model(aModel);
+
         update_layout();
         update();
     }
@@ -771,11 +781,16 @@ namespace neogfx
         throw no_selection();
     }
 
-    bool drop_list::exact_match() const
+    bool drop_list::input_matches_current_item() const
     {
         return selection_model().has_current_index() &&
             model().cell_data(presentation_model().to_item_model_index(
                 selection_model().current_index())).to_string() == input_widget().text();
+    }
+
+    bool drop_list::input_matches_selection() const
+    {
+        return has_selection() && model().cell_data(selection()).to_string() == input_widget().text();
     }
 
     bool drop_list::view_created() const
@@ -851,14 +866,16 @@ namespace neogfx
         update_widgets(true);
     }
 
-    void drop_list::cancel_selection()
+    void drop_list::cancel_selection(bool aClearInput)
     {
-        handle_cancel_selection(view_created());
+        handle_cancel_selection(false);
+        if (aClearInput && editable())
+            input_widget().set_text(string{});
     }
 
-    void drop_list::cancel_and_restore_selection()
+    void drop_list::cancel_and_restore_selection(bool aOnlyRestoreIfViewCreated)
     {
-        handle_cancel_selection(true);
+        handle_cancel_selection(aOnlyRestoreIfViewCreated ? view_created() : true);
     }
 
     drop_list_style drop_list::style() const
@@ -926,6 +943,11 @@ namespace neogfx
                 iStyle = (iStyle & ~drop_list_style::NoFilter);
             // todo
         }
+    }
+
+    bool drop_list::has_input() const
+    {
+        return !input_widget().text().empty();
     }
 
     const i_drop_list_input_widget& drop_list::input_widget() const
@@ -1013,7 +1035,7 @@ namespace neogfx
                     {
                         if (view_created())
                             hide_view();
-                        cancel_selection();
+                        cancel_and_restore_selection(true);
                     }
                 }
             }
@@ -1327,7 +1349,7 @@ namespace neogfx
             case ScanCode_ESCAPE:
                 if (has_selection())
                 {
-                    cancel_selection();
+                    cancel_and_restore_selection(true);
                     return true;
                 }
                 return false;
