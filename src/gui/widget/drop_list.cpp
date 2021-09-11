@@ -239,6 +239,8 @@ namespace neogfx
 
     void drop_list_popup::update_placement()
     {
+        set_ready_to_render(false);
+
         view().set_padding(iDropList.input_widget().as_widget().padding() - view().presentation_model().cell_padding(*this) - view().effective_frame_width());
 
         // First stab at sizing ourselves...
@@ -280,6 +282,8 @@ namespace neogfx
 
         surface().move_surface(correctedRect.top_left());
         resize(correctedRect.extents());
+
+        set_ready_to_render(true);
     }
 
     drop_list::list_proxy::view_container::view_container(i_layout& aLayout) :
@@ -767,6 +771,13 @@ namespace neogfx
         throw no_selection();
     }
 
+    bool drop_list::exact_match() const
+    {
+        return selection_model().has_current_index() &&
+            model().cell_data(presentation_model().to_item_model_index(
+                selection_model().current_index())).to_string() == input_widget().text();
+    }
+
     bool drop_list::view_created() const
     {
         return iListProxy.view_created();
@@ -779,7 +790,7 @@ namespace neogfx
 
     void drop_list::show_view()
     {
-        iListProxy.show_view();
+        bool showView = true;
         if (editable() && !accepting_selection())
         {
             if ((iStyle & drop_list_style::NoFilter) != drop_list_style::NoFilter)
@@ -792,7 +803,10 @@ namespace neogfx
                 else
                     selection_model().clear_current_index();
             }
+            showView = presentation_model().rows() > 0;
         }
+        if (showView)
+            iListProxy.show_view();
     }
 
     void drop_list::hide_view()

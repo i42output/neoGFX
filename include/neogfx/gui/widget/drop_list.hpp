@@ -256,6 +256,8 @@ namespace neogfx
         bool has_selection() const;
         const item_model_index& selection() const;
     public:
+        bool exact_match() const;
+    public:
         bool view_created() const;
         bool view_visible() const;
         void show_view();
