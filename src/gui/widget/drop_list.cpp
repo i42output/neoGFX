@@ -805,7 +805,7 @@ namespace neogfx
 
     void drop_list::show_view()
     {
-        bool showView = true;
+        iListProxy.show_view();
         if (editable() && !accepting_selection())
         {
             if ((iStyle & drop_list_style::NoFilter) != drop_list_style::NoFilter)
@@ -818,10 +818,7 @@ namespace neogfx
                 else
                     selection_model().clear_current_index();
             }
-            showView = presentation_model().rows() > 0;
         }
-        if (showView)
-            iListProxy.show_view();
     }
 
     void drop_list::hide_view()
