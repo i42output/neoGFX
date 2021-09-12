@@ -808,7 +808,7 @@ namespace neogfx
         iListProxy.show_view();
         if (editable() && !accepting_selection())
         {
-            if ((iStyle & drop_list_style::NoFilter) != drop_list_style::NoFilter)
+            if (filter_enabled())
                 presentation_model().filter_by(0, input_widget().text());
             else if (presentation_model().rows() > 0)
             {
@@ -849,7 +849,12 @@ namespace neogfx
         presentation_model().reset_filter();
 
         if (newSelection != std::nullopt)
-            selection_model().set_current_index(presentation_model().from_item_model_index(*newSelection));
+        {
+            auto const presentationModelIndex = presentation_model().from_item_model_index(*newSelection);
+            selection_model().set_current_index(presentationModelIndex);
+            if (editable())
+                input_widget().set_text(string{ presentation_model().cell_to_string(presentationModelIndex) });
+        }
         else
             selection_model().clear_current_index();
 
