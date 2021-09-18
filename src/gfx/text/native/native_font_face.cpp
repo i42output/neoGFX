@@ -96,8 +96,8 @@ namespace neogfx
         return result;
     }
 
-    native_font_face::native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
-        iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
+    native_font_face::native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
+        iFontLib{ aFontLib }, iId { aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         set_metrics();
         sGetAdvanceCache[aFreetypeFace] = get_advance_cache_face{};
@@ -338,6 +338,9 @@ namespace neogfx
         bool useSubpixelFiltering = true;
 
         FT_Bitmap& bitmap = iHandle.freetypeFace->glyph->bitmap;
+
+        if ((style() & (font_style::EmulatedBold)) == font_style::EmulatedBold)
+            FT_Bitmap_Embolden(iFontLib, &bitmap, static_cast<FT_F26Dot6>(default_dpi_scale_factor(iPixelDensityDpi.cx) * 64), 0);
 
         auto pixelMode = to_glyph_pixel_mode(bitmap.pixel_mode);
 

@@ -43,6 +43,8 @@ namespace neogfx
         virtual uint32_t style_count() const = 0;
         virtual font_style style(uint32_t aStyleIndex) const = 0;
         virtual i_string const& style_name(uint32_t aStyleIndex) const = 0;
+        virtual void remove_style(font_style aStyle) = 0;
+        virtual void remove_style(uint32_t aStyleIndex) = 0;
         virtual void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         virtual void create_face(i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         // helpers

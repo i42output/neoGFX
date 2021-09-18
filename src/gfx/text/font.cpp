@@ -37,7 +37,7 @@ namespace neogfx
             return font_weight::Normal;
     }
 
-    font_weight font_info::weight_from_style_name(std::string aStyleName)
+    font_weight font_info::weight_from_style_name(std::string aStyleName, bool aUnknownAsRegular)
     {
         static std::unordered_map<std::string, font_weight> sWeightMap =
         {
@@ -55,6 +55,7 @@ namespace neogfx
             { "demibold", font_weight::Demibold },
             { "demi bold", font_weight::Demibold },
             { "bold", font_weight::Bold },
+            { "bold (emulated)", font_weight::Bold },
             { "extrabold", font_weight::Extrabold },
             { "extra bold", font_weight::Extrabold },
             { "ultrabold", font_weight::Ultrabold },
@@ -95,7 +96,7 @@ namespace neogfx
             }
         if (match != std::nullopt)
             return (**match).second;
-        return font_weight::Normal;
+        return aUnknownAsRegular ? font_weight::Regular : font_weight::Unknown;
     }
 
     class font_info::instance

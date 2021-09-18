@@ -44,6 +44,9 @@ namespace neogfx
     public:
         i_string const& title() const override;
         void set_title(i_string const& aTitle) override;
+    public:
+        const text_widget& title_widget() const override;
+        text_widget& title_widget() override;
     protected:
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
     protected:

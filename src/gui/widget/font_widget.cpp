@@ -93,8 +93,8 @@ namespace neogfx
                         std::optional<uint32_t> matchingStyle;
                         for (uint32_t s = 0; s < styleCount; ++s)
                         {
-                            item_model().insert_item(item_model().end(), fm.font_style(fontFamilyIndex, s));
-                            if (existingStyle && *existingStyle == fm.font_style(fontFamilyIndex, s))
+                            item_model().insert_item(item_model().end(), fm.font_style_name(fontFamilyIndex, s));
+                            if (existingStyle && *existingStyle == fm.font_style_name(fontFamilyIndex, s))
                                 matchingStyle = s;
                         }
                         if (!matchingStyle)
@@ -276,7 +276,7 @@ namespace neogfx
             fontSize = std::min(std::max(fontSize, 1.0), 1638.0);
             iSelectedFont = neogfx::font{ 
                 fm.font_family(fontFamilyIndex), 
-                fm.font_style(fontFamilyIndex, fontStyleIndex), 
+                fm.font_style_name(fontFamilyIndex, fontStyleIndex), 
                 fontSize };
         }
         else

@@ -454,6 +454,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tab_page_container.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_text_document.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_text_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tool.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp" />

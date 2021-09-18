@@ -831,9 +831,22 @@ namespace neogfx
         };
         enumerate(detail::platform_specific::get_system_font_directory());
         enumerate(detail::platform_specific::get_local_font_directory());
-        for (auto& famlily : iFontFamilies)
-            std::sort(famlily.second.begin(), famlily.second.end(),
+        for (auto& family : iFontFamilies)
+        {
+            std::optional<native_font_list::iterator> bold;
+            std::optional<native_font_list::iterator> emulatedBold;
+            for (auto& font : family.second)
+            {
+                if (font->has_style(font_style::Bold))
+                    bold = font;
+                if (font->has_style(font_style::EmulatedBold))
+                    emulatedBold = font;
+            }
+            if (bold && emulatedBold)
+                (**emulatedBold).remove_style(font_style::EmulatedBold);
+            std::sort(family.second.begin(), family.second.end(),
                 [](auto const& f1, auto const& f2) { return f1->min_style() < f2->min_style() || (f1->min_style() == f2->min_style() && f1->min_weight() < f2->min_weight()); });
+        }
     }
 
     font_manager::~font_manager()
@@ -1006,7 +1019,21 @@ namespace neogfx
         throw bad_font_family_index();
     }
 
-    i_string const& font_manager::font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
+    font_style font_manager::font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
+    {
+        if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
+        {
+            for (auto& font : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
+            {
+                if (aStyleIndex < font->style_count())
+                    return font->style(aStyleIndex);
+                aStyleIndex -= font->style_count();
+            }
+        }
+        throw bad_font_family_index();
+    }
+
+    i_string const& font_manager::font_style_name(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
     {
         if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
         {
@@ -1112,9 +1139,16 @@ namespace neogfx
             family = iFontFamilies.find(default_system_font_info(system_font_role::Widget)->family_name());
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
-        std::optional<std::pair<std::pair<uint32_t, font_weight>, i_native_font*>> bestNormalFont;
-        std::optional<std::pair<std::pair<uint32_t, font_weight>, i_native_font*>> bestBoldFont;
-        std::optional<std::pair<std::pair<uint32_t, font_weight>, i_native_font*>> bestOtherFont;
+        struct match
+        {
+            uint32_t matchingBits;
+            neogfx::font_style style;
+            font_weight weight;
+            i_native_font* font;
+        };
+        std::optional<match> bestNormalFont;
+        std::optional<match> bestBoldFont;
+        std::optional<match> bestOtherFont;
         for (auto& f : family->second)
         {
             for (uint32_t s = 0; s < f->style_count(); ++s)
@@ -1123,40 +1157,48 @@ namespace neogfx
                 auto const& styleName = f->style_name(s);
                 auto const weight = font::weight_from_style_name(styleName);
                 if (weight <= font_weight::Normal && (
-                    bestNormalFont == std::nullopt || 
-                    bestNormalFont->first.first < matchingBits ||
-                    (bestNormalFont->first.first == matchingBits && bestNormalFont->first.second < weight)))
-                    bestNormalFont = std::make_pair(std::make_pair(matchingBits, weight), &*f);
+                    bestNormalFont == std::nullopt ||
+                    bestNormalFont->matchingBits < matchingBits ||
+                    (bestNormalFont->matchingBits == matchingBits && bestNormalFont->weight < weight)))
+                {
+                    bestNormalFont = match{ matchingBits, f->style(s), weight, &*f };
+                }
                 else if (weight >= font_weight::Bold && (
                     bestBoldFont == std::nullopt ||
-                    bestBoldFont->first.first < matchingBits ||
-                    (bestBoldFont->first.first == matchingBits && bestBoldFont->first.second > weight)))
-                    bestBoldFont = std::make_pair(std::make_pair(matchingBits, weight), &*f);
+                    bestBoldFont->matchingBits < matchingBits ||
+                    (bestBoldFont->style & font_style::Emulated) == font_style::Emulated ||
+                    (bestBoldFont->matchingBits == matchingBits && bestBoldFont->weight > weight)))
+                {
+                    bestBoldFont = match{ matchingBits, f->style(s), weight, &*f };
+                }
                 else if (bestOtherFont == std::nullopt ||
-                    bestOtherFont->first.first < matchingBits ||
-                    (bestOtherFont->first.first == matchingBits && bestOtherFont->first.second < weight))
-                    bestOtherFont = std::make_pair(std::make_pair(matchingBits, weight), &*f);
+                    bestOtherFont->matchingBits < matchingBits ||
+                    (bestOtherFont->style & font_style::Emulated) == font_style::Emulated ||
+                    (bestOtherFont->matchingBits == matchingBits && bestOtherFont->weight < weight))
+                {
+                    bestOtherFont = match{ matchingBits, f->style(s), weight, &*f };
+                }
             }
         }
         if ((aStyle & neogfx::font_style::Bold) != neogfx::font_style::Bold)
         {
             if (bestNormalFont != std::nullopt)
-                return *bestNormalFont->second;
+                return *bestNormalFont->font;
             else if (bestOtherFont != std::nullopt)
-                return *bestOtherFont->second;
+                return *bestOtherFont->font;
             else if (bestBoldFont != std::nullopt)
-                return *bestBoldFont->second;
+                return *bestBoldFont->font;
             else
                 throw no_matching_font_found();
         }
         else
         {
             if (bestBoldFont != std::nullopt)
-                return *bestBoldFont->second;
+                return *bestBoldFont->font;
             else if (bestOtherFont != std::nullopt)
-                return *bestOtherFont->second;
+                return *bestOtherFont->font;
             else if (bestNormalFont != std::nullopt)
-                return *bestNormalFont->second;
+                return *bestNormalFont->font;
             else
                 throw no_matching_font_found();
         }

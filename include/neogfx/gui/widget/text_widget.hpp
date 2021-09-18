@@ -19,36 +19,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "widget.hpp"
+#include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/widget/i_text_widget.hpp>
 
 namespace neogfx
 {
-    enum class text_widget_type
-    {
-        SingleLine,
-        MultiLine
-    };
-
-    enum class text_widget_flags
-    {
-        None                = 0x00,
-        HideOnEmpty         = 0x01,
-        TakesSpaceWhenEmpty = 0x02,
-        CutOff              = 0x04,
-        UseEllipsis         = 0x08
-    };
-
-    inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)
-    {
-        return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
-    }
-
-    inline constexpr text_widget_flags operator&(text_widget_flags aLhs, text_widget_flags aRhs)
-    {
-        return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
-    }
-
-    class text_widget : public widget<>
+    class text_widget : public widget<i_text_widget>
     {
     public:
         define_event(TextChanged, text_changed)
@@ -68,20 +44,20 @@ namespace neogfx
     public:
         bool visible() const override;
     public:
-        i_string const& text() const;
-        void set_text(i_string const& aText);
-        void set_size_hint(const size_hint& aSizeHint);
-        bool multi_line() const;
-        text_widget_flags flags() const;
-        void set_flags(text_widget_flags aFlags);
-        neogfx::alignment alignment() const;
-        void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true);
-        bool has_text_color() const;
-        color text_color() const;
-        void set_text_color(const optional_color& aTextColor);
-        bool has_text_appearance() const;
-        neogfx::text_appearance text_appearance() const;
-        void set_text_appearance(const optional_text_appearance& aTextAppearance);
+        i_string const& text() const override;
+        void set_text(i_string const& aText) override;
+        void set_size_hint(const size_hint& aSizeHint) override;
+        bool multi_line() const override;
+        text_widget_flags flags() const override;
+        void set_flags(text_widget_flags aFlags) override;
+        neogfx::alignment alignment() const override;
+        void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        bool has_text_color() const override;
+        color text_color() const override;
+        void set_text_color(const optional_color& aTextColor) override;
+        bool has_text_appearance() const override;
+        neogfx::text_appearance text_appearance() const override;
+        void set_text_appearance(const optional_text_appearance& aTextAppearance) override;
     protected:
         size text_extent() const;
         size size_hint_extent() const;
