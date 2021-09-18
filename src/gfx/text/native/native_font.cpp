@@ -151,16 +151,13 @@ namespace neogfx
         }
         if (!has_style(font_style::Italic) && has_style(font_style::Normal))
         {
-            // todo (FT_Set_Transform looks awful so think about another way of doing this)...
-            // auto existingNormal = find_style(font_style::Normal);
-            // iStyleMap.emplace(std::make_pair(font_style::EmulatedItalic, "Italic (Emulated)"), existingNormal->second);
+            auto existingNormal = find_style(font_style::Normal);
+            iStyleMap.emplace(std::make_pair(font_style::EmulatedItalic, "Italic (Emulated)"), existingNormal->second);
         }
-        // todo (FT_Set_Transform looks awful so think about another way of doing this)...
         if (!has_style(font_style::BoldItalic) && has_style(font_style::Normal))
         {
-            // todo (FT_Set_Transform looks awful so think about another way of doing this)...
-            // auto existingNormal = find_style(font_style::Normal);
-            // iStyleMap.emplace(std::make_pair(font_style::EmulatedBoldItalic, "Bold Italic (Emulated)"), existingNormal->second);
+            auto existingNormal = find_style(font_style::Normal);
+            iStyleMap.emplace(std::make_pair(font_style::EmulatedBoldItalic, "Bold Italic (Emulated)"), existingNormal->second);
         }
         iCache.clear();
         iCache.shrink_to_fit();

@@ -941,7 +941,7 @@ namespace neogfx
             result.extents().cy = d;
             return result;
         }
-        self_type with_centerd_origin() const
+        self_type with_centered_origin() const
         {
             return self_type{ point_type{ -extents() / two }, extents() };
         }

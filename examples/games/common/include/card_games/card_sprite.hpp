@@ -117,7 +117,7 @@ namespace neogames
             static const neogfx::game::sprite_2d_archetype cardArchetype{ "Card" };
 
             // Card background shape...
-            auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centerd_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
+            auto cardBackgroundVertices = neogfx::rounded_rect_vertices(neogfx::rect{ neogfx::point{}, neogfx::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centered_origin(), 0.1, neogfx::mesh_type::Triangles, 20);
 
             neogfx::game::mesh mesh{ cardBackgroundVertices, neogfx::vertices_2d{cardBackgroundVertices.size(), neogfx::vec2{} }, neogfx::game::default_faces(cardBackgroundVertices) };
             neogfx::game::mesh_renderer meshRenderer{ neogfx::game::material{ neogfx::to_ecs_component( neogfx::color::White) } };

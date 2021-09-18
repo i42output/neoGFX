@@ -34,45 +34,49 @@ namespace neogfx
     struct unsupported_mesh_type : std::logic_error { unsupported_mesh_type() : std::logic_error("neogfx::unsupported_mesh_type") {} };
 
     template <std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline void calc_rect_vertices(vec3_array<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
+    inline void calc_rect_vertices(vec3_array<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0, const optional_mat44& aTransformation = {})
     {
+        auto const& transformableRect = aTransformation ? aRect.with_centered_origin() : aRect;
         aResult.clear();
         switch(aType)
         {
         case mesh_type::TriangleFan:
-            aResult.push_back(aRect.center().to_vec3(aZpos));
-            aResult.push_back(aRect.top_left().to_vec3(aZpos));
-            aResult.push_back(aRect.top_right().to_vec3(aZpos));
-            aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
-            aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
-            aResult.push_back(aRect.top_left().to_vec3(aZpos));
+            aResult.push_back(transformableRect.center().to_vec3(aZpos));
+            aResult.push_back(transformableRect.top_left().to_vec3(aZpos));
+            aResult.push_back(transformableRect.top_right().to_vec3(aZpos));
+            aResult.push_back(transformableRect.bottom_right().to_vec3(aZpos));
+            aResult.push_back(transformableRect.bottom_left().to_vec3(aZpos));
+            aResult.push_back(transformableRect.top_left().to_vec3(aZpos));
             break;
         case mesh_type::Triangles:
-            aResult.push_back(aRect.top_left().to_vec3(aZpos));
-            aResult.push_back(aRect.top_right().to_vec3(aZpos));
-            aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
-            aResult.push_back(aRect.top_right().to_vec3(aZpos));
-            aResult.push_back(aRect.bottom_right().to_vec3(aZpos));
-            aResult.push_back(aRect.bottom_left().to_vec3(aZpos));
+            aResult.push_back(transformableRect.top_left().to_vec3(aZpos));
+            aResult.push_back(transformableRect.top_right().to_vec3(aZpos));
+            aResult.push_back(transformableRect.bottom_left().to_vec3(aZpos));
+            aResult.push_back(transformableRect.top_right().to_vec3(aZpos));
+            aResult.push_back(transformableRect.bottom_right().to_vec3(aZpos));
+            aResult.push_back(transformableRect.bottom_left().to_vec3(aZpos));
             break;
         case mesh_type::Outline:
-            aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y, aZpos });
-            aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y, aZpos });
-            aResult.push_back(xyz{ aRect.top_right().x, aRect.top_right().y, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_right().x, aRect.bottom_right().y, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y, aZpos });
-            aResult.push_back(xyz{ aRect.bottom_left().x, aRect.bottom_left().y, aZpos });
-            aResult.push_back(xyz{ aRect.top_left().x, aRect.top_left().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.top_left().x, transformableRect.top_left().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.top_right().x, transformableRect.top_right().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.top_right().x, transformableRect.top_right().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.bottom_right().x, transformableRect.bottom_right().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.bottom_right().x, transformableRect.bottom_right().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.bottom_left().x, transformableRect.bottom_left().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.bottom_left().x, transformableRect.bottom_left().y, aZpos });
+            aResult.push_back(xyz{ transformableRect.top_left().x, transformableRect.top_left().y, aZpos });
             break;
         }
+        if (aTransformation)
+            for (auto& v : aResult)
+                v = *aTransformation * v + aRect.center().to_vec3();
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline vec3_array<8> rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0)
+    inline vec3_array<8> rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, scalar aZpos = 0.0, const optional_mat44& aTransformation = {})
     {
         vec3_array<8> result;
-        calc_rect_vertices(result, aRect, aType, aZpos);
+        calc_rect_vertices(result, aRect, aType, aZpos, aTransformation);
         return result;
     };
     vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);

@@ -834,16 +834,35 @@ namespace neogfx
         for (auto& family : iFontFamilies)
         {
             std::optional<native_font_list::iterator> bold;
-            std::optional<native_font_list::iterator> emulatedBold;
+            std::optional<native_font_list::iterator> italic;
+            std::optional<native_font_list::iterator> boldItalic;
+            std::vector<native_font_list::iterator> emulatedBold;
+            std::vector<native_font_list::iterator> emulatedItalic;
+            std::vector<native_font_list::iterator> emulatedBoldItalic;
             for (auto& font : family.second)
             {
                 if (font->has_style(font_style::Bold))
                     bold = font;
+                if (font->has_style(font_style::Italic))
+                    italic = font;
+                if (font->has_style(font_style::BoldItalic))
+                    boldItalic = font;
                 if (font->has_style(font_style::EmulatedBold))
-                    emulatedBold = font;
+                    emulatedBold.push_back(font);
+                if (font->has_style(font_style::EmulatedItalic))
+                    emulatedItalic.push_back(font);
+                if (font->has_style(font_style::EmulatedBoldItalic))
+                    emulatedBoldItalic.push_back(font);
             }
-            if (bold && emulatedBold)
-                (**emulatedBold).remove_style(font_style::EmulatedBold);
+            if (bold)
+                for (auto& f : emulatedBold)
+                    (*f).remove_style(font_style::EmulatedBold);
+            if (italic)
+                for (auto& f : emulatedItalic)
+                    (*f).remove_style(font_style::EmulatedItalic);
+            if (boldItalic)
+                for (auto& f : emulatedBoldItalic)
+                    (*f).remove_style(font_style::EmulatedBoldItalic);
             std::sort(family.second.begin(), family.second.end(),
                 [](auto const& f1, auto const& f2) { return f1->min_style() < f2->min_style() || (f1->min_style() == f2->min_style() && f1->min_weight() < f2->min_weight()); });
         }

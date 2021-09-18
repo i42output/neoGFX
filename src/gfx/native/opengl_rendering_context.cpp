@@ -1844,6 +1844,15 @@ namespace neogfx
 
                         vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
 
+                        auto const xTransformCoefficient = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? -1.0 : 1.0;
+                        auto const transformation = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
+                            optional_mat44{} :
+                            mat44{ 
+                                { 1.0, 0.0, 0.0, 0.0 }, 
+                                { xTransformCoefficient * 0.25, 1.0, 0.0, 0.0 },
+                                { 0.0, 0.0, 1.0, 0.0 }, 
+                                { 0.0, 0.0, 0.0, 1.0 } };
+
                         if (pass == 4)
                         {
                             if (drawOp.appearance->effect() && drawOp.appearance->effect()->type() == text_effect_type::Outline)
@@ -1860,11 +1869,13 @@ namespace neogfx
                                         to_ecs_component(
                                             outputRect,
                                             mesh_type::Triangles,
-                                            drawOp.point.z) :
+                                            drawOp.point.z,
+                                            transformation) :
                                         to_ecs_component(
                                             game_rect{ outputRect },
                                             mesh_type::Triangles,
-                                            drawOp.point.z);
+                                            drawOp.point.z, 
+                                            transformation);
                                     meshFilters.push_back(game::mesh_filter{ {}, mesh });
                                     auto const& ink = drawOp.appearance->effect()->color();
                                     meshRenderers.push_back(
@@ -1889,11 +1900,13 @@ namespace neogfx
                             to_ecs_component(
                                 outputRect,
                                 mesh_type::Triangles,
-                                drawOp.point.z) :
+                                drawOp.point.z,
+                                transformation) :
                             to_ecs_component(
                                 game_rect{ outputRect },
                                 mesh_type::Triangles,
-                                drawOp.point.z);
+                                drawOp.point.z,
+                                transformation);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                             drawOp.appearance->ink() : drawOp.appearance->effect()->color();
@@ -2039,7 +2052,11 @@ namespace neogfx
             ignore = {};
             auto const& meshRenderCache = (meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
-            auto const& transformation = meshDrawable.transformation;
+            auto const& transformation = meshDrawable.transformation && meshFilter.transformation ?
+                *meshDrawable.transformation * *meshFilter.transformation :
+                meshDrawable.transformation ? *meshDrawable.transformation :
+                meshFilter.transformation ? *meshFilter.transformation :
+                optional_mat44{};
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
             vec2 textureStorageExtents;
@@ -2087,7 +2104,7 @@ namespace neogfx
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            auto const& xyz = (transformation ? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
+                            auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
                             auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
                             auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
                                 (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents) : vec2{});
