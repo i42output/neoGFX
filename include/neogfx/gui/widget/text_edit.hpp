@@ -467,6 +467,27 @@ namespace neogfx
             dimension iWidth;
         };
         typedef std::vector<glyph_column> glyph_columns;
+    private:
+        class dragger : public widget_timer
+        {
+        public:
+            dragger(text_edit& aOwner) : 
+                widget_timer{ aOwner, [&](widget_timer& aTimer)
+                {
+                    aTimer.again();
+                    aOwner.set_cursor_position(aOwner.mouse_position(), false);
+                }, std::chrono::milliseconds{ 250 } }, 
+                iSts1{ aOwner.vertical_scrollbar().Position },
+                iSts2{ aOwner.horizontal_scrollbar().Position }
+            {
+            }
+            ~dragger()
+            {
+            }
+        private:
+            scoped_transition_suppression iSts1;
+            scoped_transition_suppression iSts2;
+        };
     public:
         typedef document_text::size_type position_type;
     public:
@@ -682,7 +703,7 @@ namespace neogfx
         basic_point<std::optional<dimension>> iCursorHint;
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         widget_timer iAnimator;
-        std::optional<widget_timer> iDragger;
+        std::optional<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;

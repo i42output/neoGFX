@@ -1220,11 +1220,7 @@ namespace neogfx
         {
             if (!capturing())
                 set_capture();
-            iDragger.emplace(*this, [this](widget_timer& aTimer)
-            {
-                aTimer.again();
-                set_cursor_position(mouse_position(), false);
-            }, std::chrono::milliseconds{ 250 });
+            iDragger.emplace(*this);
         }
     }
 
