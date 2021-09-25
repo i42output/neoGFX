@@ -43,6 +43,8 @@ namespace neogfx
 
         Password    = 0x00000100,
 
+        ParseURIs   = 0x00001000,
+
         OnlyAccept  = 0x00010000,
 
         LINES_MASK  = SingleLine | MultiLine
@@ -82,6 +84,7 @@ namespace neogfx
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)
         define_event(ContextMenu, context_menu, i_menu&)
+        define_event(UriClicked, uri_clicked, i_string const&)
     private:
         typedef text_edit property_context_type;
     public:
