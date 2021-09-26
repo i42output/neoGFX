@@ -260,7 +260,7 @@ namespace neogfx
     };
 
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ (aCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -279,7 +279,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aParent, aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -298,7 +298,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aLayout, aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },

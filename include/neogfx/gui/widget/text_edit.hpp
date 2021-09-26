@@ -713,7 +713,7 @@ namespace neogfx
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
-        define_property(property_category::other, bool, WordWrap, word_wrap, iCaps == text_edit_caps::MultiLine)
+        define_property(property_category::other, bool, WordWrap, word_wrap, (iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
         define_property(property_category::other, bool, Password, password, false)
         define_property(property_category::other, string, PasswordMask, password_mask)
         define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)
