@@ -514,14 +514,26 @@ namespace neogfx
     {
         if ((scrolling_disposition() & neogfx::scrolling_disposition::DontConsiderChildWidgets) == neogfx::scrolling_disposition::DontConsiderChildWidgets)
             return;
+        bool layoutItems = false;
         switch (aStage)
         {
         case UsvStageInit:
             if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                vertical_scrollbar().hide();
+            {
+                if (vertical_scrollbar().visible())
+                {
+                    vertical_scrollbar().hide();
+                    layoutItems = true;
+                }
+            }
             if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                horizontal_scrollbar().hide();
-            as_widget().layout_items();
+            {
+                if (horizontal_scrollbar().visible())
+                {
+                    horizontal_scrollbar().hide();
+                    layoutItems = true;
+                }
+            }
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
@@ -538,8 +550,11 @@ namespace neogfx
                         continue;
                     if (childPos.y < cr.top() || childPos.y + childExtents.cy > cr.bottom())
                     {
-                        vertical_scrollbar().show();
-                        as_widget().layout_items();
+                        if (!vertical_scrollbar().visible())
+                        {
+                            vertical_scrollbar().show();
+                            layoutItems = true;
+                        }
                         break;
                     }
                 }
@@ -559,8 +574,11 @@ namespace neogfx
                         continue;
                     if (childPos.x < cr.left() || childPos.x + childExtents.cx > cr.right())
                     {
-                        horizontal_scrollbar().show();
-                        as_widget().layout_items();
+                        if (!horizontal_scrollbar().visible())
+                        {
+                            horizontal_scrollbar().show();
+                            layoutItems = true;
+                        }
                         break;
                     }
                 }
@@ -620,5 +638,8 @@ namespace neogfx
         default:
             break;
         }
+
+        if (layoutItems)
+            as_widget().layout_items();
     }
 }

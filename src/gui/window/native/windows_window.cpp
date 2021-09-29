@@ -1246,6 +1246,7 @@ namespace neogfx
                 {
                     auto const& wpc = *reinterpret_cast<WINDOWPOS const*>(lparam);
                     bool placementChanged = false;
+                    bool needRedraw = ((wpc.flags & SWP_DRAWFRAME) == SWP_DRAWFRAME);
                     if (self.iPosition != basic_point<int>{ wpc.x, wpc.y }.as<scalar>())
                     {
                         self.iPosition.emplace(wpc.x, wpc.y);
@@ -1257,13 +1258,14 @@ namespace neogfx
                         self.iExtents.emplace(wpc.cx, wpc.cy);
                         self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
                         placementChanged = true;
+                        needRedraw = true;
                     }
                     if (placementChanged)
                     {
                         if (!self.iInMoveResizeCall)
                             self.iPlacementChangedExplicitly = true;
                     }
-                    if (!self.initialising())
+                    if (!self.initialising() && needRedraw)
                     {
                         ::InvalidateRect(hwnd, NULL, FALSE);
                         ::UpdateWindow(hwnd);

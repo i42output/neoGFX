@@ -289,7 +289,7 @@ namespace neogfx
                 continue;
             if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
                 continue;
-            auto& disposition = item.as_layout_item_cache().cached_disposition();
+            auto& disposition = item.cached_disposition();
             disposition = layout_item_disposition::Unknown;
             if (AxisPolicy::size_policy_x(item.effective_size_policy()) == size_constraint::Minimum)
             {
@@ -321,7 +321,7 @@ namespace neogfx
                     continue;
                 if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
                     continue;
-                auto& disposition = item.as_layout_item_cache().cached_disposition();
+                auto& disposition = item.cached_disposition();
                 if (disposition != layout_item_disposition::Unknown && disposition != layout_item_disposition::Weighted)
                     continue;
 #ifdef NEOGFX_DEBUG
@@ -359,7 +359,7 @@ namespace neogfx
             {
                 if (!item.visible() && !ignore_visibility())
                     continue;
-                auto& disposition = item.as_layout_item_cache().cached_disposition();
+                auto& disposition = item.cached_disposition();
                 if (disposition == layout_item_disposition::Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace);
             }
@@ -387,7 +387,7 @@ namespace neogfx
             auto const itemMaxSize = item.maximum_size(availableSpace);
             size s;
             AxisPolicy::cy(s) = std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSpace)), AxisPolicy::cy(itemMaxSize));
-            auto disposition = item.as_layout_item_cache().cached_disposition();
+            auto disposition = item.cached_disposition();
             if (disposition == layout_item_disposition::FixedSize)
                 AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
             else if (disposition == layout_item_disposition::TooSmall)
