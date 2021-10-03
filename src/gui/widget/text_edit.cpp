@@ -723,13 +723,14 @@ namespace neogfx
             if (vertical_scrollbar().visible())
             {
                 vertical_scrollbar().hide();
-                refreshLines = true;
+//                refreshLines = true;  // todo: optimize this properly
             }
             if (horizontal_scrollbar().visible())
             {
                 horizontal_scrollbar().hide();
-                refreshLines = true;
+//                refreshLines = true;  // todo: optimize this properly
             }
+            refreshLines = true;  // todo: optimize this properly
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
@@ -744,16 +745,18 @@ namespace neogfx
                     if (!vertical_scrollbar().visible())
                     {
                         vertical_scrollbar().show();
-                        refreshLines = true;
+                        // refreshLines = true;  // todo: optimize this properly
                     }
+                    refreshLines = true;  // todo: optimize this properly
                 }
                 else
                 {
                     if (vertical_scrollbar().visible())
                     {
                         vertical_scrollbar().hide();
-                        refreshLines = true;
+                        // refreshLines = true;  // todo: optimize this properly
                     }
+                    refreshLines = true;  // todo: optimize this properly
                 }
                 framed_scrollable_widget::update_scrollbar_visibility(aStage);
             }
