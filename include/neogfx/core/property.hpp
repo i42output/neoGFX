@@ -54,8 +54,7 @@ namespace neogfx
             if (iProperty.iPreviousValue != std::nullopt)
             {
                 bool alreadyActive = active();
-                iFrom = iProperty.iPreviousValue;
-                iTo = iProperty.iValue;
+                sync();
                 reset(true, disable_when_finished(), !alreadyActive);
                 neolib::scoped_flag sf{ iUpdatingProperty };
                 iProperty = *iFrom;
@@ -82,11 +81,11 @@ namespace neogfx
             return iUpdatingProperty;
         }
     public:
-        bool property_transition::can_apply() const override
+        bool property_transition::can_apply() const final
         {
             return !finished() && enabled() && !paused();
         }
-        void apply() override
+        void apply() final
         {
             if (!can_apply())
                 throw cannot_apply();
@@ -107,16 +106,21 @@ namespace neogfx
                     disable();
             }
         }
-        bool finished() const override
+        bool finished() const final
         {
             return iFrom == std::nullopt;
         }
     public:
-        void clear() override
+        void clear() final
         {
             iFrom = std::nullopt;
             iTo = std::nullopt;
             iMix = std::nullopt;
+        }
+        void sync(bool aIgnorePrevious = false) final
+        {
+            iFrom = aIgnorePrevious ? iProperty.iValue : iProperty.iPreviousValue;
+            iTo = iProperty.iValue;
         }
     private:
         property_type& iProperty;
@@ -194,33 +198,33 @@ namespace neogfx
             aOwner.properties().register_property(*this);
         }
     public:
-        property_variant get(const i_property& aProperty) const override
+        property_variant get(const i_property& aProperty) const final
         {
             return get_as_variant();
         }
     public:
-        i_property_owner& owner() const override
+        i_property_owner& owner() const final
         {
             return iOwner;
         }
     public:
-        const string& name() const override
+        const string& name() const final
         {
             return iName;
         }
-        const std::type_info& type() const override
+        const std::type_info& type() const final
         {
             return typeid(value_type);
         }
-        const std::type_info& category() const override
+        const std::type_info& category() const final
         {
             return typeid(category_type);
         }
-        bool optional() const override
+        bool optional() const final
         {
             return neolib::is_optional_v<T>;
         }
-        property_variant get_as_variant() const override
+        property_variant get_as_variant() const final
         {
             if constexpr (neolib::is_optional_v<T>)
             {
@@ -232,7 +236,7 @@ namespace neogfx
             else
                 return value();
         }
-        void set_from_variant(const property_variant& aValue) override
+        void set_from_variant(const property_variant& aValue) final
         {
             std::visit([this](auto&& arg)
             {
@@ -242,51 +246,64 @@ namespace neogfx
                     *this = std::forward<decltype(arg)>(arg);
             }, aValue);
         }
-        bool transition_set() const override
+        bool read_only() const final
+        {
+            return iReadOnly;
+        }
+        void set_read_only(bool aReadOnly) final
+        {
+            iReadOnly = aReadOnly;
+        }
+        bool transition_set() const final
         {
             return iTransition != nullptr;
         }
-        transition_type& transition() const override
+        transition_type& transition() const final
         {
             if (iTransition != nullptr)
                 return *iTransition;
             throw std::logic_error( "neogfx::property: no transition!" );
         }
-        void set_transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true) override
+        void set_transition(i_animator& aAnimator, easing aEasingFunction, double aDuration, bool aEnabled = true) final
         {
             iTransition = std::make_unique<transition_type>(aAnimator, *this, aEasingFunction, aDuration, aEnabled);
         }
-        void clear_transition() override
+        void clear_transition() final
         {
             iTransition = nullptr;
         }
-        bool transition_suppressed() const override
+        bool transition_suppressed() const final
         {
             return iTransitionSuppressed;
         }
-        void suppress_transition(bool aSuppress) override
+        void suppress_transition(bool aSuppress) final
         {
             iTransitionSuppressed = aSuppress;
+            if (aSuppress)
+            {
+                if (transition_set())
+                    transition().clear();
+            }
         }
-        bool has_delegate() const override
+        bool has_delegate() const final
         {
             return iDelegate != nullptr;
         }   
-        i_property_delegate const& delegate() const override
+        i_property_delegate const& delegate() const final
         {
             if (has_delegate())
                 return *iDelegate;
             throw no_delegate();
         }
-        i_property_delegate& delegate() override
+        i_property_delegate& delegate() final
         {
             return const_cast<i_property_delegate&>(to_const(*this).delegate());
         }
-        void set_delegate(i_property_delegate& aDelegate) override
+        void set_delegate(i_property_delegate& aDelegate) final
         {
             iDelegate = &aDelegate;
         }
-        void unset_delegate() override
+        void unset_delegate() final
         {
             iDelegate = nullptr;
         }
@@ -374,6 +391,11 @@ namespace neogfx
         {
             return optional_proxy<const self_type>{ *this };
         }
+        template <typename SFINAE = optional_proxy<self_type>>
+        typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator->()
+        {
+            return optional_proxy<self_type>{ *this };
+        }
         template <typename T>
         bool operator==(const T& aRhs) const
         {
@@ -395,21 +417,21 @@ namespace neogfx
             return value() != aRhs;
         }
     protected:
-        const void* data() const override
+        const void* data() const final
         {
             if (!has_delegate())
                 return &value();
             else
                 return delegate().data();
         }
-        void* data() override
+        void* data() final
         {
             if (!has_delegate())
                 return &mutable_value();
             else
                 return delegate().data();
         }
-        void*const* calculator_function() const override
+        void*const* calculator_function() const final
         {
             // why? because we have to type-erase to support plugins and std::function can't be passed across a plugin boundary.
             if (iCalculator != nullptr)
@@ -424,6 +446,9 @@ namespace neogfx
         template <typename T2>
         self_type& do_assign(T2&& aValue, bool aOwnerNotify = true)
         {
+            if (read_only())
+                return *this;
+
             if (transition_set() && !transition_suppressed() &&
                 !transition().updating_property() &&
                 transition().started() && aValue == transition().to())
@@ -433,8 +458,13 @@ namespace neogfx
             {
                 iPreviousValue = value();
                 mutable_value() = aValue;
-                if (transition_set() && !transition_suppressed() && !transition().updating_property())
-                    transition().start_if();
+                if (transition_set() && !transition().updating_property())
+                {
+                    if (!transition_suppressed())
+                        transition().start_if();
+                    else
+                        transition().clear();
+                }
                 update(aOwnerNotify);
             }
 
@@ -477,6 +507,7 @@ namespace neogfx
         calculator_function_type iCalculator;
         mutable value_type iValue;
         std::optional<value_type> iPreviousValue;
+        bool iReadOnly = false;
         std::unique_ptr<transition_type> iTransition;
         bool iTransitionSuppressed = false;
         i_property_delegate* iDelegate = nullptr;

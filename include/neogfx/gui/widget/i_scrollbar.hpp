@@ -107,6 +107,7 @@ namespace neogfx
         virtual scrollbar_zone pop_zone() = 0;
         virtual value_type position() const = 0;
         virtual value_type effective_position() const = 0;
+        virtual value_type maximum_position() const = 0;
         virtual bool set_position(value_type aPosition) = 0;
         virtual value_type minimum() const = 0;
         virtual void set_minimum(value_type aMinimum) = 0;

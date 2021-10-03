@@ -710,33 +710,41 @@ namespace neogfx
 
     void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
-        scoped_transition_suppression sts1{ vertical_scrollbar().Position };
-        scoped_transition_suppression sts2{ horizontal_scrollbar().Position };
+        scoped_property_transition_suppression sts1{ vertical_scrollbar().Position };
+        scoped_property_transition_suppression sts2{ horizontal_scrollbar().Position };
+
+        bool refreshLines = (iTextExtents == std::nullopt);
 
         switch (aStage)
         {
         case UsvStageInit:
             if (resizing())
                 vertical_scrollbar().push_zone();
-            vertical_scrollbar().hide();
-            horizontal_scrollbar().hide();
-            refresh_lines();
+            if (vertical_scrollbar().visible())
+            {
+                vertical_scrollbar().hide();
+                refreshLines = true;
+            }
+            if (horizontal_scrollbar().visible())
+            {
+                horizontal_scrollbar().hide();
+                refreshLines = true;
+            }
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
             {
                 i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-                vertical_scrollbar().set_maximum(iTextExtents.cy);
+                vertical_scrollbar().set_maximum(iTextExtents->cy);
                 vertical_scrollbar().set_step(font().height());
                 vertical_scrollbar().set_page(client_rect(false).height());
                 vertical_scrollbar().set_position(oldPosition);
-                bool changed = false;
                 if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
                 {
                     if (!vertical_scrollbar().visible())
                     {
                         vertical_scrollbar().show();
-                        changed = true;
+                        refreshLines = true;
                     }
                 }
                 else
@@ -744,18 +752,16 @@ namespace neogfx
                     if (vertical_scrollbar().visible())
                     {
                         vertical_scrollbar().hide();
-                        changed = true;
+                        refreshLines = true;
                     }
                 }
-                if (changed)
-                    refresh_lines();
                 framed_scrollable_widget::update_scrollbar_visibility(aStage);
             }
             break;
         case UsvStageCheckHorizontal:
             {
                 i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
-                horizontal_scrollbar().set_maximum(iTextExtents.cx <= client_rect(false).width() ? 0.0 : iTextExtents.cx);
+                horizontal_scrollbar().set_maximum(iTextExtents->cx <= client_rect(false).width() ? 0.0 : iTextExtents->cx);
                 horizontal_scrollbar().set_step(font().height());
                 horizontal_scrollbar().set_page(client_rect(false).width());
                 horizontal_scrollbar().set_position(oldPosition);
@@ -784,6 +790,9 @@ namespace neogfx
         default:
             break;
         }
+
+        if (refreshLines)
+            refresh_lines();
     }
 
     color text_edit::frame_color() const
@@ -1917,6 +1926,7 @@ namespace neogfx
 
     void text_edit::refresh_columns()
     {
+        iTextExtents = std::nullopt;
         update_scrollbar_visibility();
         update();
     }
@@ -2029,7 +2039,7 @@ namespace neogfx
                             }
                         }
                         pos.y += height;
-                        iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
+                        iTextExtents->cx = std::max(iTextExtents->cx, x - offset);
                         lineStart = next;
                         if (lineStart != paragraphEnd)
                             offset = lineStart->x;
@@ -2052,7 +2062,7 @@ namespace neogfx
                             pos.y,
                             { (lineEnd - 1)->x + advance(*(lineEnd - 1)).cx, height} });
                     pos.y += lines.back().extents.cy;
-                    iTextExtents.cx = std::max(iTextExtents.cx, lines.back().extents.cx);
+                    iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                 }
                 if (p + 1 == iGlyphParagraphs.end() && !glyphs().empty() && is_line_breaking_whitespace(glyphs().back()))
                     pos.y += font().height();
@@ -2081,7 +2091,7 @@ namespace neogfx
                         next_pass();
                     break;
                 case 2:
-                    if (!horizontal_scrollbar().visible() && !showHorizontalScrollbar && iTextExtents.cx > availableWidth)
+                    if (!horizontal_scrollbar().visible() && !showHorizontalScrollbar && iTextExtents->cx > availableWidth)
                     {
                         showHorizontalScrollbar = true;
                         availableHeight -= horizontal_scrollbar().width();
@@ -2095,10 +2105,10 @@ namespace neogfx
                     break;
                 }
             }
-            iTextExtents.cy = pos.y;
-            if (iTextExtents.cy < client_rect(false).cy)
+            iTextExtents->cy = pos.y;
+            if (iTextExtents->cy < client_rect(false).cy)
             {
-                auto const space = client_rect(false).cy - iTextExtents.cy;
+                auto const space = client_rect(false).cy - iTextExtents->cy;
                 auto const adjust = 
                     ((Alignment & alignment::Vertical) == alignment::Bottom) ? space : 
                         ((Alignment & alignment::Vertical) == alignment::VCenter) ? std::floor(space / 2.0) : 0.0;

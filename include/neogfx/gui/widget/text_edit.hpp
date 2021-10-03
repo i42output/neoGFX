@@ -488,8 +488,8 @@ namespace neogfx
             {
             }
         private:
-            scoped_transition_suppression iSts1;
-            scoped_transition_suppression iSts2;
+            scoped_property_transition_suppression iSts1;
+            scoped_property_transition_suppression iSts2;
         };
     public:
         typedef document_text::size_type position_type;
@@ -687,7 +687,7 @@ namespace neogfx
         mutable std::optional<document_glyphs> iGlyphs;
         glyph_paragraphs iGlyphParagraphs;
         glyph_columns iGlyphColumns;
-        size iTextExtents;
+        optional_size iTextExtents;
         uint64_t iCursorAnimationStartTime;
         typedef std::pair<position_type, position_type> find_span;
         typedef std::map<
