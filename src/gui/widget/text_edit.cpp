@@ -710,7 +710,16 @@ namespace neogfx
 
     void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
+        std::optional<scoped_property_transition_suppression> sts1;
+        std::optional<scoped_property_transition_suppression> sts2;
+
         bool refreshLines = (iTextExtents == std::nullopt);
+
+        if (!refreshLines) // must be a resize event
+        {
+            sts1.emplace(vertical_scrollbar().Position);
+            sts2.emplace(horizontal_scrollbar().Position);
+        }
 
         switch (aStage)
         {
