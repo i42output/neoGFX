@@ -348,17 +348,17 @@ namespace neogfx
                 return transition().to();
         }
         template <typename T2>
-        self_type& assign(T2&& aValue, bool aOwnerNotify = true)
+        self_type& assign(T2&& aValue, bool aOwnerNotify = true, bool aDiscardPreviousValue = false)
         {
             typedef std::decay_t<decltype(aValue)> try_type;
             if constexpr (std::is_same_v<try_type, value_type> || std::is_same_v<neolib::optional<try_type>, value_type>)
-                return do_assign(std::forward<T2>(aValue), aOwnerNotify);
+                return do_assign(std::forward<T2>(aValue), aOwnerNotify, aDiscardPreviousValue);
             else if constexpr (std::is_same_v<try_type, custom_type>)
-                return do_assign(neolib::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify);
+                return do_assign(neolib::any_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify, aDiscardPreviousValue);
             else if constexpr (std::is_same_v<try_type, neolib::none_t> || std::is_same_v<try_type, std::monostate>)
-                return do_assign(value_type{}, aOwnerNotify);
+                return do_assign(value_type{}, aOwnerNotify, aDiscardPreviousValue);
             else if constexpr (std::is_arithmetic_v<value_type> && std::is_convertible_v<try_type, value_type> && std::is_integral_v<try_type> == std::is_integral_v<value_type>)
-                return do_assign(static_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify);
+                return do_assign(static_cast<value_type>(std::forward<T2>(aValue)), aOwnerNotify, aDiscardPreviousValue);
             else
             {
                 // [[unreachable]]
@@ -444,22 +444,31 @@ namespace neogfx
             return const_cast<value_type&>(to_const(*this).value());
         }
         template <typename T2>
-        self_type& do_assign(T2&& aValue, bool aOwnerNotify = true)
+        self_type& do_assign(T2&& aValue, bool aOwnerNotify = true, bool aDiscardPreviousValue = false)
         {
             if (read_only())
                 return *this;
 
             if (transition_set() && !transition_suppressed() &&
                 !transition().updating_property() &&
-                transition().started() && aValue == transition().to())
+                transition().started() && aValue == effective_value())
                 return *this;
 
             if (mutable_value() != aValue)
             {
-                iPreviousValue = value();
-                mutable_value() = aValue;
-                if (transition_set() && !transition().updating_property())
+                if (!transition_set())
                 {
+                    iPreviousValue = !aDiscardPreviousValue ? value() : aValue;
+                    mutable_value() = aValue;
+                }
+                else if (transition().updating_property())
+                {
+                    mutable_value() = aValue;
+                }
+                else 
+                {
+                    iPreviousValue = !aDiscardPreviousValue ? effective_value() : aValue;
+                    mutable_value() = aValue;
                     if (!transition_suppressed())
                         transition().start_if();
                     else
