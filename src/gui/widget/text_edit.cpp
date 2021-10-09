@@ -2109,7 +2109,7 @@ namespace neogfx
                 {
                 case 1:
                 case 3:
-                    if (!vertical_scrollbar().visible() && !showVerticalScrollbar && pos.y >= availableHeight)
+                    if (!vertical_scrollbar().visible() && !showVerticalScrollbar && pos.y > availableHeight)
                     {
                         showVerticalScrollbar = true;
                         availableWidth -= vertical_scrollbar().width();
