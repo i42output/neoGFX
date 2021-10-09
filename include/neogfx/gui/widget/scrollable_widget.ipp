@@ -59,7 +59,11 @@ namespace neogfx
     {
         base_type::layout_items_completed();
         if (!as_widget().layout_items_in_progress() && !iIgnoreScrollbarUpdates && !iMovingWidgets)
+        {
+            scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
+            scoped_property_transition_suppression sts2{ iHorizontalScrollbar.Position };
             update_scrollbar_visibility();
+        }
     }
 
     template <typename Base>
@@ -67,7 +71,11 @@ namespace neogfx
     {
         base_type::resized();
         if (!as_widget().layout_items_in_progress() && !iIgnoreScrollbarUpdates)
+        {
+            scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
+            scoped_property_transition_suppression sts2{ iHorizontalScrollbar.Position };
             update_scrollbar_visibility();
+        }
     }
 
     template <typename Base>
