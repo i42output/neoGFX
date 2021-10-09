@@ -1475,6 +1475,7 @@ namespace neogfx
         for (std::size_t i = 0; i < iGlyphColumns.size(); ++i)
             iGlyphColumns[i].lines().clear();
         iUtf8TextCache = std::nullopt;
+        refresh_columns();
         if (iPreviousText != iText)
             notify_text_changed();
     }
