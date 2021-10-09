@@ -575,7 +575,7 @@ namespace neogfx
                     else if ((iCaps & text_edit_caps::OnlyAccept) == text_edit_caps::OnlyAccept)
                         break;
                 }
-                if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+                if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
                 {
                     multiple_text_changes mtc{ *this };
                     delete_any_selection();
@@ -612,7 +612,7 @@ namespace neogfx
                 delete_any_selection();
             break;
         case ScanCode_UP:
-            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+            if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -623,7 +623,7 @@ namespace neogfx
                 handled = false;
             break;
         case ScanCode_DOWN:
-            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+            if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
