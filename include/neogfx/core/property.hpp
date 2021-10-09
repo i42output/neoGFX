@@ -281,8 +281,11 @@ namespace neogfx
             iTransitionSuppressed = aSuppress;
             if (aSuppress)
             {
-                if (transition_set())
+                if (transition_set() && transition().started())
+                {
+                    assign(transition().to(), true, true);
                     transition().clear();
+                }
             }
         }
         bool has_delegate() const final
