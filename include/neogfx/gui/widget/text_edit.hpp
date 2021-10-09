@@ -570,6 +570,8 @@ namespace neogfx
         void set_read_only(bool aReadOnly = true);
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
+        uint32_t grow_lines() const;
+        void set_grow_lines(uint32_t aGrowLines = 5u);
         bool password() const;
         i_string const& password_mask() const;
         void set_password(bool aPassword, i_string const& aMask = string{ "\xE2\x97\x8F" });
@@ -713,7 +715,8 @@ namespace neogfx
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
-        define_property(property_category::other, bool, WordWrap, word_wrap, (iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+        define_property(property_category::other, bool, WordWrap, word_wrap, (iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
+        define_property(property_category::other, uint32_t, GrowLines, grow_lines, 5u)
         define_property(property_category::other, bool, Password, password, false)
         define_property(property_category::other, string, PasswordMask, password_mask)
         define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)

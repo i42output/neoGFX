@@ -260,7 +260,7 @@ namespace neogfx
     };
 
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ (aCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -279,7 +279,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -298,7 +298,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iGlyphColumns{ 1 },
@@ -337,8 +337,9 @@ namespace neogfx
         if (has_minimum_size())
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         scoped_units su{ *this, units::Pixels };
-        auto childLayoutSize = has_layout() ? layout().minimum_size(aAvailableSpace) : size{};
-        auto result = framed_scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
+        auto const childLayoutSize = has_layout() ? layout().minimum_size(aAvailableSpace) : size{};
+        auto const frameBits = framed_scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
+        auto result = frameBits;
         if (!size_hint())
             result += size{ font().height() }.max(childLayoutSize);
         else
@@ -353,6 +354,8 @@ namespace neogfx
             }
             result += iHintedSize->second.max(childLayoutSize);
         }
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::GrowLines)
+            result.cy = std::max(result.cy, frameBits.cy + std::min(iTextExtents.get().cy, grow_lines() * font().height()));
         return to_units(*this, su.saved_units(), result);
     }
 
@@ -1122,6 +1125,20 @@ namespace neogfx
         }
     }
 
+    uint32_t text_edit::grow_lines() const
+    {
+        return GrowLines;
+    }
+
+    void text_edit::set_grow_lines(uint32_t aGrowLines)
+    {
+        if (GrowLines != aGrowLines)
+        {
+            GrowLines = aGrowLines;
+            update_layout();
+        }
+    }
+
     bool text_edit::password() const
     {
         return Password;
@@ -1708,7 +1725,7 @@ namespace neogfx
             refresh_paragraph(iText.begin(), 0);
         });
         auto focusPolicy = neogfx::focus_policy::ClickTabFocus;
-        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+        if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
         cursor().set_width(2.0);
@@ -1937,6 +1954,8 @@ namespace neogfx
     {
         iTextExtents = std::nullopt;
         update_scrollbar_visibility();
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::GrowLines)
+            update_layout();
         update();
     }
 
