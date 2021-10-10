@@ -282,10 +282,7 @@ namespace neogfx
             if (aSuppress)
             {
                 if (transition_set() && transition().started())
-                {
-                    assign(transition().to(), true, true);
-                    transition().clear();
-                }
+                    assign(effective_value(), true, true);
             }
         }
         bool has_delegate() const final
