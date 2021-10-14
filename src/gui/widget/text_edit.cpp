@@ -263,6 +263,7 @@ namespace neogfx
         framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -282,6 +283,7 @@ namespace neogfx
         framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -301,6 +303,7 @@ namespace neogfx
         framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -1100,6 +1103,18 @@ namespace neogfx
         paste(service<i_clipboard>());
     }
 
+    void text_edit::begin_update()
+    {
+        iUpdatingDocument = true;
+    }
+
+    void text_edit::end_update()
+    {
+        iUpdatingDocument = false;
+        refresh_paragraph(iText.begin(), 0);
+        update();
+    }
+
     bool text_edit::read_only() const
     {
         return ReadOnly;
@@ -1855,6 +1870,9 @@ namespace neogfx
 
     void text_edit::refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta)
     {
+        if (iUpdatingDocument)
+            return;
+
         /* simple (naive) implementation just to get things moving (so just refresh everything) ... */
         (void)aWhere;
         graphics_context gc{ *this, graphics_context::type::Unattached };

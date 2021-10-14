@@ -564,6 +564,9 @@ namespace neogfx
     public:
         void paste_plain_text() override;
         void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) override;
+    public:
+        void begin_update() override;
+        void end_update() override;
         // text_edit
     public:
         bool read_only() const;
@@ -682,6 +685,7 @@ namespace neogfx
         font_info iDefaultFont;
         mutable neogfx::cursor iCursor;
         style_list iStyles;
+        bool iUpdatingDocument;
         std::u32string iNormalizedTextBuffer;
         document_text iPreviousText;
         document_text iText;

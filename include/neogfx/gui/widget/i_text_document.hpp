@@ -39,5 +39,24 @@ namespace neogfx
     public:
         virtual void paste_plain_text() = 0;
         virtual void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) = 0;
+    public:
+        virtual void begin_update() = 0;
+        virtual void end_update() = 0;
+    };
+
+    class scoped_document_update
+    {
+    public:
+        scoped_document_update(i_text_document& aDocument)
+            : iDocument{ aDocument }
+        {
+            iDocument.begin_update();
+        }
+        ~scoped_document_update()
+        {
+            iDocument.end_update();
+        }
+    private:
+        i_text_document& iDocument;
     };
 }
