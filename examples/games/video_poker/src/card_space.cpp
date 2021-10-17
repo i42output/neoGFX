@@ -74,7 +74,11 @@ namespace video_poker
     {
         iCard = &aCard;
         iSink.clear();
-        iSink += card().changed([this](video_poker::card&) { update_sprite_geometry();  iCanvas.update(); });
+        iSink += card().changed([this](video_poker::card&) 
+        { 
+                update_sprite_geometry();  
+                iCanvas.update(); 
+        });
         if (iCardSprite != neogfx::game::null_entity)
             iCanvas.ecs().destroy_entity(iCardSprite);
         iCardSprite = create_card_sprite(iCanvas.ecs(), iCardTextures, aCard);

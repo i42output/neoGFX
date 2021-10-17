@@ -1281,15 +1281,14 @@ namespace neogfx
             switch (aEvent.scan_code())
             {
             case ScanCode_DOWN:
-                if (!view_created() && (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
+                if (view_created())
+                    delegate_to_proxy(aEvent);
+                else if (!view_created() && (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
                 {
                     if (selection_model().has_current_index())
                         iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
                     show_view();
-                    return true;
                 }
-                if (view_created())
-                    delegate_to_proxy(aEvent);
                 else if (has_selection() && presentation_model().from_item_model_index(selection()).row() < presentation_model().rows() - 1)
                 {
                     selection_model().set_current_index(presentation_model().from_item_model_index(selection()) += item_presentation_model_index{ 1u, 0u });

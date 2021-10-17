@@ -488,24 +488,24 @@ namespace neogfx
             if (destroyed)
                 return;
 
-            bool const discardChanged = !PropertyChanged.trigger(get_as_variant());
+            bool const discardChanged = event_consumed(PropertyChanged.trigger(get_as_variant()));
             if (destroyed)
                 return;
 
             bool discardChangedFromTo = false;
             if constexpr (!neolib::is_optional_v<T>)
-                discardChangedFromTo = !PropertyChangedFromTo.trigger(property_variant{ *iPreviousValue }, get_as_variant());
+                discardChangedFromTo = event_consumed(PropertyChangedFromTo.trigger(property_variant{ *iPreviousValue }, get_as_variant()));
             else
-                discardChangedFromTo = !PropertyChangedFromTo.trigger(*iPreviousValue != std::nullopt ? property_variant{ **iPreviousValue } : property_variant{ neolib::none }, get_as_variant());
+                discardChangedFromTo = event_consumed(PropertyChangedFromTo.trigger(*iPreviousValue != std::nullopt ? property_variant{ **iPreviousValue } : property_variant{ neolib::none }, get_as_variant()));
             if (destroyed)
                 return;
 
-            if (!discardChanged && !Changed.trigger(value()))
+            if (!discardChanged && event_consumed(Changed.trigger(value())))
                 return;
             if (destroyed)
                 return;
 
-            if (!discardChangedFromTo && !ChangedFromTo.trigger(*iPreviousValue, value()))
+            if (!discardChangedFromTo && event_consumed(ChangedFromTo.trigger(*iPreviousValue, value())))
                 return;
             if (destroyed)
                 return;

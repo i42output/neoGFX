@@ -31,8 +31,8 @@ namespace neogfx::game
     game_world::game_world(game::i_ecs& aEcs) :
         game::system<>{ aEcs }, iUniversalGravitationEnabled{ false }
     {
-        ApplyingPhysics.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
-        PhysicsApplied.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+        ApplyingPhysics.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
+        PhysicsApplied.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
     }
 
     game_world::~game_world()

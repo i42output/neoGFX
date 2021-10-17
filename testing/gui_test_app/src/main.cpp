@@ -550,22 +550,24 @@ int main(int argc, char* argv[])
             window.labelFPS.hide();
         });
         window.labelFPS.hide();
+        std::optional<ng::sink> sink1;
         window.checkColumns.checked([&]()
         {
             window.checkPassword.disable();
             window.textEdit.set_columns(3);
-            window.gradientWidget.GradientChanged([&]()
+            sink1.emplace();
+            *sink1 += window.gradientWidget.GradientChanged([&]()
             {
                 auto cs = window.textEdit.column(2);
                 cs.set_style(ng::text_edit::character_style{ ng::optional_font{}, ng::color_or_gradient{}, ng::color_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
                 window.textEdit.set_column(2, cs);
-            }, window.textEdit);
+            });
         });
         window.checkColumns.Unchecked([&]()
         {
             window.checkPassword.enable();
             window.textEdit.remove_columns();
-            window.gradientWidget.GradientChanged.unsubscribe(window.textEdit);
+            sink1 = std::nullopt;
         });
         window.checkKerning.Toggled([&app, &window]()
         {

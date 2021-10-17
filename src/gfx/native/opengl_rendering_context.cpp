@@ -1276,8 +1276,8 @@ namespace neogfx
             auto const& cache = aEcs.component<game::mesh_render_cache>();
             for (auto entity : meshRenderers.entities())
             {
-#ifdef NEOGFX_DEBUG
-                if (infos.entity_record(entity).debug::layoutItem)
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
+                if (infos.entity_record(entity).debug)
                     service<debug::logger>() << "Rendering debug::layoutItem entity..." << endl;
 #endif // NEOGFX_DEBUG
                 auto const& info = infos.entity_record_no_lock(entity);
@@ -2052,11 +2052,7 @@ namespace neogfx
             ignore = {};
             auto const& meshRenderCache = (meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);
             auto& mesh = (meshFilter.mesh != std::nullopt ? *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
-            auto const& transformation = meshDrawable.transformation && meshFilter.transformation ?
-                *meshDrawable.transformation * *meshFilter.transformation :
-                meshDrawable.transformation ? *meshDrawable.transformation :
-                meshFilter.transformation ? *meshFilter.transformation :
-                optional_mat44{};
+            auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
             vec2 textureStorageExtents;
@@ -2113,6 +2109,8 @@ namespace neogfx
                                 vertices.emplace_back(xyz, rgba, uv, xyzw );
                             else
                                 vertices[nextIndex] = { xyz, rgba, uv, xyzw };
+                            if (xyz.x > 10000.0)
+                                MessageBoxA(NULL, "foo", "foo", MB_OK);
                             if (uvGui)
                                 vertices[nextIndex].st.y = *uvGui - vertices[nextIndex].st.y;
                             vertices[nextIndex].rgba[3] *= static_cast<float>(iOpacity);
@@ -2124,9 +2122,9 @@ namespace neogfx
                 }
                 patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
             };
-#ifdef NEOGFX_DEBUG
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
             if (meshDrawable.entity != game::null_entity &&
-                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug::layoutItem)
+                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
                 service<debug::logger>() << "Adding debug::layoutItem entity drawable..." << endl;
 #endif // NEOGFX_DEBUG
             if (!faces.empty())
@@ -2244,9 +2242,9 @@ namespace neogfx
                 if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
                     vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
 
-#ifdef NEOGFX_DEBUG
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
                     service<debug::logger>() << "Drawing debug::layoutItem entity (texture)..." << endl;
 
 #endif // NEOGFX_DEBUG
@@ -2259,9 +2257,9 @@ namespace neogfx
                 if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
                     vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
 
-#ifdef NEOGFX_DEBUG
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
                     service<debug::logger>() << "Drawing debug::layoutItem entity (non-texture)..." << endl;
 
 #endif // NEOGFX_DEBUG

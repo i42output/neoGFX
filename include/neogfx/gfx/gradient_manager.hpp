@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <unordered_set>
 #include <neogfx/gfx/shader_array.hpp>
 #include <neogfx/gfx/gradient.hpp>
 #include <neogfx/gfx/i_gradient_manager.hpp>

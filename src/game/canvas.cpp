@@ -185,7 +185,7 @@ namespace neogfx::game
     void canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-        if (aButton == mouse_button::Left && EntityClicked.has_subscribers())
+        if (aButton == mouse_button::Left && EntityClicked.has_slots())
         {
             ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
             auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
@@ -197,13 +197,13 @@ namespace neogfx::game
     void canvas::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
-        if (aButton == mouse_button::Left && (EntityClicked.has_subscribers() || EntityDoubleClicked.has_subscribers()))
+        if (aButton == mouse_button::Left && (EntityClicked.has_slots() || EntityDoubleClicked.has_slots()))
         {
             ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
             auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
             if (hit)
             {
-                if (EntityDoubleClicked.has_subscribers())
+                if (EntityDoubleClicked.has_slots())
                     EntityDoubleClicked.trigger(*hit);
                 else
                     EntityClicked.trigger(*hit);

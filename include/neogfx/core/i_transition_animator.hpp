@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/i_jar.hpp>
 #include <neogfx/core/easing.hpp>
 
 namespace neogfx

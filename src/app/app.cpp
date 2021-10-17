@@ -677,7 +677,6 @@ namespace neogfx
         bool didSome = false;
         try
         {
-            didSome = neolib::async_event_queue::instance().exec();
             if (!in()) // not app thread
                 return didSome;
             
@@ -685,7 +684,6 @@ namespace neogfx
                 return didSome;
 
             bool hadStrongSurfaces = service<i_surface_manager>().any_strong_surfaces();
-            didSome = pump_messages();
             didSome = (do_work(neolib::yield_type::NoYield) || didSome);
             didSome = (do_process_events() || didSome);
             bool lastWindowClosed = hadStrongSurfaces && !service<i_surface_manager>().any_strong_surfaces();
