@@ -59,7 +59,7 @@ namespace neogfx
         boost::program_options::variables_map iOptions;
     };
 
-    class app : public async_thread, public neolib::application<i_app>, private i_keyboard_handler
+    class app : public neolib::application<i_app>, public async_thread, private i_keyboard_handler
     {
         typedef neolib::application<i_app> base_type;
     public:

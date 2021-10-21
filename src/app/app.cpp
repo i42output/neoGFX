@@ -23,6 +23,7 @@
 #include <boost/locale.hpp> 
 #include <neolib/core/scoped.hpp>
 #include <neolib/core/string_utils.hpp>
+#include <neolib/task/event.hpp>
 #include <neolib/app/power.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/i_gradient_manager.hpp>
@@ -165,8 +166,8 @@ namespace neogfx
 
     app::app(const neolib::i_application_info& aAppInfo)
         try :
-        async_thread{ "neogfx::app", true },
         neolib::application<i_app>{ aAppInfo },
+        async_thread{ "neogfx::app", true },
         iProgramOptions{ aAppInfo.arguments().argc(), aAppInfo.arguments().argv() },
         iLoader{ std::make_unique<loader>(iProgramOptions, *this) },
         iName{ aAppInfo.name() },
