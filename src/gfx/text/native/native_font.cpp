@@ -29,21 +29,13 @@ namespace neogfx
     native_font::native_font(FT_Library aFontLib, const std::string aFileName) :
         iFontLib(aFontLib), iSource(filename_type(aFileName)), iCache{}, iFaceCount(0)
     {
-        register_face(0);
-        for (FT_Long f = 1; f < iFaceCount; ++f)
-            register_face(f);
-        iCache.clear();
-        iCache.shrink_to_fit();
+        register_faces();
     }
 
     native_font::native_font(FT_Library aFontLib, const void* aData, std::size_t aSizeInBytes) :
         iFontLib(aFontLib), iSource(memory_block_type(aData, aSizeInBytes)), iCache{}, iFaceCount(0)
     {
-        register_face(0);
-        for (FT_Long f = 1; f < iFaceCount; ++f)
-            register_face(f);
-        iCache.clear();
-        iCache.shrink_to_fit();
+        register_faces();
     }
 
     native_font::~native_font()
@@ -59,7 +51,8 @@ namespace neogfx
 
     bool native_font::has_style(font_style aStyle) const
     {
-        auto result = std::find_if(iStyleMap.begin(), iStyleMap.end(), [aStyle](auto const& s) { return s.first.first == aStyle; });
+        auto result = std::find_if(iStyleMap.begin(), iStyleMap.end(), 
+                [aStyle](auto const& s) { return s.first.first == aStyle; });
         return result != iStyleMap.end();
     }
 
@@ -76,6 +69,19 @@ namespace neogfx
     i_string const& native_font::style_name(uint32_t aStyleIndex) const
     {
         return std::next(iStyleMap.begin(), aStyleIndex)->first.second;
+    }
+
+    void native_font::remove_style(font_style aStyle)
+    {
+        auto existing = std::find_if(iStyleMap.begin(), iStyleMap.end(),
+            [aStyle](auto const& s) { return s.first.first == aStyle; });
+        if (existing != iStyleMap.end())
+            iStyleMap.erase(existing);
+    }
+
+    void native_font::remove_style(uint32_t aStyleIndex)
+    {
+        iStyleMap.erase(std::next(iStyleMap.begin(), aStyleIndex));
     }
 
     namespace
@@ -104,7 +110,7 @@ namespace neogfx
         if (matches.empty())
             throw no_matching_style_found();
         FT_Long faceIndex = matches.rbegin()->second->second;
-        font_style faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript|font_style::Subscript|font_style::BelowAscenderLine|font_style::AboveBaseline)));
+        font_style faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript|font_style::Subscript|font_style::BelowAscenderLine|font_style::AboveBaseline|font_style::Emulated)));
         aResult = create_face(faceIndex, faceStyle, aSize, aDevice);
     }
 
@@ -127,6 +133,36 @@ namespace neogfx
         aResult = create_face(faceIndex, faceStyle, aSize, aDevice);
     }
 
+    native_font::style_map::const_iterator native_font::find_style(font_style aStyle) const
+    {
+        return std::find_if(iStyleMap.begin(), iStyleMap.end(), [aStyle](auto const& s) { return s.first.first == aStyle; });
+    }
+
+    void native_font::register_faces()
+    {
+        register_face(0);
+        for (FT_Long f = 1; f < iFaceCount; ++f)
+            register_face(f);
+        if (!has_style(font_style::Bold) && has_style(font_style::Normal))
+        {
+            auto existingNormal = find_style(font_style::Normal);
+            if (font_info::weight_from_style_name(existingNormal->first.second, false) == font_weight::Regular)
+                iStyleMap.emplace(std::make_pair(font_style::EmulatedBold, "Bold (Emulated)"), existingNormal->second);
+        }
+        if (!has_style(font_style::Italic) && has_style(font_style::Normal))
+        {
+            auto existingNormal = find_style(font_style::Normal);
+            iStyleMap.emplace(std::make_pair(font_style::EmulatedItalic, "Italic (Emulated)"), existingNormal->second);
+        }
+        if (!has_style(font_style::BoldItalic) && has_style(font_style::Normal))
+        {
+            auto existingNormal = find_style(font_style::Normal);
+            iStyleMap.emplace(std::make_pair(font_style::EmulatedBoldItalic, "Bold Italic (Emulated)"), existingNormal->second);
+        }
+        iCache.clear();
+        iCache.shrink_to_fit();
+    }
+
     void native_font::register_face(FT_Long aFaceIndex)
     {
         auto face = open_face(aFaceIndex);
@@ -139,9 +175,9 @@ namespace neogfx
             }
             font_style style = font_style::Invalid;
             if (face.first->style_flags & FT_STYLE_FLAG_ITALIC)
-                style = static_cast<font_style>(style | font_style::Italic);
+                style |= static_cast<font_style>(style | font_style::Italic);
             if (face.first->style_flags & FT_STYLE_FLAG_BOLD)
-                style = static_cast<font_style>(style | font_style::Bold);
+                style |= static_cast<font_style>(style | font_style::Bold);
             auto const searchKey = neolib::ci_string{ face.first->style_name };
             if (searchKey.find("italic") != neolib::ci_string::npos)
                 style |= font_style::Italic;
@@ -217,7 +253,7 @@ namespace neogfx
         try
         {
             auto newFontId = service<i_font_manager>().allocate_font_id();
-            auto newFace = make_ref<native_font_face>(newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFaceHandles.first, newFaceHandles.second);
+            auto newFace = make_ref<native_font_face>(iFontLib, newFontId, *this, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFaceHandles.first, newFaceHandles.second);
             iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aStyle, aSize, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi())), newFace)).first;
             return newFace;
         }

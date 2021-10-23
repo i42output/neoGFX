@@ -444,7 +444,7 @@ namespace neogfx
         virtual void clear_uniform(shader_uniform_id aUniform) = 0;
         virtual shader_uniform_id create_uniform(const i_string& aName) = 0;
         virtual shader_uniform_id find_uniform(const i_string& aName) const = 0;
-        virtual void set_uniform(shader_uniform_id aUniform, const value_type& aValue) = 0;
+        virtual void set_uniform(shader_uniform_id aUniform, value_type const& aValue) = 0;
         virtual void clear_uniform_location(shader_uniform_id aUniform) = 0;
         virtual void update_uniform_location(shader_uniform_id aUniform, shader_uniform_location aLocation) = 0;
         virtual const variable_list& in_variables() const = 0;
@@ -457,7 +457,7 @@ namespace neogfx
         virtual void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const = 0;
         // helpers
     public:
-        void set_uniform(const i_string& aName, const value_type& aValue)
+        void set_uniform(const i_string& aName, value_type const& aValue)
         {
             auto existing = find_uniform(aName);
             if (existing == no_uniform)

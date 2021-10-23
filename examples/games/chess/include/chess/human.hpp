@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <neogfx/core/i_event.hpp>
 #include <chess/primitives.hpp>
 #include <chess/i_player.hpp>
 

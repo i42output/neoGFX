@@ -43,6 +43,8 @@ namespace neogfx
 
         Password    = 0x00000100,
 
+        ParseURIs   = 0x00001000,
+
         OnlyAccept  = 0x00010000,
 
         LINES_MASK  = SingleLine | MultiLine
@@ -82,6 +84,7 @@ namespace neogfx
         define_event(TextChanged, text_changed)
         define_event(DefaultStyleChanged, default_style_changed)
         define_event(ContextMenu, context_menu, i_menu&)
+        define_event(UriClicked, uri_clicked, i_string const&)
     private:
         typedef text_edit property_context_type;
     public:
@@ -467,6 +470,27 @@ namespace neogfx
             dimension iWidth;
         };
         typedef std::vector<glyph_column> glyph_columns;
+    private:
+        class dragger : public widget_timer
+        {
+        public:
+            dragger(text_edit& aOwner) : 
+                widget_timer{ aOwner, [&](widget_timer& aTimer)
+                {
+                    aTimer.again();
+                    aOwner.set_cursor_position(aOwner.mouse_position(), false);
+                }, std::chrono::milliseconds{ 250 } }, 
+                iSts1{ aOwner.vertical_scrollbar().Position },
+                iSts2{ aOwner.horizontal_scrollbar().Position }
+            {
+            }
+            ~dragger()
+            {
+            }
+        private:
+            scoped_property_transition_suppression iSts1;
+            scoped_property_transition_suppression iSts2;
+        };
     public:
         typedef document_text::size_type position_type;
     public:
@@ -540,12 +564,17 @@ namespace neogfx
     public:
         void paste_plain_text() override;
         void paste_rich_text(rich_text_format aFormat = rich_text_format::Html) override;
+    public:
+        void begin_update() override;
+        void end_update() override;
         // text_edit
     public:
         bool read_only() const;
         void set_read_only(bool aReadOnly = true);
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
+        uint32_t grow_lines() const;
+        void set_grow_lines(uint32_t aGrowLines = 5u);
         bool password() const;
         i_string const& password_mask() const;
         void set_password(bool aPassword, i_string const& aMask = string{ "\xE2\x97\x8F" });
@@ -656,6 +685,7 @@ namespace neogfx
         font_info iDefaultFont;
         mutable neogfx::cursor iCursor;
         style_list iStyles;
+        bool iUpdatingDocument;
         std::u32string iNormalizedTextBuffer;
         document_text iPreviousText;
         document_text iText;
@@ -663,7 +693,7 @@ namespace neogfx
         mutable std::optional<document_glyphs> iGlyphs;
         glyph_paragraphs iGlyphParagraphs;
         glyph_columns iGlyphColumns;
-        size iTextExtents;
+        optional_size iTextExtents;
         uint64_t iCursorAnimationStartTime;
         typedef std::pair<position_type, position_type> find_span;
         typedef std::map<
@@ -682,14 +712,15 @@ namespace neogfx
         basic_point<std::optional<dimension>> iCursorHint;
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         widget_timer iAnimator;
-        std::optional<widget_timer> iDragger;
+        std::optional<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
-        define_property(property_category::other, bool, WordWrap, word_wrap, iCaps == text_edit_caps::MultiLine)
+        define_property(property_category::other, bool, WordWrap, word_wrap, (iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
+        define_property(property_category::other, uint32_t, GrowLines, grow_lines, 5u)
         define_property(property_category::other, bool, Password, password, false)
         define_property(property_category::other, string, PasswordMask, password_mask)
         define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)

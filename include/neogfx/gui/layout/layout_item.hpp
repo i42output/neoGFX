@@ -61,7 +61,7 @@ namespace neogfx
             iId = aId;
         }
     public:
-        bool has_parent_layout_item() const override
+        bool has_parent_layout_item() const final
         {
             auto& self = as_layout_item();
             if (self.has_parent_layout() && self.same_layout_owner_as(self.parent_layout()))
@@ -72,7 +72,7 @@ namespace neogfx
                 return true;
             return false;
         }
-        const i_layout_item& parent_layout_item() const override
+        const i_layout_item& parent_layout_item() const final
         {
             auto& self = as_layout_item();
             if (self.has_parent_layout() && self.same_layout_owner_as(self.parent_layout()))
@@ -83,12 +83,12 @@ namespace neogfx
                 return self.as_widget().parent();
             throw no_parent_layout_item();
         }
-        i_layout_item& parent_layout_item() override
+        i_layout_item& parent_layout_item() final
         {
             return const_cast<i_layout_item&>(to_const(*this).parent_layout_item());
         }
     public:
-        bool has_layout_manager() const override
+        bool has_layout_manager() const final
         {
             auto& self = as_layout_item();
             if (!self.has_layout_owner())
@@ -104,7 +104,7 @@ namespace neogfx
             };
             return false;
         }
-        const i_widget& layout_manager() const override
+        const i_widget& layout_manager() const final
         {
             auto& self = as_layout_item();
             const i_widget* w = &self.layout_owner();
@@ -118,24 +118,24 @@ namespace neogfx
             };
             throw no_layout_manager();
         }
-        i_widget& layout_manager() override
+        i_widget& layout_manager() final
         {
             return const_cast<i_widget&>(to_const(*this).layout_manager());
         }
-        bool is_layout_item_cache() const override
+        bool is_layout_item_cache() const final
         {
             return false;
         }
-        const i_layout_item_cache& as_layout_item_cache() const override
+        const i_layout_item_cache& as_layout_item_cache() const final
         {
             return *iCache;
         }
-        i_layout_item_cache& as_layout_item_cache() override
+        i_layout_item_cache& as_layout_item_cache() final
         {
             return *iCache;
         }
     public:
-        void update_layout(bool aDeferLayout = true, bool aAncestors = false) override
+        void update_layout(bool aDeferLayout = true, bool aAncestors = false) final
         {
             auto& self = as_layout_item();
             if (self.has_parent_layout_item())
@@ -155,7 +155,7 @@ namespace neogfx
                 self.as_layout().invalidate(aDeferLayout);
         }
     public:
-        point origin() const override
+        point origin() const final
         {
             if (iOrigin == std::nullopt)
             {
@@ -182,18 +182,18 @@ namespace neogfx
             }
             return *iOrigin;
         }
-        void reset_origin() const override
+        void reset_origin() const final
         {
             iOrigin = std::nullopt;
         }
-        point position() const override
+        point position() const final
         {
             auto& self = as_layout_item();
             return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
                 units_converter(*this).from_device_units(!Anchor_Position.active() ? 
                     static_cast<point>(Position) : static_cast<point>(Position) + Anchor_Position.evaluate_constraints() - unconstrained_origin());
         }
-        size extents() const override
+        size extents() const final
         {
             auto& self = as_layout_item();
             return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *

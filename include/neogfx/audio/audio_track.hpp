@@ -38,7 +38,7 @@ namespace neogfx
         void repeat_end() override;
     public:
         item_index item_count() const override;
-        const value_type& item(item_index aItemIndex) const override;
+        value_type const& item(item_index aItemIndex) const override;
         value_type& item(item_index aItemIndex) override;
     private:
         audio_spec iSpec;

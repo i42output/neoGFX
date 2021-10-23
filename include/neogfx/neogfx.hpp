@@ -32,6 +32,9 @@ using namespace boost::multiprecision;
 #include <neolib/core/variant.hpp>
 #include <neolib/core/any.hpp>
 #include <neolib/core/enum.hpp>
+#include <neolib/core/vector.hpp>
+#include <neolib/core/deque.hpp>
+#include <neolib/core/list.hpp>
 #include <neolib/core/string.hpp>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/task/i_async_task.hpp>
@@ -83,6 +86,15 @@ namespace neogfx
     using neolib::i_enum_t;
     using neolib::enum_t;
     using neolib::enum_to_string;
+
+    using neolib::i_vector;
+    using neolib::vector;
+
+    using neolib::i_deque;
+    using neolib::deque;
+
+    using neolib::i_list;
+    using neolib::list;
 
     using neolib::i_string;
     using neolib::string;

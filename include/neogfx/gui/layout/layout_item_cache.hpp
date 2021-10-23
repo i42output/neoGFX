@@ -36,97 +36,97 @@ namespace neogfx
         layout_item_cache(const layout_item_cache& aOther);
         ~layout_item_cache();
     public:
-        i_anchor& anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) override;
-        const anchor_map_type& anchors() const override;
-        anchor_map_type& anchors() override;
+        i_anchor& anchor_to(i_anchorable& aRhs, const i_string& aLhsAnchor, anchor_constraint_function aLhsFunction, const i_string& aRhsAnchor, anchor_constraint_function aRhsFunction) final;
+        const anchor_map_type& anchors() const final;
+        anchor_map_type& anchors() final;
     public:
-        const i_string& id() const override;
-        void set_id(const i_string& aId) override;
+        const i_string& id() const final;
+        void set_id(const i_string& aId) final;
     public:
-        bool is_layout() const override;
-        const i_layout& as_layout() const override;
-        i_layout& as_layout() override;
-        bool is_spacer() const override;
-        const i_spacer& as_spacer() const override;
-        i_spacer& as_spacer() override;
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
+        bool is_layout() const final;
+        const i_layout& as_layout() const final;
+        i_layout& as_layout() final;
+        bool is_spacer() const final;
+        const i_spacer& as_spacer() const final;
+        i_spacer& as_spacer() final;
+        bool is_widget() const final;
+        const i_widget& as_widget() const final;
+        i_widget& as_widget() final;
     public:
-        bool has_parent_layout_item() const override;
-        const i_layout_item& parent_layout_item() const override;
-        i_layout_item& parent_layout_item() override;;
+        bool has_parent_layout_item() const final;
+        const i_layout_item& parent_layout_item() const final;
+        i_layout_item& parent_layout_item() final;;
     public:
-        bool has_parent_layout() const override;
-        const i_layout& parent_layout() const override;
-        i_layout& parent_layout() override;
+        bool has_parent_layout() const final;
+        const i_layout& parent_layout() const final;
+        i_layout& parent_layout() final;
         void set_parent_layout(i_layout* aParentLayout);
-        bool has_layout_owner() const override;
-        const i_widget& layout_owner() const override;
-        i_widget& layout_owner() override;
-        void set_layout_owner(i_widget* aOwner) override;
-        bool has_layout_manager() const override;
-        const i_widget& layout_manager() const override;
-        i_widget& layout_manager() override;
-        bool is_layout_item_cache() const override;
-        const i_layout_item_cache& as_layout_item_cache() const override;
-        i_layout_item_cache& as_layout_item_cache() override;
+        bool has_layout_owner() const final;
+        const i_widget& layout_owner() const final;
+        i_widget& layout_owner() final;
+        void set_layout_owner(i_widget* aOwner) final;
+        bool has_layout_manager() const final;
+        const i_widget& layout_manager() const final;
+        i_widget& layout_manager() final;
+        bool is_layout_item_cache() const final;
+        const i_layout_item_cache& as_layout_item_cache() const final;
+        i_layout_item_cache& as_layout_item_cache() final;
     public:
-        bool high_dpi() const override;
-        dimension dpi_scale_factor() const override;
+        bool high_dpi() const final;
+        dimension dpi_scale_factor() const final;
     public:
-        bool device_metrics_available() const override;
-        const i_device_metrics& device_metrics() const override;
+        bool device_metrics_available() const final;
+        const i_device_metrics& device_metrics() const final;
     public:
-        point origin() const override;
-        void reset_origin() const override;
-        point position() const override;
-        void set_position(const point& aPosition) override;
-        size extents() const override;
-        void set_extents(const size& aExtents) override;
-        bool has_size_policy() const noexcept override;
-        neogfx::size_policy size_policy() const override;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
-        bool has_weight() const noexcept override;
-        size weight() const override;
-        void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) override;
-        bool has_minimum_size() const noexcept override;
-        bool is_minimum_size_constrained() const noexcept override;
-        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
-        void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;
-        bool has_maximum_size() const noexcept override;
-        bool is_maximum_size_constrained() const noexcept override;
-        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
-        void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override;
-        bool has_fixed_size() const noexcept override;
-        size fixed_size(optional_size const& aAvailableSpace = {}) const override;
-        void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override;
-        bool has_transformation() const noexcept override;
-        mat33 const& transformation(bool aCombineAncestorTransformations = false) const override;
-        void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) override;
+        point origin() const final;
+        void reset_origin() const final;
+        point position() const final;
+        void set_position(const point& aPosition) final;
+        size extents() const final;
+        void set_extents(const size& aExtents) final;
+        bool has_size_policy() const noexcept final;
+        neogfx::size_policy size_policy() const final;
+        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) final;
+        bool has_weight() const noexcept final;
+        size weight() const final;
+        void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) final;
+        bool has_minimum_size() const noexcept final;
+        bool is_minimum_size_constrained() const noexcept final;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const final;
+        void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) final;
+        bool has_maximum_size() const noexcept final;
+        bool is_maximum_size_constrained() const noexcept final;
+        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const final;
+        void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) final;
+        bool has_fixed_size() const noexcept final;
+        size fixed_size(optional_size const& aAvailableSpace = {}) const final;
+        void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) final;
+        bool has_transformation() const noexcept final;
+        mat33 const& transformation(bool aCombineAncestorTransformations = false) const final;
+        void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) final;
     public:
-        bool has_padding() const noexcept override;
-        neogfx::padding padding() const override;
-        void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
+        bool has_padding() const noexcept final;
+        neogfx::padding padding() const final;
+        void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) final;
     protected:
-        point unconstrained_origin() const override;
-        point unconstrained_position() const override;
+        point unconstrained_origin() const final;
+        point unconstrained_position() const final;
     protected:
-        void layout_item_enabled(i_layout_item& aItem) override;
-        void layout_item_disabled(i_layout_item& aItem) override;
+        void layout_item_enabled(i_layout_item& aItem) final;
+        void layout_item_disabled(i_layout_item& aItem) final;
     public:
-        bool visible() const override;
+        bool visible() const final;
     public:
-        void update_layout(bool aDeferLayout = true, bool aAncestors = true) override;
-        void layout_as(const point& aPosition, const size& aSize) override;
+        void update_layout(bool aDeferLayout = true, bool aAncestors = true) final;
+        void layout_as(const point& aPosition, const size& aSize) final;
     public:
-        void invalidate_combined_transformation() override;
-        void fix_weightings(bool aRecalculate = true) override;
+        void invalidate_combined_transformation() final;
+        void fix_weightings(bool aRecalculate = true) final;
     public:
-        i_layout_item& subject() const override;
-        i_ref_ptr<i_layout_item>& subject_ptr() override;
+        i_layout_item& subject() const final;
+        i_ref_ptr<i_layout_item>& subject_ptr() final;
     public:
-        layout_item_disposition& cached_disposition() const override;
+        layout_item_disposition& cached_disposition() const final;
     public:
         bool operator==(const layout_item_cache& aOther) const;
     private:

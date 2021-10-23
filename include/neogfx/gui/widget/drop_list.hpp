@@ -256,6 +256,9 @@ namespace neogfx
         bool has_selection() const;
         const item_model_index& selection() const;
     public:
+        bool input_matches_current_item() const;
+        bool input_matches_selection() const;
+    public:
         bool view_created() const;
         bool view_visible() const;
         void show_view();
@@ -263,8 +266,8 @@ namespace neogfx
         void close_view();
         drop_list_view& view() const;
         void accept_selection();
-        void cancel_selection();
-        void cancel_and_restore_selection();
+        void cancel_selection(bool aClearInput = false);
+        void cancel_and_restore_selection(bool aOnlyRestoreIfViewCreated = false);
     public:
         drop_list_style style() const;
         void set_style(drop_list_style aStyle);
@@ -274,6 +277,7 @@ namespace neogfx
         void set_list_always_visible(bool aListAlwaysVisible);
         bool filter_enabled() const;
         void enable_filter(bool aEnableFilter);
+        bool has_input() const;
         const i_drop_list_input_widget& input_widget() const;
         i_drop_list_input_widget& input_widget();
     public:

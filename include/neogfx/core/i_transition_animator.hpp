@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/i_jar.hpp>
 #include <neogfx/core/easing.hpp>
 
 namespace neogfx
@@ -57,6 +58,7 @@ namespace neogfx
         virtual void resume() = 0;
     public:
         virtual void clear() = 0;
+        virtual void sync(bool aIgnorePrevious = false) = 0;
         virtual void reset(bool aEnable = true, bool aDisableWhenFinished = false, bool aResetStartTime = true) = 0;
         virtual void reset(easing aNewEasingFunction, bool aEnable = true, bool aDisableWhenFinished = false, bool aResetStartTime = true) = 0;
         virtual bool can_apply() const = 0;

@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <chrono>
 
 #include <neogfx/core/async_thread.hpp>
+#include <neogfx/core/i_event.hpp>
 #include <chess/i_player.hpp>
 #include <chess/mailbox.hpp>
 #include <chess/bitboard.hpp>

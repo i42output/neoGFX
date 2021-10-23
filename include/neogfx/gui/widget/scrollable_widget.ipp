@@ -59,7 +59,11 @@ namespace neogfx
     {
         base_type::layout_items_completed();
         if (!as_widget().layout_items_in_progress() && !iIgnoreScrollbarUpdates && !iMovingWidgets)
+        {
+            scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
+            scoped_property_transition_suppression sts2{ iHorizontalScrollbar.Position };
             update_scrollbar_visibility();
+        }
     }
 
     template <typename Base>
@@ -67,7 +71,11 @@ namespace neogfx
     {
         base_type::resized();
         if (!as_widget().layout_items_in_progress() && !iIgnoreScrollbarUpdates)
+        {
+            scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
+            scoped_property_transition_suppression sts2{ iHorizontalScrollbar.Position };
             update_scrollbar_visibility();
+        }
     }
 
     template <typename Base>
@@ -138,8 +146,8 @@ namespace neogfx
     template <typename Base>
     bool scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
-        scoped_transition_suppression sts1{ iVerticalScrollbar.Position };
-        scoped_transition_suppression sts2{ iHorizontalScrollbar.Position };
+        scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
+        scoped_property_transition_suppression sts2{ iHorizontalScrollbar.Position };
         bool handledVertical = false;
         bool handledHorizontal = false;
         mouse_wheel verticalSense = mouse_wheel::Vertical;
@@ -514,14 +522,28 @@ namespace neogfx
     {
         if ((scrolling_disposition() & neogfx::scrolling_disposition::DontConsiderChildWidgets) == neogfx::scrolling_disposition::DontConsiderChildWidgets)
             return;
+
+        bool layoutItems = false; 
+
         switch (aStage)
         {
         case UsvStageInit:
             if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                vertical_scrollbar().hide();
+            {
+                if (vertical_scrollbar().visible())
+                {
+                    vertical_scrollbar().hide();
+                    layoutItems = true;
+                }
+            }
             if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                horizontal_scrollbar().hide();
-            as_widget().layout_items();
+            {
+                if (horizontal_scrollbar().visible())
+                {
+                    horizontal_scrollbar().hide();
+                    layoutItems = true;
+                }
+            }
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
@@ -538,8 +560,11 @@ namespace neogfx
                         continue;
                     if (childPos.y < cr.top() || childPos.y + childExtents.cy > cr.bottom())
                     {
-                        vertical_scrollbar().show();
-                        as_widget().layout_items();
+                        if (!vertical_scrollbar().visible())
+                        {
+                            vertical_scrollbar().show();
+                            layoutItems = true;
+                        }
                         break;
                     }
                 }
@@ -559,8 +584,11 @@ namespace neogfx
                         continue;
                     if (childPos.x < cr.left() || childPos.x + childExtents.cx > cr.right())
                     {
-                        horizontal_scrollbar().show();
-                        as_widget().layout_items();
+                        if (!horizontal_scrollbar().visible())
+                        {
+                            horizontal_scrollbar().show();
+                            layoutItems = true;
+                        }
                         break;
                     }
                 }
@@ -588,19 +616,14 @@ namespace neogfx
                     }
                 }
                 min = min.min({});
+                max = max.max({});
                 if (as_widget().has_layout())
                 {
                     auto const& ourLayout = as_widget().layout();
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                    {
-                        min.x += ourLayout.padding().right;
                         max.x += ourLayout.padding().right;
-                    }
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                    {
-                        min.y += ourLayout.padding().bottom;
                         max.y += ourLayout.padding().bottom;
-                    }
                 }
                 auto const& cr = as_widget().client_rect();
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
@@ -620,5 +643,8 @@ namespace neogfx
         default:
             break;
         }
+
+        if (layoutItems)
+            as_widget().layout_items();
     }
 }

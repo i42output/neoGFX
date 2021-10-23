@@ -85,7 +85,7 @@ namespace neogfx
                     iNext += iSkipAmount;
                 return *this;
             }
-            const value_type& operator*() const
+            value_type const& operator*() const
             {
                 return *iNext;
             }
@@ -1276,8 +1276,8 @@ namespace neogfx
             auto const& cache = aEcs.component<game::mesh_render_cache>();
             for (auto entity : meshRenderers.entities())
             {
-#ifdef NEOGFX_DEBUG
-                if (infos.entity_record(entity).debug::layoutItem)
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
+                if (infos.entity_record(entity).debug)
                     service<debug::logger>() << "Rendering debug::layoutItem entity..." << endl;
 #endif // NEOGFX_DEBUG
                 auto const& info = infos.entity_record_no_lock(entity);
@@ -1844,6 +1844,15 @@ namespace neogfx
 
                         vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
 
+                        auto const xTransformCoefficient = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? -1.0 : 1.0;
+                        auto const transformation = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
+                            optional_mat44{} :
+                            mat44{ 
+                                { 1.0, 0.0, 0.0, 0.0 }, 
+                                { xTransformCoefficient * 0.25, 1.0, 0.0, 0.0 },
+                                { 0.0, 0.0, 1.0, 0.0 }, 
+                                { 0.0, 0.0, 0.0, 1.0 } };
+
                         if (pass == 4)
                         {
                             if (drawOp.appearance->effect() && drawOp.appearance->effect()->type() == text_effect_type::Outline)
@@ -1860,11 +1869,13 @@ namespace neogfx
                                         to_ecs_component(
                                             outputRect,
                                             mesh_type::Triangles,
-                                            drawOp.point.z) :
+                                            drawOp.point.z,
+                                            transformation) :
                                         to_ecs_component(
                                             game_rect{ outputRect },
                                             mesh_type::Triangles,
-                                            drawOp.point.z);
+                                            drawOp.point.z, 
+                                            transformation);
                                     meshFilters.push_back(game::mesh_filter{ {}, mesh });
                                     auto const& ink = drawOp.appearance->effect()->color();
                                     meshRenderers.push_back(
@@ -1889,11 +1900,13 @@ namespace neogfx
                             to_ecs_component(
                                 outputRect,
                                 mesh_type::Triangles,
-                                drawOp.point.z) :
+                                drawOp.point.z,
+                                transformation) :
                             to_ecs_component(
                                 game_rect{ outputRect },
                                 mesh_type::Triangles,
-                                drawOp.point.z);
+                                drawOp.point.z,
+                                transformation);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                             drawOp.appearance->ink() : drawOp.appearance->effect()->color();
@@ -2087,7 +2100,7 @@ namespace neogfx
                     {
                         for (auto faceVertexIndex : face)
                         {
-                            auto const& xyz = (transformation ? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
+                            auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
                             auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
                             auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
                                 (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents) : vec2{});
@@ -2096,6 +2109,8 @@ namespace neogfx
                                 vertices.emplace_back(xyz, rgba, uv, xyzw );
                             else
                                 vertices[nextIndex] = { xyz, rgba, uv, xyzw };
+                            if (xyz.x > 10000.0)
+                                MessageBoxA(NULL, "foo", "foo", MB_OK);
                             if (uvGui)
                                 vertices[nextIndex].st.y = *uvGui - vertices[nextIndex].st.y;
                             vertices[nextIndex].rgba[3] *= static_cast<float>(iOpacity);
@@ -2107,9 +2122,9 @@ namespace neogfx
                 }
                 patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
             };
-#ifdef NEOGFX_DEBUG
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
             if (meshDrawable.entity != game::null_entity &&
-                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug::layoutItem)
+                dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
                 service<debug::logger>() << "Adding debug::layoutItem entity drawable..." << endl;
 #endif // NEOGFX_DEBUG
             if (!faces.empty())
@@ -2227,9 +2242,9 @@ namespace neogfx
                 if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
                     vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
 
-#ifdef NEOGFX_DEBUG
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
                     service<debug::logger>() << "Drawing debug::layoutItem entity (texture)..." << endl;
 
 #endif // NEOGFX_DEBUG
@@ -2242,9 +2257,9 @@ namespace neogfx
                 if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
                     vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
 
-#ifdef NEOGFX_DEBUG
+#if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
-                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug::layoutItem)
+                    dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
                     service<debug::logger>() << "Drawing debug::layoutItem entity (non-texture)..." << endl;
 
 #endif // NEOGFX_DEBUG

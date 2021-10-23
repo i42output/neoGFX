@@ -170,7 +170,7 @@ namespace neogfx
             {
                 return end() - begin();
             }
-            const value_type& operator[](std::size_t aOffset) const
+            value_type const& operator[](std::size_t aOffset) const
             {
                 return *(begin() + aOffset);
             }
@@ -179,7 +179,7 @@ namespace neogfx
                 return *(begin() + aOffset);
             }
         public:
-            void push_back(const value_type& aVertex)
+            void push_back(value_type const& aVertex)
             {
                 if (!room_for(1))
                     draw_and_execute();

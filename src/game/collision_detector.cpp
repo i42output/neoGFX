@@ -33,7 +33,7 @@ namespace neogfx::game
         iBroadphase2dTree{ aEcs },
         iCollidersUpdated{ false }
     {
-        Collision.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+        Collision.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
         start_thread_if();
     }
 

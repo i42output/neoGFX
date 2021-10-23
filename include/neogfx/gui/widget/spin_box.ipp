@@ -199,12 +199,12 @@ namespace neogfx
         iSecondaryLayout.set_spacing(size{});
         iStepUpButton.set_minimum_size(dip(SPIN_BUTTON_MINIMUM_SIZE));
         iStepUpButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
-        iStepUpButton.Clicked.set_trigger_type(event_trigger_type::Synchronous);
-        iStepUpButton.DoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
+        iStepUpButton.Clicked.set_trigger_type(trigger_type::Synchronous);
+        iStepUpButton.DoubleClicked.set_trigger_type(trigger_type::Synchronous);
         iStepDownButton.set_minimum_size(dip(SPIN_BUTTON_MINIMUM_SIZE));
         iStepDownButton.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
-        iStepDownButton.Clicked.set_trigger_type(event_trigger_type::Synchronous);
-        iStepDownButton.DoubleClicked.set_trigger_type(event_trigger_type::Synchronous);
+        iStepDownButton.Clicked.set_trigger_type(trigger_type::Synchronous);
+        iStepDownButton.DoubleClicked.set_trigger_type(trigger_type::Synchronous);
         iTextBox.set_frame_style(frame_style::NoFrame);
 
         iSink += iTextBox.TextFilter([this](std::string const& aText, bool& aAccept)

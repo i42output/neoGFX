@@ -20,6 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/widget/i_text_widget.hpp>
 
 namespace neogfx
 {
@@ -32,6 +33,8 @@ namespace neogfx
     public:
         virtual i_string const& title() const = 0;
         virtual void set_title(i_string const& aTitle) = 0;
+        virtual i_text_widget const& title_widget() const = 0;
+        virtual i_text_widget& title_widget() = 0;
         // todo: get/set icon
     public:
     };

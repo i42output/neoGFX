@@ -89,6 +89,16 @@ namespace neogfx
         iTitle.set_text(aTitle);
     }
 
+    const text_widget& tool_title_bar::title_widget() const
+    {
+        return iTitle;
+    }
+
+    text_widget& tool_title_bar::title_widget()
+    {
+        return iTitle;
+    }
+
     size tool_title_bar::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())

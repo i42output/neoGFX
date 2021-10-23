@@ -30,37 +30,40 @@ namespace neogfx
     public:
         typedef T value_type;
     public:
-        virtual iterator insert_item(const_iterator aPosition, const value_type& aValue) = 0;
-        virtual iterator insert_item(const_iterator aPosition, const value_type& aValue, const item_cell_data& aCellData) = 0;
-        virtual iterator insert_item(item_model_index const& aIndex, const value_type& aValue) = 0;
-        virtual iterator insert_item(item_model_index const& aIndex, const value_type& aValue, const item_cell_data& aCellData) = 0;
-        virtual iterator append_item(const value_type& aValue) = 0;
-        virtual iterator append_item(const value_type& aValue, const item_cell_data& aCellData) = 0;
-        virtual iterator append_item(const_iterator aParent, const value_type& aValue) = 0;
-        virtual iterator append_item(const_iterator aParent, const value_type& aValue, const item_cell_data& aCellData) = 0;
-        virtual iterator append_item(item_model_index const& aIndex, const value_type& aValue) = 0;
-        virtual iterator append_item(item_model_index const& aIndex, const value_type& aValue, const item_cell_data& aCellData) = 0;
+        virtual iterator insert_item(const_iterator aPosition, value_type const& aValue) = 0;
+        virtual iterator insert_item(const_iterator aPosition, value_type const& aValue, item_cell_data const& aCellData) = 0;
+        virtual iterator insert_item(item_model_index const& aIndex, value_type const& aValue) = 0;
+        virtual iterator insert_item(item_model_index const& aIndex, value_type const& aValue, item_cell_data const& aCellData) = 0;
+        virtual iterator append_item(value_type const& aValue) = 0;
+        virtual iterator append_item(value_type const& aValue, item_cell_data const& aCellData) = 0;
+        virtual iterator append_item(const_iterator aParent, value_type const& aValue) = 0;
+        virtual iterator append_item(const_iterator aParent, value_type const& aValue, item_cell_data const& aCellData) = 0;
+        virtual iterator append_item(item_model_index const& aIndex, value_type const& aValue) = 0;
+        virtual iterator append_item(item_model_index const& aIndex, value_type const& aValue, item_cell_data const& aCellData) = 0;
     public:
         virtual value_type& item(item_model_index const& aIndex) = 0;
-        virtual const value_type& item(item_model_index const& aIndex) const = 0;
+        virtual value_type const& item(item_model_index const& aIndex) const = 0;
     public:
         value_type& item(const_iterator aItem)
         {
             return item(iterator_to_index(aItem));
         }
-        const value_type& item(const_iterator aItem) const
+        value_type const& item(const_iterator aItem) const
         {
             return item(iterator_to_index(aItem));
         }
-        std::optional<item_model_index> find_item_maybe(const value_type& aItem) const
+        std::optional<item_model_index> find_item_maybe(value_type const& aItem) const
         {
             auto const end = rows();
             for (item_model_index::row_type row = 0; row < end; ++row)
-                if (item(item_model_index{ row, 0 }) == aItem)
+            {
+                auto const& existing = item(item_model_index{ row, 0 });
+                if (existing == aItem)
                     return item_model_index{ row, 0 };
+            }
             return std::nullopt;
         }
-        item_model_index find_item(const value_type& aItem) const
+        item_model_index find_item(value_type const& aItem) const
         {
             auto result = find_item_maybe(aItem);
             if (result != std::nullopt)

@@ -36,7 +36,7 @@ namespace neogfx::game
         system<entity_info, animation_filter, mesh_renderer, mesh_render_cache>{ aEcs },
         iLock{ aEcs, neolib::ecs::dont_lock }
     {
-        Animate.set_trigger_type(neolib::event_trigger_type::SynchronousDontQueue);
+        Animate.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
         start_thread_if();
     }
 

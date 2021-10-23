@@ -40,7 +40,7 @@ namespace neogfx
         iHoverElement{ scrollbar_element::None },
         iPaused{ false }
     {
-        Position.changed_from_to([this](const value_type& aFrom, const value_type& aTo)
+        Position.changed_from_to([this](value_type const& aFrom, value_type const& aTo)
         {
             update_reason_e updateReason = (aFrom < aTo ? ScrolledDown : ScrolledUp);
             iContainer.scrollbar_updated(*this, updateReason);
@@ -115,7 +115,7 @@ namespace neogfx
     {
         if (effective_position() == 0.0)
             return scrollbar_zone::Top;
-        else if (effective_position() == maximum() - page())
+        else if (effective_position() == maximum_position())
             return scrollbar_zone::Bottom;
         else
             return scrollbar_zone::Middle;
@@ -151,13 +151,18 @@ namespace neogfx
         return result;
     }
 
+    scrollbar::value_type scrollbar::maximum_position() const
+    {
+        return std::max(maximum() - page(), minimum());
+    }
+
     bool scrollbar::set_position(value_type aPosition)
     {
-        aPosition = std::max(std::min(aPosition, maximum() - page()), minimum());
+        aPosition = std::min(std::max(aPosition, minimum()), maximum_position());
         if (iIntegerPositions)
             aPosition = std::ceil(aPosition);
         bool changed = false;
-        if (Position != aPosition)
+        if (Position.effective_value() != aPosition)
         {
             changed = true;
             Position = aPosition;
@@ -231,7 +236,7 @@ namespace neogfx
         if (iLockedPosition != std::nullopt)
             throw already_locked();
         iLockedPosition = position();
-        scoped_transition_suppression sts{ Position };
+        scoped_property_transition_suppression sts{ Position };
         set_position(aPosition);
     }
 
@@ -239,7 +244,7 @@ namespace neogfx
     {
         if (iLockedPosition == std::nullopt)
             throw not_locked();
-        scoped_transition_suppression sts{ Position };
+        scoped_property_transition_suppression sts{ Position };
         set_position(*iLockedPosition);
         iLockedPosition = std::nullopt;
     }
@@ -424,7 +429,6 @@ namespace neogfx
     {
         if (!visible())
             return;
-        scoped_transition_suppression sts{ Position };
         if (clicked_element() != scrollbar_element::None && clicked_element() != element_at(as_widget().mouse_position()))
             pause();
         else
@@ -434,6 +438,7 @@ namespace neogfx
             point delta = (std::holds_alternative<point>(aUpdateParams) ? static_variant_cast<point>(aUpdateParams) : as_widget().mouse_position()) - iThumbClickedPosition;
             scoped_units su(units::Pixels);
             rect g = iContainer.scrollbar_geometry(*this);
+            scoped_property_transition_suppression sts{ Position };
             if (iType == scrollbar_type::Vertical)
             {
                 g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
@@ -465,7 +470,7 @@ namespace neogfx
     {
         if (iClickedElement != scrollbar_element::None)
             throw element_already_clicked();
-        scoped_transition_suppression sts{ Position };
+        scoped_property_transition_suppression sts{ Position };
         iClickedElement = aElement;
         switch (aElement)
         {
@@ -475,7 +480,7 @@ namespace neogfx
             {
                 aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
-                scoped_transition_suppression sts{ Position };
+                scoped_property_transition_suppression sts{ Position };
                 if (!iPaused)
                     set_position(position() - step());
             }, std::chrono::milliseconds{ 500 });
@@ -486,7 +491,7 @@ namespace neogfx
             {
                 aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
-                scoped_transition_suppression sts{ Position };
+                scoped_property_transition_suppression sts{ Position };
                 if (!iPaused)
                     set_position(position() + step());
             }, std::chrono::milliseconds{ 500 });
@@ -497,7 +502,7 @@ namespace neogfx
             {
                 aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
-                scoped_transition_suppression sts{ Position };
+                scoped_property_transition_suppression sts{ Position };
                 if (!iPaused)
                     set_position(position() - page());
             }, std::chrono::milliseconds{ 500 });
@@ -508,7 +513,7 @@ namespace neogfx
             {
                 aTimer.set_duration(std::chrono::milliseconds{ 50 });
                 aTimer.again();
-                scoped_transition_suppression sts{ Position };
+                scoped_property_transition_suppression sts{ Position };
                 if (!iPaused)
                     set_position(position() + page());
             }, std::chrono::milliseconds{ 500 });

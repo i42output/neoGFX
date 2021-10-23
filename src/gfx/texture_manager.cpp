@@ -99,13 +99,15 @@ namespace neogfx
 
     texture_manager::texture_list::const_iterator texture_manager::find_texture(i_image const& aImage, rect const& aImagePart) const
     {
+        if (aImage.uri().empty())
+            return textures().end();
         for (auto i = textures().begin(); i != textures().end(); ++i)
         {
             auto& texture = *i;
-            if (texture.first()->type() != texture_type::Texture)
+            if (texture.first()->type() != texture_type::Texture)   
                 continue;
-            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri() &&
-                aImagePart == texture.first()->part() && aImage.sampling() == texture.first()->sampling())
+            auto const& textureUri = texture.first()->native_texture().uri();
+            if (aImage.uri() == textureUri && aImagePart == texture.first()->part() && aImage.sampling() == texture.first()->sampling())
                 return i;
         }
         return textures().end();
@@ -113,13 +115,15 @@ namespace neogfx
 
     texture_manager::texture_list::iterator texture_manager::find_texture(i_image const& aImage, rect const& aImagePart)
     {
+        if (aImage.uri().empty())
+            return textures().end();
         for (auto i = textures().begin(); i != textures().end(); ++i)
         {
             auto& texture = *i;
             if (texture.first()->type() != texture_type::Texture)
                 continue;
-            if (!aImage.uri().empty() && aImage.uri() == texture.first()->native_texture().uri() &&
-                aImagePart == texture.first()->part() && aImage.sampling() == texture.first()->sampling())
+            auto const& textureUri = texture.first()->native_texture().uri();
+            if (aImage.uri() == textureUri && aImagePart == texture.first()->part() && aImage.sampling() == texture.first()->sampling())
                 return i;
         }
         return textures().end();

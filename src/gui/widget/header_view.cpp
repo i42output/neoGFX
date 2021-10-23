@@ -394,7 +394,7 @@ namespace neogfx
                             presentation_model().sort_by(i);
                             root().window_manager().restore_mouse_cursor(root());
                         }
-                    }, *this);
+                    });
                 if (iButtonSinks[i][1].empty())
                     iButtonSinks[i][1] = button.right_clicked([&, i]()
                     {
@@ -436,7 +436,7 @@ namespace neogfx
                             });
                             menu.exec();
                         }
-                    }, *this);
+                    });
             }
             else if (!expand_last_column())
             {

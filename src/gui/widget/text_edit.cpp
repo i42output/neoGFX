@@ -260,9 +260,10 @@ namespace neogfx
     };
 
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -279,9 +280,10 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aParent, aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -298,9 +300,10 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aLayout, aCaps == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
+        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -337,8 +340,9 @@ namespace neogfx
         if (has_minimum_size())
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         scoped_units su{ *this, units::Pixels };
-        auto childLayoutSize = has_layout() ? layout().minimum_size(aAvailableSpace) : size{};
-        auto result = framed_scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
+        auto const childLayoutSize = has_layout() ? layout().minimum_size(aAvailableSpace) : size{};
+        auto const frameBits = framed_scrollable_widget::minimum_size(aAvailableSpace) - childLayoutSize;
+        auto result = frameBits;
         if (!size_hint())
             result += size{ font().height() }.max(childLayoutSize);
         else
@@ -353,6 +357,8 @@ namespace neogfx
             }
             result += iHintedSize->second.max(childLayoutSize);
         }
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::GrowLines)
+            result.cy = std::max(result.cy, frameBits.cy + std::min(iTextExtents.get().cy, grow_lines() * font().height()));
         return to_units(*this, su.saved_units(), result);
     }
 
@@ -572,7 +578,7 @@ namespace neogfx
                     else if ((iCaps & text_edit_caps::OnlyAccept) == text_edit_caps::OnlyAccept)
                         break;
                 }
-                if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+                if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
                 {
                     multiple_text_changes mtc{ *this };
                     delete_any_selection();
@@ -609,7 +615,7 @@ namespace neogfx
                 delete_any_selection();
             break;
         case ScanCode_UP:
-            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+            if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -620,7 +626,7 @@ namespace neogfx
                 handled = false;
             break;
         case ScanCode_DOWN:
-            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+            if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -710,52 +716,67 @@ namespace neogfx
 
     void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
-        scoped_transition_suppression sts1{ vertical_scrollbar().Position };
-        scoped_transition_suppression sts2{ horizontal_scrollbar().Position };
+        std::optional<scoped_property_transition_suppression> sts1;
+        std::optional<scoped_property_transition_suppression> sts2;
+
+        bool refreshLines = (iTextExtents == std::nullopt);
+
+        if (!refreshLines) // must be a resize event
+        {
+            sts1.emplace(vertical_scrollbar().Position);
+            sts2.emplace(horizontal_scrollbar().Position);
+        }
 
         switch (aStage)
         {
         case UsvStageInit:
             if (resizing())
                 vertical_scrollbar().push_zone();
-            vertical_scrollbar().hide();
-            horizontal_scrollbar().hide();
-            refresh_lines();
+            if (vertical_scrollbar().visible())
+            {
+                vertical_scrollbar().hide();
+//                refreshLines = true;  // todo: optimize this properly
+            }
+            if (horizontal_scrollbar().visible())
+            {
+                horizontal_scrollbar().hide();
+//                refreshLines = true;  // todo: optimize this properly
+            }
+            refreshLines = true;  // todo: optimize this properly
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
             {
                 i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-                vertical_scrollbar().set_maximum(iTextExtents.cy);
+                vertical_scrollbar().set_maximum(iTextExtents->cy);
                 vertical_scrollbar().set_step(font().height());
                 vertical_scrollbar().set_page(client_rect(false).height());
                 vertical_scrollbar().set_position(oldPosition);
-                bool changed = false;
                 if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
                 {
                     if (!vertical_scrollbar().visible())
                     {
                         vertical_scrollbar().show();
-                        changed = true;
+                        // refreshLines = true;  // todo: optimize this properly
                     }
+                    refreshLines = true;  // todo: optimize this properly
                 }
                 else
                 {
                     if (vertical_scrollbar().visible())
                     {
                         vertical_scrollbar().hide();
-                        changed = true;
+                        // refreshLines = true;  // todo: optimize this properly
                     }
+                    refreshLines = true;  // todo: optimize this properly
                 }
-                if (changed)
-                    refresh_lines();
                 framed_scrollable_widget::update_scrollbar_visibility(aStage);
             }
             break;
         case UsvStageCheckHorizontal:
             {
                 i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
-                horizontal_scrollbar().set_maximum(iTextExtents.cx <= client_rect(false).width() ? 0.0 : iTextExtents.cx);
+                horizontal_scrollbar().set_maximum(iTextExtents->cx <= client_rect(false).width() ? 0.0 : iTextExtents->cx);
                 horizontal_scrollbar().set_step(font().height());
                 horizontal_scrollbar().set_page(client_rect(false).width());
                 horizontal_scrollbar().set_position(oldPosition);
@@ -784,6 +805,9 @@ namespace neogfx
         default:
             break;
         }
+
+        if (refreshLines)
+            refresh_lines();
     }
 
     color text_edit::frame_color() const
@@ -1079,6 +1103,18 @@ namespace neogfx
         paste(service<i_clipboard>());
     }
 
+    void text_edit::begin_update()
+    {
+        iUpdatingDocument = true;
+    }
+
+    void text_edit::end_update()
+    {
+        iUpdatingDocument = false;
+        refresh_paragraph(iText.begin(), 0);
+        update();
+    }
+
     bool text_edit::read_only() const
     {
         return ReadOnly;
@@ -1101,6 +1137,20 @@ namespace neogfx
         {
             WordWrap = aWordWrap;
             refresh_columns();
+        }
+    }
+
+    uint32_t text_edit::grow_lines() const
+    {
+        return GrowLines;
+    }
+
+    void text_edit::set_grow_lines(uint32_t aGrowLines)
+    {
+        if (GrowLines != aGrowLines)
+        {
+            GrowLines = aGrowLines;
+            update_layout();
         }
     }
 
@@ -1220,11 +1270,7 @@ namespace neogfx
         {
             if (!capturing())
                 set_capture();
-            iDragger.emplace(*this, [this](widget_timer& aTimer)
-            {
-                aTimer.again();
-                set_cursor_position(mouse_position(), false);
-            }, std::chrono::milliseconds{ 250 });
+            iDragger.emplace(*this);
         }
     }
 
@@ -1444,6 +1490,7 @@ namespace neogfx
         for (std::size_t i = 0; i < iGlyphColumns.size(); ++i)
             iGlyphColumns[i].lines().clear();
         iUtf8TextCache = std::nullopt;
+        refresh_columns();
         if (iPreviousText != iText)
             notify_text_changed();
     }
@@ -1694,7 +1741,7 @@ namespace neogfx
             refresh_paragraph(iText.begin(), 0);
         });
         auto focusPolicy = neogfx::focus_policy::ClickTabFocus;
-        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
+        if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
         cursor().set_width(2.0);
@@ -1823,6 +1870,9 @@ namespace neogfx
 
     void text_edit::refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta)
     {
+        if (iUpdatingDocument)
+            return;
+
         /* simple (naive) implementation just to get things moving (so just refresh everything) ... */
         (void)aWhere;
         graphics_context gc{ *this, graphics_context::type::Unattached };
@@ -1921,7 +1971,10 @@ namespace neogfx
 
     void text_edit::refresh_columns()
     {
+        iTextExtents = std::nullopt;
         update_scrollbar_visibility();
+        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::GrowLines)
+            update_layout();
         update();
     }
 
@@ -2033,7 +2086,7 @@ namespace neogfx
                             }
                         }
                         pos.y += height;
-                        iTextExtents.cx = std::max(iTextExtents.cx, x - offset);
+                        iTextExtents->cx = std::max(iTextExtents->cx, x - offset);
                         lineStart = next;
                         if (lineStart != paragraphEnd)
                             offset = lineStart->x;
@@ -2056,7 +2109,7 @@ namespace neogfx
                             pos.y,
                             { (lineEnd - 1)->x + advance(*(lineEnd - 1)).cx, height} });
                     pos.y += lines.back().extents.cy;
-                    iTextExtents.cx = std::max(iTextExtents.cx, lines.back().extents.cx);
+                    iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                 }
                 if (p + 1 == iGlyphParagraphs.end() && !glyphs().empty() && is_line_breaking_whitespace(glyphs().back()))
                     pos.y += font().height();
@@ -2075,7 +2128,7 @@ namespace neogfx
                 {
                 case 1:
                 case 3:
-                    if (!vertical_scrollbar().visible() && !showVerticalScrollbar && pos.y >= availableHeight)
+                    if (!vertical_scrollbar().visible() && !showVerticalScrollbar && pos.y > availableHeight)
                     {
                         showVerticalScrollbar = true;
                         availableWidth -= vertical_scrollbar().width();
@@ -2085,7 +2138,7 @@ namespace neogfx
                         next_pass();
                     break;
                 case 2:
-                    if (!horizontal_scrollbar().visible() && !showHorizontalScrollbar && iTextExtents.cx > availableWidth)
+                    if (!horizontal_scrollbar().visible() && !showHorizontalScrollbar && iTextExtents->cx > availableWidth)
                     {
                         showHorizontalScrollbar = true;
                         availableHeight -= horizontal_scrollbar().width();
@@ -2099,10 +2152,10 @@ namespace neogfx
                     break;
                 }
             }
-            iTextExtents.cy = pos.y;
-            if (iTextExtents.cy < client_rect(false).cy)
+            iTextExtents->cy = pos.y;
+            if (iTextExtents->cy < client_rect(false).cy)
             {
-                auto const space = client_rect(false).cy - iTextExtents.cy;
+                auto const space = client_rect(false).cy - iTextExtents->cy;
                 auto const adjust = 
                     ((Alignment & alignment::Vertical) == alignment::Bottom) ? space : 
                         ((Alignment & alignment::Vertical) == alignment::VCenter) ? std::floor(space / 2.0) : 0.0;

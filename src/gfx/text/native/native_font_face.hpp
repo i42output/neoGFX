@@ -127,7 +127,7 @@ namespace neogfx
         struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(std::string const& aError) : freetype_error(aError) {} };
         struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(std::string const& aError) : freetype_error(aError) {} };
     public:
-        native_font_face(font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace);
+        native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace);
         ~native_font_face();
     public:
         font_id id() const override;
@@ -160,6 +160,7 @@ namespace neogfx
         i_glyph_texture& invalid_glyph() const;
         void set_metrics();
     private:
+        FT_Library iFontLib;
         font_id iId;
         i_native_font& iFont;
         font_style iStyle;

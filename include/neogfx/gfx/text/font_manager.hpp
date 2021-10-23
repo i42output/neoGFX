@@ -84,7 +84,8 @@ namespace neogfx
         uint32_t font_family_count() const override;
         i_string const& font_family(uint32_t aFamilyIndex) const override;
         uint32_t font_style_count(uint32_t aFamilyIndex) const override;
-        i_string const& font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const override;
+        neogfx::font_style font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const override;
+        i_string const& font_style_name(uint32_t aFamilyIndex, uint32_t aStyleIndex) const override;
     private:
         font_id allocate_font_id() override;
     public:

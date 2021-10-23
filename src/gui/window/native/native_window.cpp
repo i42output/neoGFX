@@ -182,7 +182,7 @@ namespace neogfx
     {
         destroyed_flag destroyed{ *this };
         neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
-        if (!Filter.trigger(iCurrentEvent))
+        if (event_consumed(Filter.trigger(iCurrentEvent)))
         {
             if (destroyed)
                 sc.ignore();
@@ -191,7 +191,7 @@ namespace neogfx
         if (std::holds_alternative<window_event>(iCurrentEvent))
         {
             auto& windowEvent = static_variant_cast<window_event&>(iCurrentEvent);
-            if (!surface_window().as_window().window_event().trigger(windowEvent))
+            if (event_consumed(surface_window().as_window().window_event().trigger(windowEvent)))
                 return;
             switch (windowEvent.type())
             {

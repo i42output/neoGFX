@@ -45,7 +45,7 @@ namespace neogfx
         virtual void repeat_end() = 0;
     public:
         virtual item_index item_count() const = 0;
-        virtual const value_type& item(item_index aItemIndex) const = 0;
+        virtual value_type const& item(item_index aItemIndex) const = 0;
         virtual value_type& item(item_index aItemIndex) = 0;
     };
 }

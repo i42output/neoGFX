@@ -58,6 +58,7 @@ namespace neogfx
         scrollbar_zone pop_zone() override;
         value_type position() const override;
         value_type effective_position() const override;
+        value_type maximum_position() const override;
         bool set_position(value_type aPosition) override;
         value_type minimum() const override;
         void set_minimum(value_type aMinimum) override;

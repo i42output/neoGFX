@@ -20,9 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/plugin/i_plugin_event.hpp>
+#include <neolib/task/i_event.hpp>
 
 namespace neogfx
 {
-    using namespace neolib::plugin_events;
+    using neolib::trigger_type;
+    using neolib::trigger_result;
+    using neolib::event_consumed;
+    using neolib::i_event;
+    using neolib::sink;
 }

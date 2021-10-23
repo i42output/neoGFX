@@ -36,9 +36,9 @@
 namespace neogfx
 {
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline game::mesh to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, scalar aZpos = 0.0, uint32_t aOffset = 0)
+    inline game::mesh to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, scalar aZpos = 0.0, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
     {
-        auto const rectVertices = rect_vertices(aRect, aMeshType, aZpos);
+        auto rectVertices = rect_vertices(aRect, aMeshType, aZpos, aTransformation);
         return game::mesh
         {
             {
@@ -258,7 +258,7 @@ namespace neogfx
 
     inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const rect& aRect, scalar aZpos, const neogfx::i_texture& aTexture, const mat33& aTextureTransform = mat33::identity())
     {
-        auto patchMesh = to_ecs_component(aRect, mesh_type::Triangles, aZpos, static_cast<uint32_t>(aMesh.vertices.size())); 
+        auto patchMesh = to_ecs_component(aRect, mesh_type::Triangles, aZpos, std::nullopt, static_cast<uint32_t>(aMesh.vertices.size())); 
         aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
         if (!aTextureTransform.is_identity())
             for (auto& uv : patchMesh.uv)
