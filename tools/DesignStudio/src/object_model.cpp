@@ -30,8 +30,8 @@ namespace neogfx::DesignStudio
         {
             if (aProjectManager.project_active())
             {
+                scoped_item_update siu{ *this };
                 item_model().clear();
-                item_model().updating().trigger();
                 std::function<void(ng::i_item_model::iterator, i_element&)> addNode = [&](ng::i_item_model::iterator aPosition, i_element& aElement)
                 {
                     switch (aElement.group())
@@ -61,7 +61,6 @@ namespace neogfx::DesignStudio
                     }
                 };
                 addNode(item_model().send(), aProjectManager.active_project().root());
-                item_model().updated().trigger();
             }
             else
                 item_model().clear();
