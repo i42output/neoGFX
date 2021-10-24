@@ -714,6 +714,11 @@ namespace neogfx
         return neogfx::scrolling_disposition::DontScrollChildWidget;
     }
 
+    bool text_edit::use_scrollbar_container_updater() const
+    {
+        return false;
+    }
+
     void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
         std::optional<scoped_property_transition_suppression> sts1;

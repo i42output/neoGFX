@@ -147,6 +147,7 @@ namespace neogfx
 
     class i_scrollbar_container
     {
+        friend class scrollbar_container_updater;
     public:
         virtual rect scroll_area() const = 0;
     public:
@@ -156,5 +157,19 @@ namespace neogfx
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
+    protected:
+        virtual void update_scrollbar_visibility() = 0;
+    };
+
+    class i_scrollbar_container_updater : public i_service
+    {
+    public:
+        virtual void queue(i_scrollbar_container& aContainer) = 0;
+        virtual bool processing() const = 0;
+        virtual void process() = 0;
+        virtual i_scrollbar_container& current() const = 0;
+    public:
+        // {76C8BC39-25EA-4E55-B41C-4798E609E5B9}
+        static uuid const& iid() { static uuid const sIid{ 0x76c8bc39, 0x25ea, 0x4e55, 0xb41c, { 0x47, 0x98, 0xe6, 0x9, 0xe5, 0xb9 } }; return sIid; }
     };
 }

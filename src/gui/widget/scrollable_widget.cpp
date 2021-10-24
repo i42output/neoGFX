@@ -25,8 +25,56 @@
 
 namespace neogfx
 {
+    class scrollbar_container_updater : public i_scrollbar_container_updater
+    {
+    public:
+        scrollbar_container_updater() :
+            iProcessing{ false }
+        {
+        }
+    public:
+        void queue(i_scrollbar_container& aContainer) final
+        {
+            iQueue.push_back(&aContainer);
+        }
+        bool processing() const final
+        {
+            return iProcessing;
+        }
+        void process() final
+        {
+            neolib::scoped_flag sf{ iProcessing };
+            std::reverse(iQueue.begin(), iQueue.end());
+            for (auto sc1 = iQueue.begin(); sc1 != iQueue.end(); ++sc1)
+                for (auto sc2 = std::next(sc1); sc2 != iQueue.end(); ++sc2)
+                    if (*sc1 == *sc2)
+                        *sc2 = nullptr;
+            while (!iQueue.empty())
+            {
+                if (iQueue.back() != nullptr)
+                    iQueue.back()->update_scrollbar_visibility();
+                iQueue.pop_back();
+            }
+        }
+        i_scrollbar_container& current() const final
+        {
+            if (!iQueue.empty() && processing())
+                return *iQueue.back();
+            throw std::logic_error{ "neogfx::scrollbar_container_updater: not processing" };
+        }
+    private:
+        std::vector<i_scrollbar_container*> iQueue;
+        bool iProcessing;
+    };
+
     template class scrollable_widget<>;
     template class scrollable_widget<framed_widget<widget<>>>;
     template class scrollable_widget<framed_widget<widget<i_window>>>;
+}
+
+template<> neogfx::i_scrollbar_container_updater& services::start_service<neogfx::i_scrollbar_container_updater>()
+{
+    thread_local neogfx::scrollbar_container_updater tUpdater;
+    return tUpdater;
 }
 

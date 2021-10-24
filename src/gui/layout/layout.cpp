@@ -18,16 +18,31 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/layout.hpp>
 #include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
-#include <neogfx/app/i_app.hpp>
+#include <neogfx/gui/widget/i_scrollbar.hpp>
 #include "layout.inl"
 
 namespace neogfx
 {
+    scoped_layout_items::scoped_layout_items(bool aForceRefresh) :
+        neolib::scoped_flag{ global_layout_state::instance().in_progress() },
+        iStartLayout{ !saved() || aForceRefresh }
+    {
+        if (iStartLayout)
+            global_layout_state::instance().increment_id();
+    }
+    
+    scoped_layout_items::~scoped_layout_items()
+    {
+        if (iStartLayout)
+            service<i_scrollbar_container_updater>().process();
+    }
+
     template size layout::do_minimum_size<layout::column_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
     template size layout::do_maximum_size<layout::column_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
     template void layout::do_layout_items<layout::column_major<horizontal_layout>>(const point& aPosition, const size& aSize);

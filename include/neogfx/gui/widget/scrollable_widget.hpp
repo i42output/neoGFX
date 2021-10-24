@@ -46,6 +46,7 @@ namespace neogfx
     template <typename Base = widget<>>
     class scrollable_widget : public Base, private i_scrollbar_container
     {
+        typedef scrollable_widget<Base> self_type;
         typedef Base base_type;
     protected:
         enum usv_stage_e
@@ -151,7 +152,8 @@ namespace neogfx
         i_widget const& as_widget() const override;
         i_widget& as_widget() override;
     protected:
-        virtual void update_scrollbar_visibility();
+        virtual bool use_scrollbar_container_updater() const;
+        void update_scrollbar_visibility() override;
         virtual void update_scrollbar_visibility(usv_stage_e aStage);
     protected:
         void init_scrollbars();

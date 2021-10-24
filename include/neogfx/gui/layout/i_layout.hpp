@@ -445,14 +445,9 @@ namespace neogfx
     class scoped_layout_items : private neolib::scoped_flag
     {
     public:
-        scoped_layout_items(bool aForceRefresh = false) : 
-            neolib::scoped_flag{ global_layout_state::instance().in_progress() }
-        {
-            if (!saved() || aForceRefresh)
-                global_layout_state::instance().increment_id();
-        }
-        ~scoped_layout_items()
-        {
-        }
+        scoped_layout_items(bool aForceRefresh = false);
+        ~scoped_layout_items();
+    private:
+        bool iStartLayout;
     };
 }

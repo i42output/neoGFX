@@ -486,13 +486,35 @@ namespace neogfx
     }
 
     template <typename Base>
+    bool scrollable_widget<Base>::use_scrollbar_container_updater() const
+    {
+        return true;
+    }
+
+    template <typename Base>
     void scrollable_widget<Base>::update_scrollbar_visibility()
     {
         if (!base_type::device_metrics_available())
             return;
         if (iUpdatingScrollbarVisibility)
             return;
+
         neolib::scoped_flag sf{ iUpdatingScrollbarVisibility };
+
+        if (use_scrollbar_container_updater())
+        {
+            auto& updater = service<i_scrollbar_container_updater>();
+            if (!updater.processing())
+            {
+                updater.queue(*this);
+                return;
+            }
+            else if (&updater.current() != this)
+            {
+                return;
+            }
+        }
+
         iScrollbarUpdater = {};
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
             vertical_scrollbar().lock(0.0);
