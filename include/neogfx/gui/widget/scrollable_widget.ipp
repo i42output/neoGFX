@@ -507,6 +507,8 @@ namespace neogfx
             auto& updater = service<i_scrollbar_container_updater>();
             if (!updater.processing())
             {
+                neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
+                update_scrollbar_visibility(UsvStageInit);
                 updater.queue(*this);
                 return;
             }

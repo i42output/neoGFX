@@ -36,6 +36,8 @@ namespace neogfx
     public:
         void queue(i_scrollbar_container& aContainer) final
         {
+            if (processing())
+                throw std::logic_error("neogfx::scrollbar_container_updater::queue: alreday processing");
             iQueue.push_back(&aContainer);
         }
         void unqueue(i_scrollbar_container& aContainer) final
@@ -49,13 +51,15 @@ namespace neogfx
         void process() final
         {
             if (processing())
-                return throw std::logic_error("neogfx::scrollbar_container_updater::process: alreday processing");
+                return;
+
             neolib::scoped_flag sf{ iProcessing };
             std::reverse(iQueue.begin(), iQueue.end());
             for (auto sc1 = iQueue.begin(); sc1 != iQueue.end(); ++sc1)
                 for (auto sc2 = std::next(sc1); sc2 != iQueue.end(); ++sc2)
                     if (*sc1 == *sc2)
                         *sc2 = nullptr;
+
             while (!iQueue.empty())
             {
                 auto next = iQueue.back();
