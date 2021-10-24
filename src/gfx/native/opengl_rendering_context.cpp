@@ -2109,8 +2109,6 @@ namespace neogfx
                                 vertices.emplace_back(xyz, rgba, uv, xyzw );
                             else
                                 vertices[nextIndex] = { xyz, rgba, uv, xyzw };
-                            if (xyz.x > 10000.0)
-                                MessageBoxA(NULL, "foo", "foo", MB_OK);
                             if (uvGui)
                                 vertices[nextIndex].st.y = *uvGui - vertices[nextIndex].st.y;
                             vertices[nextIndex].rgba[3] *= static_cast<float>(iOpacity);
