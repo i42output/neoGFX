@@ -165,6 +165,7 @@ namespace neogfx
     {
     public:
         virtual void queue(i_scrollbar_container& aContainer) = 0;
+        virtual void unqueue(i_scrollbar_container& aContainer) = 0;
         virtual bool processing() const = 0;
         virtual void process() = 0;
         virtual i_scrollbar_container& current() const = 0;

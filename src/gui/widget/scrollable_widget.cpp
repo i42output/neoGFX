@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <algorithm>
 #include <neogfx/gui/widget/scrollable_widget.ipp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/view/view_container.hpp>
@@ -37,12 +38,18 @@ namespace neogfx
         {
             iQueue.push_back(&aContainer);
         }
+        void unqueue(i_scrollbar_container& aContainer) final
+        {
+            iQueue.erase(std::remove(iQueue.begin(), iQueue.end(), &aContainer), iQueue.end());
+        }
         bool processing() const final
         {
             return iProcessing;
         }
         void process() final
         {
+            if (processing())
+                return throw std::logic_error("neogfx::scrollbar_container_updater::process: alreday processing");
             neolib::scoped_flag sf{ iProcessing };
             std::reverse(iQueue.begin(), iQueue.end());
             for (auto sc1 = iQueue.begin(); sc1 != iQueue.end(); ++sc1)
@@ -51,8 +58,9 @@ namespace neogfx
                         *sc2 = nullptr;
             while (!iQueue.empty())
             {
-                if (iQueue.back() != nullptr)
-                    iQueue.back()->update_scrollbar_visibility();
+                auto next = iQueue.back();
+                if (next != nullptr)
+                    next->update_scrollbar_visibility();
                 iQueue.pop_back();
             }
         }

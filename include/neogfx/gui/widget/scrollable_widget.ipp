@@ -27,6 +27,7 @@ namespace neogfx
     template <typename Base>
     scrollable_widget<Base>::~scrollable_widget()
     {
+        service<i_scrollbar_container_updater>().unqueue(*this);
     }
 
     template <typename Base>
