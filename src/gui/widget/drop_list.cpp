@@ -1021,7 +1021,7 @@ namespace neogfx
             minimumSize.cx += input_widget().text_widget().padding().size().cx;
         }
         dimension modelWidth = 0.0;
-        if (has_presentation_model())
+        if (has_presentation_model() && (weight().cx == 0.0 || size_policy().horizontal_size_policy() == size_constraint::Minimum))
         {
             graphics_context gc{ *this, graphics_context::type::Unattached };
             modelWidth = presentation_model().column_width(0, gc);
