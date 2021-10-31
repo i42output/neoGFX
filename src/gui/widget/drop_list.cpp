@@ -343,6 +343,16 @@ namespace neogfx
         throw no_view();
     }
 
+    dimension drop_list::list_proxy::effective_frame_width() const
+    {
+        if (iPopup != std::nullopt)
+            return iPopup->effective_frame_width();
+        else if (iViewContainer != std::nullopt)
+            return iViewContainer->effective_frame_width();
+        else
+            return 0.0;
+    }
+
     void drop_list::list_proxy::show_view()
     {
         if (!view_created())
@@ -999,6 +1009,8 @@ namespace neogfx
         auto minimumSize = widget::minimum_size(aAvailableSpace);
         if (widget::has_minimum_size())
             return minimumSize;
+        minimumSize.cx += iListProxy.effective_frame_width() * 2.0;
+        minimumSize.cy += iListProxy.effective_frame_width() * 2.0;
         if (input_widget().image_widget().visible())
             minimumSize.cx -= input_widget().image_widget().minimum_size().cx;
         if (input_widget().image_widget().visible() && input_widget().text_widget().visible())
@@ -1012,7 +1024,7 @@ namespace neogfx
         if (has_presentation_model())
         {
             graphics_context gc{ *this, graphics_context::type::Unattached };
-            modelWidth = presentation_model().column_width(0, gc, false);
+            modelWidth = presentation_model().column_width(0, gc);
             if (list_always_visible())
                 modelWidth += view().vertical_scrollbar().width();
         }

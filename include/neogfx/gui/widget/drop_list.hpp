@@ -219,6 +219,7 @@ namespace neogfx
             bool view_created() const;
             bool view_visible() const;
             drop_list_view& view() const;
+            dimension effective_frame_width() const;
         public:
             void show_view();
             void hide_view();
