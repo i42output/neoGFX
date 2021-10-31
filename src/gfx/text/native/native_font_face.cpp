@@ -99,6 +99,18 @@ namespace neogfx
     native_font_face::native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
         iFontLib{ aFontLib }, iId { aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
+        switch (aStyle)
+        {
+        case font_style::EmulatedBold:
+            iStyleName = "Bold (Emulated)";
+            break;
+        case font_style::EmulatedItalic:
+            iStyleName = "Italic (Emulated)";
+            break;
+        case font_style::EmulatedBoldItalic:
+            iStyleName = "Bold Italic (Emulated)";
+            break;
+        }
         set_metrics();
         sGetAdvanceCache[aFreetypeFace] = get_advance_cache_face{};
     }
