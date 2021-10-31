@@ -760,6 +760,11 @@ namespace neogfx
         }
     }
 
+    bool item_view::use_scrollbar_container_updater() const
+    {
+        return false;
+    }
+
     void item_view::column_info_changed(item_model_index::value_type)
     {
         update_scrollbar_visibility();

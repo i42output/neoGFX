@@ -139,6 +139,7 @@ namespace neogfx
         neogfx::scrolling_disposition scrolling_disposition() const override;
         void update_scrollbar_visibility() override;
         void update_scrollbar_visibility(usv_stage_e aStage) override;
+        bool use_scrollbar_container_updater() const override;
     protected:
         virtual void column_info_changed(item_model_index::value_type aColumnIndex);
         virtual void item_added(const item_model_index& aItemIndex);
