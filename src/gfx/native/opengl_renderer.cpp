@@ -403,7 +403,7 @@ namespace neogfx
     i_texture& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents));
-        if (existing != aBufferList.end() && existing->first.first == aSampling && existing->first.second >= aExtents)
+        if (existing != aBufferList.end() && existing->first.first == aSampling && existing->first.second.greater_than_or_equal(aExtents))
         {
             aPreviousExtents = existing->second.second;
             existing->second.second = aExtents;

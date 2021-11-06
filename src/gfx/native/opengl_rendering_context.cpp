@@ -1677,6 +1677,40 @@ namespace neogfx
             drawables.clear();
         };
 
+        auto bounding_rect = [&]()
+        {
+            optional_rect result;
+            for (auto op = aBegin; op != aEnd; ++op)
+            {
+                auto& drawOp = *op;
+                auto& glyphText = *drawOp.glyphText;
+                auto& glyph = *drawOp.glyph;
+                font const& glyphFont = glyphText.glyph_font(glyph);
+                rect glyphRect;
+                
+                if (is_emoji(glyph))
+                    glyphRect = rect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
+                else if (!is_whitespace(glyph))
+                {
+                    auto const& glyphTexture = glyphText.glyph_texture(glyph);
+                    auto const glyphOrigin2D = point{
+                        drawOp.point.x + glyphTexture.placement().x,
+                        logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
+                            drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
+                            drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy
+                    } + glyph.offset.as<scalar>();
+                    vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
+                    glyphRect = rect{ point{ glyphOrigin }, glyphTexture.texture().extents() };
+                }
+
+                if (result == std::nullopt)
+                    result = glyphRect;
+                else
+                    result->combine(glyphRect);
+            }
+            return result;
+        };
+
         std::size_t normalGlyphCount = 0;
 
         optional_rect filterRegion;
@@ -1698,15 +1732,10 @@ namespace neogfx
                     if (drawOp.appearance->effect() != std::nullopt && !drawOp.appearance->being_filtered() &&
                         (drawOp.appearance->effect()->type() == text_effect_type::Glow || drawOp.appearance->effect()->type() == text_effect_type::Shadow))
                     {
-                        font const& glyphFont = glyphText.glyph_font(glyph);
-                        rect const glyphRect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
-
-                        if (!filterRegion)
-                            filterRegion.emplace(glyphRect);
-                        else
-                            filterRegion->combine(glyphRect);
+                        if (filterRegion == std::nullopt)
+                            filterRegion = bounding_rect();
                     }
-
+                        
                     if (drawOp.appearance->paper() != std::nullopt)
                     {
                         font const& glyphFont = glyphText.glyph_font(glyph);
@@ -1825,17 +1854,9 @@ namespace neogfx
 
                         auto const& glyphTexture = glyphText.glyph_texture(glyph);
 
-                        if (updateGlyphShader)
-                        {
-                            updateGlyphShader = false;
-                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyph);
-                        }
-
-                        bool const subpixelRender = subpixel(glyph) && glyphTexture.subpixel();
-
                         auto const& glyphFont = glyphText.glyph_font(glyph);
 
-                        auto glyphOrigin2D = point{
+                        auto const glyphOrigin2D = point{
                             drawOp.point.x + glyphTexture.placement().x,
                             logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
                                 drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
@@ -1852,6 +1873,14 @@ namespace neogfx
                                 { xTransformCoefficient * 0.25, 1.0, 0.0, 0.0 },
                                 { 0.0, 0.0, 1.0, 0.0 }, 
                                 { 0.0, 0.0, 0.0, 1.0 } };
+
+                        if (updateGlyphShader)
+                        {
+                            updateGlyphShader = false;
+                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyph);
+                        }
+
+                        bool const subpixelRender = subpixel(glyph) && glyphTexture.subpixel();
 
                         if (pass == 4)
                         {
