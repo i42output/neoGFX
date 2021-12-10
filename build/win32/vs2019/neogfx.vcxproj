@@ -579,6 +579,7 @@
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\app\settings.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />
+    <ClCompile Include="..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_beeper.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_beeper_sample.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />

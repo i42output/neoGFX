@@ -22,6 +22,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/i_node.hpp>
 #include "main_window.hpp"
 
+struct smbContext;
+smbContext* smbCreateContext();
+void smbDestroyContext(smbContext* context);
+void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float* indata, float* outdata);
+void smbFft(float* fftBuffer, long fftFrameSize, long sign);
+
 namespace neogfx::DesignStudio
 {
     main_window_ex::main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager) :
@@ -622,7 +628,41 @@ namespace neogfx::DesignStudio
                     aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, service<i_app>().current_style().palette().color(color_role::Void));
                 for (int32_t y = 0; y <= cells.cy; y += workspaceGridSubdivisions.value<uint32_t>(true))
                     aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, service<i_app>().current_style().palette().color(color_role::Void));
+            }            
+            auto const graphRect = scrollArea.deflated(ng::size{ 20, 20 });
+
+            int constexpr sampleRate = 48000;
+            float samples[sampleRate];
+            for (int n = 0; n < sampleRate; ++n)
+            {
+                samples[n] = std::sin(250.0f * n / sampleRate * ng::math::two_pi<float>());
             }
+
+            double constexpr duration = 0.1;
+
+            auto sample_point = [&](int n, float sample)
+            {
+                return graphRect.center().with_x(graphRect.left()) + point{ graphRect.width() * n / sampleRate / duration, -sample * graphRect.height() / 2 };
+            };
+
+            auto draw_samples = [&](float* samples, ng::color color)
+            {
+                ng::path path{ ng::path_shape::LineStrip };
+                path.move_to(sample_point(0, samples[0]));
+                for (int n = 1; n < sampleRate * duration; ++n)
+                    path.line_to(sample_point(n, samples[n]));
+                aGc.draw_path(path, color);
+            };
+
+            draw_samples(samples, ng::color::WhiteSmoke);
+
+            auto context = smbCreateContext();
+
+            static float scaledSamples[sampleRate];
+            static bool b = (smbPitchShift(context, 2.0, sampleRate, 1024, 32, sampleRate, samples, scaledSamples), true);
+            smbDestroyContext(context);
+
+            draw_samples(scaledSamples, ng::color::Gold);
         }
         if (iProjectManager.project_active())
         {

@@ -37,6 +37,9 @@
     <Filter Include="Source Files\native\windows">
       <UniqueIdentifier>{2938ee9a-9f1d-40cf-9c80-e6542b209f8d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\3rdparty">
+      <UniqueIdentifier>{18609eac-0e1d-4541-b2c0-7861c70518b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp">
@@ -1605,6 +1608,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\timer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp">
+      <Filter>Source Files\3rdparty</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -118,12 +118,17 @@ namespace neogfx
 
     padding length_units_converter::to_device_units(const padding& aValue) const
     {
-        return iContext.device_metrics_available() ? padding{
-            to_device_units(iContext.device_metrics().extents(), size{ aValue.left, 0 }).cx,
-            to_device_units(iContext.device_metrics().extents(), size{ 0, aValue.top }).cy,
-            to_device_units(iContext.device_metrics().extents(), size{ aValue.right, 0 }).cx,
-            to_device_units(iContext.device_metrics().extents(), size{ 0, aValue.bottom }).cy } :
-            units() == length_units::units::Pixels ? aValue : throw device_metrics_unavailable();
+        if (iContext.device_metrics_available())
+        {
+            auto const extents = iContext.device_metrics().extents();
+            return padding{
+                to_device_units(extents, size{ aValue.left, 0 }).cx,
+                to_device_units(extents, size{ 0, aValue.top }).cy,
+                to_device_units(extents, size{ aValue.right, 0 }).cx,
+                to_device_units(extents, size{ 0, aValue.bottom }).cy };
+        }
+        else
+            return units() == length_units::units::Pixels ? aValue : throw device_metrics_unavailable();
     }
 
     vector2 length_units_converter::to_device_units(const size& aExtents, const vector2& aValue) const
@@ -290,12 +295,17 @@ namespace neogfx
 
     padding length_units_converter::from_device_units(const padding& aValue) const
     {
-        return iContext.device_metrics_available() ? padding{
-            from_device_units(iContext.device_metrics().extents(), size{ aValue.left, 0 }).cx,
-            from_device_units(iContext.device_metrics().extents(), size{ 0, aValue.top }).cy,
-            from_device_units(iContext.device_metrics().extents(), size{ aValue.right, 0 }).cx,
-            from_device_units(iContext.device_metrics().extents(), size{ 0, aValue.bottom }).cy } :
-            units() == length_units::units::Pixels ? aValue : throw device_metrics_unavailable();
+        if (iContext.device_metrics_available())
+        {
+            auto const extents = iContext.device_metrics().extents();
+            return padding{
+                from_device_units(extents, size{ aValue.left, 0 }).cx,
+                from_device_units(extents, size{ 0, aValue.top }).cy,
+                from_device_units(extents, size{ aValue.right, 0 }).cx,
+                from_device_units(extents, size{ 0, aValue.bottom }).cy };
+        }
+        else
+            return units() == length_units::units::Pixels ? aValue : throw device_metrics_unavailable();
     }
 
     vector2 length_units_converter::from_device_units(const size& aExtents, const vector2& aValue) const
