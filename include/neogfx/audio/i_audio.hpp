@@ -1,7 +1,7 @@
 // i_audio.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,23 +16,31 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/i_audio_playback_device.hpp>
+#include <neogfx/audio/i_audio_device.hpp>
+
+#pragma once
 
 namespace neogfx
 {
-    class i_audio
-    {
-    public:
-        struct failed_to_initialize_audio : std::runtime_error { failed_to_initialize_audio(std::string const& aReason) : std::runtime_error{"neogfx::i_audio::failed_to_initialize_audio: " + aReason} {} };
-        struct bad_audio_device_index : std::logic_error { bad_audio_device_index() : std::logic_error{ "neogfx::i_audio::bad_audio_device_index" } {} };
-    public:
-        virtual void initialize(bool aOpenDefaultPlaybackDevice = true) = 0;
-        virtual void uninitialize() = 0;
-        virtual bool have_audio_playback_device() const = 0;
-        virtual uint32_t audio_playback_device_count() const = 0;
-        virtual i_audio_playback_device& audio_playback_device(uint32_t aDeviceIndex) = 0;
-    };
+	typedef std::any audio_context;
+
+	class i_audio_instrument_atlas;
+
+	class i_audio : public i_service
+	{
+	public:
+		virtual ~i_audio() = default;
+	public:
+		virtual i_vector<i_audio_device_info> const& available_devices() = 0;
+		virtual i_audio_device& create_device(i_audio_device_info const& aDeviceInfo, audio_data_format const& aDataFormat) = 0;
+		virtual i_audio_device& create_playback_device(audio_data_format const& aDataFormat) = 0;
+		virtual i_audio_device& create_capture_device(audio_data_format const& aDataFormat) = 0;
+		virtual void destroy_device(i_audio_device& aDevice) = 0;
+	public:
+		virtual i_audio_instrument_atlas& instrument_atlas() = 0;
+	public:
+		static uuid const& iid() { static uuid const sIid{ 0xabec285f, 0x3bc2, 0x4d97, 0xbf24, { 0x12, 0x8a, 0xe9, 0x39, 0x2f, 0x71 } }; return sIid; }
+	};
 }

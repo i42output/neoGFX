@@ -1,4 +1,4 @@
-// i_audio_track.hpp
+// i_audio_waveform.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
@@ -20,17 +20,23 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/audio/audio_primitives.hpp>
 #include <neogfx/audio/i_audio_bitstream.hpp>
+#include <neogfx/audio/i_audio_oscillator.hpp>
 
 #pragma once
 
 namespace neogfx
 {
-    class i_audio_track : public i_audio_bitstream
+    class i_audio_waveform : public i_audio_bitstream
     {
     public:
-        typedef i_audio_track abstract_type;
+        typedef i_audio_waveform abstract_type;
     public:
-        virtual ~i_audio_track() = default;
+        virtual ~i_audio_waveform() = default;
     public:
+        virtual i_audio_oscillator& create_oscillator(float aFrequency, float aAmplitude = 1.0f, oscillator_function aFunction = oscillator_function::Sine) = 0;
+        virtual i_audio_oscillator& create_oscillator(float aFrequency, float aAmplitude, std::function<float(float)> const& aFunction) = 0; ///< Note: not plugin-safe.
+        virtual i_audio_oscillator& add_oscillator(i_audio_oscillator& aOscillator) = 0;
+        virtual i_audio_oscillator& add_oscillator(i_ref_ptr<i_audio_oscillator> const& aOscillator) = 0;
+        virtual void remove_oscillator(i_audio_oscillator const& aOscillator) = 0;
     };
 }

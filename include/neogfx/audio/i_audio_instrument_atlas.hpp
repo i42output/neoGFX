@@ -1,7 +1,7 @@
-// i_audio_beeper_sample.hpp
+// i_audio_instrument_atlas.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,16 +16,20 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/i_audio_sample.hpp>
-#include <neogfx/audio/i_audio_beeper.hpp>
+#include <neogfx/audio/audio_primitives.hpp>
+#include <neogfx/audio/i_audio_bitstream.hpp>
+
+#pragma once
 
 namespace neogfx
 {
-    class i_audio_beeper_sample : public i_audio_sample, public i_audio_beeper
-    {
-    public:
-    };
+	class i_audio_instrument_atlas
+	{
+	public:
+		virtual ~i_audio_instrument_atlas() = default;
+	public:
+		virtual i_audio_bitstream& instrument(neogfx::instrument aInstrument, audio_sample_rate aSampleRate, note aNote) = 0;
+	};
 }

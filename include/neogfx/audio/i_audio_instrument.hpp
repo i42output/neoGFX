@@ -1,4 +1,4 @@
-// i_audio_track.hpp
+// i_audio_instrument.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <chrono>
 #include <neogfx/audio/audio_primitives.hpp>
 #include <neogfx/audio/i_audio_bitstream.hpp>
 
@@ -25,12 +26,19 @@
 
 namespace neogfx
 {
-    class i_audio_track : public i_audio_bitstream
+    class i_audio_instrument : public i_audio_bitstream
     {
     public:
-        typedef i_audio_track abstract_type;
+        typedef i_audio_instrument abstract_type;
     public:
-        virtual ~i_audio_track() = default;
+        typedef audio_frame_index time_point;
+        typedef audio_frame_count time_interval;
     public:
+        virtual ~i_audio_instrument() = default;
+    public:
+        virtual time_point play_note(note aNote, std::chrono::duration<double> const& aDuration) = 0;
+        virtual time_point play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration) = 0;
+        virtual time_point play_silence(std::chrono::duration<double> const& aDuration) = 0;
+        virtual time_point play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration) = 0;
     };
 }

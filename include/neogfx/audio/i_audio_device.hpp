@@ -1,7 +1,7 @@
 // i_audio_device.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,27 +16,57 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/audio_spec.hpp>
+#include <chrono>
+#include <neogfx/audio/audio_primitives.hpp>
+
+#pragma once
 
 namespace neogfx
 {
-    class i_audio_device
-    {
-    public:
-        struct already_open : std::logic_error { already_open() : std::logic_error("neogfx::i_audio_device::already_open") {} };
-        struct not_open : std::logic_error { not_open() : std::logic_error("neogfx::i_audio_device::not_open") {} };
-    public:
-        virtual ~i_audio_device() = default;
-    public:
-        virtual std::string const& name() const = 0;
-    public:
-        virtual bool is_open() const = 0;
-        virtual void open(const audio_spec& aAudioSpec = audio_spec{}, audio_spec_requirements aRequirements = audio_spec_requirements::RequireNone) = 0;
-        virtual void close() = 0;
-    public:
-        virtual const audio_spec& spec() const = 0;
-    };
+	typedef std::any audio_device_id;
+	typedef std::any audio_device_config;
+	typedef std::any audio_device_handle;
+
+	enum class audio_device_type : std::int32_t
+	{
+		Playback	= 1,
+		Capture		= 2,
+		Duplex		= Playback | Capture,
+		Loopback	= 4
+	};
+
+	class i_audio_device_info
+	{
+	public:
+		typedef i_audio_device_info abstract_type;
+	public:
+		virtual ~i_audio_device_info() = default;
+	public:
+		virtual audio_device_id id() const = 0;
+		virtual audio_device_type type() const = 0;
+		virtual i_string const& name() const = 0;
+		virtual bool is_default() const = 0;
+	public:
+		virtual i_vector<audio_data_format> const& data_formats() const = 0;
+	};
+
+	class i_audio_bitstream;
+
+	class i_audio_device : public i_reference_counted
+	{
+	public:
+		typedef i_audio_device abstract_type;
+	public:
+		virtual ~i_audio_device() = default;
+	public:
+		virtual i_audio_device_info const& info() const = 0;
+		virtual audio_data_format const& data_format() const = 0;
+	public:
+		virtual void start() = 0;
+		virtual void stop() = 0;
+	public:
+		virtual void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) = 0;
+	};
 }

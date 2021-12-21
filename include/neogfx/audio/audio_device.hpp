@@ -1,7 +1,7 @@
 // audio_device.hpp
 /*
-  neogfx C++ GUI Library
-  Copyright(C) 2017 Leigh Johnston
+  neogfx C++ App/Game Engine
+  Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,26 +16,61 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/audio/i_audio.hpp>
 #include <neogfx/audio/i_audio_device.hpp>
+#include <neogfx/audio/i_audio_bitstream.hpp>
+
+#pragma once
 
 namespace neogfx
 {
-	class audio_device : public i_audio_device
+	class audio_device_info : public i_audio_device_info
 	{
 	public:
-		audio_device(const std::string& aName);
+		audio_device_info(audio_device_id aId, audio_device_type aType, i_string const& aName, bool aIsDefault, vector<audio_data_format> const& aDataFormats);
+		audio_device_info(i_audio_device_info const& aOther);
+		~audio_device_info() override;
+	public:
+		audio_device_id id() const override;
+		audio_device_type type() const override;
+		i_string const& name() const override;
+		bool is_default() const override;
+	public:
+		i_vector<audio_data_format> const& data_formats() const override;
+	private:
+		audio_device_id iId;
+		audio_device_type iType;
+		string iName;
+		bool iIsDefault;
+		vector<audio_data_format> iDataFormats;
+	};
+
+	class audio_device : public reference_counted<i_audio_device>
+	{
+	public:
+		audio_device(audio_context aContext, i_audio_device_info const& aDeviceInfo, audio_data_format const& aDataFormat);
 		~audio_device();
 	public:
-		const std::string& name() const override;
+		i_audio_device_info const& info() const final;
+		audio_data_format const& data_format() const final;
 	public:
-		const audio_spec& spec() const override;
-	protected:
-		void set_spec(const optional_audio_spec& aSpec);
+		void start() final;
+		void stop() final;
+	public:
+		void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) final;
 	private:
-		std::string iName;
-		optional_audio_spec iSpec;
+		mutable std::recursive_mutex iMutex;
+		audio_device_info iInfo;
+		audio_data_format iDataFormat;
+		audio_device_config iConfig;
+		audio_device_handle iHandle;
+		struct source
+		{
+			ref_ptr<i_audio_bitstream> bitstream; // todo: should be i_audio_bitstream
+			std::optional<std::chrono::steady_clock::time_point> expiryTime;
+		};
+		std::vector<source> iSources;
 	};
 }

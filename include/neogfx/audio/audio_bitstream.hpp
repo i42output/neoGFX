@@ -1,4 +1,4 @@
-// i_audio_track.hpp
+// audio_waveform.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
@@ -18,19 +18,34 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/audio_primitives.hpp>
+#include <neogfx/audio/i_audio_device.hpp>
 #include <neogfx/audio/i_audio_bitstream.hpp>
 
 #pragma once
 
 namespace neogfx
 {
-    class i_audio_track : public i_audio_bitstream
+    template <typename Interface>
+    class audio_bitstream : public reference_counted<Interface>
     {
     public:
-        typedef i_audio_track abstract_type;
+        audio_bitstream(audio_sample_rate aSampleRate, float aAmplitude = 1.0f);
+        audio_bitstream(i_audio_device const& aDevice, float aAmplitude = 1.0f);
     public:
-        virtual ~i_audio_track() = default;
+        ~audio_bitstream();
     public:
+        audio_sample_rate sample_rate() const final;
+        void set_sample_rate(audio_sample_rate aSampleRate) override;
+    public:
+        float amplitude() const final;
+        void set_amplitude(float aAmplitude) final;
+        bool has_envelope() const final;
+        adsr_envelope const& envelope() final;
+        void clear_envelope() final;
+        void set_envelope(adsr_envelope const& aEnvelope) final;
+    private:
+        audio_sample_rate iSampleRate;
+        float iAmplitude;
+        std::optional<adsr_envelope> iEnvelope;
     };
 }

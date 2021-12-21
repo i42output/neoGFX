@@ -1,7 +1,7 @@
-// i_audio_beeper.hpp
+// audio_bitstream.cpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -16,30 +16,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/audio/audio_bitstream.ipp>
+#include <neogfx/audio/i_audio_waveform.hpp>
+#include <neogfx/audio/i_audio_instrument.hpp>
 
 namespace neogfx
 {
-    struct audio_envelope
-    {
-        double attack;
-        double decay;
-        double sustain;
-        double release;
-    };
-
-    class i_audio_beeper
-    {
-    public:
-        virtual ~i_audio_beeper() = default;
-    public:
-        virtual void beep(double aDuration, double aFrequency) = 0;
-        virtual void beep(const audio_envelope& aEnvelope, double aFrequency) = 0;
-        virtual void silence(double aDuration) = 0;
-        virtual void repeat_start(uint32_t aRepeatCount) = 0;
-        virtual void repeat_end() = 0;
-        virtual void clear() = 0;
-    };
+    template class audio_bitstream<i_audio_waveform>;
+    template class audio_bitstream<i_audio_instrument>;
 }

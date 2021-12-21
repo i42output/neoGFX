@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
+#include <neogfx/audio/i_audio.hpp>
 #include "main_window.hpp"
 
 namespace neogfx::DesignStudio
