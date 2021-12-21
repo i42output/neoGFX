@@ -177,7 +177,7 @@ namespace neogfx
         {
             if (iPointFrom)
             {
-                iSubPaths.push_back(sub_path_type());
+                iSubPaths.push_back(sub_path_type{});
                 if (iLineCountHint != 0)
                 {
                     iSubPaths.back().reserve(iLineCountHint + 1);
@@ -191,12 +191,13 @@ namespace neogfx
                 if (iSubPaths.empty())
                     throw missing_move_to();
             }
-            iSubPaths.back().push_back(aPoint);
+            if (iSubPaths.back().empty() || iSubPaths.back().back() != aPoint)
+                iSubPaths.back().push_back(aPoint);
             iBoundingRect = std::nullopt;
         }
         void line_to(coordinate_type aX, coordinate_type aY)
         {
-            line_to(point_type(aX, aY));
+            line_to(point_type{ aX, aY });
         }
         void add_rect(const mesh_type& aRectangle);
         void inflate(const delta_type& aDelta)
