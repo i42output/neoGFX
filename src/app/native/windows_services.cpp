@@ -79,12 +79,6 @@ template<> neogfx::i_window_manager& services::start_service<neogfx::i_window_ma
     return sWindowsWindowManager;
 }
 
-//    template<> i_audio& start_service<i_audio>()
-//    {
-//        static native::windows::audio sWindowsAudio;
-//        return sWindowsAudio;
-//    };
-
 template<> neogfx::i_clipboard& services::start_service<neogfx::i_clipboard>()
 {
     static neogfx::clipboard sClipboard{ service<neogfx::i_basic_services>().system_clipboard() };

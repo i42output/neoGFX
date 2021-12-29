@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/audio/audio_waveform.hpp>
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include "app.hpp"
 
@@ -39,6 +40,19 @@ int main(int argc, char* argv[])
     std::cout << appInfo.copyright() << std::endl << std::endl;
 
     ds::app app{ appInfo };
+
+    auto& playbackDevice = ng::service<ng::i_audio>().create_playback_device(
+        ng::audio_data_format{ ng::audio_sample_format::F32, 2u, 48000u });
+    playbackDevice.start();
+
+    ng::audio_waveform waveform{ playbackDevice, 0.25f };
+    float const noteC4 = 261.63f;
+    float const amplitude = 0.333f;
+    waveform.create_oscillator(noteC4, amplitude);
+    waveform.create_oscillator(noteC4 / 2.0f, amplitude); // 1 octave below middle C
+    waveform.create_oscillator(noteC4 * 2.0f, amplitude); // 1 octave above middle C
+
+    playbackDevice.play(waveform, std::chrono::seconds(10));
 
     try
     {
