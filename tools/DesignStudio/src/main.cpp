@@ -45,12 +45,12 @@ int main(int argc, char* argv[])
         ng::audio_data_format{ ng::audio_sample_format::F32, 2u, 48000u });
     playbackDevice.start();
 
-    ng::audio_waveform waveform{ playbackDevice, 0.25f };
-    float const noteC4 = 261.63f;
-    float const amplitude = 0.333f;
-    waveform.create_oscillator(noteC4, amplitude);
-    waveform.create_oscillator(noteC4 / 2.0f, amplitude); // 1 octave below middle C
-    waveform.create_oscillator(noteC4 * 2.0f, amplitude); // 1 octave above middle C
+    float const amplitude = 0.25f;
+    ng::audio_waveform waveform{ playbackDevice, amplitude };
+    float const componentAmplitude = 0.333f;
+    waveform.create_oscillator(ng::frequency<ng::note::C4>(), componentAmplitude);
+    waveform.create_oscillator(ng::frequency<ng::note::C3>(), componentAmplitude); // 1 octave below middle C
+    waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude); // 1 octave above middle C
 
     playbackDevice.play(waveform, std::chrono::seconds(10));
 

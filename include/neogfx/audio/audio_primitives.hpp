@@ -24,6 +24,109 @@
 
 namespace neogfx
 {
+    enum class note : std::uint32_t
+    {
+        A0  = 1,
+        Bb0 = 2,
+        B0  = 3,
+        C1  = 4,
+        Db1 = 5,
+        D1  = 6,
+        Eb1 = 7,
+        E1  = 8,
+        F1  = 9,
+        Gb1 = 10,
+        G1  = 11,
+        Ab1 = 12,
+        A1  = 13,
+        Bb1 = 14,
+        B1  = 15,
+        C2  = 16,
+        Db2 = 17,
+        D2  = 18,
+        Eb2 = 19,
+        E2  = 20,
+        F2  = 21,
+        Gb2 = 22,
+        G2  = 23,
+        Ab2 = 24,
+        A2  = 25,
+        Bb2 = 26,
+        B2  = 27,
+        C3  = 28,
+        Db3 = 29,
+        D3  = 30,
+        Eb3 = 31,
+        E3  = 32,
+        F3  = 33,
+        Gb3 = 34,
+        G3  = 35,
+        Ab3 = 36,
+        A3  = 37,
+        Bb3 = 38,
+        B3  = 39,
+        C4  = 40,
+        Db4 = 41,
+        D4  = 42,
+        Eb4 = 43,
+        E4  = 44,
+        F4  = 45,
+        Gb4 = 46,
+        G4  = 47,
+        Ab4 = 48,
+        A4  = 49,
+        Bb4 = 50,
+        B4  = 51,
+        C5  = 52,
+        Db5 = 53,
+        D5  = 54,
+        Eb5 = 55,
+        E5  = 56,
+        F5  = 57,
+        Gb5 = 58,
+        G5  = 59,
+        Ab5 = 60,
+        A5  = 61,
+        Bb5 = 62,
+        B5  = 63,
+        C6  = 64,
+        Db6 = 65,
+        D6  = 66,
+        Eb6 = 67,
+        E6  = 68,
+        F6  = 69,
+        Gb6 = 70,
+        G6  = 71,
+        Ab6 = 72,
+        A6  = 73,
+        Bb6 = 74,
+        B6  = 75,
+        C7  = 76,
+        Db7 = 77,
+        D7  = 78,
+        Eb7 = 79,
+        E7  = 80,
+        F7  = 81,
+        Gb7 = 82,
+        G7  = 83,
+        Ab7 = 84,
+        A7  = 85,
+        Bb7 = 86,
+        B7  = 87,
+        C8  = 88
+    };
+
+    inline float frequency(neogfx::note note)
+    {
+        return std::pow(2.0f, (static_cast<float>(note) - 49.0f) / 12.0f) * 440.0f;
+    }
+
+    template <neogfx::note Note>
+    inline float frequency()
+    {
+        return frequency(Note);
+    }
+
     enum class audio_channel : std::uint64_t
     {
         None                               = 0x0000000000000000ULL,
