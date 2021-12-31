@@ -52,7 +52,7 @@ namespace neogfx
 		virtual i_vector<audio_data_format> const& data_formats() const = 0;
 	};
 
-	class i_audio_waveform;
+	class i_audio_bitstream;
 
 	class i_audio_device : public i_reference_counted
 	{
@@ -67,6 +67,6 @@ namespace neogfx
 		virtual void start() = 0;
 		virtual void stop() = 0;
 	public:
-		virtual void play(i_audio_waveform& aWaveform, std::chrono::duration<double> const& aDuration) = 0;
+		virtual void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) = 0;
 	};
 }

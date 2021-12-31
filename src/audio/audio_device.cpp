@@ -113,19 +113,9 @@ namespace neogfx
 			std::unique_lock lock{ device.iMutex };
 			for (auto& source : device.iSources)
 			{
+				// todo: channel mapping
 				if (source.expiryTime > std::chrono::steady_clock::now())
-				{
-					// todo: frames from bitstreams instead (with channel mapping)
-					thread_local std::vector<float> samples;
-					samples.resize(frameCount);
-					source.bitstream->generate(frameCount, samples.data());
-					auto frames = reinterpret_cast<std::array<float, 2>*>(pOutput);
-					for (audio_frame_index frame = 0; frame != frameCount; ++frame)
-					{
-						frames[frame][0] = samples[frame];
-						frames[frame][1] = samples[frame];
-					}
-				}
+					source.bitstream->generate(audio_channel::Left | audio_channel::Right, frameCount, static_cast<float*>(pOutput));
 			}
 		};
 
@@ -169,11 +159,11 @@ namespace neogfx
 		ma_device_stop(std::any_cast<ma_device>(&iHandle));
 	}
 
-	void audio_device::play(i_audio_waveform& aWaveform, std::chrono::duration<double> const& aDuration)
+	void audio_device::play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration)
 	{
 		std::unique_lock lock{ iMutex };
 		iSources.push_back(source{
-			ref_ptr<i_audio_waveform>{ ref_ptr<i_audio_waveform>{},& aWaveform },
+			ref_ptr<i_audio_bitstream>{ ref_ptr<i_audio_bitstream>{}, &aBitstream },
 			std::chrono::steady_clock::now() + std::chrono::duration_cast<std::chrono::milliseconds>(aDuration) });
 	}
 }

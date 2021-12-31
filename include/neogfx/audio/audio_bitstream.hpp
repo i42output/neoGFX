@@ -1,4 +1,4 @@
-// i_audio_waveform.hpp
+// audio_waveform.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
@@ -18,25 +18,34 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/audio_primitives.hpp>
+#include <neogfx/audio/i_audio_device.hpp>
 #include <neogfx/audio/i_audio_bitstream.hpp>
-#include <neogfx/audio/i_audio_oscillator.hpp>
 
 #pragma once
 
 namespace neogfx
 {
-    class i_audio_waveform : public i_audio_bitstream
+    template <typename Interface>
+    class audio_bitstream : public reference_counted<Interface>
     {
     public:
-        typedef i_audio_waveform abstract_type;
+        audio_bitstream(audio_sample_rate aSampleRate, float aAmplitude = 1.0f);
+        audio_bitstream(i_audio_device const& aDevice, float aAmplitude = 1.0f);
     public:
-        virtual ~i_audio_waveform() = default;
+        ~audio_bitstream();
     public:
-        virtual i_audio_oscillator& create_oscillator(float aFrequency, float aAmplitude = 1.0f, oscillator_function aFunction = oscillator_function::Sine) = 0;
-        virtual i_audio_oscillator& create_oscillator(float aFrequency, float aAmplitude, std::function<float(float)> const& aFunction) = 0; ///< Note: not plugin-safe.
-        virtual i_audio_oscillator& add_oscillator(i_audio_oscillator& aOscillator) = 0;
-        virtual i_audio_oscillator& add_oscillator(i_ref_ptr<i_audio_oscillator> const& aOscillator) = 0;
-        virtual void remove_oscillator(i_audio_oscillator const& aOscillator) = 0;
+        audio_sample_rate sample_rate() const final;
+        void set_sample_rate(audio_sample_rate aSampleRate) override;
+    public:
+        float amplitude() const final;
+        void set_amplitude(float aAmplitude) final;
+        bool has_envelope() const final;
+        adsr_envelope const& envelope() final;
+        void clear_envelope() final;
+        void set_envelope(adsr_envelope const& aEnvelope) final;
+    private:
+        audio_sample_rate iSampleRate;
+        float iAmplitude;
+        std::optional<adsr_envelope> iEnvelope;
     };
 }

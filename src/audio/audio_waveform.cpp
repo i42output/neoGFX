@@ -18,13 +18,14 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <bit>
 #include <neogfx/audio/audio_waveform.hpp>
 #include <neogfx/audio/audio_oscillator.hpp>
 
 namespace neogfx
 {
     audio_waveform::audio_waveform(audio_sample_rate aSampleRate, float aAmplitude) :
-        iSampleRate{ aSampleRate }, iAmplitude{ aAmplitude }
+        audio_bitstream{ aSampleRate, aAmplitude }
     {
     }
 
@@ -37,16 +38,11 @@ namespace neogfx
     {
     }
 
-    audio_sample_rate audio_waveform::sample_rate() const
-    {
-        return iSampleRate;
-    }
-
     void audio_waveform::set_sample_rate(audio_sample_rate aSampleRate)
     {
-        iSampleRate = aSampleRate;
+        audio_bitstream::set_sample_rate(aSampleRate);
         for (auto& oscillator : iOscillators)
-            oscillator->set_sample_rate(iSampleRate);
+            oscillator->set_sample_rate(sample_rate());
     }
 
     i_audio_oscillator& audio_waveform::create_oscillator(float aFrequency, float aAmplitude, oscillator_function aFunction)
@@ -77,50 +73,23 @@ namespace neogfx
             iOscillators.erase(existing);
     }
 
-    float audio_waveform::amplitude() const
+    void audio_waveform::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        return iAmplitude;
-    }
-
-    void audio_waveform::set_amplitude(float aAmplitude)
-    {
-        iAmplitude = aAmplitude;
-    }
-
-    bool audio_waveform::has_envelope() const
-    {
-        return iEnvelope != std::nullopt;
-    }
-
-    adsr_envelope const& audio_waveform::envelope()
-    {
-        return iEnvelope.value();
-    }
-
-    void audio_waveform::clear_envelope()
-    {
-        iEnvelope = std::nullopt;
-    }
-
-    void audio_waveform::set_envelope(adsr_envelope const& aEnvelope)
-    {
-        iEnvelope = aEnvelope;
-    }
-
-    void audio_waveform::generate(audio_sample_count aSampleCount, float* aOutputSamples)
-    {
-        std::fill(aOutputSamples, aOutputSamples + aSampleCount, 0.0f);
+        std::fill(aOutputFrames, aOutputFrames + aFrameCount * channel_count(aChannel), 0.0f);
 
         for (auto const& o : iOscillators)
         {
             thread_local std::vector<float> componentResult;
-            componentResult.resize(aSampleCount);
+            componentResult.resize(aFrameCount);
 
-            o->generate(aSampleCount, componentResult.data());
+            o->generate(aFrameCount, componentResult.data());
 
-            auto outputSample = aOutputSamples;
+            auto outputSample = aOutputFrames;
             for (auto sampleComponent : componentResult)
-                *(outputSample++) += (sampleComponent * amplitude());
+            {
+                for (int channel = 0; channel < channel_count(aChannel); ++channel)
+                    *(outputSample++) += (sampleComponent * amplitude());
+            }
         }
     }
 }

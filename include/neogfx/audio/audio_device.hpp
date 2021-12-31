@@ -20,7 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/audio/i_audio.hpp>
 #include <neogfx/audio/i_audio_device.hpp>
-#include <neogfx/audio/i_audio_waveform.hpp>
+#include <neogfx/audio/i_audio_bitstream.hpp>
 
 #pragma once
 
@@ -59,7 +59,7 @@ namespace neogfx
 		void start() final;
 		void stop() final;
 	public:
-		void play(i_audio_waveform& aWaveform, std::chrono::duration<double> const& aDuration) final;
+		void play(i_audio_bitstream& aBitstream, std::chrono::duration<double> const& aDuration) final;
 	private:
 		mutable std::recursive_mutex iMutex;
 		audio_device_info iInfo;
@@ -68,7 +68,7 @@ namespace neogfx
 		audio_device_handle iHandle;
 		struct source
 		{
-			ref_ptr<i_audio_waveform> bitstream; // todo: should be i_audio_bitstream
+			ref_ptr<i_audio_bitstream> bitstream; // todo: should be i_audio_bitstream
 			std::optional<std::chrono::steady_clock::time_point> expiryTime;
 		};
 		std::vector<source> iSources;

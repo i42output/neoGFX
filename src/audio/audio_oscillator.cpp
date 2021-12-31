@@ -51,6 +51,7 @@ namespace neogfx
     void audio_oscillator::set_frequency(float aFrequency)
     {
         iFrequency = aFrequency;
+        iCursor = 0ULL;
     }
 
     float audio_oscillator::amplitude() const
@@ -73,12 +74,14 @@ namespace neogfx
         iFunction = aFunction;
         if (iFunction != oscillator_function::Custom)
             iCustomFunction = nullptr;
+        iCursor = 0ULL;
     }
 
     void audio_oscillator::set_function(std::function<float(float)> const& aFunction)
     {
         iFunction = oscillator_function::Custom;
         iCustomFunction = aFunction;
+        iCursor = 0ULL;
     }
 
     void audio_oscillator::generate(audio_sample_count aSampleCount, float* aOutputSamples)

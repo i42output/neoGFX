@@ -239,11 +239,13 @@
     <ClInclude Include="..\..\..\include\neogfx\app\settings.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\app\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\audio\audio_bitstream.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_oscillator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_waveform.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_bitstream.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_oscillator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_waveform.hpp" />
@@ -579,6 +581,7 @@
     <ClCompile Include="..\..\..\src\app\style.cpp" />
     <ClCompile Include="..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_bitstream.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_oscillator.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_waveform.cpp" />

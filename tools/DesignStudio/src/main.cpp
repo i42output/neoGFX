@@ -47,10 +47,10 @@ int main(int argc, char* argv[])
 
     float const amplitude = 0.25f;
     ng::audio_waveform waveform{ playbackDevice, amplitude };
-    float const componentAmplitude = 0.333f;
+    float const componentAmplitude = 0.1f;
     waveform.create_oscillator(ng::frequency<ng::note::C4>(), componentAmplitude);
-    waveform.create_oscillator(ng::frequency<ng::note::C3>(), componentAmplitude); // 1 octave below middle C
-    waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude); // 1 octave above middle C
+    waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude);
+    waveform.create_oscillator(ng::frequency<ng::note::C8>(), componentAmplitude);
 
     playbackDevice.play(waveform, std::chrono::seconds(10));
 
