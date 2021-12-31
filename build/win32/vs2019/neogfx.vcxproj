@@ -240,6 +240,7 @@
     <ClInclude Include="..\..\..\include\neogfx\app\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_bitstream.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\audio\audio_bitstream.ipp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_oscillator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_primitives.hpp" />

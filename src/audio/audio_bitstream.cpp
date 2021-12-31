@@ -18,76 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/audio_bitstream.hpp>
+#include <neogfx/audio/audio_bitstream.ipp>
 #include <neogfx/audio/i_audio_waveform.hpp>
 
 namespace neogfx
 {
-    template <typename Interface>
-    audio_bitstream<Interface>::audio_bitstream(audio_sample_rate aSampleRate, float aAmplitude) :
-        iSampleRate{ aSampleRate }, iAmplitude{ aAmplitude }
-    {
-    }
-
-    template <typename Interface>
-    audio_bitstream<Interface>::audio_bitstream(i_audio_device const& aDevice, float aAmplitude) :
-        audio_bitstream{ aDevice.data_format().sampleRate, aAmplitude }
-    {
-    }
-    
-    template <typename Interface>
-    audio_bitstream<Interface>::~audio_bitstream()
-    {
-    }
-
-    template <typename Interface>
-    audio_sample_rate audio_bitstream<Interface>::sample_rate() const
-    {
-        return iSampleRate;
-    }
-
-    template <typename Interface>
-    void audio_bitstream<Interface>::set_sample_rate(audio_sample_rate aSampleRate)
-    {
-        iSampleRate = aSampleRate;
-    }
-
-    
-    template <typename Interface>
-    float audio_bitstream<Interface>::amplitude() const
-    {
-        return iAmplitude;
-    }
-
-    template <typename Interface>
-    void audio_bitstream<Interface>::set_amplitude(float aAmplitude)
-    {
-        iAmplitude = aAmplitude;
-    }
-
-    template <typename Interface>
-    bool audio_bitstream<Interface>::has_envelope() const
-    {
-        return iEnvelope != std::nullopt;
-    }
-
-    template <typename Interface>
-    adsr_envelope const& audio_bitstream<Interface>::envelope()
-    {
-        return iEnvelope.value();
-    }
-
-    template <typename Interface>
-    void audio_bitstream<Interface>::clear_envelope()
-    {
-        iEnvelope = std::nullopt;
-    }
-
-    template <typename Interface>
-    void audio_bitstream<Interface>::set_envelope(adsr_envelope const& aEnvelope)
-    {
-        iEnvelope = aEnvelope;
-    }
-
     template class audio_bitstream<i_audio_waveform>;
 }
