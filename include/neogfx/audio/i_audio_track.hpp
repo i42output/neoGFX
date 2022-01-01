@@ -1,4 +1,4 @@
-// audio_bitstream.cpp
+// i_audio_track.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
@@ -18,12 +18,19 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/audio/audio_bitstream.ipp>
-#include <neogfx/audio/i_audio_waveform.hpp>
-#include <neogfx/audio/i_audio_instrument.hpp>
+#include <neogfx/audio/audio_primitives.hpp>
+#include <neogfx/audio/i_audio_bitstream.hpp>
+
+#pragma once
 
 namespace neogfx
 {
-    template class audio_bitstream<i_audio_waveform>;
-    template class audio_bitstream<i_audio_instrument>;
+    class i_audio_track : public i_audio_bitstream
+    {
+    public:
+        typedef i_audio_track abstract_type;
+    public:
+        virtual ~i_audio_track() = default;
+    public:
+    };
 }

@@ -41,6 +41,7 @@ namespace neogfx
         void set_function(std::function<float(float)> const& aFunction) final; ///< Note: not plugin-safe.
     public:
         void generate(audio_sample_count aSampleCount, float* aOutputSamples) final;
+        void generate_from(audio_sample_index aSampleFrom, audio_sample_count aSampleCount, float* aOutputSamples) final;
     private:
         audio_sample_rate iSampleRate;
         float iFrequency;

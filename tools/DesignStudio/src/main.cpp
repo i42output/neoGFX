@@ -17,11 +17,14 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <chrono>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/audio/audio_waveform.hpp>
+#include <neogfx/audio/audio_instrument.hpp>
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include "app.hpp"
 
+using namespace std::chrono_literals;
 using namespace neogfx::string_literals;
 
 int main(int argc, char* argv[])
@@ -46,13 +49,23 @@ int main(int argc, char* argv[])
     playbackDevice.start();
 
     float const amplitude = 0.25f;
+
     ng::audio_waveform waveform{ playbackDevice, amplitude };
     float const componentAmplitude = 0.1f;
     waveform.create_oscillator(ng::frequency<ng::note::C4>(), componentAmplitude);
     waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude);
     waveform.create_oscillator(ng::frequency<ng::note::C8>(), componentAmplitude);
 
-    playbackDevice.play(waveform, std::chrono::seconds(10));
+    playbackDevice.play(waveform, 10s);
+
+    ng::audio_instrument piano{ playbackDevice, ng::instrument::AcousticGrandPiano, amplitude };
+    auto time = piano.play_note(ng::note::G4, 0.5s);
+    time = piano.play_note(time, ng::note::A4, 0.5s);
+    time = piano.play_note(time, ng::note::F4, 0.5s);
+    time = piano.play_note(time, ng::note::F3, 0.5s);
+    time = piano.play_note(time, ng::note::C4, 0.5s);
+
+    playbackDevice.play(piano, 10s);
 
     try
     {

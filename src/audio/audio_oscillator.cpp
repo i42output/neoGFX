@@ -86,6 +86,13 @@ namespace neogfx
 
     void audio_oscillator::generate(audio_sample_count aSampleCount, float* aOutputSamples)
     {
+        generate_from(iCursor, aSampleCount, aOutputSamples);
+    }
+
+    void audio_oscillator::generate_from(audio_sample_index aSampleFrom, audio_sample_count aSampleCount, float* aOutputSamples)
+    {
+        iCursor = aSampleFrom;
+
         switch (function())
         {
         case oscillator_function::Custom:
@@ -110,6 +117,7 @@ namespace neogfx
         default:
             break;
         }
+
         iCursor += aSampleCount;
     }
 }

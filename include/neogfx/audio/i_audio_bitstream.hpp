@@ -29,6 +29,8 @@ namespace neogfx
     public:
         typedef i_audio_bitstream abstract_type;
     public:
+        typedef void* handle;
+    public:
         virtual ~i_audio_bitstream() = default;
     public:
         virtual audio_sample_rate sample_rate() const = 0;
@@ -41,6 +43,8 @@ namespace neogfx
         virtual void clear_envelope() = 0;
         virtual void set_envelope(adsr_envelope const& aEnvelope) = 0;
     public:
+        virtual audio_frame_count length() const = 0;
         virtual void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) = 0;
+        virtual void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) = 0;
     };
 }

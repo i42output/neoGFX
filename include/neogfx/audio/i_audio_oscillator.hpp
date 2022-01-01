@@ -51,5 +51,6 @@ namespace neogfx
         virtual void set_function(std::function<float(float)> const& aFunction) = 0; ///< Note: not plugin-safe.
     public:
         virtual void generate(audio_sample_count aSampleCount, float* aOutputSamples) = 0;
+        virtual void generate_from(audio_sample_index aSampleFrom, audio_sample_count aSampleCount, float* aOutputSamples) = 0;
     };
 }

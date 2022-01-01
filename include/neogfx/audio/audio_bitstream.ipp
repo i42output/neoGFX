@@ -53,37 +53,37 @@ namespace neogfx
 
     
     template <typename Interface>
-    inline float audio_bitstream<Interface>::amplitude() const
+    inline float audio_bitstream<Interface>::amplitude(handle aHandle) const
     {
         return iAmplitude;
     }
 
     template <typename Interface>
-    inline void audio_bitstream<Interface>::set_amplitude(float aAmplitude)
+    inline void audio_bitstream<Interface>::set_amplitude(handle aHandle, float aAmplitude)
     {
         iAmplitude = aAmplitude;
     }
 
     template <typename Interface>
-    inline bool audio_bitstream<Interface>::has_envelope() const
+    inline bool audio_bitstream<Interface>::has_envelope(handle aHandle) const
     {
         return iEnvelope != std::nullopt;
     }
 
     template <typename Interface>
-    inline adsr_envelope const& audio_bitstream<Interface>::envelope()
+    inline adsr_envelope const& audio_bitstream<Interface>::envelope(handle aHandle)
     {
         return iEnvelope.value();
     }
 
     template <typename Interface>
-    inline void audio_bitstream<Interface>::clear_envelope()
+    inline void audio_bitstream<Interface>::clear_envelope(handle aHandle)
     {
         iEnvelope = std::nullopt;
     }
 
     template <typename Interface>
-    inline void audio_bitstream<Interface>::set_envelope(adsr_envelope const& aEnvelope)
+    inline void audio_bitstream<Interface>::set_envelope(handle aHandle, adsr_envelope const& aEnvelope)
     {
         iEnvelope = aEnvelope;
     }

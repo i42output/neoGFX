@@ -33,7 +33,7 @@ namespace neogfx
         audio_waveform{ aDevice.data_format().sampleRate, aAmplitude }
     {
     }
-    
+
     audio_waveform::~audio_waveform()
     {
     }
@@ -54,10 +54,10 @@ namespace neogfx
     {
         return add_oscillator(make_ref<audio_oscillator>(sample_rate(), aFrequency, aAmplitude, aFunction));
     }
-    
+
     i_audio_oscillator& audio_waveform::add_oscillator(i_audio_oscillator& aOscillator)
     {
-        return add_oscillator(ref_ptr<i_audio_oscillator>{ ref_ptr<i_audio_oscillator>{}, &aOscillator});
+        return add_oscillator(ref_ptr<i_audio_oscillator>{ ref_ptr<i_audio_oscillator>{}, & aOscillator});
     }
 
     i_audio_oscillator& audio_waveform::add_oscillator(i_ref_ptr<i_audio_oscillator> const& aOscillator)
@@ -73,6 +73,11 @@ namespace neogfx
             iOscillators.erase(existing);
     }
 
+    audio_frame_count audio_waveform::length() const
+    {
+        return 0ULL;
+    }
+
     void audio_waveform::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
         std::fill(aOutputFrames, aOutputFrames + aFrameCount * channel_count(aChannel), 0.0f);
@@ -83,6 +88,24 @@ namespace neogfx
             componentResult.resize(aFrameCount);
 
             o->generate(aFrameCount, componentResult.data());
+
+            auto outputSample = aOutputFrames;
+            for (auto sampleComponent : componentResult)
+            {
+                for (int channel = 0; channel < channel_count(aChannel); ++channel)
+                    *(outputSample++) += (sampleComponent * amplitude());
+            }
+        }
+    }
+
+    void audio_waveform::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+    {
+        for (auto const& o : iOscillators)
+        {
+            thread_local std::vector<float> componentResult;
+            componentResult.resize(aFrameCount);
+
+            o->generate_from(aFrameFrom, aFrameCount, componentResult.data());
 
             auto outputSample = aOutputFrames;
             for (auto sampleComponent : componentResult)

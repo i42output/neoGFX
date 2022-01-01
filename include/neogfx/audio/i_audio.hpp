@@ -26,6 +26,8 @@ namespace neogfx
 {
 	typedef std::any audio_context;
 
+	class i_audio_instrument_atlas;
+
 	class i_audio : public i_service
 	{
 	public:
@@ -36,6 +38,8 @@ namespace neogfx
 		virtual i_audio_device& create_playback_device(audio_data_format const& aDataFormat) = 0;
 		virtual i_audio_device& create_capture_device(audio_data_format const& aDataFormat) = 0;
 		virtual void destroy_device(i_audio_device& aDevice) = 0;
+	public:
+		virtual i_audio_instrument_atlas& instrument_atlas() = 0;
 	public:
 		static uuid const& iid() { static uuid const sIid{ 0xabec285f, 0x3bc2, 0x4d97, 0xbf24, { 0x12, 0x8a, 0xe9, 0x39, 0x2f, 0x71 } }; return sIid; }
 	};
