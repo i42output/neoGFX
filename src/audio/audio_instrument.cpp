@@ -18,6 +18,8 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/audio/i_audio.hpp>
+#include <neogfx/audio/i_audio_instrument_atlas.hpp>
 #include <neogfx/audio/audio_instrument.hpp>
 
 namespace neogfx
@@ -34,41 +36,44 @@ namespace neogfx
 
     audio_instrument::time_point audio_instrument::play_note(note aNote, std::chrono::duration<double> const& aDuration)
     {
-        // todo
-        return 0ULL;
+        return play_note(iInputCursor, aNote, aDuration);
     }
 
     audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration)
     {
-        // todo
-        return 0ULL;
+        iComposition.emplace_back(aNote, aWhen, aDuration.count() * sample_rate());
+        iInputCursor = aWhen + iComposition.back().duration;
+        return iInputCursor;
     }
 
     audio_instrument::time_point audio_instrument::play_silence(std::chrono::duration<double> const& aDuration)
     {
-        // todo
-        return 0ULL;
+        return play_silence(iInputCursor, aDuration);
     }
 
     audio_instrument::time_point audio_instrument::play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration)
     {
-        // todo
-        return 0ULL;
+        iComposition.emplace_back(std::nullopt, aWhen, aDuration.count() * sample_rate());
+        iInputCursor = aWhen + iComposition.back().duration;
+        return iInputCursor;
     }
 
     audio_frame_count audio_instrument::length() const
     {
-        // todo
-        return 0ULL;
+        if (!iComposition.empty())
+            return iComposition.back().start + iComposition.back().duration;
+        else
+            return 0ULL;
     }
 
     void audio_instrument::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        // todo
+        generate_from(aChannel, iOutputCursor, aFrameCount, aOutputFrames);
     }
 
     void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        // todo
+        service<i_audio>().instrument_atlas().
+        iOutputCursor = aFrameFrom + aFrameCount;
     }
 }

@@ -42,5 +42,14 @@ namespace neogfx
         void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) final;
     private:
         neogfx::instrument iInstrument;
+        time_point iInputCursor = 0ULL;
+        time_point iOutputCursor = 0ULL;
+        struct part
+        {
+            std::optional<note> note;
+            time_interval start;
+            time_interval duration;
+        };
+        std::vector<part> iComposition;
     };
 }

@@ -32,6 +32,7 @@ namespace neogfx
         typedef i_audio_instrument abstract_type;
     public:
         typedef audio_frame_index time_point;
+        typedef audio_frame_count time_interval;
     public:
         virtual ~i_audio_instrument() = default;
     public:
