@@ -36,6 +36,8 @@ namespace neogfx
 		i_audio_device& create_playback_device(audio_data_format const& aDataFormat) override;
 		i_audio_device& create_capture_device(audio_data_format const& aDataFormat) override;
 		void destroy_device(i_audio_device& aDevice) override;
+	public:
+		i_audio_instrument_atlas& instrument_atlas() override;
 	private:
 		i_audio_device_info const* find_device(audio_device_type aType, audio_data_format const& aDataFormat);
 	private:

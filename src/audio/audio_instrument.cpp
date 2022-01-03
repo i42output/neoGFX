@@ -41,7 +41,7 @@ namespace neogfx
 
     audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration)
     {
-        iComposition.emplace_back(aNote, aWhen, aDuration.count() * sample_rate());
+        iComposition.emplace_back(aNote, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
         iInputCursor = aWhen + iComposition.back().duration;
         return iInputCursor;
     }
@@ -53,7 +53,7 @@ namespace neogfx
 
     audio_instrument::time_point audio_instrument::play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration)
     {
-        iComposition.emplace_back(std::nullopt, aWhen, aDuration.count() * sample_rate());
+        iComposition.emplace_back(std::nullopt, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
         iInputCursor = aWhen + iComposition.back().duration;
         return iInputCursor;
     }
@@ -73,7 +73,22 @@ namespace neogfx
 
     void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        service<i_audio>().instrument_atlas().
-        iOutputCursor = aFrameFrom + aFrameCount;
+        auto start = std::lower_bound(iComposition.begin(), iComposition.end(), aFrameFrom, [](auto const& lhs, auto const& rhs)
+            {
+                return lhs.start < rhs;
+            });
+        iOutputCursor = aFrameFrom;
+        for (auto next = start; next->start < aFrameFrom + aFrameCount; ++next)
+        {
+            auto count = std::min(next->duration, (aFrameFrom + aFrameCount) - iOutputCursor);
+            thread_local std::vector<float> buffer;
+            buffer.resize(count);
+            if (next->note)
+                service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), *next->note).generate_from(
+                    aChannel, iOutputCursor - next->start, count, buffer.data());
+            for (auto sample : buffer)
+                (*aOutputFrames++) += (sample * amplitude());
+            iOutputCursor += count;
+        }
     }
 }
