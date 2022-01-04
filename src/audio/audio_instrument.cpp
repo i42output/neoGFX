@@ -34,14 +34,14 @@ namespace neogfx
     {
     }
 
-    audio_instrument::time_point audio_instrument::play_note(note aNote, std::chrono::duration<double> const& aDuration)
+    audio_instrument::time_point audio_instrument::play_note(note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude)
     {
         return play_note(iInputCursor, aNote, aDuration);
     }
 
-    audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration)
+    audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude)
     {
-        iComposition.emplace_back(aNote, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
+        iComposition.emplace_back(aNote, aAmplitude, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
         iInputCursor = aWhen + iComposition.back().duration;
         return iInputCursor;
     }
@@ -53,7 +53,7 @@ namespace neogfx
 
     audio_instrument::time_point audio_instrument::play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration)
     {
-        iComposition.emplace_back(std::nullopt, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
+        iComposition.emplace_back(std::nullopt, std::nullopt, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
         iInputCursor = aWhen + iComposition.back().duration;
         return iInputCursor;
     }
@@ -87,7 +87,7 @@ namespace neogfx
                 service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), *next->note).generate_from(
                     aChannel, iOutputCursor - next->start, count, buffer.data());
             for (auto sample : buffer)
-                (*aOutputFrames++) += (sample * amplitude());
+                (*aOutputFrames++) += (sample * next->amplitude.value() * amplitude());
             iOutputCursor += count;
         }
     }

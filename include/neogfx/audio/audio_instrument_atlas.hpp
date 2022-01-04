@@ -1,4 +1,4 @@
-// i_audio_instrument_atlas.hpp
+// audio_instrument_atlas.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
@@ -19,20 +19,30 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/audio/audio_primitives.hpp>
-#include <neogfx/audio/i_audio_bitstream.hpp>
+#include <neogfx/audio/i_audio_instrument_atlas.hpp>
 
 #pragma once
 
 namespace neogfx
 {
-	struct audio_instrument_not_found : std::runtime_error { audio_instrument_not_found(neogfx::instrument aInstrument) : std::runtime_error{"Audio instrument '" + to_string(aInstrument) + "' not found"} {} };
-
-	class i_audio_instrument_atlas
+	class audio_instrument_atlas : public i_audio_instrument_atlas
 	{
+	private:
+		typedef std::tuple<neogfx::instrument, audio_sample_rate, note> note_key;
+		struct sample_info
+		{
+			std::string sampleFile;
+			note midiKeyLow;
+			note midiKeyPitchCentre;
+			note midiKeyHigh;
+		};
 	public:
-		virtual ~i_audio_instrument_atlas() = default;
+		audio_instrument_atlas();
 	public:
-		virtual bool load_instrument(neogfx::instrument aInstrument, audio_sample_rate aSampleRate) = 0;
-		virtual i_audio_bitstream& instrument(neogfx::instrument aInstrument, audio_sample_rate aSampleRate, note aNote) = 0;
+		bool load_instrument(neogfx::instrument aInstrument, audio_sample_rate aSampleRate) override;
+		i_audio_bitstream& instrument(neogfx::instrument aInstrument, audio_sample_rate aSampleRate, note aNote) override;
+	private:
+		std::map<neogfx::instrument, std::map<note, sample_info>> iSamples;
+		std::map<note_key, ref_ptr<i_audio_bitstream>> iNotes;
 	};
 }

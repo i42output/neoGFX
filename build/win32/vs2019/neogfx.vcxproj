@@ -243,6 +243,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_bitstream.ipp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_device.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_instrument.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\audio\audio_instrument_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_oscillator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\audio_waveform.hpp" />
@@ -589,6 +590,7 @@
     <ClCompile Include="..\..\..\src\audio\audio_bitstream.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_instrument.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_instrument_atlas.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_oscillator.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_waveform.cpp" />
     <ClCompile Include="..\..\..\src\core\transition_animator.cpp" />

@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude);
     waveform.create_oscillator(ng::frequency<ng::note::C8>(), componentAmplitude);
 
-    playbackDevice.play(waveform, 10s);
+    //playbackDevice.play(waveform, 10s);
 
     ng::audio_instrument piano{ playbackDevice, ng::instrument::AcousticGrandPiano, amplitude };
     auto time = piano.play_note(ng::note::G4, 0.5s);

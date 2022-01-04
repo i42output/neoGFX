@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/audio/i_audio.hpp>
 #include <neogfx/audio/audio_device.hpp>
+#include <neogfx/audio/audio_instrument_atlas.hpp>
 
 #pragma once
 
@@ -44,5 +45,6 @@ namespace neogfx
 		audio_context iContext;
 		vector<audio_device_info> iDeviceInfos;
 		vector<ref_ptr<i_audio_device>> iDevices;
+		audio_instrument_atlas iInstrumentAtlas;
 	};
 }

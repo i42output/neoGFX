@@ -133,7 +133,7 @@ namespace neogfx
 
     i_audio_instrument_atlas& audio::instrument_atlas()
     {
-        throw std::logic_error("audio::instrument_atlas(): todo");
+        return iInstrumentAtlas;
     }
 
     i_audio_device_info const* audio::find_device(audio_device_type aType, audio_data_format const& aDataFormat)

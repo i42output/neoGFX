@@ -36,8 +36,8 @@ namespace neogfx
     public:
         virtual ~i_audio_instrument() = default;
     public:
-        virtual time_point play_note(note aNote, std::chrono::duration<double> const& aDuration) = 0;
-        virtual time_point play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration) = 0;
+        virtual time_point play_note(note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude = 1.0f) = 0;
+        virtual time_point play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude = 1.0f) = 0;
         virtual time_point play_silence(std::chrono::duration<double> const& aDuration) = 0;
         virtual time_point play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration) = 0;
     };

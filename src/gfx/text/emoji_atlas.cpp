@@ -19,9 +19,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <sstream>
+#include <filesystem>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/filesystem.hpp>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/file/file.hpp>
 #include <neolib/file/zip.hpp>
@@ -36,7 +36,7 @@ namespace neogfx
     {
         try
         {
-            if (boost::filesystem::exists(kFilePath))
+            if (std::filesystem::exists(kFilePath))
             {
                 neolib::zip zipFile(kFilePath);
                 std::istringstream metaDataFile{ zipFile.extract_to_string(zipFile.index_of("meta.json")) };

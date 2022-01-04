@@ -1104,6 +1104,9 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_instrument_atlas.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\audio\audio_instrument_atlas.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1628,6 +1631,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\audio\audio_instrument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\audio\audio_instrument_atlas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
