@@ -25,7 +25,10 @@
 
 namespace neogfx
 {
+	struct audio_instrument_atlas_file_found : std::runtime_error { audio_instrument_atlas_file_found() : std::runtime_error{ "Audio instrument atlas file not found" } {} };
 	struct audio_instrument_not_found : std::runtime_error { audio_instrument_not_found(neogfx::instrument aInstrument) : std::runtime_error{"Audio instrument '" + to_string(aInstrument) + "' not found"} {} };
+	struct audio_instrument_note_not_found : std::runtime_error { audio_instrument_note_not_found(neogfx::instrument aInstrument, neogfx::note aNote) : std::runtime_error{ "Audio instrument '" + to_string(aInstrument) + "' note '" + to_string(aNote) + "' not found" } {} };
+	struct audio_instrument_sample_decode_failure : std::runtime_error { audio_instrument_sample_decode_failure() : std::runtime_error{ "audio_instrument_sample_decode_failure" } {} };
 
 	class i_audio_instrument_atlas
 	{

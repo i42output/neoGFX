@@ -41,6 +41,8 @@ namespace neogfx
 
     audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude)
     {
+        (void)service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), aNote);
+
         iComposition.emplace_back(aNote, aAmplitude, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
         iInputCursor = aWhen + iComposition.back().duration;
         return iInputCursor;
@@ -73,12 +75,12 @@ namespace neogfx
 
     void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        auto start = std::lower_bound(iComposition.begin(), iComposition.end(), aFrameFrom, [](auto const& lhs, auto const& rhs)
+        auto start = std::find_if(iComposition.begin(), iComposition.end(), [&](auto const& n)
             {
-                return lhs.start < rhs;
+                return aFrameFrom >= n.start && aFrameFrom < n.start + n.duration;
             });
         iOutputCursor = aFrameFrom;
-        for (auto next = start; next->start < aFrameFrom + aFrameCount; ++next)
+        for (auto next = start; next != iComposition.end() && next->start < aFrameFrom + aFrameCount; ++next)
         {
             auto count = std::min(next->duration, (aFrameFrom + aFrameCount) - iOutputCursor);
             thread_local std::vector<float> buffer;
@@ -87,7 +89,8 @@ namespace neogfx
                 service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), *next->note).generate_from(
                     aChannel, iOutputCursor - next->start, count, buffer.data());
             for (auto sample : buffer)
-                (*aOutputFrames++) += (sample * next->amplitude.value() * amplitude());
+                for (int channel = 0; channel < channel_count(aChannel); ++channel)
+                    (*aOutputFrames++) += (sample * next->amplitude.value() * amplitude());
             iOutputCursor += count;
         }
     }

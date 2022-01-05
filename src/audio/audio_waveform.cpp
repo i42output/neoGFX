@@ -80,8 +80,6 @@ namespace neogfx
 
     void audio_waveform::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        std::fill(aOutputFrames, aOutputFrames + aFrameCount * channel_count(aChannel), 0.0f);
-
         for (auto const& o : iOscillators)
         {
             thread_local std::vector<float> componentResult;
@@ -97,7 +95,7 @@ namespace neogfx
             }
         }
     }
-
+        
     void audio_waveform::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
     {
         for (auto const& o : iOscillators)

@@ -24,6 +24,7 @@
 
 namespace neogfx
 {
+    template class audio_bitstream<i_audio_bitstream>;
     template class audio_bitstream<i_audio_waveform>;
     template class audio_bitstream<i_audio_instrument>;
 }

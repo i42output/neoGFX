@@ -59,21 +59,13 @@ int main(int argc, char* argv[])
     //playbackDevice.play(waveform, 10s);
 
     ng::audio_instrument piano{ playbackDevice, ng::instrument::AcousticGrandPiano, amplitude };
-    auto time = piano.play_note(ng::note::G4, 0.5s);
-    time = piano.play_note(time, ng::note::A4, 0.5s);
-    time = piano.play_note(time, ng::note::F4, 0.5s);
-    time = piano.play_note(time, ng::note::F3, 0.5s);
-    time = piano.play_note(time, ng::note::C4, 0.5s);
+    auto time = piano.play_note(ng::note::G4, 1s);
+    time = piano.play_note(time, ng::note::A4, 1s);
+    time = piano.play_note(time, ng::note::F4, 1s);
+    time = piano.play_note(time, ng::note::F3, 1s);
+    time = piano.play_note(time, ng::note::C4, 1s);
 
-    ng::audio_instrument cello{ playbackDevice, ng::instrument::Cello, amplitude };
-    time = cello.play_note(ng::note::G4, 0.5s);
-    time = cello.play_note(time, ng::note::A4, 0.5s);
-    time = cello.play_note(time, ng::note::F4, 0.5s);
-    time = cello.play_note(time, ng::note::F3, 0.5s);
-    time = cello.play_note(time, ng::note::C4, 0.5s);
-
-    //playbackDevice.play(piano, 10s);
-    //playbackDevice.play(cello, 10s);
+    playbackDevice.play(piano, 10s);
 
     try
     {
