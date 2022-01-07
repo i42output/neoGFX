@@ -39,7 +39,7 @@ namespace neogfx
         virtual float amplitude() const = 0;
         virtual void set_amplitude(float aAmplitude) = 0;
         virtual bool has_envelope() const = 0;
-        virtual adsr_envelope const& envelope() = 0;
+        virtual adsr_envelope const& envelope() const = 0;
         virtual void clear_envelope() = 0;
         virtual void set_envelope(adsr_envelope const& aEnvelope) = 0;
     public:

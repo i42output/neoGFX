@@ -39,24 +39,24 @@ namespace neogfx
         return play_note(iInputCursor, aNote, aDuration);
     }
 
+    audio_instrument::time_point audio_instrument::play_note(std::chrono::duration<double> const& aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude)
+    {
+        return play_note(static_cast<time_point>(aWhen.count() * sample_rate()), aNote, aDuration, aAmplitude);
+    }
+        
     audio_instrument::time_point audio_instrument::play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude)
     {
-        (void)service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), aNote);
+        auto noteLength = service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), aNote).length();
 
-        iComposition.emplace_back(aNote, aAmplitude, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
+        iComposition.emplace_back(aNote, noteLength, aAmplitude, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
         iInputCursor = aWhen + iComposition.back().duration;
         return iInputCursor;
     }
 
-    audio_instrument::time_point audio_instrument::play_silence(std::chrono::duration<double> const& aDuration)
+    audio_instrument::time_point audio_instrument::rest(std::chrono::duration<double> const& aDuration)
     {
-        return play_silence(iInputCursor, aDuration);
-    }
-
-    audio_instrument::time_point audio_instrument::play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration)
-    {
-        iComposition.emplace_back(std::nullopt, std::nullopt, aWhen, static_cast<time_interval>(aDuration.count() * sample_rate()));
-        iInputCursor = aWhen + iComposition.back().duration;
+        iComposition.emplace_back(std::nullopt, std::nullopt, std::nullopt, iInputCursor, static_cast<time_interval>(aDuration.count() * sample_rate()));
+        iInputCursor += iComposition.back().duration;
         return iInputCursor;
     }
 
@@ -75,23 +75,22 @@ namespace neogfx
 
     void audio_instrument::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        auto start = std::find_if(iComposition.begin(), iComposition.end(), [&](auto const& n)
-            {
-                return aFrameFrom >= n.start && aFrameFrom < n.start + n.duration;
-            });
-        iOutputCursor = aFrameFrom;
-        for (auto next = start; next != iComposition.end() && next->start < aFrameFrom + aFrameCount; ++next)
+        for (auto next = iComposition.begin(); next != iComposition.end(); ++next)
         {
-            auto count = std::min(next->duration, (aFrameFrom + aFrameCount) - iOutputCursor);
+            if (aFrameFrom < next->start || aFrameFrom > next->start + next->noteLength.value())
+                continue;
+            auto pos = aFrameFrom - next->start;
+            auto count = std::min(next->noteLength.value() - pos, aFrameCount);
             thread_local std::vector<float> buffer;
             buffer.resize(count);
             if (next->note)
-                service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), *next->note).generate_from(
-                    aChannel, iOutputCursor - next->start, count, buffer.data());
-            for (auto sample : buffer)
+                service<i_audio>().instrument_atlas().instrument(iInstrument, sample_rate(), next->note.value()).generate_from(
+                    aChannel, pos, count, buffer.data());
+            auto output = aOutputFrames;
+            for (auto const& sample : buffer)
                 for (int channel = 0; channel < channel_count(aChannel); ++channel)
-                    (*aOutputFrames++) += (sample * next->amplitude.value() * amplitude());
-            iOutputCursor += count;
+                    (*output++) += (sample * next->amplitude.value() * apply_envelope(pos + &sample - &buffer[0], next->duration));
         }
+        iOutputCursor += aFrameCount;
     }
 }

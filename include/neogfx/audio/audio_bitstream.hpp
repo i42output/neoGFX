@@ -40,9 +40,11 @@ namespace neogfx
         float amplitude() const final;
         void set_amplitude(float aAmplitude) final;
         bool has_envelope() const final;
-        adsr_envelope const& envelope() final;
+        adsr_envelope const& envelope() const final;
         void clear_envelope() final;
         void set_envelope(adsr_envelope const& aEnvelope) final;
+    protected:
+        float apply_envelope(audio_sample_index aIndex, audio_sample_count aLength) const;
     private:
         audio_sample_rate iSampleRate;
         float iAmplitude;

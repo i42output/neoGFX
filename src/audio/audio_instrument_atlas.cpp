@@ -164,8 +164,12 @@ namespace neogfx
 		}
 		void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) override
 		{
-			std::copy(std::next(iPcmFrames.begin(), aFrameFrom), std::next(iPcmFrames.begin(), aFrameFrom + aFrameCount), aOutputFrames);
-			iCursor = aFrameFrom + aFrameCount;
+			std::fill(aOutputFrames, aOutputFrames + aFrameCount, 0.0f);
+			if (aFrameFrom >= iPcmFrames.size())
+				return;
+			auto count = std::min(iPcmFrames.size() - aFrameFrom, aFrameCount);
+			std::copy(std::next(iPcmFrames.begin(), aFrameFrom), std::next(iPcmFrames.begin(), aFrameFrom + count), aOutputFrames);
+			iCursor = aFrameFrom + count;
 		}
 	private:
 		std::vector<float> iPcmFrames;

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/numerical.hpp>
 #include <neogfx/audio/audio_bitstream.hpp>
 
 namespace neogfx
@@ -71,7 +72,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    inline adsr_envelope const& audio_bitstream<Interface>::envelope()
+    inline adsr_envelope const& audio_bitstream<Interface>::envelope() const
     {
         return iEnvelope.value();
     }
@@ -86,5 +87,30 @@ namespace neogfx
     inline void audio_bitstream<Interface>::set_envelope(adsr_envelope const& aEnvelope)
     {
         iEnvelope = aEnvelope;
+    }
+
+    template <typename Interface>
+    inline float audio_bitstream<Interface>::apply_envelope(audio_sample_index aIndex, audio_sample_count aLength) const
+    {
+        if (!has_envelope())
+            return amplitude();
+        auto const attack = static_cast<audio_sample_count>(envelope().attack * sample_rate());
+        if (aIndex < attack)
+            return mix(0.0f, amplitude(), static_cast<float>(aIndex) / attack);
+        aIndex -= attack;
+        aLength -= attack;
+        auto const decay = static_cast<audio_sample_count>(envelope().decay * sample_rate());
+        if (aIndex < decay)
+            return mix(amplitude(), amplitude() * envelope().sustain, static_cast<float>(aIndex) / decay);
+        aIndex -= decay;
+        aLength -= decay;
+        auto const release = static_cast<audio_sample_count>(envelope().release * sample_rate());
+         if (aIndex < aLength - release)
+            return amplitude() * envelope().sustain;
+        aIndex -= (aLength - release);
+        aLength -= (aLength - release);
+        if (aIndex < release)
+            return mix(amplitude() * envelope().sustain, 0.0f, static_cast<float>(aIndex) / release);
+        return 0.0f;
     }
 }

@@ -33,9 +33,9 @@ namespace neogfx
         audio_instrument(i_audio_device const& aDevice, neogfx::instrument aInstrument, float aAmplitude = 1.0f);
     public:
         time_point play_note(note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude = 1.0f) final;
+        time_point play_note(std::chrono::duration<double> const& aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude = 1.0f) final;
         time_point play_note(time_point aWhen, note aNote, std::chrono::duration<double> const& aDuration, float aAmplitude = 1.0f) final;
-        time_point play_silence(std::chrono::duration<double> const& aDuration) final;
-        time_point play_silence(time_point aWhen, std::chrono::duration<double> const& aDuration) final;
+        time_point rest(std::chrono::duration<double> const& aDuration) final;
     public:
         audio_frame_count length() const final;
         void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) final;
@@ -47,6 +47,7 @@ namespace neogfx
         struct part
         {
             std::optional<note> note;
+            std::optional<time_interval> noteLength;
             std::optional<float> amplitude;
             time_interval start;
             time_interval duration;
