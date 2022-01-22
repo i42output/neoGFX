@@ -22,6 +22,7 @@
 #include <freetype/ftimage.h>
 #include <freetype/internal/ftobjs.h>
 
+#define FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
 #ifdef FT_CONFIG_OPTION_SUBPIXEL_RENDERING
 
