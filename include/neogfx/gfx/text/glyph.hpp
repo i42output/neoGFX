@@ -186,7 +186,7 @@ namespace neogfx
     
     inline point offset(glyph const& g)
     { 
-        return (g.offset + basic_point<float>{0.5f, 0.5f}).floor(); 
+        return (g.offset + basic_point<float>{0.5f, 0.5f}).floor();
     }
 
     inline bool underline(glyph const& g)

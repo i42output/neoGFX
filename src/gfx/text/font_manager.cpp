@@ -204,7 +204,6 @@ namespace neogfx
                 iGlyphInfo{ nullptr },
                 iGlyphPos{ nullptr }
             {
-                scoped_kerning sk{ aFont.kerning() };
                 hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
                 std::vector<uint32_t> reversed;
@@ -686,11 +685,19 @@ namespace neogfx
                         font = font.has_fallback() ? font.fallback() : selectedFont;
                 }
                 if (j > 0 && !result.empty())
-                    kerning_adjust(result.back(), static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
+                {
+                    // remove Harfbuzz kern, re-add later if kerning enabled...
+                    auto const harfbuzzKern = static_cast<float>(hb_font_get_glyph_h_kerning(
+                        static_cast<font_face_handle*>(font.native_font_face().handle())->harfbuzzFont,
+                        shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint));
+                    kerning_adjust(result.back(), -harfbuzzKern);
+                    kerning_adjust(result.back(), 
+                        static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
+                }
                 size advance = textDirections[startCluster].category != text_category::Emoji ?
                     size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
                     size{ font.height(), 0.0 };
-                result.emplace_back(
+                auto& newGlyph = result.emplace_back(
                     textDirections[startCluster],
                     shapes.glyph_info(j).codepoint,
                     glyph::flags_e{},
@@ -698,34 +705,20 @@ namespace neogfx
                     font.id(),
                     advance, point(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0),
                     size{advance.cx, font.height()});
-                if (category(result.back()) == text_category::Whitespace)
-                    result.back().value = aUtf32Begin[startCluster];
-                else if (category(result.back()) == text_category::Emoji)
-                    result.back().value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
+                if (category(newGlyph) == text_category::Whitespace)
+                    newGlyph.value = aUtf32Begin[startCluster];
+                else if (category(newGlyph) == text_category::Emoji)
+                    newGlyph.value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
                 if ((selectedFont.style() & font_style::Underline) == font_style::Underline)
-                    set_underline(result.back(), true);
+                    set_underline(newGlyph, true);
                 if ((selectedFont.style() & font_style::Superscript) == font_style::Superscript)
-                    set_superscript(result.back(), true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
+                    set_superscript(newGlyph, true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
                 if ((selectedFont.style() & font_style::Subscript) == font_style::Subscript)
-                    set_subscript(result.back(), true, (selectedFont.style() & font_style::AboveBaseline) == font_style::AboveBaseline);
+                    set_subscript(newGlyph, true, (selectedFont.style() & font_style::AboveBaseline) == font_style::AboveBaseline);
                 if (aContext.is_subpixel_rendering_on() && !font.is_bitmap_font())
-                    set_subpixel(result.back(), true);
+                    set_subpixel(newGlyph, true);
                 if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
-                    set_mnemonic(result.back(), true);
-                if (category(result.back()) != text_category::Whitespace && category(result.back()) != text_category::Emoji)
-                {
-                    auto& glyph = result.back();
-                    if (neogfx::advance(glyph) != advance.ceil())
-                    {
-                        const i_glyph_texture& glyphTexture = font.native_font_face().glyph_texture(glyph);
-                        auto visibleAdvance = std::ceil(offset(glyph).x + glyphTexture.placement().x + glyphTexture.texture().extents().cx);
-                        if (visibleAdvance > advance.cx)
-                        {
-                            advance.cx = visibleAdvance;
-                            glyph.advance = advance;
-                        }
-                    }
-                }
+                    set_mnemonic(newGlyph, true);
             }
         }
         if (hasEmojis)

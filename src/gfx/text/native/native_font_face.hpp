@@ -69,45 +69,30 @@ namespace neogfx
 {
     class i_rendering_engine;
 
-    bool kerning_enabled();
-    void enable_kerning();
-    void disable_kerning();
+    hb_position_t hb_kerning_func(hb_font_t* font, void* font_data, hb_codepoint_t first_glyph, hb_codepoint_t second_glyph, void* user_data);
 
-    class scoped_kerning
-    {
-    public:
-        scoped_kerning(bool aEnableKerning) : iPrevious{ kerning_enabled() }
-        {
-            if (aEnableKerning)
-                enable_kerning();
-            else
-                disable_kerning();
-        }
-        ~scoped_kerning()
-        {
-            if (iPrevious)
-                enable_kerning();
-            else
-                disable_kerning();
-        }
-    private:
-        bool iPrevious;
-    };
-
+    class native_font_face;
+    
     struct font_face_handle
     {
+        native_font_face& owner;
         FT_Face freetypeFace;
         hb_face_t* harfbuzzFace;
         hb_font_t* harfbuzzFont;
         hb_buffer_t* harfbuzzBuf;
         hb_unicode_funcs_t* harfbuzzUnicodeFuncs;
-        font_face_handle(FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
+        font_face_handle(native_font_face& aOwner,  FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
+            owner{ aOwner },
             freetypeFace{ aFreetypeFace },
             harfbuzzFace{ aHarfbuzzFace },
-            harfbuzzFont{ hb_font_create(aHarfbuzzFace) },
+            harfbuzzFont{ hb_font_create_sub_font(hb_font_create(aHarfbuzzFace)) },
             harfbuzzBuf{ hb_buffer_create() },
             harfbuzzUnicodeFuncs{ hb_buffer_get_unicode_funcs(harfbuzzBuf) }
         {
+            hb_font_funcs_t * ffunctions = hb_font_funcs_create();
+            hb_font_funcs_set_glyph_h_kerning_func(ffunctions, hb_kerning_func, this, nullptr);
+            hb_font_set_funcs(harfbuzzFont, ffunctions, nullptr, nullptr);
+            hb_font_funcs_destroy(ffunctions);
         }
         ~font_face_handle()
         {
@@ -130,32 +115,32 @@ namespace neogfx
         native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace);
         ~native_font_face();
     public:
-        font_id id() const override;
-        i_native_font& native_font() override;
-        i_string const& family_name() const override;
-        font_style style() const override;
-        font::point_size size() const override;
-        i_string const& style_name() const override;
-        dimension horizontal_dpi() const override;
-        dimension vertical_dpi() const override;
-        dimension height() const override;
-        dimension ascender() const override;
-        dimension descender() const override;
-        dimension underline_position() const override;
-        dimension underline_thickness() const override;
-        dimension line_spacing() const override;
-        neogfx::kerning_method kerning_method() const override;
-        void set_kerning_method(neogfx::kerning_method aKerningMethod) override;
-        dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const override;
-        bool is_bitmap_font() const override;
-        uint32_t num_fixed_sizes() const override;
-        font::point_size fixed_size(uint32_t aFixedSizeIndex) const override;
-        bool has_fallback() const override;
-        bool fallback_cached() const override;
-        i_native_font_face& fallback() const override;
-        void* handle() const override;
-        glyph_index_t glyph_index(char32_t aCodePoint) const override;
-        i_glyph_texture& glyph_texture(const glyph& aGlyph) const override;
+        font_id id() const final;
+        i_native_font& native_font() final;
+        i_string const& family_name() const final;
+        font_style style() const final;
+        font::point_size size() const final;
+        i_string const& style_name() const final;
+        dimension horizontal_dpi() const final;
+        dimension vertical_dpi() const final;
+        dimension height() const final;
+        dimension ascender() const final;
+        dimension descender() const final;
+        dimension underline_position() const final;
+        dimension underline_thickness() const final;
+        dimension line_spacing() const final;
+        neogfx::kerning_method kerning_method() const final;
+        void set_kerning_method(neogfx::kerning_method aKerningMethod) final;
+        dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const final;
+        bool is_bitmap_font() const final;
+        uint32_t num_fixed_sizes() const final;
+        font::point_size fixed_size(uint32_t aFixedSizeIndex) const final;
+        bool has_fallback() const final;
+        bool fallback_cached() const final;
+        i_native_font_face& fallback() const final;
+        void* handle() const final;
+        glyph_index_t glyph_index(char32_t aCodePoint) const final;
+        i_glyph_texture& glyph_texture(const glyph& aGlyph) const final;
     private:
         i_glyph_texture& invalid_glyph() const;
         void set_metrics();

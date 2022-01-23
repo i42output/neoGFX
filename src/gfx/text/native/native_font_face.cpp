@@ -44,60 +44,13 @@ namespace neogfx
         get_advance_cache sGetAdvanceCache;
     }
 
-    extern "C" FT_EXPORT(FT_Error)
-        neoGFX_Get_Advance(FT_Face face, FT_UInt gindex, FT_Int32 load_flags, FT_Fixed* padvance)
+    hb_position_t hb_kerning_func(hb_font_t* font, void* font_data, hb_codepoint_t first_glyph, hb_codepoint_t second_glyph, void* user_data)
     {
-        auto cachedFace = sGetAdvanceCache.find(face);
-        if (cachedFace != sGetAdvanceCache.end())
-        {
-            auto entry = cachedFace->second.find(std::make_pair(gindex, load_flags));
-            if (entry != cachedFace->second.end())
-            {
-                *padvance = entry->second;
-                return FT_Err_Ok;
-            }
-            auto result = FT_Get_Advance(face, gindex, load_flags, padvance);
-            if (result == FT_Err_Ok)
-                cachedFace->second[std::make_pair(gindex, load_flags)] = *padvance;
-            return result;
-        }
-        auto result = FT_Get_Advance(face, gindex, load_flags, padvance);
-        return result;
-    }
-
-    thread_local bool tKerningEnabled = false;
-
-    bool kerning_enabled()
-    {
-        return tKerningEnabled;
-    }
-
-    void enable_kerning()
-    {
-        tKerningEnabled = true;
-    }
-
-    void disable_kerning()
-    {
-        tKerningEnabled = false;
-    }
-
-    extern "C" FT_EXPORT(FT_Error)
-        neoGFX_Get_Kerning(FT_Face     face,
-            FT_UInt     left_glyph,
-            FT_UInt     right_glyph,
-            FT_UInt     kern_mode,
-            FT_Vector * akerning)
-    {
-        // Not currently used by Harfbuzz as we have disabled OT kerning in Harfbuzz.
-        auto result = FT_Get_Kerning(face, left_glyph, right_glyph, kern_mode, akerning);
-        if (!kerning_enabled())
-            *akerning = FT_Vector{};
-        return result;
+        return static_cast<hb_position_t>(static_cast<font_face_handle*>(user_data)->owner.kerning(first_glyph, second_glyph));
     }
 
     native_font_face::native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
-        iFontLib{ aFontLib }, iId { aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
+        iFontLib{ aFontLib }, iId { aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         switch (aStyle)
         {
@@ -217,18 +170,29 @@ namespace neogfx
     void native_font_face::set_kerning_method(neogfx::kerning_method aKerningMethod)
     {
         iKerningMethod = aKerningMethod;
+        iKerningTable.clear();
     }
 
     dimension native_font_face::kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const
     {
-        if (!iHasKerning || kerning_method() != neogfx::kerning_method::Freetype)
+        if (!iHasKerning)
             return 0.0;
         auto existing = iKerningTable.find(std::make_pair(aLeftGlyphIndex, aRightGlyphIndex));
         if (existing != iKerningTable.end())
             return existing->second;
-        FT_Vector delta;
-        freetypeCheck(FT_Get_Kerning(iHandle.freetypeFace, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_DEFAULT, &delta));
-        return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
+        switch (kerning_method())
+        {
+        case neogfx::kerning_method::Freetype:
+        case neogfx::kerning_method::Harfbuzz:
+            {
+                FT_Vector delta;
+                freetypeCheck(FT_Get_Kerning(iHandle.freetypeFace, aLeftGlyphIndex, aRightGlyphIndex, FT_KERNING_UNFITTED, &delta));
+                return (iKerningTable[std::make_pair(aLeftGlyphIndex, aRightGlyphIndex)] = delta.x / 64.0);
+            }
+        case neogfx::kerning_method::Disabled:
+        default:
+            return 0.0;
+        }
     }
 
     bool native_font_face::is_bitmap_font() const

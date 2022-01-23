@@ -482,6 +482,7 @@
                                         check_box: {
                                             id: checkKerning
                                             text: "kern"
+                                            checked: true
                                         }
                                         check_box: {
                                             id: checkSubpixel

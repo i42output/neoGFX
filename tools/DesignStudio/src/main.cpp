@@ -50,23 +50,22 @@ int main(int argc, char* argv[])
 
     float const amplitude = 0.25f;
 
-    //ng::audio_waveform waveform{ playbackDevice, amplitude };
-    //float const componentAmplitude = 0.1f;
-    //waveform.create_oscillator(ng::frequency<ng::note::C4>(), componentAmplitude);
-    //waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude);
-    //waveform.create_oscillator(ng::frequency<ng::note::C8>(), componentAmplitude);
-
-    //playbackDevice.play(waveform, 10s);
+    ng::audio_waveform waveform{ playbackDevice, amplitude };
+    float const componentAmplitude = 0.1f;
+    waveform.create_oscillator(ng::frequency<ng::note::C4>(), componentAmplitude);
+    waveform.create_oscillator(ng::frequency<ng::note::C5>(), componentAmplitude);
+    waveform.create_oscillator(ng::frequency<ng::note::C8>(), componentAmplitude);
 
     ng::audio_instrument churchOrgan{ playbackDevice, ng::instrument::ChurchOrgan, amplitude };
     churchOrgan.set_envelope(ng::adsr_envelope{ 0.1f, 0.0f, 1.0f, 0.1f });
-    churchOrgan.play_note(0s, ng::note::G4, 6s);
-    churchOrgan.play_note(1s, ng::note::A4, 5s);
-    churchOrgan.play_note(2s, ng::note::F4, 4s);
-    churchOrgan.play_note(3s, ng::note::F3, 3s);
-    churchOrgan.play_note(4s, ng::note::C4, 2s);
+    churchOrgan.play_note(5s, ng::note::G4, 6s);
+    churchOrgan.play_note(6s, ng::note::A4, 5s);
+    churchOrgan.play_note(7s, ng::note::F4, 4s);
+    churchOrgan.play_note(8s, ng::note::F3, 3s);
+    churchOrgan.play_note(9s, ng::note::C4, 2s);
 
-    playbackDevice.play(churchOrgan, 20s);
+    playbackDevice.play(waveform, 15s);
+    playbackDevice.play(churchOrgan, 15s);
 
     try
     {
