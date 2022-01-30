@@ -1739,7 +1739,7 @@ namespace neogfx
                     if (drawOp.appearance->paper() != std::nullopt)
                     {
                         font const& glyphFont = glyphText.glyph_font(glyph);
-                        rect const glyphRect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
+                        rect const glyphRect{ point{ drawOp.point }, size{ advance(glyph).cx, glyphFont.height() } };
 
                         auto const& mesh = to_ecs_component(
                             glyphRect,

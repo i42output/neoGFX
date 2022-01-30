@@ -79,6 +79,7 @@ namespace neogfx
         FT_Face freetypeFace;
         hb_face_t* harfbuzzFace;
         hb_font_t* harfbuzzFont;
+        hb_font_funcs_t* harfbuzzFontFuncs;
         hb_buffer_t* harfbuzzBuf;
         hb_unicode_funcs_t* harfbuzzUnicodeFuncs;
         font_face_handle(native_font_face& aOwner,  FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
@@ -86,18 +87,18 @@ namespace neogfx
             freetypeFace{ aFreetypeFace },
             harfbuzzFace{ aHarfbuzzFace },
             harfbuzzFont{ hb_font_create_sub_font(hb_font_create(aHarfbuzzFace)) },
+            harfbuzzFontFuncs{ hb_font_funcs_create() },
             harfbuzzBuf{ hb_buffer_create() },
             harfbuzzUnicodeFuncs{ hb_buffer_get_unicode_funcs(harfbuzzBuf) }
         {
-            hb_font_funcs_t * ffunctions = hb_font_funcs_create();
-            hb_font_funcs_set_glyph_h_kerning_func(ffunctions, hb_kerning_func, this, nullptr);
-            hb_font_set_funcs(harfbuzzFont, ffunctions, nullptr, nullptr);
-            hb_font_funcs_destroy(ffunctions);
+            hb_font_funcs_set_glyph_h_kerning_func(harfbuzzFontFuncs, hb_kerning_func, this, nullptr);
+            hb_font_set_funcs(harfbuzzFont, harfbuzzFontFuncs, nullptr, nullptr);
         }
         ~font_face_handle()
         {
-            hb_font_destroy(harfbuzzFont);
             hb_buffer_destroy(harfbuzzBuf);
+            hb_font_funcs_destroy(harfbuzzFontFuncs);
+            hb_font_destroy(harfbuzzFont);
         }
     };
 
@@ -161,5 +162,24 @@ namespace neogfx
         mutable kerning_table iKerningTable;
         mutable std::optional<bool> iHasFallback;
         mutable std::optional<neogfx::glyph_texture> iInvalidGlyph;
+    };
+
+    bool kerning_enabled();
+    void enable_kerning(bool aEnableKerning);
+
+    class scoped_kerning
+    {
+    public:
+        scoped_kerning(bool aEnableKerning) :
+            iPrevious(kerning_enabled())
+        {
+            enable_kerning(aEnableKerning);
+        }
+        ~scoped_kerning()
+        {
+            enable_kerning(iPrevious);
+        }
+    private:
+        bool iPrevious;
     };
 }

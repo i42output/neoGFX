@@ -240,6 +240,7 @@ namespace neogfx
                     }
                     hb_buffer_add_utf32(iBuf, &*reversed.begin(), static_cast<int>(reversed.size()), 0u, static_cast<int>(reversed.size()));
                 }
+                scoped_kerning sk{ aFont.kerning() };
                 hb_shape(iFont, iBuf, NULL, 0);
                 unsigned int glyphCount = 0;
                 iGlyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
@@ -683,16 +684,6 @@ namespace neogfx
                     font = font.has_fallback() ? font.fallback() : selectedFont;
                     for (auto fi = shapes.fallback_index(j); font != selectedFont && fi > 0; --fi)
                         font = font.has_fallback() ? font.fallback() : selectedFont;
-                }
-                if (j > 0 && !result.empty())
-                {
-                    // remove Harfbuzz kern, re-add later if kerning enabled...
-                    auto const harfbuzzKern = static_cast<float>(hb_font_get_glyph_h_kerning(
-                        static_cast<font_face_handle*>(font.native_font_face().handle())->harfbuzzFont,
-                        shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint));
-                    kerning_adjust(result.back(), -harfbuzzKern);
-                    kerning_adjust(result.back(), 
-                        static_cast<float>(font.kerning(shapes.glyph_info(j - 1).codepoint, shapes.glyph_info(j).codepoint)));
                 }
                 size advance = textDirections[startCluster].category != text_category::Emoji ?
                     size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :

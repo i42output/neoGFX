@@ -228,7 +228,7 @@ namespace neogfx
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aGc.draw_glyph(pos + offset(*iterGlyph).to_vec3(), aGlyphText, *iterGlyph, aAppearance);
+            aGc.draw_glyph(pos, aGlyphText, *iterGlyph, aAppearance);
             pos.x += advance(*iterGlyph).cx;
         }
     }

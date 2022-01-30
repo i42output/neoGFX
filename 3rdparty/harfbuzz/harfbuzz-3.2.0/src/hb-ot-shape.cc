@@ -270,6 +270,11 @@ hb_ot_shape_plan_t::substitute (hb_font_t   *font,
     map.substitute (this, font, buffer);
 }
 
+namespace neogfx
+{
+  extern bool kerning_enabled();
+}
+
 void
 hb_ot_shape_plan_t::position (hb_font_t   *font,
 			      hb_buffer_t *buffer) const
@@ -281,12 +286,14 @@ hb_ot_shape_plan_t::position (hb_font_t   *font,
     hb_aat_layout_position (this, font, buffer);
 #endif
 
+  if (neogfx::kerning_enabled())
+  {
 #ifndef HB_NO_OT_KERN
-  if (this->apply_kern)
-    hb_ot_layout_kern (this, font, buffer);
+    if (this->apply_kern) hb_ot_layout_kern (this, font, buffer);
 #endif
-  else if (this->apply_fallback_kern)
-    _hb_ot_shape_fallback_kern (this, font, buffer);
+    else if (this->apply_fallback_kern)
+      _hb_ot_shape_fallback_kern (this, font, buffer);
+  }
 
 #ifndef HB_NO_AAT_SHAPE
   if (this->apply_trak)

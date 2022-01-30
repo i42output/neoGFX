@@ -271,10 +271,6 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
-        ng::font font{ "Gill Sans MT", ng::font_style::Normal, 36.0 };
-        ng::graphics_context gc{ window, ng::graphics_context::type::Unattached };
-        auto glyphText = gc.to_glyph_text("MIND THE GAP"_s, font);
-            
         window.textEdit.ObjectAcceptable([&](ng::i_drag_drop_object const& aObject, ng::drop_operation& aAcceptableAs)
         {
             if (aObject.ddo_type() == ng::i_drag_drop_file_list::otid())

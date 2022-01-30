@@ -44,6 +44,22 @@ namespace neogfx
         get_advance_cache sGetAdvanceCache;
     }
 
+    bool& kerning_enabled_flag()
+    {
+        thread_local bool tKerningEnabled = true;
+        return tKerningEnabled;
+    }
+
+    bool kerning_enabled()
+    {
+        return kerning_enabled_flag();
+    }
+
+    void enable_kerning(bool aEnableKerning)
+    {
+        kerning_enabled_flag() = aEnableKerning;
+    }
+
     hb_position_t hb_kerning_func(hb_font_t* font, void* font_data, hb_codepoint_t first_glyph, hb_codepoint_t second_glyph, void* user_data)
     {
         return static_cast<hb_position_t>(static_cast<font_face_handle*>(user_data)->owner.kerning(first_glyph, second_glyph));
