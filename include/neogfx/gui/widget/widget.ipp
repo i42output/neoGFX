@@ -902,6 +902,7 @@ namespace neogfx
             {
                 parent().layout_items_started();
                 parent().layout_items_completed();
+                scoped_layout_items{};
             }
         }
         if (self_type::is_root())
@@ -958,6 +959,7 @@ namespace neogfx
         {
             parent().layout_items_started();
             parent().layout_items_completed();
+            scoped_layout_items{};
         }
     }
 
