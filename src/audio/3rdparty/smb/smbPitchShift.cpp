@@ -42,17 +42,18 @@
 
 #include <array>
 
-#define M_PI 3.14159265358979323846
-#define MAX_FRAME_LENGTH 8192
+#include <neogfx/core/numerical.hpp>
 
-void smbFft(float *fftBuffer, long fftFrameSize, long sign);
-double smbAtan2(double x, double y);
+#include <ffts.h>
+
+#define MAX_FRAME_LENGTH 8192
 
 struct smbContext
 {
 	std::array<float, MAX_FRAME_LENGTH> gInFIFO = {};
 	std::array<float, MAX_FRAME_LENGTH> gOutFIFO = {};
-	std::array<float, MAX_FRAME_LENGTH * 2> gFFTworksp = {};
+	std::array<float, MAX_FRAME_LENGTH * 2> alignas(16) gFFTworksp = {};
+	std::array<float, MAX_FRAME_LENGTH * 2> alignas(16) gFFTworksp2 = {};
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1> gLastPhase = {};
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1> gSumPhase = {};
 	std::array<float, MAX_FRAME_LENGTH * 2> gOutputAccum = {};
@@ -61,15 +62,22 @@ struct smbContext
 	std::array<float, MAX_FRAME_LENGTH> gSynFreq = {};
 	std::array<float, MAX_FRAME_LENGTH> gSynMagn = {};
 	long gRover = false;
+	ffts_plan_t* fftsToComplexPlan = nullptr;
+	ffts_plan_t* fftsToRealPlan = nullptr;
 };
 
-smbContext* smbCreateContext()
+smbContext* smbCreateContext(long fftFrameSize)
 {
-	return new smbContext{};
+	auto newContext = new smbContext{};
+	newContext->fftsToComplexPlan = ffts_init_1d(fftFrameSize, FFTS_FORWARD);
+	newContext->fftsToRealPlan = ffts_init_1d(fftFrameSize, FFTS_BACKWARD);
+	return newContext;
 }
 
 void smbDestroyContext(smbContext* context)
 {
+	ffts_free(context->fftsToComplexPlan);
+	ffts_free(context->fftsToRealPlan);
 	delete context;
 }
 
@@ -87,6 +95,7 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 	std::array<float, MAX_FRAME_LENGTH>& gInFIFO = context->gInFIFO;
 	std::array<float, MAX_FRAME_LENGTH>& gOutFIFO = context->gOutFIFO;
 	std::array<float, MAX_FRAME_LENGTH * 2>& gFFTworksp = context->gFFTworksp;
+	std::array<float, MAX_FRAME_LENGTH * 2>& gFFTworksp2 = context->gFFTworksp2;
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1>& gLastPhase = context->gLastPhase;
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1>& gSumPhase = context->gSumPhase;
 	std::array<float, MAX_FRAME_LENGTH * 2>& gOutputAccum = context->gOutputAccum;
@@ -96,15 +105,15 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 	std::array<float, MAX_FRAME_LENGTH>& gSynMagn = context->gSynMagn;
 	long& gRover = context->gRover;
 	
-	double magn, phase, tmp, window, real, imag;
-	double freqPerBin, expct;
+	float magn, phase, tmp, window, real, imag;
+	float freqPerBin, expct;
 	long i,k, qpd, index, inFifoLatency, stepSize, fftFrameSize2;
 
 	/* set up some handy variables */
 	fftFrameSize2 = fftFrameSize/2;
 	stepSize = fftFrameSize/osamp;
-	freqPerBin = sampleRate/(double)fftFrameSize;
-	expct = 2.*M_PI*(double)stepSize/(double)fftFrameSize;
+	freqPerBin = sampleRate/(float)fftFrameSize;
+	expct = 2.0f * neogfx::math::pi<float>() * (float)stepSize / (float)fftFrameSize;
 	inFifoLatency = fftFrameSize-stepSize;
 	if (gRover == false) gRover = inFifoLatency;
 
@@ -122,7 +131,7 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 
 			/* do windowing and re,im interleave */
 			for (k = 0; k < fftFrameSize;k++) {
-				window = -.5*cos(2.*M_PI*(double)k/(double)fftFrameSize)+.5;
+				window = -0.5f * cos(2.0f * neogfx::math::pi<float>() * (float)k / (float)fftFrameSize) +0.5f;
 				gFFTworksp[2*k] = gInFIFO[k] * window;
 				gFFTworksp[2*k+1] = 0.;
 			}
@@ -130,7 +139,8 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 
 			/* ***************** ANALYSIS ******************* */
 			/* do transform */
-			smbFft(&gFFTworksp[0], fftFrameSize, -1);
+			ffts_execute(context->fftsToComplexPlan, &gFFTworksp[0], &gFFTworksp2[0]);
+			std::memcpy(&gFFTworksp[0], &gFFTworksp2[0], fftFrameSize * 2 * sizeof(float));
 
 			/* this is the analysis step */
 			for (k = 0; k <= fftFrameSize2; k++) {
@@ -140,7 +150,7 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 				imag = gFFTworksp[2*k+1];
 
 				/* compute magnitude and phase */
-				magn = 2.*sqrt(real*real + imag*imag);
+				magn = 2.0f * sqrt(real*real + imag*imag);
 				phase = atan2(imag,real);
 
 				/* compute phase difference */
@@ -148,19 +158,19 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 				gLastPhase[k] = phase;
 
 				/* subtract expected phase difference */
-				tmp -= (double)k*expct;
+				tmp -= (float)k*expct;
 
 				/* map delta phase into +/- Pi interval */
-				qpd = tmp/M_PI;
+				qpd = static_cast<long>(tmp / neogfx::math::pi<float>());
 				if (qpd >= 0) qpd += qpd&1;
 				else qpd -= qpd&1;
-				tmp -= M_PI*(double)qpd;
+				tmp -= neogfx::math::pi<float>() * (float)qpd;
 
 				/* get deviation from bin frequency from the +/- Pi interval */
-				tmp = osamp*tmp/(2.*M_PI);
+				tmp = osamp * tmp / (2.0f * neogfx::math::pi<float>());
 
 				/* compute the k-th partials' true frequency */
-				tmp = (double)k*freqPerBin + tmp*freqPerBin;
+				tmp = (float)k*freqPerBin + tmp*freqPerBin;
 
 				/* store magnitude and true frequency in analysis arrays */
 				gAnaMagn[k] = magn;
@@ -173,7 +183,7 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 			memset(&gSynMagn[0], 0, fftFrameSize*sizeof(float));
 			memset(&gSynFreq[0], 0, fftFrameSize*sizeof(float));
 			for (k = 0; k <= fftFrameSize2; k++) { 
-				index = k*pitchShift;
+				index = static_cast<long>(k*pitchShift);
 				if (index <= fftFrameSize2) { 
 					gSynMagn[index] += gAnaMagn[k]; 
 					gSynFreq[index] = gAnaFreq[k] * pitchShift; 
@@ -189,16 +199,16 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 				tmp = gSynFreq[k];
 
 				/* subtract bin mid frequency */
-				tmp -= (double)k*freqPerBin;
+				tmp -= (float)k*freqPerBin;
 
 				/* get bin deviation from freq deviation */
 				tmp /= freqPerBin;
 
 				/* take osamp into account */
-				tmp = 2.*M_PI*tmp/osamp;
+				tmp = 2.0f * neogfx::math::pi<float>() * tmp / osamp;
 
 				/* add the overlap phase advance back in */
-				tmp += (double)k*expct;
+				tmp += (float)k*expct;
 
 				/* accumulate delta phase to get bin phase */
 				gSumPhase[k] += tmp;
@@ -210,15 +220,16 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 			} 
 
 			/* zero negative frequencies */
-			for (k = fftFrameSize+2; k < 2*fftFrameSize; k++) gFFTworksp[k] = 0.;
+			for (k = fftFrameSize+2; k < 2*fftFrameSize; k++) gFFTworksp[k] = 0.0f;
 
 			/* do inverse transform */
-			smbFft(&gFFTworksp[0], fftFrameSize, 1);
+			ffts_execute(context->fftsToRealPlan, &gFFTworksp[0], &gFFTworksp2[0]);
+			std::memcpy(&gFFTworksp[0], &gFFTworksp2[0], fftFrameSize * 2 * sizeof(float));
 
 			/* do windowing and add to output accumulator */ 
 			for(k=0; k < fftFrameSize; k++) {
-				window = -.5*cos(2.*M_PI*(double)k/(double)fftFrameSize)+.5;
-				gOutputAccum[k] += 2.*window*gFFTworksp[2*k]/(fftFrameSize2*osamp);
+				window = -0.5f * cos(2.0f * neogfx::math::pi<float>() * (float)k / (float)fftFrameSize) + 0.5f;
+				gOutputAccum[k] += 2.0f * window * gFFTworksp[2*k] / (fftFrameSize2 * osamp);
 			}
 			for (k = 0; k < stepSize; k++) gOutFIFO[k] = gOutputAccum[k];
 
@@ -231,96 +242,8 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 	}
 }
 
-// -----------------------------------------------------------------------------------------------------------------
-
-
-void smbFft(float *fftBuffer, long fftFrameSize, long sign)
-/* 
-	FFT routine, (C)1996 S.M.Bernsee. Sign = -1 is FFT, 1 is iFFT (inverse)
-	Fills fftBuffer[0...2*fftFrameSize-1] with the Fourier transform of the
-	time domain data in fftBuffer[0...2*fftFrameSize-1]. The FFT array takes
-	and returns the cosine and sine parts in an interleaved manner, ie.
-	fftBuffer[0] = cosPart[0], fftBuffer[1] = sinPart[0], asf. fftFrameSize
-	must be a power of 2. It expects a complex input signal (see footnote 2),
-	ie. when working with 'common' audio signals our input signal has to be
-	passed as {in[0],0.,in[1],0.,in[2],0.,...} asf. In that case, the transform
-	of the frequencies of interest is in fftBuffer[0...fftFrameSize].
-*/
-{
-	float wr, wi, arg, *p1, *p2, temp;
-	float tr, ti, ur, ui, *p1r, *p1i, *p2r, *p2i;
-	long i, bitm, j, le, le2, k;
-
-	for (i = 2; i < 2*fftFrameSize-2; i += 2) {
-		for (bitm = 2, j = 0; bitm < 2*fftFrameSize; bitm <<= 1) {
-			if (i & bitm) j++;
-			j <<= 1;
-		}
-		if (i < j) {
-			p1 = fftBuffer+i; p2 = fftBuffer+j;
-			temp = *p1; *(p1++) = *p2;
-			*(p2++) = temp; temp = *p1;
-			*p1 = *p2; *p2 = temp;
-		}
-	}
-	for (k = 0, le = 2; k < (long)(log(fftFrameSize)/log(2.)+.5); k++) {
-		le <<= 1;
-		le2 = le>>1;
-		ur = 1.0;
-		ui = 0.0;
-		arg = M_PI / (le2>>1);
-		wr = cos(arg);
-		wi = sign*sin(arg);
-		for (j = 0; j < le2; j += 2) {
-			p1r = fftBuffer+j; p1i = p1r+1;
-			p2r = p1r+le2; p2i = p2r+1;
-			for (i = j; i < 2*fftFrameSize; i += le) {
-				tr = *p2r * ur - *p2i * ui;
-				ti = *p2r * ui + *p2i * ur;
-				*p2r = *p1r - tr; *p2i = *p1i - ti;
-				*p1r += tr; *p1i += ti;
-				p1r += le; p1i += le;
-				p2r += le; p2i += le;
-			}
-			tr = ur*wr - ui*wi;
-			ui = ur*wi + ui*wr;
-			ur = tr;
-		}
-	}
-}
-
 
 // -----------------------------------------------------------------------------------------------------------------
-
-/*
-
-    12/12/02, smb
-    
-    PLEASE NOTE:
-    
-    There have been some reports on domain errors when the atan2() function was used
-    as in the above code. Usually, a domain error should not interrupt the program flow
-    (maybe except in Debug mode) but rather be handled "silently" and a global variable
-    should be set according to this error. However, on some occasions people ran into
-    this kind of scenario, so a replacement atan2() function is provided here.
-    
-    If you are experiencing domain errors and your program stops, simply replace all
-    instances of atan2() with calls to the smbAtan2() function below.
-    
-*/
-
-
-double smbAtan2(double x, double y)
-{
-  double signx;
-  if (x > 0.) signx = 1.;  
-  else signx = -1.;
-  
-  if (x == 0.) return 0.;
-  if (y == 0.) return signx * M_PI / 2.;
-  
-  return atan2(x, y);
-}
 
 
 // -----------------------------------------------------------------------------------------------------------------

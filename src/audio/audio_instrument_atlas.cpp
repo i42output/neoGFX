@@ -36,7 +36,7 @@
 #include <neogfx/audio/audio_oscillator.hpp>
 
 struct smbContext;
-smbContext* smbCreateContext();
+smbContext* smbCreateContext(long fftFrameSize);
 void smbDestroyContext(smbContext* context);
 void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess, long fftFrameSize, long osamp, float sampleRate, float* indata, float* outdata);
 
@@ -199,7 +199,7 @@ namespace neogfx
 		auto atlasFile = neolib::program_directory() + "/music.zip";
 		if (!std::filesystem::exists(atlasFile))
 			throw audio_instrument_atlas_file_found();
-		neolib::zip zipFile(atlasFile);
+		thread_local neolib::zip zipFile(atlasFile);
 		thread_local std::vector<std::uint8_t> buffer;
 		buffer.clear();
 		zipFile.extract_to(zipFile.index_of(existingNote->second.sampleFile), buffer);
@@ -224,7 +224,7 @@ namespace neogfx
 
 		if (aNote != existingNote->second.midiKeyPitchCentre)
 		{
-			auto context = smbCreateContext();
+			auto context = smbCreateContext(4096);
 			auto const frequencyShift = frequency(aNote) / frequency(existingNote->second.midiKeyPitchCentre);
 			smbPitchShift(context, frequencyShift, static_cast<long>(entireSample.size()), 4096, 32, static_cast<float>(aSampleRate), entireSample.data(), entireSample.data());
 			smbDestroyContext(context);
