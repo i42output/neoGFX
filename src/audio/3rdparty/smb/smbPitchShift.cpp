@@ -52,7 +52,7 @@ struct smbContext
 {
 	std::array<float, MAX_FRAME_LENGTH> gInFIFO = {};
 	std::array<float, MAX_FRAME_LENGTH> gOutFIFO = {};
-	std::array<float, MAX_FRAME_LENGTH * 2> alignas(16) gFFTworksp = {};
+	std::array<float, MAX_FRAME_LENGTH * 2> alignas(16) gFFTworksp1 = {};
 	std::array<float, MAX_FRAME_LENGTH * 2> alignas(16) gFFTworksp2 = {};
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1> gLastPhase = {};
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1> gSumPhase = {};
@@ -94,7 +94,7 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 {
 	std::array<float, MAX_FRAME_LENGTH>& gInFIFO = context->gInFIFO;
 	std::array<float, MAX_FRAME_LENGTH>& gOutFIFO = context->gOutFIFO;
-	std::array<float, MAX_FRAME_LENGTH * 2>& gFFTworksp = context->gFFTworksp;
+	std::array<float, MAX_FRAME_LENGTH * 2>& gFFTworksp1 = context->gFFTworksp1;
 	std::array<float, MAX_FRAME_LENGTH * 2>& gFFTworksp2 = context->gFFTworksp2;
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1>& gLastPhase = context->gLastPhase;
 	std::array<float, MAX_FRAME_LENGTH / 2 + 1>& gSumPhase = context->gSumPhase;
@@ -103,6 +103,7 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 	std::array<float, MAX_FRAME_LENGTH>& gAnaMagn = context->gAnaMagn;
 	std::array<float, MAX_FRAME_LENGTH>& gSynFreq = context->gSynFreq;
 	std::array<float, MAX_FRAME_LENGTH>& gSynMagn = context->gSynMagn;
+	auto gFFTworksp = &gFFTworksp1[0];
 	long& gRover = context->gRover;
 	
 	float magn, phase, tmp, window, real, imag;
@@ -129,6 +130,8 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 		if (gRover >= fftFrameSize) {
 			gRover = inFifoLatency;
 
+			gFFTworksp = &gFFTworksp1[0];
+
 			/* do windowing and re,im interleave */
 			for (k = 0; k < fftFrameSize;k++) {
 				window = -0.5f * cos(2.0f * neogfx::math::pi<float>() * (float)k / (float)fftFrameSize) +0.5f;
@@ -139,8 +142,8 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 
 			/* ***************** ANALYSIS ******************* */
 			/* do transform */
-			ffts_execute(context->fftsToComplexPlan, &gFFTworksp[0], &gFFTworksp2[0]);
-			std::memcpy(&gFFTworksp[0], &gFFTworksp2[0], fftFrameSize * 2 * sizeof(float));
+			ffts_execute(context->fftsToComplexPlan, &gFFTworksp1[0], &gFFTworksp2[0]);
+			gFFTworksp = &gFFTworksp2[0];
 
 			/* this is the analysis step */
 			for (k = 0; k <= fftFrameSize2; k++) {
@@ -223,8 +226,8 @@ void smbPitchShift(smbContext* context, float pitchShift, long numSampsToProcess
 			for (k = fftFrameSize+2; k < 2*fftFrameSize; k++) gFFTworksp[k] = 0.0f;
 
 			/* do inverse transform */
-			ffts_execute(context->fftsToRealPlan, &gFFTworksp[0], &gFFTworksp2[0]);
-			std::memcpy(&gFFTworksp[0], &gFFTworksp2[0], fftFrameSize * 2 * sizeof(float));
+			ffts_execute(context->fftsToRealPlan, &gFFTworksp2[0], &gFFTworksp1[0]);
+			gFFTworksp = &gFFTworksp1[0];
 
 			/* do windowing and add to output accumulator */ 
 			for(k=0; k < fftFrameSize; k++) {
