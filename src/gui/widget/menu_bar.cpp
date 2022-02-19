@@ -230,7 +230,8 @@ namespace neogfx
     void menu_bar::close_sub_menu(bool aClearSelection)
     {
         iSink2 = sink{};
-        iOpenSubMenu->clear_menu();
+        if (iOpenSubMenu)
+            iOpenSubMenu->clear_menu();
         if (aClearSelection)
             clear_selection();
     }
