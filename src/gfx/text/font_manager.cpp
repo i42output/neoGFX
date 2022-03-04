@@ -440,7 +440,8 @@ namespace neogfx
         runs.clear();
         auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
         text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
-        if (aContext.mnemonic_set() && codePoints[0] == static_cast<char32_t>(aContext.mnemonic()))
+        if (aContext.mnemonic_set() && codePoints[0] == static_cast<char32_t>(aContext.mnemonic()) && 
+            (codePointCount == 1 || codePoints[1] != static_cast<char32_t>(aContext.mnemonic())))
             previousCategory = text_category::Mnemonic;
         text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
         const char32_t* runStart = &codePoints[0];
@@ -484,7 +485,8 @@ namespace neogfx
 
             hb_unicode_funcs_t* unicodeFuncs = static_cast<font_face_handle*>(currentFont.native_font_face().handle())->harfbuzzUnicodeFuncs;
             text_category currentCategory = get_text_category(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
-            if (aContext.mnemonic_set() && codePoints[codePointIndex] == static_cast<char32_t>(aContext.mnemonic()))
+            if (aContext.mnemonic_set() && codePoints[codePointIndex] == static_cast<char32_t>(aContext.mnemonic()) &&
+                (codePointCount - 1 == codePointIndex || codePoints[codePointIndex + 1] != static_cast<char32_t>(aContext.mnemonic())))
                 currentCategory = text_category::Mnemonic;
             text_direction currentDirection = previousDirection;
             if (currentCategory == text_category::LTR)

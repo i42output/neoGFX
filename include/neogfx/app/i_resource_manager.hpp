@@ -26,8 +26,10 @@ namespace neogfx
 {
     struct embedded_resource_not_found : std::runtime_error { embedded_resource_not_found(std::string const& aResource) : std::runtime_error{ "neogfx::embedded_resource_not_found: " + aResource } {} };
 
-    class i_resource_manager
+    class i_resource_manager : public i_service
     {
+    public:
+        virtual void merge(i_resource_manager& aResourceManager) = 0;
     public:
         virtual void add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
         virtual void add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize) = 0;
@@ -35,6 +37,9 @@ namespace neogfx
     public:
         virtual void cleanup() = 0;
         virtual void clean() = 0;
+    public:
+        virtual neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resources() = 0;
+        virtual neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_archives() = 0;
     public:
         void add_resource(std::string const& aUri, const void* aResourceData, std::size_t aResourceSize)
         {
@@ -50,5 +55,7 @@ namespace neogfx
             load_resource(string{ aUri }, result);
             return result;
         }
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xe5f11ade, 0x7596, 0x4179, 0x8d77, { 0x1e, 0xb9, 0x9d, 0x6f, 0x3b, 0x96 } }; return sIid; }
     };
 }

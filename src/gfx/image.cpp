@@ -48,7 +48,7 @@ namespace neogfx
     }
 
     image::image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
-        iResource{ resource_manager::instance().load_resource(aUri) },
+        iResource{ service<i_resource_manager>().load_resource(aUri) },
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
         iColorSpace{ aColorSpace },

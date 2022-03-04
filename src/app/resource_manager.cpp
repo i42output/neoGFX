@@ -23,6 +23,11 @@
 #include <neogfx/app/module_resource.hpp>
 #include <neogfx/app/resource.hpp>
 
+template<> neogfx::i_resource_manager& services::start_service<neogfx::i_resource_manager>()
+{
+    return neogfx::resource_manager::instance();
+}
+
 namespace neogfx
 {    
     resource_manager::resource_manager()
@@ -35,46 +40,54 @@ namespace neogfx
         return sInstance;
     }
 
+    void resource_manager::merge(i_resource_manager& aResourceManager)
+    {
+        for (auto const& r : aResourceManager.resources())
+            iResources.insert(r.first(), r.second());
+        for (auto const& ra : aResourceManager.resource_archives())
+            iResourceArchives.insert(ra.first(), ra.second());
+    }
+
     void resource_manager::add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources[aUri] = ref_ptr<i_resource>{ make_ref<resource>(*this, aUri, aResourceData, aResourceSize) };
+        iResources.insert(aUri, decltype(iResources)::mapped_type{ ref_ptr<i_resource>{ make_ref<resource>(*this, aUri, aResourceData, aResourceSize) } });
     }
 
     void resource_manager::add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources[aUri] = ref_ptr<i_resource>{ make_ref<module_resource>(aUri, aResourceData, aResourceSize) };
+        iResources.insert(aUri, decltype(iResources)::mapped_type{ ref_ptr<i_resource>{ make_ref<resource>(*this, aUri, aResourceData, aResourceSize) } });
     }
 
     void resource_manager::load_resource(i_string const& aUri, i_ref_ptr<i_resource>& aResult)
     {
-        auto existing = iResources.find(aUri);
-        if (existing != iResources.end())
+        auto existing = iResources.to_std_map().find(aUri);
+        if (existing != iResources.to_std_map().end())
         {
-            if (std::holds_alternative<ref_ptr<i_resource>>(existing->second))
+            if (std::holds_alternative<ref_ptr<i_resource>>(existing->second.second()))
             {
-                aResult = std::get<ref_ptr<i_resource>>(existing->second);
+                aResult = std::get<ref_ptr<i_resource>>(existing->second.second());
                 return;
             }
-            weak_ref_ptr<i_resource> ptr = std::get<weak_ref_ptr<i_resource>>(existing->second);
+            weak_ref_ptr<i_resource> ptr = std::get<weak_ref_ptr<i_resource>>(existing->second.second());
             if (!ptr.expired())
             {
                 aResult = ptr;
                 return;
             }
         }
-        if (neolib::uri{ aUri }.scheme().empty() && iResources.find(aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#'))) == iResources.end())
+        if (neolib::uri{ aUri }.scheme().empty() && iResources.to_std_map().find(aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#'))) == iResources.to_std_map().end())
             throw embedded_resource_not_found(aUri);
         auto newResource = make_ref<resource>(*this, aUri);
-        iResources[aUri] = weak_ref_ptr<i_resource>{ newResource };
+        iResources[aUri] = decltype(iResources)::mapped_type{ weak_ref_ptr<i_resource>{ newResource } };
         aResult = newResource;
     }
 
     void resource_manager::cleanup()
     {
-        for (auto i = iResources.begin(); i != iResources.end();)
+        for (auto i = iResources.to_std_map().begin(); i != iResources.to_std_map().end();)
         {
-            if (std::holds_alternative<weak_ref_ptr<i_resource>>(i->second) && std::get<weak_ref_ptr<i_resource>>(i->second).expired())
-                i = iResources.erase(i);
+            if (std::holds_alternative<weak_ref_ptr<i_resource>>(i->second.second()) && std::get<weak_ref_ptr<i_resource>>(i->second.second()).expired())
+                i = iResources.to_std_map().erase(i);
             else
                 ++i;
         }
@@ -83,8 +96,18 @@ namespace neogfx
     void resource_manager::clean()
     {
         decltype(iResources) resources;
-        resources.swap(iResources);
+        resources.to_std_map().swap(iResources.to_std_map());
         decltype(iResourceArchives) resourceArchives;
-        resourceArchives.swap(iResourceArchives);
+        resourceArchives.to_std_map().swap(iResourceArchives.to_std_map());
+    }
+
+    neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_manager::resources()
+    {
+        return iResources;
+    }
+
+    neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_manager::resource_archives()
+    {
+        return iResourceArchives;
     }
 }

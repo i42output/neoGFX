@@ -313,7 +313,7 @@ namespace neogfx
     app::~app()
     {
         service<i_keyboard>().ungrab_keyboard(*this);
-        resource_manager::instance().clean();
+        service<i_resource_manager>().clean();
     }
 
     app& app::instance()

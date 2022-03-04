@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
+#include <neolib/core/map.hpp>
 #include "i_resource_manager.hpp"
 
 namespace neogfx
@@ -31,6 +32,8 @@ namespace neogfx
         resource_manager();
         static resource_manager& instance();
     public:
+        void merge(i_resource_manager& aResourceManager) override;
+    public:
         using i_resource_manager::add_resource;
         using i_resource_manager::add_module_resource;
         using i_resource_manager::load_resource;
@@ -40,8 +43,11 @@ namespace neogfx
     public:
         void cleanup() override;
         void clean() override;
+    public:
+        neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resources() override;
+        neolib::i_map<i_string, neolib::i_variant<i_ref_ptr<i_resource>, i_weak_ref_ptr<i_resource>>> const& resource_archives() override;
     private:
-        std::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResources;
-        std::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResourceArchives;
+        neolib::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResources;
+        neolib::map<string, neolib::variant<ref_ptr<i_resource>, weak_ref_ptr<i_resource>>> iResourceArchives;
     };
 }
