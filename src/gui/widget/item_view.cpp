@@ -471,7 +471,6 @@ namespace neogfx
             {
                 if (!selection_model().is_selected(*item))
                     select(*item, aKeyModifiers);
-                CellContextMenu.trigger(*item);
             }
         }
     }
@@ -509,7 +508,9 @@ namespace neogfx
                     actioned = true;
                 }
                 if (model().is_tree() && !actioned)
-                    presentation_model().toggle_expanded(*item);
+                    actioned = presentation_model().toggle_expanded(*item);
+                if (!actioned)
+                    CellAction.trigger(*item);
             }
         }
     }
@@ -534,6 +535,12 @@ namespace neogfx
             iClickedCheckBox = std::nullopt;
             if (doCheck)
                 presentation_model().toggle_check(*item);
+        }
+        if (aButton == mouse_button::Right)
+        {
+            auto item = item_at(aPosition);
+            if (item != std::nullopt)
+                CellContextMenu.trigger(*item);
         }
     }
 
