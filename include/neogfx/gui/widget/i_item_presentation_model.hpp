@@ -272,7 +272,10 @@ namespace neogfx
         virtual optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, optional_size const& aImageSize) = 0;
     public:
+        virtual bool expand(item_presentation_model_index const& aIndex) = 0;
+        virtual bool collapse(item_presentation_model_index const& aIndex) = 0;
         virtual bool toggle_expanded(item_presentation_model_index const& aIndex) = 0;
+        virtual bool expand_to(item_model_index const& aIndex) = 0;
     public:
         virtual button_checked_state const& checked_state(item_presentation_model_index const& aIndex) = 0;
         virtual bool is_checked(item_presentation_model_index const& aIndex) const = 0;

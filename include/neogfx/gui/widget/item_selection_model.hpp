@@ -177,7 +177,7 @@ namespace neogfx
                 return;
             iMode = aMode;
             ModeChanged.trigger(mode());
-            clear({});
+            clear(item_presentation_model_index{});
         }
     public:
         bool has_current_index() const override
@@ -465,6 +465,11 @@ namespace neogfx
             update(iPreviousSelection, false);
             if ((aOperation & item_selection_operation::Internal) != item_selection_operation::Internal)
                 process_queue();
+        }
+        void select(item_model_index const& aIndex, item_selection_operation aOperation) override
+        {
+            presentation_model().expand_to(aIndex);
+            select(presentation_model().from_item_model_index(aIndex), aOperation);
         }
     public:
         bool sorting() const override

@@ -320,6 +320,30 @@ namespace neogfx
                 ColumnInfoChanged.trigger(aColumnIndex);
             }
         }
+        bool expand(item_presentation_model_index const& aIndex) override
+        {
+            if constexpr (container_traits::is_tree)
+            {
+                if (!cell_meta(aIndex.with_column(0)).expanded)
+                {
+                    toggle_expanded(aIndex.with_column(0));
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool collapse(item_presentation_model_index const& aIndex) override
+        {
+            if constexpr (container_traits::is_tree)
+            {
+                if (cell_meta(aIndex.with_column(0)).expanded)
+                {
+                    toggle_expanded(aIndex.with_column(0));
+                    return true;
+                }
+            }
+            return false;
+        }
         bool toggle_expanded(item_presentation_model_index const& aIndex) override
         {
             if constexpr (container_traits::is_tree)
@@ -342,6 +366,18 @@ namespace neogfx
                     ItemExpanded.trigger(aIndex);
                 else
                     ItemCollapsed.trigger(aIndex);
+                return true;
+            }
+            else
+                return false;
+        }
+        bool expand_to(item_model_index const& aIndex) override
+        {
+            if constexpr (container_traits::is_tree)
+            {
+                if (!has_item_model_index(aIndex) && item_model().has_parent(aIndex))
+                    expand_to(item_model().parent(aIndex));
+                expand(from_item_model_index(aIndex));
                 return true;
             }
             else

@@ -309,6 +309,7 @@ namespace neogfx
         virtual bool is_selected(item_presentation_model_index const& aIndex) const = 0;
         virtual bool is_selectable(item_presentation_model_index const& aIndex) const = 0;
         virtual void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) = 0;
+        virtual void select(item_model_index const& aIndex, item_selection_operation aOperation) = 0;
     public:
         virtual bool sorting() const = 0;
         virtual bool filtering() const = 0;
@@ -339,7 +340,28 @@ namespace neogfx
                 break;
             }
         }
+        void select(item_model_index const& aIndex)
+        {
+            switch (mode())
+            {
+            case item_selection_mode::NoSelection:
+                break;
+            case item_selection_mode::SingleSelection:
+                select(aIndex, item_selection_operation::ClearAndSelect);
+                break;
+            case item_selection_mode::MultipleSelection:
+                select(aIndex, item_selection_operation::ClearAndSelect);
+                break;
+            case item_selection_mode::ExtendedSelection:
+                select(aIndex, item_selection_operation::Select);
+                break;
+            }
+        }
         void clear(item_presentation_model_index const& aIndex)
+        {
+            select(aIndex, item_selection_operation::Clear);
+        }
+        void clear(item_model_index const& aIndex)
         {
             select(aIndex, item_selection_operation::Clear);
         }
