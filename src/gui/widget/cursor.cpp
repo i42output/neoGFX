@@ -82,6 +82,12 @@ namespace neogfx
         }
     }
 
+    bool cursor::anchored_over_entire_document() const
+    {
+        return (position() == 0 && anchor() == document().document_length()) ||
+            (position() == document().document_length() && anchor() == 0);
+    }
+
     const color_or_gradient& cursor::color() const
     {
         return iColor;

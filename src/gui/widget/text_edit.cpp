@@ -263,6 +263,7 @@ namespace neogfx
         framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iCursor{ *this },
         iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
@@ -283,6 +284,7 @@ namespace neogfx
         framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iCursor{ *this },
         iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
@@ -303,6 +305,7 @@ namespace neogfx
         framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::Invisible, aFrameStyle },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
+        iCursor{ *this },
         iUpdatingDocument{ false },
         iGlyphColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
@@ -924,6 +927,11 @@ namespace neogfx
     {
         cursor().set_anchor(0);
         cursor().set_position(iText.size(), false);
+    }
+
+    std::size_t text_edit::document_length() const
+    {
+        return iText.size();
     }
 
     void text_edit::move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor)
@@ -2314,7 +2322,7 @@ namespace neogfx
         scalar yOffset = 0.0;
         if (cursorPos.glyph != glyphs().end() && cursorPos.lineStart != cursorPos.lineEnd)
         {
-            auto iterGlyph = cursorPos.glyph < cursorPos.lineEnd ? cursorPos.glyph : cursorPos.glyph - 1;
+            auto iterGlyph = (cursorPos.glyph > cursorPos.lineStart ? cursorPos.glyph - 1 : cursorPos.glyph);
             auto const& glyph = *iterGlyph;
             glyphHeight = glyph.extents.cy;
             yOffset = glyph.offset.as<scalar>().y;

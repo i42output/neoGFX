@@ -556,6 +556,7 @@ namespace neogfx
         void select_all() override;
         // i_text_document
     public:
+        std::size_t document_length() const override;
         void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;
     public:
         i_string const& plain_text() const override;

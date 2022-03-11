@@ -140,6 +140,8 @@ namespace neogfx::DesignStudio
                         s.character().set_font(fontPicker.selected_font());
                         s.character().set_from_text_appearance(*fontPicker.selected_appearance());
                         iDefaultItem->apply_style(s);
+                        if (iDefaultItem->cursor().anchored_over_entire_document())
+                            iDefaultItem->set_default_style(s);
                     }
                     else
                     {

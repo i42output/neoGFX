@@ -29,6 +29,7 @@ namespace neogfx
     public:
         virtual ~i_document() = default;
     public:
+        virtual std::size_t document_length() const = 0;
         virtual void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) = 0;
     };
 }

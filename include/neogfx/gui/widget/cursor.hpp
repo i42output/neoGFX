@@ -80,6 +80,7 @@ namespace neogfx
         void set_position(position_type aPosition, bool aMoveAnchor = true);
         position_type anchor() const;
         void set_anchor(position_type aAnchor);
+        bool anchored_over_entire_document() const;
         const color_or_gradient& color() const;
         void set_color(const color_or_gradient& aColor);
         cursor_style style() const;
