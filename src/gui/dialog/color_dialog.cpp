@@ -559,7 +559,7 @@ namespace neogfx
     {
         point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
         if (iImage)
-            return iImage->get_pixel(pos + scroll_position());
+            return iImage->get_pixel(((pos + scroll_position()) * dpi_scale_factor() / iCanvas.extents() * iImage->extents()).floor());
         switch (iOwner.current_channel())
         {
         case ChannelHue:

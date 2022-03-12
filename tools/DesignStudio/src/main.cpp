@@ -44,6 +44,7 @@ int main(int argc, char* argv[])
 
     ds::app app{ appInfo };
 
+#if 0
     auto& playbackDevice = ng::service<ng::i_audio>().create_playback_device(
         ng::audio_data_format{ ng::audio_sample_format::F32, 2u, 48000u });
     playbackDevice.start();
@@ -66,6 +67,7 @@ int main(int argc, char* argv[])
 
     playbackDevice.play(waveform, 15s);
     playbackDevice.play(churchOrgan, 15s);
+#endif
 
     try
     {
