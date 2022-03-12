@@ -505,10 +505,8 @@ namespace neogfx
     void surface_window::native_window_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
-        if (!event_consumed(w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event()))) &&
-            !w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers) &&
-            &w.surface() == this)
-            widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
+        if (!event_consumed(w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event()))))
+            w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
     }
 
     void surface_window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -555,9 +553,9 @@ namespace neogfx
 
     void surface_window::native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
-        i_widget& w = widget_for_mouse_event(as_window().mouse_position());
+        i_widget& w = widget_for_mouse_event(aPosition);
         if (!w.ignore_non_client_mouse_events() && !event_consumed(w.non_client_mouse_event().trigger(std::get<non_client_mouse_event>(native_window().current_event()))))
-            widget_for_mouse_event(as_window().mouse_position()).mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
     }
 
     void surface_window::native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

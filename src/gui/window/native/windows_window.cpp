@@ -1039,10 +1039,10 @@ namespace neogfx
                         self.push_event(mouse_event{ mouse_event_type::ButtonDoubleClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MOUSEWHEEL:
-                        self.push_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ 0, static_cast<int16_t>(HIWORD(wparam)) } });
+                        self.push_event(mouse_event{ mouse_event_type::WheelScrolled, pt - self.surface_position(), mouse_wheel::Vertical, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ 0, static_cast<int16_t>(HIWORD(wparam)) } });
                         break;
                     case WM_MOUSEHWHEEL:
-                        self.push_event(mouse_event{ mouse_event_type::WheelScrolled, pt, mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ static_cast<int16_t>(HIWORD(wparam)), 0 } });
+                        self.push_event(mouse_event{ mouse_event_type::WheelScrolled, pt - self.surface_position(), mouse_wheel::Horizontal, mouse::modifiers_from_message(LOWORD(wparam)), neogfx::basic_delta<int16_t>{ static_cast<int16_t>(HIWORD(wparam)), 0 } });
                         break;
                     }
                 }

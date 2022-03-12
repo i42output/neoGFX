@@ -1914,6 +1914,7 @@ namespace neogfx
 
         if (has_parent() && same_surface(parent()))
             return parent().mouse_wheel_scrolled(aWheel, aPosition + self.position(), aDelta, aKeyModifiers);
+
         return false;
     }
 

@@ -68,11 +68,14 @@ namespace neogfx
                 aResult = std::get<ref_ptr<i_resource>>(existing->second.second());
                 return;
             }
-            weak_ref_ptr<i_resource> ptr = std::get<weak_ref_ptr<i_resource>>(existing->second.second());
-            if (!ptr.expired())
+            else if (std::holds_alternative<weak_ref_ptr<i_resource>>(existing->second.second()))
             {
-                aResult = ptr;
-                return;
+                weak_ref_ptr<i_resource> ptr = std::get<weak_ref_ptr<i_resource>>(existing->second.second());
+                if (!ptr.expired())
+                {
+                    aResult = ptr;
+                    return;
+                }
             }
         }
         if (neolib::uri{ aUri }.scheme().empty() && iResources.to_std_map().find(aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#'))) == iResources.to_std_map().end())
