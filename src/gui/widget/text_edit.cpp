@@ -987,6 +987,12 @@ namespace neogfx
             auto selectionStart = std::min(cursor().position(), cursor().anchor());
             auto selectionEnd = std::max(cursor().position(), cursor().anchor());
             selectedText.assign(iText.begin() + selectionStart, iText.begin() + selectionEnd);
+            for (auto sti = selectedText.begin(); sti != selectedText.end();)
+            {
+                auto const ch = *sti++;
+                if (ch == U'\r' && (sti == selectedText.end() || *sti != U'\n'))
+                    *std::prev(sti) = U'\n';
+            }
             aClipboard.set_text(string{ neolib::utf32_to_utf8(selectedText) });
         }
     }
