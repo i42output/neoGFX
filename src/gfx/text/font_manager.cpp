@@ -682,8 +682,7 @@ namespace neogfx
                 startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
                 endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 
-                if (textDirections[startCluster].category == text_category::Whitespace &&
-                    (aUtf32Begin[startCluster] == U'\n' || aUtf32Begin[startCluster] == U'\r'))
+                if (textDirections[startCluster].category == text_category::Whitespace && aUtf32Begin[startCluster] == U'\r')
                 {
                     result.line_breaks().push_back(result.size());
                     continue;

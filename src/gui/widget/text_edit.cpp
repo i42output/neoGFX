@@ -642,6 +642,8 @@ namespace neogfx
 
     bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
+        neolib::service<neolib::i_power>().register_activity();
+
         bool handled = true;
         switch (aScanCode)
         {
@@ -673,7 +675,10 @@ namespace neogfx
                 {
                     multiple_text_changes mtc{ *this };
                     delete_any_selection();
-                    insert_text(string{ "\n" }, next_style());
+                    if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
+                        insert_text(string{ "\n" }, next_style());
+                    else
+                        insert_text(string{ "\r" }, next_style());
                     cursor().set_position(cursor().position() + 1);
                 }
             }
@@ -2168,8 +2173,15 @@ namespace neogfx
                     if (paragraphLineStart == paragraphLineEnd || is_line_breaking_whitespace(*paragraphLineStart))
                     {
                         auto lineStart = paragraphLineStart;
-                        auto lineEnd = lineStart;
+                        auto lineEnd = paragraphLineEnd;
                         auto height = paragraph.first.height(lineStart, lineEnd);
+                        if (height == 0.0)
+                        {
+                            if (lines.empty())
+                                height = paragraphStyle.character().font()->height();
+                            else
+                                height = lines.back().extents.cy;
+                        }
                         lines.push_back(
                             glyph_line{
                                 { p - iGlyphParagraphs.begin(), p },

@@ -271,6 +271,10 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
+        auto ds = window.textEdit.default_style();
+        ds.paragraph().set_padding(ng::padding{ 0, 4.0_dip });
+        window.textEdit.set_default_style(ds);
+
         window.textEdit.ObjectAcceptable([&](ng::i_drag_drop_object const& aObject, ng::drop_operation& aAcceptableAs)
         {
             if (aObject.ddo_type() == ng::i_drag_drop_file_list::otid())
