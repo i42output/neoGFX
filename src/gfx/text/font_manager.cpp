@@ -728,6 +728,7 @@ namespace neogfx
         {
             auto refEmojiResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
             auto& emojiResult = *refEmojiResult;
+            emojiResult.line_breaks() = result.line_breaks();
             for (auto i = result.begin(); i != result.end(); ++i)
             {
                 auto cluster = i->source.first;
