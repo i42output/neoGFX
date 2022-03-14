@@ -293,6 +293,9 @@ namespace neogfx
         virtual self_type& bottom_justify() = 0;
         virtual std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const = 0;
     public:
+        virtual i_vector<size_type> const& line_breaks() const = 0;
+        virtual i_vector<size_type>& line_breaks() = 0;
+    public:
         virtual const_iterator cbegin() const = 0;
         virtual const_iterator cend() const = 0;
         const_iterator begin() const
@@ -396,6 +399,9 @@ namespace neogfx
         self_type& bottom_justify() override;
         std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const override;
     public:
+        virtual vector<size_type> const& line_breaks() const override;
+        virtual vector<size_type>& line_breaks() override;
+    public:
         const font& glyph_font() const override;
         const font& glyph_font(const_reference aGlyph) const override;
         void cache_glyph_font(font_id aFontId) const override;
@@ -404,6 +410,7 @@ namespace neogfx
     private:
         font_cache iCache;
         mutable std::optional<neogfx::size> iExtents;
+        vector<size_type> iLineBreaks;
     };
 
     constexpr std::size_t SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT = 16;

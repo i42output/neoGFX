@@ -231,7 +231,7 @@ namespace neogfx
     {
         hsv_color left = to_hsv();
         hsv_color right = aOther.to_hsv();
-        return std::make_tuple(left.hue(), left.saturation(), left.value()) < std::make_tuple(right.hue(), right.saturation(), right.value());
+        return std::make_tuple(left.hue(), left.saturation(), left.value(), left.alpha()) < std::make_tuple(right.hue(), right.saturation(), right.value(), right.alpha());
     }
 
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>

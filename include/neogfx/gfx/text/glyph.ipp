@@ -341,6 +341,18 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
+    vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type> const& basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks() const
+    {
+        return iLineBreaks;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type>& basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks()
+    {
+        return iLineBreaks;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
     const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::glyph_font() const
     {
         return iCache.glyph_font();

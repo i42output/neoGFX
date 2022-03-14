@@ -494,7 +494,7 @@ namespace neogfx
             else if (currentCategory == text_category::RTL)
                 currentDirection = text_direction::RTL;
 
-            bool newLine = (codePoints[codePointIndex] == '\r' || codePoints[codePointIndex] == '\n');
+            bool newLine = (codePoints[codePointIndex] == U'\r' || codePoints[codePointIndex] == U'\n');
             if (newLine)
             {
                 currentLineHasLTR = false;
@@ -656,9 +656,11 @@ namespace neogfx
         {
             if (std::get<3>(runs[i]))
                 continue;
+            
             bool drawMnemonic = (i > 0 && std::get<3>(runs[i - 1]));
             std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
             glyph_shapes shapes{ aContext, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
+            
             for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
             {
                 std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
@@ -679,6 +681,14 @@ namespace neogfx
                 }
                 startCluster += (std::get<0>(runs[i]) - &codePoints[0]);
                 endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
+
+                if (textDirections[startCluster].category == text_category::Whitespace &&
+                    (aUtf32Begin[startCluster] == U'\n' || aUtf32Begin[startCluster] == U'\r'))
+                {
+                    result.line_breaks().push_back(result.size());
+                    continue;
+                }
+
                 neogfx::font selectedFont = aFontSelector.select_font(startCluster);
                 neogfx::font font = selectedFont;
                 if (shapes.using_fallback(j))

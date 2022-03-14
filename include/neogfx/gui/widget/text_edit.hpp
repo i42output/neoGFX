@@ -128,11 +128,34 @@ namespace neogfx
             bool iIgnoreEmoji;
             optional_text_effect iTextEffect;
         };
+        class paragraph_style
+        {
+        public:
+            paragraph_style();
+            paragraph_style(paragraph_style const& aOther);
+            paragraph_style(optional_padding const& aPadding, optional<double> const& aLineSpacing);
+        public:
+            optional_padding const& padding() const;
+            paragraph_style& set_padding(optional_padding const& aPadding = {});
+            optional<double> const& line_spacing() const;
+            paragraph_style& set_line_spacing(optional<double> const& aLineSpacing = {});
+        public:
+            paragraph_style& merge(const paragraph_style& aRhs);
+        public:
+            bool operator==(const paragraph_style& aRhs) const;
+            bool operator!=(const paragraph_style& aRhs) const;
+            bool operator<(const paragraph_style& aRhs) const;
+        public:
+            optional_padding iPadding;
+            optional<double> iLineSpacing;
+        };
         class style
         {
         public:
             style();
             style(character_style const& aCharacter);
+            style(character_style const& aCharacter, paragraph_style const& aParagraph);
+            style(paragraph_style const& aParagraph);
             style(text_edit& aParent, const style& aOther);
         public:
             void add_ref() const;
@@ -146,10 +169,13 @@ namespace neogfx
         public:
             character_style const& character() const;
             character_style& character();
+            paragraph_style const& paragraph() const;
+            paragraph_style& paragraph();
         private:
 			text_edit* iParent;
             mutable uint32_t iUseCount;
             character_style iCharacter;
+            paragraph_style iParagraph;
         };
         typedef std::set<style> style_list;
         class column_info
@@ -348,6 +374,14 @@ namespace neogfx
             {
                 iSelf = aSelf;
             }
+            i_vector<glyph_text::size_type> const& line_breaks() const
+            {
+                return iLineBreaks;
+            }
+            void set_line_breaks(i_vector<glyph_text::size_type> const& aLineBreaks)
+            {
+                iLineBreaks = aLineBreaks;
+            }
             glyph_paragraph& operator=(const glyph_paragraph& aOther)
             {
                 iParent = aOther.iParent;
@@ -443,6 +477,7 @@ namespace neogfx
             text_edit* iParent;
             glyph_paragraphs::const_iterator iSelf;
             mutable height_list iHeights;
+            vector<glyph_text::size_type> iLineBreaks;
         };
         struct glyph_line
         {
