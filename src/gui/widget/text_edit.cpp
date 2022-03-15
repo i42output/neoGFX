@@ -1575,7 +1575,8 @@ namespace neogfx
 
     bool text_edit::same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const
     {
-        if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n')
+        if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n' ||
+            iText[aTextPositionLeft] == U'\r' || iText[aTextPositionRight] == U'\r')
             return false;
         auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
         return get_text_category(emojiAtlas, iText[aTextPositionLeft]) == get_text_category(emojiAtlas, iText[aTextPositionRight]);
@@ -1906,7 +1907,7 @@ namespace neogfx
         for (auto ti = text.begin(); ti != text.end();)
         {
             auto ch = *ti++;
-            if (ch != U'\r' || (ti == text.end() || (*ti) == U'\n'))
+            if (ch != U'\r' || (ti == text.end() || (*ti) != U'\n'))
                 iNormalizedTextBuffer.push_back(ch);
         }
         auto eos = iNormalizedTextBuffer.size();
@@ -2059,7 +2060,7 @@ namespace neogfx
             for (auto lineBreak : paragraph.first.line_breaks())
             {
                 paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.start() + lineBreak);
-                lastBreak = lineBreak;
+                lastBreak = lineBreak + 1;
             }
             paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.end());
 
@@ -2146,7 +2147,7 @@ namespace neogfx
                 for (auto lineBreak : paragraph.first.line_breaks())
                 {
                     paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.start() + lineBreak);
-                    lastBreak = lineBreak;
+                    lastBreak = lineBreak + 1;
                 }
                 paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.end());
 
