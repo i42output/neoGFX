@@ -1129,15 +1129,18 @@ namespace neogfx
                 return;
             if (!updating())
                 ItemRemoved.trigger(from_item_model_index(aItemIndex));
-            iRows.erase(std::next(begin(), from_item_model_index(aItemIndex).row()));
+            auto const mappedRow = from_item_model_index(aItemIndex).row();
+            iRows.erase(std::next(begin(), mappedRow));
             for (auto& row : iRows)
                 if (row.value >= aItemIndex.row())
                     --row.value;
+            if (iRowMap[aItemIndex.row()])
+                for (auto& row : iRowMap)
+                    if (row && *row >= mappedRow)
+                        --*row;
+            iRowMap.erase(std::next(iRowMap.begin(), aItemIndex.row()));
             if (!updating())
-            {
-                reset_row_map(aItemIndex);
                 reset_meta(); // todo: optimize
-            }
         }
     private:
         void reset_maps(const item_model_index& aFrom = {}) const
