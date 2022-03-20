@@ -719,11 +719,10 @@ namespace neogfx
 
     void item_view::update_scrollbar_visibility()
     {
-        bool wasVisible = has_presentation_model() && has_selection_model() &&
-            selection_model().has_current_index() && is_visible(selection_model().current_index());
+        bool wasVisible = iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value());
         base_type::update_scrollbar_visibility();
         if (wasVisible)
-            make_visible(selection_model().current_index());
+            make_visible(iVisibleItem.value());
     }
 
     void item_view::update_scrollbar_visibility(usv_stage_e aStage)
@@ -909,6 +908,11 @@ namespace neogfx
         iHotTracking = false;
     }
 
+    bool item_view::is_valid(item_presentation_model_index const& aItemIndex) const
+    {
+        return aItemIndex.row() < presentation_model().rows() && aItemIndex.column() < presentation_model().columns();
+    }
+
     bool item_view::is_visible(item_presentation_model_index const& aItemIndex) const
     {
         return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
@@ -916,6 +920,7 @@ namespace neogfx
 
     bool item_view::make_visible(item_presentation_model_index const& aItemIndex)
     {
+        iVisibleItem = aItemIndex;
         bool changed = false;
         graphics_context gc{ *this, graphics_context::type::Unattached };
         auto const& cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
@@ -1176,9 +1181,8 @@ namespace neogfx
     {
         if (aUpdateReason == header_view_update_reason::FullUpdate)
         {
-            bool wasVisible = selection_model().has_current_index() && is_visible(selection_model().current_index());
-            if (wasVisible)
-                make_visible(selection_model().current_index());
+            if (iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value()))
+                make_visible(iVisibleItem.value());
             layout_items();
         }
         else

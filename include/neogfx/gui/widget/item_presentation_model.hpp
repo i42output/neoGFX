@@ -269,8 +269,13 @@ namespace neogfx
         {
             if (column(aColumnIndex).headingText != std::nullopt)
                 return *column(aColumnIndex).headingText;
-            else
+            else if (has_model_column(aColumnIndex))
                 return item_model().column_name(model_column(aColumnIndex));
+            else
+            {
+                static std::string const none;
+                return none;
+            }
         }
         size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc) const override
         {
@@ -1064,6 +1069,7 @@ namespace neogfx
     private:
         void item_model_column_info_changed(item_model_index::column_type aColumnIndex)
         {
+            reset_column_map(false);
             if (has_item_model_index(item_model_index{ 0, aColumnIndex }))
             {
                 auto const index = from_item_model_index(item_model_index{ 0, aColumnIndex });
@@ -1208,6 +1214,13 @@ namespace neogfx
                 }
             }
             return *mapCol;
+        }
+        bool has_model_column(item_presentation_model_index::column_type aColumnIndex) const
+        {
+            auto const& col = column(aColumnIndex);
+            if (col.modelColumn)
+                reset_column_map(false);
+            return col.modelColumn.has_value();
         }
         item_model_index::column_type model_column(item_presentation_model_index::column_type aColumnIndex) const
         {

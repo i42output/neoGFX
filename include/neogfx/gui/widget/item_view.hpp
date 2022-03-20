@@ -83,6 +83,7 @@ namespace neogfx
         void enable_hot_tracking();
         void disable_hot_tracking();
     public:
+        bool is_valid(item_presentation_model_index const& aItemIndex) const;
         bool is_visible(item_presentation_model_index const& aItemIndex) const;
         bool make_visible(item_presentation_model_index const& aItemIndex);
         const optional_item_presentation_model_index& editing() const;
@@ -184,6 +185,7 @@ namespace neogfx
         ref_ptr<i_item_model> iModel;
         ref_ptr<i_item_presentation_model> iPresentationModel;
         ref_ptr<i_item_selection_model> iSelectionModel;
+        optional_item_presentation_model_index iVisibleItem;
         bool iHotTracking;
         bool iIgnoreNextMouseMove;
         std::optional<widget_timer> iMouseTracker;
