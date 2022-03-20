@@ -362,6 +362,7 @@ namespace neogfx
         for (uint32_t i = 0u; i < layout().count(); ++i)
         {
             header_button& button = layout().get_widget_at<header_button>(i);
+            button.layout().set_alignment(alignment::Left | alignment::VCenter);
             if (i == 0u)
             {
                 auto m = button.padding();
