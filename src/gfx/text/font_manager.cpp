@@ -918,6 +918,8 @@ namespace neogfx
 
     i_native_font_face& font_manager::create_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
     {
+        if (aStyle == neogfx::font_style::Emulated)
+            aStyle = neogfx::font_style::Normal;
         return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, aDevice));
     }
 
@@ -936,6 +938,8 @@ namespace neogfx
 
     i_native_font_face& font_manager::create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
     {
+        if (aStyle == neogfx::font_style::Emulated)
+            aStyle = neogfx::font_style::Normal;
         return add_font(aFont.create_face(aStyle, aSize, aDevice));
     }
 
@@ -1146,6 +1150,8 @@ namespace neogfx
 
     i_native_font& font_manager::find_best_font(i_string const& aFamilyName, neogfx::font_style aStyle, font::point_size)
     {
+        if (aStyle == neogfx::font_style::Emulated)
+            aStyle = neogfx::font_style::Normal;
         auto family = iFontFamilies.find(aFamilyName);
         if (family == iFontFamilies.end() && default_system_font_info(system_font_role::Widget) != std::nullopt)
             family = iFontFamilies.find(default_system_font_info(system_font_role::Widget)->family_name());
