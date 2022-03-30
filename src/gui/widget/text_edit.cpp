@@ -1449,8 +1449,12 @@ namespace neogfx
         {
             if (line == lines.end())
             {
-                if (aGlyphPosition <= lines.back().lineEnd.first && !is_line_breaking_whitespace(glyphs().back()))
-                    --line;
+                auto const& lastLine = lines.back();
+                if (aGlyphPosition <= lastLine.lineEnd.first || !is_line_breaking_whitespace(glyphs().back()))
+                {
+                    if (!is_line_breaking_whitespace(glyphs().back()) || lastLine.lineEnd.first - lastLine.lineStart.first != 1)
+                        --line;
+                }
             }
             else if (aGlyphPosition < line->lineStart.first)
                 --line;
