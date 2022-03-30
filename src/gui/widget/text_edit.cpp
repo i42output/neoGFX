@@ -1154,7 +1154,9 @@ namespace neogfx
                 if (currentPosition.line != currentPosition.column->lines().begin())
                 {
                     auto const columnRectSansPadding = column_rect(column_index(*currentPosition.column));
-                    cursor().set_position(from_glyph(glyphs().begin() + document_hit_test(point{ *iCursorHint.x, std::prev(currentPosition.line)->ypos } +columnRectSansPadding.top_left(), false)).first, aMoveAnchor);
+                    auto const cursorPos = point{ *iCursorHint.x, std::prev(currentPosition.line)->ypos } + columnRectSansPadding.top_left();
+                    auto const glyph = document_hit_test(cursorPos, false);
+                    cursor().set_position(from_glyph(glyphs().begin() + glyph).first, aMoveAnchor);
                 }
             }
             break;
@@ -1163,10 +1165,14 @@ namespace neogfx
                 auto currentPosition = glyph_position(cursor_glyph_position());
                 if (currentPosition.line != currentPosition.column->lines().end())
                 {
-                    auto const columnRectSansPadding = column_rect(column_index(*currentPosition.column));
                     if (std::next(currentPosition.line) != currentPosition.column->lines().end())
-                        cursor().set_position(from_glyph(glyphs().begin() + document_hit_test(point{ *iCursorHint.x, std::next(currentPosition.line)->ypos } + columnRectSansPadding.top_left(), false)).first, aMoveAnchor);
-                    else if (currentPosition.lineEnd != glyphs().end() && is_line_breaking_whitespace(*currentPosition.lineEnd))
+                    {
+                        auto const columnRectSansPadding = column_rect(column_index(*currentPosition.column));
+                        auto const cursorPos = point{ *iCursorHint.x, std::next(currentPosition.line)->ypos } + columnRectSansPadding.top_left();
+                        auto const glyph = document_hit_test(cursorPos, false);
+                        cursor().set_position(from_glyph(glyphs().begin() + glyph).first, aMoveAnchor);
+                    }
+                    else if (currentPosition.lineEnd == glyphs().end() || is_line_breaking_whitespace(*currentPosition.lineEnd))
                         cursor().set_position(iText.size(), aMoveAnchor);
                 }
             }
@@ -1443,7 +1449,7 @@ namespace neogfx
         {
             if (line == lines.end())
             {
-                if (aGlyphPosition <= lines.back().lineEnd.first || is_non_line_breaking_whitespace(glyphs().back()))
+                if (aGlyphPosition <= lines.back().lineEnd.first && !is_line_breaking_whitespace(glyphs().back()))
                     --line;
             }
             else if (aGlyphPosition < line->lineStart.first)
@@ -1556,11 +1562,12 @@ namespace neogfx
             auto lineStartX = line->lineStart.second->x;
             for (auto gi = line->lineStart.first; gi != lineEnd; ++gi)
             {
-                auto& g = glyphs()[gi];
-                if (adjustedPosition.x >= g.x - lineStartX && adjustedPosition.x < g.x - lineStartX + advance(g).cx)
+                auto& glyph = glyphs()[gi];
+                auto const glyphAdvance = advance(glyph).cx;
+                if (adjustedPosition.x >= glyph.x - lineStartX && (adjustedPosition.x < glyph.x - lineStartX + glyphAdvance || glyphAdvance == 0.0))
                 {
-                    if (direction(g) != text_direction::RTL)
-                        return adjustedPosition.x < g.x - lineStartX + advance(g).cx / 2.0 ? gi : gi + 1;
+                    if (direction(glyph) != text_direction::RTL)
+                        return adjustedPosition.x < glyph.x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0 ? gi : gi + 1;
                     else
                         return gi + 1;
                 }
