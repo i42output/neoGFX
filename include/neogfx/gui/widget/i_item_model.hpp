@@ -267,6 +267,7 @@ namespace neogfx
         declare_event(column_info_changed, item_model_index::column_type)
         declare_event(item_added, item_model_index const&)
         declare_event(item_changed, item_model_index const&)
+        declare_event(item_removing, item_model_index const&)
         declare_event(item_removed, item_model_index const&)
         declare_event(cleared)
     public:

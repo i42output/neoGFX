@@ -285,6 +285,9 @@ namespace neogfx
          
     i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const
     {
+        // todo: investigate why turning off sub-pixel doesn't produce same grayscale bitmap as Windows with ClearType disabled
+        bool useSubpixelFiltering = true;
+
         auto existingGlyph = iGlyphs.find(aGlyph.value);
         if (existingGlyph != iGlyphs.end())
             return existingGlyph->second;
@@ -293,7 +296,14 @@ namespace neogfx
             try
             {
                 // todo: remove FT_LOAD_NO_AUTOHINT when cause of crash in freetype 2.11 with certain fonts is resolved
-                freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_NO_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                if (useSubpixelFiltering)
+                {
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_NO_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                }
+                else
+                {
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_NO_AUTOHINT | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
+                }
             }
             catch (freetype_error fe)
             {
@@ -302,7 +312,14 @@ namespace neogfx
             }
             try
             {
-                freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_LCD));
+                if (useSubpixelFiltering)
+                {
+                    freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_LCD));
+                }
+                else
+                {
+                    freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_NORMAL));
+                }
             }
             catch (freetype_error fe)
             {
@@ -327,8 +344,6 @@ namespace neogfx
             return invalid_glyph();
         }
 
-        bool useSubpixelFiltering = true;
-
         FT_Bitmap& bitmap = iHandle.freetypeFace->glyph->bitmap;
 
         if ((style() & (font_style::EmulatedBold)) == font_style::EmulatedBold)
@@ -345,7 +360,7 @@ namespace neogfx
 
         auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
             neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
-            1.0, texture_sampling::Normal, pixelMode != glyph_pixel_mode::Mono ? texture_data_format::SubPixel : texture_data_format::Red);
+            1.0, texture_sampling::Normal, pixelMode == glyph_pixel_mode::LCD ? texture_data_format::SubPixel : texture_data_format::Red);
 
         rect glyphRect{ subTexture.atlas_location() };
         i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value,

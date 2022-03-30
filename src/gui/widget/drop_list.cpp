@@ -345,9 +345,7 @@ namespace neogfx
 
     dimension drop_list::list_proxy::effective_frame_width() const
     {
-        if (iPopup != std::nullopt)
-            return iPopup->effective_frame_width();
-        else if (iViewContainer != std::nullopt)
+        if (iViewContainer != std::nullopt)
             return iViewContainer->effective_frame_width();
         else
             return 0.0;
@@ -712,11 +710,15 @@ namespace neogfx
     {
         if (iPresentationModel == aPresentationModel)
             return;
+        if (has_presentation_model() && presentation_model().attached())
+            presentation_model().detach();
         iPresentationModel = aPresentationModel;
         if (has_presentation_model() && has_model())
             presentation_model().set_item_model(model());
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(*aPresentationModel);
+        if (has_presentation_model())
+            presentation_model().attach(ref_ptr<i_widget>{ *this });
         if (view_created())
             view().set_presentation_model(aPresentationModel);
 

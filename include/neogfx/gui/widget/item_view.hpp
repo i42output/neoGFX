@@ -101,6 +101,8 @@ namespace neogfx
         bool is_drag_drop_object(point const& aPosition) const override;
         i_drag_drop_object const* drag_drop_object(point const& aPosition) override;
     protected:
+        bool updating_models() const override;
+    protected:
         void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) override;
     protected:
         virtual void model_changed() = 0;
@@ -185,6 +187,7 @@ namespace neogfx
         ref_ptr<i_item_model> iModel;
         ref_ptr<i_item_presentation_model> iPresentationModel;
         ref_ptr<i_item_selection_model> iSelectionModel;
+        bool iUpdatingModels;
         optional_item_presentation_model_index iVisibleItem;
         bool iHotTracking;
         bool iIgnoreNextMouseMove;

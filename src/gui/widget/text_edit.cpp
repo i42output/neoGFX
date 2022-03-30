@@ -681,6 +681,8 @@ namespace neogfx
                         insert_text(string{ "\r" }, next_style());
                     cursor().set_position(cursor().position() + 1);
                 }
+                else
+                    handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             }
             else
                 handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);

@@ -30,19 +30,19 @@
 namespace neogfx
 {
     item_view::item_view(frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
+        base_type{ aScrollbarStyle, aFrameStyle }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
 
     item_view::item_view(i_widget& aParent, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
+        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
 
     item_view::item_view(i_layout& aLayout, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
+        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
@@ -82,6 +82,7 @@ namespace neogfx
     {
         if (iModel == aModel)
             return;
+        neolib::scoped_flag sf{ iUpdatingModels };
         iModelSink.clear();
         iModel = aModel;
         if (has_model())
@@ -95,7 +96,7 @@ namespace neogfx
                 presentation_model().set_item_model(*aModel);
         }
         model_changed();
-        update_scrollbar_visibility();
+        layout_items(true);
         update();
     }
 
@@ -130,10 +131,16 @@ namespace neogfx
     {
         if (iPresentationModel == aPresentationModel)
             return;
+        neolib::scoped_flag sf{ iUpdatingModels };
+        if (has_presentation_model() && presentation_model().attached())
+            presentation_model().detach();
         iPresentationModelSink.clear();
         iPresentationModel = aPresentationModel;
         if (has_presentation_model())
         {
+            if (presentation_model().attached())
+                presentation_model().detach();
+            presentation_model().attach(ref_ptr<i_widget>{ *this });
             if (presentation_model().has_item_model())
                 set_model(presentation_model().item_model());
             else if (has_model())
@@ -207,7 +214,7 @@ namespace neogfx
             iSelectionModelSink += neolib::destroyed(selection_model(), [this]() { iSelectionModel = nullptr; });
         }
         selection_model_changed();
-        update_scrollbar_visibility();
+        layout_items(true);
         update();
     }
 
@@ -361,7 +368,7 @@ namespace neogfx
                     if (cellImage != std::nullopt)
                         aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage);
                     auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
-                    auto const& glyphText = presentation_model().cell_glyph_text(itemIndex, aGc);
+                    auto const& glyphText = presentation_model().cell_glyph_text(itemIndex);
                     if (!editing() || editing() != itemIndex)
                         aGc.draw_glyph_text(cellTextRect.top_left(), glyphText, *textColor);
                 }
@@ -394,8 +401,8 @@ namespace neogfx
         if (base_type::has_focus_policy())
             return base_type::focus_policy();
         auto result = base_type::focus_policy();
-        if (editing() != std::nullopt)
-            result |= (focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
+        if (editing())
+            result |= (focus_policy::ConsumeEscapeKey | focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
         return result;
     }
 
@@ -587,16 +594,28 @@ namespace neogfx
             item_presentation_model_index newIndex = currentIndex;
             switch (aScanCode)
             {
+            case ScanCode_ESCAPE:
+                if (editing() && editor_has_text_edit())
+                {
+                    auto& textEdit = editor_text_edit();
+                    if (textEdit.cursor().position() == textEdit.cursor().anchor())
+                    {
+                        end_edit(false);
+                        return true;
+                    }
+                    return false;
+                }
+                break;
             case ScanCode_RETURN:
             case ScanCode_KP_ENTER:
-                if (editing() != std::nullopt)
+                if (editing())
                 {
                     end_edit(true);
                     return true;
                 }
                 break;
             case ScanCode_TAB:
-                if (editing() != std::nullopt)
+                if (editing())
                 {
                     end_edit(true);
                     item_presentation_model_index originalIndex = selection_model().current_index();
@@ -605,7 +624,7 @@ namespace neogfx
                     else
                         select(selection_model().relative_to_current_index(index_location::PreviousCell, true, true));
                     edit(selection_model().current_index());
-                    if (editing() != std::nullopt && editor_has_text_edit())
+                    if (editing() && editor_has_text_edit())
                     {
                         editor_text_edit().cursor().set_anchor(0);
                         editor_text_edit().cursor().set_position(editor_text_edit().text().size(), false);
@@ -773,9 +792,9 @@ namespace neogfx
 
     void item_view::column_info_changed(item_model_index::value_type)
     {
-        update_scrollbar_visibility();
+        layout_items(true);
         update();
-        if (editing() != std::nullopt && !presentation_model().cell_editable(*editing()))
+        if (editing() && !presentation_model().cell_editable(*editing()))
             end_edit(false);
     }
 
@@ -793,7 +812,7 @@ namespace neogfx
 
     void item_view::item_model_changed(const i_item_model&)
     {
-        update_scrollbar_visibility();
+        layout_items(true);
         update();
     }
 
@@ -814,7 +833,7 @@ namespace neogfx
 
     void item_view::items_updated()
     {
-        update_scrollbar_visibility();
+        layout_items(true);
         update();
     }
 
@@ -872,9 +891,9 @@ namespace neogfx
             {
                 if (aPreviousIndex != std::nullopt)
                 {
-                    if (editing() != std::nullopt && presentation_model().cell_editable_when_focused(*aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
+                    if (editing() && presentation_model().cell_editable_when_focused(*aCurrentIndex) && editing() != aCurrentIndex && iSavedModelIndex == std::nullopt)
                         edit(*aCurrentIndex);
-                    else if (editing() != std::nullopt)
+                    else if (editing())
                         end_edit(true);
                 }
             }
@@ -1046,7 +1065,7 @@ namespace neogfx
 
     void item_view::begin_edit()
     {
-        if (editing() != std::nullopt && !ending_edit() && editor_has_text_edit())
+        if (editing() && !ending_edit() && editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
             textEdit.set_focus();
@@ -1177,20 +1196,21 @@ namespace neogfx
         return nullptr;
     }
 
+    bool item_view::updating_models() const
+    {
+        return iUpdatingModels;
+    }
+
+
     void item_view::header_view_updated(header_view&, header_view_update_reason aUpdateReason)
     {
         if (aUpdateReason == header_view_update_reason::FullUpdate)
         {
             if (iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value()))
                 make_visible(iVisibleItem.value());
-            layout_items();
         }
-        else
-        {
-            update_scrollbar_visibility();
-            layout_items();
-        }
-        if (editing() != std::nullopt)
+        layout_items();
+        if (editing())
         {
             auto editorRect = cell_rect(*editing(), cell_part::Text);
             editorRect.inflate(presentation_model().cell_padding(*this));
@@ -1310,7 +1330,7 @@ namespace neogfx
         case cell_part::Text:
             {
                 auto cellRect = cell_rect(aItemIndex);
-                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex, aGc);
+                auto const& glyphText = presentation_model().cell_glyph_text(aItemIndex);
                 auto const textHeight = std::max(glyphText.extents().cy,
                     (presentation_model().cell_font(aItemIndex) == std::nullopt ? presentation_model().default_font() : *presentation_model().cell_font(aItemIndex)).height());
                 auto const textAdjust = std::floor((cellRect.height() - textHeight) / 2.0);
@@ -1377,7 +1397,8 @@ namespace neogfx
 
     void item_view::init()
     {
-        set_focus_policy(focus_policy::ClickTabFocus);
+        set_focus_policy(focus_policy::ClickTabFocus | 
+            focus_policy::ConsumeEscapeKey | focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
         set_padding(neogfx::padding{});
         iSink += service<i_app>().current_style_changed([this](style_aspect)
         {
@@ -1388,7 +1409,7 @@ namespace neogfx
 
     void item_view::invalidate_item(item_presentation_model_index const& aItemIndex)
     {
-        update_scrollbar_visibility();
+        layout_items(true);
         update();
         if (iHoverCell && iHoverCell->row() >= aItemIndex.row())
             iHoverCell = std::nullopt;

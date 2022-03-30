@@ -27,9 +27,10 @@
 #include <neolib/core/segmented_array.hpp>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/core/object.hpp>
-#include <neogfx/gfx/i_graphics_context.hpp>
+#include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_drag_drop.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
@@ -48,6 +49,7 @@ namespace neogfx
         define_declared_event(ItemModelChanged, item_model_changed, const i_item_model&)
         define_declared_event(ItemAdded, item_added, item_presentation_model_index const&)
         define_declared_event(ItemChanged, item_changed, item_presentation_model_index const&)
+        define_declared_event(ItemRemoving, item_removing, item_presentation_model_index const&)
         define_declared_event(ItemRemoved, item_removed, item_presentation_model_index const&)
         define_declared_event(ItemExpanding, item_expanding, item_presentation_model_index const&)
         define_declared_event(ItemCollapsing, item_collapsing, item_presentation_model_index const&)
@@ -96,11 +98,25 @@ namespace neogfx
             column_info(const item_model_index::optional_column_type modelColumn = {}) : modelColumn{ modelColumn } {}
             mutable item_model_index::optional_column_type modelColumn;
             item_cell_flags flags = item_cell_flags::Default;
-            mutable optional_dimension width;
+            mutable std::map<dimension, uint32_t> cellWidths;
             mutable std::optional<std::string> headingText;
             mutable font headingFont;
             mutable optional_size headingExtents;
             optional_size imageSize;
+
+            void add_cell_width(dimension aWidth) const
+            {
+                ++cellWidths[aWidth];
+            }
+            void remove_cell_width(dimension aWidth) const
+            {
+                auto existing = cellWidths.find(aWidth);
+                if (existing != cellWidths.end())
+                {
+                    if (--existing->second == 0)
+                        cellWidths.erase(existing);
+                }
+            }
         };
         typedef typename container_traits::template rebind<item_presentation_model_index::row_type, column_info>::other::row_cell_array column_info_array;
     public:
@@ -124,16 +140,33 @@ namespace neogfx
             iItemModelSink.clear();
         }
     public:
-        bool updating() const override
+        bool attached() const final
+        {
+            return iAttachment != nullptr;
+        }
+        void attach(i_ref_ptr<i_widget> const& aWidget) final
+        {
+            if (iAttachment != nullptr && aWidget != nullptr)
+                throw already_attached();
+            iAttachment = aWidget;
+        }
+        void detach() final
+        {
+            if (iAttachment == nullptr)
+                throw not_attached();
+            iAttachment = nullptr;
+        }
+    public:
+        bool updating() const final
         {
             return iUpdating != 0u;
         }
-        void begin_update() override
+        void begin_update() final
         {
             if (++iUpdating == 1)
                 ItemsUpdating.trigger();
         }
-        void end_update() override
+        void end_update() final
         {
             if (--iUpdating == 0)
             {
@@ -143,17 +176,17 @@ namespace neogfx
                 ItemsUpdated.trigger();
             }
         }
-        bool has_item_model() const override
+        bool has_item_model() const final
         {
             return iItemModel != nullptr;
         }
-        item_model_type& item_model() const override
+        item_model_type& item_model() const final
         {
             if (iItemModel == nullptr)
                 throw no_item_model();
             return static_cast<item_model_type&>(*iItemModel);
         }
-        void set_item_model(i_item_model& aItemModel) override
+        void set_item_model(i_item_model& aItemModel) final
         {
             if (iItemModel != &aItemModel)
             {
@@ -176,6 +209,7 @@ namespace neogfx
                 iItemModelSink += item_model().column_info_changed([this](item_model_index::column_type aColumnIndex) { item_model_column_info_changed(aColumnIndex); });
                 iItemModelSink += item_model().item_added([this](const item_model_index& aItemIndex) { item_added(aItemIndex); });
                 iItemModelSink += item_model().item_changed([this](const item_model_index& aItemIndex) { item_changed(aItemIndex); });
+                iItemModelSink += item_model().item_removing([this](const item_model_index& aItemIndex) { item_removing(aItemIndex); });
                 iItemModelSink += item_model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
                 iItemModelSink += item_model().cleared([this]()
                 {  
@@ -197,38 +231,38 @@ namespace neogfx
                 reset_model();
             }
         }
-        item_model_index to_item_model_index(item_presentation_model_index const& aIndex) const override
+        item_model_index to_item_model_index(item_presentation_model_index const& aIndex) const final
         {
             return item_model_index{ row(aIndex).value, model_column(aIndex.column()) };
         }
-        bool has_item_model_index(item_model_index const& aIndex) const override
+        bool has_item_model_index(item_model_index const& aIndex) const final
         {
             return aIndex.row() < row_map().size() && row_map()[aIndex.row()];
         }
-        item_presentation_model_index from_item_model_index(item_model_index const& aIndex, bool aIgnoreColumn = false) const override
+        item_presentation_model_index from_item_model_index(item_model_index const& aIndex, bool aIgnoreColumn = false) const final
         {
             if (has_item_model_index(aIndex))
                 return item_presentation_model_index{ mapped_row(aIndex.row()), !aIgnoreColumn ? mapped_column(aIndex.column()) : 0 };
             throw bad_index();
         }
     public:
-        uint32_t rows() const override
+        uint32_t rows() const final
         {
             if constexpr (container_traits::is_flat)
                 return static_cast<uint32_t>(iRows.size());
             else
                 return static_cast<uint32_t>(iRows.ksize());
         }
-        uint32_t columns() const override
+        uint32_t columns() const final
         {
             return static_cast<uint32_t>(iColumns.size());
         }
-        uint32_t columns(item_presentation_model_index const& aIndex) const override
+        uint32_t columns(item_presentation_model_index const& aIndex) const final
         {
             return static_cast<uint32_t>(row(aIndex).cells.size());
         }
     public:
-        void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) override
+        void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) final
         {
             if constexpr (container_traits::is_flat)
             {
@@ -250,20 +284,16 @@ namespace neogfx
             }
         }
     public:
-        dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc, bool aIncludePadding = true) const override
+        dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aIncludePadding = true) const override
         {
-            if (iColumns.size() < aColumnIndex + 1u)
+            if (rows() == 0 || columns() < aColumnIndex + 1u)
                 return 0.0;
-            auto& columnWidth = column(aColumnIndex).width;
-            if (columnWidth != std::nullopt)
-                return *columnWidth + (aIncludePadding ? cell_padding(aGc).size().cx : 0.0);
-            columnWidth = 0.0;
+            auto& cellWidths = column(aColumnIndex).cellWidths;
+            if (!cellWidths.empty())
+                return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aIncludePadding ? cell_padding(aUnitsContext).size().cx : 0.0);
             for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
-            {
-                auto const cellWidth = cell_extents(item_presentation_model_index{ row, aColumnIndex }, aGc).cx;
-                columnWidth = std::max(*columnWidth, cellWidth);
-            }
-            return *columnWidth + (aIncludePadding ? cell_padding(aGc).size().cx : 0.0);
+                cell_extents(item_presentation_model_index{ row, aColumnIndex }, aUnitsContext);
+            return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aIncludePadding ? cell_padding(aUnitsContext).size().cx : 0.0);
         }
         std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {
@@ -277,7 +307,7 @@ namespace neogfx
                 return none;
             }
         }
-        size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc) const override
+        size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext) const override
         {
             if (column(aColumnIndex).headingFont != font{})
             {
@@ -285,14 +315,15 @@ namespace neogfx
                 column(aColumnIndex).headingExtents = std::nullopt;
             }
             if (column(aColumnIndex).headingExtents != std::nullopt)
-                return units_converter(aGc).from_device_units(*column(aColumnIndex).headingExtents);
-            size columnHeadingExtents = aGc.multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
-            column(aColumnIndex).headingExtents = units_converter(aGc).to_device_units(columnHeadingExtents);
+                return units_converter(aUnitsContext).from_device_units(*column(aColumnIndex).headingExtents);
+            size columnHeadingExtents = graphics_context{ *iAttachment, graphics_context::type::Unattached }.
+                multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
+            column(aColumnIndex).headingExtents = units_converter(aUnitsContext).to_device_units(columnHeadingExtents);
             column(aColumnIndex).headingExtents->cx = std::ceil(column(aColumnIndex).headingExtents->cx);
             column(aColumnIndex).headingExtents->cy = std::ceil(column(aColumnIndex).headingExtents->cy);
-            return units_converter(aGc).from_device_units(*column(aColumnIndex).headingExtents);
+            return units_converter(aUnitsContext).from_device_units(*column(aColumnIndex).headingExtents);
         }
-        void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) override
+        void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) final
         {
             column(aColumnIndex).headingText = aHeadingText;
             column(aColumnIndex).headingExtents = std::nullopt;
@@ -304,7 +335,7 @@ namespace neogfx
                 return column(aColumnIndex).flags;
             return item_cell_flags::Default;
         }
-        void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) override
+        void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) final
         {
             if (column(aColumnIndex).flags != aFlags)
             {
@@ -316,7 +347,7 @@ namespace neogfx
         {
             return column(aColumnIndex).imageSize;
         }
-        void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, optional_size const& aImageSize) override
+        void set_column_image_size(item_presentation_model_index::column_type aColumnIndex, optional_size const& aImageSize) final
         {
             if (column(aColumnIndex).imageSize != aImageSize)
             {
@@ -325,7 +356,7 @@ namespace neogfx
                 ColumnInfoChanged.trigger(aColumnIndex);
             }
         }
-        bool expand(item_presentation_model_index const& aIndex) override
+        bool expand(item_presentation_model_index const& aIndex) final
         {
             if constexpr (container_traits::is_tree)
             {
@@ -337,7 +368,7 @@ namespace neogfx
             }
             return false;
         }
-        bool collapse(item_presentation_model_index const& aIndex) override
+        bool collapse(item_presentation_model_index const& aIndex) final
         {
             if constexpr (container_traits::is_tree)
             {
@@ -349,7 +380,7 @@ namespace neogfx
             }
             return false;
         }
-        bool toggle_expanded(item_presentation_model_index const& aIndex) override
+        bool toggle_expanded(item_presentation_model_index const& aIndex) final
         {
             if constexpr (container_traits::is_tree)
             {
@@ -376,7 +407,7 @@ namespace neogfx
             else
                 return false;
         }
-        bool expand_to(item_model_index const& aIndex) override
+        bool expand_to(item_model_index const& aIndex) final
         {
             if constexpr (container_traits::is_tree)
             {
@@ -388,23 +419,23 @@ namespace neogfx
             else
                 return false;
         }
-        const button_checked_state& checked_state(item_presentation_model_index const& aIndex) override
+        const button_checked_state& checked_state(item_presentation_model_index const& aIndex) final
         {
             return cell_meta(aIndex).checked;
         }
-        bool is_checked(item_presentation_model_index const& aIndex) const override
+        bool is_checked(item_presentation_model_index const& aIndex) const final
         {
             return cell_meta(aIndex).checked == true;
         }
-        bool is_unchecked(item_presentation_model_index const& aIndex) const override
+        bool is_unchecked(item_presentation_model_index const& aIndex) const final
         {
             return cell_meta(aIndex).checked == false;
         }
-        bool is_indeterminate(item_presentation_model_index const& aIndex) const override
+        bool is_indeterminate(item_presentation_model_index const& aIndex) const final
         {
             return cell_meta(aIndex).checked == std::nullopt;
         }
-        void set_checked_state(item_presentation_model_index const& aIndex, button_checked_state const& aState) override
+        void set_checked_state(item_presentation_model_index const& aIndex, button_checked_state const& aState) final
         {
             if (cell_meta(aIndex).checked != aState)
             {
@@ -421,36 +452,36 @@ namespace neogfx
                     ItemIndeterminate.trigger(aIndex);
             }
         }
-        void check(item_presentation_model_index const& aIndex) override
+        void check(item_presentation_model_index const& aIndex) final
         {
             set_checked(aIndex, true);
         }
-        void uncheck(item_presentation_model_index const& aIndex) override
+        void uncheck(item_presentation_model_index const& aIndex) final
         {
             set_checked(aIndex, false);
         }
-        void set_indeterminate(item_presentation_model_index const& aIndex) override
+        void set_indeterminate(item_presentation_model_index const& aIndex) final
         {
             set_checked_state(aIndex, button_checked_state{});
         }
-        void set_checked(item_presentation_model_index const& aIndex, bool aChecked) override
+        void set_checked(item_presentation_model_index const& aIndex, bool aChecked) final
         {
             set_checked_state(aIndex, aChecked);
         }
-        void toggle_check(item_presentation_model_index const& aIndex) override
+        void toggle_check(item_presentation_model_index const& aIndex) final
         {
             if (is_checked(aIndex) || is_indeterminate(aIndex))
                 set_checked(aIndex, false);
             else
                 set_checked(aIndex, true);
         }
-        const font& default_font() const override
+        const font& default_font() const final
         {
             if (iDefaultFont != std::nullopt)
                 return *iDefaultFont;
             return service<i_app>().current_style().font();
         }
-        void set_default_font(optional_font const& aDefaultFont) override
+        void set_default_font(optional_font const& aDefaultFont) final
         {
             if (iDefaultFont != aDefaultFont)
             {
@@ -458,7 +489,7 @@ namespace neogfx
                 reset_meta();
             }
         }
-        size cell_spacing(i_units_context const& aUnitsContext) const override
+        size cell_spacing(i_units_context const& aUnitsContext) const final
         {
             if (iCellSpacing == std::nullopt)
             {
@@ -471,14 +502,14 @@ namespace neogfx
             }
             return units_converter(aUnitsContext).from_device_units(*iCellSpacing);
         }
-        void set_cell_spacing(optional_size const& aSpacing, i_units_context const& aUnitsContext) override
+        void set_cell_spacing(optional_size const& aSpacing, i_units_context const& aUnitsContext) final
         {
             if (aSpacing == std::nullopt)
                 iCellSpacing = aSpacing;
             else
                 iCellSpacing = units_converter(aUnitsContext).to_device_units(*aSpacing);
         }
-        neogfx::padding cell_padding(i_units_context const& aUnitsContext) const override
+        neogfx::padding cell_padding(i_units_context const& aUnitsContext) const final
         {
             if (iCellPadding == std::nullopt)
             {
@@ -486,23 +517,23 @@ namespace neogfx
             }
             return units_converter(aUnitsContext).from_device_units(*iCellPadding);
         }
-        void set_cell_padding(optional_padding const& aPadding, i_units_context const& aUnitsContext) override
+        void set_cell_padding(optional_padding const& aPadding, i_units_context const& aUnitsContext) final
         {
             if (aPadding == std::nullopt)
                 iCellPadding = aPadding;
             else
                 iCellPadding = units_converter(aUnitsContext).to_device_units(*aPadding);
         }
-        bool alternating_row_color() const override
+        bool alternating_row_color() const final
         {
             return iAlternatingRowColor;
         }
-        void set_alternating_row_color(bool aAlternatingColor) override
+        void set_alternating_row_color(bool aAlternatingColor) final
         {
             iAlternatingRowColor = aAlternatingColor;
         }
     public:
-        dimension item_height(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
+        dimension item_height(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const final
         {
             dimension height = 0.0;
             for (uint32_t col = 0; col < row(aIndex).cells.size(); ++col)
@@ -528,7 +559,7 @@ namespace neogfx
             }
             return height + cell_padding(aUnitsContext).size().cy + cell_spacing(aUnitsContext).cy;
         }
-        double total_height(i_units_context const& aUnitsContext) const override
+        double total_height(i_units_context const& aUnitsContext) const final
         {
             if (iTotalHeight != std::nullopt)
                 return *iTotalHeight;
@@ -538,7 +569,7 @@ namespace neogfx
             iTotalHeight = height;
             return *iTotalHeight;
         }
-        double item_position(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
+        double item_position(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const final
         {
             if (iPositions[aIndex.row()] == std::nullopt)
             {
@@ -565,7 +596,7 @@ namespace neogfx
             }
             return *iPositions[aIndex.row()];
         }
-        std::pair<item_presentation_model_index::row_type, coordinate> item_at(double aPosition, i_units_context const& aUnitsContext) const override
+        std::pair<item_presentation_model_index::row_type, coordinate> item_at(double aPosition, i_units_context const& aUnitsContext) const final
         {
             if (rows() == 0)
                 return std::pair<item_presentation_model_index::row_type, coordinate>{ 0u, 0.0 };
@@ -608,7 +639,7 @@ namespace neogfx
                 return *cell_meta(aIndex).flags;
             return column_flags(aIndex.column());
         }
-        void set_cell_flags(item_presentation_model_index const& aIndex, item_cell_flags aFlags) override
+        void set_cell_flags(item_presentation_model_index const& aIndex, item_cell_flags aFlags) final
         {
             if (cell_meta(aIndex).flags != aFlags)
             {
@@ -616,7 +647,7 @@ namespace neogfx
                 ItemChanged.trigger(aIndex);
             }
         }
-        cell_meta_type& cell_meta(item_presentation_model_index const& aIndex) const override
+        cell_meta_type& cell_meta(item_presentation_model_index const& aIndex) const final
         {
             if (aIndex.row() < rows())
             {
@@ -632,7 +663,7 @@ namespace neogfx
             throw bad_index();
         }
     public:
-        std::string cell_to_string(item_presentation_model_index const& aIndex) const override
+        std::string cell_to_string(item_presentation_model_index const& aIndex) const final
         {
             auto const modelIndex = to_item_model_index(aIndex);
             return std::visit([&, this](auto&& arg) -> std::string
@@ -644,12 +675,12 @@ namespace neogfx
                     return "";
             }, item_model().cell_data(modelIndex));
         }
-        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString) const override
+        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString) const final
         {
             bool error = false;
             return string_to_cell_data(aIndex, aString, error);
         }
-        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString, bool& aError) const override
+        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString, bool& aError) const final
         {
             aError = false;
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
@@ -780,19 +811,19 @@ namespace neogfx
                 return cell_image(aIndex)->extents();
             return {};
         }
-        optional_size cell_check_box_size(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
+        optional_size cell_check_box_size(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
         {
             if (cell_checkable(aIndex))
             {
                 auto const& cellFont = cell_font(aIndex);
                 auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
-                dimension const length = units_converter(aGc).from_device_units(effectiveFont.height() * (2.0 / 3.0));
+                dimension const length = units_converter(aUnitsContext).from_device_units(effectiveFont.height() * (2.0 / 3.0));
                 auto const checkBoxSize = service<i_skin_manager>().active_skin().preferred_size(skin_element::CheckBox, size{ length });
                 return checkBoxSize;
             }
             return {};
         }
-        optional_size cell_tree_expander_size(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
+        optional_size cell_tree_expander_size(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
         {
             if constexpr (container_traits::is_flat)
                 return {};
@@ -803,51 +834,54 @@ namespace neogfx
         {
             return optional_texture{};
         }
-        neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
+        neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex) const override
         {
             if (cell_meta(aIndex).text != std::nullopt)
                 return *cell_meta(aIndex).text;
             auto const& cellFont = cell_font(aIndex);
             auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
-            cell_meta(aIndex).text = aGc.to_glyph_text(cell_to_string(aIndex), effectiveFont);
+            cell_meta(aIndex).text = graphics_context{ *iAttachment, graphics_context::type::Unattached }.
+                to_glyph_text(cell_to_string(aIndex), effectiveFont);
             return *cell_meta(aIndex).text;
         }
-        size cell_extents(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
+        size cell_extents(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
         {
-            auto oldItemHeight = item_height(aIndex, aGc);
+            auto oldItemHeight = item_height(aIndex, aUnitsContext);
             auto const& cellFont = cell_font(aIndex);
             auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
             auto& cellMeta = cell_meta(aIndex);
             if (cellMeta.extents != std::nullopt)
-                return units_converter(aGc).from_device_units(*cellMeta.extents);
-            size cellExtents = cell_glyph_text(aIndex, aGc).extents();
+                return units_converter(aUnitsContext).from_device_units(*cellMeta.extents);
+            size cellExtents = cell_glyph_text(aIndex).extents();
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
             if (cell_editable(aIndex) && cellInfo.dataStep != neolib::none)
             {
-                cellExtents.cx = std::max(cellExtents.cx, aGc.text_extent(cellInfo.dataMax.to_string(), effectiveFont).cx);
+                cellExtents.cx = std::max(cellExtents.cx, graphics_context{ *iAttachment, graphics_context::type::Unattached }.
+                    text_extent(cellInfo.dataMax.to_string(), effectiveFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::INTERNAL_SPACING.cx + basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
                 cellExtents.cy = std::max<dimension>(cellExtents.cy, dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cy * 2.0));
             }
-            cellExtents.cx += indent(aIndex, aGc);
-            auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aGc);
+            cellExtents.cx += indent(aIndex, aUnitsContext);
+            auto const& maybeCheckBoxSize = cell_check_box_size(aIndex, aUnitsContext);
             if (maybeCheckBoxSize != std::nullopt)
             {
-                cellExtents.cx += (maybeCheckBoxSize->cx + units_converter(aGc).to_device_units(cell_spacing(aGc)).cx);
+                cellExtents.cx += (maybeCheckBoxSize->cx + units_converter(aUnitsContext).to_device_units(cell_spacing(aUnitsContext)).cx);
                 cellExtents.cy = std::max(cellExtents.cy, maybeCheckBoxSize->cy);
             }
             auto const& maybeCellImageSize = cell_image_size(aIndex);
             if (maybeCellImageSize != std::nullopt)
             {
-                cellExtents.cx += (maybeCellImageSize->cx + units_converter(aGc).to_device_units(cell_spacing(aGc)).cx);
+                cellExtents.cx += (maybeCellImageSize->cx + units_converter(aUnitsContext).to_device_units(cell_spacing(aUnitsContext)).cx);
                 cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
             cellExtents.cy = std::max(cellExtents.cy, effectiveFont.height());
             cellMeta.extents = cellExtents.ceil();
+            column(aIndex.column()).add_cell_width(cellMeta.extents->cx);
             if (iTotalHeight != std::nullopt)
-                *iTotalHeight += (item_height(aIndex, aGc) - oldItemHeight);
-            return units_converter(aGc).from_device_units(*cell_meta(aIndex).extents);
+                *iTotalHeight += (item_height(aIndex, aUnitsContext) - oldItemHeight);
+            return units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents);
         }
-        dimension indent(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const override
+        dimension indent(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const override
         {
             if constexpr (container_traits::is_flat)
                 return 0.0;
@@ -858,11 +892,11 @@ namespace neogfx
                 auto baseIter = typename item_model_type::const_base_iterator{ item_model().index_to_iterator(to_item_model_index(aIndex)) };
                 auto treeIter = baseIter.get<typename item_model_type::const_iterator, typename item_model_type::const_iterator,
                     typename item_model_type::iterator, typename item_model_type::const_sibling_iterator, typename item_model_type::sibling_iterator>();
-                return (treeIter.depth() + 1) * cell_tree_expander_size(aIndex, aGc)->cx;
+                return (treeIter.depth() + 1) * cell_tree_expander_size(aIndex, aUnitsContext)->cx;
             }
         }
     public:
-        void sort(i_item_sort_predicate const& aPredicate) override
+        void sort(i_item_sort_predicate const& aPredicate) final
         {
             iSortOrder.clear();
             ItemsSorting.trigger();
@@ -874,22 +908,22 @@ namespace neogfx
             reset_position_meta(0);
             ItemsSorted.trigger();
         }
-        bool sortable() const override
+        bool sortable() const final
         {
             return iSortable;
         }
-        void set_sortable(bool aSortable) override
+        void set_sortable(bool aSortable) final
         {
             iSortable = aSortable;
         }
-        optional_sort_by_param sorting_by() const override
+        optional_sort_by_param sorting_by() const final
         {
             if (!iSortOrder.empty())
                 return iSortOrder.front();
             else
                 return optional_sort_by_param{};
         }
-        void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) override
+        void sort_by(item_presentation_model_index::column_type aColumnIndex, const optional_sort_direction& aSortDirection = optional_sort_direction{}) final
         {
             iSortOrder.push_front(sort_by_param{ aColumnIndex, aSortDirection == std::nullopt ? sort_direction::Ascending : *aSortDirection });
             for (auto i = std::next(iSortOrder.begin()); i != iSortOrder.end(); ++i)
@@ -909,14 +943,15 @@ namespace neogfx
             }
             execute_sort(true);
         }
-        void reset_sort() override
+        void reset_sort() final
         {
             iSortOrder.clear();
             if (sortable())
                 execute_sort();
         }
     public:
-        optional_item_presentation_model_index find_item(filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const override
+        optional_item_presentation_model_index find_item(filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, 
+            filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const final
         {
             for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
             {
@@ -937,18 +972,19 @@ namespace neogfx
             return optional_item_presentation_model_index{};
         }
     public:
-        bool filtering() const override
+        bool filtering() const final
         {
             return iFiltering;
         }
-        optional_filter filtering_by() const override
+        optional_filter filtering_by() const final
         {
             if (!iFilters.empty())
                 return iFilters.front();
             else
                 return optional_filter{};
         }
-        void filter_by(item_presentation_model_index::column_type aColumnIndex, filter_search_key const& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Value, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) override
+        void filter_by(item_presentation_model_index::column_type aColumnIndex, filter_search_key const& aFilterSearchKey, 
+            filter_search_type aFilterSearchType = filter_search_type::Value, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) final
         {
             iFilters.push_back(filter{ aColumnIndex, aFilterSearchKey, aFilterSearchType, aCaseSensitivity });
             for (auto i = iFilters.begin(); i != std::prev(iFilters.end()); ++i)
@@ -961,7 +997,7 @@ namespace neogfx
             }            
             execute_filter();
         }
-        void reset_filter() override
+        void reset_filter() final
         {
             if (!iFilters.empty())
             {
@@ -1108,7 +1144,7 @@ namespace neogfx
 
             if (!updating())
             {
-                reset_meta(); // todo: optimize
+                reset_position_meta(aItemIndex.row());
                 execute_sort();
                 ItemAdded.trigger(from_item_model_index(aItemIndex, true));
             }
@@ -1120,33 +1156,49 @@ namespace neogfx
             if (!updating())
             {
                 reset_row_map();
-                reset_meta(); // todo: optimize
+                reset_position_meta(aItemIndex.row());
                 execute_sort();
-                auto& cellMeta = cell_meta(from_item_model_index(aItemIndex));
+                auto const index = from_item_model_index(aItemIndex);
+                auto& col = column(mapped_column(aItemIndex.column()));
+                auto& cellMeta = cell_meta(index);
+                if (cellMeta.extents != std::nullopt)
+                    col.remove_cell_width(cellMeta.extents->cx);
                 cellMeta.text = std::nullopt;
                 cellMeta.extents = std::nullopt;
-                column(mapped_column(aItemIndex.column())).width = std::nullopt;
+                cell_extents(index, *iAttachment);
                 ItemChanged.trigger(from_item_model_index(aItemIndex));
             }
         }
-        void item_removed(const item_model_index& aItemIndex)
+        void item_removing(const item_model_index& aItemIndex)
         {
             if (!has_item_model_index(aItemIndex))
                 return;
+            auto const index = from_item_model_index(aItemIndex);
+            for (item_presentation_model_index::column_type col = 0; col < columns(); ++col)
+            {
+                auto& cellMeta = cell_meta(index.with_column(col));
+                if (cellMeta.extents != std::nullopt)
+                    column(col).remove_cell_width(cellMeta.extents->cx);
+            }
             if (!updating())
-                ItemRemoved.trigger(from_item_model_index(aItemIndex));
-            auto const mappedRow = from_item_model_index(aItemIndex).row();
-            iRows.erase(std::next(begin(), mappedRow));
+                ItemRemoving.trigger(index);
+            iRows.erase(std::next(begin(), index.row()));
             for (auto& row : iRows)
                 if (row.value >= aItemIndex.row())
                     --row.value;
             if (iRowMap[aItemIndex.row()])
                 for (auto& row : iRowMap)
-                    if (row && *row >= mappedRow)
-                        --*row;
+                    if (row && *row >= index.row())
+                        --* row;
             iRowMap.erase(std::next(iRowMap.begin(), aItemIndex.row()));
             if (!updating())
-                reset_meta(); // todo: optimize
+            {
+                reset_position_meta(index.row());
+                ItemRemoved.trigger(index);
+            }
+        }
+        void item_removed(const item_model_index& aItemIndex)
+        {
         }
     private:
         void reset_maps(const item_model_index& aFrom = {}) const
@@ -1255,6 +1307,8 @@ namespace neogfx
                     if (aColumn != std::nullopt && col != *aColumn)
                         continue;
                     cell_meta(item_presentation_model_index(row, col)).text = std::nullopt;
+                    if (cell_meta(item_presentation_model_index(row, col)).extents != std::nullopt)
+                        column(col).remove_cell_width(cell_meta(item_presentation_model_index(row, col)).extents->cx);
                     cell_meta(item_presentation_model_index(row, col)).extents = std::nullopt;
                 }
             }
@@ -1265,7 +1319,7 @@ namespace neogfx
             {
                 if (aColumn != std::nullopt && col != *aColumn)
                     continue;
-                column(col).width = std::nullopt;
+                column(col).cellWidths.clear();
                 column(col).headingExtents = std::nullopt;
             }
         }
@@ -1341,6 +1395,7 @@ namespace neogfx
             return const_cast<column_info&>(to_const(*this).column(aColumnIndex));
         }
     private:
+        weak_ref_ptr<i_widget> iAttachment;
         i_item_model* iItemModel;
         bool iSortable;
         sink iItemModelSink;

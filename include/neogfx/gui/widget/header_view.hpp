@@ -38,6 +38,8 @@ namespace neogfx
     class i_header_view_owner
     {
     public:
+        virtual bool updating_models() const = 0;
+    public:
         virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
     };
 
@@ -54,7 +56,6 @@ namespace neogfx
         {
             optional_dimension manual;
             dimension calculated;
-            dimension max;
         };
     public:
         header_view(i_header_view_owner& aOwner, header_view_type aType = header_view_type::Horizontal);
@@ -92,17 +93,15 @@ namespace neogfx
         virtual void item_added(item_presentation_model_index const& aItemIndex);
         virtual void item_changed(item_presentation_model_index const& aItemIndex);
         virtual void item_removed(item_presentation_model_index const& aItemIndex);
+        virtual void items_updated();
         virtual void items_sorting();
         virtual void items_sorted();
         virtual void items_filtering();
         virtual void items_filtered();
     private:
         void init();
-        void update_buttons();
-        void request_full_update();
         void full_update();
-        void update_from_row(uint32_t aRow, i_graphics_context& aGc);
-        bool update_section_width(uint32_t aColumn, const size& aCellExtents, i_graphics_context& aGc);
+        bool update_section_width(uint32_t aColumn, dimension aColumnWidth);
     private:
         i_header_view_owner& iOwner;
         sink iSink;
@@ -114,7 +113,5 @@ namespace neogfx
         bool iExpandLastColumn;
         optional_dimension iSeparatorWidth;
         std::vector<section_dimension> iSectionWidths;
-        std::optional<widget_timer> iUpdater;
-        bool iUpdateNeeded;
     };
 }

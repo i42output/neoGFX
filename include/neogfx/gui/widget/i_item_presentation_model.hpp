@@ -182,6 +182,7 @@ namespace neogfx
         declare_event(item_model_changed, const i_item_model&)
         declare_event(item_added, item_presentation_model_index const&)
         declare_event(item_changed, item_presentation_model_index const&)
+        declare_event(item_removing, item_presentation_model_index const&)
         declare_event(item_removed, item_presentation_model_index const&)
         declare_event(item_expanding, item_presentation_model_index const&)
         declare_event(item_collapsing, item_presentation_model_index const&)
@@ -244,8 +245,14 @@ namespace neogfx
         struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
         struct bad_index : std::logic_error { bad_index() : std::logic_error("neogfx::i_item_presentation_model::bad_index") {} };
         struct no_mapped_row : std::logic_error { no_mapped_row() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_row") {} };
+        struct already_attached : std::logic_error { already_attached() : std::logic_error("neogfx::i_item_presentation_model::already_attached") {} };
+        struct not_attached : std::logic_error { not_attached() : std::logic_error("neogfx::i_item_presentation_model::not_attached") {} };
     public:
         virtual ~i_item_presentation_model() = default;
+    public:
+        virtual bool attached() const = 0;
+        virtual void attach(i_ref_ptr<i_widget> const& aWidget) = 0;
+        virtual void detach() = 0;
     public:
         virtual bool updating() const = 0;
         virtual void begin_update() = 0;
@@ -263,9 +270,9 @@ namespace neogfx
     public:
         virtual void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) = 0;
     public:
-        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc, bool aIncludePadding = true) const = 0;
+        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aIncludePadding = true) const = 0;
         virtual std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
-        virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_graphics_context const& aGc) const = 0;
+        virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext) const = 0;
         virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) = 0;
         virtual item_cell_flags column_flags(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) = 0;
@@ -313,12 +320,12 @@ namespace neogfx
         virtual optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const = 0;
         virtual optional_font cell_font(item_presentation_model_index const& aIndex) const = 0;
         virtual optional_size cell_image_size(item_presentation_model_index const& aIndex) const = 0;
-        virtual optional_size cell_check_box_size(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
-        virtual optional_size cell_tree_expander_size(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
+        virtual optional_size cell_check_box_size(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
+        virtual optional_size cell_tree_expander_size(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
         virtual optional_texture cell_image(item_presentation_model_index const& aIndex) const = 0;
-        virtual neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
-        virtual size cell_extents(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
-        virtual dimension indent(item_presentation_model_index const& aIndex, i_graphics_context const& aGc) const = 0;
+        virtual neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex) const = 0;
+        virtual size cell_extents(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
+        virtual dimension indent(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
     public:
         virtual void sort(i_item_sort_predicate const& aPredicate) = 0;
         virtual bool sortable() const = 0;

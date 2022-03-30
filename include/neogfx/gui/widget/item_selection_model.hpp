@@ -98,14 +98,25 @@ namespace neogfx
                 iCurrentIndex = std::nullopt;
                 reindex();
             });
-            iSink += presentation_model().item_removed([this](item_presentation_model_index const&)
+            iSink += presentation_model().item_added([this](item_presentation_model_index const& aIndex)
+            {
+                if (has_current_index())
+                {
+                    if (current_index().row() >= aIndex.row())
+                        iCurrentIndex->set_row(current_index().row() + 1u);
+                }
+                reindex();
+            });
+            iSink += presentation_model().item_removing([this](item_presentation_model_index const& aIndex)
             {
                 if (has_current_index())
                 {
                     if (presentation_model().rows() <= 1u)
                         iCurrentIndex = std::nullopt;
-                    else if (iCurrentIndex->row() >= presentation_model().rows() - 1u)
-                        iCurrentIndex->set_row(iCurrentIndex->row() - 1u);
+                    else if (current_index().row() > aIndex.row())
+                        iCurrentIndex->set_row(current_index().row() - 1u);
+                    else if (current_index().row() == aIndex.row() && aIndex.row() == presentation_model().rows() - 1u)
+                        iCurrentIndex->set_row(aIndex.row() - 1u);
                 }
                 reindex();
             });

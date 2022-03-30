@@ -212,6 +212,7 @@ namespace neogfx
         define_declared_event(ColumnInfoChanged, column_info_changed, item_model_index::column_type)
         define_declared_event(ItemAdded, item_added, const item_model_index&)
         define_declared_event(ItemChanged, item_changed, const item_model_index&)
+        define_declared_event(ItemRemoving, item_removing, const item_model_index&)
         define_declared_event(ItemRemoved, item_removed, const item_model_index&)
         define_declared_event(Cleared, cleared)
     public:
@@ -559,8 +560,10 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
                 while (containerIterator.rbegin() != containerIterator.rend())
                     erase(const_base_iterator{ --containerIterator.rbegin().base() });
-            ItemRemoved.trigger(iterator_to_index(aPosition));
+            auto const index = iterator_to_index(aPosition);
+            ItemRemoving.trigger(index);
             auto result = base_iterator{ iItems.erase(containerIterator) };
+            ItemRemoved.trigger(index);
             return result;
         }
         i_item_model::iterator erase(item_model_index const& aIndex) override
