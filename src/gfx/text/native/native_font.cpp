@@ -86,27 +86,31 @@ namespace neogfx
 
     namespace
     {
-        uint32_t matching_bits(uint32_t lhs, uint32_t rhs)
+        using matching_bits_t = std::pair<int32_t, int32_t>;
+
+        matching_bits_t matching_bits(int32_t lhs, int32_t rhs)
         {
             if (lhs == rhs)
-                return 32;
-            uint32_t matches = 0;
+                return matching_bits_t{ 32, 0 };
+            matching_bits_t result;
             uint32_t test = 1;
             while (test != 0)
             {
                 if ((lhs & rhs) & test)
-                    ++matches;
+                    ++result.first;
+                else if ((lhs & test) || (rhs & test))
+                    --result.second;
                 test <<= 1;
             }
-            return matches;
+            return result;
         }
     }
 
     void native_font::create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
-        std::multimap<font_style, style_map::value_type*> matches;
+        std::multimap<matching_bits_t, style_map::value_type*> matches;
         for (auto& s : iStyleMap)
-            matches.insert(std::make_pair(static_cast<font_style>(matching_bits(static_cast<uint32_t>(s.first.first), static_cast<uint32_t>(aStyle))), &s));
+            matches.insert(std::make_pair(matching_bits(static_cast<uint32_t>(s.first.first), static_cast<uint32_t>(aStyle)), &s));
         if (matches.empty())
             throw no_matching_style_found();
         FT_Long faceIndex = matches.rbegin()->second->second;
