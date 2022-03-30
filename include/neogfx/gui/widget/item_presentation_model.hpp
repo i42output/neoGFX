@@ -140,13 +140,17 @@ namespace neogfx
             iItemModelSink.clear();
         }
     public:
+        bool metrics_available() const
+        {
+            return iAttachment && iAttachment->has_root();
+        }
         bool attached() const final
         {
             return iAttachment != nullptr;
         }
         void attach(i_ref_ptr<i_widget> const& aWidget) final
         {
-            if (iAttachment != nullptr && aWidget != nullptr)
+            if (iAttachment && aWidget != nullptr)
                 throw already_attached();
             iAttachment = aWidget;
         }
@@ -316,6 +320,8 @@ namespace neogfx
             }
             if (column(aColumnIndex).headingExtents != std::nullopt)
                 return units_converter(aUnitsContext).from_device_units(*column(aColumnIndex).headingExtents);
+            if (!metrics_available())
+                return size{};
             size columnHeadingExtents = graphics_context{ *iAttachment, graphics_context::type::Unattached }.
                 multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
             column(aColumnIndex).headingExtents = units_converter(aUnitsContext).to_device_units(columnHeadingExtents);
