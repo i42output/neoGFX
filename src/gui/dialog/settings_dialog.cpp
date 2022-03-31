@@ -57,7 +57,13 @@ namespace neogfx
             auto settingWidget = make_ref<setting_widget<basic_slider_box<T>>>(aSetting, aLayout);
             settingWidget->set_minimum(aSetting.constraints().minimum_value<T>());
             settingWidget->set_maximum(aSetting.constraints().maximum_value<T>());
-            settingWidget->set_step(aSetting.constraints().step_value<T>());
+            if (aSetting.constraints().has_step_value())
+                settingWidget->set_step(aSetting.constraints().step_value<T>());
+            else
+            {
+                settingWidget->slider().hide();
+                settingWidget->spin_box().hide_arrows();
+            }
             settingWidget->set_value(aSetting.value().get<T>());
             aSink += settingWidget->value_changed([&, settingWidget]()
             {
@@ -89,11 +95,11 @@ namespace neogfx
         {
         }
     public:
-        void create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink, i_ref_ptr<i_widget>& aResult) const override
+        void create_widget(neolib::i_setting& aSetting, i_layout& aLayout, i_string const& aFormat, sink& aSink, i_ref_ptr<i_widget>& aResult) const override
         {
             ref_ptr<i_widget> result;
             if (iUserFactory)
-                result = iUserFactory->create_widget(aSetting, aLayout, aSink);
+                result = iUserFactory->create_widget(aSetting, aLayout, aFormat, aSink);
             if (!result)
             {
                 switch (aSetting.value().type())
@@ -156,7 +162,37 @@ namespace neogfx
                     result = create_slider_box<double>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::String:
-                    // todo
+                    {
+                        auto settingWidget = make_ref<setting_widget<line_edit>>(aSetting, aLayout);
+                        settingWidget->set_text(aSetting.value().get<string>());
+                        aSink += settingWidget->TextChanged([&, settingWidget]()
+                            {
+                                if (!settingWidget->updating)
+                                {
+                                    neolib::scoped_flag sf{ settingWidget->updating };
+                                    aSetting.set_value(settingWidget->text());
+                                }
+                            });
+                        aSink += aSetting.changing([&, settingWidget]()
+                            {
+                                if (!settingWidget->updating)
+                                {
+                                    neolib::scoped_flag sf{ settingWidget->updating };
+                                    settingWidget->set_text(aSetting.value<string>(true));
+                                }
+                            });
+                        aSink += aSetting.changed([&, settingWidget]()
+                            {
+                                if (!settingWidget->updating)
+                                {
+                                    neolib::scoped_flag sf{ settingWidget->updating };
+                                    settingWidget->set_text(aSetting.value<string>(true));
+                                }
+                            });
+                        if (!aFormat.empty())
+                            settingWidget->set_size_hint(size_hint{ aFormat });
+                        result = settingWidget;
+                    }                    
                     break;
                 case neolib::setting_type::Enum:
                     {
@@ -463,13 +499,13 @@ namespace neogfx
                         thread_local std::vector<std::string> bits;
                         bits.clear();
                         bits = neolib::tokens(*nextArgument, ":"s);
-                        if (bits.size() == 1 && bits[0] == "?")
-                            iWidgetFactory->create_widget(*setting, *itemLayout, iSink);
-                        else if (bits.size() == 2 && bits[1] == "?")
+                        if (bits.size() == 1 && bits[0][0] == '?')
+                            iWidgetFactory->create_widget(*setting, *itemLayout, string{ bits[0].substr(1) }, iSink);
+                        else if (bits.size() == 2 && bits[1][0] == '?')
                         {
                             auto existing = iSettings.all_settings().find(string{ bits[0] });
                             if (existing != iSettings.all_settings().end())
-                                iWidgetFactory->create_widget(*existing->second(), *itemLayout, iSink);
+                                iWidgetFactory->create_widget(*existing->second(), *itemLayout, string{ bits[1].substr(1) }, iSink);
                         }
                         nextArgument = {};
                     }

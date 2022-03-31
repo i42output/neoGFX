@@ -53,6 +53,8 @@ namespace neogfx
         i_string const& text();
         const line_edit& text_box() const;
         line_edit& text_box();
+        void show_arrows();
+        void hide_arrows();
     public:
         value_type minimum() const;
         void set_minimum(value_type aMinimum);

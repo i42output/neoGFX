@@ -158,6 +158,18 @@ namespace neogfx
     }
 
     template <typename T>
+    void basic_spin_box<T>::show_arrows()
+    {
+        iSecondaryLayout.enable();
+    }
+
+    template <typename T>
+    void basic_spin_box<T>::hide_arrows()
+    {
+        iSecondaryLayout.disable();
+    }
+
+    template <typename T>
     void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
     {
         auto result = std::max(minimum(), 

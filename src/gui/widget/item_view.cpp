@@ -1038,7 +1038,6 @@ namespace neogfx
         {
             auto& textEdit = editor_text_edit();
             auto const& textEditRect = to_client_coordinates(textEdit.to_window_coordinates(textEdit.client_rect()));
-            bool const childTextEdit = (&textEdit != &editor());
             auto const& textRect = cell_rect(newIndex, cell_part::Text);
             auto const adjust = textRect.position() - textEditRect.position();
             auto const paddingAdjust = neogfx::padding{ adjust.x, adjust.y, adjust.x, 0 };

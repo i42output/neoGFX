@@ -36,13 +36,13 @@ namespace neogfx
     public:
         virtual ~i_setting_widget_factory() = default;
     public:
-        virtual void create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink, i_ref_ptr<i_widget>& aResult) const = 0;
+        virtual void create_widget(neolib::i_setting& aSetting, i_layout& aLayout, i_string const& aFormat, sink& aSink, i_ref_ptr<i_widget>& aResult) const = 0;
         // helpers
     public:
-        ref_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout, sink& aSink) const
+        ref_ptr<i_widget> create_widget(neolib::i_setting& aSetting, i_layout& aLayout, i_string const& aFormat, sink& aSink) const
         {
             ref_ptr<i_widget> result;
-            create_widget(aSetting, aLayout, aSink, result);
+            create_widget(aSetting, aLayout, aFormat, aSink, result);
             return result;
         }
     };

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/app/settings.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 
 namespace neogfx
 {
