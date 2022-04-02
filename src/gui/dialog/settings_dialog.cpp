@@ -106,7 +106,7 @@ namespace neogfx
                 {
                 case neolib::setting_type::Boolean:
                     {
-                        auto settingWidget = make_ref<setting_widget<check_box>>(aSetting, aLayout);
+                        auto settingWidget = make_ref<setting_widget<check_box>>(aSetting, aLayout, aFormat);
                         settingWidget->set_checked(aSetting.value().get<bool>());
                         aSink += settingWidget->Checked([&, settingWidget]()
                         {
@@ -509,6 +509,9 @@ namespace neogfx
                         }
                         nextArgument = {};
                     }
+                    break;
+                case '\t':
+                    emit_label();
                     break;
                 case '\n':
                     emit_label();

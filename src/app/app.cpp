@@ -155,8 +155,8 @@ namespace neogfx
 
     app::loader::~loader()
     {
-        iApp.async_task::cancel();
         iApp.plugin_manager().unload_plugins();
+        iApp.async_task::cancel();
         teardown_service<i_animator>();
         teardown_service<i_gradient_manager>();
         teardown_service<i_rendering_engine>();
