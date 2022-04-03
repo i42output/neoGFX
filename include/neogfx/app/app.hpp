@@ -110,7 +110,10 @@ namespace neogfx
         i_style& change_style(std::string const& aStyleName) override;
         i_style& register_style(const i_style& aStyle) override;
     public:
-        i_string const& translate(i_string const& aTranslatableString, i_string const& aContext = string{}) const override;
+        void clear_translations();
+        void load_translations();
+        void load_translations(std::filesystem::path const& aTranslationFile);
+        i_string const& translate(i_string const& aTranslatableString, i_string const& aContext = string{}, std::int64_t aPlurality = 1) const override;
     public:
         i_action& action_file_new() override;
         i_action& action_file_open() override;
@@ -171,6 +174,7 @@ namespace neogfx
         neogfx::event_processing_context iAppContext;
         std::vector<std::pair<key_code_e, key_modifiers_e>> iKeySequence;
         mutable std::unique_ptr<i_help> iHelp;
+        std::map<std::string, std::map<std::string, std::map<std::pair<std::int64_t, std::int64_t>, string>>> iTranslations;
         // standard actions
     public:
         action actionFileNew;

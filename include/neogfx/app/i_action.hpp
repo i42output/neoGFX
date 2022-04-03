@@ -59,7 +59,7 @@ namespace neogfx
         virtual i_texture const& checked_image() const = 0;
         virtual optional_key_sequence const& shortcut() const = 0;
         virtual i_action& set_enabled(bool aEnabled) = 0;
-        virtual i_action& set_checkable(bool aCheckable) = 0;
+        virtual i_action& set_checkable(bool aCheckable = true) = 0;
         virtual i_action& set_checked(bool aChecked) = 0;
         virtual i_action& set_group(uuid const& aGroup) = 0;
         virtual i_action& set_separator(bool aIsSeparator) = 0;

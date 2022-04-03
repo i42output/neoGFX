@@ -66,7 +66,7 @@ namespace neogfx
         const i_texture& checked_image() const override;
         const optional_key_sequence& shortcut() const override;
         action& set_enabled(bool aEnabled) override;
-        action& set_checkable(bool aCheckable) override;
+        action& set_checkable(bool aCheckable = true) override;
         action& set_checked(bool aChecked) override;
         action& set_group(uuid const& aGroup) override;
         action& set_separator(bool aIsSeparator) override;

@@ -58,23 +58,45 @@ namespace neogfx
         return sContextStack;
     }
 
-    string operator "" _t(const char* aTranslatableString, std::size_t aStringLength)
+    translatable_string::translatable_string(i_string const& aTranslatableString, i_string const& aContext) : 
+        iTranslatableString{ aTranslatableString },
+        iContext{ aContext }
     {
-        return translate(string{ aTranslatableString, aStringLength });
     }
 
-    string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength)
+    translatable_string::operator string() const
     {
-        return translate(string{ reinterpret_cast<const char*>(aTranslatableString), aStringLength });
+        return service<i_app>().translate(iTranslatableString, iContext, iPlurality);
     }
 
-    i_string const& translate(string const& aTranslatableString)
+    translatable_string::operator std::string() const
     {
-        return translate(aTranslatableString, translation_context::context());
+        return service<i_app>().translate(iTranslatableString, iContext, iPlurality).to_std_string();
     }
 
-    i_string const& translate(string const& aTranslatableString, string const& aContext)
+    translatable_string& translatable_string::operator()(std::int64_t aPlurality)
     {
-        return service<i_app>().translate(aTranslatableString, aContext);
+        iPlurality = aPlurality;
+        return *this;
+    }
+
+    translatable_string translate(string const& aTranslatableString)
+    {
+        return translatable_string{ aTranslatableString, translation_context::context() };
+    }
+
+    translatable_string translate(string const& aTranslatableString, string const& aContext)
+    {
+        return translatable_string{ aTranslatableString, aContext };
+    }
+
+    translatable_string operator "" _t(const char* aTranslatableString, std::size_t aStringLength)
+    {
+        return translatable_string{ string{ aTranslatableString, aStringLength }, translation_context::context() };
+    }
+
+    translatable_string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength)
+    {
+        return translatable_string{ string{ reinterpret_cast<const char*>(aTranslatableString), aStringLength }, translation_context::context() };
     }
 }

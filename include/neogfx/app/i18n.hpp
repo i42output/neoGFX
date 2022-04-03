@@ -37,12 +37,26 @@ namespace neogfx
         static std::vector<string>& context_stack();
     };
 
-    string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
-    string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
+    class translatable_string
+    {
+    public:
+        translatable_string(i_string const& aTranslatableString, i_string const& aContext);
+    public:
+        operator string() const;
+        operator std::string() const;
+    public:
+        /// @todo add support for multiple plurals in a string
+        translatable_string& operator()(std::int64_t aPlurality);
+    private:
+        string iTranslatableString;
+        string iContext;
+        std::int64_t iPlurality = 1;
+    };
 
-    i_string const& translate(string const& aTranslatableString);
-
-    i_string const& translate(string const& aTranslatableString, string const& aContext);
+    translatable_string translate(string const& aTranslatableString);
+    translatable_string translate(string const& aTranslatableString, string const& aContext);
+    translatable_string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
+    translatable_string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
 }
 
 using neogfx::operator "" _t;

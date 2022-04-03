@@ -20,7 +20,10 @@
 #include <neogfx/neogfx.hpp>
 #include <string>
 #include <atomic>
+#include <filesystem>
 #include <boost/locale.hpp> 
+#include <neolib/file/file.hpp>
+#include <neolib/file/xml.hpp>
 #include <neolib/core/scoped.hpp>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/task/event.hpp>
@@ -296,6 +299,8 @@ namespace neogfx
         actionPaste.triggered([this]() { service<i_clipboard>().paste(); });
         actionDelete.triggered([this]() { service<i_clipboard>().delete_selected(); });
         actionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
+    
+        load_translations();
     }
     catch (std::exception& e)
     {
@@ -449,10 +454,76 @@ namespace neogfx
         return newStyle->second;
     }
 
-    i_string const& app::translate(i_string const& aTranslatableString, i_string const& aContext) const
+    void app::clear_translations()
     {
-        // todo: i18n
-        return aTranslatableString;
+        iTranslations.clear();
+    }
+
+    void app::load_translations()
+    {
+        for (auto const& file : std::filesystem::directory_iterator{ std::filesystem::path{ neolib::program_directory() } })
+            if (file.path().extension() == ".xneol")
+                load_translations(file.path());
+    }
+
+    void app::load_translations(std::filesystem::path const& aTranslationFile)
+    {
+        neolib::xml translationFile{ aTranslationFile.generic_string() };
+        if (translationFile.root().name() == "xneol")
+        {
+            auto const& language = translationFile.root().attribute_value("trgLang").to_std_string();
+            for (auto const& item : translationFile.root())
+            {
+                if (item.name() == "text")
+                {
+                    std::optional<std::string> source;
+                    std::vector<std::pair<std::pair<std::int64_t, std::int64_t>, std::string>> targets;
+                    for (auto const& part : item)
+                    {
+                        if (part.name() == "source")
+                            source = part.text();
+                        else if (part.name() == "target")
+                        {
+                            auto plurality = std::make_pair(std::numeric_limits<std::int64_t>::min(), std::numeric_limits<std::int64_t>::max());
+                            if (part.has_attribute("n"))
+                            {
+                                auto const& n = part.attribute_value("n").to_std_string();
+                                neolib::vecarray<std::string, 2> bits;
+                                neolib::tokens(n, ".."s, bits, 2, false, true);
+                                if (bits.size() == 1)
+                                    plurality.second = (plurality.first = boost::lexical_cast<std::int64_t>(bits[0]));
+                                else if (bits.size() == 2)
+                                {
+                                    if (!bits[0].empty())
+                                        plurality.first = boost::lexical_cast<std::int64_t>(bits[0]);
+                                    if (!bits[1].empty())
+                                        plurality.second = boost::lexical_cast<std::int64_t>(bits[1]);
+                                }
+                            }
+                            targets.push_back(std::make_pair(plurality, part.text()));
+                        }
+                    }
+                    if (source)
+                        for (auto const& target : targets)
+                            iTranslations[language][source.value()][target.first] = target.second;
+                }
+            }
+        }
+    }
+
+    i_string const& app::translate(i_string const& aTranslatableString, i_string const& aContext, std::int64_t aPlurality) const
+    {
+        if (iTranslations.empty())
+            return aTranslatableString;
+        /// @todo select language
+        /// @todo context
+        auto existing = iTranslations.begin()->second.find(aTranslatableString);
+        if (existing == iTranslations.begin()->second.end())
+            return aTranslatableString;
+        for (auto const& target : existing->second)
+            if (aPlurality >= target.first.first && aPlurality <= target.first.second)
+                return target.second;
+        return existing->second.begin()->second;
     }
 
     i_action& app::action_file_new()
