@@ -59,24 +59,15 @@ namespace neogfx
     }
 
     translatable_string::translatable_string(i_string const& aTranslatableString, i_string const& aContext) : 
+        string{ service<i_app>().translate(aTranslatableString, aContext) },
         iTranslatableString{ aTranslatableString },
         iContext{ aContext }
     {
     }
 
-    translatable_string::operator string() const
-    {
-        return service<i_app>().translate(iTranslatableString, iContext, iPlurality);
-    }
-
-    translatable_string::operator std::string() const
-    {
-        return service<i_app>().translate(iTranslatableString, iContext, iPlurality).to_std_string();
-    }
-
     translatable_string& translatable_string::operator()(std::int64_t aPlurality)
     {
-        iPlurality = aPlurality;
+        assign(service<i_app>().translate(iTranslatableString, iContext, aPlurality));
         return *this;
     }
 
