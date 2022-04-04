@@ -1576,6 +1576,8 @@ namespace neogfx
                         return gi + 1;
                 }
             }
+            if (lineEnd > lineStart && line != std::prev(lines.end()) && !is_whitespace(glyphs()[lineEnd]))
+                return lineEnd - 1;
             if (lineEnd > lineStart && direction(glyphs()[lineEnd - 1]) == text_direction::RTL)
                 return lineEnd - 1;
             return lineEnd;
@@ -1937,7 +1939,10 @@ namespace neogfx
         refresh_paragraph(insertionPoint, eos);
         update();
         if (aMoveCursor)
+        {
             cursor().set_position(insertionPoint - iText.begin() + eos);
+            iCursorHint.x = glyph_position(cursor_glyph_position(), true).pos.x;
+        }
         if (iPreviousText != iText)
             notify_text_changed();
         return eos;
