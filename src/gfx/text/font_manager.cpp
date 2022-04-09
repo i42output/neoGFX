@@ -912,7 +912,7 @@ namespace neogfx
             virtual dimension ppi() const { return iResolution.magnitude() / std::sqrt(2.0); }
         } deviceResolution;
         deviceResolution.iResolution = size(aExistingFont.horizontal_dpi(), aExistingFont.vertical_dpi());
-        auto& fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), aExistingFont.style_name(), aExistingFont.size(), deviceResolution);
+        auto& fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), (aExistingFont.style() & ~font_style::Emulated), aExistingFont.size(), deviceResolution);
         return fallbackFont;
     }
 
