@@ -298,11 +298,11 @@ namespace neogfx
                 // todo: remove FT_LOAD_NO_AUTOHINT when cause of crash in freetype 2.11 with certain fonts is resolved
                 if (useSubpixelFiltering)
                 {
-                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_NO_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
                 }
                 else
                 {
-                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_NO_AUTOHINT | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
                 }
             }
             catch (freetype_error fe)
@@ -383,7 +383,7 @@ namespace neogfx
         {
             subpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
             // sub-pixel FIR filter.
-            static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
+            static double coefficients[] = { 0.5 / 16.0, 2.5 / 16.0, 10.0 / 16.0, 2.5 / 16.0, 0.5 / 16.0 };
             for (uint32_t y = 0; y < bitmap.rows; y++)
             {
                 for (uint32_t x = 0; x < bitmap.width; x++)
