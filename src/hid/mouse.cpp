@@ -31,7 +31,7 @@ namespace neogfx
         for (auto& g : iMouse.iGrabs)
             if (g->mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers))
                 return true;
-        return !iMouse.iGrabs.empty();
+        return false;
     }
 
     mouse::mouse(const i_string& aName) :

@@ -73,6 +73,12 @@ namespace neogfx
         }
     }
 
+    bool drop_list_view::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    {
+        bool result = list_view::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+        return result || !iDropList.list_always_visible();
+    }
+
     bool drop_list_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
         bool handled = false;
