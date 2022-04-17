@@ -1,0 +1,13 @@
+FONTS:
+Roboto-Regular.ttf
+SourceSerifVariable-Roman.ttf
+
+PROFILES:
+default.txt
+drop-hints.txt
+
+SUBSETS:
+abc
+Ǽ!A bc
+abcdefghijk
+×ØÙÚÞ

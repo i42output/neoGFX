@@ -44,7 +44,7 @@
 
 #include <neogfx/core/numerical.hpp>
 
-#include <ffts.h>
+#include <ffts/ffts.h>
 
 #define MAX_FRAME_LENGTH 8192
 
