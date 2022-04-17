@@ -178,8 +178,8 @@ namespace neogfx
         typedef std::vector<glyph_run> run_list;
     public:
         glyph_text create_glyph_text(font const& aFont) override;
-        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) override;
-        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) override;
+        glyph_text to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) override;
+        glyph_text to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) override;
     private:
         cluster_map_t iClusterMap;
         std::vector<character_type> iTextDirections;
@@ -395,7 +395,7 @@ namespace neogfx
         return *make_ref<glyph_text_content>(aFont);
     }
 
-    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector)
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector)
     {
         auto& clusterMap = iClusterMap;
         clusterMap.clear();
@@ -410,13 +410,13 @@ namespace neogfx
         if (codePoints.empty())
             return aFontSelector.select_font(0);
 
-        return to_glyph_text(aContext, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
+        return to_glyph_text(aGc, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
         {
             return aFontSelector.select_font(clusterMap[aIndex].from);
         } });
     }
 
-    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aContext, char32_t const*  aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char32_t const*  aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
     {
         auto refResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
         auto& result = *refResult;
@@ -432,16 +432,16 @@ namespace neogfx
         std::u32string::size_type codePointCount = aUtf32End - aUtf32Begin;
 
         std::u32string adjustedCodepoints;
-        if (aContext.password())
-            adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(aContext.password_mask())[0]);
+        if (aGc.password())
+            adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(aGc.password_mask())[0]);
         auto codePoints = adjustedCodepoints.empty() ? &*aUtf32Begin : &adjustedCodepoints[0];
 
         auto& runs = iRuns;
         runs.clear();
         auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
         text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
-        if (aContext.mnemonic_set() && codePoints[0] == static_cast<char32_t>(aContext.mnemonic()) && 
-            (codePointCount == 1 || codePoints[1] != static_cast<char32_t>(aContext.mnemonic())))
+        if (aGc.mnemonic_set() && codePoints[0] == static_cast<char32_t>(aGc.mnemonic()) && 
+            (codePointCount == 1 || codePoints[1] != static_cast<char32_t>(aGc.mnemonic())))
             previousCategory = text_category::Mnemonic;
         text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
         const char32_t* runStart = &codePoints[0];
@@ -485,8 +485,8 @@ namespace neogfx
 
             hb_unicode_funcs_t* unicodeFuncs = static_cast<font_face_handle*>(currentFont.native_font_face().handle())->harfbuzzUnicodeFuncs;
             text_category currentCategory = get_text_category(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
-            if (aContext.mnemonic_set() && codePoints[codePointIndex] == static_cast<char32_t>(aContext.mnemonic()) &&
-                (codePointCount - 1 == codePointIndex || codePoints[codePointIndex + 1] != static_cast<char32_t>(aContext.mnemonic())))
+            if (aGc.mnemonic_set() && codePoints[codePointIndex] == static_cast<char32_t>(aGc.mnemonic()) &&
+                (codePointCount - 1 == codePointIndex || codePoints[codePointIndex + 1] != static_cast<char32_t>(aGc.mnemonic())))
                 currentCategory = text_category::Mnemonic;
             text_direction currentDirection = previousDirection;
             if (currentCategory == text_category::LTR)
@@ -659,7 +659,7 @@ namespace neogfx
             
             bool drawMnemonic = (i > 0 && std::get<3>(runs[i - 1]));
             std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
-            glyph_shapes shapes{ aContext, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
+            glyph_shapes shapes{ aGc, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
             
             for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
             {
@@ -704,6 +704,8 @@ namespace neogfx
                     font.id(),
                     advance, point(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0),
                     size{advance.cx, font.height()});
+                if (aGc.logical_coordinates().is_gui_orientation())
+                    newGlyph.offset.y = -newGlyph.offset.y;
                 if (category(newGlyph) == text_category::Whitespace)
                     newGlyph.value = aUtf32Begin[startCluster];
                 else if (category(newGlyph) == text_category::Emoji)
@@ -714,7 +716,7 @@ namespace neogfx
                     set_superscript(newGlyph, true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
                 if ((selectedFont.style() & font_style::Subscript) == font_style::Subscript)
                     set_subscript(newGlyph, true, (selectedFont.style() & font_style::AboveBaseline) == font_style::AboveBaseline);
-                if (aContext.is_subpixel_rendering_on() && !font.is_bitmap_font())
+                if (aGc.is_subpixel_rendering_on() && !font.is_bitmap_font())
                     set_subpixel(newGlyph, true);
                 if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
                     set_mnemonic(newGlyph, true);
