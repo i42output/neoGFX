@@ -200,9 +200,7 @@ namespace neogfx
                 iFont{ static_cast<font_face_handle*>(aFont.native_font_face().handle())->harfbuzzFont },
                 iGlyphRun{ aGlyphRun },
                 iBuf{ static_cast<font_face_handle*>(aFont.native_font_face().handle())->harfbuzzBuf },
-                iGlyphCount{ 0u },
-                iGlyphInfo{ nullptr },
-                iGlyphPos{ nullptr }
+                iGlyphCount{ 0u }
             {
                 hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
@@ -243,8 +241,10 @@ namespace neogfx
                 scoped_kerning sk{ aFont.kerning() };
                 hb_shape(iFont, iBuf, NULL, 0);
                 unsigned int glyphCount = 0;
-                iGlyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
-                iGlyphPos = hb_buffer_get_glyph_positions(iBuf, &glyphCount);
+                auto glyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
+                iGlyphInfo.assign(glyphInfo, glyphInfo + glyphCount);
+                auto glyphPos = hb_buffer_get_glyph_positions(iBuf, &glyphCount);
+                iGlyphPos.assign(glyphPos, glyphPos + glyphCount);
                 iGlyphCount = glyphCount;
                 if (std::get<2>(aGlyphRun) == text_direction::None_RTL)
                     for (uint32_t i = 0; i < iGlyphCount; ++i)
@@ -283,8 +283,8 @@ namespace neogfx
             const glyph_text_factory::glyph_run& iGlyphRun;
             hb_buffer_t* iBuf;
             uint32_t iGlyphCount;
-            hb_glyph_info_t* iGlyphInfo;
-            hb_glyph_position_t* iGlyphPos;
+            std::vector<hb_glyph_info_t> iGlyphInfo;
+            std::vector<hb_glyph_position_t> iGlyphPos;
         };
         typedef std::list<glyphs> glyphs_list;
         typedef std::vector<std::pair<glyphs_list::const_iterator, uint32_t>> result_type;
