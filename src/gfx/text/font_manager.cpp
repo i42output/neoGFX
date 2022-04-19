@@ -570,8 +570,7 @@ namespace neogfx
                 (newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::None_RTL || previousDirection == text_direction::Digit_RTL || previousDirection == text_direction::Emoji_RTL)) ||
                 currentCategory == text_category::Mnemonic ||
                 previousCategory == text_category::Mnemonic ||
-                previousDirection != currentDirection ||
-                previousScript != currentScript;
+                previousDirection != currentDirection;
             if (!newRun)
             {
                 if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) &&
@@ -914,7 +913,20 @@ namespace neogfx
             virtual dimension ppi() const { return iResolution.magnitude() / std::sqrt(2.0); }
         } deviceResolution;
         deviceResolution.iResolution = size(aExistingFont.horizontal_dpi(), aExistingFont.vertical_dpi());
-        auto& fallbackFont = create_font(default_fallback_font_info().fallback_for(aExistingFont.family_name()), (aExistingFont.style() & ~font_style::Emulated), aExistingFont.size(), deviceResolution);
+        string fallbackFontFamily = aExistingFont.family_name();
+        try
+        {
+            bool found = false;
+            while (!found)
+            {
+                fallbackFontFamily = default_fallback_font_info().fallback_for(fallbackFontFamily);
+                found = (iFontFamilies.find(fallbackFontFamily) != iFontFamilies.end());
+            }
+        }
+        catch (...)
+        {
+        }
+        auto& fallbackFont = create_font(fallbackFontFamily, (aExistingFont.style() & ~font_style::Emulated), aExistingFont.size(), deviceResolution);
         return fallbackFont;
     }
 
