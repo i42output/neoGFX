@@ -604,10 +604,7 @@ namespace neogfx
                 "        if (!uShapeEnabled)\n"
                 "            d = distance(uStippleVertex, Coord);\n"
                 "        else if (uShape == 3)\n" // circle
-                "        {\n"
-                "            float a = atan(Coord.y - function1.y, Coord.x - function1.x) + PI;\n"
-                "            d = a * function1.z;\n"
-                "        }\n"
+                "            d = (atan(Coord.y - function1.y, Coord.x - function1.x) + PI) * function1.z;\n"
                 "        uint patternBit = uint((d + uStipplePosition) / uStippleFactor) % 16;\n"
                 "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
                 "            discard;\n"

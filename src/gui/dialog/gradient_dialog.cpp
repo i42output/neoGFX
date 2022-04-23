@@ -116,6 +116,9 @@ namespace neogfx
     class gradient_dialog::preview_box : public framed_widget<>
     {
         typedef framed_widget<> base_type;
+    private:
+        static scalar constexpr CURSOR_RADIUS = 6.0;
+        static scalar constexpr CURSOR_THICKNESS = 2.0;
     public:
         preview_box(gradient_dialog& aOwner) :
             base_type(aOwner.iPreviewGroupBox.item_layout()),
@@ -140,11 +143,11 @@ namespace neogfx
             if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().center() != optional_point{})
             {
                 point const center{ cr.center().x + cr.width() / 2.0 * iOwner.gradient().center()->x, cr.center().y + cr.height() / 2.0 * iOwner.gradient().center()->y };
-                auto const radius = 6.0_dip;
+                auto const radius = dip(CURSOR_RADIUS);
                 auto const circumference = 2.0 * math::pi<double>() * radius;
-                aGc.draw_circle(center, radius, pen{ color::White, 1.0_dip });
+                aGc.draw_circle(center, radius, pen{ color::White, dip(CURSOR_THICKNESS) });
                 aGc.line_stipple_on(radius, 0x5555, circumference * neolib::thread::program_elapsed_ms() / 1000.0);
-                aGc.draw_circle(center, radius, pen{ color::Black, 1.0_dip });
+                aGc.draw_circle(center, radius, pen{ color::Black, dip(CURSOR_THICKNESS) });
                 aGc.line_stipple_off();
             }
         }
@@ -183,7 +186,8 @@ namespace neogfx
             {
                 rect cr = client_rect();
                 point center{ cr.center().x + cr.width() / 2.0 * iOwner.gradient().center()->x, cr.center().y + cr.height() / 2.0 * iOwner.gradient().center()->y };
-                update(rect{ center - point{ 10, 10 }, size{ 20, 20 } });
+                auto const cursorLength = dip(CURSOR_RADIUS) + dip(CURSOR_THICKNESS);
+                update(rect{ center - point{ cursorLength, cursorLength }, size{ cursorLength * 2.0, cursorLength * 2.0 } });
             }
         }
     private:
