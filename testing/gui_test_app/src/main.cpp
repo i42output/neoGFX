@@ -1388,11 +1388,12 @@ int main(int argc, char* argv[])
         {
             if (!window.has_native_window())
                 return;
-            bool canUpdateCanvas = !ecs && window.canvasInstancing.can_update();
+            bool canUpdateCanvas = !ecs && window.canvasInstancing.can_update() && !window.checkPauseAnimation.is_checked();
             aTimer.set_duration(window.pageDrawing.can_update() || canUpdateCanvas ? std::chrono::milliseconds{ 0 } : std::chrono::milliseconds{ 1 });
             aTimer.again();
             window.pageDrawing.update();
-            window.canvasInstancing.update();
+            if (canUpdateCanvas)
+                window.canvasInstancing.update();
             bool const mouseOver = window.canvasInstancing.entered(true);
             window.groupRenderingScheme.show(mouseOver);
             window.groupMeshShape.show(mouseOver);

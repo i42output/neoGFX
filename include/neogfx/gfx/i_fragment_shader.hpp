@@ -97,6 +97,7 @@ namespace neogfx
     public:
         virtual bool shape_active() const = 0;
         virtual void clear_shape() = 0;
-        virtual void set_cubic_bezier(const vec2& aP0, const vec2& aP1, const vec2& aP2, const vec2& aP3, scalar aWidth) = 0;
+        virtual void set_cubic_bezier() = 0;
+        virtual void set_circle() = 0;
     };
 }

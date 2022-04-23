@@ -66,6 +66,8 @@ namespace neogfx
             return (aDesiredSize == std::nullopt ? size{ 3.5_mm, 3.5_mm } : size{ 3.5_mm, 3.5_mm }.max(*aDesiredSize)).ceil();
         case skin_element::RadioButton:
             return (aDesiredSize == std::nullopt ? size{ 3.5_mm, 3.5_mm } : size{ 3.5_mm, 3.5_mm }.max(*aDesiredSize)).ceil();
+        case skin_element::ProgressBar:
+            return (aDesiredSize == std::nullopt ? size{ 50.0_mm, 5.0_mm } : size{ 50.0_mm, 5.0_mm }.max(*aDesiredSize)).ceil();
         default:
             return {};
         }
@@ -254,6 +256,13 @@ namespace neogfx
             aGc.draw_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
         else
             aGc.fill_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
+    }
+
+    void default_skin::draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const
+    {
+        auto const& cr = aItem.as_widget().client_rect();
+        auto const color1 = aItem.as_widget().background_color().shaded(0x0B);
+        aGc.draw_rounded_rect(cr, 5.0_dip, pen{ color1.shaded(0x10), 2.0_dip }, color1);
     }
 
     void default_skin::draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const

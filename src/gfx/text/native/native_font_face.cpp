@@ -295,7 +295,6 @@ namespace neogfx
         {
             try
             {
-                // todo: remove FT_LOAD_NO_AUTOHINT when cause of crash in freetype 2.11 with certain fonts is resolved
                 if (useSubpixelFiltering)
                 {
                     freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));

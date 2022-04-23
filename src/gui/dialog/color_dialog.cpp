@@ -494,8 +494,8 @@ namespace neogfx
         iCanvas.Painted([this](i_graphics_context& aGc)
         {
             point cursor = dip(current_cursor_position());
-            aGc.fill_circle(cursor, 4.0, iOwner.selected_color());
-            aGc.draw_circle(cursor, 4.0, pen{ iOwner.selected_color().light(0x80) ? color::Black : color::White });
+            aGc.fill_circle(cursor, 4.0_dip, iOwner.selected_color());
+            aGc.draw_circle(cursor, 4.0_dip, pen{ iOwner.selected_color().light(0.5) ? color::Black : color::White });
         });
     }
 

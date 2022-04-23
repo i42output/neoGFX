@@ -122,9 +122,11 @@ namespace neogfx
 
         bool batchable(const operation& aLeft, const operation& aRight)
         {
-            if (aLeft.index() != aRight.index())
+            auto const leftOp = static_cast<operation_type>(aLeft.index());
+            auto const rightOp = static_cast<operation_type>(aRight.index());
+            if (leftOp != rightOp)
                 return false;
-            switch (static_cast<operation_type>(aLeft.index()))
+            switch (leftOp)
             {
             case operation_type::SetPixel:
             case operation_type::DrawPixel:

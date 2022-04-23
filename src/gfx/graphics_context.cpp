@@ -461,9 +461,9 @@ namespace neogfx
         pop_logical_operation();
     }
 
-    void graphics_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos) const
+    void graphics_context::fill_rect(const rect& aRect, const brush& aFill) const
     {
-        native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill, aZpos });
+        native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill });
     }
 
     void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const
@@ -471,9 +471,9 @@ namespace neogfx
         native_context().enqueue(graphics_operation::fill_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aFill });
     }
 
-    void graphics_context::fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2, scalar aZpos) const
+    void graphics_context::fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2) const
     {
-        native_context().enqueue(graphics_operation::fill_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aFill1, aFill2, aZpos });
+        native_context().enqueue(graphics_operation::fill_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aFill1, aFill2 });
     }
 
     void graphics_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const
@@ -875,7 +875,8 @@ namespace neogfx
         if (aZpos == std::nullopt)
             native_context().enqueue(graphics_operation::clear{ aColor });
         else
-            fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? point{} : point{-1.0, -1.0}, iRenderTarget.target_texture().storage_extents() }, aColor, *aZpos);
+            fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? 
+                point{ 0.0, 0.0, aZpos ? *aZpos : 0.0 } : point{ -1.0, -1.0 }, iRenderTarget.target_texture().storage_extents() }, aColor);
     }
 
     void graphics_context::clear_depth_buffer() const

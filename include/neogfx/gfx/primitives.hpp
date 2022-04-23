@@ -80,7 +80,8 @@ namespace neogfx
     {
         None            = 0,
         Line            = 1,
-        CubicBezier     = 2
+        CubicBezier     = 2,
+        Circle          = 3
     };
 
     enum class blurring_algorithm

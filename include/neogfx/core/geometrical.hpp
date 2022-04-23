@@ -388,23 +388,34 @@ namespace neogfx
         typedef CoordinateType coordinate_type;
         // construction
     public:
-        constexpr basic_point() : x{}, y{} {}
+        constexpr basic_point() : x{}, y{}, z{} {}
         template <typename Scalar>
-        constexpr basic_point(const basic_vector<Scalar, 2>& other) : x{ static_cast<coordinate_type>(other.x) }, y{ static_cast<coordinate_type>(other.y) } {}
+        constexpr basic_point(const basic_vector<Scalar, 2>& other) : 
+            x{ static_cast<coordinate_type>(other.x) }, 
+            y{ static_cast<coordinate_type>(other.y) },
+            z{} {}
         template <typename Scalar>
-        constexpr basic_point(const basic_vector<Scalar, 3>& other) : x{ static_cast<coordinate_type>(other.x) }, y{ static_cast<coordinate_type>(other.y) } {}
-        constexpr basic_point(CoordinateType x, CoordinateType y) : x{ x }, y{ y } {}
+        constexpr basic_point(const basic_vector<Scalar, 3>& other) : 
+            x{ static_cast<coordinate_type>(other.x) }, 
+            y{ static_cast<coordinate_type>(other.y) },
+            z{} {}
+        constexpr basic_point(CoordinateType x, CoordinateType y, CoordinateType z = {}) : 
+            x{ x }, y{ y }, z{ z } {}
         template <typename CoordinateType2>
         constexpr basic_point(const basic_point<CoordinateType2>& other) :
-            x{ static_cast<CoordinateType>(other.x) }, y{ static_cast<CoordinateType>(other.y) } {}
-        constexpr basic_point(const basic_delta<CoordinateType>& other) : x{ other.dx }, y{ other.dy } {}
-        constexpr basic_point(const basic_size<CoordinateType>& other) : x{ other.cx }, y{ other.cy } {}
+            x{ static_cast<CoordinateType>(other.x) }, 
+            y{ static_cast<CoordinateType>(other.y) },
+            z{ static_cast<CoordinateType>(other.z) } {}
+        constexpr basic_point(const basic_delta<CoordinateType>& other) : 
+            x{ other.dx }, y{ other.dy }, z{} {}
+        constexpr basic_point(const basic_size<CoordinateType>& other) : 
+            x{ other.cx }, y{ other.cy }, z{} {}
         // operations
     public:
         basic_delta<coordinate_type> to_delta() const { return basic_delta<CoordinateType>{ x, y }; }
         basic_size<coordinate_type> to_size() const { return basic_size<CoordinateType>{ x, y }; }
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ x, y }; }
-        basic_vector<coordinate_type, 3> to_vec3(coordinate_type z = 0.0) const { return basic_vector<coordinate_type, 3>{ x, y, z }; }
+        basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ x, y, z }; }
         explicit operator basic_delta<coordinate_type>() const { return to_delta(); }
         explicit operator basic_size<coordinate_type>() const { return to_size(); }
         auto operator<=>(const basic_point&) const = default;
@@ -420,19 +431,20 @@ namespace neogfx
         basic_point& operator-=(const basic_delta<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.dx); y -= static_cast<coordinate_type>(other.dy); return *this; }
         basic_point& operator+=(const basic_size<coordinate_type>& other) { x += static_cast<coordinate_type>(other.cx); y += static_cast<coordinate_type>(other.cy); return *this; }
         basic_point& operator-=(const basic_size<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.cx); y -= static_cast<coordinate_type>(other.cy); return *this; }
-        basic_point operator-() const { return basic_point{ -x, -y }; }
-        basic_point abs() const { return basic_point{ std::abs(x), std::abs(y) }; }
-        basic_point ceil() const { return basic_point{ std::ceil(x), std::ceil(y) }; }
-        basic_point floor() const { return basic_point{ std::floor(x), std::floor(y) }; }
-        basic_point round() const { return basic_point{ std::round(x), std::round(y) }; }
-        basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y) }; }
-        basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y) }; }
-        basic_point min_max(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::max(y, other.y) }; }
-        basic_point max_min(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::min(y, other.y) }; }
-        basic_point mid(const basic_point& other) const { return basic_point{ (x + other.x) / static_cast<coordinate_type>(2.0), (y + other.y) / static_cast<coordinate_type>(2.0) }; }
-        basic_point with_x(coordinate_type x) const { return basic_point{ x, y }; }
-        basic_point with_y(coordinate_type y) const { return basic_point{ x, y }; }
-        coordinate_type magnitude() const { return std::sqrt(x * x + y * y); }
+        basic_point operator-() const { return basic_point{ -x, -y, -z }; }
+        basic_point abs() const { return basic_point{ std::abs(x), std::abs(y), std::abs(z) }; }
+        basic_point ceil() const { return basic_point{ std::ceil(x), std::ceil(y), std::ceil(z) }; }
+        basic_point floor() const { return basic_point{ std::floor(x), std::floor(y), std::floor(z) }; }
+        basic_point round() const { return basic_point{ std::round(x), std::round(y), std::round(z) }; }
+        basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y), std::min(z, other.z) }; }
+        basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y), std::max(z, other.z) }; }
+        basic_point min_max(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::max(y, other.y), other.z }; }
+        basic_point max_min(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::min(y, other.y), other.z }; }
+        basic_point mid(const basic_point& other) const { return basic_point{ (x + other.x) / static_cast<coordinate_type>(2.0), (y + other.y) / static_cast<coordinate_type>(2.0), (z + other.z) / static_cast<coordinate_type>(2.0) }; }
+        basic_point with_x(coordinate_type x) const { return basic_point{ x, y, z }; }
+        basic_point with_y(coordinate_type y) const { return basic_point{ x, y, z }; }
+        basic_point with_z(coordinate_type z) const { return basic_point{ x, y, z }; }
+        coordinate_type magnitude() const { return std::sqrt(x * x + y * y + z * z); }
         template <typename T>
         basic_point<T> as() const
         {
@@ -442,6 +454,7 @@ namespace neogfx
     public:
         coordinate_type x;
         coordinate_type y;
+        coordinate_type z;
     };
 
     typedef basic_point<coordinate> point;

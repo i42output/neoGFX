@@ -587,11 +587,7 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::operation_type::DrawCircle:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_circle&>(*op);
-                    draw_circle(args.center, args.radius, args.pen, args.startAngle);
-                }
+                draw_circles(opBatch);
                 break;
             case graphics_operation::operation_type::DrawArc:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -643,11 +639,7 @@ namespace neogfx
                 fill_checker_rects(opBatch);
                 break;
             case graphics_operation::operation_type::FillCircle:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    auto const& args = static_variant_cast<const graphics_operation::fill_circle&>(*op);
-                    fill_circle(args.center, args.radius, args.fill);
-                }
+                fill_circles(opBatch);
                 break;
             case graphics_operation::operation_type::FillArc:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -932,7 +924,7 @@ namespace neogfx
             for (auto op = aDrawPixelOps.first; op != aDrawPixelOps.second; ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(*op);
-                auto rectVertices = rect_vertices(rect{ drawOp.point, size{1.0, 1.0} }, mesh_type::Triangles, 0);
+                auto rectVertices = rect_vertices(rect{ drawOp.point, size{1.0, 1.0} }, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
                             vec4f{{
@@ -1005,7 +997,7 @@ namespace neogfx
         else
             adjustedRect.inflate(size{ aPen.width() / 2.0 }.floor());
 
-        vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline, 0.0);
+        vec3_array<8> lines = rect_vertices(adjustedRect, mesh_type::Outline);
         lines[1].x -= (aPen.width() + rect::default_epsilon);
         lines[3].y -= (aPen.width() + rect::default_epsilon);
         lines[5].x += (aPen.width() + rect::default_epsilon);
@@ -1079,41 +1071,44 @@ namespace neogfx
         emit_any_stipple(*this, vertexArrays);
     }
 
-    void opengl_rendering_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, angle aStartAngle)
+    void opengl_rendering_context::draw_circles(const graphics_operation::batch& aDrawCircleOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_circle&>(*aDrawCircleOps.first);
 
-        auto vertices = circle_vertices(aCenter, aRadius, aStartAngle, mesh_type::Outline);
+        if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
 
-        auto lines = line_loop_to_lines(vertices);
-        thread_local vec3_list quads;
-        quads.clear();
-        lines_to_quads(lines, aPen.width(), quads);
-        thread_local vec3_list triangles;
-        triangles.clear();
-        quads_to_triangles(quads, triangles);
+        rendering_engine().default_shader_program().shape_shader().set_circle();
 
-        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.second - aDrawCircleOps.first)) };
 
-        auto const function = to_function(aPen.color(), basic_rect<float>{ aCenter - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+            for (auto op = aDrawCircleOps.first; op != aDrawCircleOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width());
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-        for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
-                vec4f{{
-                    static_variant_cast<color>(aPen.color()).red<float>(),
-                    static_variant_cast<color>(aPen.color()).green<float>(),
-                    static_variant_cast<color>(aPen.color()).blue<float>(),
-                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{},
-                {},
-                function });
-
-        emit_any_stipple(*this, vertexArrays);
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.pen.width() }.as<float>()});
+                }
+            }
+        }
     }
 
     void opengl_rendering_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
@@ -1157,7 +1152,7 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        rendering_engine().default_shader_program().shape_shader().set_cubic_bezier(aP0.to_vec2(), aP1.to_vec2(), aP2.to_vec2(), aP3.to_vec2(), aPen.width());
+        rendering_engine().default_shader_program().shape_shader().set_cubic_bezier();
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()), iOpacity);
@@ -1167,7 +1162,7 @@ namespace neogfx
 
             auto r = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
             auto const function = to_function(aPen.color(), r);
-            auto rectVertices = rect_vertices(r, mesh_type::Triangles, 0.0);
+            auto rectVertices = rect_vertices(r, mesh_type::Triangles);
             for (auto const& v : rectVertices)
                 vertexArrays.push_back({ v,
                     std::holds_alternative<color>(aPen.color()) ?
@@ -1178,7 +1173,10 @@ namespace neogfx
                             static_variant_cast<const color&>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
                         vec4f{},
                         {},
-                        function });
+                        function,
+                        vec4{ aP0.x, aP0.y, aP1.x, aP1.y }.as<float>(),
+                        vec4{ aP2.x, aP2.y, aP3.x, aP3.y }.as<float>(),
+                        vec4{ aPen.width() }.as<float>()});
         }
     }
 
@@ -1319,9 +1317,9 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill, scalar aZpos)
+    void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill)
     {
-        graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill, aZpos } };
+        graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill } };
         fill_rects(graphics_operation::batch{ &op, &op + 1 });
     }
 
@@ -1345,7 +1343,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::fill_rect&>(*op);
                 auto const function = to_function(drawOp.fill, drawOp.rect);
-                auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles, drawOp.zpos);
+                auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
                         std::holds_alternative<color>(drawOp.fill) ?
@@ -1432,7 +1430,7 @@ namespace neogfx
                                 auto const square = rect{ drawOp.rect.top_left() + point{ x, y }, drawOp.squareSize };
                                 auto const& fill = (step == 0 ? drawOp.fill1 : drawOp.fill2);
                                 auto const function = to_function(fill, square);
-                                auto rectVertices = rect_vertices(square, mesh_type::Triangles, drawOp.zpos);
+                                auto rectVertices = rect_vertices(square, mesh_type::Triangles);
                                 for (auto const& v : rectVertices)
                                     vertexArrays.push_back({ v,
                                         std::holds_alternative<color>(fill) ?
@@ -1453,33 +1451,43 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill)
+    void opengl_rendering_context::fill_circles(const graphics_operation::batch& aFillCircleOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), iOpacity);
+        auto& firstOp = static_variant_cast<const graphics_operation::fill_circle&>(*aFillCircleOps.first);
 
-        auto vertices = circle_vertices(aCenter, aRadius, 0.0, mesh_type::TriangleFan);
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_circle();
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillCircleOps.second - aFillCircleOps.first)) };
 
-            auto const function = to_function(aFill, rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
-
-            for (auto const& v : vertices)
+            for (auto op = aFillCircleOps.first; op != aFillCircleOps.second; ++op)
             {
-                vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
-                    vec4f{{
-                        static_variant_cast<const color&>(aFill).red<float>(),
-                        static_variant_cast<const color&>(aFill).green<float>(),
-                        static_variant_cast<const color&>(aFill).blue<float>(),
-                        static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{},
-                    {},
-                    function });
+                auto& drawOp = static_variant_cast<const graphics_operation::fill_circle&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } };
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>(),
+                        vec4f{ 1.0 } });
+                }
             }
         }
     }
@@ -1743,8 +1751,7 @@ namespace neogfx
 
                         auto const& mesh = to_ecs_component(
                             glyphRect,
-                            mesh_type::Triangles,
-                            drawOp.point.z);
+                            mesh_type::Triangles);
 
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         meshRenderers.push_back(
@@ -1808,12 +1815,10 @@ namespace neogfx
                     auto const& mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
                         to_ecs_component(
                             outputRect,
-                            mesh_type::Triangles,
-                            drawOp.point.z) :
+                            mesh_type::Triangles) :
                         to_ecs_component(
                             game_rect{ outputRect },
-                            mesh_type::Triangles,
-                            drawOp.point.z);
+                            mesh_type::Triangles);
 
                     auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
                     auto const& emojiTexture = emojiAtlas.emoji_texture(glyph.value).as_sub_texture();
@@ -1860,7 +1865,8 @@ namespace neogfx
                             drawOp.point.x + glyphTexture.placement().x,
                             logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
                                 drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy
+                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
+                            drawOp.point.z
                         } + glyph.offset.as<scalar>();
 
                         vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
@@ -1898,12 +1904,10 @@ namespace neogfx
                                         to_ecs_component(
                                             outputRect,
                                             mesh_type::Triangles,
-                                            drawOp.point.z,
                                             transformation) :
                                         to_ecs_component(
                                             game_rect{ outputRect },
-                                            mesh_type::Triangles,
-                                            drawOp.point.z, 
+                                            mesh_type::Triangles, 
                                             transformation);
                                     meshFilters.push_back(game::mesh_filter{ {}, mesh });
                                     auto const& ink = drawOp.appearance->effect()->color();
@@ -1929,12 +1933,10 @@ namespace neogfx
                             to_ecs_component(
                                 outputRect,
                                 mesh_type::Triangles,
-                                drawOp.point.z,
                                 transformation) :
                             to_ecs_component(
                                 game_rect{ outputRect },
                                 mesh_type::Triangles,
-                                drawOp.point.z,
                                 transformation);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?

@@ -57,14 +57,20 @@ namespace neogfx
             add_in_variable<vec3f>("Coord"_s, 0u);
             auto& fragColor = add_in_variable<vec4f>("Color"_s, 1u);
             add_in_variable<vec2f>("TexCoord"_s, 2u);
-            auto& fragFunction = add_in_variable<vec4f>("Function"_s, 3u);
+            auto& fragFunction0 = add_in_variable<vec4f>("Function0"_s, 3u);
+            auto& fragFunction1 = add_in_variable<vec4f>("Function1"_s, 4u);
+            auto& fragFunction2 = add_in_variable<vec4f>("Function2"_s, 5u);
+            auto& fragFunction3 = add_in_variable<vec4f>("Function3"_s, 6u);
             add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
-            add_out_variable<vec4f>("FragFunction"_s, 1u).link(fragFunction);
+            add_out_variable<vec4f>("FragFunction0"_s, 1u).link(fragFunction0);
+            add_out_variable<vec4f>("FragFunction1"_s, 2u).link(fragFunction1);
+            add_out_variable<vec4f>("FragFunction2"_s, 3u).link(fragFunction2);
+            add_out_variable<vec4f>("FragFunction3"_s, 4u).link(fragFunction3);
         }
     public:
         bool supports(vertex_buffer_type aBufferType) const override
         {
-            return (aBufferType & (vertex_buffer_type::Vertices | vertex_buffer_type::Color | vertex_buffer_type::Function)) != vertex_buffer_type::Invalid;
+            return (aBufferType & (vertex_buffer_type::Vertices | vertex_buffer_type::Color | vertex_buffer_type::Function0 | vertex_buffer_type::Function1 | vertex_buffer_type::Function2 | vertex_buffer_type::Function3)) != vertex_buffer_type::Invalid;
         }
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {
@@ -75,7 +81,9 @@ namespace neogfx
                 {
                     static const string code =
                     {
-                        "void standard_fragment_shader(inout vec4 color, inout vec4 function)\n"
+                        "#define PI 3.1415926538\n"
+                        "\n"
+                        "void standard_fragment_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                         "{\n"
                         "}\n"_s
                     };
@@ -198,8 +206,6 @@ namespace neogfx
 
     class standard_shape_shader : public standard_fragment_shader<i_shape_shader>
     {
-    private:
-
     public:
         standard_shape_shader(std::string const& aName = "standard_shape_shader");
     public:
@@ -207,24 +213,10 @@ namespace neogfx
     public:
         bool shape_active() const override;
         void clear_shape() override;
-        void set_cubic_bezier(const vec2& aP0, const vec2& aP1, const vec2& aP2, const vec2& aP3, scalar aWidth) override;
+        void set_cubic_bezier() override;
+        void set_circle() override;
     private:
         cache_uniform(uShapeEnabled)
         cache_uniform(uShape)
-        cache_uniform(uShapeP0)
-        cache_uniform(uShapeP1)
-        cache_uniform(uShapeP2)
-        cache_uniform(uShapeP3)
-        cache_uniform(uCoef_xxx)
-        cache_uniform(uCoef_xxy)
-        cache_uniform(uCoef_xyy)
-        cache_uniform(uCoef_yyy)
-        cache_uniform(uCoef_xx)
-        cache_uniform(uCoef_xy)
-        cache_uniform(uCoef_yy)
-        cache_uniform(uCoef_x)
-        cache_uniform(uCoef_y)
-        cache_uniform(uCoef_0)
-        cache_uniform(uShapeWidth)
     };
 }

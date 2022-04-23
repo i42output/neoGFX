@@ -93,8 +93,10 @@ namespace neogfx::game
             auto const tv = aTransformation * v;
             topLeft.x = std::min<coordinate>(topLeft.x, tv.x);
             topLeft.y = std::min<coordinate>(topLeft.y, tv.y);
+            topLeft.z = std::min<coordinate>(topLeft.z, tv.z);
             bottomRight.x = std::max<coordinate>(bottomRight.x, tv.x);
             bottomRight.y = std::max<coordinate>(bottomRight.y, tv.y);
+            bottomRight.z = std::max<coordinate>(bottomRight.z, tv.z);
         }
         return rect{ topLeft, bottomRight };
     }

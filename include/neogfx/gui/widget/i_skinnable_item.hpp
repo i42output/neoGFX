@@ -48,6 +48,7 @@ namespace neogfx
         SpinnerDownArrow,
         TabClose,
         TreeExpander,
+        ProgressBar,
         Separator,
         Custom1,
         Custom2,

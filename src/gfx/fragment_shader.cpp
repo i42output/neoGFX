@@ -204,14 +204,14 @@ namespace neogfx
                 "    return gradient_color(gradientPos);\n"
                 "}\n"
                 "\n"
-                "void standard_gradient_shader(inout vec4 color, inout vec4 function)\n"
+                "void standard_gradient_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    if (uGradientEnabled)\n"
                 "    {\n"
                 "        int d = uGradientFilterSize / 2;\n"
                 "        if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)\n"
                 "        {\n"
-                "            color = color_at(Coord.xy, function);\n"  
+                "            color = color_at(Coord.xy, function0);\n"  
                 "        }\n"
                 "        else\n"
                 "        {\n"
@@ -220,7 +220,7 @@ namespace neogfx
                 "            {\n"
                 "                for (int fx = -d; fx <= d; ++fx)\n"
                 "                {\n"
-                "                    sum += (color_at(Coord.xy + vec2(fx, fy), function) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
+                "                    sum += (color_at(Coord.xy + vec2(fx, fy), function0) * texelFetch(uGradientFilter, ivec2(fx + d, fy + d)).r);\n"
                 "                }\n"
                 "            }\n"
                 "            color = sum;\n" 
@@ -333,7 +333,7 @@ namespace neogfx
                 "    }\n"
                 "    return sum / float(gl_NumSamples);\n"
                 "}\n"
-                "void standard_texture_shader(inout vec4 color, inout vec4 function)\n"
+                "void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    if (uTextureEnabled)\n"
                 "    {\n"
@@ -428,7 +428,7 @@ namespace neogfx
         {
             static const string code
             {
-                "void standard_filter_shader(inout vec4 color, inout vec4 function)\n"
+                "void standard_filter_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    if (uFilterEnabled)\n"
                 "    {\n"
@@ -519,7 +519,7 @@ namespace neogfx
                 "}\n"
                 "\n"
                 "\n"
-                "void standard_glyph_shader(inout vec4 color, inout vec4 function)\n"
+                "void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    if (uGlyphEnabled)\n"
                 "    {\n"
@@ -596,11 +596,18 @@ namespace neogfx
         {
             static const string code
             {
-                "void standard_stipple_shader(inout vec4 color, inout vec4 function)\n"
+                "void standard_stipple_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    if (uStippleEnabled)\n"
                 "    {\n"
-                "        float d = distance(uStippleVertex, Coord);\n"
+                "        float d = 0.0;\n"
+                "        if (!uShapeEnabled)\n"
+                "            d = distance(uStippleVertex, Coord);\n"
+                "        else if (uShape == 3)\n" // circle
+                "        {\n"
+                "            float a = atan(Coord.y - function1.y, Coord.x - function1.x) + PI;\n"
+                "            d = a * function1.z;\n"
+                "        }\n"
                 "        uint patternBit = uint((d + uStipplePosition) / uStippleFactor) % 16;\n"
                 "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
                 "            discard;\n"
@@ -631,7 +638,7 @@ namespace neogfx
         iPosition = aPosition;
         uStippleFactor = static_cast<float>(aFactor);
         uStipplePattern = aPattern;
-        uStipplePosition = 0.0f;
+        uStipplePosition = static_cast<float>(iPosition);
         uStippleVertex = vec3f{};
         uStippleEnabled = true;
     }
@@ -650,6 +657,8 @@ namespace neogfx
     standard_shape_shader::standard_shape_shader(std::string const& aName) :
         standard_fragment_shader<i_shape_shader>{ aName }
     {
+        set_circle();
+        clear_shape();
         disable();
     }
 
@@ -660,14 +669,14 @@ namespace neogfx
         {
             static const string code
             {
-                "void draw_line(inout vec4 color, inout vec4 function)\n"
+                "void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
-                "    float dy = uShapeP0.y - uShapeP1.y;\n"
-                "    float dx = uShapeP0.x - uShapeP1.x;\n"
+                "    float dy = function1.y - function1.w;\n"
+                "    float dx = function1.x - function1.z;\n"
                 "    float m = dy / dx;\n" // GLSL allows divide-by-zero, we won't use the Inf
-                "    float c = uShapeP0.y - m * uShapeP0.x;\n"
-                "    float d = dx != 0.0 ? (abs(m) < 1.0 ? distance(vec2(Coord.x, m * Coord.x + c), Coord.xy) : distance(vec2((Coord.y - c) / m, Coord.y), Coord.xy)) : abs(Coord.x - uShapeP0.x);\n"
-                "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(uShapeWidth / 2.0 - 0.5, uShapeWidth / 2.0 + 0.5, d)));\n"
+                "    float c = function1.y - m * function1.x;\n"
+                "    float d = dx != 0.0 ? (abs(m) < 1.0 ? distance(vec2(Coord.x, m * Coord.x + c), Coord.xy) : distance(vec2((Coord.y - c) / m, Coord.y), Coord.xy)) : abs(Coord.x - function1.x);\n"
+                "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(function2.x / 2.0 - 0.5, function2.x / 2.0 + 0.5, d)));\n"
                 "}\n"
                 "// https://www.shadertoy.com/view/XdVBWd\n"
                 "// The MIT License\n"
@@ -703,23 +712,34 @@ namespace neogfx
                 "    }\n"
                 "    return sqrt(res);\n"
                 "}\n"
-                "void draw_cubic_bezier(inout vec4 color, inout vec4 function)\n"
+                "void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
-                "    float d = bezier_udBezier(uShapeP0, uShapeP1, uShapeP2, uShapeP3, Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5)));\n"
-                "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(uShapeWidth / 2.0 - 0.5, uShapeWidth / 2.0 + 0.5, d)));\n"
+                "    float d = bezier_udBezier(function1.xy, function1.zw, function2.xy, function2.zw, Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5)));\n"
+                "    color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.x / 2.0 - 0.5, function3.x / 2.0 + 0.5, d)));\n"
+                "}\n"
+                "void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
+                "{\n"
+                "    float d = distance(function1.xy, Coord.xy) - function1.z;\n"
+                "    if (function2.x == 1.0)\n"
+                "        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function1.w / 2.0 - 0.5, function1.w / 2.0 + 0.5, d)));\n"
+                "    else if (abs(d) >= function1.w / 2.0 - 0.5)\n"
+                "        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function1.w / 2.0 - 0.5, function1.w / 2.0 + 0.5, abs(d))));\n"
                 "}\n"
                 "\n"
-                "void standard_shape_shader(inout vec4 color, inout vec4 function)\n"
+                "void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    if (uShapeEnabled)\n"
                 "    {\n"
                 "        switch(uShape)\n"
                 "        {\n"
                 "        case 1:\n" // line
-                "            draw_line(color, function);\n"
+                "            draw_line(color, function1, function2, function3);\n"
                 "            break;\n"
                 "        case 2:\n" // cubic bezier
-                "            draw_cubic_bezier(color, function);\n"
+                "            draw_cubic_bezier(color, function1, function2, function3);\n"
+                "            break;\n"
+                "        case 3:\n" // circle
+                "            draw_circle(color, function1, function2, function3);\n"
                 "            break;\n"
                 "        }\n"
                 "    }\n"
@@ -742,15 +762,17 @@ namespace neogfx
         uShapeEnabled = false;
     }
 
-    void standard_shape_shader::set_cubic_bezier(const vec2& aP0, const vec2& aP1, const vec2& aP2, const vec2& aP3, scalar aWidth)
+    void standard_shape_shader::set_cubic_bezier()
     {
         enable();
         uShape = shader_shape::CubicBezier;
-        uShapeP0 = aP0.as<float>();
-        uShapeP1 = aP1.as<float>();
-        uShapeP2 = aP2.as<float>();
-        uShapeP3 = aP3.as<float>();
-        uShapeWidth = static_cast<float>(aWidth);
+        uShapeEnabled = true;
+    }
+    
+    void standard_shape_shader::set_circle()
+    {
+        enable();
+        uShape = shader_shape::Circle;
         uShapeEnabled = true;
     }
 }

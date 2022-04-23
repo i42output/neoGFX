@@ -219,7 +219,6 @@ namespace neogfx
         {
             rect rect;
             brush fill;
-            scalar zpos;
         };
 
         struct fill_rounded_rect
@@ -235,7 +234,6 @@ namespace neogfx
             size squareSize;
             brush fill1;
             brush fill2;
-            scalar zpos;
         };
 
         struct fill_circle

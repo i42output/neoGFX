@@ -336,12 +336,15 @@ namespace neogfx
         vec4f rgba;
         vec2f st;
         vec4f xyzw;
+        vec4f abcd;
+        vec4f efgh;
+        vec4f ijkl;
         standard_vertex(const vec3f& xyz = vec3f{}) :
             xyz{ xyz }
         {
         }
-        standard_vertex(const vec3f& xyz, const vec4f& rgba, const vec2f& st = {}, const vec4f& xyzw = {}) :
-            xyz{ xyz }, rgba{ rgba }, st{ st }, xyzw{ xyzw }
+        standard_vertex(const vec3f& xyz, const vec4f& rgba, const vec2f& st = {}, const vec4f& xyzw = {}, const vec4f& abcd = {}, const vec4f& efgh = {}, const vec4f& ijkl = {}) :
+            xyz{ xyz }, rgba{ rgba }, st{ st }, xyzw{ xyzw }, abcd{ abcd }, efgh{ efgh }, ijkl{ ijkl }
         {
         }
         struct offset
@@ -350,6 +353,9 @@ namespace neogfx
             static constexpr std::size_t rgba = xyz + sizeof(decltype(standard_vertex::xyz));
             static constexpr std::size_t st = rgba + sizeof(decltype(standard_vertex::rgba));
             static constexpr std::size_t xyzw = st + sizeof(decltype(standard_vertex::st));
+            static constexpr std::size_t abcd = xyzw + sizeof(decltype(standard_vertex::xyzw));
+            static constexpr std::size_t efgh = abcd + sizeof(decltype(standard_vertex::abcd));
+            static constexpr std::size_t ijkl = efgh + sizeof(decltype(standard_vertex::efgh));
         };
     };
 
@@ -424,13 +430,34 @@ namespace neogfx
                     vertex_type::offset::st,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::UV));
-            if (aShaderProgram.supports(vertex_buffer_type::Function))
-                iVertexFunctionAttribArray.emplace(
+            if (aShaderProgram.supports(vertex_buffer_type::Function0))
+                iVertexFunction0AttribArray.emplace(
                     false,
                     sizeof(vertex_type),
                     vertex_type::offset::xyzw,
                     aShaderProgram,
-                    standard_vertex_attribute_name(vertex_buffer_type::Function));
+                    standard_vertex_attribute_name(vertex_buffer_type::Function0));
+            if (aShaderProgram.supports(vertex_buffer_type::Function1))
+                iVertexFunction1AttribArray.emplace(
+                    false,
+                    sizeof(vertex_type),
+                    vertex_type::offset::abcd,
+                    aShaderProgram,
+                    standard_vertex_attribute_name(vertex_buffer_type::Function1));
+            if (aShaderProgram.supports(vertex_buffer_type::Function2))
+                iVertexFunction2AttribArray.emplace(
+                    false,
+                    sizeof(vertex_type),
+                    vertex_type::offset::efgh,
+                    aShaderProgram,
+                    standard_vertex_attribute_name(vertex_buffer_type::Function2));
+            if (aShaderProgram.supports(vertex_buffer_type::Function3))
+                iVertexFunction3AttribArray.emplace(
+                    false,
+                    sizeof(vertex_type),
+                    vertex_type::offset::ijkl,
+                    aShaderProgram,
+                    standard_vertex_attribute_name(vertex_buffer_type::Function3));
             if (aShaderProgram.vertex_shader().has_standard_vertex_matrices())
             {
                 auto& standardMatrices = aShaderProgram.vertex_shader().standard_vertex_matrices();
@@ -487,8 +514,14 @@ namespace neogfx
                 iVertexColorAttribArray->update(iBuffer);
             if (iVertexTextureCoordAttribArray)
                 iVertexTextureCoordAttribArray->update(iBuffer);
-            if (iVertexFunctionAttribArray)
-                iVertexFunctionAttribArray->update(iBuffer);
+            if (iVertexFunction0AttribArray)
+                iVertexFunction0AttribArray->update(iBuffer);
+            if (iVertexFunction1AttribArray)
+                iVertexFunction1AttribArray->update(iBuffer);
+            if (iVertexFunction2AttribArray)
+                iVertexFunction2AttribArray->update(iBuffer);
+            if (iVertexFunction3AttribArray)
+                iVertexFunction3AttribArray->update(iBuffer);
         }
     private:
         opengl_buffer<vertex_type> iBuffer;
@@ -497,7 +530,10 @@ namespace neogfx
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::xyz)>> iVertexPositionAttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::rgba)>> iVertexColorAttribArray;
         std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::st)>> iVertexTextureCoordAttribArray;
-        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::xyzw)>> iVertexFunctionAttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::xyzw)>> iVertexFunction0AttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::abcd)>> iVertexFunction1AttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::efgh)>> iVertexFunction2AttribArray;
+        std::optional<opengl_vertex_attrib_array<vertex_type, decltype(vertex_type::ijkl)>> iVertexFunction3AttribArray;
     };
 
     class use_shader_program
