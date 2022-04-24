@@ -654,8 +654,7 @@ namespace neogfx
     standard_shape_shader::standard_shape_shader(std::string const& aName) :
         standard_fragment_shader<i_shape_shader>{ aName }
     {
-        set_circle();
-        clear_shape();
+        uShapeEnabled = false;
         disable();
     }
 
