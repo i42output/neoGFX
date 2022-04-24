@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/task/thread.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/image.hpp>
@@ -474,7 +475,12 @@ namespace neogfx
     }
 
     color_dialog::yz_picker::yz_picker(color_dialog& aOwner) :
-        framed_scrollable_widget(aOwner.iRightTopLayout), iOwner(aOwner), iLayout{ *this }, iCanvas{ iLayout }, iTexture{ image{ size{256, 256}, color::Black } }, iTracking{ false }
+        framed_scrollable_widget(aOwner.iRightTopLayout), iOwner(aOwner), iLayout{ *this }, iCanvas{ iLayout }, iTexture{ image{ size{256, 256}, color::Black } }, iTracking{ false },
+        iAnimationTimer{ *this, [this](widget_timer& aTimer)
+        {
+            aTimer.again();
+            animate();
+        }, std::chrono::milliseconds{ 10 }, true }
     {
         iCanvas.set_image(iTexture);
         iCanvas.set_fixed_size(size{ 256.0_dip, 256.0_dip });
@@ -493,9 +499,13 @@ namespace neogfx
         update_texture();
         iCanvas.Painted([this](i_graphics_context& aGc)
         {
-            point cursor = dip(current_cursor_position());
-            aGc.fill_circle(cursor, 4.0_dip, iOwner.selected_color());
-            aGc.draw_circle(cursor, 4.0_dip, pen{ iOwner.selected_color().light(0.5) ? color::Black : color::White });
+            point center = dip(current_cursor_position());
+            auto const radius = dip(CURSOR_RADIUS);
+            auto const circumference = 2.0 * math::pi<double>() * radius;
+            aGc.draw_circle(center, radius, pen{ color::White, dip(CURSOR_THICKNESS) });
+            aGc.line_stipple_on(radius, 0x5555, circumference * neolib::thread::program_elapsed_ms() / 1000.0);
+            aGc.draw_circle(center, radius, pen{ color::Black, dip(CURSOR_THICKNESS) });
+            aGc.line_stipple_off();
         });
     }
 
@@ -705,6 +715,14 @@ namespace neogfx
         }
         iTexture.set_pixels(rect{ point{}, size{256, 256} }, &iPixels[0][0][0]);
         update();
+    }
+
+    void color_dialog::yz_picker::animate()
+    {
+        rect cr = client_rect();
+        point center = dip(current_cursor_position());
+        auto const cursorLength = dip(CURSOR_RADIUS) + dip(CURSOR_THICKNESS);
+        update(rect{ center - point{ cursorLength, cursorLength }, size{ cursorLength * 2.0, cursorLength * 2.0 } });
     }
 
     color_dialog::color_selection::color_selection(color_dialog& aOwner) :

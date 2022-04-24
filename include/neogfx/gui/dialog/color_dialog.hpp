@@ -128,6 +128,9 @@ namespace neogfx
         };
         class yz_picker : public framed_scrollable_widget
         {
+        private:
+            static scalar constexpr CURSOR_RADIUS = 4.0;
+            static scalar constexpr CURSOR_THICKNESS = 1.0;
         public:
             yz_picker(color_dialog& aOwner);
         public:
@@ -144,6 +147,7 @@ namespace neogfx
             representations color_at_position(const point& aCursorPos) const;
             point current_cursor_position() const;
             void update_texture();
+            void animate();
         private:
             color_dialog& iOwner;
             vertical_layout iLayout;
@@ -153,6 +157,7 @@ namespace neogfx
             mutable texture iTexture;
             bool iTracking;
             std::optional<point> iCursorPosition;
+            widget_timer iAnimationTimer;
         };
         class color_selection : public framed_widget<>
         {
