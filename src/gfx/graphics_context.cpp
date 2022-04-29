@@ -386,7 +386,7 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen });
     }
 
-    void graphics_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_rounded_rect(const rect& aRect, const vec4& aRadius, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)
             fill_rounded_rect(aRect, aRadius, aFill);
@@ -473,7 +473,7 @@ namespace neogfx
         native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill });
     }
 
-    void graphics_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const
+    void graphics_context::fill_rounded_rect(const rect& aRect, const vec4& aRadius, const brush& aFill) const
     {
         native_context().enqueue(graphics_operation::fill_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aFill });
     }

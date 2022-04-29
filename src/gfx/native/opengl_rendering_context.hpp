@@ -309,7 +309,7 @@ namespace neogfx
         void draw_pixels(const graphics_operation::batch& aFillRectOps);
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
         void draw_rect(const rect& aRect, const pen& aPen);
-        void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen);
+        void draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps);
         void draw_circles(const graphics_operation::batch& aDrawCircleOps);
         void draw_pies(const graphics_operation::batch& aDrawPieOps);
         void draw_arcs(const graphics_operation::batch& aDrawArcOps);
@@ -319,7 +319,7 @@ namespace neogfx
         void draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation);
         void fill_rect(const rect& aRect, const brush& aFill);
         void fill_rects(const graphics_operation::batch& aFillRectOps);
-        void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
+        void fill_rounded_rects(const graphics_operation::batch& aFillRoundedRectOps);
         void fill_checker_rects(const graphics_operation::batch& aFillCheckerRectOps);
         void fill_circles(const graphics_operation::batch& aFillCircleOps);
         void fill_pies(const graphics_operation::batch& aFillPieOps);

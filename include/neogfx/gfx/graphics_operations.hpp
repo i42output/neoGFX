@@ -165,7 +165,7 @@ namespace neogfx
         struct draw_rounded_rect
         {
             rect rect;
-            dimension radius;
+            vec4 radius;
             pen pen;
         };
 
@@ -233,7 +233,7 @@ namespace neogfx
         struct fill_rounded_rect
         {
             rect rect;
-            dimension radius;
+            vec4 radius;
             brush fill;
         };
 

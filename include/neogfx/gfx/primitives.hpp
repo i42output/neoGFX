@@ -83,7 +83,8 @@ namespace neogfx
         CubicBezier     = 0x02,
         Circle          = 0x03,
         Pie             = 0x04,
-        Arc             = 0x05
+        Arc             = 0x05,
+        RoundedRect     = 0x06
     };
 
     enum class blurring_algorithm

@@ -580,11 +580,7 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::operation_type::DrawRoundedRect:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
-                    draw_rounded_rect(args.rect, args.radius, args.pen);
-                }
+                draw_rounded_rects(opBatch);
                 break;
             case graphics_operation::operation_type::DrawCircle:
                 draw_circles(opBatch);
@@ -628,11 +624,7 @@ namespace neogfx
                 fill_rects(opBatch);
                 break;
             case graphics_operation::operation_type::FillRoundedRect:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    auto const& args = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*op);
-                    fill_rounded_rect(args.rect, args.radius, args.fill);
-                }
+                fill_rounded_rects(opBatch);
                 break;
             case graphics_operation::operation_type::FillCheckerRect:
                 fill_checker_rects(opBatch);
@@ -1023,50 +1015,46 @@ namespace neogfx
         emit_any_stipple(*this, vertexArrays);
     }
 
-    void opengl_rendering_context::draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen)
+    void opengl_rendering_context::draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+        neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto adjustedRect = aRect;
-        if (snap_to_pixel())
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*aDrawRoundedRectOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
+
         {
-            bool const oddWidth = static_cast<int32_t>(aPen.width()) % 2 == 1;
-            adjustedRect.position() -= size{ oddWidth ? 0.0 : 0.5 };
-            if (oddWidth)
-                adjustedRect = adjustedRect.with_epsilon(size{ 1.0 });
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawRoundedRectOps.second - aDrawRoundedRectOps.first)) };
+
+            for (auto op = aDrawRoundedRectOps.first; op != aDrawRoundedRectOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
+                auto boundingRect = drawOp.rect.inflated(drawOp.pen.width());
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.pen.color(), boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.rect.center().x, drawOp.rect.center().y, drawOp.rect.width(), drawOp.rect.height() }.as<float>(),
+                        drawOp.radius.as<float>(),
+                        vec4{ drawOp.pen.width(), 0.0 }.as<float>() });
+                }
+            }
         }
-        else
-            adjustedRect.inflate(size{ aPen.width() / 2.0 }.floor());
-
-        auto vertices = rounded_rect_vertices(adjustedRect, aRadius, mesh_type::Outline);
-
-        auto lines = line_loop_to_lines(vertices);
-        thread_local vec3_list quads;
-        quads.clear();
-        lines_to_quads(lines, aPen.width(), quads);
-        thread_local vec3_list triangles;
-        triangles.clear();
-        quads_to_triangles(quads, triangles);
-
-        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
-
-        auto const function = to_function(aPen.color(), aRect);
-
-        for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
-                vec4f{{
-                    static_variant_cast<color>(aPen.color()).red<float>(),
-                    static_variant_cast<color>(aPen.color()).green<float>(),
-                    static_variant_cast<color>(aPen.color()).blue<float>(),
-                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{},
-                {},
-                function });
-
-        emit_any_stipple(*this, vertexArrays);
     }
 
     void opengl_rendering_context::draw_circles(const graphics_operation::batch& aDrawCircleOps)
@@ -1403,36 +1391,44 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill)
+    void opengl_rendering_context::fill_rounded_rects(const graphics_operation::batch& aFillRoundedRectOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        if (aRect.empty())
-            return;
+        auto& firstOp = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*aFillRoundedRectOps.first);
 
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), iOpacity);
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
 
-        auto vertices = rounded_rect_vertices(aRect, aRadius, mesh_type::TriangleFan);
-        
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
+
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRoundedRectOps.second - aFillRoundedRectOps.first)) };
 
-            auto const function = to_function(aFill, aRect);
-
-            for (auto const& v : vertices)
+            for (auto op = aFillRoundedRectOps.first; op != aFillRoundedRectOps.second; ++op)
             {
-                vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
-                    vec4f{{
-                        static_variant_cast<const color&>(aFill).red<float>(),
-                        static_variant_cast<const color&>(aFill).green<float>(),
-                        static_variant_cast<const color&>(aFill).blue<float>(),
-                        static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{},
-                    {},
-                    function});
+                auto& drawOp = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*op);
+                auto boundingRect = drawOp.rect;
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.rect.center().x, drawOp.rect.center().y, drawOp.rect.width(), drawOp.rect.height() }.as<float>(),
+                        drawOp.radius.as<float>(),
+                        vec4{ 0.0, 1.0 }.as<float>() });
+                }
             }
         }
     }

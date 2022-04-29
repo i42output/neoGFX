@@ -148,7 +148,7 @@ namespace neogfx
         virtual void draw_pixel(const point& aPoint, const color& aColor) const = 0;
         virtual void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const = 0;
         virtual void draw_rect(const rect& aRect, const pen& aPen, const brush& aFill = brush{}) const = 0;
-        virtual void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const = 0;
+        virtual void draw_rounded_rect(const rect& aRect, const vec4& aRadius, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const = 0;
         virtual void draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
@@ -158,7 +158,7 @@ namespace neogfx
         virtual void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const = 0;
         virtual void draw_focus_rect(const rect& aRect) const = 0;
         virtual void fill_rect(const rect& aRect, const brush& aFill) const = 0;
-        virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const = 0;
+        virtual void fill_rounded_rect(const rect& aRect, const vec4& aRadius, const brush& aFill) const = 0;
         virtual void fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2) const = 0;
         virtual void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const = 0;
         virtual void fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
@@ -222,6 +222,15 @@ namespace neogfx
         virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) const = 0;
+    public:
+        void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const
+        {
+            draw_rounded_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, aPen, aFill);
+        }
+        void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const
+        {
+            fill_rounded_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, aFill);
+        }
     };
 
     template <typename Iter>

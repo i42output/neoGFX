@@ -1147,7 +1147,7 @@ int main(int argc, char* argv[])
         window.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
             aGc.draw_arc(ng::point{ 20, 70 }, 50, ng::to_rad(0 + 90.0 * 0), ng::to_rad(45.0 + 90.0 * 0), ng::pen{ ng::color::White, 3.0 }, ng::color::Chocolate);
-            aGc.draw_arc(ng::point{ 20, 70 }, 40, ng::to_rad(5.0 + 90.0 * 0), ng::to_rad(40.0 + 90.0 * 0), ng::pen{ ng::color::Yellow, 3.0 });
+            aGc.draw_arc(ng::point{ 20, 70 }, 40, ng::to_rad(5.0 + 90.0 * 0), ng::to_rad(50.0 + 90.0 * 0), ng::pen{ ng::color::Yellow, 3.0 });
             aGc.draw_pixel(ng::point{ 20, 70 }, ng::color::Red);
             aGc.draw_arc(ng::point{ 200, 70 }, 50, ng::to_rad(15.0 + 90.0 * 0), ng::to_rad(60.0 + 90.0 * 0), ng::pen{ ng::color::White, 3.0 }, ng::color::Chocolate);
             aGc.draw_arc(ng::point{ 200, 70 }, 40, ng::to_rad(5.0 + 90.0 * 0), ng::to_rad(50.0 + 90.0 * 0), ng::pen{ ng::color::Yellow, 3.0 });
