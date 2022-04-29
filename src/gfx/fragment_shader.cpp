@@ -665,6 +665,11 @@ namespace neogfx
         {
             static const string code
             {
+                // Parts hereof...
+                // The MIT License
+                // Copyright © 2019 Inigo Quilez
+                // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
                 "void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
                 "    float dy = function1.y - function1.w;\n"
@@ -721,6 +726,35 @@ namespace neogfx
                 "    else if (abs(d) >= function1.w / 2.0 - 0.5)\n"
                 "        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function1.w / 2.0 - 0.5, function1.w / 2.0 + 0.5, abs(d))));\n"
                 "}\n"
+                "float sdPie(in vec2 p, in vec2 c, in float r)\n"
+                "{\n"
+                "    p.x = abs(p.x);\n"
+                "    float l = length(p) - r;\n"
+                "    float m = length(p - c * clamp(dot(p,c),0.0,r));\n"
+                "    return max(l,m * sign(c.y * p.x - c.x * p.y));\n"
+                "}\n"
+                "float sdArc(in vec2 p, in vec2 c, in float r)\n"
+                "{\n"
+                "    p.x = abs(p.x);\n"
+                "    float l = length(p) - r;\n"
+                "    float m = length(p - c * clamp(dot(p,c),0.0,r));\n"
+                "    return max(-l,m * sign(c.y * p.x - c.x * p.y));\n"
+                "}\n"
+                "void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
+                "{\n"
+                "    float a0 = PI * 0.5 + function2.x * 0.5;"
+                "    vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));\n"
+                "    if (function2.z == 1.0)\n"
+                "    {\n"
+                "        float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);\n"
+                "        color = vec4(color.xyz, color.a * (1 - smoothstep(-0.5, 0.5, d0)));\n"
+                "    }\n"
+                "    else\n"
+                "    {\n"
+                "        float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);\n"
+                "        color = vec4(color.xyz, color.a * (1 - smoothstep(function2.y / 2.0 - 0.5, function2.y / 2.0 + 0.5, abs(d0))));\n"
+                "    }\n"
+                "}\n"
                 "\n"
                 "void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                 "{\n"
@@ -736,6 +770,9 @@ namespace neogfx
                 "            break;\n"
                 "        case 3:\n" // circle
                 "            draw_circle(color, function1, function2, function3);\n"
+                "            break;\n"
+                "        case 4:\n" // arc
+                "            draw_arc(color, function1, function2, function3);\n"
                 "            break;\n"
                 "        }\n"
                 "    }\n"
@@ -758,17 +795,28 @@ namespace neogfx
         uShapeEnabled = false;
     }
 
-    void standard_shape_shader::set_cubic_bezier()
+    void standard_shape_shader::set_cubic_bezier(i_rendering_context& aContext)
     {
         enable();
         uShape = shader_shape::CubicBezier;
+        uShapeGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
         uShapeEnabled = true;
     }
     
-    void standard_shape_shader::set_circle()
+    void standard_shape_shader::set_circle(i_rendering_context& aContext)
     {
         enable();
         uShape = shader_shape::Circle;
+        uShapeGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
+        uShapeEnabled = true;
+    }
+
+
+    void standard_shape_shader::set_arc(i_rendering_context& aContext)
+    {
+        enable();
+        uShape = shader_shape::Arc;
+        uShapeGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
         uShapeEnabled = true;
     }
 }

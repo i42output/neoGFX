@@ -590,11 +590,7 @@ namespace neogfx
                 draw_circles(opBatch);
                 break;
             case graphics_operation::operation_type::DrawArc:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    auto const& args = static_variant_cast<const graphics_operation::draw_arc&>(*op);
-                    draw_arc(args.center, args.radius, args.startAngle, args.endAngle, args.pen);
-                }
+                draw_arcs(opBatch);
                 break;
             case graphics_operation::operation_type::DrawCubicBezier:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -642,11 +638,7 @@ namespace neogfx
                 fill_circles(opBatch);
                 break;
             case graphics_operation::operation_type::FillArc:
-                for (auto op = opBatch.first; op != opBatch.second; ++op)
-                {
-                    auto const& args = static_variant_cast<const graphics_operation::fill_arc&>(*op);
-                    fill_arc(args.center, args.radius, args.startAngle, args.endAngle, args.fill);
-                }
+                fill_arcs(opBatch);
                 break;
             case graphics_operation::operation_type::FillPath:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
@@ -1082,7 +1074,7 @@ namespace neogfx
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
 
-        rendering_engine().default_shader_program().shape_shader().set_circle();
+        rendering_engine().default_shader_program().shape_shader().set_circle(*this);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.second - aDrawCircleOps.first)) };
@@ -1105,54 +1097,59 @@ namespace neogfx
                         vec4f{},
                         {},
                         function,
-                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.pen.width() }.as<float>()});
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.pen.width() }.as<float>(),
+                        vec4{ 0.0 }.as<float>() });
                 }
             }
         }
     }
 
-    void opengl_rendering_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen)
+    void opengl_rendering_context::draw_arcs(const graphics_operation::batch& aDrawArcOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_arc&>(*aDrawArcOps.first);
 
-        auto vertices = arc_vertices(aCenter, aRadius, aStartAngle, aEndAngle, aCenter, mesh_type::Outline);
+        if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
 
-        auto lines = line_loop_to_lines(vertices, false);
-        thread_local vec3_list quads;
-        quads.clear();
-        lines_to_quads(lines, aPen.width(), quads);
-        thread_local vec3_list triangles;
-        triangles.clear();
-        quads_to_triangles(quads, triangles);
+        rendering_engine().default_shader_program().shape_shader().set_arc(*this);
 
-        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.second - aDrawArcOps.first)) };
 
-        auto const function = to_function(aPen.color(), basic_rect<float>{ aCenter - size{ aRadius, aRadius }, size{ aRadius * 2.0, aRadius * 2.0 } });
+            for (auto op = aDrawArcOps.first; op != aDrawArcOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width());;
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-        for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
-                vec4f{{
-                    static_variant_cast<color>(aPen.color()).red<float>(),
-                    static_variant_cast<color>(aPen.color()).green<float>(),
-                    static_variant_cast<color>(aPen.color()).blue<float>(),
-                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{},
-                {},
-                function });
-
-        emit_any_stipple(*this, vertexArrays);
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ drawOp.endAngle, drawOp.pen.width(), 0.0 }.as<float>() });
+                }
+            }
+        }
     }
 
     void opengl_rendering_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        rendering_engine().default_shader_program().shape_shader().set_cubic_bezier();
+        rendering_engine().default_shader_program().shape_shader().set_cubic_bezier(*this);
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()), iOpacity);
@@ -1462,7 +1459,7 @@ namespace neogfx
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
 
-        rendering_engine().default_shader_program().shape_shader().set_circle();
+        rendering_engine().default_shader_program().shape_shader().set_circle(*this);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillCircleOps.second - aFillCircleOps.first)) };
@@ -1485,40 +1482,50 @@ namespace neogfx
                         vec4f{},
                         {},
                         function,
-                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>(),
-                        vec4f{ 1.0 } });
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, 0.0 }.as<float>(),
+                        vec4{ 1.0 }.as<float>() });
                 }
             }
         }
     }
 
-    void opengl_rendering_context::fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill)
+    void opengl_rendering_context::fill_arcs(const graphics_operation::batch& aFillArcOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        if (std::holds_alternative<gradient>(aFill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), iOpacity);
+        auto& firstOp = static_variant_cast<const graphics_operation::fill_arc&>(*aFillArcOps.first);
 
-        auto vertices = arc_vertices(aCenter, aRadius, aStartAngle, aEndAngle, aCenter, mesh_type::TriangleFan);
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_arc(*this);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLE_FAN, vertices.size() };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillArcOps.second - aFillArcOps.first)) };
 
-            auto const function = to_function(aFill, rect{ aCenter - point{ aRadius, aRadius }, size{ aRadius * 2.0 } });
-
-            for (auto const& v : vertices)
+            for (auto op = aFillArcOps.first; op != aFillArcOps.second; ++op)
             {
-                vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
-                    vec4f{{
-                        static_variant_cast<const color&>(aFill).red<float>(),
-                        static_variant_cast<const color&>(aFill).green<float>(),
-                        static_variant_cast<const color&>(aFill).blue<float>(),
-                        static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                    vec4f{},
-                    {},
-                    function });
+                auto& drawOp = static_variant_cast<const graphics_operation::fill_arc&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } };
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ drawOp.endAngle, 0.0, 1.0 }.as<float>() });
+                }
             }
         }
     }

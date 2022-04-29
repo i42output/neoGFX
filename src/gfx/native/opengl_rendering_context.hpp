@@ -311,7 +311,7 @@ namespace neogfx
         void draw_rect(const rect& aRect, const pen& aPen);
         void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen);
         void draw_circles(const graphics_operation::batch& aDrawCircleOps);
-        void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen);
+        void draw_arcs(const graphics_operation::batch& aDrawArcOps);
         void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen);
         void draw_path(const path& aPath, const pen& aPen);
         void draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen);
@@ -321,7 +321,7 @@ namespace neogfx
         void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill);
         void fill_checker_rects(const graphics_operation::batch& aFillCheckerRectOps);
         void fill_circles(const graphics_operation::batch& aFillCircleOps);
-        void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill);
+        void fill_arcs(const graphics_operation::batch& aFillArcOps);
         void fill_path(const path& aPath, const brush& aFill);
         void fill_shapes(const graphics_operation::batch& aFillShapeOps);
         void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);

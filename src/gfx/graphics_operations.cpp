@@ -125,7 +125,9 @@ namespace neogfx
             auto const leftOp = static_cast<operation_type>(aLeft.index());
             auto const rightOp = static_cast<operation_type>(aRight.index());
             if (leftOp != rightOp)
+            {
                 return false;
+            }
             switch (leftOp)
             {
             case operation_type::SetPixel:

@@ -130,7 +130,7 @@ namespace neogfx
         {
         private:
             static scalar constexpr CURSOR_RADIUS = 4.0;
-            static scalar constexpr CURSOR_THICKNESS = 1.0;
+            static scalar constexpr CURSOR_THICKNESS = 1.5;
         public:
             yz_picker(color_dialog& aOwner);
         public:
