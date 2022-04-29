@@ -150,6 +150,7 @@ namespace neogfx
         virtual void draw_rect(const rect& aRect, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const = 0;
+        virtual void draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const = 0;
         virtual void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const = 0;
         virtual void draw_path(const path& aPath, const pen& aPen, const brush& aFill = brush{}) const = 0;
@@ -160,6 +161,7 @@ namespace neogfx
         virtual void fill_rounded_rect(const rect& aRect, dimension aRadius, const brush& aFill) const = 0;
         virtual void fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2) const = 0;
         virtual void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const = 0;
+        virtual void fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
         virtual void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
         virtual void fill_path(const path& aPath, const brush& aFill) const = 0;
         virtual void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const = 0;

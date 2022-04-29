@@ -177,6 +177,15 @@ namespace neogfx
             angle startAngle;
         };
 
+        struct draw_pie
+        {
+            point center;
+            dimension radius;
+            angle startAngle;
+            angle endAngle;
+            pen pen;
+        };
+
         struct draw_arc
         {
             point center;
@@ -240,6 +249,15 @@ namespace neogfx
         {
             point center;
             dimension radius;
+            brush fill;
+        };
+
+        struct fill_pie
+        {
+            point center;
+            dimension radius;
+            angle startAngle;
+            angle endAngle;
             brush fill;
         };
 
@@ -312,6 +330,7 @@ namespace neogfx
             draw_rect,
             draw_rounded_rect,
             draw_circle,
+            draw_pie,
             draw_arc,
             draw_cubic_bezier,
             draw_path,
@@ -321,6 +340,7 @@ namespace neogfx
             fill_rounded_rect,
             fill_checker_rect,
             fill_circle,
+            fill_pie,
             fill_arc,
             fill_path,
             fill_shape,
@@ -359,6 +379,7 @@ namespace neogfx
             DrawRect,
             DrawRoundedRect,
             DrawCircle,
+            DrawPie,
             DrawArc,
             DrawCubicBezier,
             DrawPath,
@@ -368,6 +389,7 @@ namespace neogfx
             FillRoundedRect,
             FillCheckerRect,
             FillCircle,
+            FillPie,
             FillArc,
             FillPath,
             FillShape,

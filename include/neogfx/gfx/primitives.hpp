@@ -78,11 +78,12 @@ namespace neogfx
 
     enum class shader_shape
     {
-        None            = 0,
-        Line            = 1,
-        CubicBezier     = 2,
-        Circle          = 3,
-        Arc             = 4
+        None            = 0x00,
+        Line            = 0x01,
+        CubicBezier     = 0x02,
+        Circle          = 0x03,
+        Pie             = 0x04,
+        Arc             = 0x05
     };
 
     enum class blurring_algorithm

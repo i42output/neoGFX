@@ -400,6 +400,13 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aStartAngle });
     }
 
+    void graphics_context::draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
+    {
+        if (aFill != neolib::none)
+            fill_pie(aCenter, aRadius, aStartAngle, aEndAngle, aFill);
+        native_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
+    }
+
     void graphics_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)
@@ -479,6 +486,11 @@ namespace neogfx
     void graphics_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const
     {
         native_context().enqueue(graphics_operation::fill_circle{ to_device_units(aCenter) + iOrigin, aRadius, aFill });
+    }
+
+    void graphics_context::fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const
+    {
+        native_context().enqueue(graphics_operation::fill_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill });
     }
 
     void graphics_context::fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const

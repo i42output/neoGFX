@@ -589,6 +589,9 @@ namespace neogfx
             case graphics_operation::operation_type::DrawCircle:
                 draw_circles(opBatch);
                 break;
+            case graphics_operation::operation_type::DrawPie:
+                draw_pies(opBatch);
+                break;
             case graphics_operation::operation_type::DrawArc:
                 draw_arcs(opBatch);
                 break;
@@ -636,6 +639,9 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::FillCircle:
                 fill_circles(opBatch);
+                break;
+            case graphics_operation::operation_type::FillPie:
+                fill_pies(opBatch);
                 break;
             case graphics_operation::operation_type::FillArc:
                 fill_arcs(opBatch);
@@ -1074,7 +1080,7 @@ namespace neogfx
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
 
-        rendering_engine().default_shader_program().shape_shader().set_circle(*this);
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawCircleOps.second - aDrawCircleOps.first)) };
@@ -1104,6 +1110,47 @@ namespace neogfx
         }
     }
 
+    void opengl_rendering_context::draw_pies(const graphics_operation::batch& aDrawPieOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_pie&>(*aDrawPieOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawPieOps.second - aDrawPieOps.first)) };
+
+            for (auto op = aDrawPieOps.first; op != aDrawPieOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width());;
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.pen.color(), boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ drawOp.endAngle, drawOp.pen.width(), 0.0 }.as<float>() });
+                }
+            }
+        }
+    }
+
     void opengl_rendering_context::draw_arcs(const graphics_operation::batch& aDrawArcOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
@@ -1115,7 +1162,7 @@ namespace neogfx
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
 
-        rendering_engine().default_shader_program().shape_shader().set_arc(*this);
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawArcOps.second - aDrawArcOps.first)) };
@@ -1149,7 +1196,7 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
 
-        rendering_engine().default_shader_program().shape_shader().set_cubic_bezier(*this);
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::CubicBezier);
 
         if (std::holds_alternative<gradient>(aPen.color()))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()), iOpacity);
@@ -1459,7 +1506,7 @@ namespace neogfx
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
 
-        rendering_engine().default_shader_program().shape_shader().set_circle(*this);
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillCircleOps.second - aFillCircleOps.first)) };
@@ -1489,6 +1536,47 @@ namespace neogfx
         }
     }
 
+    void opengl_rendering_context::fill_pies(const graphics_operation::batch& aFillPieOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::fill_pie&>(*aFillPieOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillPieOps.second - aFillPieOps.first)) };
+
+            for (auto op = aFillPieOps.first; op != aFillPieOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::fill_pie&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } };
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ drawOp.endAngle, 0.0, 1.0 }.as<float>() });
+                }
+            }
+        }
+    }
+
     void opengl_rendering_context::fill_arcs(const graphics_operation::batch& aFillArcOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
@@ -1500,7 +1588,7 @@ namespace neogfx
         if (std::holds_alternative<gradient>(firstOp.fill))
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
 
-        rendering_engine().default_shader_program().shape_shader().set_arc(*this);
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillArcOps.second - aFillArcOps.first)) };

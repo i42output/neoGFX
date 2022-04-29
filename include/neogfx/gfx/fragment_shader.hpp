@@ -213,12 +213,9 @@ namespace neogfx
     public:
         bool shape_active() const override;
         void clear_shape() override;
-        void set_cubic_bezier(i_rendering_context& aContext) override;
-        void set_circle(i_rendering_context& aContext) override;
-        void set_arc(i_rendering_context& aContext) override;
+        void set_shape(shader_shape aShape) override;
     private:
         cache_uniform(uShapeEnabled)
         cache_uniform(uShape)
-        cache_uniform(uShapeGuiCoordinates)
     };
 }

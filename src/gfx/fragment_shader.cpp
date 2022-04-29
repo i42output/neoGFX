@@ -733,6 +733,16 @@ namespace neogfx
                 "    float m = length(p - c * clamp(dot(p,c),0.0,r));\n"
                 "    return max(l,m * sign(c.y * p.x - c.x * p.y));\n"
                 "}\n"
+                "void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
+                "{\n"
+                "    float a0 = PI * 0.5 + function2.x * 0.5;"
+                "    vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));\n"
+                "    float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);\n"
+                "    if (function2.z == 1.0)\n"
+                "        color = vec4(color.xyz, color.a * (1 - smoothstep(-0.5, 0.5, d0)));\n"
+                "    else\n"
+                "        color = vec4(color.xyz, color.a * (1 - smoothstep(function2.y / 2.0 - 0.5, function2.y / 2.0 + 0.5, abs(d0))));\n"
+                "}\n"
                 "float sdArc(in vec2 p, in vec2 c, in float r)\n"
                 "{\n"
                 "    p.x = abs(p.x);\n"
@@ -771,7 +781,10 @@ namespace neogfx
                 "        case 3:\n" // circle
                 "            draw_circle(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 4:\n" // arc
+                "        case 4:\n" // pie
+                "            draw_pie(color, function1, function2, function3);\n"
+                "            break;\n"
+                "        case 5:\n" // arc
                 "            draw_arc(color, function1, function2, function3);\n"
                 "            break;\n"
                 "        }\n"
@@ -795,28 +808,10 @@ namespace neogfx
         uShapeEnabled = false;
     }
 
-    void standard_shape_shader::set_cubic_bezier(i_rendering_context& aContext)
+    void standard_shape_shader::set_shape(shader_shape aShape)
     {
         enable();
-        uShape = shader_shape::CubicBezier;
-        uShapeGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
-        uShapeEnabled = true;
-    }
-    
-    void standard_shape_shader::set_circle(i_rendering_context& aContext)
-    {
-        enable();
-        uShape = shader_shape::Circle;
-        uShapeGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
-        uShapeEnabled = true;
-    }
-
-
-    void standard_shape_shader::set_arc(i_rendering_context& aContext)
-    {
-        enable();
-        uShape = shader_shape::Arc;
-        uShapeGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
+        uShape = aShape;
         uShapeEnabled = true;
     }
 }
