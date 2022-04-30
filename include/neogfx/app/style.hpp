@@ -43,6 +43,12 @@ namespace neogfx
         bool operator!=(const i_style& aOther) const;
     public:
         std::string const& name() const override;
+        const margin_list& all_margin() const override;
+        const neogfx::margin& margin(margin_role aMarginRole) const override;
+        void set_margin(margin_role aMarginRole, const neogfx::margin& aMargin) override;
+        const border_list& all_border() const override;
+        const neogfx::border& border(border_role aBorderRole) const override;
+        void set_border(border_role aBorderRole, const neogfx::border& aBorder) override;
         const padding_list& all_padding() const override;
         const neogfx::padding& padding(padding_role aPaddingRole) const override;
         void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) override;
@@ -61,6 +67,8 @@ namespace neogfx
         void handle_change(style_aspect aAspect);
     private:
         std::string iName;
+        margin_list iMargin;
+        border_list iBorder;
         padding_list iPadding;
         size iSpacing;
         neogfx::palette iPalette;

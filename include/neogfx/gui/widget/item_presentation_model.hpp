@@ -288,16 +288,16 @@ namespace neogfx
             }
         }
     public:
-        dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aIncludePadding = true) const override
+        dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aExtendIntoPadding = true) const override
         {
             if (rows() == 0 || columns() < aColumnIndex + 1u)
                 return 0.0;
             auto& cellWidths = column(aColumnIndex).cellWidths;
             if (!cellWidths.empty())
-                return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aIncludePadding ? cell_padding(aUnitsContext).size().cx : 0.0);
+                return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aExtendIntoPadding ? cell_padding(aUnitsContext).size().cx : 0.0);
             for (item_presentation_model_index::row_type row = 0u; row < rows(); ++row)
                 cell_extents(item_presentation_model_index{ row, aColumnIndex }, aUnitsContext);
-            return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aIncludePadding ? cell_padding(aUnitsContext).size().cx : 0.0);
+            return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aExtendIntoPadding ? cell_padding(aUnitsContext).size().cx : 0.0);
         }
         std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {

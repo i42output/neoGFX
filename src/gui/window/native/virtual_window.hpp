@@ -124,7 +124,7 @@ namespace neogfx
         void non_client_set_capture() override;
         void non_client_release_capture() override;
         void set_title_text(i_string const& aTitleText) override;
-        padding border_thickness() const override;
+        border border_thickness() const override;
     private:
         void debug_message(std::string const& aMessage);
     private:
@@ -143,7 +143,7 @@ namespace neogfx
         bool iCapturingMouse;
         bool iNonClientCapturing;
         bool iReady;
-        mutable padding iBorderThickness;
+        mutable border iBorderThickness;
         widget_part_e iClickedWidgetPart;
         bool iSystemMenuOpen;
         bool iDebug;

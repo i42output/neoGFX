@@ -113,6 +113,7 @@ namespace neogfx
         bool high_dpi() const override;
         dimension dpi_scale_factor() const override;
     public:
+        neogfx::margin margin() const override;
         neogfx::padding padding() const override;
     public:
         layout_direction direction() const override;

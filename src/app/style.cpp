@@ -27,6 +27,8 @@ namespace neogfx
 {
     style::style(std::string const& aName) :
         iName{ aName },
+        iMargin{},
+        iBorder{},
         iPadding{ 2.0, 2.0, 4.0, 4.0, 4.0, 4.0 },
         iSpacing{ 2.0, 2.0 }
     {
@@ -35,6 +37,8 @@ namespace neogfx
 
     style::style(std::string const& aName, const i_style& aOther) :
         iName{ aName },
+        iMargin{ aOther.all_margin() },
+        iBorder{ aOther.all_border() },
         iPadding{ aOther.all_padding() },
         iSpacing{ aOther.spacing() },
         iPalette{ aOther.palette() }
@@ -66,6 +70,8 @@ namespace neogfx
         if (*this != aOther)
         {
             iName = aOther.name();
+            iMargin = aOther.all_margin();
+            iBorder = aOther.all_border();
             iPadding = aOther.all_padding();
             iSpacing = aOther.spacing();
             iPalette = aOther.palette();
@@ -82,6 +88,8 @@ namespace neogfx
     bool style::operator==(const i_style& aOther) const
     {
         return iName == aOther.name() && 
+            iMargin == aOther.all_margin() &&
+            iBorder == aOther.all_border() && 
             iPadding == aOther.all_padding() &&
             iSpacing == aOther.spacing() &&
             iPalette == aOther.palette() &&
@@ -102,12 +110,50 @@ namespace neogfx
         return iName;
     }
 
+    const style::margin_list& style::all_margin() const
+    {
+        return iMargin;
+    }
+
+    const margin& style::margin(margin_role aMarginRole) const
+    {
+        return iMargin[static_cast<std::size_t>(aMarginRole)];
+    }
+
+    void style::set_margin(margin_role aMarginRole, const neogfx::margin& aMargin)
+    {
+        if (iMargin[static_cast<std::size_t>(aMarginRole)] != aMargin)
+        {
+            iMargin[static_cast<std::size_t>(aMarginRole)] = aMargin;
+            handle_change(style_aspect::Geometry);
+        }
+    }
+
+    const style::border_list& style::all_border() const
+    {
+        return iBorder;
+    }
+
+    const border& style::border(border_role aBorderRole) const
+    {
+        return iBorder[static_cast<std::size_t>(aBorderRole)];
+    }
+
+    void style::set_border(border_role aBorderRole, const neogfx::border& aBorder)
+    {
+        if (iBorder[static_cast<std::size_t>(aBorderRole)] != aBorder)
+        {
+            iBorder[static_cast<std::size_t>(aBorderRole)] = aBorder;
+            handle_change(style_aspect::Geometry);
+        }
+    }
+
     const style::padding_list& style::all_padding() const
     {
         return iPadding;
     }
 
-    const neogfx::padding& style::padding(padding_role aPaddingRole) const
+    const padding& style::padding(padding_role aPaddingRole) const
     {
         return iPadding[static_cast<std::size_t>(aPaddingRole)];
     }

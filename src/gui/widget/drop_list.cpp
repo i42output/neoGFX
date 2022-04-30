@@ -236,9 +236,9 @@ namespace neogfx
     size drop_list_popup::ideal_size() const
     {
         auto totalArea = iView.total_item_area(*this);
-        auto idealSize = size{ effective_frame_width() * 2.0 } + padding().size() + totalArea + iView.padding().size();
+        auto idealSize = internal_spacing().size() + totalArea + iView.internal_spacing().size();
         idealSize.cy = std::min(idealSize.cy, iDropList.root().as_widget().extents().cy / 2.0);
-        if (idealSize.cy - (effective_frame_width() * 2.0 + padding().size().cy) < totalArea.cy)
+        if (idealSize.cy - (effective_frame_width() * 2.0 + internal_spacing().size().cy) < totalArea.cy)
             idealSize.cx += vertical_scrollbar().width();
         return idealSize.max(iDropList.minimum_size());
     }
@@ -247,7 +247,7 @@ namespace neogfx
     {
         set_ready_to_render(false);
 
-        view().set_padding(iDropList.input_widget().as_widget().padding() - view().presentation_model().cell_padding(*this) - view().effective_frame_width());
+        view().set_padding(iDropList.input_widget().as_widget().internal_spacing() - view().presentation_model().cell_padding(*this) - view().effective_frame_width());
 
         // First stab at sizing ourselves...
         resize(minimum_size());
@@ -269,7 +269,7 @@ namespace neogfx
                 currentItemPos.x += (maybeCellImageSize->cx + view().presentation_model().cell_spacing(*this).cx);
         }
         point inputWidgetPos{ iDropList.non_client_rect().top_left() + iDropList.root().window_position() };
-        point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().padding().top_left() + iDropList.root().window_position() };
+        point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().internal_spacing().top_left() + iDropList.root().window_position() };
         point popupPos = -currentItemPos + textWidgetPos;
         
         // Popup goes below line edit if editable or on top of drop button if not...
@@ -1026,7 +1026,7 @@ namespace neogfx
         if (input_widget().text_widget().visible())
         {
             minimumSize.cx -= input_widget().text_widget().minimum_size().cx;
-            minimumSize.cx += input_widget().text_widget().padding().size().cx;
+            minimumSize.cx += input_widget().text_widget().internal_spacing().size().cx;
         }
         dimension modelWidth = 0.0;
         if (has_presentation_model() && (weight().cx == 0.0 || size_policy().horizontal_size_policy() == size_constraint::Minimum))

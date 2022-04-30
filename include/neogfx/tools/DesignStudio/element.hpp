@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
+#include <neogfx/gui/widget/progress_bar.hpp>
 #include <neogfx/tools/DesignStudio/symbol.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
@@ -254,6 +255,13 @@ namespace neogfx::DesignStudio
                     else
                     {
                         // todo: widget creation for the other widget types
+                    }
+                    if (std::is_same_v<Type, progress_bar>)
+                    {
+                        auto& progressBar = static_cast<progress_bar&>(iLayoutItem->as_widget());
+                        progressBar.set_value(0.5);
+                        progressBar.set_minimum(0.0);
+                        progressBar.set_maximum(1.0);
                     }
                     if (iLayoutItem->is_widget() && iLayoutItem->as_widget().is_root() && iLayoutItem->as_widget().root().is_nested())
                         service<i_surface_manager>().nest_for(aParent, nest_type::Caddy).add(iLayoutItem->as_widget().root().native_window());

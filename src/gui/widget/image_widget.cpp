@@ -79,7 +79,7 @@ namespace neogfx
     {
         if (has_minimum_size() || iTexture.is_empty() || size_policy() == size_constraint::DefaultMinimumExpanding)
             return widget::minimum_size(aAvailableSpace);
-        size result = units_converter{ *this }.from_device_units(iTexture.extents()) + padding().size();
+        size result = units_converter{ *this }.from_device_units(iTexture.extents()) + internal_spacing().size();
         if (iDpiAutoScale)
             result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         return to_units(*this, scoped_units::current_units(), result);

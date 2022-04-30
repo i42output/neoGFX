@@ -1012,12 +1012,12 @@ namespace neogfx
         return window_manager().mouse_position(*this);
     }
 
-    padding window::border() const
+    border window::window_border() const
     {
         // todo: for win32 desktop windows we need a transparent window behind for resizing
         auto const result = is_surface() ? 
             native_window().border_thickness() :
-            neogfx::padding{ 4.0, 4.0, 4.0, 4.0 };
+            neogfx::border{ 4.0, 4.0, 4.0, 4.0 };
         return result;
     }
 

@@ -131,7 +131,7 @@ namespace neogfx
             void non_client_set_capture() override;
             void non_client_release_capture() override;
             void set_title_text(i_string const& aTitleText) override;
-            padding border_thickness() const override;
+            border border_thickness() const override;
         protected:
             void set_destroying() override;
             void set_destroyed() override;
@@ -159,7 +159,7 @@ namespace neogfx
             bool iCapturingMouse = false;
             bool iNonClientCapturing = false;
             bool iReady = false;
-            mutable padding iBorderThickness;
+            mutable border iBorderThickness;
             widget_part_e iClickedWidgetPart = widget_part::Nowhere;
             bool iSystemMenuOpen = false;
         };

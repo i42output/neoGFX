@@ -1447,7 +1447,7 @@ namespace neogfx
             surface_window().native_window_closed();
         }
 
-        padding window::border_thickness() const
+        border window::border_thickness() const
         {
             if ((surface_window().style() & window_style::Resize) == window_style::Resize)
             {
@@ -1456,11 +1456,11 @@ namespace neogfx
                 ::AdjustWindowRectEx(&borderThickness, GetWindowLong(iHandle, GWL_STYLE) | WS_THICKFRAME & ~WS_CAPTION, FALSE, NULL);
                 borderThickness.left *= -1;
                 borderThickness.top *= -1;
-                iBorderThickness = basic_padding<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
+                iBorderThickness = basic_border<LONG>{ borderThickness.left, borderThickness.top, borderThickness.right, borderThickness.bottom };
                 iBorderThickness += service<i_app>().current_style().padding(padding_role::Window);
             }
             else
-                iBorderThickness = padding{ 1.0, 1.0, 1.0, 1.0 };
+                iBorderThickness = border{ 1.0, 1.0, 1.0, 1.0 };
             return iBorderThickness;
         }
 

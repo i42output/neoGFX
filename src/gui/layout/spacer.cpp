@@ -181,19 +181,34 @@ namespace neogfx
         return result;
     }
 
+    bool spacer::has_margin() const noexcept
+    {
+        return false;
+    }
+
+    margin spacer::margin() const
+    {
+        return neogfx::margin{};
+    }
+
+    bool spacer::has_border() const noexcept
+    {
+        return false;
+    }
+
+    border spacer::border() const
+    {
+        return neogfx::border{};
+    }
+
     bool spacer::has_padding() const noexcept
     {
         return false;
     }
 
-    neogfx::padding spacer::padding() const
+    padding spacer::padding() const
     {
         return neogfx::padding{};
-    }
-
-    void spacer::set_padding(optional_padding const&, bool)
-    {
-        /* do nothing */
     }
 
     bool spacer::device_metrics_available() const

@@ -394,9 +394,49 @@ namespace neogfx
             }
         }
     public:
+        bool has_margin() const noexcept override
+        {
+            return Margin != std::nullopt;
+        }
+        neogfx::margin margin() const override
+        {
+            return Margin != std::nullopt ? *Margin : neogfx::margin{};
+        }
+        void set_margin(optional_margin const& aMargin, bool aUpdateLayout = true) override
+        {
+            auto newMargin = (aMargin != std::nullopt ? units_converter(*this).to_device_units(*aMargin) : optional_margin{});
+            if (Margin != newMargin)
+            {
+                Margin = newMargin;
+                if (aUpdateLayout)
+                    update_layout();
+            }
+        }
+        bool has_border() const noexcept override
+        {
+            return Border != std::nullopt;
+        }
+        neogfx::border border() const override
+        {
+            return Border != std::nullopt ? *Border : neogfx::border{};
+        }
+        void set_border(optional_border const& aBorder, bool aUpdateLayout = true) override
+        {
+            auto newBorder = (aBorder != std::nullopt ? units_converter(*this).to_device_units(*aBorder) : optional_border{});
+            if (Border != newBorder)
+            {
+                Border = newBorder;
+                if (aUpdateLayout)
+                    update_layout();
+            }
+        }
         bool has_padding() const noexcept override
         {
             return Padding != std::nullopt;
+        }
+        neogfx::padding padding() const override
+        {
+            return Padding != std::nullopt ? *Padding : neogfx::padding{};
         }
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override
         {
@@ -527,6 +567,8 @@ namespace neogfx
         // todo: declare_property
         define_property(property_category::soft_geometry, point, Position, position)
         define_property(property_category::soft_geometry, size, Size, extents)
+        define_property(property_category::hard_geometry, optional_margin, Margin, margin)
+        define_property(property_category::hard_geometry, optional_border, Border, border)
         define_property(property_category::hard_geometry, optional_padding, Padding, padding)
         define_property(property_category::hard_geometry, optional_size_policy, SizePolicy, size_policy)
         define_property(property_category::hard_geometry, optional_size, Weight, weight)

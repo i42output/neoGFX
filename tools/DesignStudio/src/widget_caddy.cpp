@@ -109,11 +109,11 @@ namespace neogfx::DesignStudio
 
     size widget_caddy::minimum_size(optional_size const& aAvailableSpace) const
     {
-        size result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+        size result = item().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - internal_spacing().size() : aAvailableSpace);
         if (result.cx != 0.0)
-            result.cx += padding().size().cx;
+            result.cx += internal_spacing().size().cx;
         if (result.cy != 0.0)
-            result.cy += padding().size().cy;
+            result.cy += internal_spacing().size().cy;
         return result != size{} ? result : widget::minimum_size(aAvailableSpace);
     }
 
@@ -433,7 +433,7 @@ namespace neogfx::DesignStudio
             r.cy += adjust.y;
             break;
         }
-        auto const minSize = aIgnoreConstraints ? padding().size() : minimum_size();
+        auto const minSize = aIgnoreConstraints ? internal_spacing().size() : minimum_size();
         if (r.cx < minSize.cx)
         {
             r.cx = minSize.cx;
@@ -578,7 +578,7 @@ namespace neogfx::DesignStudio
 
     rect widget_caddy::resizer_part_rect(cardinal aPart, bool aForHitTest) const
     {
-        auto const pw = padding().left * 2.0;
+        auto const pw = internal_spacing().left * 2.0;
         auto const cr = client_rect(false).inflated(pw / 2.0);
         rect result;
         switch (aPart)

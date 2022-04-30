@@ -238,6 +238,12 @@ namespace neogfx
         virtual mat33 const& transformation(bool aCombineAncestorTransformations = false) const = 0;
         virtual void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) = 0;
     public:
+        virtual bool has_margin() const noexcept = 0;
+        virtual neogfx::margin margin() const = 0;
+        virtual void set_margin(optional_margin const& aMargin, bool aUpdateLayout = true) = 0;
+        virtual bool has_border() const noexcept = 0;
+        virtual neogfx::border border() const = 0;
+        virtual void set_border(optional_border const& aBorder, bool aUpdateLayout = true) = 0;
         virtual bool has_padding() const noexcept = 0;
         virtual neogfx::padding padding() const = 0;
         virtual void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) = 0;
@@ -307,6 +313,11 @@ namespace neogfx
             auto newSize = maximum_size();
             newSize.cy = aHeight;
             set_maximum_size(newSize, aUpdateLayout);
+        }
+    public:
+        box_areas internal_spacing(bool aExtendIntoPadding = true) const
+        {
+            return margin() + border() + (aExtendIntoPadding ? padding() : box_areas{});
         }
     };
 

@@ -105,6 +105,12 @@ namespace neogfx
         mat33 const& transformation(bool aCombineAncestorTransformations = false) const final;
         void set_transformation(optional_mat33 const& aTransformation, bool aUpdateLayout = true) final;
     public:
+        bool has_margin() const noexcept final;
+        neogfx::margin margin() const final;
+        void set_margin(optional_margin const& aMargin, bool aUpdateLayout = true) final;
+        bool has_border() const noexcept final;
+        neogfx::border border() const final;
+        void set_border(optional_border const& aBorder, bool aUpdateLayout = true) final;
         bool has_padding() const noexcept final;
         neogfx::padding padding() const final;
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) final;

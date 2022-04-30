@@ -310,7 +310,7 @@ namespace neogfx
                     enum { left = 1, top = 2, right = 4, bottom = 8 };
                     int hit = 0;
                     auto const nonClientRect = as_widget().to_client_coordinates(as_widget().non_client_rect());
-                    auto const nonClientBorder = as_widget().is_root() ? as_widget().root().border() : as_widget().padding();
+                    auto const nonClientBorder = as_widget().is_root() ? as_widget().root().window_border() : as_widget().internal_spacing();
                     if (aPosition.x < nonClientRect.left() + nonClientBorder.left)
                         hit |= left;
                     if (aPosition.x > nonClientRect.right() - nonClientBorder.right)

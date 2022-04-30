@@ -972,14 +972,10 @@ namespace neogfx
     }
 
     template <typename Interface>
-    rect widget<Interface>::client_rect(bool aIncludePadding) const
+    rect widget<Interface>::client_rect(bool aExtendIntoPadding) const
     {
         auto& self = as_widget();
-
-        if (!aIncludePadding)
-            return rect{ padding().top_left(), self.extents() - padding().size() };
-        else
-            return rect{ point{}, self.extents() };
+        return rect{ self.internal_spacing(!aExtendIntoPadding).top_left(), self.extents() - self.internal_spacing(!aExtendIntoPadding).size() };
     }
 
     template <typename Interface>
@@ -1066,14 +1062,15 @@ namespace neogfx
             result = base_type::minimum_size(aAvailableSpace);
         else if (has_layout())
         {
-            result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+            auto const is = self.internal_spacing();
+            result = layout().minimum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - is.size() : aAvailableSpace);
             if (result.cx != 0.0)
-                result.cx += padding().size().cx;
+                result.cx += is.size().cx;
             if (result.cy != 0.0)
-                result.cy += padding().size().cy;
+                result.cy += is.size().cy;
         }
         else
-            result = padding().size();
+            result = self.internal_spacing().size();
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
@@ -1097,11 +1094,12 @@ namespace neogfx
             result = minimum_size(aAvailableSpace);
         else if (has_layout())
         {
-            result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - padding().size() : aAvailableSpace);
+            auto const is = self.internal_spacing();
+            result = layout().maximum_size(aAvailableSpace != std::nullopt ? *aAvailableSpace - is.size() : aAvailableSpace);
             if (result.cx != 0.0)
-                result.cx += padding().size().cx;
+                result.cx += is.size().cx;
             if (result.cy != 0.0)
-                result.cy += padding().size().cy;
+                result.cy += is.size().cy;
         }
         else
             result = size::max_size();
@@ -2050,7 +2048,7 @@ namespace neogfx
         if (self_type::is_root() && (self_type::root().style() & window_style::Resize) == window_style::Resize)
         {
             auto const outerRect = to_client_coordinates(non_client_rect());
-            auto const innerRect = outerRect.deflated(self_type::root().border());
+            auto const innerRect = outerRect.deflated(self_type::root().window_border());
             if (outerRect.contains(clientPosition) && !innerRect.contains(clientPosition))
                 result = this;
         }
@@ -2071,7 +2069,7 @@ namespace neogfx
                     break;
                 if (location != neogfx::mouse_event_location::NonClient &&
                     w->ignore_mouse_events() && !w->ignore_non_client_mouse_events(false) &&
-                    w->non_client_rect().deflated(w->padding()).contains(aPosition) &&
+                    w->non_client_rect().deflated(w->internal_spacing()).contains(aPosition) &&
                     !w->client_rect(false).contains(widgetClientPosition))
                     break;
             }

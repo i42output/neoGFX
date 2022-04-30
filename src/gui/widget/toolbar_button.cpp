@@ -98,7 +98,7 @@ namespace neogfx
     {
         auto result = push_button::minimum_size(aAvailableSpace);
         if (!has_minimum_size() && action().is_separator())
-            result = padding().size() + units_converter(*this).from_device_units(size{ 2.0 });
+            result = internal_spacing().size() + units_converter(*this).from_device_units(size{ 2.0 });
         return result;
     }
 
@@ -107,7 +107,7 @@ namespace neogfx
         auto result = push_button::maximum_size(aAvailableSpace);
         // todo: vertical toolbars
         if (!has_maximum_size() && action().is_separator())
-            result = { padding().size().cx + units_converter(*this).from_device_units(2.0), size::max_size().cy };
+            result = { internal_spacing().size().cx + units_converter(*this).from_device_units(2.0), size::max_size().cy };
         return result;
     }
 

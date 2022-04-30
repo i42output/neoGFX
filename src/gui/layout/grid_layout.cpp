@@ -233,7 +233,7 @@ namespace neogfx
             return size{};
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
-            *availableSpaceForChildren -= padding().size();
+            *availableSpaceForChildren -= internal_spacing().size();
         size result;
         uint32_t visibleColumns = visible_columns();
         uint32_t visibleRows = visible_rows();
@@ -249,8 +249,8 @@ namespace neogfx
                 continue;
             result.cx += column_minimum_size(column, availableSpaceForChildren);
         }
-        result.cx += padding().size().cx;
-        result.cy += padding().size().cy;
+        result.cx += internal_spacing().size().cx;
+        result.cy += internal_spacing().size().cy;
         if (result.cx != size::max_dimension() && visibleColumns> 0)
             result.cx += (spacing().cx * (visibleColumns - 1));
         if (result.cy != size::max_dimension() && visibleRows > 0)
@@ -266,7 +266,7 @@ namespace neogfx
             return size{};
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
-            *availableSpaceForChildren -= padding().size();
+            *availableSpaceForChildren -= internal_spacing().size();
         size result;
         for (cell_coordinate row = 0; row < visible_rows(); ++row)
         {
@@ -285,9 +285,9 @@ namespace neogfx
                 result.cx += columnMaxSize;
         }
         if (result.cx != size::max_dimension())
-            result.cx += padding().size().cx;
+            result.cx += internal_spacing().size().cx;
         if (result.cy != size::max_dimension())
-            result.cy += padding().size().cy;
+            result.cy += internal_spacing().size().cy;
         if (result.cx != size::max_dimension() && visible_columns() > 0)
             result.cx += (spacing().cx * (visible_columns() - 1));
         if (result.cy != size::max_dimension() && visible_rows() > 0)
@@ -347,10 +347,10 @@ namespace neogfx
         for (auto& r : iRows)
             while (r->count() < iDimensions.cx)
                 r->add_spacer();
-        point availablePos = aPosition + padding().top_left();
+        point availablePos = aPosition + internal_spacing().top_left();
         size availableSize = aSize;
-        availableSize.cx -= padding().size().cx;
-        availableSize.cy -= padding().size().cy;
+        availableSize.cx -= internal_spacing().size().cx;
+        availableSize.cy -= internal_spacing().size().cy;
         iRowLayout.layout_items(availablePos, availableSize);
 
         struct stack_entry

@@ -42,7 +42,7 @@ namespace neogfx
     {
         if (widget::has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + padding().size();
+        return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + internal_spacing().size();
     }
 
     void status_bar::separator::paint(i_graphics_context& aGc) const

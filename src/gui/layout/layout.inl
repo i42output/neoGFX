@@ -157,7 +157,7 @@ namespace neogfx
         {
             auto availableSpaceForChildren = aAvailableSpace;
             if (availableSpaceForChildren != std::nullopt)
-                *availableSpaceForChildren -= padding().size();
+                *availableSpaceForChildren -= internal_spacing().size();
             uint32_t itemsZeroSized = 0;
             for (auto const& item : items())
             {
@@ -172,8 +172,8 @@ namespace neogfx
                 AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(itemMinSize));
                 AxisPolicy::cx(result) += AxisPolicy::cx(itemMinSize);
             }
-            AxisPolicy::cx(result) += AxisPolicy::cx(padding());
-            AxisPolicy::cy(result) += AxisPolicy::cy(padding());
+            AxisPolicy::cx(result) += AxisPolicy::cx(internal_spacing());
+            AxisPolicy::cy(result) += AxisPolicy::cy(internal_spacing());
             if (itemsVisible - itemsZeroSized > 0)
                 AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
             AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
@@ -209,7 +209,7 @@ namespace neogfx
         {
             auto availableSpaceForChildren = aAvailableSpace;
             if (availableSpaceForChildren != std::nullopt)
-                *availableSpaceForChildren -= padding().size();
+                *availableSpaceForChildren -= internal_spacing().size();
             uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
             uint32_t itemsZeroSized = 0;
             for (auto const& item : items())
@@ -230,14 +230,14 @@ namespace neogfx
             }
             if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(result) != 0.0)
             {
-                AxisPolicy::cx(result) += AxisPolicy::cx(padding());
+                AxisPolicy::cx(result) += AxisPolicy::cx(internal_spacing());
                 if (itemsVisible - itemsZeroSized > 0)
                     AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
                 AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
             }
             if (AxisPolicy::cy(result) != size::max_dimension() && AxisPolicy::cy(result) != 0.0)
             {
-                AxisPolicy::cy(result) += AxisPolicy::cy(padding());
+                AxisPolicy::cy(result) += AxisPolicy::cy(internal_spacing());
                 AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
             }
             if (AxisPolicy::cx(result) == 0.0 &&
@@ -269,8 +269,8 @@ namespace neogfx
         if (itemsVisible == 0u)
             return;
         size availableSpace = aSize;
-        availableSpace.cx -= padding().size().cx;
-        availableSpace.cy -= padding().size().cy;
+        availableSpace.cx -= internal_spacing().size().cx;
+        availableSpace.cy -= internal_spacing().size().cy;
         auto const itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), availableSpace);
         if (itemsZeroSized >= itemsVisible)
             return;
@@ -368,7 +368,7 @@ namespace neogfx
             bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
         neolib::bresenham_counter<int32_t> bits(bitsLeft, itemsUsingLeftover);
         uint32_t previousBit = 0;
-        point nextPos = aPosition + padding().top_left();
+        point nextPos = aPosition + internal_spacing().top_left();
         bool addSpace = false;
         for (auto& item : *this)
         {
@@ -430,8 +430,8 @@ namespace neogfx
                 addSpace = true;
         }
         point lastPos = aPosition + aSize;
-        lastPos.x -= padding().right;
-        lastPos.y -= padding().bottom;
+        lastPos.x -= internal_spacing().right;
+        lastPos.y -= internal_spacing().bottom;
         if (AxisPolicy::x(nextPos) < AxisPolicy::x(lastPos))
         {
             size adjust;

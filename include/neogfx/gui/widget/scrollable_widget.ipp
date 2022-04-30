@@ -80,9 +80,9 @@ namespace neogfx
     }
 
     template <typename Base>
-    rect scrollable_widget<Base>::client_rect(bool aIncludePadding) const
+    rect scrollable_widget<Base>::client_rect(bool aExtendIntoPadding) const
     {
-        rect result = base_type::client_rect(aIncludePadding);
+        rect result = base_type::client_rect(aExtendIntoPadding);
         if (vertical_scrollbar().visible())
         {
             if (vertical_scrollbar().style() == scrollbar_style::Normal)
@@ -646,9 +646,9 @@ namespace neogfx
                 {
                     auto const& ourLayout = as_widget().layout();
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                        max.x += ourLayout.padding().right;
+                        max.x += ourLayout.internal_spacing().right;
                     if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                        max.y += ourLayout.padding().bottom;
+                        max.y += ourLayout.internal_spacing().bottom;
                 }
                 auto const& cr = as_widget().client_rect();
                 if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)

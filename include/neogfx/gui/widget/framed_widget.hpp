@@ -121,35 +121,9 @@ namespace neogfx
     public:
         using base_type::as_widget;
     public:
-        rect client_rect(bool aIncludePadding = true) const override
+        neogfx::border border() const override
         {
-            rect cr = base_type::client_rect(aIncludePadding);
-            auto const effectiveFrameWidth = effective_frame_width();
-            cr.x += effectiveFrameWidth;
-            cr.y += effectiveFrameWidth;
-            cr.cx -= effectiveFrameWidth * 2.0;
-            cr.cy -= effectiveFrameWidth * 2.0;
-            return cr;
-        }
-    public:
-        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override
-        {
-            size result = base_type::minimum_size(aAvailableSpace);
-            if (!base_type::has_minimum_size())
-                result += size{ effective_frame_width() * 2.0 };
-            return result;
-        }
-        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override
-        {
-            size result = base_type::maximum_size(aAvailableSpace);
-            if (!base_type::has_maximum_size())
-            {
-                if (result.cx != size::max_dimension())
-                    result.cx += effective_frame_width() * 2.0;
-                if (result.cy != size::max_dimension())
-                    result.cy += effective_frame_width() * 2.0;
-            }
-            return result;
+            return neogfx::border{ effective_frame_width(), effective_frame_width(), effective_frame_width(), effective_frame_width() };
         }
     public:
         void paint_non_client(i_graphics_context& aGc) const override

@@ -266,7 +266,7 @@ namespace neogfx
 
     void message_box::init()
     {
-        iLayout1.set_padding(neogfx::padding{ 16.0_dip, 16.0_dip } - client_layout().padding());
+        iLayout1.set_padding(neogfx::padding{ 16.0_dip, 16.0_dip } - client_layout().internal_spacing());
         iLayout1.set_spacing(size{ 16.0_dip, 16.0_dip });
         iLayout2.set_padding(neogfx::padding{});
         iLayout3.set_alignment(neogfx::alignment::Left);

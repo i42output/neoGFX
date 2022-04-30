@@ -36,7 +36,7 @@ namespace neogfx
         Style       = Geometry | Font | Color
     };
 
-    enum class padding_role : uint32_t
+    enum class box_role : uint32_t
     {
         Layout  = 0x0000,
         Widget  = 0x0001,
@@ -47,6 +47,10 @@ namespace neogfx
 
         COUNT
     };
+
+    using margin_role = box_role;
+    using border_role = box_role;
+    using padding_role = box_role;
 
     inline constexpr style_aspect operator|(style_aspect aLhs, style_aspect aRhs)
     {
@@ -76,11 +80,19 @@ namespace neogfx
     public:
         declare_event(changed, style_aspect)
     public:
+        typedef std::array<neogfx::margin, static_cast<std::size_t>(margin_role::COUNT)> margin_list;
+        typedef std::array<neogfx::border, static_cast<std::size_t>(border_role::COUNT)> border_list;
         typedef std::array<neogfx::padding, static_cast<std::size_t>(padding_role::COUNT)> padding_list;
     public:
         virtual ~i_style() = default;
     public:
         virtual std::string const& name() const = 0;
+        virtual const margin_list& all_margin() const = 0;
+        virtual const neogfx::margin& margin(margin_role aMarginRole) const = 0;
+        virtual void set_margin(margin_role aMarginRole, const neogfx::margin& aMargin) = 0;
+        virtual const border_list& all_border() const = 0;
+        virtual const neogfx::border& border(border_role aBorderRole) const = 0;
+        virtual void set_border(border_role aBorderRole, const neogfx::border& aBorder) = 0;
         virtual const padding_list& all_padding() const = 0;
         virtual const neogfx::padding& padding(padding_role aPaddingRole) const = 0;
         virtual void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) = 0;

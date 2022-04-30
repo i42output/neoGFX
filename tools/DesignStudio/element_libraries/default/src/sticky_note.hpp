@@ -171,7 +171,7 @@ namespace neogfx::DesignStudio
             base_type::layout_items(aDefer);
             if (iDefaultItem != nullptr)
             {
-                auto const placementRect = (image().is_empty() ? client_rect(false) : placement_rect().deflate(padding()));
+                auto const placementRect = (image().is_empty() ? client_rect(false) : placement_rect().deflate(internal_spacing()));
                 iDefaultItem->move(placementRect.top_left());
                 iDefaultItem->resize(placementRect.extents());
             }
@@ -187,7 +187,7 @@ namespace neogfx::DesignStudio
         {
             base_type::paint(aGc);
             auto placementRect = image().is_empty() ? client_rect() : placement_rect();
-            placementRect.cy = padding().top - padding().left;
+            placementRect.cy = internal_spacing().top - internal_spacing().left;
             if (image().is_empty())
                 aGc.fill_rect(placementRect, background_color().to_hsl().shade(0.05).to_rgb<color>());
             else

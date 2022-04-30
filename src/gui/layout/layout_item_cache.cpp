@@ -572,6 +572,36 @@ namespace neogfx
         iCombinedTransformation.second = subject().transformation(true);
     }
 
+    bool layout_item_cache::has_margin() const noexcept
+    {
+        return subject().has_margin();
+    }
+
+    margin layout_item_cache::margin() const
+    {
+        return subject().margin();
+    }
+
+    void layout_item_cache::set_margin(optional_margin const& aMargin, bool aUpdateLayout)
+    {
+        subject().set_margin(aMargin, aUpdateLayout);
+    }
+
+    bool layout_item_cache::has_border() const noexcept
+    {
+        return subject().has_border();
+    }
+
+    padding layout_item_cache::border() const
+    {
+        return subject().border();
+    }
+
+    void layout_item_cache::set_border(optional_border const& aBorder, bool aUpdateLayout)
+    {
+        subject().set_border(aBorder, aUpdateLayout);
+    }
+
     bool layout_item_cache::has_padding() const noexcept
     {
         return subject().has_padding();

@@ -68,9 +68,12 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
-        neogfx::padding padding() const override;
+        bool has_margin() const noexcept override;
+        neogfx::margin margin() const override;
+        bool has_border() const noexcept override;
+        neogfx::border border() const override;
         bool has_padding() const noexcept override;
-        void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override;
+		neogfx::padding padding() const override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;

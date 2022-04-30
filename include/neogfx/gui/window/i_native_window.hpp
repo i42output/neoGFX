@@ -87,6 +87,6 @@ namespace neogfx
         virtual double rendering_priority() const = 0;
         virtual i_string const& title_text() const = 0;
         virtual void set_title_text(i_string const& aTitleText) = 0;
-        virtual padding border_thickness() const = 0;
+        virtual border border_thickness() const = 0;
     };
 }

@@ -1165,7 +1165,7 @@ int main(int argc, char* argv[])
             aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::color::Blue4, 2.0 });
-            aGc.draw_rounded_rect(ng::rect{ ng::point{ 150, 150 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::color::Red4, 2.0 });
+            aGc.draw_rounded_rect(ng::rect{ ng::point{ 125, 125 }, ng::size{ 300, 300 } }, 10.0, ng::pen{ ng::color::Red4, 2.0 });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Radial));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::color::Black, 1.0 });
             for (int x = 0; x < 3; ++x)

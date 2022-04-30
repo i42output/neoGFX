@@ -147,7 +147,7 @@ namespace neogfx
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual void set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem) = 0;
         virtual rect non_client_rect() const = 0;
-        virtual rect client_rect(bool aIncludePadding = true) const = 0;
+        virtual rect client_rect(bool aExtendIntoPadding = true) const = 0;
         virtual void move(const point& aPosition) = 0;
         virtual void moved() = 0;
         virtual void parent_moved() = 0;

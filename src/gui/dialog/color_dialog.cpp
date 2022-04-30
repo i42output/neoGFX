@@ -955,7 +955,7 @@ namespace neogfx
         iLayout2.set_spacing(standardSpacing);
         iRightLayout.set_spacing(standardSpacing);
         iRightTopLayout.set_spacing(standardSpacing * 2.0);
-        auto adjustedPadding = iRightTopLayout.padding();
+        auto adjustedPadding = iRightTopLayout.internal_spacing();
         adjustedPadding.right = std::max(adjustedPadding.right, iXPicker.cursor_width());
         iRightTopLayout.set_padding(adjustedPadding);
         iRightBottomLayout.set_spacing(standardSpacing / 2.0);

@@ -1399,12 +1399,12 @@ namespace neogfx
         return static_cast<const glyph_column*>(&aColumn) - static_cast<const glyph_column*>(&column(0));
     }
 
-    rect text_edit::column_rect(std::size_t aColumnIndex, bool aIncludePadding) const
+    rect text_edit::column_rect(std::size_t aColumnIndex, bool aExtendIntoPadding) const
     {
         auto result = client_rect(false);
         for (std::size_t ci = 0; ci < aColumnIndex; ++ci)
             result.x += static_cast<const glyph_column&>(column(ci)).width();
-        if (!aIncludePadding)
+        if (!aExtendIntoPadding)
             result.deflate(column(aColumnIndex).padding());
         return result;
     }

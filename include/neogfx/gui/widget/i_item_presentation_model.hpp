@@ -270,7 +270,7 @@ namespace neogfx
     public:
         virtual void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) = 0;
     public:
-        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aIncludePadding = true) const = 0;
+        virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aExtendIntoPadding = true) const = 0;
         virtual std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext) const = 0;
         virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) = 0;

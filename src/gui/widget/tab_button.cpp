@@ -63,7 +63,7 @@ namespace neogfx
             if (has_minimum_size())
                 return result;
             double const radius = std::sqrt(std::pow(image().extents().cx / 2.0, 2.0) * 2.0) + 2.0;
-            result = result.max(size{ std::ceil(radius * 2.0) }) + padding().size();
+            result = result.max(size{ std::ceil(radius * 2.0) }) + internal_spacing().size();
             return result;
         }
         size maximum_size(optional_size const& aAvailableSpace) const

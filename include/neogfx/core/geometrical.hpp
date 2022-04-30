@@ -1231,13 +1231,17 @@ namespace neogfx
     typedef basic_rect<uint32_t> rect_u32;
 
     template <typename DimensionType>
-    using basic_padding = basic_box_areas<DimensionType>;
-
-    template <typename DimensionType>
     using basic_margin = basic_box_areas<DimensionType>;
 
-    typedef basic_padding<dimension> padding;
+    template <typename DimensionType>
+    using basic_border = basic_box_areas<DimensionType>;
+
+    template <typename DimensionType>
+    using basic_padding = basic_box_areas<DimensionType>;
+
     typedef basic_margin<dimension> margin;
+    typedef basic_border<dimension> border;
+    typedef basic_padding<dimension> padding;
 
     typedef optional<dimension> optional_dimension;
     typedef optional<angle> optional_angle;
@@ -1249,8 +1253,9 @@ namespace neogfx
     typedef optional<point_u32> optional_point_u32;
     typedef optional<size_u32> optional_size_u32;
     typedef optional<rect_u32> optional_rect_u32;
-    typedef optional<padding> optional_padding;
     typedef optional<margin> optional_margin;
+    typedef optional<border> optional_border;
+    typedef optional<padding> optional_padding;
     typedef optional<vector1> optional_vector1;
     typedef optional<vector2> optional_vector2;
     typedef optional<vector3> optional_vector3;

@@ -669,7 +669,7 @@ namespace neogfx
         void set_cursor_position(const point& aPosition, bool aMoveAnchor = true, bool aEnableDragger = false);
     protected:
         std::size_t column_index(const column_info& aColumn) const;
-        rect column_rect(std::size_t aColumnIndex, bool aIncludePadding = false) const;
+        rect column_rect(std::size_t aColumnIndex, bool aExtendIntoPadding = false) const;
         std::size_t column_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
     private:
         struct position_info
