@@ -67,7 +67,7 @@ namespace neogfx
         case skin_element::RadioButton:
             return (aDesiredSize == std::nullopt ? size{ 3.5_mm, 3.5_mm } : size{ 3.5_mm, 3.5_mm }.max(*aDesiredSize)).ceil();
         case skin_element::ProgressBar:
-            return (aDesiredSize == std::nullopt ? size{ 50.0_mm, 5.0_mm } : size{ 50.0_mm, 5.0_mm }.max(*aDesiredSize)).ceil();
+            return (aDesiredSize == std::nullopt ? size{ 20.0_mm, 3.5_mm } : size{ 20.0_mm, 3.5_mm }.max(*aDesiredSize)).ceil();
         default:
             return {};
         }
