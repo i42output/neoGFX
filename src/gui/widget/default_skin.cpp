@@ -260,9 +260,12 @@ namespace neogfx
 
     void default_skin::draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const
     {
-        auto const& cr = aItem.as_widget().client_rect();
+        auto const& cr = aProgressBar.bar_rect();
         auto const color1 = aItem.as_widget().background_color().shaded(0x0B);
         aGc.draw_rounded_rect(cr, 5.0_dip, pen{ color1.shaded(0x10), 2.0_dip }, color1);
+        auto const br = cr.deflated(delta{ 2.0_dip }).with_cx(cr.deflated(delta{ 2.0_dip }).cx * ((aProgressBar.value() - aProgressBar.minimum()) / (aProgressBar.maximum() - aProgressBar.minimum())));
+        scoped_filter<blur_filter> filter{ aGc, blur_filter{ br, 4.0 } };
+        filter.front_buffer().fill_rounded_rect(br, 5.0_dip, color::LightGreen);
     }
 
     void default_skin::draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const

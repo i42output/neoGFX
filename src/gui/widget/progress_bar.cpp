@@ -18,46 +18,61 @@
 */
 
 #include <boost/algorithm/string.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/progress_bar.hpp>
 
 namespace neogfx
-{   
-	progress_bar::progress_bar(progress_bar_style aStyle) : 
-		iStyle{ aStyle },
-		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
+{
+	progress_bar::bar::bar(progress_bar& aOwner) :
+		widget<>{ aOwner.iLayout },
+		iOwner{ aOwner }
 	{
 	}
 
-	progress_bar::progress_bar(i_widget& aParent, progress_bar_style aStyle) :
-		iStyle{ aStyle },
-		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
-	{
-	}
-
-	progress_bar::progress_bar(i_layout& aLayout, progress_bar_style aStyle) :
-		iStyle{ aStyle },
-		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
-	{
-	}
-
-	size progress_bar::minimum_size(optional_size const& aAvailableSpace) const
+	size progress_bar::bar::minimum_size(optional_size const& aAvailableSpace) const
 	{
 		if (has_minimum_size())
 			return widget::minimum_size(aAvailableSpace);
 		return service<i_skin_manager>().active_skin().preferred_size(skin_element::ProgressBar);
 	}
 
-	size progress_bar::maximum_size(optional_size const& aAvailableSpace) const
+	void progress_bar::bar::paint(i_graphics_context& aGc) const
 	{
-		if (has_maximum_size())
-			return widget::maximum_size(aAvailableSpace);
-		return minimum_size(aAvailableSpace);
+		service<i_skin_manager>().active_skin().draw_progress_bar(aGc, iOwner, iOwner);
 	}
 
-	void progress_bar::paint(i_graphics_context& aGc) const
+	progress_bar::progress_bar(progress_bar_style aStyle) :
+		widget<>{},
+		iStyle{ aStyle },
+		iLayout{ *this },
+		iBar{ *this },
+		iLabel{ iLayout },
+		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
 	{
-		service<i_skin_manager>().active_skin().draw_progress_bar(aGc, *this, *this);
+		init();
+	}
+
+	progress_bar::progress_bar(i_widget& aParent, progress_bar_style aStyle) :
+		widget<>{ aParent },
+		iStyle{ aStyle },
+		iLayout{ *this },
+		iBar{ *this },
+		iLabel{ iLayout },
+		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
+	{
+		init();
+	}
+
+	progress_bar::progress_bar(i_layout& aLayout, progress_bar_style aStyle) :
+		widget<>{ aLayout },
+		iStyle{ aStyle },
+		iLayout{ *this },
+		iBar{ *this },
+		iLabel{ iLayout },
+		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
+	{
+		init();
 	}
 
 	progress_bar_style progress_bar::style() const
@@ -124,13 +139,26 @@ namespace neogfx
 		}
 	}
 
+	rect progress_bar::bar_rect() const
+	{
+		return iBar.client_rect(false);
+	}
+		
 	i_string const& progress_bar::value_as_text() const
 	{
 		return iValueAsText;
-	}
+	} 
 
 	void progress_bar::init()
 	{
+		placement_changed();
+	}
+
+	void progress_bar::placement_changed()
+	{
+		iLayout.remove_all();
+		iLayout.add_item_at_position(0u, 0u, iBar);
+		iLayout.add_item_at_position(0u, 1u, iLabel);
 	}
 
 	void progress_bar::changed()
@@ -139,7 +167,10 @@ namespace neogfx
 		boost::replace_all(updatedText, "%pct%", boost::lexical_cast<std::string>(value() / (maximum() - minimum()) * 100.0));
 		boost::replace_all(updatedText, "%%", "%");
 		iValueAsText = updatedText;
+
 		update();
+
+		iLabel.set_text(value_as_text());
 	}
 
 	void progress_bar::animate()

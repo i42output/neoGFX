@@ -21,6 +21,9 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/layout/grid_layout.hpp>
+#include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/i_progress_bar.hpp>
 
 namespace neogfx
@@ -28,15 +31,21 @@ namespace neogfx
     class progress_bar : public widget<>, public i_progress_bar
     {
     public:
+        class bar : public widget<>
+        {
+        public:
+            bar(progress_bar& aOwner);
+        public:
+            size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        public:
+            void paint(i_graphics_context& aGc) const override;
+        private:
+            progress_bar& iOwner;
+        };
+    public:
         progress_bar(progress_bar_style aStyle = progress_bar_style::Default);
         progress_bar(i_widget& aParent, progress_bar_style aStyle = progress_bar_style::Default);
         progress_bar(i_layout& aLayout, progress_bar_style aStyle = progress_bar_style::Default);
-        // button
-    public:
-        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
-        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
-    public:
-        void paint(i_graphics_context& aGc) const override;
     public:
         progress_bar_style style() const override;
         void set_style(progress_bar_style aStyle) override;
@@ -50,13 +59,18 @@ namespace neogfx
         scalar maximum() const override;
         void set_maximum(scalar aMaximum) override;
     public:
+        rect bar_rect() const override;
         i_string const& value_as_text() const override;
     private:
         void init();
+        void placement_changed();
         void changed();
         void animate();
     private:
         progress_bar_style iStyle;
+        grid_layout iLayout;
+        bar iBar;
+        label iLabel;
         string iText = "%pct%%%";
         scalar iValue = 0.0;
         scalar iMinimum = 0.0;

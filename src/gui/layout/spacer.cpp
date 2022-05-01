@@ -238,22 +238,22 @@ namespace neogfx
     }
 
     horizontal_spacer::horizontal_spacer() :
-        spacer(neogfx::expansion_policy::ExpandHorizontally)
+        spacer{ neogfx::expansion_policy::ExpandHorizontally }
     {
     }
 
     horizontal_spacer::horizontal_spacer(i_layout& aParent) :
-        spacer(aParent, neogfx::expansion_policy::ExpandHorizontally)
+        spacer{ aParent, neogfx::expansion_policy::ExpandHorizontally }
     {
     }
 
     vertical_spacer::vertical_spacer() :
-        spacer(neogfx::expansion_policy::ExpandVertically)
+        spacer{ neogfx::expansion_policy::ExpandVertically }
     {
     }
 
     vertical_spacer::vertical_spacer(i_layout& aParent) :
-        spacer(aParent, neogfx::expansion_policy::ExpandVertically)
+        spacer{ aParent, neogfx::expansion_policy::ExpandVertically }
     {
     }
 }

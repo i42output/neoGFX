@@ -182,7 +182,7 @@ namespace neogfx
         throw item_not_found();
     }
 
-    i_layout_item& grid_layout::item_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+    i_layout_item const& grid_layout::item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const
     {
         auto itemIter = iCells.find(cell_coordinates{ aColumn, aRow });
         if (itemIter == iCells.end())
@@ -190,7 +190,12 @@ namespace neogfx
         return *(*itemIter).second;
     }
 
-    i_widget& grid_layout::widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+    i_layout_item& grid_layout::item_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+    {
+        return const_cast<i_layout_item&>(const_cast<grid_layout const&>(*this).item_at_position(aRow, aColumn));
+    }
+
+    i_widget const& grid_layout::widget_at_position(cell_coordinate aRow, cell_coordinate aColumn) const
     {
         auto& item = item_at_position(aRow, aColumn);
         if (item.is_widget())
@@ -198,12 +203,22 @@ namespace neogfx
         throw not_a_widget();
     }
 
-    i_layout& grid_layout::layout_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+    i_widget& grid_layout::widget_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+    {
+        return const_cast<i_widget&>(const_cast<grid_layout const&>(*this).widget_at_position(aRow, aColumn));
+    }
+
+    i_layout const& grid_layout::layout_at_position(cell_coordinate aRow, cell_coordinate aColumn) const
     {
         auto& item = item_at_position(aRow, aColumn);
         if (item.is_layout())
             return item.as_layout();
         throw not_a_layout();
+    }
+
+    i_layout& grid_layout::layout_at_position(cell_coordinate aRow, cell_coordinate aColumn)
+    {
+        return const_cast<i_layout&>(const_cast<grid_layout const&>(*this).layout_at_position(aRow, aColumn));
     }
 
     void grid_layout::remove_all()

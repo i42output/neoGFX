@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
 {   
@@ -43,6 +44,7 @@ namespace neogfx
         virtual scalar maximum() const = 0;
         virtual void set_maximum(scalar aMaximum) = 0;
     public:
+        virtual rect bar_rect() const = 0;
         virtual i_string const& value_as_text() const = 0;
     };
 }

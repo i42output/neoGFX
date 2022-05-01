@@ -64,8 +64,11 @@ namespace neogfx
         virtual i_spacer& add_spacer_at_position(cell_coordinate aRow, cell_coordinate aColumn);
         virtual void remove_item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
         cell_coordinates item_position(const i_layout_item& aItem) const;
+        i_layout_item const& item_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
         i_layout_item& item_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        i_widget const& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
         i_widget& widget_at_position(cell_coordinate aRow, cell_coordinate aColumn);
+        i_layout const& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn) const;
         i_layout& layout_at_position(cell_coordinate aRow, cell_coordinate aColumn);
         void remove_all() override;
     public:
