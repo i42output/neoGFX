@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/task/thread.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/default_skin.hpp>
@@ -264,8 +265,14 @@ namespace neogfx
         auto const color1 = aItem.as_widget().background_color().shaded(0x0B);
         aGc.draw_rounded_rect(cr, 5.0_dip, pen{ color1.shaded(0x10), 2.0_dip }, color1);
         auto const br = cr.deflated(delta{ 2.0_dip }).with_cx(cr.deflated(delta{ 2.0_dip }).cx * ((aProgressBar.value() - aProgressBar.minimum()) / (aProgressBar.maximum() - aProgressBar.minimum())));
-        scoped_filter<blur_filter> filter{ aGc, blur_filter{ br, 4.0 } };
-        filter.front_buffer().fill_rounded_rect(br, 5.0_dip, color::LightGreen);
+        aGc.fill_rounded_rect(br, 5.0_dip, gradient{ gradient::color_stop_list{ { 0.0, color::LightGreen }, { 0.5, color::LightGreen }, { 1.0, color::DarkGreen } }, gradient_direction::Vertical });
+        scalar frame = static_cast<scalar>(neolib::thread::program_elapsed_ms() % 1000) / 1000.0;
+        auto const w = 0.75_cm;
+        auto const h = cr.cy / 2.0;
+        auto const fr = rect{ point{ cr.x + (cr.cx - w) * frame, cr.y - h * 0.25 }, size{ w, h } };
+        scoped_scissor ss{ aGc, br }; // todo: replace with a stencil
+        scoped_filter<blur_filter> filter{ aGc, blur_filter{ fr, 3.0, blurring_algorithm::Gaussian, 5.0, 3.5 } };
+        filter.front_buffer().fill_ellipse(fr.center(), w * 0.5, h * 0.5, color::LightGreen.with_alpha(0.2));
     }
 
     void default_skin::draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const
@@ -273,7 +280,7 @@ namespace neogfx
         auto ink1 = (aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Base));
         ink1 = ink1.shaded(0x60);
         auto ink2 = ink1.darker(0x30);
-        for (uint32_t i = 1u; i < aLayout.count(); ++i)
+        for (uint32_t i = 1u; i < aLayout.count(); ++i) 
         {
             if (aLayout.item_at(i - 1u).is_layout() && (!aLayout.item_at(i - 1u).as_layout().enabled() || aLayout.item_at(i - 1u).as_layout().count() == 0))
                 continue;

@@ -572,6 +572,9 @@ namespace neogfx
                     draw_line(args.from, args.to, args.pen);
                 }
                 break;
+            case graphics_operation::operation_type::DrawTriangle:
+                draw_triangles(opBatch);
+                break;
             case graphics_operation::operation_type::DrawRect:
                 for (auto op = opBatch.first; op != opBatch.second; ++op)
                 {
@@ -584,6 +587,9 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::DrawCircle:
                 draw_circles(opBatch);
+                break;
+            case graphics_operation::operation_type::DrawEllipse:
+                draw_ellipses(opBatch);
                 break;
             case graphics_operation::operation_type::DrawPie:
                 draw_pies(opBatch);
@@ -620,6 +626,9 @@ namespace neogfx
                     draw_entities(args.ecs, args.layer, args.transformation);
                 }
                 break;
+            case graphics_operation::operation_type::FillTriangle:
+                fill_triangles(opBatch);
+                break;
             case graphics_operation::operation_type::FillRect:
                 fill_rects(opBatch);
                 break;
@@ -628,6 +637,9 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::FillCheckerRect:
                 fill_checker_rects(opBatch);
+                break;
+            case graphics_operation::operation_type::FillEllipse:
+                fill_ellipses(opBatch);
                 break;
             case graphics_operation::operation_type::FillCircle:
                 fill_circles(opBatch);
@@ -965,6 +977,47 @@ namespace neogfx
         emit_any_stipple(*this, vertexArrays);
     }
 
+    void opengl_rendering_context::draw_triangles(const graphics_operation::batch& aDrawTriangleOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_triangle&>(*aDrawTriangleOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.second - aDrawTriangleOps.first)) };
+
+            for (auto op = aDrawTriangleOps.first; op != aDrawTriangleOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(*op);
+                auto boundingRect = rect{ drawOp.p0.min(drawOp.p1.min(drawOp.p2)), drawOp.p0.max(drawOp.p1.max(drawOp.p2)) }.inflated(drawOp.pen.width());
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.pen.color(), boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
+                        vec4{ drawOp.p2.x, drawOp.p2.y, drawOp.pen.width(), 0.0 }.as<float>() });
+                }
+            }
+        }
+    }
+
     void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program() };
@@ -1051,6 +1104,47 @@ namespace neogfx
                         function,
                         vec4{ drawOp.rect.center().x, drawOp.rect.center().y, drawOp.rect.width(), drawOp.rect.height() }.as<float>(),
                         drawOp.radius.as<float>(),
+                        vec4{ drawOp.pen.width(), 0.0 }.as<float>() });
+                }
+            }
+        }
+    }
+
+    void opengl_rendering_context::draw_ellipses(const graphics_operation::batch& aDrawEllipseOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*aDrawEllipseOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawEllipseOps.second - aDrawEllipseOps.first)) };
+
+            for (auto op = aDrawEllipseOps.first; op != aDrawEllipseOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width());
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.pen.color(), boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
                         vec4{ drawOp.pen.width(), 0.0 }.as<float>() });
                 }
             }
@@ -1349,6 +1443,47 @@ namespace neogfx
         }
     }
 
+    void opengl_rendering_context::fill_triangles(const graphics_operation::batch& aDrawTriangleOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::fill_triangle&>(*aDrawTriangleOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawTriangleOps.second - aDrawTriangleOps.first)) };
+
+            for (auto op = aDrawTriangleOps.first; op != aDrawTriangleOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::fill_triangle&>(*op);
+                auto boundingRect = rect{ drawOp.p0.min(drawOp.p1.min(drawOp.p2)), drawOp.p0.max(drawOp.p1.max(drawOp.p2)) };
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
+                        vec4{ drawOp.p2.x, drawOp.p2.y, 0.0, 1.0 }.as<float>() });
+                }
+            }
+        }
+    }
+
     void opengl_rendering_context::fill_rect(const rect& aRect, const brush& aFill)
     {
         graphics_operation::operation op{ graphics_operation::fill_rect{ aRect, aFill } };
@@ -1486,6 +1621,47 @@ namespace neogfx
                             alt = !alt;
                         }
                     }
+                }
+            }
+        }
+    }
+
+    void opengl_rendering_context::fill_ellipses(const graphics_operation::batch& aFillEllipseOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+
+        neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::fill_ellipse&>(*aFillEllipseOps.first);
+
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillEllipseOps.second - aFillEllipseOps.first)) };
+
+            for (auto op = aFillEllipseOps.first; op != aFillEllipseOps.second; ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::fill_ellipse&>(*op);
+                auto boundingRect = rect{ drawOp.center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } };
+                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                for (auto const& v : vertices)
+                {
+                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
+                        vec4f{{
+                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
+                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
+                        vec4f{},
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
+                        vec4{ 0.0, 1.0 }.as<float>() });
                 }
             }
         }

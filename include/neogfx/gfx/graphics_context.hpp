@@ -108,9 +108,11 @@ namespace neogfx
         void set_pixel(const point& aPoint, const color& aColor) const override;
         void draw_pixel(const point& aPoint, const color& aColor) const override;
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const override;
+        void draw_triangle(const point& aP0, const point& aP1, const point& aP2, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_rect(const rect& aRect, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_rounded_rect(const rect& aRect, const vec4& aRadius, const pen& aPen, const brush& aFill = brush{}) const override;
-        void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}, angle aStartAngle = 0.0) const override;
+        void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const override;
+        void draw_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const override;
@@ -118,10 +120,12 @@ namespace neogfx
         void draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill = brush{}) const override;
         void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const override;
         void draw_focus_rect(const rect& aRect) const override;
+        void fill_triangle(const point& aP0, const point& aP1, const point& aP2, const brush& aFill = brush{}) const override;
         void fill_rect(const rect& aRect, const brush& aFill) const override;
         void fill_rounded_rect(const rect& aRect, const vec4& aRadius, const brush& aFill) const override;
         void fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2) const override;
         void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const override;
+        void fill_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const brush& aFill = brush{}) const override;
         void fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const override;
         void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const override;
         void fill_path(const path& aPath, const brush& aFill) const override;

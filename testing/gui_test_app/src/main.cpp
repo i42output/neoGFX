@@ -1158,6 +1158,8 @@ int main(int argc, char* argv[])
             aGc.draw_arc(ng::point{ 800, 70 }, 40, ng::to_rad(5.0 + 90.0 * 3), ng::to_rad(50.0 + 90.0 * 3), ng::pen{ ng::color::Yellow, 3.0 });
             aGc.fill_arc(ng::point{ 800, 200 }, 50, ng::to_rad(15.0 + 90.0 * 3), ng::to_rad(60.0 + 90.0 * 3), ng::color::Chocolate);
 
+            aGc.draw_ellipse(ng::point{ 200, 250 }, 50, 25, ng::pen{ ng::color::White, 3.0_dip }, ng::gradient{ ng::color::ForestGreen, ng::color::Black, ng::gradient_direction::Vertical });
+
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });

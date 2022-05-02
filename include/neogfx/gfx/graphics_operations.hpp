@@ -156,6 +156,14 @@ namespace neogfx
             pen pen;
         };
 
+        struct draw_triangle
+        {
+            point p0;
+            point p1;
+            point p2;
+            pen pen;
+        };
+
         struct draw_rect
         {
             rect rect;
@@ -174,7 +182,14 @@ namespace neogfx
             point center;
             dimension radius;
             pen pen;
-            angle startAngle;
+        };
+
+        struct draw_ellipse
+        {
+            point center;
+            dimension radiusA;
+            dimension radiusB;
+            pen pen;
         };
 
         struct draw_pie
@@ -224,6 +239,14 @@ namespace neogfx
             mat44 transformation;
         };
 
+        struct fill_triangle
+        {
+            point p0;
+            point p1;
+            point p2;
+            brush fill;
+        };
+
         struct fill_rect
         {
             rect rect;
@@ -249,6 +272,14 @@ namespace neogfx
         {
             point center;
             dimension radius;
+            brush fill;
+        };
+
+        struct fill_ellipse
+        {
+            point center;
+            dimension radiusA;
+            dimension radiusB;
             brush fill;
         };
 
@@ -327,19 +358,23 @@ namespace neogfx
             set_pixel,
             draw_pixel,
             draw_line,
+            draw_triangle,
             draw_rect,
             draw_rounded_rect,
             draw_circle,
+            draw_ellipse,
             draw_pie,
             draw_arc,
             draw_cubic_bezier,
             draw_path,
             draw_shape,
             draw_entities,
+            fill_triangle,
             fill_rect,
             fill_rounded_rect,
             fill_checker_rect,
             fill_circle,
+            fill_ellipse,
             fill_pie,
             fill_arc,
             fill_path,
@@ -376,19 +411,23 @@ namespace neogfx
             SetPixel,
             DrawPixel,
             DrawLine,
+            DrawTriangle,
             DrawRect,
             DrawRoundedRect,
             DrawCircle,
+            DrawEllipse,
             DrawPie,
             DrawArc,
             DrawCubicBezier,
             DrawPath,
             DrawShape,
             DrawEntities,
+            FillTriangle,
             FillRect,
             FillRoundedRect,
             FillCheckerRect,
             FillCircle,
+            FillEllipse,
             FillPie,
             FillArc,
             FillPath,

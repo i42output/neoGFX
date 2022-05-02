@@ -441,9 +441,9 @@ namespace neogfx
         basic_point min_max(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::max(y, other.y), other.z }; }
         basic_point max_min(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::min(y, other.y), other.z }; }
         basic_point mid(const basic_point& other) const { return basic_point{ (x + other.x) / static_cast<coordinate_type>(2.0), (y + other.y) / static_cast<coordinate_type>(2.0), (z + other.z) / static_cast<coordinate_type>(2.0) }; }
-        basic_point with_x(coordinate_type x) const { return basic_point{ x, y, z }; }
-        basic_point with_y(coordinate_type y) const { return basic_point{ x, y, z }; }
-        basic_point with_z(coordinate_type z) const { return basic_point{ x, y, z }; }
+        basic_point with_x(coordinate_type x0) const { return basic_point{ x0, y, z }; }
+        basic_point with_y(coordinate_type y0) const { return basic_point{ x, y0, z }; }
+        basic_point with_z(coordinate_type z0) const { return basic_point{ x, y, z0 }; }
         coordinate_type magnitude() const { return std::sqrt(x * x + y * y + z * z); }
         template <typename T>
         basic_point<T> as() const

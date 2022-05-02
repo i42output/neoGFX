@@ -379,6 +379,13 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen });
     }
 
+    void graphics_context::draw_triangle(const point& aP0, const point& aP1, const point& aP2, const pen& aPen, const brush& aFill) const
+    {
+        if (aFill != neolib::none)
+            fill_triangle(aP0, aP1, aP2, aFill);
+        native_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen });
+    }
+
     void graphics_context::draw_rect(const rect& aRect, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)
@@ -393,11 +400,18 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen });
     }
 
-    void graphics_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill, angle aStartAngle) const
+    void graphics_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill) const
     {
         if (aFill != neolib::none)
             fill_circle(aCenter, aRadius, aFill);
-        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aStartAngle });
+        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen });
+    }
+
+    void graphics_context::draw_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const pen& aPen, const brush& aFill) const
+    {
+        if (aFill != neolib::none)
+            fill_ellipse(aCenter, aRadiusA, aRadiusB, aFill);
+        native_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen });
     }
 
     void graphics_context::draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
@@ -468,6 +482,11 @@ namespace neogfx
         pop_logical_operation();
     }
 
+    void graphics_context::fill_triangle(const point& aP0, const point& aP1, const point& aP2, const brush& aFill) const
+    {
+        native_context().enqueue(graphics_operation::fill_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aFill });
+    }
+        
     void graphics_context::fill_rect(const rect& aRect, const brush& aFill) const
     {
         native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill });
@@ -486,6 +505,11 @@ namespace neogfx
     void graphics_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const
     {
         native_context().enqueue(graphics_operation::fill_circle{ to_device_units(aCenter) + iOrigin, aRadius, aFill });
+    }
+
+    void graphics_context::fill_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const brush& aFill) const
+    {
+        native_context().enqueue(graphics_operation::fill_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aFill });
     }
 
     void graphics_context::fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const

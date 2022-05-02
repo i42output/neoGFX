@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/geometrical.hpp>
+#include <neogfx/gui/widget/i_text_widget.hpp>
 
 namespace neogfx
 {   
@@ -45,6 +46,8 @@ namespace neogfx
         virtual void set_maximum(scalar aMaximum) = 0;
     public:
         virtual rect bar_rect() const = 0;
+        virtual i_text_widget const& text_label() const = 0;
+        virtual i_text_widget& text_label() = 0;
         virtual i_string const& value_as_text() const = 0;
     };
 }

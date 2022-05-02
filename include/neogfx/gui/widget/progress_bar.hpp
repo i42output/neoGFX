@@ -60,6 +60,8 @@ namespace neogfx
         void set_maximum(scalar aMaximum) override;
     public:
         rect bar_rect() const override;
+        i_text_widget const& text_label() const override;
+        i_text_widget& text_label() override;
         i_string const& value_as_text() const override;
     private:
         void init();

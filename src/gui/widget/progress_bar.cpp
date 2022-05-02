@@ -48,7 +48,7 @@ namespace neogfx
 		iLayout{ *this },
 		iBar{ *this },
 		iLabel{ iLayout },
-		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
+		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 } }
 	{
 		init();
 	}
@@ -59,7 +59,7 @@ namespace neogfx
 		iLayout{ *this },
 		iBar{ *this },
 		iLabel{ iLayout },
-		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
+		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 } }
 	{
 		init();
 	}
@@ -70,7 +70,7 @@ namespace neogfx
 		iLayout{ *this },
 		iBar{ *this },
 		iLabel{ iLayout },
-		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false }
+		iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 } }
 	{
 		init();
 	}
@@ -143,6 +143,16 @@ namespace neogfx
 	{
 		return iBar.client_rect(false);
 	}
+
+	i_text_widget const& progress_bar::text_label() const
+	{
+		return iLabel.text_widget();
+	}
+
+	i_text_widget& progress_bar::text_label()
+	{
+		return iLabel.text_widget();
+	}
 		
 	i_string const& progress_bar::value_as_text() const
 	{
@@ -151,6 +161,7 @@ namespace neogfx
 
 	void progress_bar::init()
 	{
+		iLabel.text_widget().set_size_hint(size_hint{ "100%" });
 		placement_changed();
 	}
 
@@ -177,6 +188,6 @@ namespace neogfx
 	{
 		iAnimator.again();
 
-		update();
+		iBar.update();
 	}
 }
