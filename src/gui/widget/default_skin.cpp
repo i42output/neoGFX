@@ -261,18 +261,18 @@ namespace neogfx
 
     void default_skin::draw_progress_bar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_progress_bar& aProgressBar) const
     {
-        auto const& cr = aProgressBar.bar_rect();
+        auto const& barRect = aProgressBar.bar_rect();
         auto const color1 = aItem.as_widget().background_color().shaded(0x0B);
-        aGc.draw_rounded_rect(cr, 5.0_dip, pen{ color1.shaded(0x10), 2.0_dip }, color1);
-        auto const br = cr.deflated(delta{ 2.0_dip }).with_cx(cr.deflated(delta{ 2.0_dip }).cx * ((aProgressBar.value() - aProgressBar.minimum()) / (aProgressBar.maximum() - aProgressBar.minimum())));
-        aGc.fill_rounded_rect(br, 5.0_dip, gradient{ gradient::color_stop_list{ { 0.0, color::LightGreen }, { 0.5, color::LightGreen }, { 1.0, color::DarkGreen } }, gradient_direction::Vertical });
+        aGc.draw_rounded_rect(barRect, 5.0_dip, pen{ color1.shaded(0x10), 2.0_dip }, color1);
+        auto const doneRect = barRect.deflated(delta{ 2.0_dip }).with_cx(barRect.deflated(delta{ 2.0_dip }).cx * ((aProgressBar.value() - aProgressBar.minimum()) / (aProgressBar.maximum() - aProgressBar.minimum())));
+        aGc.fill_rounded_rect(doneRect, 5.0_dip, gradient{ gradient::color_stop_list{ { 0.0, color::LightGreen }, { 0.5, color::LightGreen }, { 1.0, color::DarkGreen } }, gradient_direction::Vertical });
         scalar frame = static_cast<scalar>(neolib::thread::program_elapsed_ms() % 1000) / 1000.0;
         auto const w = 0.75_cm;
-        auto const h = cr.cy / 2.0;
-        auto const fr = rect{ point{ cr.x + (cr.cx - w) * frame, cr.y - h * 0.25 }, size{ w, h } };
-        scoped_scissor ss{ aGc, br }; // todo: replace with a stencil
-        scoped_filter<blur_filter> filter{ aGc, blur_filter{ fr, 3.0, blurring_algorithm::Gaussian, 5.0, 3.5 } };
-        filter.front_buffer().fill_ellipse(fr.center(), w * 0.5, h * 0.5, color::LightGreen.with_alpha(0.2));
+        auto const h = barRect.cy / 1.5;
+        auto const frameRect = rect{ point{ barRect.x - w + (barRect.cx + w * 2.0) * frame, barRect.y - h * 0.25 }, size{ w, h } };
+        scoped_scissor ss{ aGc, doneRect }; // todo: replace with a stencil
+        scoped_filter<blur_filter> filter{ aGc, blur_filter{ frameRect.inflated(size{ w, h }), 2.0, blurring_algorithm::Gaussian, std::min(h * 2.0, 15.0), 4.0} };
+        filter.front_buffer().fill_ellipse(frameRect.center(), w * 0.5, h * 0.5, color::LightGreen.with_alpha(0.2));
     }
 
     void default_skin::draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const

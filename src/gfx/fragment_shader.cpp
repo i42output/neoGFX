@@ -474,6 +474,8 @@ namespace neogfx
         enable();
         uFilterEnabled = true;
         uFilterType = aFilter;
+        if (aFilter == shader_filter::GaussianBlur)
+            aArgument1 += (1u - static_cast<uint32_t>(aArgument1) % 2u);
         auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
         uFilterArguments = arguments.as<float>();
         auto kernel = iFilterKernel.find(std::make_pair(aFilter, arguments));
