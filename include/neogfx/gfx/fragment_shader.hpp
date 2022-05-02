@@ -82,6 +82,15 @@ namespace neogfx
                     static const string code =
                     {
                         "#define PI 3.1415926538\n"
+                        "#define SHAPE_None 0x00\n"
+                        "#define SHAPE_Line 0x01\n"
+                        "#define SHAPE_CubicBezier 0x02\n"
+                        "#define SHAPE_Triangle 0x03\n"
+                        "#define SHAPE_Circle 0x04\n"
+                        "#define SHAPE_Ellipse 0x05\n"
+                        "#define SHAPE_Pie 0x06\n"
+                        "#define SHAPE_Arc 0x07\n"
+                        "#define SHAPE_RoundedRect 0x08\n"
                         "\n"
                         "void standard_fragment_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)\n"
                         "{\n"

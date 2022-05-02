@@ -605,7 +605,7 @@ namespace neogfx
                 "        float d = 0.0;\n"
                 "        if (!uShapeEnabled)\n"
                 "            d = distance(uStippleVertex, Coord);\n"
-                "        else if (uShape == 3)\n" // circle
+                "        else if (uShape == SHAPE_Circle)\n" // circle
                 "            d = (atan(Coord.y - function1.y, Coord.x - function1.x) + PI) * function1.z;\n"
                 "        uint patternBit = uint((d + uStipplePosition) / uStippleFactor) % 16;\n"
                 "        if ((uStipplePattern & (1 << patternBit)) == 0)\n"
@@ -853,28 +853,28 @@ namespace neogfx
                 "    {\n"
                 "        switch(uShape)\n"
                 "        {\n"
-                "        case 1:\n" // line
+                "        case SHAPE_Line:\n"
                 "            draw_line(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 2:\n" // cubic bezier
+                "        case SHAPE_CubicBezier:\n"
                 "            draw_cubic_bezier(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 3:\n" // triangle
+                "        case SHAPE_Triangle:\n"
                 "            draw_triangle(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 4:\n" // circle
+                "        case SHAPE_Circle:\n"
                 "            draw_circle(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 5:\n" // ellipse
+                "        case SHAPE_Ellipse:\n"
                 "            draw_ellipse(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 6:\n" // pie
+                "        case SHAPE_Pie:\n"
                 "            draw_pie(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 7:\n" // arc
+                "        case SHAPE_Arc:\n"
                 "            draw_arc(color, function1, function2, function3);\n"
                 "            break;\n"
-                "        case 8:\n" // rounded rect
+                "        case SHAPE_RoundedRect:\n"
                 "            draw_rounded_rect(color, function1, function2, function3);\n"
                 "            break;\n"
                 "        }\n"
