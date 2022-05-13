@@ -649,8 +649,7 @@ namespace neogfx
             left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
         // operations
     public:
-        bool operator==(const self_type& other) const { return left == other.left && top == other.top && right == other.right && bottom == other.bottom; }
-        bool operator!=(const self_type& other) const { return !operator == (other); }
+        auto operator<=>(const self_type&) const = default;
         self_type operator-() const { return self_type{ -left, -top, -right, -bottom }; }
         self_type& operator+=(const self_type& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
         self_type& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
@@ -740,12 +739,6 @@ namespace neogfx
         basic_box_areas<DimensionType> ret = left;
         ret /= right;
         return ret;
-    }
-
-    template <typename DimensionType>
-    inline bool operator<(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
-    {
-        return std::tie(left.left, left.top, left.right, left.bottom) < std::tie(right.left, right.top, right.right, right.bottom);
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem = logical_coordinate_system::AutomaticGui>
@@ -1100,7 +1093,7 @@ namespace neogfx
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline bool operator<(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
     {
-        return std::tie(left.position(), left.extents()) < std::tie(right.position(), right.extents());
+        return std::forward_as_tuple(left.position(), left.extents()) < std::forward_as_tuple(right.position(), right.extents());
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>

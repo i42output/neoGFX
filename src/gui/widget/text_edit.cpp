@@ -162,7 +162,7 @@ namespace neogfx
 
     bool text_edit::character_style::operator==(const character_style& aRhs) const
     {
-        return std::tie(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) == std::tie(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
+        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) == std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
     }
 
     bool text_edit::character_style::operator!=(const character_style& aRhs) const
@@ -172,7 +172,7 @@ namespace neogfx
 
     bool text_edit::character_style::operator<(const character_style& aRhs) const
     {
-        return std::tie(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) < std::tie(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
+        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) < std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
     }
 
     text_edit::paragraph_style::paragraph_style()
@@ -224,7 +224,7 @@ namespace neogfx
 
     bool text_edit::paragraph_style::operator==(const paragraph_style& aRhs) const
     {
-        return std::tie(iPadding, iLineSpacing) == std::tie(aRhs.iPadding, aRhs.iLineSpacing);
+        return std::forward_as_tuple(iPadding, iLineSpacing) == std::forward_as_tuple(aRhs.iPadding, aRhs.iLineSpacing);
     }
 
     bool text_edit::paragraph_style::operator!=(const paragraph_style& aRhs) const
@@ -234,7 +234,7 @@ namespace neogfx
 
     bool text_edit::paragraph_style::operator<(const paragraph_style& aRhs) const
     {
-        return std::tie(iPadding, iLineSpacing) < std::tie(aRhs.iPadding, aRhs.iLineSpacing);
+        return std::forward_as_tuple(iPadding, iLineSpacing) < std::forward_as_tuple(aRhs.iPadding, aRhs.iLineSpacing);
     }
 
     text_edit::style::style() : 
@@ -293,7 +293,7 @@ namespace neogfx
 
     bool text_edit::style::operator==(const style& aRhs) const
     {
-        return std::tie(iCharacter) == std::tie(aRhs.iCharacter);
+        return std::forward_as_tuple(iCharacter) == std::forward_as_tuple(aRhs.iCharacter);
     }
 
     bool text_edit::style::operator!=(const style& aRhs) const
@@ -303,7 +303,7 @@ namespace neogfx
 
     bool text_edit::style::operator<(const style& aRhs) const
     {
-        return std::tie(iCharacter) < std::tie(aRhs.iCharacter);
+        return std::forward_as_tuple(iCharacter) < std::forward_as_tuple(aRhs.iCharacter);
     }
 
     text_edit::character_style const& text_edit::style::character() const

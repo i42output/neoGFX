@@ -199,34 +199,6 @@ namespace neogfx
         virtual void share_object(i_ref_ptr<i_gradient>& aRef) const = 0;
         // helpers
     public:
-        friend bool operator==(const i_gradient& aLhs, const i_gradient& aRhs)
-        {
-            if (aLhs.is_singular() != aRhs.is_singular())
-                return false;
-            else if (aLhs.is_singular())
-                return false;
-            else if (aLhs.id() == aRhs.id())
-                return true;
-            else
-                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) ==
-                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
-        }
-        friend bool operator!=(const i_gradient& aLhs, const i_gradient& aRhs)
-        {
-            return !(aLhs == aRhs);
-        }
-        friend bool operator<(const i_gradient& aLhs, const i_gradient& aRhs)
-        {
-            if (aLhs.is_singular() != aRhs.is_singular())
-                return aLhs.is_singular() < aRhs.is_singular();
-            else if (aLhs.is_singular())
-                return false;
-            else if (aLhs.id() == aRhs.id())
-                return false;
-            else
-                return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) <
-                    std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
-        }
         neolib::ref_ptr<i_gradient> clone() const
         {
             neolib::ref_ptr<i_gradient> result;
@@ -318,4 +290,35 @@ namespace neogfx
                 return 0.0;
         }
     };
+
+    inline bool operator==(const i_gradient& aLhs, const i_gradient& aRhs)
+    {
+        if (aLhs.is_singular() != aRhs.is_singular())
+            return false;
+        else if (aLhs.is_singular())
+            return false;
+        else if (aLhs.id() == aRhs.id())
+            return true;
+        else
+            return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) ==
+                std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
+    }
+
+    inline std::partial_ordering operator<=>(const i_gradient& aLhs, const i_gradient& aRhs)
+    {
+        if (aLhs.is_singular() || aRhs.is_singular())
+        {
+            if (aLhs.is_singular() == aRhs.is_singular())
+                return std::partial_ordering::unordered;
+            if (aLhs.is_singular() < aRhs.is_singular())
+                return std::partial_ordering::less;
+            else
+                return std::partial_ordering::greater;
+        }
+        else if (aLhs.id() == aRhs.id())
+            return std::partial_ordering::equivalent;
+        else
+            return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) <=>
+                std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
+    }
 }

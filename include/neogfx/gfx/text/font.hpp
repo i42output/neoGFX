@@ -174,8 +174,8 @@ namespace neogfx
         font_info with_size(point_size aSize) const;
     public:
         bool operator==(const font_info& aRhs) const;
-        bool operator!=(const font_info& aRhs) const;
         bool operator<(const font_info& aRhs) const;
+        std::strong_ordering operator<=>(const font_info& aRhs) const;
     public:
         static font_weight weight_from_style(font_style aStyle);
         static font_weight weight_from_style_name(std::string aStyleName, bool aUnknownAsRegular = true);
@@ -244,8 +244,8 @@ namespace neogfx
         const i_glyph_texture& glyph_texture(const glyph& aGlyph) const;
     public:
         bool operator==(const font& aRhs) const;
-        bool operator!=(const font& aRhs) const;
         bool operator<(const font& aRhs) const;
+        std::strong_ordering operator<=>(const font& aRhs) const;
     public:
         i_native_font_face& native_font_face() const;
         // attributes

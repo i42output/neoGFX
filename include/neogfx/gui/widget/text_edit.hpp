@@ -201,7 +201,7 @@ namespace neogfx
         public:
             bool operator==(const column_info& aRhs) const
             {
-                return std::tie(iDelimiter, iMinWidth, iMaxWidth, iPadding, iStyle) == std::tie(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iPadding, aRhs.iStyle);
+                return std::forward_as_tuple(iDelimiter, iMinWidth, iMaxWidth, iPadding, iStyle) == std::forward_as_tuple(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iPadding, aRhs.iStyle);
             }
             bool operator!=(const column_info& aRhs) const
             {

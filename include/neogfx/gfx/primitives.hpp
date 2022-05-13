@@ -145,12 +145,22 @@ namespace neogfx
             return *this;
         }
     public:
-        using color_or_gradient::operator==;
-        using color_or_gradient::operator!=;
-        using color_or_gradient::operator<;
-        using color_or_gradient::operator<=;
-        using color_or_gradient::operator>;
-        using color_or_gradient::operator>=;
+        bool operator==(const color& aColor) const
+        {
+            return std::holds_alternative<color>(*this) && std::get<color>(*this) == aColor;
+        }
+        bool operator!=(const color& aColor) const
+        {
+            return !(*this == aColor);
+        }
+        bool operator==(const gradient& aGradient) const
+        {
+            return std::holds_alternative<gradient>(*this) && std::get<gradient>(*this) == aGradient;
+        }
+        bool operator!=(const gradient& aGradient) const
+        {
+            return !(*this == aGradient);
+        }
     public:
         color::component alpha() const
         {
@@ -169,6 +179,7 @@ namespace neogfx
                 return text_color{};
         }
     };
+
     typedef neolib::optional<text_color> optional_text_color;
 
     enum class text_effect_type : uint32_t
@@ -205,17 +216,18 @@ namespace neogfx
             return *this;
         }
     public:
-        bool operator==(const text_effect& aOther) const
+        bool operator==(const text_effect& that) const noexcept
         {
-            return iType == aOther.iType && iColor == aOther.iColor && iWidth == aOther.iWidth && iOffset == aOther.iOffset && iAux1 == aOther.iAux1 && iIgnoreEmoji == aOther.iIgnoreEmoji;
+            return iType == that.iType && iColor == that.iColor && iWidth == that.iWidth && iOffset == that.iOffset && iAux1 == that.iAux1 && iIgnoreEmoji == that.iIgnoreEmoji;
         }
-        bool operator!=(const text_effect& aOther) const
+        std::partial_ordering operator<=>(const text_effect& that) const noexcept
         {
-            return !(*this == aOther);
-        }
-        bool operator<(const text_effect& aRhs) const
-        {
-            return std::tie(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) < std::tie(aRhs.iType, aRhs.iColor, aRhs.iWidth, aRhs.iOffset, aRhs.iAux1, aRhs.iIgnoreEmoji);
+            if (*this == that)
+                return std::partial_ordering::equivalent;
+            else if (std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) < std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iIgnoreEmoji))
+                return std::partial_ordering::less;
+            else
+                return std::partial_ordering::greater;
         }
     public:
         text_effect_type type() const

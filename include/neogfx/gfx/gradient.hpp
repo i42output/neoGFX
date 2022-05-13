@@ -172,6 +172,38 @@ namespace neogfx
         return aColorOrGradient;
     }
 
+
+    inline bool operator==(const gradient& aLhs, const gradient& aRhs)
+    {
+        if (aLhs.is_singular() != aRhs.is_singular())
+            return false;
+        else if (aLhs.is_singular())
+            return false;
+        else if (aLhs.id() == aRhs.id())
+            return true;
+        else
+            return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) ==
+            std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
+    }
+
+    inline std::partial_ordering operator<=>(const gradient& aLhs, const gradient& aRhs)
+    {
+        if (aLhs.is_singular() || aRhs.is_singular())
+        {
+            if (aLhs.is_singular() == aRhs.is_singular())
+                return std::partial_ordering::unordered;
+            if (aLhs.is_singular() < aRhs.is_singular())
+                return std::partial_ordering::less;
+            else
+                return std::partial_ordering::greater;
+        }
+        else if (aLhs.id() == aRhs.id())
+            return std::partial_ordering::equivalent;
+        else
+            return std::forward_as_tuple(aLhs.color_stops(), aLhs.alpha_stops(), aLhs.direction(), aLhs.orientation(), aLhs.shape(), aLhs.size(), aLhs.exponents(), aLhs.center(), aLhs.tile(), aLhs.smoothness()) <=>
+            std::forward_as_tuple(aRhs.color_stops(), aRhs.alpha_stops(), aRhs.direction(), aRhs.orientation(), aRhs.shape(), aRhs.size(), aRhs.exponents(), aRhs.center(), aRhs.tile(), aRhs.smoothness());
+    }
+
     inline optional_color_or_gradient with_bounding_box(optional_color_or_gradient const& aColorOrGradient, rect const& aBoundingBox)
     {
         if (aColorOrGradient != std::nullopt)

@@ -352,15 +352,20 @@ namespace neogfx
                 iInstance->iKerning == aRhs.iInstance->iKerning);
     }
 
-    bool font_info::operator!=(const font_info& aRhs) const
-    {
-        return !operator==(aRhs);
-    }
-
     bool font_info::operator<(const font_info& aRhs) const
     {
-        return std::tie(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, iInstance->iUnderline, iInstance->iSize, iInstance->iKerning) < 
-            std::tie(aRhs.iInstance->iFamilyName, aRhs.iInstance->iStyle, aRhs.iInstance->iStyleName, aRhs.iInstance->iUnderline, aRhs.iInstance->iSize, aRhs.iInstance->iKerning);
+        return std::forward_as_tuple(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, iInstance->iUnderline, iInstance->iSize, iInstance->iKerning) <
+            std::forward_as_tuple(aRhs.iInstance->iFamilyName, aRhs.iInstance->iStyle, aRhs.iInstance->iStyleName, aRhs.iInstance->iUnderline, aRhs.iInstance->iSize, aRhs.iInstance->iKerning);
+    }
+
+    std::strong_ordering font_info::operator<=>(const font_info& aRhs) const
+    {
+        if (*this == aRhs)
+            return std::strong_ordering::equal;
+        else if (*this < aRhs)
+            return std::strong_ordering::less;
+        else
+            return std::strong_ordering::greater;
     }
 
     class font::instance
@@ -619,14 +624,14 @@ namespace neogfx
             underline() == aRhs.underline() && kerning() == aRhs.kerning();
     }
 
-    bool font::operator!=(const font& aRhs) const
-    {
-        return !(*this == aRhs);
-    }
-
     bool font::operator<(const font& aRhs) const
     {
         return font_info::operator<(aRhs);
+    }
+
+    std::strong_ordering font::operator<=>(const font& aRhs) const
+    {
+        return font_info::operator<=>(aRhs);
     }
 
     i_native_font_face& font::native_font_face() const

@@ -214,7 +214,7 @@ namespace neogfx
         }
         bool operator<(const self_type& aRhs) const
         {
-            return std::tie(iValue, iUnits) < std::tie(aRhs.iValue, aRhs.iUnits);
+            return std::forward_as_tuple(iValue, iUnits) < std::forward_as_tuple(aRhs.iValue, aRhs.iUnits);
         }
     public:
         operator value_type() const

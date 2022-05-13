@@ -153,7 +153,7 @@ namespace neogames
             }
             bool operator<(const basic_card& aRhs) const
             {
-                return std::tie(iValue, iSuit) < std::tie(aRhs.iValue, aRhs.iSuit);
+                return std::forward_as_tuple(iValue, iSuit) < std::forward_as_tuple(aRhs.iValue, aRhs.iSuit);
             }
         public:
             static std::string const& to_string(value aValue)
