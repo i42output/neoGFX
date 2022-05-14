@@ -53,8 +53,8 @@ namespace neogfx
     template <typename Base>
     inline bool shader_program<Base>::supports(vertex_buffer_type aBufferType) const
     {
-        for (auto& stage : stages().to_std_vector())
-            for (auto& shader : stage.second().to_std_vector())
+        for (auto& stage : stages().as_std_vector())
+            for (auto& shader : stage.second().as_std_vector())
                 if (shader->supports(aBufferType))
                     return true;
         return false;
@@ -162,7 +162,7 @@ namespace neogfx
     inline const i_shader& shader_program<Base>::first_in_stage(shader_type aStage) const
     {
         if (have_stage(aStage))
-            for (auto const& shader : stage(aStage).to_std_vector())
+            for (auto const& shader : stage(aStage).as_std_vector())
                 if (shader->enabled())
                     return *shader;
         throw shader_not_found();
@@ -210,8 +210,8 @@ namespace neogfx
     template <typename Base>
     inline bool shader_program<Base>::dirty() const
     {
-        for (auto const& stage : stages().to_std_vector())
-            for (auto const& shader : stage.second().to_std_vector())
+        for (auto const& stage : stages().as_std_vector())
+            for (auto const& shader : stage.second().as_std_vector())
                 if (shader->dirty())
                     return (iNeedFullUniformUpdate = true);
         return false;
@@ -220,16 +220,16 @@ namespace neogfx
     template <typename Base>
     inline void shader_program<Base>::set_clean()
     {
-        for (auto& stage : stages().to_std_vector())
-            for (auto& shader : stage.second().to_std_vector())
+        for (auto& stage : stages().as_std_vector())
+            for (auto& shader : stage.second().as_std_vector())
                 shader->set_clean();
     }
 
     template <typename Base>
     inline void shader_program<Base>::prepare_uniforms(const i_rendering_context& aContext)
     {
-        for (auto& stage : stages().to_std_vector())
-            for (auto& shader : stage.second().to_std_vector())
+        for (auto& stage : stages().as_std_vector())
+            for (auto& shader : stage.second().as_std_vector())
                 shader->prepare_uniforms(aContext, *this);
     }
 
@@ -249,8 +249,8 @@ namespace neogfx
     template <typename Base>
     bool shader_program<Base>::uniforms_changed() const
     {
-        for (auto& stage : stages().to_std_vector())
-            for (auto& shader : stage.second().to_std_vector())
+        for (auto& stage : stages().as_std_vector())
+            for (auto& shader : stage.second().as_std_vector())
                 if (shader->uniforms_changed())
                     return true;
         return false;

@@ -47,7 +47,7 @@ namespace neogfx
                 {
                     if (archive.file_path(i) == uri.fragment())
                     {
-                        archive.extract_to(i, iData.to_std_vector());
+                        archive.extract_to(i, iData.as_std_vector());
                         iSize = iData.size();
                     }
                 }
@@ -63,7 +63,7 @@ namespace neogfx
                 {
                     if (archive.file_path(i) == uri.fragment())
                     {
-                        archive.extract_to(i, iData.to_std_vector());
+                        archive.extract_to(i, iData.as_std_vector());
                         iSize = iData.size();
                     }
                     else
