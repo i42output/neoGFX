@@ -107,11 +107,11 @@ namespace neogfx::DesignStudio
     {
         auto removing = find_project(aProject);
         auto removingRef = *removing;
-        iProjects.to_std_vector().erase(removing);
+        iProjects.as_std_vector().erase(removing);
         if (project_active() && &active_project() == &aProject)
         {
             if (!iProjects.empty())
-                activate_project(*iProjects.to_std_vector().back());
+                activate_project(*iProjects.as_std_vector().back());
             else
                 deactivate_project();
         }
@@ -128,7 +128,7 @@ namespace neogfx::DesignStudio
 
     project_manager::project_list::std_type::const_iterator project_manager::find_project(const i_project& aProject) const
     {
-        for (auto p = iProjects.to_std_vector().begin(); p != iProjects.to_std_vector().end(); ++p)
+        for (auto p = iProjects.as_std_vector().begin(); p != iProjects.as_std_vector().end(); ++p)
             if (*p == &aProject)
                 return p;
         throw project_not_found();
