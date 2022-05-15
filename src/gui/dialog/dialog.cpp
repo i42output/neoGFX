@@ -241,6 +241,14 @@ namespace neogfx
         return canReject;
     }
 
+    void dialog::close()
+    {
+        if (result() == dialog_result::NoResult)
+            set_result(dialog_result::Rejected);
+
+        window::close();
+    }
+
     bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
         return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
