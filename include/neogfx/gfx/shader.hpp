@@ -28,6 +28,7 @@
 namespace neogfx
 {
     #define cache_uniform( uniformName ) cached_uniform uniformName = { *this, #uniformName };
+    #define cache_shared_uniform( uniformName ) cached_uniform uniformName = { *this, #uniformName, true };
 
     template <typename Base>
     class shader : public reference_counted<Base>
@@ -44,8 +45,8 @@ namespace neogfx
         class cached_uniform
         {
         public:
-            cached_uniform(shader<Base>& aParent, const char* const aName) :
-                iParent{ aParent }, iName{ aName }
+            cached_uniform(shader<Base>& aParent, const char* const aName, bool aShared = false) :
+                iParent{ aParent }, iName{ aName }, iShared{ aShared }
             {
             }
         public:
@@ -57,7 +58,7 @@ namespace neogfx
                     if (existing != no_uniform)
                         iId = existing;
                     if (iId == std::nullopt)
-                        iId = iParent.create_uniform(iName);
+                        iId = iParent.create_uniform(iName, iShared);
                 }
                 return iParent.uniforms()[*iId];
             }
@@ -74,6 +75,7 @@ namespace neogfx
         private:
             shader<Base>& iParent;
             string iName;
+            bool iShared;
             mutable std::optional<shader_uniform_id> iId;
         };
     public:
@@ -81,7 +83,8 @@ namespace neogfx
             iType{ aType },
             iName{ aName },
             iEnabled{ aEnabled },
-            iDirty{ true }
+            iDirty{ true },
+            iHasSharedUniforms{ false }
         {
         }
         ~shader()
@@ -90,11 +93,11 @@ namespace neogfx
                 service<i_rendering_engine>().destroy_shader_object(*iHandle);
         }
     public:
-        shader_type type() const override
+        shader_type type() const final
         {
             return iType;
         }
-        const i_string& name() const override
+        const i_string& name() const final
         {
             return iName;
         }
@@ -102,7 +105,7 @@ namespace neogfx
         {
             return false;
         }
-        void* handle(const i_shader_program& aProgram) const override
+        void* handle(const i_shader_program& aProgram) const final
         {
             if (!aProgram.is_first_in_stage(*this))
                 return aProgram.first_in_stage(type()).handle(aProgram);
@@ -112,15 +115,15 @@ namespace neogfx
                 throw failed_to_create_shader_program("Failed to create shader object");
             return *iHandle;
         }
-        bool enabled() const override
+        bool enabled() const final
         {
             return iEnabled;
         }
-        bool disabled() const override
+        bool disabled() const final
         {
             return !iEnabled;
         }
-        void enable() override
+        void enable() final
         {
             if (!iEnabled)
             {
@@ -128,7 +131,7 @@ namespace neogfx
                 set_dirty();
             }
         }
-        void disable() override
+        void disable() final
         {
             if (iEnabled)
             {
@@ -136,21 +139,21 @@ namespace neogfx
                 set_dirty();
             }
         }
-        bool dirty() const override
+        bool dirty() const final
         {
             return iDirty;
         }
-        void set_dirty() override
+        void set_dirty() final
         {
             iDirty = true;
             for (auto& u : uniforms())
                 u.clear_location();
         }
-        void set_clean() override
+        void set_clean() final
         {
             iDirty = false;
         }
-        bool uniforms_changed() const override
+        bool uniforms_changed() const final
         {
             for (auto& u : uniforms())
                 if (u.is_dirty())
@@ -158,9 +161,13 @@ namespace neogfx
             return false;
         }
     public:
-        const i_shader::uniform_list& uniforms() const override
+        const i_shader::uniform_list& uniforms() const final
         {
             return iUniforms.items();
+        }
+        bool has_shared_uniforms() const final
+        {
+            return iHasSharedUniforms;
         }
     protected:
         uniform_list& uniforms()
@@ -168,19 +175,20 @@ namespace neogfx
             return iUniforms;
         }
     public:
-        void clear_uniform(shader_uniform_id aUniform) override
+        void clear_uniform(shader_uniform_id aUniform) final
         {
             iUniforms.remove(aUniform);
             set_dirty();
         }
-        shader_uniform_id create_uniform(const i_string& aName) override
+        shader_uniform_id create_uniform(const i_string& aName, bool aShared = false) final
         {
             auto id = uniforms().next_cookie();
-            uniforms().add(id, id, aName, value_type{});
+            uniforms().add(id, id, aName, aShared, value_type{});
+            iHasSharedUniforms = iHasSharedUniforms || aShared;
             set_dirty();
             return id;
         }
-        shader_uniform_id find_uniform(const i_string& aName) const override
+        shader_uniform_id find_uniform(const i_string& aName) const final
         {
             for (auto const& u : uniforms())
                 if (u.name() == aName)
@@ -188,30 +196,30 @@ namespace neogfx
             return no_uniform;
         }
         using i_shader::set_uniform;
-        void set_uniform(shader_uniform_id aUniform, const abstract_value_type& aValue) override
+        void set_uniform(shader_uniform_id aUniform, const abstract_value_type& aValue) final
         {
             auto& u = uniforms()[aUniform];
             if (u.value().empty() != aValue.empty() || (!u.value().empty() && u.different_type_to(aValue)))
                 set_dirty();
             u.set_value(aValue);
         }
-        void clear_uniform_location(shader_uniform_id aUniform) override
+        void clear_uniform_location(shader_uniform_id aUniform) final
         {
             uniforms()[aUniform].clear_location();
         }
-        void update_uniform_location(shader_uniform_id aUniform, shader_uniform_location aLocation) override
+        void update_uniform_location(shader_uniform_id aUniform, shader_uniform_location aLocation) final
         {
             uniforms()[aUniform].set_location(aLocation);
         }
-        const variable_list& in_variables() const override
+        const variable_list& in_variables() const final
         {
             return iInVariables;
         }
-        const variable_list& out_variables() const override
+        const variable_list& out_variables() const final
         {
             return iOutVariables;
         }
-        void clear_variable(const i_string& aName) override
+        void clear_variable(const i_string& aName) final
         {
             for (auto v = in_variables().begin(); v != in_variables().end(); ++v)
                 if (v->name() == aName)
@@ -226,7 +234,7 @@ namespace neogfx
                     return;
                 }
         }
-        i_shader_variable& add_variable(const i_shader_variable& aVariable) override
+        i_shader_variable& add_variable(const i_shader_variable& aVariable) final
         {
             auto& variableList = (aVariable.qualifier().value<shader_variable_qualifier>() == shader_variable_qualifier::In ? 
                 iInVariables : iOutVariables);
@@ -293,10 +301,10 @@ namespace neogfx
                     std::map<std::pair<shader_variable_qualifier, shader_variable_location>, string> variableDefinitions;
                     for (auto const& s : aProgram.stage(type()))
                     {
-                        if (s->disabled())
-                            continue;
                         for (auto const& u : s->uniforms())
                         {
+                            if (s->disabled() && !u.shared())
+                                continue;
                             string uniformDefinition;
                             switch (u.value().which())
                             {
@@ -314,6 +322,8 @@ namespace neogfx
                             uniformDefinition.replace_all("%I%"_s, u.name());
                             uniformDefinitions[u.name()] = uniformDefinition;
                         }
+                        if (s->disabled())
+                            continue;
                         for (auto const& v : s->in_variables())
                         {
                             string variableDefinition = "layout (location = %L%) in %T% %I%;\n"_s;
@@ -344,7 +354,7 @@ namespace neogfx
                     throw unsupported_shader_language();
             }
         }
-        void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const override
+        void generate_invoke(const i_shader_program& aProgram, shader_language aLanguage, i_string& aInvokes) const final
         {
             aInvokes += "    "_s + name() + "("_s;
             bool first = true;
@@ -374,6 +384,7 @@ namespace neogfx
         bool iEnabled;
         bool iDirty;
         uniform_list iUniforms;
+        bool iHasSharedUniforms;
         variable_list iInVariables;
         variable_list iOutVariables;
     };

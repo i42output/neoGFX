@@ -158,6 +158,7 @@ namespace neogfx
     public:
         virtual shader_uniform_id id() const = 0;
         virtual const i_string& name() const = 0;
+        virtual bool shared() const = 0;
         virtual bool has_location() const = 0;
         virtual shader_uniform_location location() const = 0;
         virtual void set_location(shader_uniform_location aLocation) = 0;
@@ -199,9 +200,10 @@ namespace neogfx
         typedef base_type abstract_type;
     public:
         template <typename T>
-        shader_uniform(shader_uniform_id aId, const string& aName, const T& aValue) :
+        shader_uniform(shader_uniform_id aId, const string& aName, bool aShared, const T& aValue) :
             iId { aId },
             iName{ aName }, 
+            iShared{ aShared },
             iValue{ aValue },
             iDirty{ true }
         {
@@ -209,6 +211,7 @@ namespace neogfx
         shader_uniform(const shader_uniform& aOther) :
             iId{ aOther.iId },
             iName{ aOther.iName },
+            iShared{ aOther.iShared },
             iValue{ aOther.iValue },
             iDirty{ true }
         {
@@ -216,6 +219,7 @@ namespace neogfx
         shader_uniform(shader_uniform&& aOther) noexcept :
             iId{ std::move(aOther.iId) },
             iName{ std::move(aOther.iName) },
+            iShared{ std::move(aOther.iShared) },
             iValue{ std::move(aOther.iValue) },
             iDirty{ true }
         {
@@ -223,6 +227,7 @@ namespace neogfx
         shader_uniform(const i_shader_uniform& aOther) :
             iId{ aOther.id() },
             iName{ aOther.name() },
+            iShared{ aOther.shared()},
             iValue{ aOther.value() },
             iDirty{ true }
         {
@@ -242,47 +247,52 @@ namespace neogfx
                 return *this;
             iId = std::move(aOther.iId);
             iName = std::move(aOther.iName);
+            iShared = std::move(aOther.iShared);
             iValue = std::move(aOther.iValue);
             iDirty = true;
             return *this;
         }
     public:
-        shader_uniform_id id() const override
+        shader_uniform_id id() const final
         {
             return iId;
         }
-        const i_string& name() const override 
+        const i_string& name() const final 
         { 
             return iName; 
         }
-        bool has_location() const override
+        bool shared() const final
+        {
+            return iShared;
+        }
+        bool has_location() const final
         {
             return iLocation != std::nullopt;
         }
-        shader_uniform_location location() const override
+        shader_uniform_location location() const final
         {
             if (has_location())
                 return *iLocation;
             throw unknown_uniform_location();
         }
-        void set_location(shader_uniform_location aLocation) override
+        void set_location(shader_uniform_location aLocation) final
         {
             iLocation = aLocation;
         }
-        void clear_location() override
+        void clear_location() final
         {
             iLocation = std::nullopt;
         }
-        const abstract_t<shader_value_type>& value() const override 
+        const abstract_t<shader_value_type>& value() const final 
         { 
             return iValue; 
         }
-        abstract_t<shader_value_type>& mutable_value() override
+        abstract_t<shader_value_type>& mutable_value() final
         {
             iDirty = true;
             return iValue;
         }
-        void set_value(const abstract_t<shader_value_type>& aValue) override
+        void set_value(const abstract_t<shader_value_type>& aValue) final
         { 
             if (iValue != aValue)
             {
@@ -290,11 +300,11 @@ namespace neogfx
                 iDirty = true;
             }
         }
-        bool is_dirty() const override 
+        bool is_dirty() const final 
         { 
             return iDirty; 
         }
-        void clean() const override 
+        void clean() const final 
         { 
             iDirty = false; 
         }
@@ -317,6 +327,7 @@ namespace neogfx
     public:
         shader_uniform_id iId;
         string iName;
+        bool iShared;
         mutable std::optional<shader_uniform_location> iLocation;
         shader_value_type iValue;
         mutable bool iDirty;
@@ -366,37 +377,37 @@ namespace neogfx
                 link(aOther.link());
         }
     public:
-        const i_string& name() const override 
+        const i_string& name() const final 
         { 
             return iName; 
         }
-        shader_variable_location location() const override 
+        shader_variable_location location() const final 
         { 
             return iLocation; 
         }
-        const i_enum_t<shader_variable_qualifier>& qualifier() const override 
+        const i_enum_t<shader_variable_qualifier>& qualifier() const final 
         { 
             return iQualifier; 
         }
-        const i_enum_t<shader_data_type>& type() const override 
+        const i_enum_t<shader_data_type>& type() const final 
         { 
             return iType; 
         }
-        bool has_link() const override 
+        bool has_link() const final 
         { 
             return iLink != nullptr; 
         }
-        const i_shader_variable& link() const override 
+        const i_shader_variable& link() const final 
         { 
             if (has_link()) 
                 return *iLink; 
             throw shader_variable_not_linked(); 
         }
-        void link(const i_shader_variable& aOther) override 
+        void link(const i_shader_variable& aOther) final 
         { 
             iLink = &aOther; 
         }
-        void reset_link() override 
+        void reset_link() final 
         { 
             iLink = nullptr; 
         }
@@ -441,8 +452,9 @@ namespace neogfx
         virtual bool uniforms_changed() const = 0;
     public:
         virtual const uniform_list& uniforms() const = 0;
+        virtual bool has_shared_uniforms() const = 0;
         virtual void clear_uniform(shader_uniform_id aUniform) = 0;
-        virtual shader_uniform_id create_uniform(const i_string& aName) = 0;
+        virtual shader_uniform_id create_uniform(const i_string& aName, bool aShared = false) = 0;
         virtual shader_uniform_id find_uniform(const i_string& aName) const = 0;
         virtual void set_uniform(shader_uniform_id aUniform, value_type const& aValue) = 0;
         virtual void clear_uniform_location(shader_uniform_id aUniform) = 0;

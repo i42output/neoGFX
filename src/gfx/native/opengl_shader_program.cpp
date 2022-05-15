@@ -164,9 +164,11 @@ namespace neogfx
         bool const updateAllUniforms = need_full_uniform_update();
         for (auto& stage : stages())
             for (auto& shader : stage.second())
-                if (shader->enabled())
+                if (shader->enabled() || shader->has_shared_uniforms())
                     for (auto& uniform : shader->uniforms())
                     {
+                        if (!shader->enabled() && !uniform.shared())
+                            continue;
                         if (!uniform.is_dirty() && !updateAllUniforms)
                             continue;
                         if (uniform.value().empty())

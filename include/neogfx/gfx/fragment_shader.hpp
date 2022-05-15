@@ -224,7 +224,7 @@ namespace neogfx
         void clear_shape() override;
         void set_shape(shader_shape aShape) override;
     private:
-        cache_uniform(uShapeEnabled)
-        cache_uniform(uShape)
+        cache_shared_uniform(uShapeEnabled)
+        cache_shared_uniform(uShape)
     };
 }
