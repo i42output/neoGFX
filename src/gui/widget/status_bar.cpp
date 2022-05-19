@@ -23,12 +23,14 @@
 #include <neogfx/app/i_help.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/status_bar.hpp>
+#include <neogfx/gui/window/window.hpp>
 
 namespace neogfx
 {
-    status_bar::separator::separator() : 
-        widget{}
+    status_bar::separator::separator(i_widget& aStatusBar) :
+        widget{}, iStatusBar{ aStatusBar }
     {
+        set_padding(neogfx::padding{ 4.0, 0.0 });
     }
 
     neogfx::size_policy status_bar::separator::size_policy() const
@@ -51,7 +53,7 @@ namespace neogfx
         rect line = client_rect(false);
         line.deflate(size{ 0.0_dip, 2.0_dip });
         line.cx = 1.0;
-        color ink = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));
+        color ink = (iStatusBar.has_background_color() ? iStatusBar.background_color() : service<i_app>().current_style().palette().color(color_role::Background));
         aGc.fill_rect(line, ink.darker(0x40).with_alpha(0.5));
         ++line.x;
         aGc.fill_rect(line, ink.lighter(0x40).with_alpha(0.5));
@@ -61,23 +63,33 @@ namespace neogfx
         widget{ aLayout },
         iLayout{ *this }
     {
-        iLayout.add(make_ref<separator>());
+        set_padding(neogfx::padding{});
+        iLayout.set_padding(neogfx::padding{});
+        iLayout.add(make_ref<separator>(parent()));
         auto insertLock = make_ref<label>();
+        insertLock->set_padding(neogfx::padding{});
+        insertLock->text_widget().set_padding(neogfx::padding{});
         insertLock->text_widget().set_size_hint(size_hint{ "Insert" });
         insertLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(insertLock);
-        iLayout.add(make_ref<separator>());
+        iLayout.add(make_ref<separator>(parent()));
         auto capsLock = make_ref<label>();
+        capsLock->set_padding(neogfx::padding{});
+        capsLock->text_widget().set_padding(neogfx::padding{});
         capsLock->text_widget().set_size_hint(size_hint{ "CAP" });
         capsLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(capsLock);
-        iLayout.add(make_ref<separator>());
+        iLayout.add(make_ref<separator>(parent()));
         auto numLock = make_ref<label>();
+        numLock->set_padding(neogfx::padding{});
+        numLock->text_widget().set_padding(neogfx::padding{});
         numLock->text_widget().set_size_hint(size_hint{ "NUM" });
         numLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(numLock);
-        iLayout.add(make_ref<separator>());
+        iLayout.add(make_ref<separator>(parent()));
         auto scrlLock = make_ref<label>();
+        scrlLock->set_padding(neogfx::padding{});
+        scrlLock->text_widget().set_padding(neogfx::padding{});
         scrlLock->text_widget().set_size_hint(size_hint{ "SCRL" });
         scrlLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(scrlLock);
@@ -106,6 +118,7 @@ namespace neogfx
     status_bar::size_grip_widget::size_grip_widget(i_layout& aLayout) :
         image_widget{ aLayout }
     {
+        set_padding(neogfx::padding{ 4.0, 0.0, 0.0, 0.0 });
         set_ignore_mouse_events(false);
         set_ignore_non_client_mouse_events(false);
         set_placement(cardinal::SouthEast);
@@ -261,6 +274,34 @@ namespace neogfx
         return true;
     }
 
+    bool status_bar::has_palette_color(color_role aColorRole) const
+    {
+        if (aColorRole == color_role::Background && (iStyle & style::BackgroundAsWindowBorder) == style::BackgroundAsWindowBorder)
+        {
+            auto owningFrame = dynamic_cast<window const*>(&parent());
+            if (owningFrame)
+                return true;
+            else
+                return widget<i_status_bar>::has_palette_color(aColorRole);
+        }
+        else
+            return widget<i_status_bar>::has_palette_color(aColorRole);
+    }
+
+    color status_bar::palette_color(color_role aColorRole) const
+    {
+        if (aColorRole == color_role::Background && (iStyle & style::BackgroundAsWindowBorder) == style::BackgroundAsWindowBorder)
+        {
+            auto owningFrame = dynamic_cast<window const*>(&parent());
+            if (owningFrame)
+                return owningFrame->frame_color().darker(0x40);
+            else
+                return widget<i_status_bar>::palette_color(aColorRole);
+        }
+        else
+            return widget<i_status_bar>::palette_color(aColorRole);
+    }
+
     const i_widget& status_bar::as_widget() const
     {
         return *this;
@@ -278,6 +319,8 @@ namespace neogfx
 
     void status_bar::init()
     {
+        if ((iStyle & style::BackgroundAsWindowBorder) == style::BackgroundAsWindowBorder && dynamic_cast<window const*>(&parent()) != nullptr)
+            set_background_opacity(1.0);
         set_padding({});
         iLayout.set_padding(neogfx::padding{});
         iLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
@@ -285,10 +328,18 @@ namespace neogfx
         iNormalLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMessageLayout.set_padding(neogfx::padding{});
         iMessageLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iMessageWidget.set_padding(neogfx::padding{});
+        iMessageWidget.layout().set_padding(neogfx::padding{});
+        iMessageWidget.text_widget().set_padding(neogfx::padding{});
+        iMessageWidget.image_widget().set_padding(neogfx::padding{});
         iMessageWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMessageWidget.set_font_role(neogfx::font_role::StatusBar);
         iIdleLayout.set_padding(neogfx::padding{});
         iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iIdleWidget.set_padding(neogfx::padding{});
+        iIdleWidget.layout().set_padding(neogfx::padding{});
+        iIdleWidget.text_widget().set_padding(neogfx::padding{});
+        iIdleWidget.image_widget().set_padding(neogfx::padding{});
         iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetContainer.set_padding(neogfx::padding{});
         iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
@@ -297,10 +348,10 @@ namespace neogfx
         iPermanentWidgetLayout.set_padding(neogfx::padding{});
         auto update_size_grip = [this](style_aspect)
         {
-            auto ink1 = (has_base_color() ? base_color() : service<i_app>().current_style().palette().color(color_role::Base));
+            auto ink1 = (has_background_color() ? background_color() : service<i_app>().current_style().palette().color(color_role::Background));
             ink1 = ink1.shaded(0x60);
             auto ink2 = ink1.darker(0x30);
-            if (iSizeGripTexture == std::nullopt || iSizeGripTexture->first != ink1)
+            if (iSizeGripTexture[ink1] == std::nullopt)
             {
                 const char* sSizeGripTextureImagePattern
                 {
@@ -357,14 +408,15 @@ namespace neogfx
                     "00000000000000000000000000"
                     "00000000000000000000000000"
                 };
-                iSizeGripTexture.emplace(ink1, !high_dpi() ?
+                iSizeGripTexture[ink1].emplace(!high_dpi() ?
                     neogfx::image{ "neogfx::status_bar::iSizeGripTexture::" + ink1.to_string(), sSizeGripTextureImagePattern, { { "paper", color{} }, { "ink1", ink1 }, { "ink2", ink2 } } } :
                     neogfx::image{ "neogfx::status_bar::iSizeGripHighDpiTexture::" + ink1.to_string(), sSizeGripHighDpiTextureImagePattern, { { "paper", color{} },{ "ink1", ink1 },{ "ink2", ink2 } }, 2.0 });
             }
-            iSizeGrip.set_image(iSizeGripTexture->second);
+            iSizeGrip.set_image(iSizeGripTexture[ink1].value());
         };
         iSink += service<i_surface_manager>().dpi_changed([update_size_grip](i_surface&) { update_size_grip(style_aspect::Geometry); });
         iSink += service<i_app>().current_style_changed(update_size_grip);
+        iSink += root().window_event([update_size_grip](window_event& we) { if (we.type() == window_event_type::FocusGained || we.type() == window_event_type::FocusLost) update_size_grip(style_aspect::Color); });
         update_size_grip(style_aspect::Color);
         iSink += service<i_app>().help().help_activated([this](const i_help_source&) { update_widgets(); });
         iSink += service<i_app>().help().help_deactivated([this](const i_help_source&) { update_widgets(); });

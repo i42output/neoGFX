@@ -38,10 +38,11 @@ namespace neogfx
         typedef i_status_bar abstract_type;
         enum class style : uint32_t
         {
-            DisplayNone             = 0x0000,
-            DisplayMessage          = 0x0001,
-            DisplayKeyboardLocks    = 0x0010,
-            DisplaySizeGrip         = 0x8000
+            DisplayNone                 = 0x0000,
+            DisplayMessage              = 0x0001,
+            DisplayKeyboardLocks        = 0x0010,
+            DisplaySizeGrip             = 0x4000,
+            BackgroundAsWindowBorder    = 0x8000
         };
         friend constexpr style operator|(style aLhs, style aRhs)
         {
@@ -55,12 +56,14 @@ namespace neogfx
         class separator : public widget<>
         {
         public:
-            separator();
+            separator(i_widget& aStatusBar);
         public:
             neogfx::size_policy size_policy() const override;
             size minimum_size(optional_size const& aAvailableSpace) const override;
         public:
             void paint(i_graphics_context& aGc) const override;
+        private:
+            i_widget& iStatusBar;
         };
     private:
         class keyboard_lock_status : public widget<>
@@ -113,6 +116,9 @@ namespace neogfx
     protected:
         bool is_managing_layout() const override;
     protected:
+        bool has_palette_color(color_role aColorRole) const override;
+        color palette_color(color_role aColorRole) const override;
+    protected:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     protected:
@@ -134,7 +140,7 @@ namespace neogfx
         horizontal_layout iNormalWidgetLayout;
         horizontal_layout iPermanentWidgetLayout;
         keyboard_lock_status iKeyboardLockStatus;
-        mutable std::optional<std::pair<color, texture>> iSizeGripTexture;
+        mutable std::map<color, std::optional<texture>> iSizeGripTexture;
         size_grip_widget iSizeGrip;
     };
 }
