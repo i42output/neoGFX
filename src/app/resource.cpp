@@ -133,6 +133,11 @@ namespace neogfx
     {
         return iUri;
     }
+
+    bool resource::is_empty() const
+    {
+        return iData.empty();
+    }
     
     const void* resource::cdata() const
     {

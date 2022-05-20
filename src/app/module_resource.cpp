@@ -59,6 +59,11 @@ namespace neogfx
         return iUri;
     }
 
+    bool module_resource::is_empty() const
+    {
+        return size() != 0;
+    }
+
     const void* module_resource::cdata() const
     {
         return iData;

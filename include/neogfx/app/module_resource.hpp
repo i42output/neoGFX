@@ -43,6 +43,7 @@ namespace neogfx
         i_string const& error_string() const override;
     public:
         i_string const& uri() const override;
+        bool is_empty() const override;
         const void* cdata() const override;
         const void* data() const override;
         void* data() override;

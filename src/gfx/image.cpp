@@ -205,6 +205,11 @@ namespace neogfx
         return iUri;
     }
 
+    bool image::is_empty() const
+    {
+        return iData.empty();
+    }
+
     const void* image::cdata() const
     {
         if (iData.empty())

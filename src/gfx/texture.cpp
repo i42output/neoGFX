@@ -39,12 +39,12 @@ namespace neogfx
     }
 
     texture::texture(const i_image& aImage, texture_data_format aDataFormat, texture_data_type aDataType) :
-        iNativeTexture{ service<i_texture_manager>().create_texture(aImage, aDataFormat, aDataType) }
+        iNativeTexture{ !aImage.is_empty() ? service<i_texture_manager>().create_texture(aImage, aDataFormat, aDataType) : ref_ptr<i_texture>{} }
     {
     }
 
     texture::texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType) :
-        iNativeTexture{ service<i_texture_manager>().create_texture(aImage, aImagePart, aDataFormat, aDataType) }
+        iNativeTexture{ !aImage.is_empty() ? service<i_texture_manager>().create_texture(aImage, aImagePart, aDataFormat, aDataType) : ref_ptr<i_texture>{} }
     {
     }
 
