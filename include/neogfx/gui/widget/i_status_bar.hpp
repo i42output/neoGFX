@@ -60,21 +60,21 @@ namespace neogfx
             return *w;
         }
         template<typename WidgetType>
-        WidgetType& add_normal_widget_at(widget_index aPosition, i_widget& aWidget)
+        WidgetType& add_normal_widget_at(widget_index aPosition)
         {
             auto w = make_ref<WidgetType>();
             add_normal_widget_at(aPosition, w);
             return *w;
         }
         template<typename WidgetType>
-        WidgetType& add_permanent_widget(i_widget& aWidget)
+        WidgetType& add_permanent_widget()
         {
             auto w = make_ref<WidgetType>();
             add_permanent_widget(w);
             return *w;
         }
         template<typename WidgetType>
-        WidgetType& add_permanent_widget_at(widget_index aPosition, i_widget& aWidget)
+        WidgetType& add_permanent_widget_at(widget_index aPosition)
         {
             auto w = make_ref<WidgetType>();
             add_permanent_widget_at(aPosition, w);
