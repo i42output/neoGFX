@@ -94,7 +94,7 @@ namespace neogfx
         // construction
     public:
         virtual ~i_graphics_context() = default;
-        // operations
+        // units
     public:
         virtual delta to_device_units(const delta& aValue) const = 0;
         virtual size to_device_units(const size& aValue) const = 0;
@@ -107,29 +107,44 @@ namespace neogfx
         virtual point from_device_units(const point& aValue) const = 0;
         virtual rect from_device_units(const rect& aValue) const = 0;
         virtual path from_device_units(const path& aValue) const = 0;
+        // state
+    public:
+        virtual void flush() const = 0;
+        // layers
+    public:
         virtual layer_t layer() const = 0;
         virtual void set_layer(layer_t aLayer) = 0;
+        // coordinate system
+    public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
         virtual void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const = 0;
-        virtual void set_default_font(const font& aDefaultFont) const = 0;
+        // viewport
+    public:
         virtual void set_extents(const size& aExtents) const = 0;
         virtual void set_origin(const point& aOrigin) const = 0;
         virtual point origin() const = 0;
-        virtual void flush() const = 0;
         virtual void set_default_viewport() const = 0;
         virtual void set_viewport(const rect& aViewportRect) const = 0;
+        // clipping
+    public:
         virtual void scissor_on(const rect& aRect) const = 0;
         virtual void scissor_off() const = 0;
+        // anti-aliasing
+    public:
+        virtual neogfx::smoothing_mode smoothing_mode() const = 0;
+        virtual void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const = 0;
         virtual bool snap_to_pixel() const = 0;
         virtual void set_snap_to_pixel(bool aSnap) const = 0;
+        // blending
+    public:
         virtual double opacity() const = 0;
         virtual void set_opacity(double aOpacity) const = 0;
         virtual neogfx::blending_mode blending_mode() const = 0;
         virtual void set_blending_mode(neogfx::blending_mode aBlendingMode) const = 0;
-        virtual neogfx::smoothing_mode smoothing_mode() const = 0;
-        virtual void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const = 0;
+        // drawing mode
+    public:
         virtual void push_logical_operation(logical_operation aLogicalOperation) const = 0;
         virtual void pop_logical_operation() const = 0;
         virtual void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) const = 0;
@@ -137,13 +152,19 @@ namespace neogfx
         virtual bool is_subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_off() const = 0;
+        // canvas
+    public:
         virtual void clear(const color& aColor, const std::optional<scalar>& aZpos = std::optional<scalar>{}) const = 0;
         virtual void clear_depth_buffer() const = 0;
         virtual void clear_stencil_buffer() const = 0;
         virtual void blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const = 0;
         virtual void blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const = 0;
+        // gradient
+    public:
         virtual void clear_gradient() = 0;
         virtual void set_gradient(const gradient& aGradient, const rect& aBoundingBox) = 0;
+        // shape
+    public:
         virtual void set_pixel(const point& aPoint, const color& aColor) const = 0;
         virtual void draw_pixel(const point& aPoint, const color& aColor) const = 0;
         virtual void draw_line(const point& aFrom, const point& aTo, const pen& aPen) const = 0;
@@ -169,6 +190,9 @@ namespace neogfx
         virtual void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const = 0;
         virtual void fill_path(const path& aPath, const brush& aFill) const = 0;
         virtual void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const = 0;
+        // text
+    public:
+        virtual void set_default_font(const font& aDefaultFont) const = 0;
         virtual size text_extent(std::string const& aText, const font& aFont) const = 0;
         virtual size text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
         virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const = 0;
@@ -219,13 +243,19 @@ namespace neogfx
         virtual bool password() const = 0;
         virtual std::string const& password_mask() const = 0;
         virtual void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F") = 0;
+        // texture
+    public:
         virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
         virtual void draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
+        // 3D
+    public:
+        // todo: set_transformation et al
         virtual void draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) const = 0;
+        // helpers
     public:
         void draw_rounded_rect(const rect& aRect, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const
         {
