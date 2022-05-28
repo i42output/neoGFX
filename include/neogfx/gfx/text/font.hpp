@@ -43,13 +43,13 @@ namespace neogfx
         BelowAscenderLine   = 0x00000040,
         AboveBaseline       = 0x00000040,
         Emulated            = 0x80000000,
-        BoldItalic = Bold | Italic,
+        BoldItalic          = Bold | Italic,
         BoldItalicUnderline = Bold | Italic | Underline,
-        BoldUnderline = Bold | Underline,
-        ItalicUnderline = Italic | Underline,
-        EmulatedBold = Bold | Emulated,
-        EmulatedItalic = Italic | Emulated,
-        EmulatedBoldItalic = Bold | Italic | Emulated
+        BoldUnderline       = Bold | Underline,
+        ItalicUnderline     = Italic | Underline,
+        EmulatedBold        = Bold | Emulated,
+        EmulatedItalic      = Italic | Emulated,
+        EmulatedBoldItalic  = Bold | Italic | Emulated
     };
 
     inline constexpr font_style operator~(font_style aLhs)
