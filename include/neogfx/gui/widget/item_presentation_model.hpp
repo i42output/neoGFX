@@ -142,11 +142,17 @@ namespace neogfx
     public:
         bool metrics_available() const
         {
-            return iAttachment && iAttachment->has_root();
+            return attached() && attachment().has_root();
         }
         bool attached() const final
         {
             return iAttachment != nullptr;
+        }
+        i_widget& attachment() const final
+        {
+            if (iAttachment == nullptr)
+                throw not_attached();
+            return *iAttachment;
         }
         void attach(i_ref_ptr<i_widget> const& aWidget) final
         {
@@ -322,7 +328,7 @@ namespace neogfx
                 return units_converter(aUnitsContext).from_device_units(*column(aColumnIndex).headingExtents);
             if (!metrics_available())
                 return size{};
-            size columnHeadingExtents = graphics_context{ *iAttachment, graphics_context::type::Unattached }.
+            size columnHeadingExtents = graphics_context{ attachment(), graphics_context::type::Unattached }.
                 multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
             column(aColumnIndex).headingExtents = units_converter(aUnitsContext).to_device_units(columnHeadingExtents);
             column(aColumnIndex).headingExtents->cx = std::ceil(column(aColumnIndex).headingExtents->cx);
@@ -846,7 +852,7 @@ namespace neogfx
                 return *cell_meta(aIndex).text;
             auto const& cellFont = cell_font(aIndex);
             auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
-            cell_meta(aIndex).text = graphics_context{ *iAttachment, graphics_context::type::Unattached }.
+            cell_meta(aIndex).text = graphics_context{ attachment(), graphics_context::type::Unattached }.
                 to_glyph_text(cell_to_string(aIndex), effectiveFont);
             return *cell_meta(aIndex).text;
         }
@@ -862,7 +868,7 @@ namespace neogfx
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
             if (cell_editable(aIndex) && cellInfo.dataStep != neolib::none)
             {
-                cellExtents.cx = std::max(cellExtents.cx, graphics_context{ *iAttachment, graphics_context::type::Unattached }.
+                cellExtents.cx = std::max(cellExtents.cx, graphics_context{ attachment(), graphics_context::type::Unattached }.
                     text_extent(cellInfo.dataMax.to_string(), effectiveFont).cx);
                 cellExtents.cx += dip(basic_spin_box<double>::INTERNAL_SPACING.cx + basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cx); // todo: get this from widget metrics (skin API)
                 cellExtents.cy = std::max<dimension>(cellExtents.cy, dip(basic_spin_box<double>::SPIN_BUTTON_MINIMUM_SIZE.cy * 2.0));
@@ -1171,7 +1177,8 @@ namespace neogfx
                     col.remove_cell_width(cellMeta.extents->cx);
                 cellMeta.text = std::nullopt;
                 cellMeta.extents = std::nullopt;
-                cell_extents(index, *iAttachment);
+                if (attached())
+                    cell_extents(index, attachment());
                 ItemChanged.trigger(from_item_model_index(aItemIndex));
             }
         }

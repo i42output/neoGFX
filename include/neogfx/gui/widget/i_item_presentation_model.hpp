@@ -251,6 +251,7 @@ namespace neogfx
         virtual ~i_item_presentation_model() = default;
     public:
         virtual bool attached() const = 0;
+        virtual i_widget& attachment() const = 0;
         virtual void attach(i_ref_ptr<i_widget> const& aWidget) = 0;
         virtual void detach() = 0;
     public:
