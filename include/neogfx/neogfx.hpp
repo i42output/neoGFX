@@ -53,6 +53,7 @@ namespace neogfx
 
     using neolib::to_const;
 
+    using neolib::lifetime;
     using neolib::destroying_flag;
     using neolib::destroyed_flag;
 
