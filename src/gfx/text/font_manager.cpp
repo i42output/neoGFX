@@ -204,6 +204,7 @@ namespace neogfx
             {
                 hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
+                hb_buffer_set_cluster_level(iBuf, HB_BUFFER_CLUSTER_LEVEL_CHARACTERS);
                 std::vector<uint32_t> reversed;
                 if (std::get<2>(aGlyphRun) != text_direction::None_RTL)
                     hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
@@ -316,50 +317,36 @@ namespace neogfx
             fontsTried.clear();
             auto const g = iGlyphsList.begin();
             iResults.reserve(g->glyph_count());
-            for (uint32_t i = 0; i < g->glyph_count();)
+            for (uint32_t i = 0; i < g->glyph_count(); ++i)
             {
                 auto const& gi = g->glyph_info(i);
-                auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + gi.cluster, std::get<1>(aGlyphRun));
-                if (gi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji)
-                    iResults.push_back(std::make_pair(g, i++));
+                auto glyph_match = [&](glyphs const& aGlyphs, uint32_t aIndex) -> bool
+                {
+                    auto const& hgi = aGlyphs.glyph_info(aIndex);
+                    if (hgi.cluster != gi.cluster)
+                        return false;
+                    auto tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + hgi.cluster, std::get<1>(aGlyphRun));
+                    return hgi.codepoint != 0 || tc == text_category::Whitespace || tc == text_category::Emoji;
+                };
+                if (glyph_match(*g, i))
+                    iResults.push_back(std::make_pair(g, i));
                 else
                 {
-                    std::vector<uint32_t> clusters;
-                    while (i < g->glyph_count() && g->glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
+                    auto next = std::next(g);
+                    bool found = false;
+                    while (!found && next != iGlyphsList.end())
                     {
-                        clusters.push_back(g->glyph_info(i).cluster);
-                        ++i;
-                    }
-                    std::sort(clusters.begin(), clusters.end());
-                    auto nextFallback = std::next(g);
-                    while (nextFallback != iGlyphsList.end() && !clusters.empty())
-                    {
-                        auto currentFallback = nextFallback++;
-                        auto const& fallbackGlyphs = *currentFallback;
-                        for (uint32_t j = 0; j < fallbackGlyphs.glyph_count(); ++j)
+                        for (uint32_t j = 0; j < next->glyph_count(); ++j)
                         {
-                            if (fallbackGlyphs.glyph_info(j).codepoint != 0)
+                            if (glyph_match(*next, j))
                             {
-                                auto const c = std::find(clusters.begin(), clusters.end(), fallbackGlyphs.glyph_info(j).cluster);
-                                if (c != clusters.end())
-                                {
-                                    iResults.push_back(std::make_pair(currentFallback, j));
-                                    clusters.erase(c);
-                                }
-                            }
-                            else
-                            {
-                                tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(aGlyphRun) + fallbackGlyphs.glyph_info(j).cluster, std::get<1>(aGlyphRun));
-                                if (tc != text_category::Whitespace && tc != text_category::Emoji)
-                                    break;
-                                else
-                                    goto whitespace_break;
+                                iResults.push_back(std::make_pair(next, j));
+                                found = true;
                             }
                         }
+                        ++next;
                     }
                 }
-            whitespace_break:
-                ;
             }
         }
     public:
@@ -531,15 +518,23 @@ namespace neogfx
             case text_category::LTR:
                 currentLineHasLTR = true;
                 if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
+                    currentDirection == text_direction::Mark_LTR || currentDirection == text_direction::Mark_RTL ||
                     currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
                     currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
                     currentDirection = text_direction::LTR;
                 break;
             case text_category::RTL:
                 if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
+                    currentDirection == text_direction::Mark_LTR || currentDirection == text_direction::Mark_RTL ||
                     currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
                     currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
                     currentDirection = text_direction::RTL;
+                break;
+            case text_category::Mark:
+                if (currentDirection == text_direction::LTR)
+                    currentDirection = text_direction::Mark_LTR;
+                else if (currentDirection == text_direction::RTL)
+                    currentDirection = text_direction::Mark_RTL;
                 break;
             case text_category::None:
                 if (currentDirection == text_direction::LTR)
@@ -560,21 +555,21 @@ namespace neogfx
                     currentDirection = text_direction::Emoji_RTL;
                 break;
             }
-            if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::Digit_LTR) // optimization (less runs for LTR text)
+            if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::Mark_LTR || currentDirection == text_direction::Digit_LTR) // optimization (less runs for LTR text)
                 currentDirection = text_direction::LTR;
             hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[codePointIndex]);
             if (currentScript == HB_SCRIPT_COMMON || currentScript == HB_SCRIPT_INHERITED)
                 currentScript = previousScript;
             bool newRun =
                 previousFont != currentFont ||
-                (newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::None_RTL || previousDirection == text_direction::Digit_RTL || previousDirection == text_direction::Emoji_RTL)) ||
+                (newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::None_RTL || previousDirection == text_direction::Mark_RTL || previousDirection == text_direction::Digit_RTL || previousDirection == text_direction::Emoji_RTL)) ||
                 currentCategory == text_category::Mnemonic ||
                 previousCategory == text_category::Mnemonic ||
                 previousDirection != currentDirection;
             if (!newRun)
             {
                 if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) &&
-                    (currentDirection == text_direction::RTL || currentDirection == text_direction::None_RTL || currentDirection == text_direction::Digit_RTL || currentDirection == text_direction::Emoji_RTL))
+                    (currentDirection == text_direction::RTL || currentDirection == text_direction::None_RTL || currentDirection == text_direction::Mark_RTL || currentDirection == text_direction::Digit_RTL || currentDirection == text_direction::Emoji_RTL))
                 {
                     for (std::size_t j = codePointIndex + 1; j <= lastCodePointIndex; ++j)
                     {
@@ -603,29 +598,6 @@ namespace neogfx
             previousScript = currentScript;
             if (codePointIndex == lastCodePointIndex)
                 runs.push_back(std::make_tuple(runStart, &codePoints[codePointIndex + 1], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
-            if (newLine && (newRun || codePointIndex == lastCodePointIndex))
-            {
-                for (auto i = runs.rbegin(); i != runs.rend(); ++i)
-                {
-                    if (std::get<2>(*i) == text_direction::RTL)
-                        break;
-                    else
-                    {
-                        switch (std::get<2>(*i))
-                        {
-                        case text_direction::None_RTL:
-                            std::get<2>(*i) = text_direction::None_LTR;
-                            break;
-                        case text_direction::Digit_RTL:
-                            std::get<2>(*i) = text_direction::LTR;
-                            break;
-                        case text_direction::Emoji_RTL:
-                            std::get<2>(*i) = text_direction::Emoji_LTR;
-                            break;
-                        }
-                    }
-                }
-            }
             previousFont = currentFont;
         }
 

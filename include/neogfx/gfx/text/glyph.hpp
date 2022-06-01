@@ -35,30 +35,32 @@ namespace neogfx
 
     enum class text_category : uint8_t
     {
-        Unknown        = 0x00,
+        Unknown     = 0x00,
         None        = 0x01,
-        Whitespace    = 0x02,
-        Digit        = 0x03,
-        LTR            = 0x04,
-        RTL            = 0x05,
+        Whitespace  = 0x02,
+        Digit       = 0x03,
+        LTR         = 0x04,
+        RTL         = 0x05,
         Mark        = 0x06,
         Mnemonic    = 0x07,
-        Emoji        = 0x08,
-        Control        = 0x09
+        Emoji       = 0x08,
+        Control     = 0x09
     };
 
     enum class text_direction : uint8_t
     {
-        Invalid =        0x00,
-        LTR =            0x01,
-        RTL =            0x02,
-        None_LTR =        0x04 | 0x01,
-        None_RTL =        0x08 | 0x02,
-        Digit_LTR =        0x10 | 0x01, // unused
-        Digit_RTL =        0x20 | 0x02,
-        Emoji_LTR =        0x40 | 0x01,
-        Emoji_RTL =        0x80 | 0x02,
-        BaseMask =        0x01 | 0x02
+        Invalid     = 0x00,
+        LTR         = 0x01,
+        RTL         = 0x02,
+        None_LTR    = 0x04 | LTR,
+        None_RTL    = 0x04 | RTL,
+        Mark_LTR    = 0x08 | LTR,
+        Mark_RTL    = 0x08 | RTL,
+        Digit_LTR   = 0x10 | LTR, // unused
+        Digit_RTL   = 0x10 | RTL,
+        Emoji_LTR   = 0x20 | LTR,
+        Emoji_RTL   = 0x20 | RTL,
+        BaseMask    = LTR | RTL
     };
 
     inline text_direction base_text_direction(text_direction aDirection)
