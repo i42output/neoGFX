@@ -267,6 +267,15 @@ namespace neogfx
         auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
             *iSectionWidths[aSectionIndex].manual :
             iSectionWidths[aSectionIndex].calculated);
+        auto const lastColumn = presentation_model().columns() - 1u;
+        thread_local bool tInSectionWidth = false;
+        if (aSectionIndex == lastColumn && expand_last_column() && !tInSectionWidth)
+        {
+            neolib::scoped_flag sf{ tInSectionWidth };
+            auto const delta = units_converter(*this).to_device_units(client_rect(false).cx - total_width());
+            if (delta > 0.0)
+                result += delta;
+        }
         if (aForHeaderButton && aSectionIndex == 0)
             result += presentation_model().cell_spacing(*this).cx / 2.0;
         return result;
@@ -433,22 +442,24 @@ namespace neogfx
                 button.enable(false);
             }
         }
-        for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+        for (uint32_t col = 0u; col < presentation_model().columns(); ++col)
             update_section_width(col, presentation_model().column_width(col, *this, true));
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
     }
 
     bool header_view::update_section_width(uint32_t aColumn, dimension aColumnWidth)
     {
-        dimension headingWidth = presentation_model().column_heading_extents(aColumn, *this).cx + presentation_model().cell_padding(*this).size().cx * 2.0;
-        dimension oldSectionWidth = iSectionWidths[aColumn].calculated;
+        dimension const oldSectionWidth = iSectionWidths[aColumn].calculated;
+        dimension const headingWidth = presentation_model().column_heading_extents(aColumn, *this).cx + presentation_model().cell_padding(*this).size().cx * 2.0;
+        auto const lastColumn = presentation_model().columns() - 1u;
         iSectionWidths[aColumn].calculated = std::max(iSectionWidths[aColumn].calculated, units_converter(*this).to_device_units(std::max(headingWidth, aColumnWidth)));
         if (section_width(aColumn) != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
         {
-            if (!expand_last_column() || aColumn != presentation_model().columns() - 1)
-                layout().get_widget_at(aColumn).set_fixed_size(size{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy });
+            size const widgetSize{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy };
+            if (!expand_last_column() || aColumn != lastColumn)
+                layout().get_widget_at(aColumn).set_fixed_size(widgetSize);
             else
-                layout().get_widget_at(aColumn).set_minimum_size(size{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy });
+                layout().get_widget_at(aColumn).set_minimum_size(widgetSize);
             return true;
         }
         return false;

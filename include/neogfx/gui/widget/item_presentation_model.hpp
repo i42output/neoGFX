@@ -330,9 +330,7 @@ namespace neogfx
                 return size{};
             size columnHeadingExtents = graphics_context{ attachment(), graphics_context::type::Unattached }.
                 multiline_text_extent(column_heading_text(aColumnIndex), column(aColumnIndex).headingFont);
-            column(aColumnIndex).headingExtents = units_converter(aUnitsContext).to_device_units(columnHeadingExtents);
-            column(aColumnIndex).headingExtents->cx = std::ceil(column(aColumnIndex).headingExtents->cx);
-            column(aColumnIndex).headingExtents->cy = std::ceil(column(aColumnIndex).headingExtents->cy);
+            column(aColumnIndex).headingExtents = units_converter(aUnitsContext).to_device_units(columnHeadingExtents).ceil();
             return units_converter(aUnitsContext).from_device_units(*column(aColumnIndex).headingExtents);
         }
         void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) final
