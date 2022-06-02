@@ -146,7 +146,7 @@ namespace neogfx
                 auto const radius = dip(CURSOR_RADIUS);
                 auto const circumference = 2.0 * math::pi<double>() * radius;
                 aGc.draw_circle(center, radius, pen{ color::White, dip(CURSOR_THICKNESS) });
-                aGc.line_stipple_on(radius, 0x5555, circumference * neolib::thread::program_elapsed_ms() / 1000.0);
+                aGc.line_stipple_on(circumference / 6.0, 0x5555, circumference * neolib::thread::program_elapsed_ms() / 1000.0);
                 aGc.draw_circle(center, radius, pen{ color::Black, dip(CURSOR_THICKNESS) });
                 aGc.line_stipple_off();
             }
