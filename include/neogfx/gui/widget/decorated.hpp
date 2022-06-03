@@ -477,7 +477,7 @@ namespace neogfx
             if (iInitialized)
                 return;
 
-            if ((decoration_style() & neogfx::decoration_style::Window) == neogfx::decoration_style::Window && !as_widget().is_root())
+            if ((decoration_style() & neogfx::decoration_style::NestedWindow) == neogfx::decoration_style::Window && !as_widget().is_root())
                 return; // surface not yet created
 
             as_widget().set_padding(neogfx::padding{});

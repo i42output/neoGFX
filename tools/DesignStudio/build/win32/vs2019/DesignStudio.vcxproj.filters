@@ -131,9 +131,6 @@
     <ClInclude Include="x64\Tools_Debug\GeneratedFiles\DesignStudio.ui.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\workflow.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\object_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
