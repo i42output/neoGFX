@@ -120,6 +120,7 @@ namespace neogfx
         struct tracking
         {
             widget_part_e part;
+            point startPosition;
             size startSize;
             point trackFrom;
         };
@@ -451,7 +452,7 @@ namespace neogfx
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
-                    iTracking = tracking{ clickedPart.part, resizing_context().extents(), widget_type::to_window_coordinates(aPosition) };
+                    iTracking = tracking{ clickedPart.part, resizing_context().position(), resizing_context().extents(), widget_type::to_window_coordinates(aPosition) };
                     if (as_widget().has_root())
                         as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
                 }
@@ -542,10 +543,15 @@ namespace neogfx
             {
                 i_layout_item& resizingContext = resizing_context();
                 auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;
+                auto const currentPosition = resizingContext.position();
                 auto const currentSize = resizingContext.extents();
+                optional_point newPosition;
                 optional_size newSize;
                 switch (iTracking->part)
                 {
+                case widget_part::TitleBar:
+                    newPosition = iTracking->startPosition + delta;
+                    break;
                 case widget_part::BorderLeft:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy });
                     break;
@@ -571,14 +577,32 @@ namespace neogfx
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy + delta.y });
                     break;
                 }
-                if (newSize != currentSize)
+                if (newPosition && newPosition != currentPosition)
+                {
+#ifdef NEOGFX_DEBUG
+                    if (debug::layoutItem == this)
+                        service<debug::logger>() << "update_tracking(" << aPosition << "): " << currentPosition << " -> " << newPosition << endl;
+#endif // NEOGFX_DEBUG
+                    if ((decoration_style() & neogfx::decoration_style::Nested) != neogfx::decoration_style::Nested)
+                    {
+                        // todo - undock/float
+                    }
+                    else
+                        as_widget().move(newPosition.value());
+                }
+                if (newSize && newSize != currentSize)
                 {                
 #ifdef NEOGFX_DEBUG
                     if (debug::layoutItem == this)
                         service<debug::logger>() << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << endl;
 #endif // NEOGFX_DEBUG
-                    resizingContext.set_fixed_size(newSize, false);
-                    fix_weightings();
+                    if ((decoration_style() & neogfx::decoration_style::Nested) != neogfx::decoration_style::Nested)
+                    {
+                        resizingContext.set_fixed_size(newSize, false);
+                        fix_weightings();
+                    }
+                    else
+                        as_widget().resize(newSize.value());
                 }
             }
         }
