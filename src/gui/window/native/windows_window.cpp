@@ -74,6 +74,7 @@
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include "../../../gfx/native/opengl.hpp"
 #include "../../../gfx/native/opengl_rendering_context.hpp"
 #include "../../../hid/native/windows_keyboard.hpp"
@@ -550,6 +551,8 @@ namespace neogfx
         {
             iVisible = true;
             ::ShowWindow(iHandle, aActivate ? SW_SHOW : SW_SHOWNA);
+            if (aActivate)
+                service<i_window_manager>().activate_window(surface_window().as_window());
         }
 
         void window::hide()
@@ -604,15 +607,25 @@ namespace neogfx
 
         bool window::is_active() const
         {
-            return ::GetForegroundWindow() == iHandle;
+            return ::GetForegroundWindow() == iHandle && iActive;
         }
 
         void window::activate()
         {
             if (!enabled())
                 return;
+            if (is_active())
+                return;
             ::SetForegroundWindow(iHandle);
             ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            iActive = true;
+            surface_window().as_widget().update(true);
+        }
+
+        void window::deactivate()
+        {
+            iActive = false;
+            surface_window().as_widget().update(true);
         }
 
         bool window::is_iconic() const
@@ -1430,7 +1443,7 @@ namespace neogfx
                 DeleteObject(region);
             }
 #endif
-
+            surface_window().set_native_window(*this);
          }
 
          void window::set_destroying()

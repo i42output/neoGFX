@@ -67,6 +67,9 @@ namespace neogfx::DesignStudio
                 auto widget = iSelectedElement->needs_caddy() ? ref_ptr<i_widget>{ widgetCaddy } : ref_ptr<i_widget>{ widgetCaddy->element().layout_item().as_widget() };
                 auto const position = aTarget.as_widget().to_client_coordinates(widget->to_window_coordinates(point{}));
                 aTarget.as_widget().add(widget);
+                if (!iSelectedElement->needs_caddy() && iSelectedElement->layout_item().is_widget() && iSelectedElement->layout_item().as_widget().is_root() && 
+                    iSelectedElement->layout_item().as_widget().root().is_nested())
+                    service<i_surface_manager>().nest_for(aTarget.as_widget(), nest_type::MDI).add(iSelectedElement->layout_item().as_widget().root().native_window());
                 widget->move(position);
                 iSelectedElement->set_mode(element_mode::None);
                 if (iSelectedElement->group() == element_group::Workflow)

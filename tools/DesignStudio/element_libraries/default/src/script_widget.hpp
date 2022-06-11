@@ -32,11 +32,12 @@ namespace neogfx::DesignStudio
         typedef window base_type;
     public:
         script_widget(i_widget& aParent, window_style aStyle) :
-            window{ aParent, aStyle },
+            window{ aParent, window_placement{ rect{ point{}, size{ 256.0_dip, 160.0_dip } } }, aStyle },
             iEditor{ client_layout() }
         {
             set_padding(neogfx::padding{ 2.0_dip, 2.0_dip, 2.0_dip, 2.0_dip });
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
+            debug::layoutItem = this;
         }
     private:
         text_edit iEditor;

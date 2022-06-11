@@ -267,8 +267,8 @@ namespace neogfx
     {
         if (iParent != &aParent)
         {
-            if (aParent.has_root())
-                iRoot = &aParent.root();
+            if (!self_type::is_root() && aParent.has_root())
+                self_type::set_root(aParent.root());
             if ((self_type::is_root() && !self_type::root().is_nested()) || aParent.adding_child())
             {
                 iParent = &aParent;
@@ -906,7 +906,7 @@ namespace neogfx
             }
         }
         if (self_type::is_root())
-            self_type::root().surface().move_surface(!self_type::root().is_nested() ? self.position() : self.origin());
+            self_type::root().surface().move_surface(self.position());
         PositionChanged.trigger();
     }
 

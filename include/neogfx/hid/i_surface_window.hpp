@@ -34,6 +34,8 @@ namespace neogfx
     class i_surface_window : public i_surface
     {
     public:
+        typedef i_surface_window abstract_type;
+    public:
         struct no_native_window : std::logic_error { no_native_window() : std::logic_error("neogfx::i_surface::no_native_window") {} };
         struct widget_not_clicked : std::logic_error { widget_not_clicked() : std::logic_error("neogfx::i_surface_window::widget_not_clicked") {} };
         struct widget_not_capturing : std::logic_error { widget_not_capturing() : std::logic_error("neogfx::i_surface_window::widget_not_capturing") {} };
@@ -41,6 +43,7 @@ namespace neogfx
         virtual bool has_native_window() const = 0;
         virtual const i_native_window& native_window() const = 0;
         virtual i_native_window& native_window() = 0;
+        virtual void set_native_window(i_native_window& aNativeWindow) = 0;
     public:
         virtual void handle_dpi_changed() = 0;
     public:

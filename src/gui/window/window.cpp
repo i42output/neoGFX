@@ -245,17 +245,16 @@ namespace neogfx
                 throw fullscreen_window_cannot_nest();
             iStyle |= window_style::Fullscreen;
             iStyle &= ~(window_style::Resize | window_style::MinimizeBox | window_style::MaximizeBox);
-            iSurfaceWindow = std::make_unique<surface_window>(
+            make_ref<surface_window>(
                 *this,
-                [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
+                [&](i_surface_window& aProxy)
             {
                 service<i_rendering_engine>().create_window(
                     service<i_surface_manager>(),
                     aProxy,
                     *aPlacement.video_mode(),
                     title_text(),
-                    style(),
-                    aNewWindow);
+                    style());
             });
         }
         else
@@ -272,18 +271,31 @@ namespace neogfx
             default:
             case window_state::Normal:
                 if (!has_parent_window())
-                    iSurfaceWindow = std::make_unique<surface_window>(
+                    make_ref<surface_window>(
                         *this,
-                        [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
+                        [&](i_surface_window& aProxy)
                         { 
-                            service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style(), aNewWindow); 
+                            service<i_rendering_engine>().create_window(
+                                service<i_surface_manager>(), 
+                                aProxy, 
+                                correctedPlacement.normal_geometry()->top_left(), 
+                                correctedPlacement.normal_geometry()->extents(), 
+                                title_text(), 
+                                style()); 
                         });
                 else
-                    iSurfaceWindow = std::make_unique<surface_window>(
+                    make_ref<surface_window>(
                         *this,
-                        [&](i_surface_window& aProxy, i_ref_ptr<i_native_window>& aNewWindow)
+                        [&](i_surface_window& aProxy)
                         { 
-                            service<i_rendering_engine>().create_window(service<i_surface_manager>(), aProxy, parent_window().surface().native_surface(), correctedPlacement.normal_geometry()->top_left(), correctedPlacement.normal_geometry()->extents(), title_text(), style(), aNewWindow); 
+                            service<i_rendering_engine>().create_window(
+                                service<i_surface_manager>(), 
+                                aProxy, 
+                                parent_window().surface().native_surface(), 
+                                correctedPlacement.normal_geometry()->top_left(), 
+                                correctedPlacement.normal_geometry()->extents(), 
+                                title_text(), 
+                                style()); 
                         });
                 break;
             case window_state::Iconized:
@@ -345,6 +357,12 @@ namespace neogfx
     i_surface_window& window::surface()
     {
         return const_cast<i_surface_window&>(to_const(*this).surface());
+    }
+
+    void window::set_surface(i_surface_window& aSurfaceWindow)
+    {
+        iSurfaceWindow.reset(&aSurfaceWindow);
+        iSurfaceDestroyed.emplace(surface().native_surface());
     }
 
     bool window::has_native_surface() const
@@ -822,10 +840,7 @@ namespace neogfx
 
     void window::activate()
     {
-        if (!visible())
-            show();
-        if (has_native_window())
-            native_window().activate();
+        window_manager().activate_window(*this);
     }
 
     bool window::is_iconic() const
@@ -918,8 +933,6 @@ namespace neogfx
 
     void window::init()
     {
-        iSurfaceDestroyed.emplace(surface().native_surface());
-
         base_type::init();
 
         set_decoration_style(window_style_to_decoration_style(iStyle));

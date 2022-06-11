@@ -45,26 +45,29 @@ namespace neogfx
         window_manager();
         ~window_manager();
     public:
-        void add_window(i_window& aWindow) override;
-        void remove_window(i_window& aWindow) override;
-        bool has_window(i_window& aWindow) const override;
-        std::size_t window_count() const override;
-        i_window& window(std::size_t aIndex) override;
-        bool any_strong_windows() const override;
-        i_window& hosting_window(const i_window& aNestedWindow) const override;
+        void add_window(i_window& aWindow) final;
+        void remove_window(i_window& aWindow) final;
+        bool has_window(i_window& aWindow) const final;
+        std::size_t window_count() const final;
+        i_window& window(std::size_t aIndex) final;
+        bool any_strong_windows() const final;
+        i_window& hosting_window(const i_window& aNestedWindow) const final;
     public:
-        rect desktop_rect(const i_window& aWindow) const override;
-        rect window_rect(const i_window& aWindow) const override;
-        void move_window(i_window& aWindow, const point& aPosition) override;
-        void resize_window(i_window& aWindow, const size& aExtents) override;
+        rect desktop_rect(const i_window& aWindow) const final;
+        rect window_rect(const i_window& aWindow) const final;
+        void move_window(i_window& aWindow, const point& aPosition) final;
+        void resize_window(i_window& aWindow, const size& aExtents) final;
     public:
-        bool window_activated() const override;
-        i_window& active_window() const override;
+        bool window_activated() const final;
+        i_window& active_window() const final;
+        void activate_window(i_window& aWindow) final;
+        void deactivate_window(i_window& aWindow) final;
     public:
-        point mouse_position() const override;
-        point mouse_position(const i_window& aWindow) const override;
-        bool is_mouse_button_pressed(mouse_button aButton) const override;
+        point mouse_position() const final;
+        point mouse_position(const i_window& aWindow) const final;
+        bool is_mouse_button_pressed(mouse_button aButton) const final;
     private:
         window_list iWindows;
+        i_window* iActiveWindow = nullptr;
     };
 }

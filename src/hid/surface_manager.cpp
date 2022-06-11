@@ -272,6 +272,8 @@ namespace neogfx
 
     i_display& surface_manager::display(const i_surface& aSurface) const
     {
+        if (aSurface.is_window() && (aSurface.as_surface_window().style() & surface_style::Nested) == surface_style::Nested)
+            return display(aSurface.parent_surface());
         rect rectSurface{ aSurface.surface_position(), aSurface.surface_extents() };
         std::multimap<double, uint32_t> matches;
         for (uint32_t i = 0; i < display_count(); ++i)

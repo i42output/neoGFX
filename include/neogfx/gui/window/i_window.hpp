@@ -69,6 +69,7 @@ namespace neogfx
         virtual bool has_surface() const = 0;
         virtual const i_surface& surface() const = 0;
         virtual i_surface& surface() = 0;
+        virtual void set_surface(i_surface_window& aSurfaceWindow) = 0;
         virtual bool has_native_surface() const = 0;
         virtual const i_native_surface& native_surface() const = 0;
         virtual i_native_surface& native_surface() = 0;

@@ -70,6 +70,7 @@ namespace neogfx
         bool has_surface() const final;
         const i_surface_window& surface() const final;
         i_surface_window& surface() final;
+        void set_surface(i_surface_window& aSurfaceWindow) override;
         bool has_native_surface() const final;
         const i_native_surface& native_surface() const final;
         i_native_surface& native_surface() final;
@@ -207,7 +208,7 @@ namespace neogfx
         bool iCentering;
         bool iClosed;
         sink iSink;
-        std::unique_ptr<i_surface_window> iSurfaceWindow;
+        ref_ptr<i_surface_window> iSurfaceWindow;
         bool iReadyToRender;
         string iTitleText;
         window_style iStyle;

@@ -46,7 +46,7 @@ namespace neogfx
 
     typedef window_style surface_style;
 
-    class i_surface : public i_device_metrics, public i_property_owner
+    class i_surface : public i_device_metrics, public i_property_owner, public i_reference_counted
     {
     public:
         declare_event(dpi_changed)
@@ -54,6 +54,8 @@ namespace neogfx
         declare_event(rendering_finished)
         declare_event(closing)
         declare_event(closed)
+    public:
+        typedef i_surface abstract_type;
     public:
         struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_surface::no_native_surface") {} };
         struct not_a_window : std::logic_error { not_a_window() : std::logic_error("neogfx::i_surface::not_a_window") {} };

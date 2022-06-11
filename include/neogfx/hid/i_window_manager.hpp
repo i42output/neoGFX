@@ -50,6 +50,8 @@ namespace neogfx
     public:
         virtual bool window_activated() const = 0;
         virtual i_window& active_window() const = 0;
+        virtual void activate_window(i_window& aWindow) = 0;
+        virtual void deactivate_window(i_window& aWindow) = 0;
     public:
         virtual i_window* window_from_position(const point& aPosition) const = 0;
     public:

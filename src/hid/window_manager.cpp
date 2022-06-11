@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/hid/window_manager.hpp>
 
 namespace neogfx
@@ -42,6 +43,8 @@ namespace neogfx
 
     void window_manager::remove_window(i_window& aWindow)
     {
+        if (iActiveWindow == &aWindow)
+            iActiveWindow = nullptr;
         auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
         if (existing == iWindows.end())
             throw window_not_found();
@@ -68,10 +71,7 @@ namespace neogfx
 
     bool window_manager::any_strong_windows() const
     {
-        for (auto const& w : iWindows)
-            if (w->is_strong())
-                return true;
-        return false;
+        return std::any_of(iWindows.begin(), iWindows.end(), [](auto const& w) { return w->is_strong(); });
     }
 
     i_window& window_manager::hosting_window(const i_window& aNestedWindow) const
@@ -109,20 +109,41 @@ namespace neogfx
 
     bool window_manager::window_activated() const
     {
-        for (auto const& w : iWindows)
-            if (w->is_active())
-                return true;
-        return false;
+        return iActiveWindow != nullptr;
     }
 
     i_window& window_manager::active_window() const
     {
-        for (auto const& w : iWindows)
-            if (w->is_active())
-                return *w;
+        if (window_activated())
+            return *iActiveWindow;
         throw no_window_active();
     }
 
+    void window_manager::activate_window(i_window& aWindow)
+    {
+        if (iActiveWindow == &aWindow)
+            return;
+        if (!aWindow.has_native_window())
+            return;
+        if (iActiveWindow)
+            deactivate_window(*iActiveWindow);
+        if (aWindow.is_nested())
+            activate_window(aWindow.parent_window());
+        if (aWindow.is_nested() && !aWindow.parent_window().native_window().is_active())
+            return;
+        iActiveWindow = &aWindow;
+        if (!active_window().visible())
+            active_window().show();
+        active_window().native_window().activate();
+    }
+
+    void window_manager::deactivate_window(i_window& aWindow)
+    {
+        if (iActiveWindow == &aWindow)
+            iActiveWindow = nullptr;
+        if (aWindow.has_native_surface())
+            aWindow.native_window().deactivate();
+    }
 
     point window_manager::mouse_position() const
     {

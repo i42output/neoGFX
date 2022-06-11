@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_native_window;
 
-    class surface_window : public object<i_surface_window>
+    class surface_window : public reference_counted<object<i_surface_window>>
     {
     public:
         define_declared_event(DpiChanged, dpi_changed)
@@ -36,7 +36,9 @@ namespace neogfx
         define_declared_event(Closing, closing)
         define_declared_event(Closed, closed)
     public:
-        surface_window(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator);
+        typedef i_surface_window abstract_type;
+    public:
+        surface_window(i_window& aWindow, std::function<void(i_surface_window&)> aNativeWindowCreator);
         ~surface_window();
     public:
         dimension horizontal_dpi() const final;
@@ -82,6 +84,7 @@ namespace neogfx
         bool has_native_window() const final;
         const i_native_window& native_window() const final;
         i_native_window& native_window() final;
+        void set_native_window(i_native_window& aNativeWindow) final;
     public:
         void handle_dpi_changed() final;
     public:

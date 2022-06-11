@@ -20,7 +20,9 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
-#include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include "../../../gfx/native/opengl_rendering_context.hpp"
 #include "virtual_window.hpp"
 
@@ -46,6 +48,7 @@ namespace neogfx
         iSystemMenuOpen{ false },
         iDebug{ false }
     {
+        surface_window().set_native_window(*this);
     }
 
     virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
@@ -68,6 +71,7 @@ namespace neogfx
         iSystemMenuOpen{ false },
         iDebug{ false }
     {
+        surface_window().set_native_window(*this);
     }
 
     virtual_window::~virtual_window()
@@ -286,11 +290,12 @@ namespace neogfx
 
     bool virtual_window::initialising() const
     {
-        return false;
+        return !iReady;
     }
 
     void virtual_window::initialisation_complete()
     {
+        iReady = true;
     }
 
     void* virtual_window::handle() const
@@ -305,14 +310,17 @@ namespace neogfx
 
     point virtual_window::surface_position() const
     {
-        return iPosition;
+        return iPosition + service<i_surface_manager>().find_nest(*this).widget().origin();
     }
 
     void virtual_window::move_surface(const point& aPosition)
     {
-        invalidate(rect{ surface_position(), surface_extents() });
+        if (!initialising())
+            invalidate(rect{ surface_position(), surface_extents() });
         iPosition = aPosition;
-        invalidate(rect{ surface_position(), surface_extents() });
+        as_widget().move(iPosition);
+        if (!initialising())
+            invalidate(rect{ surface_position(), surface_extents() });
     }
 
     size virtual_window::surface_extents() const
@@ -322,9 +330,12 @@ namespace neogfx
 
     void virtual_window::resize_surface(const size& aExtents)
     {
-        invalidate(rect{ surface_position(), surface_extents() });
+        if (!initialising())
+            invalidate(rect{ surface_position(), surface_extents() });
         iExtents = aExtents;
-        invalidate(rect{ surface_position(), surface_extents() });
+        as_widget().resize(iExtents);
+        if (!initialising())
+            invalidate(rect{ surface_position(), surface_extents() });
     }
 
     bool virtual_window::can_render() const
@@ -367,6 +378,8 @@ namespace neogfx
     {
         iVisible = true;
         invalidate(rect{ surface_position(), surface_extents() });
+        if (aActivate)
+            service<i_window_manager>().activate_window(surface_window().as_window());
     }
 
     void virtual_window::hide()
@@ -401,15 +414,19 @@ namespace neogfx
 
     bool virtual_window::is_active() const
     {
-        return parent().is_active() && iActive;
+        return iActive;
     }
 
     void virtual_window::activate()
     {
         if (!enabled())
             return;
-        parent().activate();
         iActive = true;
+    }
+
+    void virtual_window::deactivate()
+    {
+        iActive = false;
     }
 
     bool virtual_window::is_iconic() const
@@ -538,6 +555,16 @@ namespace neogfx
         if ((surface_window().style() & window_style::Resize) == window_style::Resize)
             iBorderThickness += service<i_app>().current_style().border(border_role::Window);
         return iBorderThickness;
+    }
+
+    i_widget const& virtual_window::as_widget() const
+    {
+        return iSurfaceWindow.as_widget();
+    }
+
+    i_widget& virtual_window::as_widget()
+    {
+        return iSurfaceWindow.as_widget();
     }
 
     void virtual_window::debug_message(std::string const& aMessage)

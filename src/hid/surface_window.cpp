@@ -32,7 +32,7 @@ namespace neogfx
 {
     constexpr dimension DEFAULT_DPI = 96.0;
 
-    surface_window::surface_window(i_window& aWindow, std::function<void(i_surface_window&, i_ref_ptr<i_native_window>&)> aNativeWindowCreator) :
+    surface_window::surface_window(i_window& aWindow, std::function<void(i_surface_window&)> aNativeWindowCreator) :
         iWindow{ aWindow }, 
         iRenderingEngine{ service<i_rendering_engine>() },
         iNativeWindowClosing{ false },
@@ -41,8 +41,7 @@ namespace neogfx
         iCapturingWidget{ nullptr },
         iClickedWidget{ nullptr }
     {
-        aNativeWindowCreator(*this, iNativeWindow);
-        iNativeSurfaceDestroyed.emplace(*iNativeWindow);
+        aNativeWindowCreator(*this);
         service<i_surface_manager>().add_surface(*this);
         set_alive();
     }
@@ -295,6 +294,13 @@ namespace neogfx
         return const_cast<i_native_window&>(to_const(*this).native_window());
     }
 
+    void surface_window::set_native_window(i_native_window& aNativeWindow)
+    {
+        iNativeWindow.reset(&aNativeWindow);
+        iNativeSurfaceDestroyed.emplace(*iNativeWindow);
+        as_window().set_surface(*this);
+    }
+
     void surface_window::handle_dpi_changed()
     {
         as_window().surface().dpi_changed().trigger();
@@ -446,6 +452,7 @@ namespace neogfx
     void surface_window::native_window_focus_gained()
     {
         as_widget().update(true);
+        service<i_window_manager>().activate_window(as_window());
         if (as_window().has_focused_widget())
             as_window().focused_widget().focus_gained(focus_reason::WindowActivation);
     }
@@ -453,6 +460,7 @@ namespace neogfx
     void surface_window::native_window_focus_lost()
     {
         as_widget().update(true);
+        service<i_window_manager>().deactivate_window(as_window());
         for (std::size_t i = 0; i < service<i_window_manager>().window_count();)
         {
             i_window& w = service<i_window_manager>().window(i);
@@ -615,9 +623,11 @@ namespace neogfx
 
     void surface_window::native_window_key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
-        i_widget* start = &as_widget();
-        if (as_window().has_focused_widget())
-            start = &as_window().focused_widget();
+        auto& targetWindow = as_window();
+        auto& targetWidget = targetWindow.as_widget();
+        i_widget* start = &targetWidget;
+        if (targetWindow.has_focused_widget())
+            start = &targetWindow.focused_widget();
         if (aScanCode == ScanCode_TAB)
         {
             i_widget* w = start;
@@ -657,9 +667,9 @@ namespace neogfx
                 else
                     return true;
             };
-            auto reject = [this, can_consume, aScanCode, aKeyCode, aKeyModifiers](i_widget*& w)
+            auto reject = [&](i_widget*& w)
             {
-                if (w == &as_widget())
+                if (w == &targetWidget)
                     return false;
                 i_widget& check = *w;
                 w = &w->parent();
@@ -687,25 +697,27 @@ namespace neogfx
             };
             if (aScanCode != ScanCode_TAB || !can_consume(*start) || reject(start))
             {
-                if (as_window().has_focused_widget())
+                if (targetWindow.has_focused_widget())
                 {
-                    i_widget* w = &as_window().focused_widget();
+                    i_widget* w = &targetWindow.focused_widget();
                     while (reject(w))
                         ;
                     if (w == nullptr)
                         return;
                     destroyed_flag destroyed{ *this };
-                    if (w == &as_widget() && can_consume(as_widget()) && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) && !destroyed)
-                        as_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                    if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) && !destroyed)
+                        targetWidget.key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                 }
-                else if (can_consume(as_widget()) && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
-                    as_widget().key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                else if (can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
+                    targetWidget.key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             }
         }
     }
 
     void surface_window::native_window_key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
+        auto& targetWindow = as_window();
+        auto& targetWidget = targetWindow.as_widget();
         auto can_consume = [aScanCode](const i_widget& aWidget)
         {
             if (aScanCode == ScanCode_TAB)
@@ -715,21 +727,23 @@ namespace neogfx
             else
                 return true;
         };
-        if (as_window().has_focused_widget())
+        if (targetWindow.has_focused_widget())
         {
-            i_widget* w = &as_window().focused_widget();
-            while ((!can_consume(*w) || event_consumed(w->keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != &as_widget())
+            i_widget* w = &targetWindow.focused_widget();
+            while ((!can_consume(*w) || event_consumed(w->keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != &targetWidget)
                 w = &w->parent();
-            if (w == &as_widget() && can_consume(as_widget()) && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
-                as_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
+            if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
+                targetWidget.key_released(aScanCode, aKeyCode, aKeyModifiers);
         }
-        else if (can_consume(as_widget()) && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
-            as_widget().key_released(aScanCode, aKeyCode, aKeyModifiers);
+        else if (can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
+            targetWidget.key_released(aScanCode, aKeyCode, aKeyModifiers);
     }
 
     void surface_window::native_window_text_input(i_string const& aText)
     {
-        auto send = [this](i_string const& aText)
+        auto& targetWindow = service<i_window_manager>().active_window();
+        auto& targetWidget = targetWindow.as_widget();
+        auto send = [&](i_string const& aText)
         {
             auto can_consume = [&aText](i_widget& aWidget)
             {
@@ -742,13 +756,13 @@ namespace neogfx
             if (as_window().has_focused_widget())
             {
                 i_widget* w = &as_window().focused_widget();
-                while ((!can_consume(*w) || event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->text_input(aText)) && w != &as_widget())
+                while ((!can_consume(*w) || event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->text_input(aText)) && w != &targetWidget)
                     w = &w->parent();
-                if (w == &as_widget() && can_consume(as_widget()) && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
-                    as_widget().text_input(aText);
+                if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
+                    targetWidget.text_input(aText);
             }
-            else if (can_consume(as_widget()) && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
-                as_widget().text_input(aText);
+            else if (can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
+                targetWidget.text_input(aText);
         };
         auto utf32 = neolib::utf8_to_utf32(aText);
         if (neolib::utf16::is_high_surrogate(utf32[0]))
@@ -765,16 +779,18 @@ namespace neogfx
 
     void surface_window::native_window_sys_text_input(i_string const& aText)
     {
+        auto& targetWindow = as_window();
+        auto& targetWidget = targetWindow.as_widget();
         if (as_window().has_focused_widget())
         {
             i_widget* w = &as_window().focused_widget();
-            while ((event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->sys_text_input(aText)) && w != &as_widget())
+            while ((event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->sys_text_input(aText)) && w != &targetWidget)
                 w = &w->parent();
-            if (w == &as_widget() && !event_consumed(as_widget().keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
-                as_widget().sys_text_input(aText);
+            if (w == &targetWidget && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
+                targetWidget.sys_text_input(aText);
         }
         else
-            as_widget().sys_text_input(aText);
+            targetWidget.sys_text_input(aText);
     }
 
     mouse_cursor surface_window::native_window_mouse_cursor() const

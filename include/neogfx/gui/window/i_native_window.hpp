@@ -69,6 +69,7 @@ namespace neogfx
         virtual void set_transparency(double aTransparency) = 0;
         virtual bool is_active() const = 0;
         virtual void activate() = 0;
+        virtual void deactivate() = 0;
         virtual bool is_iconic() const = 0;
         virtual void iconize() = 0;
         virtual bool is_maximized() const = 0;

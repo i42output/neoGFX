@@ -25,6 +25,7 @@
 namespace neogfx
 {
     class i_surface_window;
+    class i_widget;
 
     class virtual_window : public native_window
     {
@@ -33,98 +34,102 @@ namespace neogfx
         virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
         ~virtual_window();
     public:
-        render_target_type target_type() const override;
-        const i_texture& target_texture() const override;
-        point target_origin() const override;
-        size target_extents() const override;
+        render_target_type target_type() const final;
+        const i_texture& target_texture() const final;
+        point target_origin() const final;
+        size target_extents() const final;
     public:
-        neogfx::logical_coordinate_system logical_coordinate_system() const override;
-        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
-        neogfx::logical_coordinates logical_coordinates() const override;
-        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
+        neogfx::logical_coordinate_system logical_coordinate_system() const final;
+        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) final;
+        neogfx::logical_coordinates logical_coordinates() const final;
+        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) final;
     public:
-        rect_i32 viewport() const override;
-        rect_i32 set_viewport(const rect_i32& aViewport) const override;
+        rect_i32 viewport() const final;
+        rect_i32 set_viewport(const rect_i32& aViewport) const final;
     public:
-        bool target_active() const override;
-        void activate_target() const override;
-        void deactivate_target() const override;
+        bool target_active() const final;
+        void activate_target() const final;
+        void deactivate_target() const final;
     public:
-        neogfx::color_space color_space() const override;
-        color read_pixel(const point& aPosition) const override;
+        neogfx::color_space color_space() const final;
+        color read_pixel(const point& aPosition) const final;
     public:
-        uint64_t frame_counter() const override;
-        double fps() const override;
-        double potential_fps() const override;
+        uint64_t frame_counter() const final;
+        double fps() const final;
+        double potential_fps() const final;
     public:
-        void invalidate(const rect& aInvalidatedRect) override;
-        bool has_invalidated_area() const override;
-        const rect& invalidated_area() const override;
-        rect validate() override;
-        void render(bool aOOBRequest = false) override;
-        bool is_rendering() const override;
+        void invalidate(const rect& aInvalidatedRect) final;
+        bool has_invalidated_area() const final;
+        const rect& invalidated_area() const final;
+        rect validate() final;
+        void render(bool aOOBRequest = false) final;
+        bool is_rendering() const final;
     public:
-        void debug(bool aEnableDebug) override;
+        void debug(bool aEnableDebug) final;
     public:
-        bool metrics_available() const override;
-        size extents() const override;
+        bool metrics_available() const final;
+        size extents() const final;
     protected:
-        i_surface_window& surface_window() const override;
-        void set_destroying() override;
-        void set_destroyed() override;
+        i_surface_window& surface_window() const final;
+        void set_destroying() final;
+        void set_destroyed() final;
     public:
-        void* target_handle() const override;
-        void* target_device_handle() const override;
-        pixel_format_t pixel_format() const override;
+        void* target_handle() const final;
+        void* target_device_handle() const final;
+        pixel_format_t pixel_format() const final;
     public:
-        bool has_parent() const override;
-        const i_native_window& parent() const override;
-        i_native_window& parent() override;
-        bool is_nested() const override;
+        bool has_parent() const final;
+        const i_native_window& parent() const final;
+        i_native_window& parent() final;
+        bool is_nested() const final;
     public:
-        bool initialising() const override;
-        void initialisation_complete() override;
-        void* handle() const override;
-        void* native_handle() const override;
-        point surface_position() const override;
-        void move_surface(const point& aPosition) override;
-        size surface_extents() const override;
-        void resize_surface(const size& aExtents) override;
+        bool initialising() const final;
+        void initialisation_complete() final;
+        void* handle() const final;
+        void* native_handle() const final;
+        point surface_position() const final;
+        void move_surface(const point& aPosition) final;
+        size surface_extents() const final;
+        void resize_surface(const size& aExtents) final;
     public:
-        bool can_render() const override;
+        bool can_render() const final;
     public:
-        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
-        std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const override;
+        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const final;
+        std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const final;
     public:
-        void close(bool aForce = false) override;
-        bool placement_changed_explicitly() const override;
-        void set_placement_changed_explicitly() override;
-        bool visible() const override;
-        void show(bool aActivate = false) override;
-        void hide() override;
-        double opacity() const override;
-        void set_opacity(double aOpacity) override;
-        double transparency() const override;
-        void set_transparency(double aTransparency) override;
-        bool is_active() const override;
-        void activate() override;
-        bool is_iconic() const override;
-        void iconize() override;
-        bool is_maximized() const override;
-        void maximize() override;
-        bool is_restored() const override;
-        void restore() override;
-        bool is_fullscreen() const override;
-        void enter_fullscreen(const video_mode& aVideoMode) override;
-        bool enabled() const override;
-        void enable(bool aEnable) override;
-        bool is_capturing() const override;
-        void set_capture() override;
-        void release_capture() override;
-        void non_client_set_capture() override;
-        void non_client_release_capture() override;
-        void set_title_text(i_string const& aTitleText) override;
-        border border_thickness() const override;
+        void close(bool aForce = false) final;
+        bool placement_changed_explicitly() const final;
+        void set_placement_changed_explicitly() final;
+        bool visible() const final;
+        void show(bool aActivate = false) final;
+        void hide() final;
+        double opacity() const final;
+        void set_opacity(double aOpacity) final;
+        double transparency() const final;
+        void set_transparency(double aTransparency) final;
+        bool is_active() const final;
+        void activate() final;
+        void deactivate() final;
+        bool is_iconic() const final;
+        void iconize() final;
+        bool is_maximized() const final;
+        void maximize() final;
+        bool is_restored() const final;
+        void restore() final;
+        bool is_fullscreen() const final;
+        void enter_fullscreen(const video_mode& aVideoMode) final;
+        bool enabled() const final;
+        void enable(bool aEnable) final;
+        bool is_capturing() const final;
+        void set_capture() final;
+        void release_capture() final;
+        void non_client_set_capture() final;
+        void non_client_release_capture() final;
+        void set_title_text(i_string const& aTitleText) final;
+        border border_thickness() const final;
+    private:
+        i_widget const& as_widget() const;
+        i_widget& as_widget();
     private:
         void debug_message(std::string const& aMessage);
     private:
