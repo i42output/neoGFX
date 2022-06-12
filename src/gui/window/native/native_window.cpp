@@ -158,10 +158,13 @@ namespace neogfx
     {
         destroyed_flag destroyed{ *this };
         neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
+        native_event previousEvent;
+        if (has_current_event())
+            previousEvent = current_event();
         iCurrentEvent = aEvent;
         handle_event();
         if (!destroyed)
-            iCurrentEvent = neolib::none;
+            iCurrentEvent = previousEvent;
         else
             sc.ignore();
     }
@@ -173,7 +176,14 @@ namespace neogfx
 
     const native_window::native_event& native_window::current_event() const
     {
-        if (iCurrentEvent != neolib::none)
+        if (has_current_event())
+            return iCurrentEvent;
+        throw no_current_event();
+    }
+
+    native_window::native_event& native_window::current_event()
+    {
+        if (has_current_event())
             return iCurrentEvent;
         throw no_current_event();
     }
@@ -182,15 +192,15 @@ namespace neogfx
     {
         destroyed_flag destroyed{ *this };
         neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
-        if (event_consumed(Filter.trigger(iCurrentEvent)))
+        if (event_consumed(Filter.trigger(current_event())))
         {
             if (destroyed)
                 sc.ignore();
             return;
         }
-        if (std::holds_alternative<window_event>(iCurrentEvent))
+        if (std::holds_alternative<window_event>(current_event()))
         {
-            auto& windowEvent = static_variant_cast<window_event&>(iCurrentEvent);
+            auto& windowEvent = static_variant_cast<window_event&>(current_event());
             if (event_consumed(surface_window().as_window().window_event().trigger(windowEvent)))
                 return;
             switch (windowEvent.type())
@@ -228,9 +238,27 @@ namespace neogfx
                 surface_window().native_window_mouse_left();
                 break;
             case window_event_type::FocusGained:
+                if (windowEvent.has_parameter())
+                {
+                    auto& surface = service<i_surface_manager>().surface_at_position(surface_window(), windowEvent.position());
+                    if (surface.as_surface_window().as_window().enabled())
+                    {
+                        surface.as_surface_window().native_window_focus_gained();
+                        break;
+                    }
+                }
                 surface_window().native_window_focus_gained();
                 break;
             case window_event_type::FocusLost:
+                if (service<i_window_manager>().window_activated() && &service<i_window_manager>().active_window().native_window() != this)
+                {
+                    auto& activeSurface = service<i_window_manager>().active_window().native_window().surface_window();
+                    if (surface_window().is_owner_of(activeSurface))
+                    {
+                        activeSurface.native_window_focus_lost();
+                        break;
+                    }
+                }
                 surface_window().native_window_focus_lost();
                 break;
             case window_event_type::TitleTextChanged:
@@ -241,70 +269,105 @@ namespace neogfx
                 break;
             }
         }
-        else if (std::holds_alternative<mouse_event>(iCurrentEvent))
+        else if (std::holds_alternative<mouse_event>(current_event()))
         {
             auto& mouse = service<i_mouse>();
             if (!mouse.is_enabled())
                 return;
-            auto const& mouseEvent = static_variant_cast<const mouse_event&>(iCurrentEvent);
+            auto const& mouseEvent = static_variant_cast<const mouse_event&>(current_event());
+            auto& surfaceWindow = service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
+            if (&surfaceWindow != &surface_window())
+            {
+                surfaceWindow.native_window().handle_event(current_event());
+                return;
+            }
+            auto activate_if = [&]()
+            {
+                if (!surfaceWindow.native_window().is_active())
+                    surfaceWindow.native_window().activate();
+            };
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
                 if (!mouse.grabber().mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers()))
-                    surface_window().native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
+                    surfaceWindow.native_window_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
-                surface_window().native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                activate_if();
+                surfaceWindow.native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonDoubleClicked:
-                surface_window().native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                activate_if();
+                surfaceWindow.native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonReleased:
-                surface_window().native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
+                surfaceWindow.native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
                 break;
             case mouse_event_type::Moved:
-                surface_window().native_window_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
+                surfaceWindow.native_window_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             default:
                 /* do nothing */
                 break;
             }
         }
-        else if (std::holds_alternative<non_client_mouse_event>(iCurrentEvent))
+        else if (std::holds_alternative<non_client_mouse_event>(current_event()))
         {
             auto& mouse = service<i_mouse>();
             if (!mouse.is_enabled())
                 return;
-            auto const& mouseEvent = static_variant_cast<const non_client_mouse_event&>(iCurrentEvent);
+            auto const& mouseEvent = static_variant_cast<const non_client_mouse_event&>(current_event());
+            auto& surfaceWindow = service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
+            if (&surfaceWindow != &surface_window())
+            {
+                surfaceWindow.native_window().handle_event(current_event());
+                return;
+            }
+            auto activate_if = [&]()
+            {
+                if (!surfaceWindow.native_window().is_active())
+                    surfaceWindow.native_window().activate();
+            };
             switch (mouseEvent.type())
             {
             case mouse_event_type::WheelScrolled:
                 if (!mouse.grabber().mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers()))
-                    surface_window().native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
+                    surfaceWindow.native_window_non_client_mouse_wheel_scrolled(mouseEvent.mouse_wheel(), mouseEvent.position(), mouseEvent.wheel_delta(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonClicked:
-                surface_window().native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                activate_if();
+                surfaceWindow.native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonDoubleClicked:
-                surface_window().native_window_non_client_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                activate_if();
+                surfaceWindow.native_window_non_client_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonReleased:
-                surface_window().native_window_non_client_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
+                surfaceWindow.native_window_non_client_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
                 break;
             case mouse_event_type::Moved:
-                surface_window().native_window_non_client_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
+                surfaceWindow.native_window_non_client_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             default:
                 /* do nothing */
                 break;
             }
         }
-        else if (std::holds_alternative<keyboard_event>(iCurrentEvent))
+        else if (std::holds_alternative<keyboard_event>(current_event()))
         {
             auto& keyboard = service<i_keyboard>();
             if (!keyboard.is_enabled())
                 return;
-            auto const& keyboardEvent = static_variant_cast<const keyboard_event&>(iCurrentEvent);
+            auto const& keyboardEvent = static_variant_cast<const keyboard_event&>(current_event());
+            if (service<i_window_manager>().window_activated())
+            {
+                auto& activeSurfaceWindow = service<i_window_manager>().active_window().surface().as_surface_window();
+                if (&activeSurfaceWindow != &surface_window())
+                {
+                    activeSurfaceWindow.native_window().handle_event(current_event());
+                    return;
+                }
+            }
             switch (keyboardEvent.type())
             {
             case keyboard_event_type::KeyPressed:

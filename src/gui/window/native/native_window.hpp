@@ -63,6 +63,7 @@ namespace neogfx
         void handle_event(const native_event& aEvent) override;
         bool has_current_event() const override;
         const native_event& current_event() const override;
+        native_event& current_event() override;
         void handle_event() override;
         bool processing_event() const override;
         double rendering_priority() const override;

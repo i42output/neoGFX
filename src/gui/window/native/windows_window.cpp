@@ -605,9 +605,14 @@ namespace neogfx
             set_opacity(1.0 - aTransparency);
         }
 
+        bool window::is_effectively_active() const
+        {
+            return ::GetForegroundWindow() == iHandle;
+        }
+
         bool window::is_active() const
         {
-            return ::GetForegroundWindow() == iHandle && iActive;
+            return is_effectively_active() && iActive;
         }
 
         void window::activate()
@@ -1353,19 +1358,24 @@ namespace neogfx
                 {
                     BOOL minimized = HIWORD(wparam);
                     if (!minimized && (LOWORD(wparam) != WA_INACTIVE))
-                        self.handle_event(window_event{ window_event_type::FocusGained });
+                        self.handle_event(window_event{ window_event_type::FocusGained, self.iActivationMousePos ? *self.iActivationMousePos : window_event::parameter_type{} });
                     else
                     {
                         if (self.is_alive())
                             self.handle_event(window_event{ window_event_type::FocusLost });
                     }
+                    self.iActivationMousePos = std::nullopt;
                 }
                 break;
             case WM_MOUSEACTIVATE:
                 if (GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_NOACTIVATE)
                     result = MA_NOACTIVATE;
                 else
+                {
+                    auto msgPos = GetMessagePos();
+                    self.iActivationMousePos = basic_point<WORD>{ LOWORD(msgPos), HIWORD(msgPos) };
                     result = wndproc(hwnd, msg, wparam, lparam);
+                }
                 break;
             case WM_CAPTURECHANGED:
                 if (self.surface_window().has_capturing_widget())

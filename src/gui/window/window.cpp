@@ -833,6 +833,11 @@ namespace neogfx
         }
     }
 
+    bool window::is_effectively_active() const
+    {
+        return has_native_window() && native_window().is_effectively_active();
+    }
+
     bool window::is_active() const
     {
         return has_native_window() && native_window().is_active();

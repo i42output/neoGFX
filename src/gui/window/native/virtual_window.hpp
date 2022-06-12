@@ -107,6 +107,7 @@ namespace neogfx
         void set_opacity(double aOpacity) final;
         double transparency() const final;
         void set_transparency(double aTransparency) final;
+        bool is_effectively_active() const final;
         bool is_active() const final;
         void activate() final;
         void deactivate() final;

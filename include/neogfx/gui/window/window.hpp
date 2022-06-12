@@ -129,6 +129,7 @@ namespace neogfx
         i_string const& title_text() const override;
         void set_title_text(i_string const& aTitleText) override;
     public:
+        bool is_effectively_active() const override;
         bool is_active() const override;
         void activate() override;
         bool is_iconic() const override;

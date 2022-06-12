@@ -127,9 +127,9 @@ namespace neogfx
             return;
         if (iActiveWindow)
             deactivate_window(*iActiveWindow);
-        if (aWindow.is_nested())
+        if (aWindow.is_nested() && !aWindow.parent_window().is_effectively_active())
             activate_window(aWindow.parent_window());
-        if (aWindow.is_nested() && !aWindow.parent_window().native_window().is_active())
+        if (aWindow.is_nested() && !aWindow.parent_window().is_effectively_active())
             return;
         iActiveWindow = &aWindow;
         if (!active_window().visible())

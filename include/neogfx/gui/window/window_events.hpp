@@ -55,7 +55,7 @@ namespace neogfx
     public:
         typedef neolib::variant<neogfx::size, neogfx::point> parameter_type;
     public:
-        window_event(window_event_type aType, const parameter_type& aParameter = parameter_type()) :
+        window_event(window_event_type aType, const parameter_type& aParameter = parameter_type{}) :
             iType(aType), iParameter(aParameter)
         {
         }
@@ -63,6 +63,10 @@ namespace neogfx
         window_event_type type() const
         {
             return iType;
+        }
+        bool has_parameter() const
+        {
+            return !std::holds_alternative<std::monostate>(iParameter);
         }
         neogfx::size extents() const
         {

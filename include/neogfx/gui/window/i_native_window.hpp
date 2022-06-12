@@ -54,6 +54,7 @@ namespace neogfx
         virtual void handle_event(const native_event& aNativeEvent) = 0;
         virtual bool has_current_event() const = 0;
         virtual const native_event& current_event() const = 0;
+        virtual native_event& current_event() = 0;
         virtual void handle_event() = 0;
         virtual bool processing_event() const = 0;
         virtual i_surface_window& surface_window() const = 0;
@@ -67,6 +68,7 @@ namespace neogfx
         virtual void set_opacity(double aOpacity) = 0;
         virtual double transparency() const = 0;
         virtual void set_transparency(double aTransparency) = 0;
+        virtual bool is_effectively_active() const = 0;
         virtual bool is_active() const = 0;
         virtual void activate() = 0;
         virtual void deactivate() = 0;
