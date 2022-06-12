@@ -50,7 +50,8 @@ namespace neogfx
                     push_event(window_event{ window_event_type::NonClientLeave });
             }
         }, std::chrono::milliseconds{ 10 } },
-        iPaused{ 0 }
+        iPaused{ 0 },
+        iInternalWindowActivation{ false }
     {
         set_alive();
     }
@@ -240,6 +241,7 @@ namespace neogfx
             case window_event_type::FocusGained:
                 if (windowEvent.has_parameter())
                 {
+                    neolib::scoped_flag sf{ iInternalWindowActivation };
                     auto& surface = service<i_surface_manager>().surface_at_position(surface_window(), windowEvent.position());
                     if (surface.as_surface_window().as_window().enabled())
                     {
@@ -472,5 +474,10 @@ namespace neogfx
         iPixelDensityDpi = std::nullopt;
         surface_window().handle_dpi_changed();
         surface_manager().dpi_changed().trigger(surface_window());
+    }
+
+    bool native_window::internal_window_activation() const
+    {
+        return iInternalWindowActivation;
     }
 }

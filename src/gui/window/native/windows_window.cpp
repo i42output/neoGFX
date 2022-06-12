@@ -621,8 +621,11 @@ namespace neogfx
                 return;
             if (is_active())
                 return;
-            ::SetForegroundWindow(iHandle);
-            ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            if (!internal_window_activation())
+            {
+                ::SetForegroundWindow(iHandle);
+                ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+            }
             iActive = true;
             surface_window().as_widget().update(true);
         }

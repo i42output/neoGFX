@@ -77,6 +77,8 @@ namespace neogfx
     protected:
         size& pixel_density() const;
         void handle_dpi_changed() override;
+    protected:
+        bool internal_window_activation() const;
     private:
         template <typename EventCategory, typename EventType>
         event_queue::const_iterator find_event(EventType aEventType) const
@@ -100,5 +102,6 @@ namespace neogfx
         bool iNonClientEntered;
         neolib::callback_timer iUpdater;
         uint32_t iPaused;
+        bool iInternalWindowActivation;
     };
 }
