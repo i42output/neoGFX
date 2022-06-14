@@ -107,8 +107,8 @@ namespace neogfx
         i_layout& normal_layout() override;
         i_layout& permanent_layout() override;
     public:
-        label& message_widget();
-        label& idle_widget();
+        label& message_widget() override;
+        label& idle_widget() override;
     protected:
         neogfx::size_policy size_policy() const override;
     protected:

@@ -52,6 +52,9 @@ namespace neogfx
         virtual i_layout& normal_layout() = 0;
         virtual i_layout& permanent_layout() = 0;
     public:
+        virtual i_widget& message_widget() = 0;
+        virtual i_widget& idle_widget() = 0;
+    public:
         template<typename WidgetType>
         WidgetType& add_normal_widget()
         {

@@ -341,6 +341,7 @@ namespace neogfx
         iIdleWidget.text_widget().set_padding(neogfx::padding{});
         iIdleWidget.image_widget().set_padding(neogfx::padding{});
         iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iIdleWidget.set_font_role(neogfx::font_role::StatusBar);
         iNormalWidgetContainer.set_padding(neogfx::padding{});
         iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetLayout.set_padding(neogfx::padding{});
