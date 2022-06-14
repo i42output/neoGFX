@@ -77,7 +77,7 @@ namespace neogfx
     double menu_bar::opacity() const
     {
         double result = widget::opacity();
-        if (widget::parent().is_root() && !root().is_active())
+        if (widget::parent().is_root() && !root().is_effectively_active())
             result *= 0.25;
         return result;
     }

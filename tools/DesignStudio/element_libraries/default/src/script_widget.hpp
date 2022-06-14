@@ -37,7 +37,6 @@ namespace neogfx::DesignStudio
         {
             set_padding(neogfx::padding{ 2.0_dip, 2.0_dip, 2.0_dip, 2.0_dip });
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
-            debug::layoutItem = this;
         }
     private:
         text_edit iEditor;
