@@ -376,14 +376,18 @@ namespace neogfx
 
     void virtual_window::show(bool aActivate)
     {
+        if (iVisible)
+            return;
         iVisible = true;
         invalidate(rect{ surface_position(), surface_extents() });
         if (aActivate)
-            service<i_window_manager>().activate_window(surface_window().as_window());
+            activate();
     }
 
     void virtual_window::hide()
     {
+        if (!iVisible)
+            return;
         iVisible = false;
         invalidate(rect{ surface_position(), surface_extents() });
     }
@@ -426,14 +430,23 @@ namespace neogfx
     {
         if (!enabled())
             return;
+        if (is_active())
+            return;
+        auto& parentWindow = parent().surface_window().as_window();
+        if (!parentWindow.is_effectively_active())
+            parentWindow.activate();
+        if (!parentWindow.is_effectively_active())
+            return;
         iActive = true;
-        surface_window().as_widget().update(true);
         parent().surface_window().native_window_focus_lost();
+        surface_window().as_window().activated().trigger();
+        surface_window().as_widget().update(true);
     }
 
     void virtual_window::deactivate()
     {
         iActive = false;
+        surface_window().as_window().deactivated().trigger();
         surface_window().as_widget().update(true);
     }
 

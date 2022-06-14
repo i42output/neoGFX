@@ -452,7 +452,7 @@ namespace neogfx
     void surface_window::native_window_focus_gained()
     {
         as_widget().update(true);
-        service<i_window_manager>().activate_window(as_window());
+        native_window().activate();
         if (as_window().has_focused_widget())
             as_window().focused_widget().focus_gained(focus_reason::WindowActivation);
     }
@@ -460,7 +460,7 @@ namespace neogfx
     void surface_window::native_window_focus_lost()
     {
         as_widget().update(true);
-        service<i_window_manager>().deactivate_window(as_window());
+        native_window().deactivate();
         for (std::size_t i = 0; i < service<i_window_manager>().window_count();)
         {
             i_window& w = service<i_window_manager>().window(i);

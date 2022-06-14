@@ -39,6 +39,17 @@ namespace neogfx
     {
         iWindows.push_back(&aWindow);
         std::sort(iWindows.begin(), iWindows.end(), window_sorter{});
+        iSink += aWindow.activated([&]()
+        {
+            if (iActiveWindow && iActiveWindow != &aWindow)
+                deactivate_window(*iActiveWindow);
+            iActiveWindow = &aWindow;
+        });
+        iSink += aWindow.deactivated([&]()
+        {
+            if (iActiveWindow == &aWindow)
+                iActiveWindow = nullptr;
+        });
     }
 
     void window_manager::remove_window(i_window& aWindow)
@@ -121,27 +132,19 @@ namespace neogfx
 
     void window_manager::activate_window(i_window& aWindow)
     {
-        if (iActiveWindow == &aWindow)
+        if (!aWindow.has_native_surface())
             return;
-        if (!aWindow.has_native_window())
-            return;
-        if (iActiveWindow)
-            deactivate_window(*iActiveWindow);
-        if (aWindow.is_nested() && !aWindow.parent_window().is_effectively_active())
-            activate_window(aWindow.parent_window());
-        if (aWindow.is_nested() && !aWindow.parent_window().is_effectively_active())
-            return;
-        iActiveWindow = &aWindow;
-        if (!active_window().visible())
-            active_window().show();
-        active_window().native_window().activate();
+        if (!aWindow.visible())
+            aWindow.show();
+        if (!aWindow.is_active())
+            aWindow.native_window().activate();
     }
 
     void window_manager::deactivate_window(i_window& aWindow)
     {
-        if (iActiveWindow == &aWindow)
-            iActiveWindow = nullptr;
-        if (aWindow.has_native_surface())
+        if (!aWindow.has_native_surface())
+            return;
+        if (aWindow.is_active())
             aWindow.native_window().deactivate();
     }
 

@@ -211,6 +211,8 @@ namespace neogfx
                 break;
             }
         });
+        iSink += root().activated([this, update_widgets]() { update_widgets(); });
+        iSink += root().deactivated([this, update_widgets]() { update_widgets(); });
         update_textures();
         update_widgets();
     }

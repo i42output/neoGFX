@@ -549,14 +549,21 @@ namespace neogfx
 
         void window::show(bool aActivate)
         {
+            if (iVisible)
+                return;
             iVisible = true;
+
             ::ShowWindow(iHandle, aActivate ? SW_SHOW : SW_SHOWNA);
+            ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
+
             if (aActivate)
-                service<i_window_manager>().activate_window(surface_window().as_window());
+                activate();
         }
 
         void window::hide()
         {
+            if (!iVisible)
+                return;
             iVisible = false;
             ::ShowWindow(iHandle, SW_HIDE);
         }
@@ -621,18 +628,20 @@ namespace neogfx
                 return;
             if (is_active())
                 return;
-            if (!internal_window_activation())
-            {
-                ::SetForegroundWindow(iHandle);
-                ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-            }
+            if (!visible())
+                return;
+
+            ::SetForegroundWindow(iHandle);
+
             iActive = true;
+            surface_window().as_window().activated().trigger();
             surface_window().as_widget().update(true);
         }
 
         void window::deactivate()
         {
             iActive = false;
+            surface_window().as_window().deactivated().trigger();
             surface_window().as_widget().update(true);
         }
 

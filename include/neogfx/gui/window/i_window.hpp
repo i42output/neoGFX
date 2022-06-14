@@ -43,6 +43,8 @@ namespace neogfx
     public:
         declare_event(window_event, neogfx::window_event&)
         declare_event(dismissing_children, const i_widget*)
+        declare_event(activated)
+        declare_event(deactivated)
         declare_event(closed)
         declare_event(paint_overlay, i_graphics_context&)
     private:

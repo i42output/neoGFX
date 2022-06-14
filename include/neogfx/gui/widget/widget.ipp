@@ -46,6 +46,7 @@ namespace neogfx
         iLayer{ LayerWidget }
     {
         base_type::Position.Changed([this](const point&) { moved(); });
+        base_type::Size.Changed([this](const size&) { resized(); });
         base_type::set_alive();
     }
     
@@ -63,6 +64,7 @@ namespace neogfx
         iLayer{ LayerWidget }
     {
         base_type::Position.Changed([this](const point&) { moved(); });
+        base_type::Size.Changed([this](const size&) { resized(); });
         aParent.add(*this);
         base_type::set_alive();
     }
@@ -81,6 +83,7 @@ namespace neogfx
         iLayer{ LayerWidget }
     {
         base_type::Position.Changed([this](const point&) { moved(); });
+        base_type::Size.Changed([this](const size&) { resized(); });
         aLayout.add(*this);
         base_type::set_alive();
     }
@@ -938,23 +941,30 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << "widget<Interface>::resize(" << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
+
         if (base_type::Size != units_converter(*this).to_device_units(aSize))
         {
             update(true);
             self.set_extents(aSize);
-            if (self_type::is_root())
-                self_type::root().surface().resize_surface(aSize);
-            update(true);
-            resized();
         }
     }
 
     template <typename Interface>
     void widget<Interface>::resized()
     {
+        auto& self = as_widget();
+
+        if (self_type::is_root())
+            self_type::root().surface().resize_surface(self.extents());
+
+        update(true);
+        
         SizeChanged.trigger();
+        
         neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Resize };
+        
         layout_items();
+        
         if ((widget_type() & neogfx::widget_type::Floating) == neogfx::widget_type::Floating)
         {
             parent().layout_items_started();

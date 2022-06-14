@@ -239,17 +239,19 @@ namespace neogfx
                 surface_window().native_window_mouse_left();
                 break;
             case window_event_type::FocusGained:
-                if (windowEvent.has_parameter())
                 {
                     neolib::scoped_flag sf{ iInternalWindowActivation };
-                    auto& surface = service<i_surface_manager>().surface_at_position(surface_window(), windowEvent.position());
-                    if (surface.as_surface_window().as_window().enabled())
+                    if (windowEvent.has_parameter())
                     {
-                        surface.as_surface_window().native_window_focus_gained();
-                        break;
+                        auto& surface = service<i_surface_manager>().surface_at_position(surface_window(), windowEvent.position());
+                        if (surface.as_surface_window().as_window().enabled())
+                        {
+                            surface.as_surface_window().native_window_focus_gained();
+                            break;
+                        }
                     }
+                    surface_window().native_window_focus_gained();
                 }
-                surface_window().native_window_focus_gained();
                 break;
             case window_event_type::FocusLost:
                 if (service<i_window_manager>().window_activated() && &service<i_window_manager>().active_window().native_window() != this)
@@ -277,7 +279,7 @@ namespace neogfx
             if (!mouse.is_enabled())
                 return;
             auto const& mouseEvent = static_variant_cast<const mouse_event&>(current_event());
-            auto& surfaceWindow = service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
+            auto& surfaceWindow = service<i_surface_manager>().surface_at_position(surface_window(), surface_window().surface_position() + mouseEvent.position(), true).as_surface_window();
             if (&surfaceWindow != &surface_window())
             {
                 surfaceWindow.native_window().handle_event(current_event());

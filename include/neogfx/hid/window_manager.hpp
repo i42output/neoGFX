@@ -67,6 +67,7 @@ namespace neogfx
         point mouse_position(const i_window& aWindow) const final;
         bool is_mouse_button_pressed(mouse_button aButton) const final;
     private:
+        sink iSink;
         window_list iWindows;
         i_window* iActiveWindow = nullptr;
     };
