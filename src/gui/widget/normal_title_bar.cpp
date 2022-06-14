@@ -170,7 +170,7 @@ namespace neogfx
         auto update_widgets = [this]()
         {
             bool isEnabled = root().window_enabled();
-            bool isActive = root().is_active();
+            bool isActive = root().is_effectively_active();
             bool isIconic = root().is_iconic();
             bool isMaximized = root().is_maximized();
             bool isRestored = root().is_restored();
