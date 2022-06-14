@@ -490,7 +490,7 @@ namespace neogfx
 
     color window::frame_color() const
     {
-        if (effectively_enabled() && !base_type::has_frame_color() && is_active())
+        if (effectively_enabled() && !base_type::has_frame_color() && is_effectively_active())
         {
             if (!is_nested())
                 return service<i_app>().current_style().palette().color(color_role::Selection);
@@ -498,7 +498,7 @@ namespace neogfx
                 return service<i_app>().current_style().palette().color(color_role::SecondaryAccent);
         }
         else
-            return base_type::frame_color().with_alpha(is_active() ? 1.0 : 0.25);
+            return base_type::frame_color().with_alpha(is_effectively_active() ? 1.0 : 0.25);
     }
 
     void window::set_parent(i_widget& aParent)

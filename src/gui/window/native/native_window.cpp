@@ -287,7 +287,7 @@ namespace neogfx
             }
             auto activate_if = [&]()
             {
-                if (surfaceWindow.native_window().is_nested() && !surfaceWindow.native_window().is_active())
+                if (!surfaceWindow.native_window().is_active())
                     surfaceWindow.native_window().activate();
             };
             switch (mouseEvent.type())
@@ -329,7 +329,7 @@ namespace neogfx
             }
             auto activate_if = [&]()
             {
-                if (surfaceWindow.native_window().is_nested() && !surfaceWindow.native_window().is_active())
+                if (!surfaceWindow.native_window().is_active())
                     surfaceWindow.native_window().activate();
             };
             switch (mouseEvent.type())
