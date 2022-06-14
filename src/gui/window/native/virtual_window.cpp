@@ -432,11 +432,15 @@ namespace neogfx
             return;
         if (is_active())
             return;
+        if (!visible())
+            show();
+
         auto& parentWindow = parent().surface_window().as_window();
         if (!parentWindow.is_effectively_active())
             parentWindow.activate();
         if (!parentWindow.is_effectively_active())
             return;
+
         iActive = true;
         parent().surface_window().native_window_focus_lost();
         surface_window().as_window().activated().trigger();

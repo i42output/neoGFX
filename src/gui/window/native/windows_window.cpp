@@ -554,7 +554,6 @@ namespace neogfx
             iVisible = true;
 
             ::ShowWindow(iHandle, aActivate ? SW_SHOW : SW_SHOWNA);
-            ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
             if (aActivate)
                 activate();
@@ -629,9 +628,10 @@ namespace neogfx
             if (is_active())
                 return;
             if (!visible())
-                return;
+                show();
 
             ::SetForegroundWindow(iHandle);
+            ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
             iActive = true;
             surface_window().as_window().activated().trigger();
