@@ -623,6 +623,8 @@ namespace neogfx
 
         void window::activate()
         {
+            if ((surface_window().style() & window_style::NoActivate) == window_style::NoActivate)
+                return;
             if (!enabled())
                 return;
             if (is_active())
