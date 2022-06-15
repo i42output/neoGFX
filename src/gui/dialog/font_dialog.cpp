@@ -277,7 +277,8 @@ namespace neogfx
         if (dialog::has_minimum_size())
             return result;
         result.cy += dpi_scale(std::min(font().height(), 16.0) * 8.0);
-        result.cx += dpi_scale(std::min(font().height(), 16.0) * 6.0);
+        result.cx += dpi_scale(std::min(font().height(), 16.0) * 8.0);
+        result.cx = std::max<scalar>(result.cx, 640.0_dip);
         return result;
     }
 
