@@ -120,7 +120,10 @@ namespace neogfx
 
     font::point_size native_font_face::size() const
     {
-        return iSize;
+        if (iSize >= 0.0)
+            return iSize;
+        else
+            return 72.0 / iPixelDensityDpi.cy * -iSize;
     }
 
     dimension native_font_face::horizontal_dpi() const
@@ -167,7 +170,7 @@ namespace neogfx
             result = iHandle.freetypeFace->underline_thickness / 64.0;
         else
             result = static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_weight::Normal);
-        if (result < 1.0 || (result > 1.0 && iSize < 20))
+        if (result < 1.0 || (result > 1.0 && size() < 20.0))
             result = 1.0;
         return std::floor(result);
     }
@@ -445,20 +448,32 @@ namespace neogfx
 
     void native_font_face::set_metrics()
     {
-        auto const size = ((style() & (font_style::Superscript | font_style::Subscript)) == font_style::Invalid) ? iSize : iSize * 0.58;
+        auto const desiredSize = ((style() & (font_style::Superscript | font_style::Subscript)) == font_style::Invalid) ? iSize : iSize * 0.58;
+        bool const sizeInPts = (iSize >= 0.0);
+        double correction = 1.0;
         if (!is_bitmap_font())
         {
-            freetypeCheck(FT_Set_Char_Size(iHandle.freetypeFace, 0, static_cast<FT_F26Dot6>(size * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+            freetypeCheck(FT_Set_Char_Size(iHandle.freetypeFace, 0, static_cast<FT_F26Dot6>(size() * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+            if (!sizeInPts)
+            {
+                double const gotSize = iHandle.freetypeFace->size->metrics.height / 64.0;
+                if (gotSize != -desiredSize)
+                {
+                    correction = -desiredSize / gotSize;
+                    auto const corrected = static_cast<FT_F26Dot6>(size() * correction * 64);
+                    freetypeCheck(FT_Set_Char_Size(iHandle.freetypeFace, 0, corrected, static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
+                }
+            }
         }
         else
         {
-            auto requestedSize = size * iPixelDensityDpi.cy / 72.0;
+            auto requestedSize = (sizeInPts ? desiredSize * iPixelDensityDpi.cy / 72.0 : -desiredSize);
             auto availableSize = iHandle.freetypeFace->available_sizes[0].size / 64.0;
             FT_Int strikeIndex = 0;
             for (FT_Int si = 0; si < iHandle.freetypeFace->num_fixed_sizes; ++si)
             {
                 auto nextAvailableSize = iHandle.freetypeFace->available_sizes[si].size / 64.0;
-                if (abs(requestedSize - nextAvailableSize) < abs(requestedSize - availableSize))
+                if (std::abs(requestedSize - nextAvailableSize) < std::abs(requestedSize - availableSize))
                 {
                     availableSize = nextAvailableSize;
                     strikeIndex = si;
@@ -477,8 +492,8 @@ namespace neogfx
             }
         }
         hb_font_set_scale(
-            iHandle.harfbuzzFont, 
-            static_cast<int>(size * iPixelDensityDpi.cx / 72.0 * 64), 
-            static_cast<int>(size * iPixelDensityDpi.cy / 72.0 * 64));
+            iHandle.harfbuzzFont,
+            static_cast<int>(size() * correction * iPixelDensityDpi.cx / 72.0 * 64),
+            static_cast<int>(size() * correction * iPixelDensityDpi.cy / 72.0 * 64));
     }
 }

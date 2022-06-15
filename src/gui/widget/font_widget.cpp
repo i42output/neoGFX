@@ -64,7 +64,11 @@ namespace neogfx
                 if (iFonts[modelRow] == std::nullopt)
                 {
                     auto& fm = service<i_font_manager>();
-                    iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, 12.0 };
+                    auto const pointSize = std::max(service<i_app>().current_style().font_info().size(), 12.0);
+                    iFonts[modelRow] = font{
+                        fm.font_family(modelRow),
+                        font_style::Normal,
+                        -font{ service<i_app>().current_style().font().with_size(pointSize) }.height() };
                 }
                 return iFonts[modelRow];
             }

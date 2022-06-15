@@ -61,7 +61,11 @@ namespace neogfx
                 if (iFonts[modelRow] == std::nullopt)
                 {
                     auto& fm = service<i_font_manager>();
-                    iFonts[modelRow] = font{ fm.font_family(modelRow), font_style::Normal, std::max(service<i_app>().current_style().font_info().size(), 12.0) };
+                    auto const pointSize = std::max(service<i_app>().current_style().font_info().size(), 12.0);
+                    iFonts[modelRow] = font{ 
+                        fm.font_family(modelRow), 
+                        font_style::Normal, 
+                        -font{ service<i_app>().current_style().font().with_size(pointSize) }.height() };
                 }
                 return iFonts[modelRow];
             }
@@ -113,10 +117,11 @@ namespace neogfx
                 if (iFonts[modelRow] == std::nullopt)
                 {
                     auto& fm = service<i_font_manager>();
-                    iFonts[modelRow] = font{ 
+                    auto const pointSize = std::max(service<i_app>().current_style().font_info().size(), 12.0);
+                    iFonts[modelRow] = font{
                         fm.font_family(familyModelRow), 
                         static_variant_cast<string const&>(item_model().cell_data(to_item_model_index(aIndex))), 
-                        std::max(service<i_app>().current_style().font_info().size(), 12.0) };
+                        -font{ service<i_app>().current_style().font().with_size(pointSize) }.height() };
                 }
                 return iFonts[modelRow];
             }
@@ -322,10 +327,13 @@ namespace neogfx
             message_box::stop(*this, "neoGFX Feature"_t, "Sorry, this neoGFX feature (subpixel rendering settings dialog) has yet to be implemented."_t, standard_button::Ok);
         });
 
-        iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+        iFamilyPicker.set_size_policy(size_constraint::Expanding);
         iStylePicker.set_size_policy(size_constraint::Expanding);
         iSizePicker.set_size_policy(size_constraint::Expanding);
-        iLayout1.set_weight(neogfx::size{ 0.0, 1.0 });
+        iLayout1.set_size_policy(size_constraint::Expanding);
+        iLayout2.set_size_policy(size_constraint::Expanding);
+        iLayout1.set_weight(neogfx::size{ 6.0, 1.0 });
+        iLayout2.set_weight(neogfx::size{ 6.0, 1.0 });
         iLayout4.set_weight(neogfx::size{ 3.0, 1.0 });
         iLayout5.set_weight(neogfx::size{ 1.0, 1.0 });
 
