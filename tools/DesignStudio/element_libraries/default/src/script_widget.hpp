@@ -23,6 +23,7 @@
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
+#include <neogfx/tools/DesignStudio/i_element_library.hpp>
 #include <neogfx/tools/DesignStudio/script.hpp>
 
 namespace neogfx::DesignStudio
@@ -31,12 +32,14 @@ namespace neogfx::DesignStudio
     {
         typedef window base_type;
     public:
-        script_widget(i_widget& aParent, window_style aStyle) :
+        script_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
             window{ aParent, window_placement{ rect{ point{}, size{ 256.0_dip, 160.0_dip } } }, aStyle },
             iEditor{ client_layout() }
         {
             set_padding(neogfx::padding{ 2.0_dip, 2.0_dip, 2.0_dip, 2.0_dip });
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
+            title_bar().set_icon(aElement.library().element_icon(aElement.type()));
+            title_bar().set_title(""_s);
         }
     private:
         text_edit iEditor;

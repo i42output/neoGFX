@@ -226,6 +226,9 @@ namespace neogfx
         iFocusedWidget{ nullptr },
         iDismissingChildren{ false }
     {
+        if ((iStyle & window_style::Nested) == window_style::Nested)
+            iStyle &= ~window_style::MinimizeBox;
+
         set_root(*this);
 
         if (aParent)

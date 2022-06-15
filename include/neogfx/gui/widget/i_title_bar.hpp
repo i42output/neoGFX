@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_text_widget.hpp>
 
@@ -29,8 +30,11 @@ namespace neogfx
     public:
         typedef i_title_bar abstract_type;
     public:
+        struct unsupported_operation : std::logic_error { unsupported_operation() : std::logic_error{ "neogfx::i_title_bar::unsupported_operation" } {} };
+    public:
         virtual ~i_title_bar() = default;
     public:
+        virtual void set_icon(i_texture const& aIcon) = 0;
         virtual i_string const& title() const = 0;
         virtual void set_title(i_string const& aTitle) = 0;
         virtual i_text_widget const& title_widget() const = 0;

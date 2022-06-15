@@ -77,6 +77,11 @@ namespace neogfx
         return *this;
     }
 
+    void normal_title_bar::set_icon(i_texture const& aIcon)
+    {
+        icon_widget().set_image(aIcon);
+    }
+
     i_string const& normal_title_bar::title() const
     {
         return iTitle.text();

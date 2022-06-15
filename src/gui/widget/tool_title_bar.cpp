@@ -79,6 +79,11 @@ namespace neogfx
         return *this;
     }
 
+    void tool_title_bar::set_icon(i_texture const& aIcon)
+    {
+        throw unsupported_operation();
+    }
+
     i_string const& tool_title_bar::title() const
     {
         return iTitle.text();
