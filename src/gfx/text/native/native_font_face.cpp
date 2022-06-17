@@ -452,16 +452,17 @@ namespace neogfx
         bool const sizeSpecified = (iSize >= 0.0);
         bool const heightSpecified = !sizeSpecified;
         auto const requestedSize = sizeSpecified ? desiredSize : -desiredSize / iPixelDensityDpi.cy * 72.0;
+        auto const requestedHeight = heightSpecified ? -desiredSize : desiredSize * iPixelDensityDpi.cy / 72.0;
         double correction = 1.0;
         if (!is_bitmap_font())
         {
             freetypeCheck(FT_Set_Char_Size(iHandle.freetypeFace, 0, static_cast<FT_F26Dot6>(requestedSize * 64), static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
             if (heightSpecified)
             {
-                double const gotSize = iHandle.freetypeFace->size->metrics.height / 64.0;
-                if (gotSize != -desiredSize)
+                double const gotHeight = iHandle.freetypeFace->size->metrics.height / 64.0;
+                if (gotHeight != requestedHeight)
                 {
-                    correction = -desiredSize / gotSize;
+                    correction = requestedHeight / gotHeight;
                     auto const corrected = static_cast<FT_F26Dot6>(requestedSize * correction * 64);
                     freetypeCheck(FT_Set_Char_Size(iHandle.freetypeFace, 0, corrected, static_cast<FT_UInt>(iPixelDensityDpi.cx), static_cast<FT_UInt>(iPixelDensityDpi.cy)));
                 }
@@ -469,7 +470,6 @@ namespace neogfx
         }
         else
         {
-            auto requestedHeight = heightSpecified ? -desiredSize : desiredSize * iPixelDensityDpi.cy / 72.0;
             auto availableHeight = iHandle.freetypeFace->available_sizes[0].size / 64.0;
             FT_Int strikeIndex = 0;
             for (FT_Int si = 0; si < iHandle.freetypeFace->num_fixed_sizes; ++si)
