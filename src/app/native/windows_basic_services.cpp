@@ -20,12 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <Shellapi.h>
 #include <ShellScalingApi.h>
 #include <D2d1.h>
 #pragma comment(lib, "Shcore.lib")
 
 #include "3rdparty/tinyfiledialogs.h"
 
+#include <neolib/core/string_utils.hpp>
 #include <neogfx/hid/display.hpp>
 #include <neogfx/app/i_app.hpp>
 #include "../../hid/native/windows_display.hpp"
@@ -262,7 +264,7 @@ namespace neogfx
         bool basic_services::has_system_clipboard() const
         {
             return true;
-        }
+        }   
 
         i_native_clipboard& basic_services::system_clipboard()
         {
@@ -278,6 +280,11 @@ namespace neogfx
         i_shared_menu_bar& basic_services::system_menu_bar()
         {
             throw no_system_menu_bar();
+        }
+
+        bool basic_services::browse_to(std::string const& aUri)
+        {
+            return (INT_PTR)::ShellExecute(NULL, NULL, reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aUri).c_str()), NULL, NULL, SW_SHOWNORMAL) > 32;
         }
     }
 }

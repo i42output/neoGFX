@@ -55,6 +55,7 @@ begin_declare_enum(neogfx::text_edit_caps)
 declare_enum_string(neogfx::text_edit_caps, SingleLine)
 declare_enum_string(neogfx::text_edit_caps, MultiLine)
 declare_enum_string(neogfx::text_edit_caps, Password)  
+declare_enum_string(neogfx::text_edit_caps, ParseURIs)
 declare_enum_string(neogfx::text_edit_caps, OnlyAccept)
 end_declare_enum(neogfx::text_edit_caps)
 
@@ -663,7 +664,7 @@ namespace neogfx
     public:
         position_type document_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
-        virtual std::pair<position_type, position_type> word_at(position_type aTextPosition) const;
+        virtual std::pair<position_type, position_type> word_at(position_type aTextPosition, bool aOnlyConsiderSpaces = false) const;
     public:
         neogfx::cursor& cursor() const;
         void set_cursor_position(const point& aPosition, bool aMoveAnchor = true, bool aEnableDragger = false);

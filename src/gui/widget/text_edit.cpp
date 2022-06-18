@@ -22,6 +22,7 @@
 #include <neolib/core/scoped.hpp>
 #include <neolib/task/thread.hpp>
 #include <neolib/app/i_power.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
@@ -568,7 +569,21 @@ namespace neogfx
     {
         framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
+        {
             set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
+            {
+                auto wordSpan = word_at(document_hit_test(aPosition), true);
+                thread_local std::u32string utf32word;
+                utf32word.clear();
+                std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
+                if (utf32word.find(U"://") != std::u32string::npos)
+                {
+                    if (!service<i_basic_services>().browse_to(neolib::utf32_to_utf8(utf32word)))
+                        service<i_basic_services>().system_beep();
+                }
+            }
+        }
     }
 
     void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -635,7 +650,18 @@ namespace neogfx
     neogfx::mouse_cursor text_edit::mouse_cursor() const
     {
         if (client_rect(false).contains(mouse_position()) || iDragger != std::nullopt)
+        {
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
+            {
+                auto wordSpan = word_at(document_hit_test(mouse_position()), true);
+                thread_local std::u32string utf32word;
+                utf32word.clear();
+                std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
+                if (utf32word.find(U"://") != std::u32string::npos)
+                    return mouse_system_cursor::Hand;
+            }
             return mouse_system_cursor::IBeam;
+        }
         else
             return framed_scrollable_widget::mouse_cursor();
     }
@@ -1597,13 +1623,28 @@ namespace neogfx
         return get_text_category(emojiAtlas, iText[aTextPositionLeft]) == get_text_category(emojiAtlas, iText[aTextPositionRight]);
     }
 
-    std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition) const
+    std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition, bool aOnlyConsiderSpaces) const
     {
+        auto is_space = [](char32_t ch)
+        {
+            switch (ch)
+            {
+            case U'\r':
+            case U'\n':
+            case U'\t':
+            case U'\f':
+            case U'\v':
+            case U' ':
+                return true;
+            default:
+                return false;
+            }
+        };
         auto start = aTextPosition;
         auto end = aTextPosition;
-        while (start > 0 && same_word(start - 1, aTextPosition))
+        while (start > 0 && (aOnlyConsiderSpaces ? !is_space(iText[start - 1]) : same_word(start - 1, aTextPosition)))
             --start;
-        while (end < iText.size() && same_word(aTextPosition, end))
+        while (end < iText.size() && (aOnlyConsiderSpaces ? !is_space(iText[end]) : same_word(aTextPosition, end)))
             ++end;
         return std::make_pair(start, end);
     }
