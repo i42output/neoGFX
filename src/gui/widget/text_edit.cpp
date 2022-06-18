@@ -570,7 +570,6 @@ namespace neogfx
         framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
-            set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
             if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
             {
                 auto wordSpan = word_at(document_hit_test(aPosition), true);
@@ -581,8 +580,10 @@ namespace neogfx
                 {
                     if (!service<i_basic_services>().browse_to(neolib::utf32_to_utf8(utf32word)))
                         service<i_basic_services>().system_beep();
+                    return;
                 }
             }
+            set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
         }
     }
 

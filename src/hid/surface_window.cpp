@@ -477,6 +477,10 @@ namespace neogfx
         }
         if (as_window().has_focused_widget())
             as_window().focused_widget().focus_lost(focus_reason::WindowActivation);
+        if (has_capturing_widget())
+            release_capture(capturing_widget());
+        else
+            native_window().release_capture();
     }
 
     void surface_window::native_window_resized()
