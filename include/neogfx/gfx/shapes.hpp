@@ -73,9 +73,9 @@ namespace neogfx
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline vec3_array<8> rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44& aTransformation = {})
+    inline vec3_array<8> const& rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44& aTransformation = {})
     {
-        vec3_array<8> result;
+        thread_local vec3_array<8> result;
         calc_rect_vertices(result, aRect, aType, aTransformation);
         return result;
     };

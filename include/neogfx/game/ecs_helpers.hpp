@@ -36,23 +36,24 @@
 namespace neogfx
 {
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline game::mesh to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(game::mesh& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
     {
-        auto rectVertices = rect_vertices(aRect, aMeshType, aTransformation);
-        return game::mesh
-        {
-            {
-                rectVertices.begin(), rectVertices.end()
-            },
-            {
+        auto const& rectVertices = rect_vertices(aRect, aMeshType, aTransformation);
+        aResult.vertices.assign(rectVertices.begin(), rectVertices.end());
+        aResult.uv = {
                 vec2{ 0.0, 1.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 0.0 },
-                vec2{ 1.0, 1.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 0.0 }
-            },
-            {
+                vec2{ 1.0, 1.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 0.0 } };
+        aResult.faces = {
                 game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
-                game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u }    
-            }
-        };
+                game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u } };
+        return aResult;
+    }
+
+    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline game::mesh const& to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    {
+        thread_local game::mesh result;
+        return to_ecs_component(result, aRect, aMeshType, aTransformation, aOffset);
     }
 
     inline game::mesh to_ecs_component(const vertices& aVertices, mesh_type aSourceMeshType = mesh_type::TriangleFan, mesh_type aDestinationMeshType = mesh_type::Triangles)
@@ -258,7 +259,8 @@ namespace neogfx
 
     inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const rect& aRect, const neogfx::i_texture& aTexture, const mat33& aTextureTransform = mat33::identity())
     {
-        auto patchMesh = to_ecs_component(aRect, mesh_type::Triangles, std::nullopt, static_cast<uint32_t>(aMesh.vertices.size())); 
+        thread_local game::mesh patchMesh;
+        to_ecs_component(patchMesh, aRect, mesh_type::Triangles, std::nullopt, static_cast<uint32_t>(aMesh.vertices.size()));
         aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
         if (!aTextureTransform.is_identity())
             for (auto& uv : patchMesh.uv)

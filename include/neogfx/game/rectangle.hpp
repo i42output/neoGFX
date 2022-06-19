@@ -82,7 +82,8 @@ namespace neogfx::game
             static void update(const rectangle& aData, i_ecs& aEcs, entity_id aEntity)
             {
                 using neogfx::game::material;
-                aEcs.component<mesh>().populate(aEntity, to_ecs_component(rect{ point{ ~aData.position.xy - aData.extents / 2.0 }, size{aData.extents} }));
+                thread_local game::mesh rectMesh;
+                aEcs.component<mesh>().populate(aEntity, to_ecs_component(rectMesh, rect{ point{ ~aData.position.xy - aData.extents / 2.0 }, size{aData.extents} }));
                 aEcs.component<material>().populate(aEntity, aData.material);
             }
         };
