@@ -128,6 +128,11 @@ namespace neogfx
     public:
         void paint_non_client(i_graphics_context& aGc) const override
         {
+#ifdef NEOGFX_DEBUG
+            if (debug::renderItem == this)
+                service<debug::logger>() << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << endl;
+#endif // NEOGFX_DEBUG
+
             base_type::paint_non_client(aGc);
             switch (iStyle)
             {

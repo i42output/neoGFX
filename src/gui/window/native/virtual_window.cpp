@@ -450,6 +450,7 @@ namespace neogfx
             activeSurface.native_window_focus_lost();
         }
         surface_window().as_window().activated().trigger();
+        parentWindow.as_widget().update(true);
         surface_window().as_widget().update(true);
     }
 
@@ -457,6 +458,7 @@ namespace neogfx
     {
         iActive = false;
         surface_window().as_window().deactivated().trigger();
+        parent().surface_window().as_widget().update(true);
         surface_window().as_widget().update(true);
     }
 

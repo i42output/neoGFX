@@ -2426,7 +2426,7 @@ namespace neogfx
 
     void text_edit::update_cursor()
     {
-        update(cursor_rect());
+        //update(cursor_rect());
     }
 
     void text_edit::make_cursor_visible(bool aForcePreviewScroll)
