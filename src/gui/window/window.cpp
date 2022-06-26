@@ -987,6 +987,9 @@ namespace neogfx
                 surface().native_surface().invalidate(rect{ surface().surface_extents() });
         });
 
+        iSink += activated([&]() { surface().native_surface().invalidate(rect{ surface().surface_extents() }); });
+        iSink += deactivated([&]() { surface().native_surface().invalidate(rect{ surface().surface_extents() }); });
+
         init_scrollbars();
 
         if (!placement().video_mode())

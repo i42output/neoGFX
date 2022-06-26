@@ -289,7 +289,7 @@ namespace neogfx
             auto activate_if = [&]()
             {
                 if (!surfaceWindow.native_window().is_active())
-                    surfaceWindow.native_window().activate();
+                    surfaceWindow.native_window().surface_window().native_window_focus_gained();
             };
             switch (mouseEvent.type())
             {
