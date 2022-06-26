@@ -70,6 +70,7 @@ namespace neogfx
         void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) final;
         neogfx::logical_coordinates logical_coordinates() const final;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) final;
+        double z_order() const final;
         void layout_surface() final;
         void invalidate_surface(const rect& aInvalidatedRect, bool aInternal = true) final;
         bool has_invalidated_area() const final;

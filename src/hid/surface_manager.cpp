@@ -51,7 +51,7 @@ namespace neogfx
 
     bool surface_manager::initialising_surface() const
     {
-        for (auto const& s : iSurfaces)
+        for (auto s : iSurfaces)
         {
             if (s->has_native_surface() && s->native_surface().initialising())
                 return true;
@@ -61,53 +61,59 @@ namespace neogfx
 
     void surface_manager::add_surface(i_surface& aSurface)
     {
-        iSurfaces.insert(&aSurface);
+        iSurfaces.push_back(&aSurface);
+        std::sort(iSurfaces.begin(), iSurfaces.end(), surface_sorter{});
+        if (aSurface.is_window())
+        {
+            iSink += aSurface.as_surface_window().as_window().activated([&]()
+            {
+                std::sort(iSurfaces.begin(), iSurfaces.end(), surface_sorter{});
+            });
+        }
     }
     
     void surface_manager::remove_surface(i_surface& aSurface)
     {
-        auto existingSurface = iSurfaces.find(&aSurface);
+        auto existingSurface = std::find(iSurfaces.begin(), iSurfaces.end(), &aSurface);
         if (existingSurface != iSurfaces.end())
         {
+            iSurfaces.erase(existingSurface);
             for (auto s = iSurfaces.begin(); s != iSurfaces.end();)
             {
                 if (aSurface.is_owner_of(**s))
                 {
                     auto& childSurface = **s;
-                    iSurfaces.erase(s);
+                    s = iSurfaces.erase(s);
                     childSurface.close();
-                    s = iSurfaces.begin();
                 }
                 else
                     ++s;
             }
-            iSurfaces.erase(existingSurface);
         }    
     }
 
     const i_surface& surface_manager::surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent) const
     {
         const i_surface* match = nullptr;
-        for (auto s = iSurfaces.begin(); s != iSurfaces.end(); ++s)
+        for (auto s : iSurfaces)
         {
-            auto const& surface = **s;
-            if (!surface.is_window() || !aProgenitor.is_owner_of(surface) || !surface.as_surface_window().native_window().visible())
+            if (!s->is_window() || !aProgenitor.is_owner_of(*s) || !s->as_surface_window().native_window().visible())
                 continue;
             if (aForMouseEvent)
             {
-                if (!surface.as_surface_window().native_window().enabled())
+                if (!s->as_surface_window().native_window().enabled())
                     continue;
                 auto const location = aProgenitor.as_surface_window().current_mouse_event_location();
                 if (location == mouse_event_location::None ||
-                    (location == mouse_event_location::Client && surface.as_surface_window().as_widget().ignore_mouse_events()) ||
-                    (location == mouse_event_location::NonClient && surface.as_surface_window().as_widget().ignore_non_client_mouse_events()))
+                    (location == mouse_event_location::Client && s->as_surface_window().as_widget().ignore_mouse_events()) ||
+                    (location == mouse_event_location::NonClient && s->as_surface_window().as_widget().ignore_non_client_mouse_events()))
                     continue;
             }
-            rect const surfaceRect{ surface.as_surface_window().surface_position(), surface.as_surface_window().surface_extents() };
+            rect const surfaceRect{ s->as_surface_window().surface_position(), s->as_surface_window().surface_extents() };
             if (surfaceRect.contains(aPosition))
             {
-                if (match == nullptr || match->is_owner_of(surface))
-                    match = &surface;
+                if (match == nullptr || match->is_owner_of(*s))
+                    match = s;
             }
         }
         if (match != nullptr)
@@ -168,7 +174,7 @@ namespace neogfx
 
     bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const
     {
-        for (auto& s : iSurfaces)
+        for (auto s : iSurfaces)
             if (s->has_native_surface() && s->native_surface().handle() == aNativeSurfaceHandle)
                 return true;
         return false;
@@ -176,7 +182,7 @@ namespace neogfx
 
     i_surface& surface_manager::attached_surface(void* aNativeSurfaceHandle)
     {
-        for (auto& s : iSurfaces)
+        for (auto s : iSurfaces)
             if (s->has_native_surface() && s->native_surface().handle() == aNativeSurfaceHandle)
                 return *s;
         throw surface_not_found();
@@ -194,7 +200,7 @@ namespace neogfx
 
     bool surface_manager::any_strong_surfaces() const
     {
-        for (auto& s : iSurfaces)
+        for (auto s : iSurfaces)
             if (s->is_strong())
                 return true;
         return false;
@@ -203,7 +209,7 @@ namespace neogfx
     std::size_t surface_manager::strong_surface_count() const
     {
         std::size_t result = 0u;
-        for (auto& s : iSurfaces)
+        for (auto s : iSurfaces)
             if (s->is_strong())
                 ++result;
         return result;
@@ -220,13 +226,13 @@ namespace neogfx
 
     void surface_manager::layout_surfaces()
     {
-        for (auto i = iSurfaces.begin(); i != iSurfaces.end(); ++i)
-            (*i)->layout_surface();
+        for (auto s : iSurfaces)
+            s->layout_surface();
     }
 
     void surface_manager::invalidate_surfaces()
     {
-        for (auto& s : iSurfaces)
+        for (auto s : iSurfaces)
             s->invalidate_surface(rect(point{}, s->surface_extents()), false);
     }
 
@@ -235,20 +241,20 @@ namespace neogfx
         if (iRenderingSurfaces || iRenderingEngine.creating_window())
             return;
         iRenderingSurfaces = true;
-        for (auto& s : iSurfaces)
+        for (auto s : iSurfaces)
             s->render_surface();
         iRenderingSurfaces = false;
     }
 
     void surface_manager::display_error_message(std::string const& aTitle, std::string const& aMessage) const
     {
-        for (auto i = iSurfaces.begin(); i != iSurfaces.end(); ++i)
+        for (auto s : iSurfaces)
         {
-            if (!(*i)->has_native_surface())
+            if (!s->has_native_surface())
                 continue;
-            if ((*i)->surface_type() == surface_type::Window && (*i)->as_surface_window().as_window().is_active())
+            if (s->surface_type() == surface_type::Window && s->as_surface_window().as_window().is_active())
             {
-                display_error_message((*i)->native_surface(), aTitle, aMessage);
+                display_error_message(s->native_surface(), aTitle, aMessage);
                 return;
             }
         }

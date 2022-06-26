@@ -36,6 +36,7 @@ namespace neogfx
         AlternateBase,
         Text,
         Selection,
+        AlternateSelection,
         SelectedText,
         Hover,
         PrimaryAccent,

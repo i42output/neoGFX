@@ -513,7 +513,7 @@ namespace neogfx
             if (!is_nested())
                 return service<i_app>().current_style().palette().color(color_role::Selection);
             else
-                return service<i_app>().current_style().palette().color(color_role::SecondaryAccent);
+                return service<i_app>().current_style().palette().color(color_role::AlternateSelection);
         }
         else
             return base_type::frame_color().with_alpha(is_effectively_active() ? 1.0 : 0.25);

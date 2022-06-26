@@ -40,13 +40,13 @@ namespace neogfx
             {
                 if (left->is_owner_of(*right))
                     return true;
-                else if (right->is_owner_of(*left)) 
+                else if (right->is_owner_of(*left))
                     return false;
                 else
-                    return std::less<i_surface*>{}(left, right);
+                    return left->z_order() > right->z_order();
             }
         };
-        typedef std::set<i_surface*, surface_sorter> surface_list;
+        typedef std::vector<i_surface*> surface_list;
         typedef neolib::mutable_set<nest> nest_list;
     public:
         surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);

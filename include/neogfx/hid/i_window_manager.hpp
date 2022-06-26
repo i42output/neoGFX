@@ -45,6 +45,7 @@ namespace neogfx
     public:
         virtual rect desktop_rect(const i_window& aWindow) const = 0;
         virtual rect window_rect(const i_window& aWindow) const = 0;
+        virtual double z_order(const i_window& aWindow) const = 0;
         virtual void move_window(i_window& aWindow, const point& aPosition) = 0;
         virtual void resize_window(i_window& aWindow, const size& aExtents) = 0;
     public:

@@ -38,12 +38,16 @@ namespace neogfx
     void window_manager::add_window(i_window& aWindow)
     {
         iWindows.push_back(&aWindow);
-        std::sort(iWindows.begin(), iWindows.end(), window_sorter{});
+        std::stable_sort(iWindows.begin(), iWindows.end(), window_sorter{});
         iSink += aWindow.activated([&]()
         {
             if (iActiveWindow && iActiveWindow != &aWindow)
                 deactivate_window(*iActiveWindow);
             iActiveWindow = &aWindow;
+            auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
+            iWindows.erase(existing);
+            iWindows.insert(iWindows.begin(), &aWindow);
+            std::stable_sort(iWindows.begin(), iWindows.end(), window_sorter{});
         });
         iSink += aWindow.deactivated([&]()
         {
@@ -106,6 +110,12 @@ namespace neogfx
         return aWindow.is_nested() ?
             window_rect(aWindow.parent_window()) :
             rect{ aWindow.surface().surface_position(), aWindow.surface().surface_extents() };
+    }
+
+    double window_manager::z_order(const i_window& aWindow) const
+    {
+        auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
+        return std::distance(iWindows.begin(), existing) * -1.0;
     }
 
     void window_manager::move_window(i_window& aWindow, const point& aPosition)

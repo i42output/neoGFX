@@ -37,7 +37,7 @@ namespace neogfx
                 else if (right->is_owner_of(*left))
                     return false;
                 else
-                    return std::less<i_window*>{}(left, right);
+                    return false;
             }
         };
         typedef std::vector<i_window*> window_list;
@@ -55,6 +55,7 @@ namespace neogfx
     public:
         rect desktop_rect(const i_window& aWindow) const final;
         rect window_rect(const i_window& aWindow) const final;
+        double z_order(const i_window& aWindow) const final;
         void move_window(i_window& aWindow, const point& aPosition) final;
         void resize_window(i_window& aWindow, const size& aExtents) final;
     public:

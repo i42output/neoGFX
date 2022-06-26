@@ -215,6 +215,13 @@ namespace neogfx
         native_surface().set_logical_coordinates(aCoordinates);
     }
 
+    double surface_window::z_order() const
+    {
+        if (is_window())
+            return service<i_window_manager>().z_order(as_window());
+        return 0.0;
+    }
+
     void surface_window::layout_surface()
     {
         as_widget().layout_items();
