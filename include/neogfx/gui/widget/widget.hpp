@@ -91,6 +91,8 @@ namespace neogfx
         bool has_surface() const override;
         const i_surface& surface() const override;
         i_surface& surface() override;
+        const i_surface& physical_surface() const override;
+        i_surface& physical_surface() override;
         bool has_parent() const final;
         const i_widget& parent() const final;
         i_widget& parent() final;

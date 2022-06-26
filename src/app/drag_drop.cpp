@@ -117,7 +117,7 @@ namespace neogfx
             for (auto const& target : iTargets)
                 if (target->can_accept(aObject) &&
                     target->is_widget() &&
-                    target->as_widget().same_surface(hitWidget) &&
+                    target->as_widget().same_physical_surface(hitWidget) &&
                     (&target->as_widget() == &hitWidget || target->as_widget().is_ancestor_of(hitWidget)))
                     return target;
         }

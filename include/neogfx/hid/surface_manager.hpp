@@ -73,7 +73,7 @@ namespace neogfx
         const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent = false) const override;
         i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent = false) override;
     public:
-        i_nest& nest_for(i_widget const& aNestWidget, nest_type aNestType) const override;
+        i_nest& nest_for(i_widget& aNestWidget, nest_type aNestType) const override;
         virtual i_nest& find_nest(i_native_window const& aNestedWindow) const override;
         void destroy_nest(i_nest& aNest) override;
         i_nest& active_nest() const override;

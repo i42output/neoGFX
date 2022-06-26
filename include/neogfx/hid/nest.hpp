@@ -29,17 +29,17 @@ namespace neogfx
     class nest : public i_nest
     {
     public:
-        nest(i_widget const& aWidget, nest_type aType);
+        nest(i_widget& aWidget, nest_type aType);
         ~nest();
     public:
-        i_widget const& widget() const override;
+        i_widget& widget() const override;
         nest_type type() const override;
     public:
         bool has(i_native_window const& aNestedWindow) const override;
         void add(i_native_window& aNestedWindow) override;
         void remove(i_native_window& aNestedWindow) override;
     private:
-        i_widget const& iWidget;
+        i_widget& iWidget;
         nest_type iType;
         std::set<i_native_window const*> iNestedWindows;
         sink iSink;

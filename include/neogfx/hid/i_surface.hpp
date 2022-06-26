@@ -76,6 +76,7 @@ namespace neogfx
         virtual void close() = 0;
     public:
         virtual bool is_window() const = 0;
+        virtual bool is_nested_window() const = 0;
         virtual const i_surface_window& as_surface_window() const = 0;
         virtual i_surface_window& as_surface_window() = 0;
     public:

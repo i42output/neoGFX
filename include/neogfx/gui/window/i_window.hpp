@@ -178,6 +178,19 @@ namespace neogfx
         {
             return const_cast<i_surface_window*>(to_const(*this).find_surface());
         }
+        const i_surface_window* find_physical_surface() const
+        {
+            if (is_surface() && !surface().is_nested_window())
+                return &surface().as_surface_window();
+            else if (has_parent_window())
+                return parent_window().find_physical_surface();
+            else
+                return nullptr;
+        }
+        i_surface_window* find_physical_surface()
+        {
+            return const_cast<i_surface_window*>(to_const(*this).find_physical_surface());
+        }
         bool is_ancestor_of(const i_window& aWindow) const
         {
             const i_window* w = &aWindow;

@@ -61,6 +61,7 @@ namespace neogfx
         bool is_owner_of(const i_surface& aChildSurface) const final;
     public:
         bool is_window() const final;
+        bool is_nested_window() const final;
         const i_surface_window& as_surface_window() const final;
         i_surface_window& as_surface_window() final;
     public:

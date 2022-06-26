@@ -175,6 +175,11 @@ namespace neogfx
         return true;
     }
 
+    bool surface_window::is_nested_window() const
+    {
+        return is_window() && as_window().is_nested();
+    }
+
     const i_surface_window& surface_window::as_surface_window() const
     {
         return *this;

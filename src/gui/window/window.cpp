@@ -362,6 +362,21 @@ namespace neogfx
         return const_cast<i_surface_window&>(to_const(*this).surface());
     }
 
+    const i_surface_window& window::physical_surface() const
+    {
+        if (window::is_surface() && !is_nested())
+            return *iSurfaceWindow;
+        auto s = find_physical_surface();
+        if (s != nullptr)
+            return *s;
+        throw no_surface();
+    }
+
+    i_surface_window& window::physical_surface()
+    {
+        return const_cast<i_surface_window&>(to_const(*this).physical_surface());
+    }
+
     void window::set_surface(i_surface_window& aSurfaceWindow)
     {
         iSurfaceWindow.reset(&aSurfaceWindow);

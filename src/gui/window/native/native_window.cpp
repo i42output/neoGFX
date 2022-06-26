@@ -279,7 +279,8 @@ namespace neogfx
             if (!mouse.is_enabled())
                 return;
             auto const& mouseEvent = static_variant_cast<const mouse_event&>(current_event());
-            auto& surfaceWindow = service<i_surface_manager>().surface_at_position(surface_window(), surface_window().surface_position() + mouseEvent.position(), true).as_surface_window();
+            auto& surfaceWindow = mouse.capturing() ? mouse.capture_target().as_surface_window() :
+                service<i_surface_manager>().surface_at_position(surface_window(), surface_window().surface_position() + mouseEvent.position(), true).as_surface_window();
             if (&surfaceWindow != &surface_window())
             {
                 surfaceWindow.native_window().handle_event(current_event());
@@ -321,7 +322,8 @@ namespace neogfx
             if (!mouse.is_enabled())
                 return;
             auto const& mouseEvent = static_variant_cast<const non_client_mouse_event&>(current_event());
-            auto& surfaceWindow = service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
+            auto& surfaceWindow = mouse.capturing() ? mouse.capture_target().as_surface_window() :
+                service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
             if (&surfaceWindow != &surface_window())
             {
                 surfaceWindow.native_window().handle_event(current_event());

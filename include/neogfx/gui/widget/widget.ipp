@@ -246,6 +246,18 @@ namespace neogfx
     }
 
     template <typename Interface>
+    const i_surface& widget<Interface>::physical_surface() const
+    {
+        return self_type::root().physical_surface();
+    }
+
+    template <typename Interface>
+    i_surface& widget<Interface>::physical_surface()
+    {
+        return self_type::root().physical_surface();
+    }
+
+    template <typename Interface>
     bool widget<Interface>::has_parent() const
     {
         return iParent != nullptr;

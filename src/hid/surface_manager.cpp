@@ -120,7 +120,7 @@ namespace neogfx
         return const_cast<i_surface&>(to_const(*this).surface_at_position(aProgenitor, aPosition, aForMouseEvent));
     }
 
-    i_nest& surface_manager::nest_for(i_widget const& aNestWidget, nest_type aNestType) const
+    i_nest& surface_manager::nest_for(i_widget& aNestWidget, nest_type aNestType) const
     {
         auto existing = std::find_if(iNests.begin(), iNests.end(), [&](auto&& e) { return &e->widget() == &aNestWidget; });
         if (existing == iNests.end())

@@ -64,7 +64,7 @@ namespace neogfx
         virtual const i_surface& surface_at_position(i_surface const& aProgenitor, point const& aPosition, bool aForMouseEvent = false) const = 0;
         virtual i_surface& surface_at_position(i_surface const& aProgenitor, point const& aPosition, bool aForMouseEvent = false) = 0;
     public:
-        virtual i_nest& nest_for(i_widget const& aNestWidget, nest_type aNestType) const = 0;
+        virtual i_nest& nest_for(i_widget& aNestWidget, nest_type aNestType) const = 0;
         virtual i_nest& find_nest(i_native_window const& aNestedWindow) const = 0;
         virtual void destroy_nest(i_nest& aNest) = 0;
         virtual i_nest& active_nest() const = 0;

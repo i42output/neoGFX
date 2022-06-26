@@ -25,11 +25,12 @@
 #include <neogfx/hid/nest.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
+#include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
-    nest::nest(i_widget const& aWidget, nest_type aType) :
+    nest::nest(i_widget& aWidget, nest_type aType) :
         iWidget{ aWidget }, iType{ aType }
     {
         iSink += widget().destroyed([&]()
@@ -42,7 +43,7 @@ namespace neogfx
     {
     }
 #
-    i_widget const& nest::widget() const
+    i_widget& nest::widget() const
     {
         return iWidget;
     }
@@ -63,6 +64,10 @@ namespace neogfx
         iSink += aNestedWindow.destroyed([&]()
         {
             remove(aNestedWindow);
+        });
+        iSink += aNestedWindow.surface_window().as_window().activated([&]()
+        {
+            widget().bring_child_to_front(aNestedWindow.surface_window().as_widget());
         });
         if (type() == nest_type::Caddy)
         {
