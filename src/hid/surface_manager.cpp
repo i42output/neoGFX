@@ -241,8 +241,8 @@ namespace neogfx
         if (iRenderingSurfaces || iRenderingEngine.creating_window())
             return;
         iRenderingSurfaces = true;
-        for (auto s : iSurfaces)
-            s->render_surface();
+        for (auto s = iSurfaces.rbegin(); s != iSurfaces.rend(); ++s)
+            (**s).render_surface();
         iRenderingSurfaces = false;
     }
 

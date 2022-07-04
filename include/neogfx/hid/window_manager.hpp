@@ -32,12 +32,7 @@ namespace neogfx
         {
             bool operator()(i_window* left, i_window* right) const
             {
-                if (left->is_owner_of(*right))
-                    return true;
-                else if (right->is_owner_of(*left))
-                    return false;
-                else
-                    return false;
+                return left->is_descendent_of(*right) && left != right;
             }
         };
         typedef std::vector<i_window*> window_list;
@@ -49,7 +44,7 @@ namespace neogfx
         void remove_window(i_window& aWindow) final;
         bool has_window(i_window& aWindow) const final;
         std::size_t window_count() const final;
-        i_window& window(std::size_t aIndex) final;
+        i_window& window(std::size_t aIndex) const final;
         bool any_strong_windows() const final;
         i_window& hosting_window(const i_window& aNestedWindow) const final;
     public:

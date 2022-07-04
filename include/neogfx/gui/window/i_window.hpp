@@ -198,7 +198,11 @@ namespace neogfx
                 w = &w->parent_window();
             return w == this;
         }
-    };
+        bool is_descendent_of(const i_window& aWindow) const
+        {
+            return aWindow.is_ancestor_of(*this);
+        }
+     };
 
     rect corrected_popup_rect(i_window& aPopup, rect aPopupRect);
     rect corrected_popup_rect(i_window& aPopup);

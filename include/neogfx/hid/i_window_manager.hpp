@@ -25,6 +25,7 @@
 
 namespace neogfx
 {
+    class i_widget;
     class i_window;
 
     class i_window_manager : public i_service
@@ -39,7 +40,7 @@ namespace neogfx
         virtual void remove_window(i_window& aWindow) = 0;
         virtual bool has_window(i_window& aWindow) const = 0;
         virtual std::size_t window_count() const = 0;
-        virtual i_window& window(std::size_t aIndex) = 0;
+        virtual i_window& window(std::size_t aIndex) const = 0;
         virtual bool any_strong_windows() const = 0;
         virtual i_window& hosting_window(const i_window& aNestedWindow) const = 0;
     public:
@@ -55,6 +56,7 @@ namespace neogfx
         virtual void deactivate_window(i_window& aWindow) = 0;
     public:
         virtual i_window* window_from_position(const point& aPosition) const = 0;
+        virtual i_window* window_from_position(const point& aPosition, i_widget const& aIgnore) const = 0;
     public:
         virtual point mouse_position() const = 0;
         virtual point mouse_position(const i_window& aWindow) const = 0;

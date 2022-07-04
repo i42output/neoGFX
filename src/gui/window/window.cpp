@@ -1045,7 +1045,7 @@ namespace neogfx
 
     point window::mouse_position() const
     {
-        return window_manager().mouse_position(*this);
+        return window_manager().mouse_position(*this) - origin();
     }
 
     border window::window_border() const

@@ -42,27 +42,27 @@ namespace neogfx
         bool operator==(const i_style& aOther) const;
         bool operator!=(const i_style& aOther) const;
     public:
-        std::string const& name() const override;
-        const margin_list& all_margin() const override;
-        const neogfx::margin& margin(margin_role aMarginRole) const override;
-        void set_margin(margin_role aMarginRole, const neogfx::margin& aMargin) override;
-        const border_list& all_border() const override;
-        const neogfx::border& border(border_role aBorderRole) const override;
-        void set_border(border_role aBorderRole, const neogfx::border& aBorder) override;
-        const padding_list& all_padding() const override;
-        const neogfx::padding& padding(padding_role aPaddingRole) const override;
-        void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) override;
-        const size& spacing() const override;
-        void set_spacing(const size& aSpacing) override;
-        const i_palette& palette() const override;
-        i_palette& palette() override;
-        void set_palette(const i_palette& aPalette) override;
-        void set_palette_color(color_role aRole, const optional_color& aColor) override;
-        bool font_available(font_role aRole) const override;
-        const neogfx::font_info& font_info(font_role aRole) const override;
-        const i_optional<neogfx::font_info>& maybe_font_info(font_role aRole) const override;
-        void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) override;
-        const neogfx::font& font(font_role aRole) const override;
+        std::string const& name() const final;
+        const margin_list& all_margin() const final;
+        const neogfx::margin& margin(margin_role aMarginRole) const final;
+        void set_margin(margin_role aMarginRole, const neogfx::margin& aMargin) final;
+        const border_list& all_border() const final;
+        const neogfx::border& border(border_role aBorderRole) const final;
+        void set_border(border_role aBorderRole, const neogfx::border& aBorder) final;
+        const padding_list& all_padding() const final;
+        const neogfx::padding& padding(padding_role aPaddingRole) const final;
+        void set_padding(padding_role aPaddingRole, const neogfx::padding& aPadding) final;
+        const size& spacing() const final;
+        void set_spacing(const size& aSpacing) final;
+        const i_palette& palette() const final;
+        i_palette& palette() final;
+        void set_palette(const i_palette& aPalette) final;
+        void set_palette_color(color_role aRole, const optional_color& aColor) final;
+        bool font_available(font_role aRole) const final;
+        const neogfx::font_info& font_info(font_role aRole) const final;
+        const i_optional<neogfx::font_info>& maybe_font_info(font_role aRole) const final;
+        void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) final;
+        const neogfx::font& font(font_role aRole) const final;
     private:
         void handle_change(style_aspect aAspect);
     private:

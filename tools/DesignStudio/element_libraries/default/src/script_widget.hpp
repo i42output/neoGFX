@@ -40,6 +40,13 @@ namespace neogfx::DesignStudio
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
+
+            ng::debug::layoutItem = this;
+        }
+        ~script_widget()
+        {
+            if (ng::debug::layoutItem = this)
+                ng::debug::layoutItem = nullptr;
         }
     private:
         text_edit iEditor;

@@ -77,7 +77,7 @@ namespace neogfx
         return iWindows.size();
     }
 
-    i_window& window_manager::window(std::size_t aIndex)
+    i_window& window_manager::window(std::size_t aIndex) const
     {
         if (aIndex >= iWindows.size())
             throw window_not_found();

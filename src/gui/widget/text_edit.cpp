@@ -650,11 +650,13 @@ namespace neogfx
 
     neogfx::mouse_cursor text_edit::mouse_cursor() const
     {
-        if (client_rect(false).contains(mouse_position()) || iDragger != std::nullopt)
+        auto const mousePosition = mouse_position();
+        auto const clientRect = client_rect(false);
+        if (clientRect.contains(mousePosition) || iDragger != std::nullopt)
         {
             if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
             {
-                auto wordSpan = word_at(document_hit_test(mouse_position()), true);
+                auto wordSpan = word_at(document_hit_test(mousePosition), true);
                 thread_local std::u32string utf32word;
                 utf32word.clear();
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));

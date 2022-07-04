@@ -58,6 +58,7 @@ namespace neogfx
             ~window_manager();
         public:
             i_window* window_from_position(const point& aPosition) const override;
+            i_window* window_from_position(const point& aPosition, i_widget const& aIgnore) const override;
         public:
             void save_mouse_cursor() override;
             void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;

@@ -811,7 +811,7 @@ namespace neogfx
 
     mouse_cursor surface_window::native_window_mouse_cursor() const
     {
-        auto const mousePosition = as_window().mouse_position();
+        auto const mousePosition = as_window().mouse_position() + as_window().origin();
         const i_widget& widgetUnderMouse = (!has_capturing_widget() ? widget_for_mouse_event(mousePosition, true) : capturing_widget());
         if (widgetUnderMouse.effectively_disabled())
             return mouse_system_cursor::Arrow;

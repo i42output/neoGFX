@@ -110,7 +110,9 @@ namespace neogfx
 
     i_drag_drop_target* drag_drop::find_target(i_drag_drop_object const& aObject, point const& aPosition) const
     {
-        auto window = service<i_window_manager>().window_from_position(aPosition);
+        auto window = aObject.source().drag_drop_widget() ?
+            service<i_window_manager>().window_from_position(aPosition, *aObject.source().drag_drop_widget()) :
+            service<i_window_manager>().window_from_position(aPosition);
         if (window)
         {
             auto const& hitWidget = window->as_widget().get_widget_at(window->as_widget().to_client_coordinates(aPosition - window->window_position()));

@@ -35,12 +35,33 @@ namespace neogfx
         {
         }
 
-        i_window* window_manager::window_from_position(const point& aPosition) const
+        inline i_window* window_from_position(window_manager const& aWindowManager, const point& aPosition, i_widget const* aIgnore)
         {
             HWND hwnd = ::WindowFromPoint(POINT{ static_cast<LONG>(aPosition.x), static_cast<LONG>(aPosition.y) });
             if (service<i_surface_manager>().is_surface_attached(hwnd))
-                return &service<i_surface_manager>().attached_surface(hwnd).as_surface_window().as_window();
+            {
+                auto& ancestor = service<i_surface_manager>().attached_surface(hwnd).as_surface_window().as_window();
+                for (std::size_t i = 0; i < aWindowManager.window_count(); ++i)
+                {
+                    auto& w = aWindowManager.window(i);
+                    if (aIgnore && w.as_widget().is_descendent_of(*aIgnore))
+                        continue;
+                    if (w.effectively_visible() && w.is_descendent_of(ancestor) && w.non_client_rect().contains(aPosition - ancestor.position()))
+                        return &w;
+                }
+                return &ancestor;
+            }
             return nullptr;
+        }
+
+        i_window* window_manager::window_from_position(const point& aPosition) const
+        {
+            return windows::window_from_position(*this, aPosition, nullptr);
+        }
+
+        i_window* window_manager::window_from_position(const point& aPosition, i_widget const& aIgnore) const
+        {
+            return windows::window_from_position(*this, aPosition, &aIgnore);
         }
 
         void window_manager::save_mouse_cursor()
@@ -107,7 +128,14 @@ namespace neogfx
         void window_manager::update_mouse_cursor(const i_window& aWindow)
         {
             if (iSavedCursors.empty())
-                set_mouse_cursor(aWindow.surface().as_surface_window().native_window_mouse_cursor().system_cursor());
+            {
+                auto const mousePosition = mouse_position();
+                auto w = window_from_position(mousePosition);
+                if (w && w->is_descendent_of(aWindow))
+                    set_mouse_cursor(w->surface().as_surface_window().native_window_mouse_cursor().system_cursor());
+                else
+                    set_mouse_cursor(aWindow.surface().as_surface_window().native_window_mouse_cursor().system_cursor());
+            }
         }
     }
 }

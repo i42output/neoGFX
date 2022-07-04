@@ -46,9 +46,9 @@ namespace neogfx
             {
             }
         public:
-            widget_part hit_test(const point&) const override
+            widget_part part(const point&) const override
             {
-                return widget_part{ WidgetType::root().as_widget(), WidgetPart };
+                return widget_part{ this->root().as_widget(), WidgetPart};
             }
             bool ignore_non_client_mouse_events(bool aConsiderAncestors = true) const override
             {
@@ -83,7 +83,7 @@ namespace neogfx
         neogfx::size_policy size_policy() const override;
     public:
         neogfx::widget_type widget_type() const override;
-        widget_part hit_test(const point& aPosition) const override;
+        widget_part part(const point&) const override;
     private:
         void init();
         void update_textures();
@@ -101,7 +101,7 @@ namespace neogfx
     };
 
     template <>
-    inline widget_part normal_title_bar::non_client_item<image_widget, widget_part::SystemMenu>::hit_test(const point&) const
+    inline widget_part normal_title_bar::non_client_item<image_widget, widget_part::SystemMenu>::part(const point&) const
     {
         if ((static_cast<const normal_title_bar&>(parent()).root().style() & window_style::SystemMenu) == window_style::SystemMenu)
             return widget_part{ root().as_widget(), widget_part::SystemMenu };

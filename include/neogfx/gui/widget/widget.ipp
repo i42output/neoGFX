@@ -1994,13 +1994,18 @@ namespace neogfx
     {
         auto& self = as_widget();
 
-        return self_type::root().mouse_position() - self.origin();
+        auto const rootMousePosition = self_type::root().mouse_position();
+        if (self_type::is_root())
+            return rootMousePosition;
+        else
+            return rootMousePosition + self_type::root().origin() - self.origin();
     }
 
     template <typename Interface>
     neogfx::mouse_cursor widget<Interface>::mouse_cursor() const
     {
-        auto const partUnderMouse = part(mouse_position());
+        auto const mousePosition = mouse_position();
+        auto const partUnderMouse = part(mousePosition);
         if (part_active(partUnderMouse))
         {
             switch (partUnderMouse.part)
