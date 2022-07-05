@@ -61,6 +61,7 @@ namespace neogfx
     void nest::add(i_native_window& aNestedWindow)
     {
         iNestedWindows.insert(&aNestedWindow);
+        widget().bring_child_to_front(aNestedWindow.surface_window().as_widget());
         iSink += aNestedWindow.destroyed([&]()
         {
             remove(aNestedWindow);
