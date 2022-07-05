@@ -129,7 +129,7 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding };
     }
 
-    widget_part status_bar::size_grip_widget::hit_test(const point&) const
+    widget_part status_bar::size_grip_widget::part(const point&) const
     {
         return widget_part{ root().as_widget(), widget_part::BorderBottomRight };
     }
@@ -260,13 +260,13 @@ namespace neogfx
         return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
-    widget_part status_bar::hit_test(const point& aPosition) const
+    widget_part status_bar::part(const point& aPosition) const
     {
         point const gripOrigin = client_rect().bottom_right() - (iSizeGrip.origin() - origin());
         rect const gripRect = { gripOrigin, size{ client_rect().bottom_right() - gripOrigin } };
         if (gripRect.contains(aPosition))
             return widget_part{ root().as_widget(), widget_part::BorderBottomRight };
-        return widget::hit_test(aPosition);
+        return widget::part(aPosition);
     }
 
     bool status_bar::is_managing_layout() const

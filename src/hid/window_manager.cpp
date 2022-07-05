@@ -37,7 +37,7 @@ namespace neogfx
 
     void window_manager::add_window(i_window& aWindow)
     {
-        iWindows.push_back(&aWindow);
+        iWindows.insert(iWindows.begin(), &aWindow);
         std::stable_sort(iWindows.begin(), iWindows.end(), window_sorter{});
         iSink += aWindow.activated([&]()
         {

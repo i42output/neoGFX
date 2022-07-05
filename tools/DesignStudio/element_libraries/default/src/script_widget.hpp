@@ -36,10 +36,11 @@ namespace neogfx::DesignStudio
             window{ aParent, window_placement{ rect{ point{}, size{ 256.0_dip, 160.0_dip } } }, aStyle },
             iEditor{ client_layout() }
         {
-            set_padding(neogfx::padding{ 2.0_dip, 2.0_dip, 2.0_dip, 2.0_dip });
             set_minimum_size(size{ 256.0_dip, 160.0_dip });
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
+            create_status_bar<neogfx::status_bar>(
+                neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip | neogfx::status_bar::style::BackgroundAsWindowBorder );
         }
         ~script_widget()
         {

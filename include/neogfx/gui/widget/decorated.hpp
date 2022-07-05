@@ -292,6 +292,8 @@ namespace neogfx
             case widget_part::BorderBottomLeft:
                 return (decoration_style() & neogfx::decoration_style::Resizable) == neogfx::decoration_style::Resizable &&
                     (decoration() & neogfx::decoration::Border) == neogfx::decoration::Border;
+            case widget_part::TitleBar:
+                return true;
                 // todo: the rest
             default:
                 return false;
@@ -320,6 +322,11 @@ namespace neogfx
                         hit |= top;
                     if (aPosition.y > nonClientRect.bottom() - nonClientBorder.bottom)
                         hit |= bottom;
+                    if (iTitleBar != nullptr)
+                    {
+                        if (as_widget().to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
+                            result.part = widget_part::TitleBar;
+                    }
                     if (iStatusBar != nullptr)
                     {
                         point const sizeGripPos = as_widget().to_client_coordinates(iStatusBar->size_grip().non_client_rect().position());
@@ -448,7 +455,7 @@ namespace neogfx
         {
             widget_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left && as_widget().capturing() && 
-                (!as_widget().is_root() || (as_widget().root().is_nested() && (as_widget().root().style() & window_style::Resize) == window_style::Resize)))
+                (!as_widget().is_root() || as_widget().root().is_nested()))
             {
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
@@ -555,15 +562,23 @@ namespace neogfx
                     break;
                 case widget_part::BorderLeft:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy });
+                    if (newSize != currentSize)
+                        newPosition = iTracking->startPosition - (*newSize - iTracking->startSize).with_cy(0.0);
                     break;
                 case widget_part::BorderTopLeft:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy - delta.y });
+                    if (newSize != currentSize)
+                        newPosition = iTracking->startPosition - (*newSize - iTracking->startSize);
                     break;
                 case widget_part::BorderTop:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx, iTracking->startSize.cy - delta.y });
+                    if (newSize != currentSize)
+                        newPosition = iTracking->startPosition - (*newSize - iTracking->startSize).with_cx(0.0);
                     break;
                 case widget_part::BorderTopRight:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.x, iTracking->startSize.cy - delta.y });
+                    if (newSize != currentSize)
+                        newPosition = iTracking->startPosition - (*newSize - iTracking->startSize).with_cx(0.0);
                     break;
                 case widget_part::BorderRight:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx + delta.x, iTracking->startSize.cy });
@@ -576,6 +591,8 @@ namespace neogfx
                     break;
                 case widget_part::BorderBottomLeft:
                     newSize = resizingContext.minimum_size().max(size{ iTracking->startSize.cx - delta.x, iTracking->startSize.cy + delta.y });
+                    if (newSize != currentSize)
+                        newPosition = iTracking->startPosition - (*newSize - iTracking->startSize).with_cy(0.0);
                     break;
                 }
                 if (newPosition && newPosition != currentPosition)

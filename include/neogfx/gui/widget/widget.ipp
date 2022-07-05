@@ -2088,8 +2088,18 @@ namespace neogfx
                 auto const widgetClientPosition = aPosition - w->origin();
                 if (w->effectively_hidden() || (w->effectively_disabled() && !aForHitTest))
                     continue;
-                if (w->part(widgetClientPosition).part == widget_part::Nowhere)
+                switch (w->part(widgetClientPosition).part)
+                {
+                case widget_part::Nowhere:
                     continue;
+                case widget_part::TitleBar:
+                case widget_part::BorderBottomRight:
+                    if (w->root().is_nested())
+                        return w->root();
+                    break;
+                default:
+                    break;
+                }
                 if (!w->ignore_mouse_events() && location != neogfx::mouse_event_location::NonClient)
                     break;
                 if (!w->ignore_non_client_mouse_events() && location == neogfx::mouse_event_location::NonClient)
