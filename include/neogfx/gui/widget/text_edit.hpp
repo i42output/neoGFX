@@ -78,6 +78,7 @@ namespace neogfx
 
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
+        // events
     public:
         define_event(CanAcceptText, can_accept_text, i_string const&, bool&)
         define_event(AcceptText, accept_text, i_string const&)
@@ -86,10 +87,14 @@ namespace neogfx
         define_event(DefaultStyleChanged, default_style_changed)
         define_event(ContextMenu, context_menu, i_menu&)
         define_event(UriClicked, uri_clicked, i_string const&)
+
+        // types
     private:
         typedef text_edit property_context_type;
+
     public:
         typedef std::optional<string> optional_password_mask;
+
         class character_style
         {
         public:
@@ -129,6 +134,7 @@ namespace neogfx
             bool iIgnoreEmoji;
             optional_text_effect iTextEffect;
         };
+
         class paragraph_style
         {
         public:
@@ -150,6 +156,7 @@ namespace neogfx
             optional_padding iPadding;
             optional<double> iLineSpacing;
         };
+
         class style
         {
         public:
@@ -178,36 +185,29 @@ namespace neogfx
             character_style iCharacter;
             paragraph_style iParagraph;
         };
+
         typedef std::set<style> style_list;
+
         class column_info
         {
         public:
-            column_info() :
-                iDelimiter{ U'\t' }
-            {
-            }
+            column_info();
 
         public:
-            char32_t delimiter() const { return iDelimiter; }
-            void set_delimiter(char32_t aDelimiter) { iDelimiter = aDelimiter; }
-            const optional_dimension& min_width() const { return iMinWidth; }
-            void set_min_width(const optional_dimension& aMinWidth) { iMinWidth = aMinWidth; }
-            const optional_dimension& max_width() const { return iMaxWidth; }
-            void set_max_width(const optional_dimension& aMaxWidth) { iMaxWidth = aMaxWidth; }
-            const neogfx::padding& padding() const { return iPadding; }
-            void set_padding(const neogfx::padding& aPadding) { iPadding = aPadding; }
-            const std::optional<text_edit::style>& style() const { return iStyle; }
-            void set_style(const std::optional<text_edit::style>& aStyle) { iStyle = aStyle; }
+            char32_t delimiter() const;
+            void set_delimiter(char32_t aDelimiter);
+            const optional_dimension& min_width() const;
+            void set_min_width(const optional_dimension& aMinWidth);
+            const optional_dimension& max_width() const;
+            void set_max_width(const optional_dimension& aMaxWidth);
+            const neogfx::padding& padding() const;
+            void set_padding(const neogfx::padding& aPadding);
+            const std::optional<text_edit::style>& style() const;
+            void set_style(const std::optional<text_edit::style>& aStyle);
 
         public:
-            bool operator==(const column_info& aRhs) const
-            {
-                return std::forward_as_tuple(iDelimiter, iMinWidth, iMaxWidth, iPadding, iStyle) == std::forward_as_tuple(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iPadding, aRhs.iStyle);
-            }
-            bool operator!=(const column_info& aRhs) const
-            {
-                return !(*this == aRhs);
-            }
+            bool operator==(const column_info& aRhs) const;
+            bool operator!=(const column_info& aRhs) const;
 
         private:
             char32_t iDelimiter;
@@ -216,9 +216,12 @@ namespace neogfx
             neogfx::padding iPadding;
             std::optional<text_edit::style> iStyle;
         };
+
     private:
         class multiple_text_changes;
+
         struct unknown_node {};
+
         template <typename Node = unknown_node>
         class tag
         {
@@ -248,13 +251,13 @@ namespace neogfx
                     static_variant_cast<style_list::const_iterator>(style())->add_ref();
             }
             template <typename Node2>
-            tag(node_type& aNode, const tag<Node2>& aTag) : 
+            tag(node_type& aNode, const tag<Node2>& aTag) :
                 iNode(&aNode), iContents(aTag.iContents)
             {
                 if (std::holds_alternative<style_list::const_iterator>(style()))
                     static_variant_cast<style_list::const_iterator>(style())->add_ref();
             }
-            tag(const tag& aOther) : 
+            tag(const tag& aOther) :
                 iNode(aOther.iNode), iContents(aOther.iContents)
             {
                 if (std::holds_alternative<style_list::const_iterator>(style()))
@@ -292,245 +295,39 @@ namespace neogfx
             node_type* iNode;
             tag_data iContents;
         };
+
         typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
-        class paragraph_positioned_glyph : public glyph
-        {
-        public:
-            using glyph::glyph;
-            paragraph_positioned_glyph(double aX) : x(aX)
-            {
-            }
-            paragraph_positioned_glyph(const glyph& aOther) : glyph(aOther), x(0.0)
-            {
-            }
-        public:
-            paragraph_positioned_glyph& operator=(const glyph& aOther)
-            {
-                glyph::operator=(aOther);
-                x = 0.0;
-                return *this;
-            }
-        public:
-            bool operator<(const paragraph_positioned_glyph& aOther) const
-            {
-                return x < aOther.x;
-            }
-        public:
-            double x = 0.0;
-        };
+
+        class paragraph_positioned_glyph;
         typedef neolib::segmented_array<paragraph_positioned_glyph, 256> glyph_container_type;
+
         typedef basic_glyph_text_content<glyph_container_type> document_glyphs;
+
         class glyph_paragraph;
-        class glyph_paragraph_index
-        {
-        public:
-            glyph_paragraph_index() :
-                iCharacters(0), iGlyphs(0)
-            {
-            }
-            glyph_paragraph_index(document_text::size_type aCharacters, document_glyphs::size_type aGlyphs) :
-                iCharacters(aCharacters), iGlyphs(aGlyphs)
-            {
-            }
-        public:
-            document_text::size_type characters() const { return iCharacters; }
-            document_glyphs::size_type glyphs() const { return iGlyphs; }
-        public:
-            bool operator==(const glyph_paragraph_index& aRhs) const { return iCharacters == aRhs.iCharacters; }
-            bool operator!=(const glyph_paragraph_index& aRhs) const { return !(*this == aRhs);    }
-            bool operator<(const glyph_paragraph_index& aRhs) const { return iCharacters < aRhs.iCharacters; }
-            bool operator>(const glyph_paragraph_index& aRhs) const { return aRhs < *this; }
-            bool operator<=(const glyph_paragraph_index& aRhs) const { return iCharacters <= aRhs.iCharacters; }
-            bool operator>=(const glyph_paragraph_index& aRhs) const { return aRhs <= *this; }
-            glyph_paragraph_index operator+(const glyph_paragraph_index& aRhs) const { glyph_paragraph_index result = *this; result += aRhs; return result; }
-            glyph_paragraph_index operator-(const glyph_paragraph_index& aRhs) const { glyph_paragraph_index result = *this; result -= aRhs; return result; }
-            glyph_paragraph_index& operator+=(const glyph_paragraph_index& aRhs) { iCharacters += aRhs.iCharacters; iGlyphs += aRhs.iGlyphs; return *this; };
-            glyph_paragraph_index& operator-=(const glyph_paragraph_index& aRhs) { iCharacters -= aRhs.iCharacters; iGlyphs -= aRhs.iGlyphs; return *this; };
-        private:
-            document_text::size_type iCharacters;
-            document_glyphs::size_type iGlyphs;
-        };
+        class glyph_paragraph_index;
         typedef neolib::indexitor<
             glyph_paragraph, 
             glyph_paragraph_index, 
             boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> glyph_paragraphs;
-        class glyph_paragraph
-        {
-        public:
-            typedef std::map<document_glyphs::size_type, dimension, std::less<document_glyphs::size_type>, boost::fast_pool_allocator<std::pair<const document_glyphs::size_type, dimension>>> height_list;
-        public:
-            glyph_paragraph(text_edit& aParent) :
-                iParent{&aParent}, iSelf{}
-            {
-            }
-            glyph_paragraph() :
-                iParent{nullptr}, iSelf{}
-            {
-            }
-            ~glyph_paragraph()
-            {
-            }
-        public:
-            void set_self(glyph_paragraphs::const_iterator aSelf)
-            {
-                iSelf = aSelf;
-            }
-            i_vector<glyph_text::size_type> const& line_breaks() const
-            {
-                return iLineBreaks;
-            }
-            void set_line_breaks(i_vector<glyph_text::size_type> const& aLineBreaks)
-            {
-                iLineBreaks = aLineBreaks;
-            }
-            glyph_paragraph& operator=(const glyph_paragraph& aOther)
-            {
-                iParent = aOther.iParent;
-                iSelf = aOther.iSelf;
-                iHeights = aOther.iHeights;
-                return *this;
-            }
-        public:
-            text_edit& parent() const
-            {
-                return *iParent;
-            }
-            document_text::size_type text_start_index() const
-            {
-                return parent().iGlyphParagraphs.foreign_index(iSelf).characters();
-            }
-            document_text::const_iterator text_start() const
-            {
-                return parent().iText.begin() + text_start_index();
-            }
-            document_text::iterator text_start()
-            {
-                return parent().iText.begin() + text_start_index();
-            }
-            document_text::size_type text_end_index() const
-            {
-                return (parent().iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + parent().iGlyphParagraphs.skip_after(iSelf)).characters();
-            }
-            document_text::const_iterator text_end() const
-            {
-                return parent().iText.begin() + text_end_index();
-            }
-            document_text::iterator text_end()
-            {
-                return parent().iText.begin() + text_end_index();
-            }
-            document_glyphs::size_type start_index() const
-            {
-                return parent().iGlyphParagraphs.foreign_index(iSelf).glyphs();
-            }
-            document_glyphs::const_iterator start() const
-            {
-                return parent().glyphs().begin() + start_index();
-            }
-            document_glyphs::iterator start()
-            {
-                return parent().glyphs().begin() + start_index();
-            }
-            document_glyphs::size_type end_index() const
-            {
-                return (parent().iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + parent().iGlyphParagraphs.skip_after(iSelf)).glyphs();
-            }
-            document_glyphs::const_iterator end() const
-            {
-                return parent().glyphs().begin() + end_index();
-            }
-            document_glyphs::iterator end()
-            {
-                return parent().glyphs().begin() + end_index();
-            }
-            dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
-            {
-                if (iHeights.empty())
-                {
-                    dimension previousHeight = 0.0;
-                    auto glyphsStartIndex = start_index();
-                    auto glyphsEndIndex = end_index();
-                    auto iterGlyph = start();
-                    for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
-                    {
-                        auto const& glyph = *(iterGlyph++);
-                        dimension cy = parent().glyphs().extents(glyph).cy;
-                        if (i == glyphsStartIndex || cy != previousHeight)
-                        {
-                            iHeights[i] = cy;
-                            previousHeight = cy;
-                        }
-                    }
-                    iHeights[end_index()] = 0.0;
-                }
-                dimension result = 0.0;
-                auto start = iHeights.lower_bound(aStart - parent().glyphs().begin());
-                if (start != iHeights.begin() && aStart < parent().glyphs().begin() + start->first)
-                    --start;
-                auto stop = iHeights.lower_bound(aEnd - parent().glyphs().begin());
-                if (start == stop && stop != iHeights.end())
-                    ++stop;
-                for (auto i = start; i != stop; ++i)
-                    result = std::max(result, (*i).second);
-                return result;
-            }
-        private:
-            text_edit* iParent;
-            glyph_paragraphs::const_iterator iSelf;
-            mutable height_list iHeights;
-            vector<glyph_text::size_type> iLineBreaks;
-        };
-        struct glyph_line
-        {
-            std::pair<glyph_paragraphs::size_type, glyph_paragraphs::const_iterator> paragraph;
-            std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineStart;
-            std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineEnd;
-            coordinate ypos;
-            size extents;
-        };
+
+        struct glyph_line;
         typedef std::vector<glyph_line> glyph_lines;
-        class glyph_column : public column_info
-        {
-        public:
-            glyph_column() :
-                iWidth(0.0)
-            {
-            }
-        public:
-            const glyph_lines& lines() const { return iLines; }
-            glyph_lines& lines() { return iLines; }
-            dimension width() const { return iWidth; }
-            void set_width(dimension aWidth) { iWidth = aWidth; }
-        private:
-            glyph_lines iLines;
-            dimension iWidth;
-        };
+
+        class glyph_column;
         typedef std::vector<glyph_column> glyph_columns;
+
+        struct position_info;
+
     private:
-        class dragger : public widget_timer
-        {
-        public:
-            dragger(text_edit& aOwner) : 
-                widget_timer{ aOwner, [&](widget_timer& aTimer)
-                {
-                    aTimer.again();
-                    aOwner.set_cursor_position(aOwner.mouse_position(), false);
-                }, std::chrono::milliseconds{ 250 } }, 
-                iSts1{ aOwner.vertical_scrollbar().Position },
-                iSts2{ aOwner.horizontal_scrollbar().Position }
-            {
-            }
-            ~dragger()
-            {
-            }
-        private:
-            scoped_property_transition_suppression iSts1;
-            scoped_property_transition_suppression iSts2;
-        };
+        class dragger;
+
     public:
         typedef document_text::size_type position_type;
+
+        // exceptions
     public:
         struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} }; 
+
         // text_edit
     public:
         text_edit(text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
@@ -673,15 +470,6 @@ namespace neogfx
         rect column_rect(std::size_t aColumnIndex, bool aExtendIntoPadding = false) const;
         std::size_t column_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
     private:
-        struct position_info
-        {
-            document_glyphs::const_iterator glyph;
-            glyph_columns::const_iterator column;
-            glyph_lines::const_iterator line;
-            document_glyphs::const_iterator lineStart;
-            document_glyphs::const_iterator lineEnd;
-            point pos;
-        };
         std::pair<glyph_columns::const_iterator, glyph_lines::const_iterator> glyph_column_line(position_type aGlyphPosition) const;
         position_info glyph_position(position_type aGlyphPosition, bool aForCursor = false) const;
         position_type cursor_glyph_position() const;
@@ -750,7 +538,7 @@ namespace neogfx
         basic_point<std::optional<dimension>> iCursorHint;
         mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         widget_timer iAnimator;
-        std::optional<dragger> iDragger;
+        std::unique_ptr<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;

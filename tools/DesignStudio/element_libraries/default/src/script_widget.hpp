@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/format.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
@@ -41,12 +42,37 @@ namespace neogfx::DesignStudio
             title_bar().set_title(""_s);
             create_status_bar<neogfx::status_bar>(
                 neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip | neogfx::status_bar::style::BackgroundAsWindowBorder );
+            iDocInfo = status_bar().add_permanent_widget<text_widget>();
+            iCursorInfo = status_bar().add_permanent_widget<text_widget>();
+            iDocInfo->set_font_role(font_role::StatusBar);
+            iCursorInfo->set_font_role(font_role::StatusBar);
+            auto text_changed = [&]()
+            {
+                iDocInfo->set_text(string{ boost::str(boost::format("Length: %1%  Lines: %2%") %
+                    iEditor.plain_text().size() %
+                    (std::count(iEditor.plain_text().begin(), iEditor.plain_text().end(), '\n') + 1)) });
+            };
+            iEditor.TextChanged(text_changed);
+            auto position_changed = [&]()
+            {
+                auto currentPos = std::next(iEditor.plain_text().rbegin(), iEditor.plain_text().size() - iEditor.cursor().position());
+                auto startLine = std::find(currentPos, iEditor.plain_text().rend(), '\n');
+                iCursorInfo->set_text(string{ boost::str(boost::format("Ln: %1%  Col: %2%  Pos: %3%") %
+                    (std::count(iEditor.plain_text().begin(), std::next(iEditor.plain_text().begin(), iEditor.cursor().position()), '\n') + 1) %
+                    (std::distance(currentPos, startLine) + 1) %
+                    (iEditor.cursor().position() + 1)) });
+            };
+            iEditor.cursor().PositionChanged(position_changed); 
+            text_changed();
+            position_changed();
         }
         ~script_widget()
         {
         }
     private:
         text_edit iEditor;
+        ref_ptr<text_widget> iDocInfo;
+        ref_ptr<text_widget> iCursorInfo;
         sink iSink;
     };
 

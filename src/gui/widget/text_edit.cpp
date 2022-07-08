@@ -35,6 +35,236 @@ namespace neogfx
 {
     template class basic_glyph_text_content<text_edit::glyph_container_type>;
 
+    class text_edit::paragraph_positioned_glyph : public glyph
+    {
+    public:
+        using glyph::glyph;
+        paragraph_positioned_glyph(double aX) : x(aX)
+        {
+        }
+        paragraph_positioned_glyph(const glyph& aOther) : glyph(aOther), x(0.0)
+        {
+        }
+    public:
+        paragraph_positioned_glyph& operator=(const glyph& aOther)
+        {
+            glyph::operator=(aOther);
+            x = 0.0;
+            return *this;
+        }
+    public:
+        bool operator<(const paragraph_positioned_glyph& aOther) const
+        {
+            return x < aOther.x;
+        }
+    public:
+        double x = 0.0;
+    };
+
+    class text_edit::glyph_paragraph_index
+    {
+    public:
+        glyph_paragraph_index() :
+            iCharacters(0), iGlyphs(0)
+        {
+        }
+        glyph_paragraph_index(document_text::size_type aCharacters, document_glyphs::size_type aGlyphs) :
+            iCharacters(aCharacters), iGlyphs(aGlyphs)
+        {
+        }
+    public:
+        document_text::size_type characters() const { return iCharacters; }
+        document_glyphs::size_type glyphs() const { return iGlyphs; }
+    public:
+        bool operator==(const glyph_paragraph_index& aRhs) const { return iCharacters == aRhs.iCharacters; }
+        bool operator!=(const glyph_paragraph_index& aRhs) const { return !(*this == aRhs); }
+        bool operator<(const glyph_paragraph_index& aRhs) const { return iCharacters < aRhs.iCharacters; }
+        bool operator>(const glyph_paragraph_index& aRhs) const { return aRhs < *this; }
+        bool operator<=(const glyph_paragraph_index& aRhs) const { return iCharacters <= aRhs.iCharacters; }
+        bool operator>=(const glyph_paragraph_index& aRhs) const { return aRhs <= *this; }
+        glyph_paragraph_index operator+(const glyph_paragraph_index& aRhs) const { glyph_paragraph_index result = *this; result += aRhs; return result; }
+        glyph_paragraph_index operator-(const glyph_paragraph_index& aRhs) const { glyph_paragraph_index result = *this; result -= aRhs; return result; }
+        glyph_paragraph_index& operator+=(const glyph_paragraph_index& aRhs) { iCharacters += aRhs.iCharacters; iGlyphs += aRhs.iGlyphs; return *this; };
+        glyph_paragraph_index& operator-=(const glyph_paragraph_index& aRhs) { iCharacters -= aRhs.iCharacters; iGlyphs -= aRhs.iGlyphs; return *this; };
+    private:
+        document_text::size_type iCharacters;
+        document_glyphs::size_type iGlyphs;
+    };
+
+    class text_edit::glyph_paragraph
+    {
+    public:
+        typedef std::map<document_glyphs::size_type, dimension, std::less<document_glyphs::size_type>, boost::fast_pool_allocator<std::pair<const document_glyphs::size_type, dimension>>> height_list;
+    public:
+        glyph_paragraph(text_edit& aParent) :
+            iParent{ &aParent }, iSelf{}
+        {
+        }
+        glyph_paragraph() :
+            iParent{ nullptr }, iSelf{}
+        {
+        }
+        ~glyph_paragraph()
+        {
+        }
+    public:
+        void set_self(glyph_paragraphs::const_iterator aSelf)
+        {
+            iSelf = aSelf;
+        }
+        i_vector<glyph_text::size_type> const& line_breaks() const
+        {
+            return iLineBreaks;
+        }
+        void set_line_breaks(i_vector<glyph_text::size_type> const& aLineBreaks)
+        {
+            iLineBreaks = aLineBreaks;
+        }
+        glyph_paragraph& operator=(const glyph_paragraph& aOther)
+        {
+            iParent = aOther.iParent;
+            iSelf = aOther.iSelf;
+            iHeights = aOther.iHeights;
+            return *this;
+        }
+    public:
+        text_edit& parent() const
+        {
+            return *iParent;
+        }
+        document_text::size_type text_start_index() const
+        {
+            return parent().iGlyphParagraphs.foreign_index(iSelf).characters();
+        }
+        document_text::const_iterator text_start() const
+        {
+            return parent().iText.begin() + text_start_index();
+        }
+        document_text::iterator text_start()
+        {
+            return parent().iText.begin() + text_start_index();
+        }
+        document_text::size_type text_end_index() const
+        {
+            return (parent().iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + parent().iGlyphParagraphs.skip_after(iSelf)).characters();
+        }
+        document_text::const_iterator text_end() const
+        {
+            return parent().iText.begin() + text_end_index();
+        }
+        document_text::iterator text_end()
+        {
+            return parent().iText.begin() + text_end_index();
+        }
+        document_glyphs::size_type start_index() const
+        {
+            return parent().iGlyphParagraphs.foreign_index(iSelf).glyphs();
+        }
+        document_glyphs::const_iterator start() const
+        {
+            return parent().glyphs().begin() + start_index();
+        }
+        document_glyphs::iterator start()
+        {
+            return parent().glyphs().begin() + start_index();
+        }
+        document_glyphs::size_type end_index() const
+        {
+            return (parent().iGlyphParagraphs.foreign_index(iSelf) + iSelf->second + parent().iGlyphParagraphs.skip_after(iSelf)).glyphs();
+        }
+        document_glyphs::const_iterator end() const
+        {
+            return parent().glyphs().begin() + end_index();
+        }
+        document_glyphs::iterator end()
+        {
+            return parent().glyphs().begin() + end_index();
+        }
+        dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const
+        {
+            if (iHeights.empty())
+            {
+                dimension previousHeight = 0.0;
+                auto glyphsStartIndex = start_index();
+                auto glyphsEndIndex = end_index();
+                auto iterGlyph = start();
+                for (auto i = glyphsStartIndex; i != glyphsEndIndex; ++i)
+                {
+                    auto const& glyph = *(iterGlyph++);
+                    dimension cy = parent().glyphs().extents(glyph).cy;
+                    if (i == glyphsStartIndex || cy != previousHeight)
+                    {
+                        iHeights[i] = cy;
+                        previousHeight = cy;
+                    }
+                }
+                iHeights[end_index()] = 0.0;
+            }
+            dimension result = 0.0;
+            auto start = iHeights.lower_bound(aStart - parent().glyphs().begin());
+            if (start != iHeights.begin() && aStart < parent().glyphs().begin() + start->first)
+                --start;
+            auto stop = iHeights.lower_bound(aEnd - parent().glyphs().begin());
+            if (start == stop && stop != iHeights.end())
+                ++stop;
+            for (auto i = start; i != stop; ++i)
+                result = std::max(result, (*i).second);
+            return result;
+        }
+    private:
+        text_edit* iParent;
+        glyph_paragraphs::const_iterator iSelf;
+        mutable height_list iHeights;
+        vector<glyph_text::size_type> iLineBreaks;
+    };
+
+    struct text_edit::glyph_line
+    {
+        std::pair<glyph_paragraphs::size_type, glyph_paragraphs::const_iterator> paragraph;
+        std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineStart;
+        std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineEnd;
+        coordinate ypos;
+        size extents;
+    };
+
+    class text_edit::glyph_column : public column_info
+    {
+    public:
+        glyph_column() :
+            iWidth(0.0)
+        {
+        }
+    public:
+        const glyph_lines& lines() const { return iLines; }
+        glyph_lines& lines() { return iLines; }
+        dimension width() const { return iWidth; }
+        void set_width(dimension aWidth) { iWidth = aWidth; }
+    private:
+        glyph_lines iLines;
+        dimension iWidth;
+    };
+
+    class text_edit::dragger : public widget_timer
+    {
+    public:
+        dragger(text_edit& aOwner) :
+            widget_timer{ aOwner, [&](widget_timer& aTimer)
+            {
+                aTimer.again();
+                aOwner.set_cursor_position(aOwner.mouse_position(), false);
+            }, std::chrono::milliseconds{ 250 } },
+            iSts1{ aOwner.vertical_scrollbar().Position },
+                iSts2{ aOwner.horizontal_scrollbar().Position }
+            {
+            }
+            ~dragger()
+            {
+            }
+    private:
+        scoped_property_transition_suppression iSts1;
+        scoped_property_transition_suppression iSts2;
+    };
+
     text_edit::character_style::character_style() :
         iIgnoreEmoji{ true }
     {
@@ -327,6 +557,71 @@ namespace neogfx
         return iParagraph;
     }
 
+    text_edit::column_info::column_info() :
+        iDelimiter{ U'\t' }
+    {
+    }
+
+    char32_t text_edit::column_info::delimiter() const 
+    { 
+        return iDelimiter; 
+    }
+
+    void text_edit::column_info::set_delimiter(char32_t aDelimiter) 
+    { 
+        iDelimiter = aDelimiter; 
+    }
+
+    const optional_dimension& text_edit::column_info::min_width() const 
+    { 
+        return iMinWidth; 
+    }
+
+    void text_edit::column_info::set_min_width(const optional_dimension& aMinWidth) 
+    { 
+        iMinWidth = aMinWidth; 
+    }
+
+    const optional_dimension& text_edit::column_info::max_width() const 
+    { 
+        return iMaxWidth; 
+    }
+    
+    void text_edit::column_info::set_max_width(const optional_dimension& aMaxWidth) 
+    { 
+        iMaxWidth = aMaxWidth; 
+    }
+
+    const neogfx::padding& text_edit::column_info::padding() const 
+    { 
+        return iPadding; 
+    }
+
+    void text_edit::column_info::set_padding(const neogfx::padding& aPadding) 
+    { 
+        iPadding = aPadding; 
+    }
+
+    const std::optional<text_edit::style>& text_edit::column_info::style() const 
+    { 
+        return iStyle; 
+    }
+
+    void text_edit::column_info::set_style(const std::optional<text_edit::style>& aStyle) 
+    { 
+        iStyle = aStyle; 
+    }
+
+    bool text_edit::column_info::operator==(const column_info& aRhs) const
+    {
+        return std::forward_as_tuple(iDelimiter, iMinWidth, iMaxWidth, iPadding, iStyle) == std::forward_as_tuple(aRhs.iDelimiter, aRhs.iMinWidth, aRhs.iMaxWidth, aRhs.iPadding, aRhs.iStyle);
+    }
+    
+    bool text_edit::column_info::operator!=(const column_info& aRhs) const
+    {
+        return !(*this == aRhs);
+    }
+
     class text_edit::multiple_text_changes
     {
     public:
@@ -347,6 +642,16 @@ namespace neogfx
         }
     private:
         text_edit & iOwner;
+    };
+
+    struct text_edit::position_info
+    {
+        document_glyphs::const_iterator glyph;
+        glyph_columns::const_iterator column;
+        glyph_lines::const_iterator line;
+        document_glyphs::const_iterator lineStart;
+        document_glyphs::const_iterator lineEnd;
+        point pos;
     };
 
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
@@ -601,7 +906,7 @@ namespace neogfx
     void text_edit::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         framed_scrollable_widget::mouse_button_released(aButton, aPosition);
-        iDragger = std::nullopt;
+        iDragger = nullptr;
         if (aButton == mouse_button::Right)
         {
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
@@ -634,7 +939,7 @@ namespace neogfx
     {
         framed_scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
         neolib::service<neolib::i_power>().register_activity();
-        if (iDragger != std::nullopt)
+        if (iDragger != nullptr)
             set_cursor_position(aPosition, false);
     }
 
@@ -652,7 +957,7 @@ namespace neogfx
     {
         auto const mousePosition = mouse_position();
         auto const clientRect = client_rect(false);
-        if (clientRect.contains(mousePosition) || iDragger != std::nullopt)
+        if (clientRect.contains(mousePosition) || iDragger != nullptr)
         {
             if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
             {
@@ -1419,7 +1724,7 @@ namespace neogfx
         {
             if (!capturing())
                 set_capture();
-            iDragger.emplace(*this);
+            iDragger = std::make_unique<dragger>(*this);
         }
     }
 
