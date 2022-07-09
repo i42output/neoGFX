@@ -542,6 +542,7 @@ namespace neogfx
         std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;
+        std::optional<std::pair<text_edit::position_type, text_edit::position_type>> iSelectedUri;
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)

@@ -883,8 +883,7 @@ namespace neogfx
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
                 if (utf32word.find(U"://") != std::u32string::npos)
                 {
-                    if (!service<i_basic_services>().browse_to(neolib::utf32_to_utf8(utf32word)))
-                        service<i_basic_services>().system_beep();
+                    iSelectedUri = wordSpan;
                     return;
                 }
             }
@@ -907,7 +906,26 @@ namespace neogfx
     {
         framed_scrollable_widget::mouse_button_released(aButton, aPosition);
         iDragger = nullptr;
-        if (aButton == mouse_button::Right)
+        if (aButton == mouse_button::Left && client_rect().contains(aPosition))
+        {
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && iSelectedUri)
+            {
+                auto wordSpan = word_at(document_hit_test(aPosition), true);
+                if (iSelectedUri == wordSpan)
+                {
+                    thread_local std::u32string utf32word;
+                    utf32word.clear();
+                    std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
+                    if (utf32word.find(U"://") != std::u32string::npos)
+                    {
+                        if (!service<i_basic_services>().browse_to(neolib::utf32_to_utf8(utf32word)))
+                            service<i_basic_services>().system_beep();
+                        return;
+                    }
+                }
+            }
+        }
+        else if (aButton == mouse_button::Right)
         {
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
             ContextMenu.trigger(iMenu->menu());
@@ -933,6 +951,7 @@ namespace neogfx
             iMenu->exec();
             iMenu.reset();
         }
+        iSelectedUri = std::nullopt;
     }
 
     void text_edit::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1924,6 +1943,8 @@ namespace neogfx
 
     bool text_edit::same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const
     {
+        if (aTextPositionRight == iText.size())
+            return false;
         if (iText[aTextPositionLeft] == U'\n' || iText[aTextPositionRight] == U'\n' ||
             iText[aTextPositionLeft] == U'\r' || iText[aTextPositionRight] == U'\r')
             return false;
@@ -1950,6 +1971,8 @@ namespace neogfx
         };
         auto start = aTextPosition;
         auto end = aTextPosition;
+        if (aOnlyConsiderSpaces && (start == iText.size() || is_space(iText[start])))
+            return std::make_pair(start, end);
         while (start > 0 && (aOnlyConsiderSpaces ? !is_space(iText[start - 1]) : same_word(start - 1, aTextPosition)))
             --start;
         while (end < iText.size() && (aOnlyConsiderSpaces ? !is_space(iText[end]) : same_word(aTextPosition, end)))
