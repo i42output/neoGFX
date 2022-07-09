@@ -1803,11 +1803,8 @@ namespace neogfx
             if (line == lines.end())
             {
                 auto const& lastLine = lines.back();
-                if (aGlyphPosition <= lastLine.lineEnd.first || !is_line_breaking_whitespace(glyphs().back()))
-                {
-                    if (!is_line_breaking_whitespace(glyphs().back()) || lastLine.lineEnd.first - lastLine.lineStart.first != 1)
-                        --line;
-                }
+                if (aGlyphPosition <= lastLine.lineEnd.first)
+                    --line;
             }
             else if (aGlyphPosition < line->lineStart.first)
                 --line;
@@ -2540,6 +2537,9 @@ namespace neogfx
                     lastBreak = lineBreak + 1;
                 }
                 paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.end());
+                if (paragraphLines.back().first != paragraphLines.back().second && 
+                    is_line_breaking_whitespace(glyphs().back()) && std::next(p) == iGlyphParagraphs.end())
+                    paragraphLines.emplace_back(paragraph.first.end(), paragraph.first.end());
 
                 auto const& paragraphStyle = glyph_style(paragraph.first.start(), column);
 
@@ -2677,9 +2677,6 @@ namespace neogfx
                         iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                     }
                 }
-
-                if (p + 1 == iGlyphParagraphs.end() && !glyphs().empty() && is_line_breaking_whitespace(glyphs().back()))
-                    pos.y += font().height();
 
                 if (paragraphStyle.paragraph().padding())
                     pos.y += paragraphStyle.paragraph().padding().value().bottom;
