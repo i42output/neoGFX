@@ -151,7 +151,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
-        if (has_minimum_size())
+        if (has_minimum_size() && !querying_ideal_size())
             result = base_type::minimum_size(aAvailableSpace);
         else if (itemsVisible != 0)
         {

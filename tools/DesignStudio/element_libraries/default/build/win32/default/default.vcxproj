@@ -235,6 +235,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\console_widget.hpp" />
     <ClInclude Include="..\..\..\src\library.hpp" />
     <ClInclude Include="..\..\..\src\node_widget.hpp" />
     <ClInclude Include="..\..\..\src\script_widget.hpp" />

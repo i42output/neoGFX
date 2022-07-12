@@ -34,10 +34,10 @@ namespace neogfx
     private:
         typedef std::unique_ptr<neogfx::label> label_ptr;
         typedef std::unique_ptr<neogfx::check_box> check_box_ptr;
-        class item_container : public widget<>
+        class contents_container : public widget<>
         {
         public:
-            item_container(group_box& aParent);
+            contents_container(group_box& aParent);
         protected:
             void paint(i_graphics_context& aGc) const override;
         protected:
@@ -63,15 +63,15 @@ namespace neogfx
         bool has_check_box() const;
         const neogfx::check_box& check_box() const;
         neogfx::check_box& check_box();
-        void set_item_layout(i_layout& aItemLayout);
-        void set_item_layout(i_ref_ptr<i_layout> const& aItemLayout);
-        const i_layout& item_layout() const;
-        i_layout& item_layout();
+        void set_contents_layout(i_layout& aContentsLayout);
+        void set_contents_layout(i_ref_ptr<i_layout> const& aContentsLayout);
+        const i_layout& contents_layout() const;
+        i_layout& contents_layout();
         template <typename LayoutT, typename... Args>
-        LayoutT& with_item_layout(Args&&... args)
+        LayoutT& with_contents_layout(Args&&... args)
         {
-            set_item_layout(to_abstract(make_ref<LayoutT>(std::forward<Args>(args)...)));
-            return static_cast<LayoutT&>(item_layout());
+            set_contents_layout(to_abstract(make_ref<LayoutT>(std::forward<Args>(args)...)));
+            return static_cast<LayoutT&>(contents_layout());
         }
     public:
         neogfx::size_policy size_policy() const override;
@@ -93,8 +93,8 @@ namespace neogfx
         vertical_layout iLayout;
         horizontal_layout iTitleLayout;
         std::variant<std::monostate, label_ptr, check_box_ptr> iTitle;
-        item_container iItemContainer;
-        ref_ptr<i_layout> iItemLayout;
+        contents_container iContentsContainer;
+        ref_ptr<i_layout> iContentsLayout;
         define_property(property_category::color, optional_color, BorderColor, border_color)
         define_property(property_category::color, optional_color, FillColor, fill_color)
         define_property(property_category::other_appearance, double, FillOpacity, fill_opacity, 1.0)

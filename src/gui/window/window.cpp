@@ -134,10 +134,9 @@ namespace neogfx
 
     size window::client::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (has_minimum_size() || (root().style() & window_style::Resize) != window_style::Resize)
+        if (has_minimum_size() || (root().style() & window_style::Resize) != window_style::Resize || querying_ideal_size())
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
-        else
-            return service<i_app>().current_style().padding(padding_role::Window).size();
+        return service<i_app>().current_style().padding(padding_role::Window).size();
     }
 
     window::window(window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
@@ -585,7 +584,7 @@ namespace neogfx
         if ((style() & window_style::Dialog) == window_style::Dialog)
             return base_type::minimum_size(aAvailableSpace);
         if ((style() & window_style::TitleBar) == window_style::TitleBar)
-            return size{ 200_dip, 200_dip };
+            return base_type::minimum_size(aAvailableSpace).max(size{ 200_dip, 200_dip });
         return base_type::minimum_size(aAvailableSpace);
     }
 
@@ -958,7 +957,10 @@ namespace neogfx
     {
         base_type::init();
 
-        set_decoration_style(window_style_to_decoration_style(iStyle));
+        set_decoration_style(window_style_to_decoration_style(style()));
+
+        if ((style() & (window_style::SizeToContents | window_style::Main)) == (window_style::SizeToContents | window_style::Main))
+            layout(standard_layout::Dock, layout_position::Center).parent_layout().set_minimum_size({});
 
         if (is_fullscreen() || (service<i_app>().program_options().nest() && &ultimate_ancestor() == this))
         {

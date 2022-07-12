@@ -196,6 +196,21 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
+    bool drop_list_popup::has_ideal_size() const noexcept
+    {
+        return true;
+    }
+
+    size drop_list_popup::ideal_size(optional_size const&) const
+    {
+        auto totalArea = iView.total_item_area(*this);
+        auto idealSize = internal_spacing().size() + totalArea + iView.internal_spacing().size();
+        idealSize.cy = std::min(idealSize.cy, iDropList.root().as_widget().extents().cy / 2.0);
+        if (idealSize.cy - (effective_frame_width() * 2.0 + internal_spacing().size().cy) < totalArea.cy)
+            idealSize.cx += vertical_scrollbar().width();
+        return idealSize.max(iDropList.minimum_size());
+    }
+
     size drop_list_popup::minimum_size(optional_size const&) const
     {
         if (window::has_minimum_size())
@@ -231,16 +246,6 @@ namespace neogfx
         // 'this' will be destroyed at this point...
         if (dropListForCancellation)
             dropListForCancellation->cancel_and_restore_selection();
-    }
-
-    size drop_list_popup::ideal_size() const
-    {
-        auto totalArea = iView.total_item_area(*this);
-        auto idealSize = internal_spacing().size() + totalArea + iView.internal_spacing().size();
-        idealSize.cy = std::min(idealSize.cy, iDropList.root().as_widget().extents().cy / 2.0);
-        if (idealSize.cy - (effective_frame_width() * 2.0 + internal_spacing().size().cy) < totalArea.cy)
-            idealSize.cx += vertical_scrollbar().width();
-        return idealSize.max(iDropList.minimum_size());
     }
 
     void drop_list_popup::update_placement()

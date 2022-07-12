@@ -1080,7 +1080,9 @@ namespace neogfx
             service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
         size result;
-        if (self.has_minimum_size() || (base_type::Anchor_MinimumSize.active() && !base_type::Anchor_MinimumSize.calculating()))
+        if (self.has_ideal_size() && querying_ideal_size())
+            result = base_type::ideal_size(aAvailableSpace);
+        else if (self.has_minimum_size() || (base_type::Anchor_MinimumSize.active() && !base_type::Anchor_MinimumSize.calculating()))
             result = base_type::minimum_size(aAvailableSpace);
         else if (has_layout())
         {

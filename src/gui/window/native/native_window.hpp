@@ -38,6 +38,7 @@ namespace neogfx
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
         define_declared_event(Filter, filter, native_event&)
+        define_declared_event(AddedToNest, added_to_nest)
     public:
         struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::native_window::busy_rendering") {} };
         struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::native_window::bad_pause_count") {} };

@@ -136,9 +136,19 @@ namespace neogfx
         return iPixelDensityDpi.cy;
     }
 
+    size native_font_face::em_size() const
+    {
+        return basic_size<FT_UShort>{ iMetrics->x_ppem, iMetrics->y_ppem };
+    }
+
     dimension native_font_face::height() const
     {
         return iMetrics->height / 64.0;
+    }
+
+    dimension native_font_face::max_advance() const
+    {
+        return iMetrics->max_advance / 64.0;
     }
 
     dimension native_font_face::ascender() const

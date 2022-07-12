@@ -69,7 +69,10 @@ namespace neogfx::DesignStudio
         });
         iItem = aElement.has_layout_item() ? aElement.layout_item() : (aElement.create_layout_item(*this), aElement.layout_item());
         if (item().is_widget())
-            add(item().as_widget());
+        {
+            auto& itemAsWidget = item().as_widget();
+            add(itemAsWidget);
+        }
         else
             item().set_layout_owner(this);
     }

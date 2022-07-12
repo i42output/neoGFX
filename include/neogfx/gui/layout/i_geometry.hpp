@@ -223,6 +223,10 @@ namespace neogfx
         virtual bool has_weight() const noexcept = 0;
         virtual size weight() const = 0;
         virtual void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) = 0;
+        virtual bool has_ideal_size() const noexcept = 0;
+        virtual bool is_ideal_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
+        virtual size ideal_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual void set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout = true) = 0;
         virtual bool has_minimum_size() const noexcept = 0;
         virtual bool is_minimum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size minimum_size(optional_size const& aAvailableSpace = {}) const = 0;

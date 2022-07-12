@@ -22,37 +22,37 @@
 
 namespace neogfx
 {
-    group_box::item_container::item_container(group_box& aParent) :
+    group_box::contents_container::contents_container(group_box& aParent) :
         widget{ aParent.layout() }, iParent{ aParent }
     {
         set_padding(dpi_scale(size{ DEFAULT_PADDING }));
     }
 
-    void group_box::item_container::paint(i_graphics_context& aGc) const
+    void group_box::contents_container::paint(i_graphics_context& aGc) const
     {
         widget::paint(aGc);
         aGc.draw_rounded_rect(client_rect(), 4.0, pen{ iParent.border_color() }, brush{ iParent.fill_color() });
     }
 
-    color group_box::item_container::palette_color(color_role aColorRole) const
+    color group_box::contents_container::palette_color(color_role aColorRole) const
     {
         return iParent.palette_color(aColorRole);
     }
 
     group_box::group_box(std::string const& aText) : 
-        widget(), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iItemContainer{ *this }
+        widget(), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iContentsContainer{ *this }
     {
         init();
     }
 
     group_box::group_box(i_widget& aParent, std::string const& aText) :
-        widget(aParent), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iItemContainer{ *this }
+        widget(aParent), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iContentsContainer{ *this }
     {
         init();
     }
 
     group_box::group_box(i_layout& aLayout, std::string const& aText) :
-        widget(aLayout), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iItemContainer{ *this }
+        widget(aLayout), iLayout{ *this }, iTitleLayout{ iLayout }, iTitle{ std::make_unique<neogfx::label>(iTitleLayout, aText) }, iContentsContainer{ *this }
     {
         init();
     }
@@ -134,29 +134,29 @@ namespace neogfx
         throw not_checkable();
     }
 
-    void group_box::set_item_layout(i_layout& aItemLayout)
+    void group_box::set_contents_layout(i_layout& aContentsLayout)
     {
-        set_item_layout(ref_ptr<i_layout>{ref_ptr<i_layout>{}, &aItemLayout});
+        set_contents_layout(ref_ptr<i_layout>{ref_ptr<i_layout>{}, &aContentsLayout});
     }
 
-    void group_box::set_item_layout(i_ref_ptr<i_layout> const& aItemLayout)
+    void group_box::set_contents_layout(i_ref_ptr<i_layout> const& aContentsLayout)
     {
-        iItemLayout = aItemLayout;
-        iItemContainer.set_layout(iItemLayout);
-        if (!iItemLayout->has_padding())
-            iItemLayout->set_padding(neogfx::padding{});
-        if (!iItemLayout->has_spacing())
-            iItemLayout->set_spacing(dpi_scale(size{ DEFAULT_PADDING }));
+        iContentsLayout = aContentsLayout;
+        iContentsContainer.set_layout(iContentsLayout);
+        if (!iContentsLayout->has_padding())
+            iContentsLayout->set_padding(neogfx::padding{});
+        if (!iContentsLayout->has_spacing())
+            iContentsLayout->set_spacing(dpi_scale(size{ DEFAULT_PADDING }));
     }
 
-    const i_layout& group_box::item_layout() const
+    const i_layout& group_box::contents_layout() const
     {
-        return *iItemLayout;
+        return *iContentsLayout;
     }
 
-    i_layout& group_box::item_layout()
+    i_layout& group_box::contents_layout()
     {
-        return *iItemLayout;
+        return *iContentsLayout;
     }
 
     neogfx::size_policy group_box::size_policy() const
@@ -224,7 +224,7 @@ namespace neogfx
         FillOpacity = aFillOpacity;
     }
 
-    class group_box_item_layout : public vertical_layout
+    class group_box_contents_layout : public vertical_layout
     {
     public:
         size minimum_size(optional_size const& aAvailableSpace) const override
@@ -242,11 +242,11 @@ namespace neogfx
         iLayout.set_padding(neogfx::padding{});
         iTitleLayout.set_padding(dpi_scale(neogfx::padding{ DEFAULT_PADDING, DEFAULT_PADDING, DEFAULT_PADDING, 0.0 }));
         iTitleLayout.set_spacing(dpi_scale(size{ DEFAULT_PADDING }));
-        set_item_layout(make_ref<group_box_item_layout>());
+        set_contents_layout(make_ref<group_box_contents_layout>());
     }
 
     void group_box::update_widgets()
     {
-        iItemContainer.enable(!is_checkable() || check_box().is_checked());
+        iContentsContainer.enable(!is_checkable() || check_box().is_checked());
     }
 }

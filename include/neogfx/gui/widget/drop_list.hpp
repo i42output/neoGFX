@@ -111,6 +111,8 @@ namespace neogfx
         bool show(bool aVisible) override;
     protected:
         neogfx::size_policy size_policy() const override;
+        bool has_ideal_size() const noexcept override;
+        size ideal_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         bool can_dismiss(const i_widget*) const override;
@@ -118,7 +120,6 @@ namespace neogfx
         bool dismissed() const override;
         void dismiss() override;
     private:
-        size ideal_size() const;
         void update_placement();
     private:
         drop_list& iDropList;

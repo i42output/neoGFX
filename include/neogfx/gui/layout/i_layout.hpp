@@ -405,43 +405,6 @@ namespace neogfx
         return result;
     }
 
-    class global_layout_state
-    {
-    public:
-        global_layout_state() :
-            iLayoutId{ 0u }
-        {
-        }
-    public:
-        static global_layout_state& instance()
-        {
-            static global_layout_state sState;
-            return sState;
-        }
-    public:
-        uint32_t id() const
-        {
-            return iLayoutId;
-        }
-        void increment_id()
-        {
-            if (++iLayoutId == static_cast<uint32_t>(-1))
-                iLayoutId = 0u;
-        }
-        bool& in_progress()
-        {
-            return iLayoutInProgress;
-        }
-    private:
-        uint32_t iLayoutId;
-        bool iLayoutInProgress;
-    };
-
-    inline uint32_t global_layout_id()
-    {
-        return global_layout_state::instance().id();
-    }
-
     class scoped_layout_items : private neolib::scoped_flag
     {
     public:
@@ -449,5 +412,12 @@ namespace neogfx
         ~scoped_layout_items();
     private:
         bool iStartLayout;
+    };
+
+    class scoped_query_ideal_size : private neolib::scoped_flag
+    {
+    public:
+        scoped_query_ideal_size();
+        ~scoped_query_ideal_size();
     };
 }

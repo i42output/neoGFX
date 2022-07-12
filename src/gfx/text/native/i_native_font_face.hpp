@@ -57,7 +57,9 @@ namespace neogfx
         virtual font::point_size size() const = 0;
         virtual dimension horizontal_dpi() const = 0;
         virtual dimension vertical_dpi() const = 0;
+        virtual neogfx::size em_size() const = 0;
         virtual dimension height() const = 0;
+        virtual dimension max_advance() const = 0;
         virtual dimension ascender() const = 0;
         virtual dimension descender() const = 0;
         virtual dimension underline_position() const = 0;

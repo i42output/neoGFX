@@ -565,10 +565,20 @@ namespace neogfx
     {
         return native_font_face().size();
     }
+    
+    size font::em_size() const
+    {
+        return native_font_face().em_size();
+    }
 
     dimension font::height() const
     {
         return native_font_face().height();
+    }
+
+    dimension font::max_advance() const
+    {
+        return native_font_face().max_advance();
     }
 
     dimension font::ascender() const

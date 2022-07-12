@@ -90,6 +90,10 @@ namespace neogfx
         bool has_weight() const noexcept final;
         size weight() const final;
         void set_weight(optional_size const& aWeight, bool aUpdateLayout = true) final;
+        bool has_ideal_size() const noexcept final;
+        bool is_ideal_size_constrained() const noexcept final;
+        size ideal_size(optional_size const& aAvailableSpace = optional_size{}) const final;
+        void set_ideal_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) final;
         bool has_minimum_size() const noexcept final;
         bool is_minimum_size_constrained() const noexcept final;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const final;
@@ -144,6 +148,7 @@ namespace neogfx
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
         mutable std::pair<uint32_t, size> iWeight;
+        mutable std::pair<uint32_t, std::pair<optional_size, size>> iIdealSize;
         mutable std::pair<uint32_t, std::pair<optional_size, size>> iMinimumSize;
         mutable std::pair<uint32_t, std::pair<optional_size, size>> iMaximumSize;
         mutable std::pair<uint32_t, std::pair<optional_size, size>> iFixedSize;

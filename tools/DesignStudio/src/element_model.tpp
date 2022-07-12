@@ -39,7 +39,7 @@ namespace neogfx::DesignStudio
                     if (std::holds_alternative<ds::element_tool_t>(item))
                     {
                         auto widgetCaddy = make_ref<widget_caddy>(aProject, aElement, iDragDropItem->source().drag_drop_event_monitor().root().as_widget(), point{});
-                        auto const idealSize = widgetCaddy->minimum_size();
+                        auto const idealSize = widgetCaddy->ideal_size();
                         widgetCaddy->resize(idealSize);
                         widgetCaddy->move((iDragDropItem->source().drag_drop_tracking_position() + iDragDropItem->source().drag_drop_event_monitor().origin() - widgetCaddy->extents() / 2.0).ceil());
                         iDragDropItem->source().set_drag_drop_widget(widgetCaddy);
