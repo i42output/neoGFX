@@ -38,8 +38,8 @@ namespace neogfx::DesignStudio
         {
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
-//            create_status_bar<neogfx::status_bar>(
-//                neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip | neogfx::status_bar::style::BackgroundAsWindowBorder );
+            //create_status_bar<neogfx::status_bar>(
+            //    neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip | neogfx::status_bar::style::BackgroundAsWindowBorder );
         }
         ~console_widget()
         {

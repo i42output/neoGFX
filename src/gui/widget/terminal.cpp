@@ -137,6 +137,8 @@ namespace neogfx
 
     void terminal::init()
     {
+        vertical_scrollbar().set_style(vertical_scrollbar().style() | scrollbar_style::AlwaysVisible);
+        horizontal_scrollbar().set_style(scrollbar_style::None);
         set_ideal_size(size{ font().max_advance(), font().height() } * size { iTerminalSize } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
     }

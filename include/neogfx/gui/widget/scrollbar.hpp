@@ -40,13 +40,17 @@ namespace neogfx
     public:
         struct no_transition : std::logic_error { no_transition() : std::logic_error{ "neogfx::scrollbar::no_transition" } {} };
     public:
-        scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
+        scrollbar(i_scrollbar_container& aContainer, scrollbar_orientation aOrientation, scrollbar_style aStyle = scrollbar_style::Normal, bool aIntegerPositions = true);
         ~scrollbar();
     public:
         i_scrollbar_container& container() const override;
     public:
-        scrollbar_type type() const override;
+        scrollbar_orientation orientation() const override;
         scrollbar_style style() const override;
+        scrollbar_style type() const override;
+        void set_style(scrollbar_style aStyle) override;
+        bool always_visible() const override;
+        bool always_hidden() const override;
         void show() override;
         void hide() override;
         bool visible() const override;
@@ -104,7 +108,7 @@ namespace neogfx
         rect element_rect(skin_element aElement) const override;
     private:
         i_scrollbar_container& iContainer;
-        scrollbar_type iType;
+        scrollbar_orientation iOrientation;
         scrollbar_style iStyle;
         bool iIntegerPositions;
         bool iVisible;

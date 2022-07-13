@@ -83,13 +83,13 @@ namespace neogfx
         auto const width = aScrollbar.width();
         color scrollbarColor = aScrollbar.container().scrollbar_color(aScrollbar).shaded(0x30);
         color backgroundColor = scrollbarColor.unshaded(0x30);
-        if (aScrollbar.style() == scrollbar_style::Normal)
+        if (aScrollbar.type() == scrollbar_style::Normal)
             aGc.fill_rect(g, backgroundColor);
-        else if (aScrollbar.style() == scrollbar_style::Menu)
+        else if (aScrollbar.type() == scrollbar_style::Menu)
         {
             auto g1 = g;
             auto g2 = g;
-            if (aScrollbar.type() == scrollbar_type::Vertical)
+            if (aScrollbar.orientation() == scrollbar_orientation::Vertical)
             {
                 g1.cy = width;
                 g2.y = g2.y + g2.cy - width;
@@ -104,11 +104,11 @@ namespace neogfx
             aGc.fill_rect(g1, backgroundColor);
             aGc.fill_rect(g2, backgroundColor);
         }
-        else if (aScrollbar.style() == scrollbar_style::Scroller)
+        else if (aScrollbar.type() == scrollbar_style::Scroller)
         {
             auto g1 = g;
             auto g2 = g;
-            if (aScrollbar.type() == scrollbar_type::Vertical)
+            if (aScrollbar.orientation() == scrollbar_orientation::Vertical)
             {
                 g1.y = g1.y + g1.cy - width * 2.0;
                 g1.cy = width;
@@ -127,7 +127,7 @@ namespace neogfx
             if (aScrollbar.position() != aScrollbar.minimum())
             {
                 auto fadeRect = g;
-                if (aScrollbar.type() == scrollbar_type::Vertical)
+                if (aScrollbar.orientation() == scrollbar_orientation::Vertical)
                     fadeRect.cy = width;
                 else
                     fadeRect.cx = width;
@@ -135,13 +135,13 @@ namespace neogfx
                     {
                         gradient::color_stop_list{ { 0.0, backgroundColor }, { 1.0, backgroundColor } },
                         gradient::alpha_stop_list{ { 0.0, 0xFF_u8 }, { 1.0, 0x00_u8 } },
-                        aScrollbar.type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
+                        aScrollbar.orientation() == scrollbar_orientation::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
                     });
             }
             if (aScrollbar.position() != aScrollbar.maximum() - aScrollbar.page())
             {
                 auto fadeRect = g;
-                if (aScrollbar.type() == scrollbar_type::Vertical)
+                if (aScrollbar.orientation() == scrollbar_orientation::Vertical)
                 {
                     fadeRect.y = fadeRect.y + fadeRect.cy - width * 3.0;
                     fadeRect.cy = width;
@@ -155,7 +155,7 @@ namespace neogfx
                     {
                         gradient::color_stop_list{ { 0.0, backgroundColor }, { 1.0, backgroundColor } },
                         gradient::alpha_stop_list{ { 0.0, 0x00_u8 },{ 1.0, 0xFF_u8 } },
-                        aScrollbar.type() == scrollbar_type::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
+                        aScrollbar.orientation() == scrollbar_orientation::Vertical ? gradient_direction::Vertical : gradient_direction::Horizontal
                     });
             }
         }
@@ -163,7 +163,7 @@ namespace neogfx
         const dimension padding = 3.0_dip;
         rect rectUpButton = aItem.element_rect(skin_element::ScrollbarUpArrow).deflate(padding, padding);
         rect rectDownButton = aItem.element_rect(skin_element::ScrollbarDownArrow).deflate(padding, padding);
-        if (aScrollbar.type() == scrollbar_type::Vertical)
+        if (aScrollbar.orientation() == scrollbar_orientation::Vertical)
         {
             coordinate x = std::floor(rectUpButton.center().x);
             coordinate w = 1.0;
@@ -191,8 +191,8 @@ namespace neogfx
                 h += 2.0;
             }
         }
-        if (aScrollbar.style() == scrollbar_style::Normal)
-            aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.type() == scrollbar_type::Vertical ? padding : 0.0, aScrollbar.type() == scrollbar_type::Vertical ? 0.0 : padding),
+        if (aScrollbar.type() == scrollbar_style::Normal)
+            aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.orientation() == scrollbar_orientation::Vertical ? padding : 0.0, aScrollbar.orientation() == scrollbar_orientation::Vertical ? 0.0 : padding),
                 scrollbarColor.shaded(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00));;
     }
 

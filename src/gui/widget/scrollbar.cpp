@@ -25,9 +25,9 @@
 
 namespace neogfx
 {
-    scrollbar::scrollbar(i_scrollbar_container& aContainer, scrollbar_type aType, scrollbar_style aStyle, bool aIntegerPositions) :
+    scrollbar::scrollbar(i_scrollbar_container& aContainer, scrollbar_orientation aOrientation, scrollbar_style aStyle, bool aIntegerPositions) :
         iContainer{ aContainer },
-        iType{ aType },
+        iOrientation{ aOrientation },
         iStyle{ aStyle },
         iIntegerPositions{ aIntegerPositions },
         iVisible{ false },
@@ -57,9 +57,9 @@ namespace neogfx
         return iContainer;
     }
 
-    scrollbar_type scrollbar::type() const
+    scrollbar_orientation scrollbar::orientation() const
     {
-        return iType;
+        return iOrientation;
     }
 
     scrollbar_style scrollbar::style() const
@@ -67,9 +67,37 @@ namespace neogfx
         return iStyle;
     }
 
+    scrollbar_style scrollbar::type() const
+    {
+        return style() & scrollbar_style::TYPE_MASK;
+    }
+
+    void scrollbar::set_style(scrollbar_style aStyle)
+    {
+        if (iStyle != aStyle)
+        {
+            iStyle = aStyle;
+            iContainer.scrollbar_updated(*this, AttributeChanged);
+            if (always_visible())
+                show();
+            else if (always_hidden())
+                hide();
+        }
+    }
+
+    bool scrollbar::always_visible() const
+    {
+        return (style() & scrollbar_style::AlwaysVisible) == scrollbar_style::AlwaysVisible;
+    }
+
+    bool scrollbar::always_hidden() const
+    {
+        return type() == scrollbar_style::None;
+    }
+
     void scrollbar::show()
     {
-        if (!iVisible && style() != scrollbar_style::Invisible)
+        if (!visible() && !always_hidden())
         {
             iVisible = true;
             iContainer.scrollbar_updated(*this, Shown);
@@ -78,7 +106,7 @@ namespace neogfx
 
     void scrollbar::hide()
     {
-        if (iVisible)
+        if (visible() && !always_visible())
         {
             iVisible = false;
             iContainer.scrollbar_updated(*this, Hidden);
@@ -107,8 +135,8 @@ namespace neogfx
     bool scrollbar::auto_hidden() const
     {
         return (auto_hide() && clicked_element() == scrollbar_element::None &&
-            ((style() != scrollbar_style::Normal && hovering_element() == scrollbar_element::None) ||
-             (style() == scrollbar_style::Normal && !container().scrollbar_geometry(*this).contains(container().as_widget().mouse_position()))));
+            ((type() != scrollbar_style::Normal && hovering_element() == scrollbar_element::None) ||
+             (type() == scrollbar_style::Normal && !container().scrollbar_geometry(*this).contains(container().as_widget().mouse_position()))));
     }
 
     scrollbar_zone scrollbar::zone() const
@@ -256,14 +284,14 @@ namespace neogfx
 
     void scrollbar::render(i_graphics_context& aGc) const
     {
-        if (style() == scrollbar_style::Invisible)
+        if (type() == scrollbar_style::None)
             return;
         service<i_skin_manager>().active_skin().draw_scrollbar(aGc, *this, *this);
     }
 
     rect scrollbar::element_geometry(scrollbar_element aElement) const
     {
-        if (style() == scrollbar_style::Invisible)
+        if (type() == scrollbar_style::None)
             return rect{};
         scoped_units su(units::Pixels);
         rect g = iContainer.scrollbar_geometry(*this);
@@ -273,13 +301,13 @@ namespace neogfx
         case scrollbar_element::Scrollbar:
             return g;
         case scrollbar_element::UpButton:
-            if (iType == scrollbar_type::Vertical)
+            if (orientation() == scrollbar_orientation::Vertical)
             {
-                if (iStyle == scrollbar_style::Normal)
+                if (type() == scrollbar_style::Normal)
                     g.cy = std::ceil((g.cx - padding * 2.0) / 2.0 + padding * 2.0);
-                else if (iStyle == scrollbar_style::Menu)
+                else if (type() == scrollbar_style::Menu)
                     g.cy = std::ceil(width());
-                else if (iStyle == scrollbar_style::Scroller)
+                else if (type() == scrollbar_style::Scroller)
                 {
                     g.y = g.bottom() - std::ceil(width()) * 2.0;
                     g.cy = std::ceil(width());
@@ -287,11 +315,11 @@ namespace neogfx
             }
             else
             {
-                if (iStyle == scrollbar_style::Normal)
+                if (type() == scrollbar_style::Normal)
                     g.cx = std::ceil((g.cy - padding * 2.0) / 2.0 + padding * 2.0);
-                else if (iStyle == scrollbar_style::Menu)
+                else if (type() == scrollbar_style::Menu)
                     g.cx = std::ceil(width());
-                else if (iStyle == scrollbar_style::Scroller)
+                else if (type() == scrollbar_style::Scroller)
                 {
                     g.x = g.right() - std::ceil(width()) * 2.0;
                     g.cx = std::ceil(width());;
@@ -299,14 +327,14 @@ namespace neogfx
             }
             break;
         case scrollbar_element::DownButton:
-            if (iType == scrollbar_type::Vertical)
+            if (orientation() == scrollbar_orientation::Vertical)
             {
-                if (iStyle == scrollbar_style::Normal)
+                if (type() == scrollbar_style::Normal)
                 {
                     g.y = g.bottom() - std::ceil((g.cx - padding * 2.0) / 2.0 + padding * 2.0);
                     g.cy = std::ceil((g.cx - padding * 2.0) / 2.0 + padding * 2.0);
                 }
-                else if (iStyle == scrollbar_style::Menu || iStyle == scrollbar_style::Scroller)
+                else if (type() == scrollbar_style::Menu || type() == scrollbar_style::Scroller)
                 {
                     g.y = g.bottom() - std::ceil(width());
                     g.cy = std::ceil(width());
@@ -314,12 +342,12 @@ namespace neogfx
             }
             else
             {
-                if (iStyle == scrollbar_style::Normal)
+                if (type() == scrollbar_style::Normal)
                 {
                     g.x = g.right() - std::ceil((g.cy - padding * 2.0) / 2.0 + padding * 2.0);
                     g.cx = std::ceil((g.cy - padding * 2.0) / 2.0 + padding * 2.0);
                 }
-                else if (iStyle == scrollbar_style::Menu || iStyle == scrollbar_style::Scroller)
+                else if (type() == scrollbar_style::Menu || type() == scrollbar_style::Scroller)
                 {
                     g.x = g.right() - std::ceil(width());
                     g.cx = std::ceil(width());
@@ -327,7 +355,7 @@ namespace neogfx
             }
             break;
         case scrollbar_element::PageUpArea:
-            if (iType == scrollbar_type::Vertical)
+            if (orientation() == scrollbar_orientation::Vertical)
             {
                 g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
                 g.cy = element_geometry(scrollbar_element::Thumb).top() - 1.0 - g.y;
@@ -339,7 +367,7 @@ namespace neogfx
             }
             break;
         case scrollbar_element::PageDownArea:
-            if (iType == scrollbar_type::Vertical)
+            if (orientation() == scrollbar_orientation::Vertical)
             {
                 g.y = element_geometry(scrollbar_element::Thumb).bottom() + 1.0;
                 g.cy = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
@@ -351,7 +379,7 @@ namespace neogfx
             }
             break;
         case scrollbar_element::Thumb:
-            if (iType == scrollbar_type::Vertical)
+            if (orientation() == scrollbar_orientation::Vertical)
             {
                 g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
                 dimension available = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
@@ -404,13 +432,13 @@ namespace neogfx
 
     scrollbar_element scrollbar::element_at(const point& aPosition) const
     {
-        if (style() == scrollbar_style::Invisible)
+        if (type() == scrollbar_style::None)
             return scrollbar_element::None;
         else if (element_geometry(scrollbar_element::UpButton).contains(aPosition))
             return scrollbar_element::UpButton;
         else if (element_geometry(scrollbar_element::DownButton).contains(aPosition))
             return scrollbar_element::DownButton;
-        else if (style() == scrollbar_style::Normal)
+        else if (type() == scrollbar_style::Normal)
         {
             if (element_geometry(scrollbar_element::PageUpArea).contains(aPosition))
                 return scrollbar_element::PageUpArea;
@@ -439,7 +467,7 @@ namespace neogfx
             scoped_units su(units::Pixels);
             rect g = iContainer.scrollbar_geometry(*this);
             scoped_property_transition_suppression sts{ Position };
-            if (iType == scrollbar_type::Vertical)
+            if (orientation() == scrollbar_orientation::Vertical)
             {
                 g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
                 g.cy = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
@@ -580,7 +608,7 @@ namespace neogfx
                 point delta = as_widget().mouse_position() - *iScrollTrackPosition;
                 scoped_units su(as_widget(), units::Pixels);
                 rect g = iContainer.scrollbar_geometry(*this);
-                if (iType == scrollbar_type::Vertical)
+                if (orientation() == scrollbar_orientation::Vertical)
                 {
                     g.y = element_geometry(scrollbar_element::UpButton).bottom() + 1.0;
                     g.cy = element_geometry(scrollbar_element::DownButton).top() - 1.0 - g.y;
@@ -623,9 +651,9 @@ namespace neogfx
 
     dimension scrollbar::width(scrollbar_style aStyle)
     {
-        if (aStyle == scrollbar_style::Invisible)
+        if ((aStyle & scrollbar_style::TYPE_MASK) == scrollbar_style::None)
             return 0.0;
-        dimension w = ceil_rasterized(aStyle == scrollbar_style::Normal ? 4.0_mm : 3.0_mm);
+        dimension w = ceil_rasterized((aStyle & scrollbar_style::TYPE_MASK)  == scrollbar_style::Normal ? 4.0_mm : 3.0_mm);
         if (to_px<uint32_t>(w) % 2u == 0u)
             w = from_px<dimension>(to_px<uint32_t>(w) + 1u);
         return w;
