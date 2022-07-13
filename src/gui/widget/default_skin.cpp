@@ -83,6 +83,7 @@ namespace neogfx
         auto const width = aScrollbar.width();
         color scrollbarColor = aScrollbar.container().scrollbar_color(aScrollbar).shaded(0x30);
         color backgroundColor = scrollbarColor.unshaded(0x30);
+        bool const noThumb = (aScrollbar.maximum() - aScrollbar.minimum() <= aScrollbar.page());
         if (aScrollbar.type() == scrollbar_style::Normal)
             aGc.fill_rect(g, backgroundColor);
         else if (aScrollbar.type() == scrollbar_style::Menu)
@@ -170,9 +171,9 @@ namespace neogfx
             for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
             {
                 aGc.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), 
-                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element()== scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00) );
+                    scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element()== scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00) );
                 aGc.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)),
-                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
+                    scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
                 x -= 1.0;
                 w += 2.0;
             }
@@ -184,14 +185,14 @@ namespace neogfx
             for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
             {
                 aGc.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)),
-                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00));
+                    scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00));
                 aGc.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)),
-                    scrollbarColor.shaded(aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
+                    scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
                 y -= 1.0;
                 h += 2.0;
             }
         }
-        if (aScrollbar.type() == scrollbar_style::Normal)
+        if (aScrollbar.type() == scrollbar_style::Normal && !noThumb)
             aGc.fill_rect(aItem.element_rect(skin_element::ScrollbarThumb).deflate(aScrollbar.orientation() == scrollbar_orientation::Vertical ? padding : 0.0, aScrollbar.orientation() == scrollbar_orientation::Vertical ? 0.0 : padding),
                 scrollbarColor.shaded(aScrollbar.clicked_element() == scrollbar_element::Thumb ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::Thumb ? 0x30 : 0x00));;
     }
