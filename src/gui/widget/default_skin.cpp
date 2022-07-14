@@ -170,9 +170,9 @@ namespace neogfx
             coordinate w = 1.0;
             for (coordinate y = 0.0; y < rectUpButton.height(); ++y)
             {
-                aGc.fill_rect(rect(point(x, std::floor(y + rectUpButton.top())), size(w, 1.0)), 
+                aGc.fill_rect(rect{ point{ x, std::floor(y + rectUpButton.top()) }, size{ w, 1.0 } },
                     scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element()== scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00) );
-                aGc.fill_rect(rect(point(x, std::floor(rectDownButton.bottom() - y)), size(w, 1.0)),
+                aGc.fill_rect(rect{ point{ x, std::floor(rectDownButton.bottom() - y) }, size{ w, 1.0 } },
                     scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
                 x -= 1.0;
                 w += 2.0;
@@ -184,9 +184,9 @@ namespace neogfx
             coordinate h = 1.0;
             for (coordinate x = 0.0; x < rectUpButton.width(); ++x)
             {
-                aGc.fill_rect(rect(point(std::floor(x + rectUpButton.left()), y), size(1.0, h)),
+                aGc.fill_rect(rect{ point{ std::floor(x + rectUpButton.left()), y }, size{ 1.0, h } },
                     scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.minimum() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::UpButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::UpButton ? 0x30 : 0x00));
-                aGc.fill_rect(rect(point(std::floor(rectDownButton.right() - x), y), size(1.0, h)),
+                aGc.fill_rect(rect{ point{ std::floor(rectDownButton.right() - x), y }, size{ 1.0, h } },
                     scrollbarColor.shaded(noThumb || aScrollbar.position() == aScrollbar.maximum() - aScrollbar.page() ? 0x00 : aScrollbar.clicked_element() == scrollbar_element::DownButton ? 0x60 : aScrollbar.hovering_element() == scrollbar_element::DownButton ? 0x30 : 0x00));
                 y -= 1.0;
                 h += 2.0;

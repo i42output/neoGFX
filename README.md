@@ -30,12 +30,12 @@ neoGFX uses C++20 features; although C++20 compiler support is currently patchy 
 
 # Roadmap
 
-Version | ETA           | Features
---------|---------------|---------------------------------------------------
-v0.99   | Q3, 2021      | Windows OpenGL; widget library feature complete; UI design tool
-v1.00   | Q4, 2021      | Linux OpenGL; scripting engine
-v1.10   | Q2, 2022      | Vulkan; Android support; physics engine
-v1.20   | Q4, 2022      | macOS support
+Version | ETA             | Features
+--------|-----------------|---------------------------------------------------
+v0.99   | WID             | Windows OpenGL; widget library feature complete; UI design tool
+v1.00   | WID + 12 months | Linux OpenGL; scripting engine
+v1.10   | WID + 24 months | Vulkan; Android support; physics engine
+v1.20   | WID + 36 months | macOS support
 
 # Implementation Progress
 
