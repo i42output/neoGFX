@@ -63,6 +63,7 @@ namespace neogfx::DesignStudio
                     (iEditor.cursor().position() + 1)) });
             };
             iEditor.cursor().PositionChanged(position_changed); 
+            iEditor.set_word_wrap(false);
             text_changed();
             position_changed();
         }
