@@ -85,26 +85,26 @@ namespace neogfx
         rect result = base_type::client_rect(aExtendIntoPadding);
         if (vertical_scrollbar().visible())
         {
-            if (vertical_scrollbar().style() == scrollbar_style::Normal)
+            if (vertical_scrollbar().type() == scrollbar_style::Normal)
                 result.cx -= vertical_scrollbar().width();
-            else if (vertical_scrollbar().style() == scrollbar_style::Menu)
+            else if (vertical_scrollbar().type() == scrollbar_style::Menu)
             {
                 result.y += vertical_scrollbar().width();
                 result.cy -= vertical_scrollbar().width() * 2.0;
             }
-            else if (vertical_scrollbar().style() == scrollbar_style::Scroller)
+            else if (vertical_scrollbar().type() == scrollbar_style::Scroller)
                 result.cy -= vertical_scrollbar().width() * 2.0;
         }
         if (horizontal_scrollbar().visible())
         {
-            if (horizontal_scrollbar().style() == scrollbar_style::Normal)
+            if (horizontal_scrollbar().type() == scrollbar_style::Normal)
                 result.cy -= horizontal_scrollbar().width();
-            else if (vertical_scrollbar().style() == scrollbar_style::Menu)
+            else if (vertical_scrollbar().type() == scrollbar_style::Menu)
             {
                 result.x += horizontal_scrollbar().width();
                 result.cx -= horizontal_scrollbar().width() * 2.0;
             }
-            else if (vertical_scrollbar().style() == scrollbar_style::Scroller)
+            else if (vertical_scrollbar().type() == scrollbar_style::Scroller)
                 result.cx -= horizontal_scrollbar().width() * 2.0;
         }
         return result;
@@ -115,11 +115,11 @@ namespace neogfx
     {
         if (vertical_scrollbar().visible() &&
             ((vertical_scrollbar().element_at(aPosition) != scrollbar_element::None) ||
-            (vertical_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition))))
+            (vertical_scrollbar().type() == scrollbar_style::Normal && scrollbar_geometry(vertical_scrollbar()).contains(aPosition))))
             return widget_part{ *this, widget_part::VerticalScrollbar };
         else if (horizontal_scrollbar().visible() &&
             ((horizontal_scrollbar().element_at(aPosition) != scrollbar_element::None) ||
-            (horizontal_scrollbar().style() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition))))
+            (horizontal_scrollbar().type() == scrollbar_style::Normal && scrollbar_geometry(horizontal_scrollbar()).contains(aPosition))))
             return widget_part{ *this, widget_part::HorizontalScrollbar };
         else
             return base_type::part(aPosition);
@@ -135,7 +135,7 @@ namespace neogfx
             horizontal_scrollbar().render(aGc);
         if (vertical_scrollbar().visible() && horizontal_scrollbar().visible() && 
             !vertical_scrollbar().auto_hidden() && !horizontal_scrollbar().auto_hidden() &&
-            vertical_scrollbar().style() == horizontal_scrollbar().style() && vertical_scrollbar().style() == scrollbar_style::Normal)
+            vertical_scrollbar().type() == horizontal_scrollbar().type() && vertical_scrollbar().type() == scrollbar_style::Normal)
         {
             auto const spareSquare = rect{
                     point{ scrollbar_geometry(horizontal_scrollbar()).right(), scrollbar_geometry(vertical_scrollbar()).bottom() },
@@ -416,22 +416,24 @@ namespace neogfx
     rect scrollable_widget<Base>::scrollbar_geometry(const i_scrollbar& aScrollbar) const
     {
         auto const sbrect = client_rect();
-        switch (aScrollbar.type())
+        switch (aScrollbar.orientation())
         {
-        case scrollbar_type::Vertical:
-            if (aScrollbar.style() == scrollbar_style::Normal)
+        case scrollbar_orientation::Vertical:
+            if (aScrollbar.type() == scrollbar_style::Normal)
                 return rect{ sbrect.top_right(), size{ aScrollbar.width(), sbrect.cy } };
-            else if (aScrollbar.style() == scrollbar_style::Scroller)
+            else if (aScrollbar.type() == scrollbar_style::Scroller)
                 return rect{ sbrect.bottom_left(),  size{ sbrect.width(), aScrollbar.width() * 2.0  } };
-            else // scrollbar_style::Menu
+            else if (aScrollbar.type() == scrollbar_style::Menu)
                 return sbrect + point{ 0.0, -aScrollbar.width() } + size{ 0.0, aScrollbar.width() * 2.0 };
-        case scrollbar_type::Horizontal: 
-            if (aScrollbar.style() == scrollbar_style::Normal)
+            return rect{};
+        case scrollbar_orientation::Horizontal:
+            if (aScrollbar.type() == scrollbar_style::Normal)
                 return rect{ sbrect.bottom_left(), size{ sbrect.cx , aScrollbar.width() } };
-            else if (aScrollbar.style() == scrollbar_style::Scroller)
+            else if (aScrollbar.type() == scrollbar_style::Scroller)
                 return rect{ sbrect.top_right(),  size{ aScrollbar.width() * 2.0, sbrect.height() } };
-            else // scrollbar_style::Menu
+            else if (aScrollbar.type() == scrollbar_style::Menu)
                 return sbrect + point{ -aScrollbar.width(), 0.0 } + size{ aScrollbar.width() * 2.0, 0.0 };
+            return rect{};
         default:
             return rect{};
         }
@@ -449,17 +451,17 @@ namespace neogfx
                 for (auto& c : as_widget().children())
                 {
                     point delta = -(scrollPosition - iOldScrollPosition);
-                    if (aScrollbar.type() == scrollbar_type::Horizontal || (scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::DontScrollChildWidget)
+                    if (aScrollbar.orientation() == scrollbar_orientation::Horizontal || (scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::DontScrollChildWidget)
                         delta.y = 0.0;
-                    if (aScrollbar.type() == scrollbar_type::Vertical || (scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::DontScrollChildWidget)
+                    if (aScrollbar.orientation() == scrollbar_orientation::Vertical || (scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::DontScrollChildWidget)
                         delta.x = 0.0;
                     c->move(c->position() + delta);
                 }
-                if (aScrollbar.type() == scrollbar_type::Vertical)
+                if (aScrollbar.orientation() == scrollbar_orientation::Vertical)
                 {
                     iOldScrollPosition.y = scrollPosition.y;
                 }
-                else if (aScrollbar.type() == scrollbar_type::Horizontal)
+                else if (aScrollbar.orientation() == scrollbar_orientation::Horizontal)
                 {
                     iOldScrollPosition.x = scrollPosition.x;
                 }

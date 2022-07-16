@@ -126,4 +126,25 @@ namespace neogfx
         }
     public:
     };
+
+    class i_item_layout : public i_service
+    {
+    public:
+        virtual std::uint32_t id() const = 0;
+        virtual void increment_id() = 0;
+        virtual bool& in_progress() = 0;
+        virtual bool& querying_ideal_size() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xd7e05b0f, 0xc4eb, 0x440a, 0x844e, { 0x35, 0x18, 0xc0, 0x48, 0xee, 0x53 } }; return sIid; }
+    };
+
+    inline uint32_t global_layout_id()
+    {
+        return service<i_item_layout>().id();
+    }
+
+    inline bool querying_ideal_size()
+    {
+        return service<i_item_layout>().querying_ideal_size();
+    }
 }

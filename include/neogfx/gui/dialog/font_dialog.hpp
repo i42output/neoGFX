@@ -109,8 +109,8 @@ namespace neogfx
             group_box box;
             slider_box slider;
             text_effect_width(font_dialog& aParent) :
-                box{ aParent.iAdvancedEffectsBox.item_layout(), "Width"_t },
-                slider{ box.with_item_layout<vertical_layout>() }
+                box{ aParent.iAdvancedEffectsBox.contents_layout(), "Width"_t },
+                slider{ box.with_contents_layout<vertical_layout>() }
             {
             }
         };

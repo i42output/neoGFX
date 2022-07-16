@@ -25,14 +25,13 @@ namespace neogfx
     template <typename AxisPolicy>
     size flow_layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (has_minimum_size())
+        if (has_minimum_size() || aAvailableSpace == std::nullopt)
             return layout::minimum_size(aAvailableSpace);
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         if (itemsVisible == 0)
             return size{};
         auto availableSpaceForChildren = aAvailableSpace;
-        if (availableSpaceForChildren != std::nullopt)
-            *availableSpaceForChildren -= internal_spacing().size();
+        *availableSpaceForChildren -= internal_spacing().size();
         size result;
         uint32_t itemsZeroSized = 0;
         size extent;

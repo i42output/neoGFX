@@ -56,6 +56,7 @@ namespace neogfx
         InitiallyHidden             = 0x02000000,
         InitiallyCentered           = 0x04000000,    // Center on desktop or parent
         InitiallyRenderable         = 0x08000000,
+        SizeToContents              = 0x10000000,
         Weak                        = 0x80000000,
         Default                     = Main | TitleBar | SystemMenu | Menu | MinimizeBox | MaximizeBox | Resize | SizeGrip | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
         DefaultDialog               = (Default | Dialog) & ~(InitiallyRenderable | Main | Menu),

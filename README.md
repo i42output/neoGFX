@@ -30,12 +30,15 @@ neoGFX uses C++20 features; although C++20 compiler support is currently patchy 
 
 # Roadmap
 
-Version | ETA           | Features
---------|---------------|---------------------------------------------------
-v0.99   | Q3, 2021      | Windows OpenGL; widget library feature complete; UI design tool
-v1.00   | Q4, 2021      | Linux OpenGL; scripting engine
-v1.10   | Q2, 2022      | Vulkan; Android support; physics engine
-v1.20   | Q4, 2022      | macOS support
+Version | ETA             | Features
+--------|-----------------|---------------------------------------------------
+v0.99   | WID\*           | Windows OpenGL; widget library feature complete; UI design tool
+v1.00   | WID + 12 months | Linux OpenGL; scripting engine
+v1.10   | WID + 24 months | Vulkan; Android support; physics engine
+v1.20   | WID + 36 months | macOS support
+
+\* When It's Done
+
 
 # Implementation Progress
 
@@ -49,7 +52,7 @@ Window                          | 95      |     Drop shadow
 Dialog                          | 90      |     Default button
 Message Box                     | 100     |
 Menu                            | 100     | 
-Nested windows                  | 25      |     
+Nested windows                  | 90      |     
 MDI                             | 0       |
 Tabs                            | 95      |     Vertical tabs
 Toolbars                        | 90      |     Drop-down button support
@@ -69,9 +72,9 @@ Combo Box                       | 95      |     Glob and regex filters; review U
 Group Box                       | 100     |
 Tool Tips                       | 0       |
 Status Bar                      | 100     |
-Progress Bar                    | 0       |
+Progress Bar                    | 95      |
 Docks							| 75      |
-Font Picker                     | 95      |     Font selection widget
+Font Picker                     | 99      |     Monospace filter
 Colour Gradient Selector        | 95      |     Swatch library
 Colour Picker                   | 100     |     
 Date/Time                       | 0       |
@@ -79,11 +82,9 @@ File Browsers (Native)          | 99      |
 Drag and drop                   | 75      |
 UI/Resource Description (RJSON) | 40      |
 tool: neoGFX Design Studio      | 10      |
-i18n                            | 40      |
+i18n                            | 70      |
 l10n                            | 0       |     UK English, US English, French, German, Chinese
 HID: Game Controllers           | 80      |     Calibration/settings UI; DirectInput button mapping
 Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
 Scene Graph						| 0		  |		
 Skins                           | 40      |
-
-Last updated: 10/10/2020

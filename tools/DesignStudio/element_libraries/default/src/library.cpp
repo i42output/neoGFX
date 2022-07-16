@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/spin_box.hpp>
 #include <neogfx/gui/widget/progress_bar.hpp>
 #include <neogfx/gui/widget/gradient_widget.hpp>
+#include <neogfx/gui/widget/terminal.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/layout/grid_layout.hpp>
@@ -61,6 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "sticky_note.hpp"
 #include "node_widget.hpp"
 #include "script_widget.hpp"
+#include "console_widget.hpp"
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
@@ -76,6 +78,7 @@ namespace neogfx::DesignStudio
         { "sticky_note" },
         { "code" },
         { "script" },
+        { "console" },
         { "node" },
         { "user_interface" },
         { "app" },
@@ -175,6 +178,7 @@ namespace neogfx::DesignStudio
             MAKE_ELEMENT_FACTORY_FUNCTION(build)
             MAKE_ELEMENT_FACTORY_FUNCTION(scripting_languages)
             MAKE_ELEMENT_FACTORY_FUNCTION(sticky_note)
+            MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(console, console_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(MVC_app, app)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(dialog_app, app)
@@ -239,6 +243,7 @@ namespace neogfx::DesignStudio
             { "build", DesignStudio::element_group::Workflow },
             { "sticky_note", DesignStudio::element_group::Workflow },
             { "scripting_languages", DesignStudio::element_group::Workflow },
+            { "console", DesignStudio::element_group::Workflow },
             { "code", DesignStudio::element_group::Code },
             { "script", DesignStudio::element_group::Script },
             { "node", DesignStudio::element_group::Node },
@@ -327,6 +332,13 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/note.png" }, color::Khaki);
+                }
+            },
+            {
+                "console",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/console.png" }, color::Khaki);
                 }
             },
             {

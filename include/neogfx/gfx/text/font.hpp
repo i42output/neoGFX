@@ -231,7 +231,9 @@ namespace neogfx
         font_style style() const override;
         i_string const& style_name() const override;
         point_size size() const override;
+        neogfx::size em_size() const;
         dimension height() const;
+        dimension max_advance() const;
         dimension ascender() const;
         dimension descender() const;
         dimension line_spacing() const;

@@ -138,8 +138,6 @@ namespace neogfx
     public:
         void set_extents(const size& aExtents) override;
         neogfx::size_policy size_policy() const override;
-        void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override;
-        void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override;
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;

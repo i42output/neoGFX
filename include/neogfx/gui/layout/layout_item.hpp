@@ -267,6 +267,46 @@ namespace neogfx
                     update_layout();
             }
         }
+        bool has_ideal_size() const noexcept override
+        {
+            return IdealSize != std::nullopt;
+        }
+        bool is_ideal_size_constrained() const noexcept override
+        {
+            return Anchor_IdealSize.active();
+        }
+        size ideal_size(optional_size const& aAvailableSpace = {}) const override
+        {
+            size result;
+            if (has_ideal_size())
+                result = units_converter(*this).from_device_units(*IdealSize);
+            else if (Anchor_IdealSize.active())
+                result = units_converter(*this).from_device_units(Anchor_IdealSize.evaluate_constraints(aAvailableSpace));
+            else
+            {
+                scoped_query_ideal_size sqis;
+                result = minimum_size(aAvailableSpace);
+            }
+#ifdef NEOGFX_DEBUG
+            if (debug::layoutItem == this)
+                service<debug::logger>() << typeid(*this).name() << "::ideal_size(" << aAvailableSpace << ") --> " << result << endl;
+#endif // NEOGFX_DEBUG
+            return result;
+        }
+        void set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout = true) override
+        {
+            optional_size newIdealSize = (aIdealSize != std::nullopt ? units_converter(*this).to_device_units(*aIdealSize) : optional_size{});
+            if (IdealSize != newIdealSize)
+            {
+#ifdef NEOGFX_DEBUG
+                if (debug::layoutItem == this)
+                    service<debug::logger>() << typeid(*this).name() << "::set_ideal_size(" << aIdealSize << ", " << aUpdateLayout << ")" << endl;
+#endif // NEOGFX_DEBUG
+                IdealSize.assign(newIdealSize, aUpdateLayout);
+                if (aUpdateLayout)
+                    update_layout();
+            }
+        }
         bool has_minimum_size() const noexcept override
         {
             return MinimumSize != std::nullopt;
@@ -284,6 +324,10 @@ namespace neogfx
                 result = units_converter(*this).from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = {};
+#ifdef NEOGFX_DEBUG
+            if (debug::layoutItem == this)
+                service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
+#endif // NEOGFX_DEBUG
             return result;
         }
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override
@@ -572,6 +616,7 @@ namespace neogfx
         define_property(property_category::hard_geometry, optional_padding, Padding, padding)
         define_property(property_category::hard_geometry, optional_size_policy, SizePolicy, size_policy)
         define_property(property_category::hard_geometry, optional_size, Weight, weight)
+        define_property(property_category::hard_geometry, optional_size, IdealSize, ideal_size)
         define_property(property_category::hard_geometry, optional_size, MinimumSize, minimum_size)
         define_property(property_category::hard_geometry, optional_size, MaximumSize, maximum_size)
         define_property(property_category::hard_geometry, optional_size, FixedSize, fixed_size)
@@ -580,6 +625,7 @@ namespace neogfx
         define_anchor_ex(Position, unconstrained_origin)
         define_anchor(Size)
         define_anchor(Padding)
+        define_anchor(IdealSize)
         define_anchor(MinimumSize)
         define_anchor(MaximumSize)
     private:

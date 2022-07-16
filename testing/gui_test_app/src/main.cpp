@@ -795,7 +795,7 @@ int main(int argc, char* argv[])
             auto bd = ng::dialog_button_box::standard_button_details(static_cast<ng::standard_button>(standardButton));
             if (bd.first != ng::button_role::Invalid)
             {
-                auto& button = window.groupMessageBoxButtons.item_layout().emplace<ng::check_box>(bd.second);
+                auto& button = window.groupMessageBoxButtons.contents_layout().emplace<ng::check_box>(bd.second);
                 button.checked([&standardButtons, standardButton]() { standardButtons |= standardButton; });
                 button.Unchecked([&standardButtons, standardButton]() { standardButtons &= ~standardButton; });
             }

@@ -28,21 +28,40 @@
 
 namespace neogfx
 {
-    enum class scrollbar_type
+    enum class scrollbar_orientation : std::uint32_t
     {
-        Vertical = 0x01,
-        Horizontal = 0x02,
+        Vertical    = 0x01,
+        Horizontal  = 0x02,
     };
 
-    enum class scrollbar_style
+    enum class scrollbar_style : std::uint32_t
     {
-        Normal,
-        Menu,
-        Scroller,
-        Invisible
+        None            = 0x00,
+        Normal          = 0x01,
+        Menu            = 0x02,
+        Scroller        = 0x03,
+
+        AlwaysVisible   = 0x80,
+
+        TYPE_MASK    = 0x0F
     };
 
-    enum class scrollbar_element : uint32_t
+    inline scrollbar_style operator~(scrollbar_style aStyle)
+    {
+        return static_cast<scrollbar_style>(~static_cast<std::uint32_t>(aStyle));
+    }
+
+    inline scrollbar_style operator&(scrollbar_style aLhs, scrollbar_style aRhs)
+    {
+        return static_cast<scrollbar_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline scrollbar_style operator|(scrollbar_style aLhs, scrollbar_style aRhs)
+    {
+        return static_cast<scrollbar_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    enum class scrollbar_element : std::uint32_t
     {
         None             = 0x00,
         Scrollbar        = 0x01,
@@ -94,8 +113,12 @@ namespace neogfx
     public:
         virtual i_scrollbar_container& container() const = 0;
     public:
-        virtual scrollbar_type type() const = 0;
+        virtual scrollbar_orientation orientation() const = 0;
         virtual scrollbar_style style() const = 0;
+        virtual scrollbar_style type() const = 0;
+        virtual void set_style(scrollbar_style aStyle) = 0;
+        virtual bool always_visible() const = 0;
+        virtual bool always_hidden() const = 0;
         virtual void show() = 0;
         virtual void hide() = 0;
         virtual bool visible() const = 0;

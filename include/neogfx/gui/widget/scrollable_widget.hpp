@@ -67,8 +67,8 @@ namespace neogfx
         scrollable_widget(neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs) :
             base_type{ std::forward<Args>(aArgs)... },
             iScrollbarStyle{ aScrollbarStyle },
-            iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
-            iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+            iVerticalScrollbar{ *this, scrollbar_orientation::Vertical, aScrollbarStyle },
+            iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
             iMovingWidgets{ false }
@@ -84,8 +84,8 @@ namespace neogfx
         scrollable_widget(i_widget& aParent, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs) :
             base_type{ aParent, std::forward<Args>(aArgs)... },
             iScrollbarStyle{ aScrollbarStyle },
-            iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
-            iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+            iVerticalScrollbar{ *this, scrollbar_orientation::Vertical, aScrollbarStyle },
+            iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
             iMovingWidgets{ false }
@@ -101,8 +101,8 @@ namespace neogfx
         scrollable_widget(i_layout& aLayout, neogfx::scrollbar_style aScrollbarStyle, Args&&... aArgs) :
             base_type{ aLayout, std::forward<Args>(aArgs)... },
             iScrollbarStyle{ aScrollbarStyle },
-            iVerticalScrollbar{ *this, scrollbar_type::Vertical, aScrollbarStyle },
-            iHorizontalScrollbar{ *this, scrollbar_type::Horizontal, aScrollbarStyle },
+            iVerticalScrollbar{ *this, scrollbar_orientation::Vertical, aScrollbarStyle },
+            iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
             iMovingWidgets{ false }

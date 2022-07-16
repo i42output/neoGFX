@@ -25,6 +25,7 @@
 #include <neogfx/gui/widget/i_title_bar.hpp>
 #include <neogfx/gui/widget/i_status_bar.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/widget/i_terminal.hpp>
 
 namespace neogfx
 {
@@ -35,5 +36,6 @@ namespace neogfx
     template class widget<i_title_bar>;
     template class widget<i_status_bar>;
     template class widget<i_window>;
+    template class widget<i_terminal>;
 }
 

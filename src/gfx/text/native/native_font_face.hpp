@@ -124,7 +124,9 @@ namespace neogfx
         i_string const& style_name() const final;
         dimension horizontal_dpi() const final;
         dimension vertical_dpi() const final;
+        neogfx::size em_size() const final;
         dimension height() const final;
+        dimension max_advance() const final;
         dimension ascender() const final;
         dimension descender() const final;
         dimension underline_position() const final;

@@ -29,18 +29,73 @@
 
 namespace neogfx
 {
+    class item_layout : public i_item_layout
+    {
+    public:
+        item_layout() :
+            iLayoutId{ 0u },
+            iLayoutInProgress{ false },
+            iQueryingIdealSize{ false }
+        {
+        }
+    public:
+        uint32_t id() const final
+        {
+            return iLayoutId;
+        }
+        void increment_id() final
+        {
+            if (++iLayoutId == static_cast<uint32_t>(-1))
+                iLayoutId = 0u;
+        }
+        bool& in_progress() final
+        {
+            return iLayoutInProgress;
+        }
+        bool& querying_ideal_size() final
+        {
+            return iQueryingIdealSize;
+        }
+    private:
+        uint32_t iLayoutId;
+        bool iLayoutInProgress;
+        bool iQueryingIdealSize;
+    };
+}
+
+template<> neogfx::i_item_layout& services::start_service<neogfx::i_item_layout>()
+{
+    static neogfx::item_layout sLayoutState;
+    return sLayoutState;
+}
+
+namespace neogfx
+{
     scoped_layout_items::scoped_layout_items(bool aForceRefresh) :
-        neolib::scoped_flag{ global_layout_state::instance().in_progress() },
+        neolib::scoped_flag{ service<i_item_layout>().in_progress() },
         iStartLayout{ !saved() || aForceRefresh }
     {
         if (iStartLayout)
-            global_layout_state::instance().increment_id();
+            service<i_item_layout>().increment_id();
     }
     
     scoped_layout_items::~scoped_layout_items()
     {
         if (iStartLayout)
             service<i_scrollbar_container_updater>().process();
+    }
+
+    scoped_query_ideal_size::scoped_query_ideal_size() :
+        neolib::scoped_flag{ service<i_item_layout>().querying_ideal_size() }
+    {
+        if (!saved())
+            service<i_item_layout>().increment_id();
+    }
+
+    scoped_query_ideal_size::~scoped_query_ideal_size()
+    {
+        if (!saved())
+            service<i_item_layout>().increment_id();
     }
 
     template size layout::do_minimum_size<layout::column_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
@@ -577,36 +632,6 @@ namespace neogfx
                 result.set_vertical_size_policy(size_constraint::Maximum);
         }
         return result;
-    }
-
-    void layout::set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout)
-    {
-        optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size{});
-        if (MinimumSize != newMinimumSize)
-        {
-#ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::set_minimum_size(" << newMinimumSize << ", " << aUpdateLayout << ")" << endl;
-#endif // NEOGFX_DEBUG
-            MinimumSize = newMinimumSize;
-            if (aUpdateLayout)
-                update_layout();
-        }
-    }
-
-    void layout::set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout)
-    {
-        optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size{});
-        if (MaximumSize != newMaximumSize)
-        {
-#ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::set_maximum_size(" << newMaximumSize << ", " << aUpdateLayout << ")" << endl;
-#endif // NEOGFX_DEBUG
-            MaximumSize = newMaximumSize;
-            if (aUpdateLayout)
-                update_layout();
-        }
     }
 
     bool layout::device_metrics_available() const

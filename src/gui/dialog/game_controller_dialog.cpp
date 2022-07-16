@@ -28,13 +28,13 @@ namespace neogfx
     game_controller_dialog::game_controller_dialog() :
         dialog{ "Game Controller Settings"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iControllerSelectorGroupBox{ client_layout(), "Installed Game Controllers"_t },
-        iControllerSelector{ iControllerSelectorGroupBox.item_layout() },
+        iControllerSelector{ iControllerSelectorGroupBox.contents_layout() },
         iTabs{ client_layout(), false, tab_container_style::TabAlignmentTop | tab_container_style::ResizeToTabs },
         iCalibrateTab{ iTabs, "Calibrate"_t },
         iTestTab{ iTabs, "Test"_t },
         iLayout1{ iCalibrateTab },
         iSchematicGroupBox{ iLayout1, "Button Mappings"_t },
-        iSchematic{ iSchematicGroupBox.item_layout(), image{ ":/neogfx/resources/images/game_controller.png" } },
+        iSchematic{ iSchematicGroupBox.contents_layout(), image{ ":/neogfx/resources/images/game_controller.png" } },
         iLayout2{ iTestTab },
         iTestGroupBox{ iLayout2, "" }
     {
@@ -44,13 +44,13 @@ namespace neogfx
     game_controller_dialog::game_controller_dialog(i_widget& aParent) :
         dialog{ aParent, "Game Controller Settings", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iControllerSelectorGroupBox{ client_layout(), "Installed Game Controllers"_t },
-        iControllerSelector{ iControllerSelectorGroupBox.item_layout() },
+        iControllerSelector{ iControllerSelectorGroupBox.contents_layout() },
         iTabs{ client_layout(), false, tab_container_style::TabAlignmentTop | tab_container_style::ResizeToTabs },
         iCalibrateTab{ iTabs, "Calibrate"_t },
         iTestTab{ iTabs, "Test"_t },
         iLayout1{ iCalibrateTab },
         iSchematicGroupBox{ iLayout1, "Button Mappings"_t },
-        iSchematic{ iSchematicGroupBox.item_layout(), image{ ":/neogfx/resources/images/game_controller.png" } },
+        iSchematic{ iSchematicGroupBox.contents_layout(), image{ ":/neogfx/resources/images/game_controller.png" } },
         iLayout2{ iTestTab },
         iTestGroupBox{ iLayout2, "" }
     {

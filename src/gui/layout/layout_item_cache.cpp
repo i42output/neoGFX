@@ -37,6 +37,7 @@ namespace neogfx
         iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
         iWeight{ static_cast<uint32_t>(-1), {} },
+        iIdealSize{ static_cast<uint32_t>(-1), {} },
         iMinimumSize{ static_cast<uint32_t>(-1), {} },
         iMaximumSize{ static_cast<uint32_t>(-1), {} },
         iFixedSize{ static_cast<uint32_t>(-1), {} },
@@ -52,6 +53,7 @@ namespace neogfx
         iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } },
         iWeight{ static_cast<uint32_t>(-1), {} },
+        iIdealSize{ static_cast<uint32_t>(-1), {} },
         iMinimumSize{ static_cast<uint32_t>(-1), {} },
         iMaximumSize{ static_cast<uint32_t>(-1), {} },
         iFixedSize{ static_cast<uint32_t>(-1), {} },
@@ -389,6 +391,69 @@ namespace neogfx
     void layout_item_cache::set_weight(optional_size const& aWeight, bool aUpdateLayout)
     {
         subject().set_weight(aWeight, aUpdateLayout);
+    }
+    
+    bool layout_item_cache::has_ideal_size() const noexcept
+    {
+        return subject().has_ideal_size();
+    }
+
+    bool layout_item_cache::is_ideal_size_constrained() const noexcept
+    {
+        return subject().is_ideal_size_constrained();
+    }
+
+    size layout_item_cache::ideal_size(optional_size const& aAvailableSpace) const
+    {
+#ifdef NEOGFX_DEBUG
+        if (&subject() == debug::layoutItem)
+            service<debug::logger>() << "layout_item_cache::ideal_size(" << aAvailableSpace << ")" << endl;
+#endif // NEOGFX_DEBUG
+        if (!visible())
+            return size{};
+        auto& cachedIdealSize = iIdealSize.second.second;
+        if (iIdealSize.first != global_layout_id() || iIdealSize.second.first != aAvailableSpace || is_minimum_size_constrained())
+        {
+#ifdef NEOGFX_DEBUG
+            if (&subject() == debug::layoutItem)
+                service<debug::logger>() << "layout_item_cache::ideal_size(" << aAvailableSpace << ") (cache invalid)" << endl;
+#endif // NEOGFX_DEBUG
+            cachedIdealSize = subject().ideal_size(aAvailableSpace);
+            if (effective_size_policy().maintain_aspect_ratio())
+            {
+                auto const& aspectRatio = effective_size_policy().aspect_ratio();
+                if (aspectRatio.cx < aspectRatio.cy)
+                {
+                    if (cachedIdealSize.cx < cachedIdealSize.cy)
+                        cachedIdealSize = size{ cachedIdealSize.cx, cachedIdealSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+                    else
+                        cachedIdealSize = size{ cachedIdealSize.cy * (aspectRatio.cx / aspectRatio.cy), cachedIdealSize.cy };
+                }
+                else
+                {
+                    if (cachedIdealSize.cx < cachedIdealSize.cy)
+                        cachedIdealSize = size{ cachedIdealSize.cy * (aspectRatio.cx / aspectRatio.cy), cachedIdealSize.cy };
+                    else
+                        cachedIdealSize = size{ cachedIdealSize.cx, cachedIdealSize.cx * (aspectRatio.cy / aspectRatio.cx) };
+                }
+            }
+            cachedIdealSize = subject().apply_fixed_size(cachedIdealSize);
+            iIdealSize.first = global_layout_id();
+            iIdealSize.second.first = aAvailableSpace;
+        }
+        auto const result = transformation() * cachedIdealSize;
+#ifdef NEOGFX_DEBUG
+        if (&subject() == debug::layoutItem)
+            service<debug::logger>() << "layout_item_cache::ideal_size(" << aAvailableSpace << ") -> " << cachedIdealSize << " -> " << result << endl;
+#endif // NEOGFX_DEBUG
+        return result;
+    }
+
+    void layout_item_cache::set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout)
+    {
+        subject().set_ideal_size(aIdealSize, aUpdateLayout);
+        if (aIdealSize != std::nullopt)
+            iIdealSize.second.second = *aIdealSize;
     }
 
     bool layout_item_cache::has_minimum_size() const noexcept

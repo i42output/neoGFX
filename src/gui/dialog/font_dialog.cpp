@@ -154,30 +154,30 @@ namespace neogfx
         iSizePicker{ iLayout5, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayoutEffects{ client_layout(), neogfx::alignment::Top },
         iEffectsBox{ iLayoutEffects, "Effects"_t, },
-        iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
-        iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
-        iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
-        iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
+        iUnderline{ iEffectsBox.with_contents_layout<vertical_layout>(), "Underline"_t },
+        iSuperscript{ iEffectsBox.contents_layout(), "Superscript"_t },
+        iSubscript{ iEffectsBox.contents_layout(), "Subscript"_t },
+        iBelowAscenderLine{ iEffectsBox.contents_layout(), "Below ascender"_t },
         iAppearanceContainer{ iLayoutEffects },
         iLayoutAppearance{ iAppearanceContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutAppearance, "Ink"_t },
-        iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iInkGradient{ iInkBox.item_layout(), "Gradient"_t },
-        iInkEmoji{ iInkBox.item_layout(), "+Emoji"_t },
+        iInkColor{ iInkBox.with_contents_layout<vertical_layout>(), "Color"_t },
+        iInkGradient{ iInkBox.contents_layout(), "Gradient"_t },
+        iInkEmoji{ iInkBox.contents_layout(), "+Emoji"_t },
         iPaperBox{ iLayoutAppearance, "Paper"_t },
-        iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iPaperGradient{ iPaperBox.item_layout(), "Gradient"_t },
+        iPaperColor{ iPaperBox.with_contents_layout<vertical_layout>(), "Color"_t },
+        iPaperGradient{ iPaperBox.contents_layout(), "Gradient"_t },
         iAdvancedEffectsBox{ iLayoutAppearance, "Advanced Effects"_t },
-        iAdvancedEffectsTypeBox{ iAdvancedEffectsBox.with_item_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
-        iAdvancedEffectsOutline{ iAdvancedEffectsTypeBox.with_item_layout<vertical_layout>(), "Outline"_t },
-        iAdvancedEffectsShadow{ iAdvancedEffectsTypeBox.item_layout(), "Shadow"_t },
-        iAdvancedEffectsGlow{ iAdvancedEffectsTypeBox.item_layout(), "Glow"_t },
-        iAdvancedEffectsInkBox{ iAdvancedEffectsBox.item_layout(), "Ink"_t },
-        iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.item_layout(), "Gradient"_t },
-        iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.item_layout(), "+Emoji"_t },
+        iAdvancedEffectsTypeBox{ iAdvancedEffectsBox.with_contents_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
+        iAdvancedEffectsOutline{ iAdvancedEffectsTypeBox.with_contents_layout<vertical_layout>(), "Outline"_t },
+        iAdvancedEffectsShadow{ iAdvancedEffectsTypeBox.contents_layout(), "Shadow"_t },
+        iAdvancedEffectsGlow{ iAdvancedEffectsTypeBox.contents_layout(), "Glow"_t },
+        iAdvancedEffectsInkBox{ iAdvancedEffectsBox.contents_layout(), "Ink"_t },
+        iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_contents_layout<vertical_layout>(), "Color"_t },
+        iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.contents_layout(), "Gradient"_t },
+        iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.contents_layout(), "+Emoji"_t },
         iSampleBox{ iLayout2, "Sample"_t },
-        iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
+        iSample{ iSampleBox.with_contents_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
         init();
     }
@@ -203,30 +203,30 @@ namespace neogfx
         iSizePicker{ iLayout5, drop_list_style::Editable | drop_list_style::ListAlwaysVisible | drop_list_style::NoFilter },
         iLayoutEffects{ client_layout(), neogfx::alignment::Top },
         iEffectsBox{ iLayoutEffects, "Effects"_t, },
-        iUnderline{ iEffectsBox.with_item_layout<vertical_layout>(), "Underline"_t },
-        iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
-        iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
-        iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
+        iUnderline{ iEffectsBox.with_contents_layout<vertical_layout>(), "Underline"_t },
+        iSuperscript{ iEffectsBox.contents_layout(), "Superscript"_t },
+        iSubscript{ iEffectsBox.contents_layout(), "Subscript"_t },
+        iBelowAscenderLine{ iEffectsBox.contents_layout(), "Below ascender"_t },
         iAppearanceContainer{ iLayoutEffects },
         iLayoutAppearance{ iAppearanceContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutAppearance, "Ink"_t },
-        iInkColor{ iInkBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iInkGradient{ iInkBox.item_layout(), "Gradient"_t },
-        iInkEmoji{ iInkBox.item_layout(), "+Emoji"_t },
+        iInkColor{ iInkBox.with_contents_layout<vertical_layout>(), "Color"_t },
+        iInkGradient{ iInkBox.contents_layout(), "Gradient"_t },
+        iInkEmoji{ iInkBox.contents_layout(), "+Emoji"_t },
         iPaperBox{ iLayoutAppearance, "Paper"_t },
-        iPaperColor{ iPaperBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iPaperGradient{ iPaperBox.item_layout(), "Gradient"_t },
+        iPaperColor{ iPaperBox.with_contents_layout<vertical_layout>(), "Color"_t },
+        iPaperGradient{ iPaperBox.contents_layout(), "Gradient"_t },
         iAdvancedEffectsBox{ iLayoutAppearance, "Advanced Effects"_t },
-        iAdvancedEffectsTypeBox{ iAdvancedEffectsBox.with_item_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
-        iAdvancedEffectsOutline{ iAdvancedEffectsTypeBox.with_item_layout<vertical_layout>(), "Outline"_t },
-        iAdvancedEffectsShadow{ iAdvancedEffectsTypeBox.item_layout(), "Shadow"_t },
-        iAdvancedEffectsGlow{ iAdvancedEffectsTypeBox.item_layout(), "Glow"_t },
-        iAdvancedEffectsInkBox{ iAdvancedEffectsBox.item_layout(), "Ink"_t },
-        iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_item_layout<vertical_layout>(), "Color"_t },
-        iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.item_layout(), "Gradient"_t },
-        iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.item_layout(), "+Emoji"_t },
+        iAdvancedEffectsTypeBox{ iAdvancedEffectsBox.with_contents_layout<horizontal_layout>(neogfx::alignment::Top), "Type"_t },
+        iAdvancedEffectsOutline{ iAdvancedEffectsTypeBox.with_contents_layout<vertical_layout>(), "Outline"_t },
+        iAdvancedEffectsShadow{ iAdvancedEffectsTypeBox.contents_layout(), "Shadow"_t },
+        iAdvancedEffectsGlow{ iAdvancedEffectsTypeBox.contents_layout(), "Glow"_t },
+        iAdvancedEffectsInkBox{ iAdvancedEffectsBox.contents_layout(), "Ink"_t },
+        iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_contents_layout<vertical_layout>(), "Color"_t },
+        iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.contents_layout(), "Gradient"_t },
+        iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.contents_layout(), "+Emoji"_t },
         iSampleBox{ iLayout2, "Sample"_t },
-        iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
+        iSample{ iSampleBox.with_contents_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
         init();
     }
@@ -674,7 +674,7 @@ namespace neogfx
                     iInkColor.check();
                     if (!std::holds_alternative<color_widget>(iInk))
                     {
-                        iInk.emplace<color_widget>(iInkBox.item_layout());
+                        iInk.emplace<color_widget>(iInkBox.contents_layout());
                         iSink += std::get<color_widget>(iInk).ColorChanged([&]()
                         {
                             update_selected_appearance(std::get<color_widget>(iInk));
@@ -687,7 +687,7 @@ namespace neogfx
                     iInkGradient.check();
                     if (!std::holds_alternative<gradient_widget>(iInk))
                     {
-                        iInk.emplace<gradient_widget>(iInkBox.item_layout());
+                        iInk.emplace<gradient_widget>(iInkBox.contents_layout());
                         iSink += std::get<gradient_widget>(iInk).GradientChanged([&]()
                         {
                             update_selected_appearance(std::get<gradient_widget>(iInk));
@@ -707,7 +707,7 @@ namespace neogfx
                     iPaperColor.check();
                     if (!std::holds_alternative<color_widget>(iPaper))
                     {
-                        iPaper.emplace<color_widget>(iPaperBox.item_layout());
+                        iPaper.emplace<color_widget>(iPaperBox.contents_layout());
                         iSink += std::get<color_widget>(iPaper).ColorChanged([&]()
                         {
                             update_selected_appearance(std::get<color_widget>(iPaper));
@@ -720,7 +720,7 @@ namespace neogfx
                     iPaperGradient.check();
                     if (!std::holds_alternative<gradient_widget>(iPaper))
                     {
-                        iPaper.emplace<gradient_widget>(iPaperBox.item_layout());
+                        iPaper.emplace<gradient_widget>(iPaperBox.contents_layout());
                         iSink += std::get<gradient_widget>(iPaper).GradientChanged([&]()
                         {
                             update_selected_appearance(std::get<gradient_widget>(iPaper));
@@ -739,7 +739,7 @@ namespace neogfx
                     iAdvancedEffectsColor.check();
                     if (!std::holds_alternative<color_widget>(iAdvancedEffectsInk))
                     {
-                        iAdvancedEffectsInk.emplace<color_widget>(iAdvancedEffectsInkBox.item_layout());
+                        iAdvancedEffectsInk.emplace<color_widget>(iAdvancedEffectsInkBox.contents_layout());
                         iSink += std::get<color_widget>(iAdvancedEffectsInk).ColorChanged([&]()
                         {
                             update_selected_appearance(std::get<color_widget>(iAdvancedEffectsInk));
@@ -752,7 +752,7 @@ namespace neogfx
                     iAdvancedEffectsGradient.check();
                     if (!std::holds_alternative<gradient_widget>(iAdvancedEffectsInk))
                     {
-                        iAdvancedEffectsInk.emplace<gradient_widget>(iAdvancedEffectsInkBox.item_layout());
+                        iAdvancedEffectsInk.emplace<gradient_widget>(iAdvancedEffectsInkBox.contents_layout());
                         iSink += std::get<gradient_widget>(iAdvancedEffectsInk).GradientChanged([&]()
                         {
                             update_selected_appearance(std::get<gradient_widget>(iAdvancedEffectsInk));
