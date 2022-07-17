@@ -744,7 +744,7 @@ namespace neogfx
             make_visible(iVisibleItem.value());
     }
 
-    void item_view::update_scrollbar_visibility(usv_stage_e aStage)
+    bool item_view::update_scrollbar_visibility(usv_stage_e aStage)
     {
         scoped_units su{ *this, units::Pixels };
         switch (aStage)
@@ -783,6 +783,8 @@ namespace neogfx
         default:
             break;
         }
+
+        return true;
     }
 
     bool item_view::use_scrollbar_container_updater() const

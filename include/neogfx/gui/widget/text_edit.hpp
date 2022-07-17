@@ -366,9 +366,14 @@ namespace neogfx
         bool text_input(i_string const& aText) override;
     public:
         neogfx::scrolling_disposition scrolling_disposition() const override;
+    public:
+        rect scroll_area() const override;
+        size scroll_page() const override;
+    public:
         bool use_scrollbar_container_updater() const override;
         using framed_scrollable_widget::update_scrollbar_visibility;
-        void update_scrollbar_visibility(usv_stage_e aStage) override;
+        bool update_scrollbar_visibility(usv_stage_e aStage) override;
+        void scroll_page_updated() override;
     public:
         color frame_color() const override;
         // i_clipboard

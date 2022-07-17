@@ -155,7 +155,8 @@ namespace neogfx
     protected:
         virtual bool use_scrollbar_container_updater() const;
         void update_scrollbar_visibility() override;
-        virtual void update_scrollbar_visibility(usv_stage_e aStage);
+        virtual bool update_scrollbar_visibility(usv_stage_e aStage);
+        virtual void scroll_page_updated();
     protected:
         void init_scrollbars();
     private:

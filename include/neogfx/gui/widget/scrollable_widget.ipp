@@ -434,9 +434,9 @@ namespace neogfx
             }
 
             if (!min)
-                min = point{};
+                min = cr.top_left();
             if (!max)
-                max = point{};
+                max = cr.top_left();
 
             if (self.has_layout())
             {
@@ -618,9 +618,9 @@ namespace neogfx
     }
 
     template <typename Base>
-    void scrollable_widget<Base>::update_scrollbar_visibility(usv_stage_e aStage)
+    bool scrollable_widget<Base>::update_scrollbar_visibility(usv_stage_e aStage)
     {
-        bool layoutItems = false; 
+        bool updatePage = false; 
 
         switch (aStage)
         {
@@ -628,12 +628,12 @@ namespace neogfx
             if (vertical_scrollbar().visible())
             {
                 vertical_scrollbar().hide();
-                layoutItems = true;
+                updatePage = true;
             }
             if (horizontal_scrollbar().visible())
             {
                 horizontal_scrollbar().hide();
-                layoutItems = true;
+                updatePage = true;
             }
             break;
         case UsvStageCheckVertical1:
@@ -643,7 +643,7 @@ namespace neogfx
                 if (!vertical_scrollbar().visible())
                 {
                     vertical_scrollbar().show();
-                    layoutItems = true;
+                    updatePage = true;
                 }
             }
             break;
@@ -653,7 +653,7 @@ namespace neogfx
                 if (!horizontal_scrollbar().visible())
                 {
                     horizontal_scrollbar().show();
-                    layoutItems = true;
+                    updatePage = true;
                 }
                 break;
             }
@@ -674,7 +674,15 @@ namespace neogfx
             break;
         }
 
-        if (layoutItems)
-            as_widget().layout_items();
+        if (updatePage)
+            scroll_page_updated();
+
+        return updatePage;
+    }
+
+    template <typename Base>
+    void scrollable_widget<Base>::scroll_page_updated()
+    {
+        as_widget().layout_items();
     }
 }

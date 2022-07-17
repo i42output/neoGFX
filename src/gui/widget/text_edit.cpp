@@ -1165,19 +1165,27 @@ namespace neogfx
         return neogfx::scrolling_disposition::DontScrollChildWidget;
     }
 
+    rect text_edit::scroll_area() const
+    {
+        return rect{ point{}, iTextExtents.value() };
+    }
+
+    size text_edit::scroll_page() const
+    {
+        return client_rect(false);
+    }
+
     bool text_edit::use_scrollbar_container_updater() const
     {
         return false;
     }
 
-    void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
+    bool text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
         std::optional<scoped_property_transition_suppression> sts1;
         std::optional<scoped_property_transition_suppression> sts2;
 
-        bool refreshLines = (iTextExtents == std::nullopt);
-
-        if (!refreshLines) // must be a resize event
+        if (iTextExtents != std::nullopt) // must be a resize event
         {
             sts1.emplace(vertical_scrollbar().Position);
             sts2.emplace(horizontal_scrollbar().Position);
@@ -1188,62 +1196,13 @@ namespace neogfx
         case UsvStageInit:
             if (resizing())
                 vertical_scrollbar().push_zone();
-            if (vertical_scrollbar().visible())
-            {
-                vertical_scrollbar().hide();
-//                refreshLines = true;  // todo: optimize this properly
-            }
-            if (horizontal_scrollbar().visible())
-            {
-                horizontal_scrollbar().hide();
-//                refreshLines = true;  // todo: optimize this properly
-            }
-            refreshLines = true;  // todo: optimize this properly
-            break;
-        case UsvStageCheckVertical1:
-        case UsvStageCheckVertical2:
-            {
-                i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-                vertical_scrollbar().set_maximum(iTextExtents->cy);
-                vertical_scrollbar().set_step(font().height());
-                vertical_scrollbar().set_page(client_rect(false).height());
-                vertical_scrollbar().set_position(oldPosition);
-                if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
-                {
-                    if (!vertical_scrollbar().visible())
-                    {
-                        vertical_scrollbar().show();
-                        // refreshLines = true;  // todo: optimize this properly
-                    }
-                    refreshLines = true;  // todo: optimize this properly
-                }
-                else
-                {
-                    if (vertical_scrollbar().visible())
-                    {
-                        vertical_scrollbar().hide();
-                        // refreshLines = true;  // todo: optimize this properly
-                    }
-                    refreshLines = true;  // todo: optimize this properly
-                }
-                framed_scrollable_widget::update_scrollbar_visibility(aStage);
-            }
-            break;
-        case UsvStageCheckHorizontal:
-            {
-                i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
-                horizontal_scrollbar().set_maximum(iTextExtents->cx <= client_rect(false).width() ? 0.0 : iTextExtents->cx);
-                horizontal_scrollbar().set_step(font().height());
-                horizontal_scrollbar().set_page(client_rect(false).width());
-                horizontal_scrollbar().set_position(oldPosition);
-                if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
-                    horizontal_scrollbar().show();
-                else
-                    horizontal_scrollbar().hide();
-                framed_scrollable_widget::update_scrollbar_visibility(aStage);
-            }
+            vertical_scrollbar().set_step(font().height());
+            horizontal_scrollbar().set_step(font().height());
+            if (!framed_scrollable_widget::update_scrollbar_visibility(aStage))
+                refresh_lines();
             break;
         case UsvStageDone:
+            framed_scrollable_widget::update_scrollbar_visibility(aStage);
             if (has_focus() && !read_only())
                 make_cursor_visible();
             else if (resizing())
@@ -1259,11 +1218,15 @@ namespace neogfx
             }
             break;
         default:
-            break;
+            return framed_scrollable_widget::update_scrollbar_visibility(aStage);
         }
 
-        if (refreshLines)
-            refresh_lines();
+        return true;
+    }
+
+    void text_edit::scroll_page_updated()
+    {
+        refresh_lines();
     }
 
     color text_edit::frame_color() const
