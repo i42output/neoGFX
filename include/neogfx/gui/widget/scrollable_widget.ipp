@@ -382,7 +382,6 @@ namespace neogfx
         init_scrollbars();
     }
 
-
     template <typename Base>
     scrolling_disposition scrollable_widget<Base>::scrolling_disposition() const
     {

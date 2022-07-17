@@ -139,11 +139,13 @@ namespace neogfx
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool text_input(i_string const& aText) override;
     protected:
-        using framed_scrollable_widget::scrolling_disposition;
-        neogfx::scrolling_disposition scrolling_disposition() const override;
+        rect scroll_area() const override;
+        size scroll_page() const override;
+    protected:
         void update_scrollbar_visibility() override;
         bool update_scrollbar_visibility(usv_stage_e aStage) override;
         bool use_scrollbar_container_updater() const override;
+        void scroll_page_updated() override;
     protected:
         virtual void column_info_changed(item_model_index::value_type aColumnIndex);
         virtual void item_added(const item_model_index& aItemIndex);

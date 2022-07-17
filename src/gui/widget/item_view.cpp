@@ -58,7 +58,7 @@ namespace neogfx
         else
             return false;
     }
-    
+
     const i_item_model& item_view::model() const
     {
         if (has_model())
@@ -192,7 +192,7 @@ namespace neogfx
 
     void item_view::set_selection_model(i_item_selection_model& aSelectionModel)
     {
-        set_selection_model(ref_ptr<i_item_selection_model>{ref_ptr<i_item_selection_model>{}, &aSelectionModel});
+        set_selection_model(ref_ptr<i_item_selection_model>{ref_ptr<i_item_selection_model>{}, & aSelectionModel});
     }
 
     void item_view::set_selection_model(i_ref_ptr<i_item_selection_model> const& aSelectionModel)
@@ -731,9 +731,14 @@ namespace neogfx
         return handled;
     }
 
-    scrolling_disposition item_view::scrolling_disposition() const
+    rect item_view::scroll_area() const
     {
-        return neogfx::scrolling_disposition::ScrollChildWidgetVertically | neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
+        return rect{ point{}, total_item_area(*this) };
+    }
+
+    size item_view::scroll_page() const
+    {
+        return item_display_rect();
     }
 
     void item_view::update_scrollbar_visibility()
@@ -750,41 +755,26 @@ namespace neogfx
         switch (aStage)
         {
         case UsvStageInit:
-            {
-                iOldPositionForScrollbarVisibility = size{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
-                vertical_scrollbar().hide();
-                horizontal_scrollbar().hide();
-            }
-            break;
-        case UsvStageCheckVertical1:
-        case UsvStageCheckVertical2:
-            vertical_scrollbar().set_maximum(units_converter{ *this }.to_device_units(total_item_area(*this)).cy);
+            iOldPositionForScrollbarVisibility = size{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
             vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_padding(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
-            vertical_scrollbar().set_page(std::max(units_converter{ *this }.to_device_units(item_display_rect()).cy, 0.0));
-            vertical_scrollbar().set_position(iOldPositionForScrollbarVisibility.cy);
-            if (vertical_scrollbar().page() > 0 && vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
-                vertical_scrollbar().show();
-            else
-                vertical_scrollbar().hide();
-            break;
-        case UsvStageCheckHorizontal:
-            horizontal_scrollbar().set_maximum(units_converter{ *this }.to_device_units(total_item_area(*this)).cx);
             horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_padding(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
-            horizontal_scrollbar().set_page(std::max(units_converter{ *this }.to_device_units(item_display_rect()).cx, 0.0));
-            horizontal_scrollbar().set_position(iOldPositionForScrollbarVisibility.cx);
-            if (horizontal_scrollbar().page() > 0 && horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
-                horizontal_scrollbar().show();
-            else
-                horizontal_scrollbar().hide();
+            base_type::update_scrollbar_visibility(aStage);
             break;
         case UsvStageDone:
-            layout_items();
+            base_type::update_scrollbar_visibility(aStage);
+            vertical_scrollbar().set_position(iOldPositionForScrollbarVisibility.cy);
+            horizontal_scrollbar().set_position(iOldPositionForScrollbarVisibility.cx);
             break;
         default:
-            break;
+            return base_type::update_scrollbar_visibility(aStage);
         }
 
         return true;
+    }
+
+    void item_view::scroll_page_updated()
+    {
+        layout_items();
     }
 
     bool item_view::use_scrollbar_container_updater() const
