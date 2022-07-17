@@ -205,7 +205,7 @@ namespace neogfx
     public:
         dimension line_width() const
         {
-            return units_converter(*this).from_device_units(iLineWidth);
+            return units_converter{ *this }.from_device_units(iLineWidth);
         }
         dimension effective_frame_width() const
         {

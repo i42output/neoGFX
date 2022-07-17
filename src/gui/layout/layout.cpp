@@ -429,13 +429,13 @@ namespace neogfx
     margin layout::margin() const
     {
         auto const& adjustedMargin = (has_margin() ? *Margin : service<i_app>().current_style().margin(margin_role::Layout) * dpi_scale_factor());
-        return transformation(true) * units_converter(*this).from_device_units(adjustedMargin);
+        return transformation(true) * units_converter{ *this }.from_device_units(adjustedMargin);
     }
 
     padding layout::padding() const
     {
         auto const& adjustedPadding = (has_padding() ? *Padding : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
-        return transformation(true) * units_converter(*this).from_device_units(adjustedPadding);
+        return transformation(true) * units_converter{ *this }.from_device_units(adjustedPadding);
     }
 
     layout_direction layout::direction() const
@@ -451,7 +451,7 @@ namespace neogfx
     size layout::spacing() const
     {
         auto const& adjustedSpacing = (has_spacing() ? *iSpacing : service<i_app>().current_style().spacing() * dpi_scale_factor());
-        return units_converter(*this).from_device_units(adjustedSpacing);
+        return units_converter{ *this }.from_device_units(adjustedSpacing);
     }
 
     void layout::set_spacing(optional_size const& aSpacing, bool aUpdateLayout)
@@ -459,7 +459,7 @@ namespace neogfx
         if (iSpacing != aSpacing)
         {
             iSpacing = (aSpacing != std::nullopt ?
-                optional_size{ units_converter(*this).to_device_units(*aSpacing) } :
+                optional_size{ units_converter{ *this }.to_device_units(*aSpacing) } :
                 aSpacing);
             if (aUpdateLayout)
                 invalidate();

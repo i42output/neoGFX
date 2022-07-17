@@ -2205,7 +2205,7 @@ namespace neogfx
 
     void text_edit::set_tab_stops(const optional_dimension& aTabStops)
     {
-        optional_dimension newTabStops = (aTabStops != std::nullopt ? optional_dimension{ units_converter(*this).to_device_units(size{ *aTabStops, 0.0 }).cx } : optional_dimension{});
+        optional_dimension newTabStops = (aTabStops != std::nullopt ? optional_dimension{ units_converter{ *this }.to_device_units(size{ *aTabStops, 0.0 }).cx } : optional_dimension{});
         if (iTabStops != newTabStops)
         {
             iTabStops = newTabStops;

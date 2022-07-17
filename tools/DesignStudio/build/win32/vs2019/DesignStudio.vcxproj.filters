@@ -172,7 +172,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\element_model.tpp">
+    <None Include="..\..\..\src\element_model.ipp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

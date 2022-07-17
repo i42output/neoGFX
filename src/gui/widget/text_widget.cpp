@@ -79,7 +79,7 @@ namespace neogfx
             if (debug::layoutItem == this)
                 service<debug::logger>() << "text_widget::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
-            return units_converter(*this).from_device_units(result);
+            return units_converter{ *this }.from_device_units(result);
         }
     }
 

@@ -197,27 +197,27 @@ namespace neogfx
 
     delta graphics_context::to_device_units(const delta& aValue) const
     {
-        return units_converter(*this).to_device_units(aValue);
+        return units_converter{ *this }.to_device_units(aValue);
     }
 
     size graphics_context::to_device_units(const size& aValue) const
     {
-        return units_converter(*this).to_device_units(aValue);
+        return units_converter{ *this }.to_device_units(aValue);
     }
 
     point graphics_context::to_device_units(const point& aValue) const
     {
-        return units_converter(*this).to_device_units(aValue);
+        return units_converter{ *this }.to_device_units(aValue);
     }
 
     vec2 graphics_context::to_device_units(const vec2& aValue) const
     {
-        return units_converter(*this).to_device_units(aValue);
+        return units_converter{ *this }.to_device_units(aValue);
     }
 
     rect graphics_context::to_device_units(const rect& aValue) const
     {
-        return units_converter(*this).to_device_units(aValue);
+        return units_converter{ *this }.to_device_units(aValue);
     }
 
     path graphics_context::to_device_units(const path& aValue) const
@@ -232,22 +232,22 @@ namespace neogfx
 
     delta graphics_context::from_device_units(const delta& aValue) const
     {
-        return units_converter(*this).from_device_units(aValue);
+        return units_converter{ *this }.from_device_units(aValue);
     }
 
     size graphics_context::from_device_units(const size& aValue) const
     {
-        return units_converter(*this).from_device_units(aValue);
+        return units_converter{ *this }.from_device_units(aValue);
     }
 
     point graphics_context::from_device_units(const point& aValue) const
     {
-        return units_converter(*this).from_device_units(aValue);
+        return units_converter{ *this }.from_device_units(aValue);
     }
 
     rect graphics_context::from_device_units(const rect& aValue) const
     {
-        return units_converter(*this).from_device_units(aValue);
+        return units_converter{ *this }.from_device_units(aValue);
     }
 
     path graphics_context::from_device_units(const path& aValue) const

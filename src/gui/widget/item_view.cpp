@@ -758,9 +758,9 @@ namespace neogfx
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
-            vertical_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cy);
+            vertical_scrollbar().set_maximum(units_converter{ *this }.to_device_units(total_item_area(*this)).cy);
             vertical_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_padding(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
-            vertical_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cy, 0.0));
+            vertical_scrollbar().set_page(std::max(units_converter{ *this }.to_device_units(item_display_rect()).cy, 0.0));
             vertical_scrollbar().set_position(iOldPositionForScrollbarVisibility.cy);
             if (vertical_scrollbar().page() > 0 && vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
                 vertical_scrollbar().show();
@@ -768,9 +768,9 @@ namespace neogfx
                 vertical_scrollbar().hide();
             break;
         case UsvStageCheckHorizontal:
-            horizontal_scrollbar().set_maximum(units_converter(*this).to_device_units(total_item_area(*this)).cx);
+            horizontal_scrollbar().set_maximum(units_converter{ *this }.to_device_units(total_item_area(*this)).cx);
             horizontal_scrollbar().set_step(font().height() + (has_presentation_model() ? presentation_model().cell_padding(*this).size().cy + presentation_model().cell_spacing(*this).cy : 0.0));
-            horizontal_scrollbar().set_page(std::max(units_converter(*this).to_device_units(item_display_rect()).cx, 0.0));
+            horizontal_scrollbar().set_page(std::max(units_converter{ *this }.to_device_units(item_display_rect()).cx, 0.0));
             horizontal_scrollbar().set_position(iOldPositionForScrollbarVisibility.cx);
             if (horizontal_scrollbar().page() > 0 && horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
                 horizontal_scrollbar().show();

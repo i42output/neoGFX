@@ -190,27 +190,27 @@ namespace neogfx
         {
             auto& self = as_layout_item();
             return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
-                units_converter(*this).from_device_units(!Anchor_Position.active() ? 
+                units_converter{ *this }.from_device_units(!Anchor_Position.active() ? 
                     static_cast<point>(Position) : static_cast<point>(Position) + Anchor_Position.evaluate_constraints() - unconstrained_origin());
         }
         size extents() const final
         {
             auto& self = as_layout_item();
             return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
-                units_converter(*this).from_device_units(!Anchor_Size.active() ? 
+                units_converter{ *this }.from_device_units(!Anchor_Size.active() ? 
                     static_cast<size>(Size) : Anchor_Size.evaluate_constraints());
         }
     protected:
         void set_position(const point& aPosition) override
         {
             reset_origin();
-            if (Position != units_converter(*this).to_device_units(aPosition))
-                Position.assign(units_converter(*this).to_device_units(aPosition), false);
+            if (Position != units_converter{ *this }.to_device_units(aPosition))
+                Position.assign(units_converter{ *this }.to_device_units(aPosition), false);
         }
         void set_extents(const size& aExtents) override
         {
-            if (Size != units_converter(*this).to_device_units(aExtents))
-                Size.assign(units_converter(*this).to_device_units(aExtents), false);
+            if (Size != units_converter{ *this }.to_device_units(aExtents))
+                Size.assign(units_converter{ *this }.to_device_units(aExtents), false);
         }
     public:
         bool has_size_policy() const noexcept override
@@ -279,9 +279,9 @@ namespace neogfx
         {
             size result;
             if (has_ideal_size())
-                result = units_converter(*this).from_device_units(*IdealSize);
+                result = units_converter{ *this }.from_device_units(*IdealSize);
             else if (Anchor_IdealSize.active())
-                result = units_converter(*this).from_device_units(Anchor_IdealSize.evaluate_constraints(aAvailableSpace));
+                result = units_converter{ *this }.from_device_units(Anchor_IdealSize.evaluate_constraints(aAvailableSpace));
             else
             {
                 scoped_query_ideal_size sqis;
@@ -295,7 +295,7 @@ namespace neogfx
         }
         void set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout = true) override
         {
-            optional_size newIdealSize = (aIdealSize != std::nullopt ? units_converter(*this).to_device_units(*aIdealSize) : optional_size{});
+            optional_size newIdealSize = (aIdealSize != std::nullopt ? units_converter{ *this }.to_device_units(*aIdealSize) : optional_size{});
             if (IdealSize != newIdealSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -319,9 +319,9 @@ namespace neogfx
         {
             size result;
             if (has_minimum_size())
-                result = units_converter(*this).from_device_units(*MinimumSize);
+                result = units_converter{ *this }.from_device_units(*MinimumSize);
             else if (Anchor_MinimumSize.active())
-                result = units_converter(*this).from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
+                result = units_converter{ *this }.from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = {};
 #ifdef NEOGFX_DEBUG
@@ -332,7 +332,7 @@ namespace neogfx
         }
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override
         {
-            optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size{});
+            optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter{ *this }.to_device_units(*aMinimumSize) : optional_size{});
             if (MinimumSize != newMinimumSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -356,16 +356,16 @@ namespace neogfx
         {
             size result;
             if (has_maximum_size())
-                result = units_converter(*this).from_device_units(*MaximumSize);
+                result = units_converter{ *this }.from_device_units(*MaximumSize);
             else if (Anchor_MaximumSize.active())
-                result = units_converter(*this).from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
+                result = units_converter{ *this }.from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = size::max_size();
             return result;
         }
         void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override
         {
-            optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size{});
+            optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter{ *this }.to_device_units(*aMaximumSize) : optional_size{});
             if (MaximumSize != newMaximumSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -384,12 +384,12 @@ namespace neogfx
         size fixed_size(optional_size const& aAvailableSpace = {}) const override
         {
             if (has_fixed_size())
-                return units_converter(*this).from_device_units(*FixedSize);
+                return units_converter{ *this }.from_device_units(*FixedSize);
             return minimum_size(aAvailableSpace);
         }
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true)
         {
-            optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size{});
+            optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter{ *this }.to_device_units(*aFixedSize) : optional_size{});
             if (FixedSize != newFixedSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -448,7 +448,7 @@ namespace neogfx
         }
         void set_margin(optional_margin const& aMargin, bool aUpdateLayout = true) override
         {
-            auto newMargin = (aMargin != std::nullopt ? units_converter(*this).to_device_units(*aMargin) : optional_margin{});
+            auto newMargin = (aMargin != std::nullopt ? units_converter{ *this }.to_device_units(*aMargin) : optional_margin{});
             if (Margin != newMargin)
             {
                 Margin = newMargin;
@@ -466,7 +466,7 @@ namespace neogfx
         }
         void set_border(optional_border const& aBorder, bool aUpdateLayout = true) override
         {
-            auto newBorder = (aBorder != std::nullopt ? units_converter(*this).to_device_units(*aBorder) : optional_border{});
+            auto newBorder = (aBorder != std::nullopt ? units_converter{ *this }.to_device_units(*aBorder) : optional_border{});
             if (Border != newBorder)
             {
                 Border = newBorder;
@@ -484,7 +484,7 @@ namespace neogfx
         }
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override
         {
-            auto newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding{});
+            auto newPadding = (aPadding != std::nullopt ? units_converter{ *this }.to_device_units(*aPadding) : optional_padding{});
             if (Padding != newPadding)
             {
                 Padding = newPadding;

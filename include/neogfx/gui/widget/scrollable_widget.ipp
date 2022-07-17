@@ -398,18 +398,85 @@ namespace neogfx
     template <typename Base>
     rect scrollable_widget<Base>::scroll_area() const
     {
-        rect result = client_rect();
-        if (horizontal_scrollbar().visible())
+        scoped_units su{ *this, units::Pixels };
+        
+        auto const cr = client_rect();
+        
+        rect result = cr;
+
+        if (iUpdatingScrollbarVisibility)
         {
-            result.x = horizontal_scrollbar().minimum();
-            result.cx = horizontal_scrollbar().maximum() - result.x;
+            auto& self = as_widget();
+
+            optional_point min;
+            optional_point max;
+
+            for (auto& c : self.children())
+            {
+                if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
+                    continue;
+                if (!min)
+                    min.emplace(std::numeric_limits<scalar>::infinity(), std::numeric_limits<scalar>::infinity());
+                if (!max)
+                    max.emplace(-std::numeric_limits<scalar>::infinity(), -std::numeric_limits<scalar>::infinity());
+                point const childTopLeftPos{ point{ units_converter{ *c }.to_device_units(c->position()) } };
+                point const childBottomRightPos{ point{ units_converter{ *c }.to_device_units(c->position() + units_converter{ *c }.to_device_units(c->extents())) - point{ 1.0, 1.0 } } };
+                if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
+                {
+                    min->x = std::min(min->x, childTopLeftPos.x);
+                    max->x = std::max(max->x, childBottomRightPos.x);
+                }
+                if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
+                {
+                    min->y = std::min(min->y, childTopLeftPos.y);
+                    max->y = std::max(max->y, childBottomRightPos.y);
+                }
+            }
+
+            if (!min)
+                min = point{};
+            if (!max)
+                max = point{};
+
+            if (self.has_layout())
+            {
+                auto const& ourLayout = self.layout();
+                if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
+                    max->x += ourLayout.internal_spacing().right;
+                if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
+                    max->y += ourLayout.internal_spacing().bottom;
+            }
+      
+            if (max->x > cr.right() - 1.0 - self.internal_spacing().right)
+                max->x += self.internal_spacing().right;
+            if (max->y > cr.bottom() - 1.0 - self.internal_spacing().bottom)
+                max->y += self.internal_spacing().bottom;
+
+            min = min->min(cr.top_left());
+            max = max->max(cr.bottom_right()) - point{ 1.0, 1.0 };
+            
+            result = rect{ *min, *max };
         }
-        if (vertical_scrollbar().visible())
+        else
         {
-            result.y = vertical_scrollbar().minimum();
-            result.cy = vertical_scrollbar().maximum() - result.y;
+            if (horizontal_scrollbar().visible())
+            {
+                result.x = horizontal_scrollbar().minimum();
+                result.cx = horizontal_scrollbar().maximum() - result.x;
+            }
+            if (vertical_scrollbar().visible())
+            {
+                result.y = vertical_scrollbar().minimum();
+                result.cy = vertical_scrollbar().maximum() - result.y;
+            }
         }
-        return result;
+
+        return to_units(*this, su.saved_units(), result);
+    }
+    template <typename Base>
+    size scrollable_widget<Base>::scroll_page() const
+    {
+        return client_rect().extents();
     }
 
     template <typename Base>
@@ -502,6 +569,9 @@ namespace neogfx
         if (iUpdatingScrollbarVisibility)
             return;
 
+        if (debug::layoutItem == this)
+            service<debug::logger>() << "widget:layout_items: update_scrollbar_visibility..."  << endl;
+
         neolib::scoped_flag sf{ iUpdatingScrollbarVisibility };
 
         if (use_scrollbar_container_updater())
@@ -542,129 +612,62 @@ namespace neogfx
             vertical_scrollbar().unlock();
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
             horizontal_scrollbar().unlock();
+
+        if (debug::layoutItem == this)
+            service<debug::logger>() << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scroll_area() << ", scroll_page: " << scroll_page() << endl;
     }
 
     template <typename Base>
     void scrollable_widget<Base>::update_scrollbar_visibility(usv_stage_e aStage)
     {
-        if ((scrolling_disposition() & neogfx::scrolling_disposition::DontConsiderChildWidgets) == neogfx::scrolling_disposition::DontConsiderChildWidgets)
-            return;
-
         bool layoutItems = false; 
 
         switch (aStage)
         {
         case UsvStageInit:
-            if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
+            if (vertical_scrollbar().visible())
             {
-                if (vertical_scrollbar().visible())
-                {
-                    vertical_scrollbar().hide();
-                    layoutItems = true;
-                }
+                vertical_scrollbar().hide();
+                layoutItems = true;
             }
-            if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
+            if (horizontal_scrollbar().visible())
             {
-                if (horizontal_scrollbar().visible())
-                {
-                    horizontal_scrollbar().hide();
-                    layoutItems = true;
-                }
+                horizontal_scrollbar().hide();
+                layoutItems = true;
             }
             break;
         case UsvStageCheckVertical1:
         case UsvStageCheckVertical2:
-            if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
+            if (scroll_area().cy > scroll_page().cy)
             {
-                auto const& cr = as_widget().client_rect();
-                for (auto& child : as_widget().children())
+                if (!vertical_scrollbar().visible())
                 {
-                    auto const& childPos = child->position();
-                    auto const& childExtents = child->extents();
-                    if (child->hidden() || childExtents.cx == 0.0 || childExtents.cy == 0.0)
-                        continue;
-                    if ((scrolling_disposition(*child) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::DontScrollChildWidget)
-                        continue;
-                    if (childPos.y < cr.top() || childPos.y + childExtents.cy > cr.bottom())
-                    {
-                        if (!vertical_scrollbar().visible())
-                        {
-                            vertical_scrollbar().show();
-                            layoutItems = true;
-                        }
-                        break;
-                    }
+                    vertical_scrollbar().show();
+                    layoutItems = true;
                 }
             }
             break;
         case UsvStageCheckHorizontal:
-            if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
+            if (scroll_area().cx > scroll_page().cx)
             {
-                auto const& cr = as_widget().client_rect();
-                for (auto& child : as_widget().children())
+                if (!horizontal_scrollbar().visible())
                 {
-                    auto const& childPos = child->position();
-                    auto const& childExtents = child->extents();
-                    if (child->hidden() || childExtents.cx == 0.0 || childExtents.cy == 0.0)
-                        continue;
-                    if ((scrolling_disposition(*child) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::DontScrollChildWidget)
-                        continue;
-                    if (childPos.x < cr.left() || childPos.x + childExtents.cx > cr.right())
-                    {
-                        if (!horizontal_scrollbar().visible())
-                        {
-                            horizontal_scrollbar().show();
-                            layoutItems = true;
-                        }
-                        break;
-                    }
+                    horizontal_scrollbar().show();
+                    layoutItems = true;
                 }
+                break;
             }
             break;
         case UsvStageDone:
             {
-                point min{ std::numeric_limits<scalar>::infinity(), std::numeric_limits<scalar>::infinity() };
-                point max{ -std::numeric_limits<scalar>::infinity(), -std::numeric_limits<scalar>::infinity() };
-                for (auto& c : as_widget().children())
-                {
-                    if (c->hidden() || c->extents().cx == 0.0 || c->extents().cy == 0.0)
-                        continue;
-                    point const childTopLeftPos{ point{ units_converter{ *c }.to_device_units(c->position()) } };
-                    point const childBottomRightPos{ point{ units_converter{ *c }.to_device_units(c->position() + c->extents()) - point{ 1.0, 1.0 } } };
-                    if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                    {
-                        min.x = std::min(min.x, childTopLeftPos.x);
-                        max.x = std::max(max.x, childBottomRightPos.x);
-                    }
-                    if ((scrolling_disposition(*c) & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                    {
-                        min.y = std::min(min.y, childTopLeftPos.y);
-                        max.y = std::max(max.y, childBottomRightPos.y);
-                    }
-                }
-                min = min.min({});
-                max = max.max({});
-                if (as_widget().has_layout())
-                {
-                    auto const& ourLayout = as_widget().layout();
-                    if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                        max.x += ourLayout.internal_spacing().right;
-                    if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                        max.y += ourLayout.internal_spacing().bottom;
-                }
-                auto const& cr = as_widget().client_rect();
-                if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetVertically) == neogfx::scrolling_disposition::ScrollChildWidgetVertically)
-                {
-                    vertical_scrollbar().set_minimum(min.y);
-                    vertical_scrollbar().set_maximum(max.y);
-                    vertical_scrollbar().set_page(units_converter{ *this }.to_device_units(cr).height());
-                }
-                if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
-                {
-                    horizontal_scrollbar().set_minimum(min.x);
-                    horizontal_scrollbar().set_maximum(max.x);
-                    horizontal_scrollbar().set_page(units_converter{ *this }.to_device_units(cr).width());
-                }
+                auto const& sa = units_converter{ *this }.to_device_units(scroll_area());
+                auto const& sp = units_converter{ *this }.to_device_units(scroll_page());
+                vertical_scrollbar().set_minimum(sa.top());
+                vertical_scrollbar().set_maximum(sa.bottom());
+                vertical_scrollbar().set_page(sp.cy);
+                horizontal_scrollbar().set_minimum(sa.left());
+                horizontal_scrollbar().set_maximum(sa.right());
+                horizontal_scrollbar().set_page(sp.cx);
             }
             break;
         default:

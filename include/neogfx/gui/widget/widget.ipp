@@ -954,7 +954,7 @@ namespace neogfx
             service<debug::logger>() << "widget<Interface>::resize(" << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
 
-        if (base_type::Size != units_converter(*this).to_device_units(aSize))
+        if (base_type::Size != units_converter{ *this }.to_device_units(aSize))
         {
             update(true);
             self.set_extents(aSize);
@@ -1144,7 +1144,7 @@ namespace neogfx
         auto& self = as_widget();
 
         auto const& adjustedPadding = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(self_type::is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
-        return self.transformation() * units_converter(*this).from_device_units(adjustedPadding);
+        return self.transformation() * units_converter{ *this }.from_device_units(adjustedPadding);
     }
 
     template <typename Interface>
