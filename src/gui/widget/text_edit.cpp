@@ -2816,12 +2816,12 @@ namespace neogfx
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
         auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
-        if (cursorColor == neolib::none && cursor().style() == cursor_style::Standard)
-            cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);
         if (cursorColor == neolib::none)
+            cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);
+        if (cursor().style() == cursor_style::Xor)
         {
             aGc.push_logical_operation(logical_operation::Xor);
-            aGc.fill_rect(cursor_rect(), color::White.with_combined_alpha(cursorAlpha));
+            aGc.fill_rect(cursor_rect(), (cursorAlpha >= 0.5 ? color::White : color::Black));
             aGc.pop_logical_operation();
         }
         else if (std::holds_alternative<color>(cursorColor))

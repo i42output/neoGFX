@@ -26,5 +26,9 @@ namespace neogfx
 {
     class i_terminal : public i_widget
     {
+    public:
+        declare_event(input, i_string const&)
+    public:
+        virtual void output(i_string const& aOutput) = 0;
     };
 }
