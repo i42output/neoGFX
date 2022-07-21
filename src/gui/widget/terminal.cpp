@@ -300,8 +300,10 @@ namespace neogfx
 
     void terminal::set_cursor_pos(point_type aCursorPos, bool aExtendBuffer)
     {
-        if (aCursorPos.y >= iBuffer.size() && aCursorPos.y + 1 < iBufferSize.cy && aExtendBuffer)
+        if (aCursorPos.y >= iBuffer.size() && aCursorPos.y <= iBufferSize.cy && aExtendBuffer)
             iBuffer.resize(aCursorPos.y + 1);
+        if (iBuffer.size() > iBufferSize.cy)
+            iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), iBuffer.size() - iBufferSize.cy));
         aCursorPos.y = std::max(0, std::min(aCursorPos.y, static_cast<size_type::coordinate_type>(iBuffer.size() - 1)));
         aCursorPos.x = std::max(0, std::min(aCursorPos.x, static_cast<size_type::coordinate_type>(iBuffer[aCursorPos.y].text.size())));
         if (iCursorPos != aCursorPos)
