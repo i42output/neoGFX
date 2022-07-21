@@ -44,8 +44,8 @@ namespace neogfx
             mutable optional_glyph_text glyphs;
             std::vector<attribute> attributes;
         };
-        typedef basic_size<std::uint32_t> text_size;
-        typedef basic_point<std::uint32_t> cursor_pos;
+        typedef basic_size<std::int32_t> size_type;
+        typedef basic_point<std::int32_t> point_type;
     public:
         terminal();
         terminal(i_widget& aParent);
@@ -80,13 +80,15 @@ namespace neogfx
     private:
         void init();
         void animate();
-        void set_cursor_pos(cursor_pos aCursorPos);
+        point_type cursor_pos() const;
+        void set_cursor_pos(point_type aCursorPos, bool aExtendBuffer = false);
         rect cursor_rect() const;
+        void make_cursor_visible();
         void draw_cursor(i_graphics_context& aGc) const;
     private:
-        text_size iTerminalSize;
-        text_size iBufferSize;
-        cursor_pos iCursorPos;
+        size_type iTerminalSize;
+        size_type iBufferSize;
+        std::optional<point_type> iCursorPos;
         std::vector<line> iBuffer;
         mutable neogfx::cursor iCursor;
         uint64_t iCursorAnimationStartTime;

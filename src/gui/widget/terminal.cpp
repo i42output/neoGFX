@@ -29,7 +29,8 @@ namespace neogfx
     template class scrollable_widget<framed_widget<widget<i_terminal>>>;
 
     terminal::terminal() : 
-        iTerminalSize{ 80u, 25u },
+        iTerminalSize{ 80, 25 },
+        iBufferSize{ 80, 250 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iAnimator{ *this, [this](widget_timer&)
         {
@@ -42,9 +43,8 @@ namespace neogfx
 
     terminal::terminal(i_widget& aParent) : 
         base_type{ aParent, scrollbar_style::Normal, frame_style::NoFrame },
-        iTerminalSize{ 80u, 25u },
-        iBufferSize{ iTerminalSize },
-        iCursorPos{},
+        iTerminalSize{ 80, 25 },
+        iBufferSize{ 80, 250 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iAnimator{ *this, [this](widget_timer&)
         {
@@ -57,9 +57,8 @@ namespace neogfx
 
     terminal::terminal(i_layout& aLayout) :
         base_type{ aLayout, scrollbar_style::Normal, frame_style::NoFrame },
-        iTerminalSize{ 80u, 25u },
-        iBufferSize{ iTerminalSize },
-        iCursorPos{},
+        iTerminalSize{ 80, 25 },
+        iBufferSize{ 80, 250 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iAnimator{ *this, [this](widget_timer&)
         {
@@ -178,7 +177,26 @@ namespace neogfx
     {
         neolib::service<neolib::i_power>().register_activity();
 
-        return base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+        bool handled = true;
+        switch (aScanCode)
+        {
+        case ScanCode_LEFT:
+            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - 1));
+            break;
+        case ScanCode_RIGHT:
+            set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
+            break;
+        case ScanCode_UP:
+            set_cursor_pos(cursor_pos().with_y(cursor_pos().y - 1));
+            break;
+        case ScanCode_DOWN:
+            set_cursor_pos(cursor_pos().with_y(cursor_pos().y + 1));
+            break;
+        default:
+            handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            break;
+        }
+        return handled;
     }
 
     bool terminal::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
@@ -189,7 +207,8 @@ namespace neogfx
     bool terminal::text_input(i_string const& aText)
     {
         Input.trigger(aText);
-        output(aText); // todo: remove
+        if (aText == "\r"_s)
+            Input.trigger("\n"_s);
         return true;
     }
 
@@ -198,31 +217,28 @@ namespace neogfx
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
         for (auto ch : utf32)
         {
-            auto cursorPos = iCursorPos;
-            if (iBuffer.size() <= cursorPos.y)
-                iBuffer.resize(cursorPos.y + 1u);
-            if (ch == U'\n' || ch == U'\r')
-            {
-                cursorPos.x = 0u;
+            auto cursorPos = cursor_pos();
+            if (ch == U'\r')
+                cursorPos.x = 0;
+            else if (ch == U'\n')
                 ++cursorPos.y;
-            }
             else
             {
                 if (iBuffer[cursorPos.y].text.size() <= cursorPos.x)
-                    iBuffer[cursorPos.y].text.resize(cursorPos.x + 1u);
+                    iBuffer[cursorPos.y].text.resize(cursorPos.x + 1);
                 iBuffer[cursorPos.y].text[cursorPos.x] = ch;
                 if (iBuffer[cursorPos.y].attributes.size() <= cursorPos.x)
-                    iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1u, { color::White, color::Black });
+                    iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1, { color::White, color::Black });
                 iBuffer[cursorPos.y].glyphs = std::nullopt;
                 ++cursorPos.x;
                 if (cursorPos.x == iTerminalSize.cx)
                 {
-                    cursorPos.x = 0u;
+                    cursorPos.x = 0;
                     ++cursorPos.y;
                 }
             }
-            if (cursorPos != iCursorPos)
-                set_cursor_pos(cursorPos);
+            if (cursorPos != cursor_pos())
+                set_cursor_pos(cursorPos, true);
         }
         update();
     }
@@ -260,6 +276,13 @@ namespace neogfx
                 update();
             });
 
+        // todo: remove the following
+        Input([this](i_string const& aInput)
+            {
+                output(aInput);
+            });
+
+        set_cursor_pos({}, true);
     }
 
     void terminal::animate()
@@ -270,14 +293,23 @@ namespace neogfx
             update(cursor_rect());
     }
 
-    void terminal::set_cursor_pos(cursor_pos aCursorPos)
+    terminal::point_type terminal::cursor_pos() const
     {
-        aCursorPos.x = std::min(aCursorPos.x, iTerminalSize.cx - 1u);
-        aCursorPos.y = std::min(aCursorPos.y, iTerminalSize.cy - 1u);
+        return iCursorPos.value();
+    }
+
+    void terminal::set_cursor_pos(point_type aCursorPos, bool aExtendBuffer)
+    {
+        if (aCursorPos.y >= iBuffer.size() && aCursorPos.y + 1 < iBufferSize.cy && aExtendBuffer)
+            iBuffer.resize(aCursorPos.y + 1);
+        aCursorPos.y = std::max(0, std::min(aCursorPos.y, static_cast<size_type::coordinate_type>(iBuffer.size() - 1)));
+        aCursorPos.x = std::max(0, std::min(aCursorPos.x, static_cast<size_type::coordinate_type>(iBuffer[aCursorPos.y].text.size())));
         if (iCursorPos != aCursorPos)
         {
             iCursorPos = aCursorPos;
-            cursor().set_position(iTerminalSize.cx * iCursorPos.y + iCursorPos.x);
+            cursor().set_position(iTerminalSize.cx * aCursorPos.y + aCursorPos.x);
+            vertical_scrollbar().set_maximum(iBuffer.size() * font().height());
+            make_cursor_visible();
             update();
         }
     }
@@ -285,8 +317,17 @@ namespace neogfx
     rect terminal::cursor_rect() const
     {
         size const cursorSize{ font().max_advance(), font().height() };
-        return rect{ point{ iCursorPos } * cursorSize, cursorSize };
+        return rect{ point{ cursor_pos() } * cursorSize - point{ 0.0, vertical_scrollbar().position() }, cursorSize};
 
+    }
+
+    void terminal::make_cursor_visible()
+    {
+        auto const& cr = cursor_rect();
+        if (cr.bottom() <= 0.0)
+            vertical_scrollbar().set_position(vertical_scrollbar().position() + cr.top());
+        else if (cr.top() >= vertical_scrollbar().page())
+            vertical_scrollbar().set_position(vertical_scrollbar().position() + cr.bottom() - vertical_scrollbar().page());
     }
     
     void terminal::draw_cursor(i_graphics_context& aGc) const
