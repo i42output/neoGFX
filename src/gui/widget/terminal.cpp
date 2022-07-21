@@ -276,12 +276,6 @@ namespace neogfx
                 update();
             });
 
-        // todo: remove the following
-        Input([this](i_string const& aInput)
-            {
-                output(aInput);
-            });
-
         set_cursor_pos({}, true);
     }
 
