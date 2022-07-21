@@ -82,6 +82,7 @@ namespace neogfx
         void animate();
         point_type cursor_pos() const;
         void set_cursor_pos(point_type aCursorPos, bool aExtendBuffer = false);
+        void update_cursor();
         rect cursor_rect() const;
         void make_cursor_visible();
         void draw_cursor(i_graphics_context& aGc) const;
@@ -91,6 +92,7 @@ namespace neogfx
         std::optional<point_type> iCursorPos;
         std::vector<line> iBuffer;
         mutable neogfx::cursor iCursor;
+        mutable bool iOutputting = false;
         uint64_t iCursorAnimationStartTime;
         widget_timer iAnimator;
         sink iSink;

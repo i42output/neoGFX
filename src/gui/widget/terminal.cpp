@@ -214,6 +214,7 @@ namespace neogfx
 
     void terminal::output(i_string const& aOutput)
     {
+        neolib::scoped_flag sf{ iOutputting };
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
         for (auto ch : utf32)
         {
@@ -240,7 +241,7 @@ namespace neogfx
             if (cursorPos != cursor_pos())
                 set_cursor_pos(cursorPos, true);
         }
-        update();
+        update_cursor();
     }
 
     cursor& terminal::cursor() const
@@ -295,7 +296,11 @@ namespace neogfx
     void terminal::set_cursor_pos(point_type aCursorPos, bool aExtendBuffer)
     {
         if (aCursorPos.y >= iBuffer.size() && aCursorPos.y <= iBufferSize.cy && aExtendBuffer)
+        {
             iBuffer.resize(aCursorPos.y + 1);
+            iBuffer.back().text.reserve(iBufferSize.cx);
+            iBuffer.back().attributes.reserve(iBufferSize.cx);
+        }
         if (iBuffer.size() > iBufferSize.cy)
             iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), iBuffer.size() - iBufferSize.cy));
         aCursorPos.y = std::max(0, std::min(aCursorPos.y, static_cast<size_type::coordinate_type>(iBuffer.size() - 1)));
@@ -303,11 +308,19 @@ namespace neogfx
         if (iCursorPos != aCursorPos)
         {
             iCursorPos = aCursorPos;
-            cursor().set_position(iTerminalSize.cx * aCursorPos.y + aCursorPos.x);
-            vertical_scrollbar().set_maximum(iBuffer.size() * font().height());
-            make_cursor_visible();
-            update();
+            if (!iOutputting)
+            {
+                update_cursor();
+            }
         }
+    }
+
+    void terminal::update_cursor()
+    {
+        cursor().set_position(iTerminalSize.cx * iCursorPos->y + iCursorPos->x);
+        vertical_scrollbar().set_maximum(iBuffer.size() * font().height());
+        make_cursor_visible();
+        update();
     }
     
     rect terminal::cursor_rect() const
