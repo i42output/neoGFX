@@ -212,6 +212,41 @@ namespace neogfx
         return true;
     }
 
+    namespace
+    {
+        color attribute_color(std::int32_t aCode)
+        {
+            switch (aCode)
+            {
+            case 30:
+            case 40:
+                return color::Black;
+            case 31:
+            case 41:
+                return color::Red;
+            case 32:
+            case 42:
+                return color::Green;
+            case 33:
+            case 43:
+                return color::Yellow;
+            case 34:
+            case 44:
+                return color::Blue;
+            case 35:
+            case 45:
+                return color::Magenta;
+            case 36:
+            case 46:
+                return color::Cyan;
+            case 37:
+            case 47:
+            default:
+                return color::White;
+            }
+        };
+    }
+
     void terminal::output(i_string const& aOutput)
     {
         neolib::scoped_flag sf{ iOutputting };
@@ -219,21 +254,74 @@ namespace neogfx
         for (auto ch : utf32)
         {
             auto cursorPos = cursor_pos();
-            if (ch == U'\r')
+            if (iEscapeSequence)
+            {
+                *iEscapeSequence += static_cast<char>(ch);
+                switch(iEscapeSequence.value()[0])
+                {
+                case '[':
+                    // todo
+                    if (iEscapeSequence.value().size() > 1 && ch >= U'\x40' && ch <= U'\x7E')
+                    {
+                        auto params = neolib::tokens(iEscapeSequence.value().substr(1, iEscapeSequence.value().size() - 2), ";"s, 0, false);
+                        switch (ch)
+                        {
+                        case U'm':
+                            {
+                                for (auto const& param : params)
+                                {
+                                    auto code = 0;
+                                    try { code = std::stoi(param); } catch (...) {}
+                                    if (code == 0)
+                                        iAttribute = std::nullopt;
+                                    else if ((code >= 30 && code <= 37) || (code >= 40 && code <= 47))
+                                    {
+                                        if (!iAttribute)
+                                            iAttribute.emplace(color::White, color::Black);
+                                        if (code <= 37)
+                                            iAttribute.value().ink = attribute_color(code);
+                                        else
+                                            iAttribute.value().paper = attribute_color(code);
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        iEscapeSequence = std::nullopt;
+                    }
+                    break;
+                default:
+                    // todo
+                    iEscapeSequence = std::nullopt;
+                    break;
+                }
+                continue;
+            }
+            else if (ch == U'\r')
                 cursorPos.x = 0;
             else if (ch == U'\n')
-                ++cursorPos.y;
+            {
+                if (cursorPos.x != 0 || cursorPos.y == 0 || !iBuffer[cursorPos.y - 1].eol)
+                    ++cursorPos.y;
+                else
+                    iBuffer[cursorPos.y - 1].eol = false;
+            }
+            else if (ch == U'\0')
+                continue;
+            else if (ch == U'\x1B')
+                iEscapeSequence.emplace();
             else
             {
                 if (iBuffer[cursorPos.y].text.size() <= cursorPos.x)
                     iBuffer[cursorPos.y].text.resize(cursorPos.x + 1);
                 iBuffer[cursorPos.y].text[cursorPos.x] = ch;
                 if (iBuffer[cursorPos.y].attributes.size() <= cursorPos.x)
-                    iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1, { color::White, color::Black });
+                    iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1, iAttribute ? iAttribute.value() : attribute{ color::White, color::Black });
                 iBuffer[cursorPos.y].glyphs = std::nullopt;
                 ++cursorPos.x;
                 if (cursorPos.x == iTerminalSize.cx)
                 {
+                    iBuffer[cursorPos.y].eol = true;
                     cursorPos.x = 0;
                     ++cursorPos.y;
                 }

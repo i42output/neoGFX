@@ -43,6 +43,7 @@ namespace neogfx
             std::u32string text;
             mutable optional_glyph_text glyphs;
             std::vector<attribute> attributes;
+            bool eol = false;
         };
         typedef basic_size<std::int32_t> size_type;
         typedef basic_point<std::int32_t> point_type;
@@ -91,6 +92,8 @@ namespace neogfx
         size_type iBufferSize;
         std::optional<point_type> iCursorPos;
         std::vector<line> iBuffer;
+        std::optional<attribute> iAttribute;
+        std::optional<std::string> iEscapeSequence;
         mutable neogfx::cursor iCursor;
         mutable bool iOutputting = false;
         uint64_t iCursorAnimationStartTime;
