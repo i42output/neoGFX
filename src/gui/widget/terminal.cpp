@@ -19,6 +19,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/task/thread.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neolib/app/i_power.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/scrollable_widget.ipp>
@@ -120,7 +121,7 @@ namespace neogfx
 
     focus_policy terminal::focus_policy() const
     {
-        return neogfx::focus_policy::StrongFocus;
+        return neogfx::focus_policy::StrongFocus | focus_policy::ConsumeTabKey;
     }
 
     void terminal::focus_gained(focus_reason aFocusReason)
@@ -181,16 +182,19 @@ namespace neogfx
         switch (aScanCode)
         {
         case ScanCode_LEFT:
-            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - 1));
+            Input.trigger("\x1B[D"_s);
             break;
         case ScanCode_RIGHT:
-            set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
+            Input.trigger("\x1B[C"_s);
             break;
         case ScanCode_UP:
-            set_cursor_pos(cursor_pos().with_y(cursor_pos().y - 1));
+            Input.trigger("\x1B[A"_s);
             break;
         case ScanCode_DOWN:
-            set_cursor_pos(cursor_pos().with_y(cursor_pos().y + 1));
+            Input.trigger("\x1B[B"_s);
+            break;
+        case ScanCode_BACKSPACE:
+            Input.trigger("\x08"_s);
             break;
         default:
             handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -286,6 +290,104 @@ namespace neogfx
                                 }
                             }
                             break;
+                        case U'A':
+                            {
+                                std::int32_t n = 1;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                cursorPos = cursorPos.with_y(cursorPos.y - n);
+                            }
+                            break;
+                        case U'B':
+                            {
+                                std::int32_t n = 1;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                cursorPos = cursorPos.with_y(cursorPos.y + n);
+                            }
+                            break;
+                        case U'C':
+                            {
+                                std::int32_t n = 1;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                cursorPos = cursorPos.with_x(cursorPos.x + n);
+                            }
+                            break;
+                        case U'D':
+                            {
+                                std::int32_t n = 1;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                cursorPos = cursorPos.with_x(cursorPos.x - n);
+                            }
+                            break;
+                        case U'H':
+                            {
+                                std::int32_t row = 1;
+                                std::int32_t col = 1;
+                                if (!params.empty())
+                                    try { row = std::stoi(params[0]); if (params.size() >= 2) col = std::stoi(params[1]); } catch (...) {}
+                                cursorPos.y = row - 1 + static_cast<std::int32_t>(vertical_scrollbar().position() / font().height());
+                                cursorPos.x = col - 1;
+                            }
+                            break;
+                        case U'J':
+                            {
+                                std::int32_t n = 0;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                switch (n)
+                                {
+                                case 0:
+                                    iBuffer.erase(std::next(iBuffer.begin(), cursorPos.y), iBuffer.end());
+                                    break;
+                                case 1:
+                                    iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), cursorPos.y));
+                                    break;
+                                case 2:
+                                    iBuffer.clear();
+                                    break;
+                                }
+                            }
+                            break;
+                        case U'K':
+                            {
+                                std::int32_t n = 0;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                auto& line = iBuffer[cursorPos.y];
+                                switch (n)
+                                {
+                                case 0:
+                                    line.text.erase(std::next(line.text.begin(), cursorPos.x), line.text.end());
+                                    line.attributes.erase(std::next(line.attributes.begin(), cursorPos.x), line.attributes.end());
+                                    line.glyphs = std::nullopt;
+                                    break;
+                                case 1:
+                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), cursorPos.x));
+                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), cursorPos.x));
+                                    line.glyphs = std::nullopt;
+                                    break;
+                                case 2:
+                                    line.text.clear();
+                                    line.attributes.clear();
+                                    line.glyphs = std::nullopt;
+                                    break;
+                                }
+                            }
+                            break;
+                        case U'P':
+                            {
+                                std::int32_t n = 1;
+                                if (!params.empty())
+                                    try { n = std::stoi(params[0]); } catch (...) {}
+                                auto& line = iBuffer[cursorPos.y];
+                                line.text.erase(std::next(line.text.begin(), cursorPos.x), std::next(line.text.begin(), cursorPos.x + n));
+                                line.attributes.erase(std::next(line.attributes.begin(), cursorPos.x), std::next(line.attributes.begin(), cursorPos.x + n));
+                                line.glyphs = std::nullopt;
+                            }
+                            break;
                         }
                         iEscapeSequence = std::nullopt;
                     }
@@ -295,39 +397,48 @@ namespace neogfx
                     iEscapeSequence = std::nullopt;
                     break;
                 }
-                continue;
             }
-            else if (ch == U'\r')
-                cursorPos.x = 0;
-            else if (ch == U'\n')
-            {
-                if (cursorPos.x != 0 || cursorPos.y == 0 || !iBuffer[cursorPos.y - 1].eol)
-                    ++cursorPos.y;
-                else
-                    iBuffer[cursorPos.y - 1].eol = false;
-            }
-            else if (ch == U'\0')
-                continue;
-            else if (ch == U'\x1B')
-                iEscapeSequence.emplace();
             else
             {
-                if (iBuffer[cursorPos.y].text.size() <= cursorPos.x)
-                    iBuffer[cursorPos.y].text.resize(cursorPos.x + 1);
-                iBuffer[cursorPos.y].text[cursorPos.x] = ch;
-                if (iBuffer[cursorPos.y].attributes.size() <= cursorPos.x)
-                    iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1, iAttribute ? iAttribute.value() : attribute{ color::White, color::Black });
-                iBuffer[cursorPos.y].glyphs = std::nullopt;
-                ++cursorPos.x;
-                if (cursorPos.x == iTerminalSize.cx)
+                switch (ch)
                 {
-                    iBuffer[cursorPos.y].eol = true;
+                case U'\a':
+                    service<i_basic_services>().system_beep();
+                    break;
+                case U'\r':
                     cursorPos.x = 0;
-                    ++cursorPos.y;
+                    break;
+                case U'\n':
+                    if (cursorPos.x != 0 || cursorPos.y == 0 || !iBuffer[cursorPos.y - 1].eol)
+                        ++cursorPos.y;
+                    else
+                        iBuffer[cursorPos.y - 1].eol = false;
+                    break;
+                case U'\0':
+                    break;
+                case U'\x1B':
+                    iEscapeSequence.emplace();
+                    break;
+                default:
+                    if (iBuffer[cursorPos.y].text.size() <= cursorPos.x)
+                        iBuffer[cursorPos.y].text.resize(cursorPos.x + 1, U' ');
+                    iBuffer[cursorPos.y].text[cursorPos.x] = ch;
+                    if (iBuffer[cursorPos.y].attributes.size() <= cursorPos.x)
+                        iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1, iAttribute ? iAttribute.value() : attribute{ color::White, color::Black });
+                    iBuffer[cursorPos.y].glyphs = std::nullopt;
+                    ++cursorPos.x;
+                    if (cursorPos.x == iTerminalSize.cx)
+                    {
+                        iBuffer[cursorPos.y].eol = true;
+                        cursorPos.x = 0;
+                        ++cursorPos.y;
+                    }
+                    else if (cursorPos.x == 1 && cursorPos.y > 0)
+                        iBuffer[cursorPos.y - 1].eol = false;
+                    break;
                 }
             }
-            if (cursorPos != cursor_pos())
-                set_cursor_pos(cursorPos, true);
+            set_cursor_pos(cursorPos, true);
         }
         update_cursor();
     }
