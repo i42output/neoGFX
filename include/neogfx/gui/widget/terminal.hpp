@@ -46,7 +46,6 @@ namespace neogfx
             std::u32string text;
             mutable optional_glyph_text glyphs;
             std::vector<attribute> attributes;
-            bool eol = false;
         };
         typedef basic_size<std::int32_t> size_type;
         typedef basic_point<std::int32_t> point_type;
@@ -94,10 +93,11 @@ namespace neogfx
         void animate();
         void erase_in_display(point_type const& aBufferPosStart, point_type const& aBufferPosEnd);
         buffer_line& line(coordinate_type aLine);
+        char32_t& character(point_type const& aBufferPos);
         point_type buffer_pos() const;
         point_type to_buffer_pos(point_type aCursorPos) const;
         point_type cursor_pos() const;
-        void set_cursor_pos(point_type aCursorPos, bool aUpdateBuffer = false);
+        void set_cursor_pos(point_type aCursorPos);
         void update_cursor();
         rect cursor_rect() const;
         void make_cursor_visible(bool aToBufferOrigin = true);

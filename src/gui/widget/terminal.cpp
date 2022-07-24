@@ -360,9 +360,6 @@ namespace neogfx
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
         for (auto ch : utf32)
         {
-            auto cursorPos = cursor_pos();
-            auto const bufferPos = buffer_pos();
-            bool updateBuffer = false;
             if (iEscapeSequence)
             {
                 *iEscapeSequence += static_cast<char>(ch);
@@ -432,12 +429,22 @@ namespace neogfx
                                         if (!iAttribute)
                                             iAttribute.emplace(color::White, color::Black);
                                         iAttribute.value().style |= font_style::Bold;
+                                        iAttribute.value().style &= ~font_style::Normal;
                                     }
                                     else if (code == 7)
                                     {
                                         if (!iAttribute)
                                             iAttribute.emplace(color::White, color::Black);
                                         iAttribute.value().reverse = true;
+                                    }
+                                    else if (code == 22)
+                                    {
+                                        if (iAttribute)
+                                        {
+                                            iAttribute.value().style &= ~font_style::Bold;
+                                            if ((iAttribute.value().style & font_style::Italic) == font_style::Invalid)
+                                                iAttribute.value().style |= font_style::Normal;
+                                        }
                                     }
                                     else if (code == 27)
                                     {
@@ -500,7 +507,7 @@ namespace neogfx
                                 std::int32_t n = 1;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                cursorPos = cursorPos.with_y(cursorPos.y - n);
+                                set_cursor_pos(cursor_pos().with_y(cursor_pos().y - n));
                             }
                             break;
                         case U'B':
@@ -508,7 +515,7 @@ namespace neogfx
                                 std::int32_t n = 1;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                cursorPos = cursorPos.with_y(cursorPos.y + n);
+                                set_cursor_pos(cursor_pos().with_y(cursor_pos().y + n));
                             }
                             break;
                         case U'C':
@@ -516,7 +523,7 @@ namespace neogfx
                                 std::int32_t n = 1;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                cursorPos = cursorPos.with_x(cursorPos.x + n);
+                                set_cursor_pos(cursor_pos().with_x(cursor_pos().x + n));
                             }
                             break;
                         case U'D':
@@ -524,7 +531,7 @@ namespace neogfx
                                 std::int32_t n = 1;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                cursorPos = cursorPos.with_x(cursorPos.x - n);
+                                set_cursor_pos(cursor_pos().with_x(cursor_pos().x - n));
                             }
                             break;
                         case U'H':
@@ -533,8 +540,7 @@ namespace neogfx
                                 std::int32_t col = 1;
                                 if (!params.empty())
                                     try { row = std::stoi(params[0]); if (params.size() >= 2) col = std::stoi(params[1]); } catch (...) {}
-                                cursorPos.y = row - 1;
-                                cursorPos.x = col - 1;
+                                set_cursor_pos({ col - 1, row - 1 });
                             }
                             break;
                         case U'J':
@@ -545,10 +551,10 @@ namespace neogfx
                                 switch (n)
                                 {
                                 case 0:
-                                    erase_in_display(bufferPos, to_buffer_pos(iTerminalSize));
+                                    erase_in_display(buffer_pos(), to_buffer_pos(iTerminalSize));
                                     break;
                                 case 1:
-                                    erase_in_display(iBufferOrigin, bufferPos);
+                                    erase_in_display(iBufferOrigin, buffer_pos());
                                     break;
                                 case 2:
                                     erase_in_display(iBufferOrigin, to_buffer_pos(iTerminalSize));
@@ -556,8 +562,7 @@ namespace neogfx
                                 case 3:
                                     iBuffer.clear();
                                     iBufferOrigin = {};
-                                    cursorPos = point{};
-                                    updateBuffer = true;
+                                    set_cursor_pos({});
                                     break;
                                 }
                             }
@@ -567,17 +572,17 @@ namespace neogfx
                                 std::int32_t n = 0;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                auto& line = terminal::line(bufferPos.y);
+                                auto& line = terminal::line(buffer_pos().y);
                                 switch (n)
                                 {
                                 case 0:
-                                    line.text.erase(std::next(line.text.begin(), bufferPos.x), line.text.end());
-                                    line.attributes.erase(std::next(line.attributes.begin(), bufferPos.x), line.attributes.end());
+                                    line.text.erase(std::next(line.text.begin(), buffer_pos().x), line.text.end());
+                                    line.attributes.erase(std::next(line.attributes.begin(), buffer_pos().x), line.attributes.end());
                                     line.glyphs = std::nullopt;
                                     break;
                                 case 1:
-                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), bufferPos.x));
-                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), bufferPos.x));
+                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), buffer_pos().x));
+                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), buffer_pos().x));
                                     line.glyphs = std::nullopt;
                                     break;
                                 case 2:
@@ -593,9 +598,9 @@ namespace neogfx
                                 std::int32_t n = 1;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                auto& line = terminal::line(bufferPos.y);
-                                line.text.erase(std::next(line.text.begin(), bufferPos.x), std::next(line.text.begin(), bufferPos.x + n));
-                                line.attributes.erase(std::next(line.attributes.begin(), bufferPos.x), std::next(line.attributes.begin(), bufferPos.x + n));
+                                auto& line = terminal::line(buffer_pos().y);
+                                line.text.erase(std::next(line.text.begin(), buffer_pos().x), std::next(line.text.begin(), buffer_pos().x + n));
+                                line.attributes.erase(std::next(line.attributes.begin(), buffer_pos().x), std::next(line.attributes.begin(), buffer_pos().x + n));
                                 line.glyphs = std::nullopt;
                             }
                             break;
@@ -624,47 +629,26 @@ namespace neogfx
                     service<i_basic_services>().system_beep();
                     break;
                 case U'\r':
-                    cursorPos.x = 0;
+                    set_cursor_pos(cursor_pos().with_x(0));
                     break;
                 case U'\n':
-                    if (cursorPos.x != 0 || bufferPos.y == 0 || !line(bufferPos.y - 1).eol)
-                        ++cursorPos.y;
-                    else
-                        line(bufferPos.y - 1).eol = false;
-                    updateBuffer = true;
+                    set_cursor_pos(cursor_pos().with_y(cursor_pos().y + 1));
                     break;
                 case U'\0':
                     break;
                 case U'\b':
-                    if (cursorPos.x > 0)
-                        --cursorPos.x;
+                    if (cursor_pos().x > 0)
+                        set_cursor_pos(cursor_pos().with_x(cursor_pos().x - 1));
                     break;
                 default:
-                    updateBuffer = true;
-                    if (line(bufferPos.y).text.size() <= bufferPos.x)
-                        line(bufferPos.y).text.resize(bufferPos.x + 1, U' ');
-                    if (line(bufferPos.y).attributes.size() <= bufferPos.x)
-                        line(bufferPos.y).attributes.resize(bufferPos.x + 1, iAttribute ? iAttribute.value() : attribute{ color::White, color::Black });
-                    if (bufferPos.x != iTerminalSize.cx - 1 || !line(bufferPos.y).eol)
-                        line(bufferPos.y).text[bufferPos.x] = ch;
-                    line(bufferPos.y).glyphs = std::nullopt;
-                    ++cursorPos.x;
-                    if (cursorPos.x == iTerminalSize.cx)
-                    {
-                        if (iAutoWrap)
-                        {
-                            line(bufferPos.y).eol = true;
-                            cursorPos.x = 0;
-                            ++cursorPos.y;
-                            updateBuffer = false;
-                        }
-                    }
-                    else if (cursorPos.x == 1 && bufferPos.y > 0)
-                        line(bufferPos.y - 1).eol = false;
+                    if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
+                        set_cursor_pos({ 0, cursor_pos().y + 1 });
+                    character(buffer_pos()) = ch;
+                    line(buffer_pos().y).glyphs = std::nullopt;
+                    set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
                     break;
                 }
             }
-            set_cursor_pos(cursorPos, updateBuffer);
         }
         update_cursor();
     }
@@ -821,6 +805,18 @@ namespace neogfx
         return iBuffer[aLine];
     }
 
+    char32_t& terminal::character(point_type const& aBufferPos)
+    {
+        auto& line = terminal::line(aBufferPos.y);
+        if (line.text.size() <= aBufferPos.x)
+            line.text.resize(aBufferPos.x + 1, U' ');
+        if (line.attributes.size() <= aBufferPos.x)
+            line.attributes.resize(aBufferPos.x + 1, attribute{ color::White, color::Black });
+        if (iAttribute)
+            line.attributes[aBufferPos.x] = iAttribute.value();
+        return line.text[aBufferPos.x];
+    }
+
     terminal::point_type terminal::buffer_pos() const
     {
         return to_buffer_pos(cursor_pos());
@@ -836,16 +832,13 @@ namespace neogfx
         return iCursorPos.value();
     }
 
-    void terminal::set_cursor_pos(point_type aCursorPos, bool aUpdateBuffer)
+    void terminal::set_cursor_pos(point_type aCursorPos)
     {
-        aCursorPos.y = std::max(0, std::min(aCursorPos.y, iBufferSize.cy - 1));
-        aCursorPos.x = std::max(0, std::min(aCursorPos.x, iTerminalSize.cx - 1));
-        if (aUpdateBuffer)
-        {
-            auto const bufferPos = to_buffer_pos(aCursorPos);
-            (void) terminal::line(bufferPos.y);
-            aCursorPos.y = std::max(0, std::min(aCursorPos.y, iTerminalSize.cy - 1));
-        }
+        (void)line(to_buffer_pos(aCursorPos).y);
+
+        aCursorPos.y = std::max(0, std::min(aCursorPos.y, iTerminalSize.cy - 1));
+        aCursorPos.x = std::max(0, std::min(aCursorPos.x, iTerminalSize.cx));
+
         if (iCursorPos != aCursorPos)
         {
             iCursorPos = aCursorPos;
