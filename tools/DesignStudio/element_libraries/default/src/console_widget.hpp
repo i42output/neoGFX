@@ -157,7 +157,7 @@ namespace neogfx::DesignStudio
                                         static_cast<char>(code::IAC), 
                                         static_cast<char>(command::Suboption), 
                                         static_cast<char>(sub_command::TerminalType),
-                                        '\0', 'A', 'N', 'S', 'I',
+                                        '\0', 'X', 'T', 'E', 'R', 'M',
                                         static_cast<char>(code::IAC),
                                         static_cast<char>(command::SuboptionEnd) });
                                     break;
@@ -240,7 +240,7 @@ namespace neogfx::DesignStudio
         console_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
             window{ aParent, window_placement{ rect{ point{}, size{ 480.0_dip, 480.0_dip } } }, aStyle | window_style::SizeToContents },
             iTerminal{ client_layout() },
-            iTestConnection{ "i42.io" }
+            iTestConnection{ "10.0.0.201" }
         {
             iTerminal.Input([&](i_string const& aText)
             {
@@ -252,6 +252,7 @@ namespace neogfx::DesignStudio
             });
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
+            iTerminal.set_font(font().with_size(8)); // todo: remove
             //create_status_bar<neogfx::status_bar>(
             //    neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip | neogfx::status_bar::style::BackgroundAsWindowBorder );
         }

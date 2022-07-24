@@ -204,10 +204,12 @@ namespace neogfx
         virtual size glyph_text_extent(const glyph_text& aText) const = 0;
         virtual size glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const = 0;
         virtual size multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const = 0;
+        virtual glyph_text to_glyph_text(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
         virtual glyph_text to_glyph_text(std::string const& aText, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
         virtual glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const = 0;
+        virtual glyph_text to_glyph_text(const std::u32string& aText, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
         virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::string const& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;

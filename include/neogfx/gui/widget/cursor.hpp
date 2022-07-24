@@ -89,6 +89,10 @@ namespace neogfx
         void set_width(dimension aWidth);
         std::chrono::milliseconds flash_interval() const;
         void set_flash_interval(std::chrono::milliseconds aInterval);
+        bool visible() const;
+        bool hidden() const;
+        void show();
+        void hide();
     private:
         i_document* iDocument;
         position_type iPosition;
@@ -97,5 +101,6 @@ namespace neogfx
         cursor_style iStyle;
         dimension iWidth;
         std::chrono::milliseconds iFlashInterval;
+        bool iVisible = true;
     };
 }

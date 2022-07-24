@@ -37,8 +37,11 @@ namespace neogfx
         {
             color ink;
             color paper;
+            bool reverse = false;
+            bool blink = false;
+            font_style style = font_style::Normal;
         };
-        struct line
+        struct buffer_line
         {
             std::u32string text;
             mutable optional_glyph_text glyphs;
@@ -47,6 +50,7 @@ namespace neogfx
         };
         typedef basic_size<std::int32_t> size_type;
         typedef basic_point<std::int32_t> point_type;
+        typedef point_type::coordinate_type coordinate_type;
     public:
         terminal();
         terminal(i_widget& aParent);
@@ -80,20 +84,39 @@ namespace neogfx
         neogfx::cursor& cursor() const;
     private:
         void init();
+        using base_type::font;
+        neogfx::font const& font(font_style aStyle) const;
+        neogfx::font const& normal_font() const;
+        neogfx::font const& bold_font() const;
+        neogfx::font const& italic_font() const;
+        neogfx::font const& bold_italic_font() const;
+        size character_extents() const;
         void animate();
+        void erase_in_display(point_type const& aBufferPosStart, point_type const& aBufferPosEnd);
+        buffer_line& line(coordinate_type aLine);
+        point_type buffer_pos() const;
+        point_type to_buffer_pos(point_type aCursorPos) const;
         point_type cursor_pos() const;
-        void set_cursor_pos(point_type aCursorPos, bool aExtendBuffer = false);
+        void set_cursor_pos(point_type aCursorPos, bool aUpdateBuffer = false);
         void update_cursor();
         rect cursor_rect() const;
-        void make_cursor_visible();
+        void make_cursor_visible(bool aToBufferOrigin = true);
         void draw_cursor(i_graphics_context& aGc) const;
     private:
         size_type iTerminalSize;
         size_type iBufferSize;
+        mutable optional_font iNormalFont;
+        mutable optional_font iBoldFont;
+        mutable optional_font iItalicFont;
+        mutable optional_font iBoldItalicFont;
+        mutable optional_size iCharacterExtents;
+        point_type iBufferOrigin;
         std::optional<point_type> iCursorPos;
-        std::vector<line> iBuffer;
+        std::vector<buffer_line> iBuffer;
         std::optional<attribute> iAttribute;
         std::optional<std::string> iEscapeSequence;
+        bool iAutoWrap = true;
+        bool iBracketedPaste = false;
         mutable neogfx::cursor iCursor;
         mutable bool iOutputting = false;
         uint64_t iCursorAnimationStartTime;

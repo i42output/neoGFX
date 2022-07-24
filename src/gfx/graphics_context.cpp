@@ -978,6 +978,11 @@ namespace neogfx
         return to_glyph_text(aText.begin(), aText.end(), aFont);
     }
 
+    glyph_text graphics_context::to_glyph_text(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const
+    {
+        return to_glyph_text(aText.begin(), aText.end(), aFontSelector);
+    }
+
     glyph_text graphics_context::to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
@@ -991,6 +996,11 @@ namespace neogfx
     glyph_text graphics_context::to_glyph_text(const std::u32string& aText, const font& aFont) const
     {
         return to_glyph_text(aText.begin(), aText.end(), aFont);
+    }
+
+    glyph_text graphics_context::to_glyph_text(const std::u32string& aText, std::function<font(std::size_t)> aFontSelector) const
+    {
+        return to_glyph_text(aText.begin(), aText.end(), aFontSelector);
     }
 
     glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const

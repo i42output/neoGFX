@@ -142,9 +142,11 @@ namespace neogfx
         size glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const final;
         size multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const final;
         glyph_text to_glyph_text(std::string const& aText, const font& aFont) const final;
+        glyph_text to_glyph_text(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const final;
         glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const final;
         glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const final;
         glyph_text to_glyph_text(const std::u32string& aText, const font& aFont) const final;
+        glyph_text to_glyph_text(const std::u32string& aText, std::function<font(std::size_t)> aFontSelector) const final;
         glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const final;
         glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const final;
         multiline_glyph_text to_multiline_glyph_text(std::string const& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const final;

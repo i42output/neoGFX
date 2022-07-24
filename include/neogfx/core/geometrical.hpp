@@ -920,6 +920,13 @@ namespace neogfx
             else
                 return self_type{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
         }
+        self_type with_position(const point_type& p) const
+        {
+            auto result = *this;
+            result.position().x = p.x;
+            result.position().y = p.y;
+            return result;
+        }
         self_type with_x(coordinate_type c) const
         {
             auto result = *this;

@@ -84,21 +84,32 @@ namespace neogfx
         base_type::paint(aGc);
 
         auto const& cr = client_rect(false);
+        auto const& ce = character_extents();
+
         scalar y = -vertical_scrollbar().position();
+
         for (auto const& line : iBuffer)
         {
             if (line.glyphs == std::nullopt)
-                line.glyphs = aGc.to_glyph_text(line.text, font());
-            if (y + line.glyphs->extents().cy >= cr.top() && y < cr.bottom())
+                line.glyphs = aGc.to_glyph_text(line.text, 
+                    [&](std::size_t n) -> neogfx::font 
+                    { 
+                        return n < line.attributes.size() ? font(line.attributes[n].style) : normal_font();
+                    });
+            if (y + ce.cy >= cr.top() && y < cr.bottom())
             {
                 scalar x = 0.0;
                 for (auto const& g : *line.glyphs)
                 {
-                    aGc.draw_glyph(point{ x, y }, *line.glyphs, g, { line.attributes[g.source.first].ink, line.attributes[g.source.first].paper });
-                    x += g.advance.cx;
+                    auto ink = line.attributes[g.source.first].ink;
+                    auto paper = line.attributes[g.source.first].paper;
+                    if (line.attributes[g.source.first].reverse)
+                        std::swap(ink, paper);
+                    aGc.draw_glyph(point{ x, y }, *line.glyphs, g, { ink, paper });
+                    x += ce.cx;
                 }
             }
-            y += line.glyphs->extents().cy;
+            y += ce.cy;
         }
 
         if (has_focus())
@@ -117,6 +128,14 @@ namespace neogfx
     void terminal::set_font(optional_font const& aFont)
     {
         base_type::set_font(aFont);
+        iNormalFont = std::nullopt;
+        iBoldFont = std::nullopt;
+        iItalicFont = std::nullopt;
+        iBoldItalicFont = std::nullopt;
+        iCharacterExtents = std::nullopt;
+        set_ideal_size(character_extents() * size { iTerminalSize } +
+            size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
+        cursor().set_width(character_extents().cx);
     }
 
     focus_policy terminal::focus_policy() const
@@ -178,28 +197,42 @@ namespace neogfx
     {
         neolib::service<neolib::i_power>().register_activity();
 
-        bool handled = true;
+        bool handled = false;
+
+        if (aScanCode >= ScanCode_A && aScanCode <= ScanCode_Z && (aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+        {
+            Input.trigger(string{ 1, static_cast<char>(aScanCode - ScanCode_A) + '\x01' });
+            handled = true;
+        }
+
         switch (aScanCode)
         {
         case ScanCode_LEFT:
             Input.trigger("\x1B[D"_s);
+            handled = true;
             break;
         case ScanCode_RIGHT:
             Input.trigger("\x1B[C"_s);
+            handled = true;
             break;
         case ScanCode_UP:
             Input.trigger("\x1B[A"_s);
+            handled = true;
             break;
         case ScanCode_DOWN:
             Input.trigger("\x1B[B"_s);
+            handled = true;
             break;
         case ScanCode_BACKSPACE:
-            Input.trigger("\x08"_s);
+            Input.trigger("\x7F"_s);
+            handled = true;
             break;
         default:
-            handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            if (!handled)
+                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         }
+
         return handled;
     }
 
@@ -227,28 +260,98 @@ namespace neogfx
                 return color::Black;
             case 31:
             case 41:
-                return color::Red;
+                return color{ 170, 0, 0 };
             case 32:
             case 42:
-                return color::Green;
+                return color{ 0, 170, 0 };
             case 33:
             case 43:
-                return color::Yellow;
+                return color{ 170, 85, 0 };
             case 34:
             case 44:
-                return color::Blue;
+                return color{ 0, 0, 170 };
             case 35:
             case 45:
-                return color::Magenta;
+                return color{ 170, 0, 170 };
             case 36:
             case 46:
-                return color::Cyan;
+                return color{ 0, 170, 170 };
             case 37:
             case 47:
+                return color{ 170, 170, 170 };
+            case 90:
+            case 100:
+                return color{ 85, 85, 85 };
+            case 91:
+            case 101:
+                return color{ 255, 85, 85 };
+            case 92:
+            case 102:
+                return color{ 85, 255, 85 };
+            case 93:
+            case 103:
+                return color{ 255, 255, 85 };
+            case 94:
+            case 104:
+                return color{ 85, 85, 255 };
+            case 95:
+            case 105:
+                return color{ 255, 85, 255 };
+            case 96:
+            case 106:
+                return color{ 85, 255, 255 };
+            case 97:
+            case 107:
+                return color{ 255, 255, 255 };
             default:
-                return color::White;
+                return color{ 255, 255, 255 };
             }
         };
+
+        color attribute_color_8bit(std::int32_t code)
+        {
+            static color const table[256]
+            {
+                "#000000"s,"#800000"s,"#008000"s,"#808000"s,"#000080"s,"#800080"s,"#008080"s,"#c0c0c0"s,
+                "#808080"s,"#ff0000"s,"#00ff00"s,"#ffff00"s,"#0000ff"s,"#ff00ff"s,"#00ffff"s,"#ffffff"s,
+                "#000000"s,"#00005f"s,"#000087"s,"#0000af"s,"#0000d7"s,"#0000ff"s,"#005f00"s,"#005f5f"s,
+                "#005f87"s,"#005faf"s,"#005fd7"s,"#005fff"s,"#008700"s,"#00875f"s,"#008787"s,"#0087af"s,
+                "#0087d7"s,"#0087ff"s,"#00af00"s,"#00af5f"s,"#00af87"s,"#00afaf"s,"#00afd7"s,"#00afff"s,
+                "#00d700"s,"#00d75f"s,"#00d787"s,"#00d7af"s,"#00d7d7"s,"#00d7ff"s,"#00ff00"s,"#00ff5f"s,
+                "#00ff87"s,"#00ffaf"s,"#00ffd7"s,"#00ffff"s,"#5f0000"s,"#5f005f"s,"#5f0087"s,"#5f00af"s,
+                "#5f00d7"s,"#5f00ff"s,"#5f5f00"s,"#5f5f5f"s,"#5f5f87"s,"#5f5faf"s,"#5f5fd7"s,"#5f5fff"s,
+                "#5f8700"s,"#5f875f"s,"#5f8787"s,"#5f87af"s,"#5f87d7"s,"#5f87ff"s,"#5faf00"s,"#5faf5f"s,
+                "#5faf87"s,"#5fafaf"s,"#5fafd7"s,"#5fafff"s,"#5fd700"s,"#5fd75f"s,"#5fd787"s,"#5fd7af"s,
+                "#5fd7d7"s,"#5fd7ff"s,"#5fff00"s,"#5fff5f"s,"#5fff87"s,"#5fffaf"s,"#5fffd7"s,"#5fffff"s,
+                "#870000"s,"#87005f"s,"#870087"s,"#8700af"s,"#8700d7"s,"#8700ff"s,"#875f00"s,"#875f5f"s,
+                "#875f87"s,"#875faf"s,"#875fd7"s,"#875fff"s,"#878700"s,"#87875f"s,"#878787"s,"#8787af"s,
+                "#8787d7"s,"#8787ff"s,"#87af00"s,"#87af5f"s,"#87af87"s,"#87afaf"s,"#87afd7"s,"#87afff"s,
+                "#87d700"s,"#87d75f"s,"#87d787"s,"#87d7af"s,"#87d7d7"s,"#87d7ff"s,"#87ff00"s,"#87ff5f"s,
+                "#87ff87"s,"#87ffaf"s,"#87ffd7"s,"#87ffff"s,"#af0000"s,"#af005f"s,"#af0087"s,"#af00af"s,
+                "#af00d7"s,"#af00ff"s,"#af5f00"s,"#af5f5f"s,"#af5f87"s,"#af5faf"s,"#af5fd7"s,"#af5fff"s,
+                "#af8700"s,"#af875f"s,"#af8787"s,"#af87af"s,"#af87d7"s,"#af87ff"s,"#afaf00"s,"#afaf5f"s,
+                "#afaf87"s,"#afafaf"s,"#afafd7"s,"#afafff"s,"#afd700"s,"#afd75f"s,"#afd787"s,"#afd7af"s,
+                "#afd7d7"s,"#afd7ff"s,"#afff00"s,"#afff5f"s,"#afff87"s,"#afffaf"s,"#afffd7"s,"#afffff"s,
+                "#d70000"s,"#d7005f"s,"#d70087"s,"#d700af"s,"#d700d7"s,"#d700ff"s,"#d75f00"s,"#d75f5f"s,
+                "#d75f87"s,"#d75faf"s,"#d75fd7"s,"#d75fff"s,"#d78700"s,"#d7875f"s,"#d78787"s,"#d787af"s,
+                "#d787d7"s,"#d787ff"s,"#d7af00"s,"#d7af5f"s,"#d7af87"s,"#d7afaf"s,"#d7afd7"s,"#d7afff"s,
+                "#d7d700"s,"#d7d75f"s,"#d7d787"s,"#d7d7af"s,"#d7d7d7"s,"#d7d7ff"s,"#d7ff00"s,"#d7ff5f"s,
+                "#d7ff87"s,"#d7ffaf"s,"#d7ffd7"s,"#d7ffff"s,"#ff0000"s,"#ff005f"s,"#ff0087"s,"#ff00af"s,
+                "#ff00d7"s,"#ff00ff"s,"#ff5f00"s,"#ff5f5f"s,"#ff5f87"s,"#ff5faf"s,"#ff5fd7"s,"#ff5fff"s,
+                "#ff8700"s,"#ff875f"s,"#ff8787"s,"#ff87af"s,"#ff87d7"s,"#ff87ff"s,"#ffaf00"s,"#ffaf5f"s,
+                "#ffaf87"s,"#ffafaf"s,"#ffafd7"s,"#ffafff"s,"#ffd700"s,"#ffd75f"s,"#ffd787"s,"#ffd7af"s,
+                "#ffd7d7"s,"#ffd7ff"s,"#ffff00"s,"#ffff5f"s,"#ffff87"s,"#ffffaf"s,"#ffffd7"s,"#ffffff"s,
+                "#080808"s,"#121212"s,"#1c1c1c"s,"#262626"s,"#303030"s,"#3a3a3a"s,"#444444"s,"#4e4e4e"s,
+                "#585858"s,"#626262"s,"#6c6c6c"s,"#767676"s,"#808080"s,"#8a8a8a"s,"#949494"s,"#9e9e9e"s,
+                "#a8a8a8"s,"#b2b2b2"s,"#bcbcbc"s,"#c6c6c6"s,"#d0d0d0"s,"#dadada"s,"#e4e4e4"s,"#eeeeee"s
+            };
+            return table[code % 256];
+        }
+
+        color attribute_color_24bit(std::int32_t r, std::int32_t g, std::int32_t b)
+        {
+            return color{ r, g, b };
+        }
     }
 
     void terminal::output(i_string const& aOutput)
@@ -258,11 +361,33 @@ namespace neogfx
         for (auto ch : utf32)
         {
             auto cursorPos = cursor_pos();
+            auto const bufferPos = buffer_pos();
+            bool updateBuffer = false;
             if (iEscapeSequence)
             {
                 *iEscapeSequence += static_cast<char>(ch);
                 switch(iEscapeSequence.value()[0])
                 {
+                case '%': // todo 
+                case '(': // todo
+                case ')': // todo
+                case '*': // todo
+                case '+': // todo
+                case '-': // todo
+                case '.': // todo
+                case '/': // todo
+                    if (iEscapeSequence.value().size() > 1)
+                    {
+                        iEscapeSequence = std::nullopt;
+                    }
+                    break;
+                case ']':
+                    // todo
+                    if (iEscapeSequence.value().size() > 1 && ch == U'\a')
+                    {
+                        iEscapeSequence = std::nullopt;
+                    }
+                    break;
                 case '[':
                     // todo
                     if (iEscapeSequence.value().size() > 1 && ch >= U'\x40' && ch <= U'\x7E')
@@ -270,22 +395,102 @@ namespace neogfx
                         auto params = neolib::tokens(iEscapeSequence.value().substr(1, iEscapeSequence.value().size() - 2), ";"s, 0, false);
                         switch (ch)
                         {
+                        case U'h':
+                            if (!params.empty())
+                            {
+                                if (params[0] == "?25")
+                                    cursor().show();
+                                else if (params[0] == "?7")
+                                    iAutoWrap = true;
+                                else if (params[0] == "?2004")
+                                    iBracketedPaste = true;
+                            }
+                            break;
+                        case U'l':
+                            if (!params.empty())
+                            {
+                                if (params[0] == "?25")
+                                    cursor().hide();
+                                else if (params[0] == "?7")
+                                    iAutoWrap = false;
+                                else if (params[0] == "?2004")
+                                    iBracketedPaste = false;
+                            }
+                            break;
                         case U'm':
                             {
+                                if (params.empty())
+                                    iAttribute = std::nullopt;
                                 for (auto const& param : params)
                                 {
                                     auto code = 0;
                                     try { code = std::stoi(param); } catch (...) {}
                                     if (code == 0)
                                         iAttribute = std::nullopt;
-                                    else if ((code >= 30 && code <= 37) || (code >= 40 && code <= 47))
+                                    else if (code == 1)
                                     {
                                         if (!iAttribute)
                                             iAttribute.emplace(color::White, color::Black);
-                                        if (code <= 37)
+                                        iAttribute.value().style |= font_style::Bold;
+                                    }
+                                    else if (code == 7)
+                                    {
+                                        if (!iAttribute)
+                                            iAttribute.emplace(color::White, color::Black);
+                                        iAttribute.value().reverse = true;
+                                    }
+                                    else if (code == 27)
+                                    {
+                                        if (iAttribute)
+                                            iAttribute.value().reverse = false;
+                                    }
+                                    else if ((code >= 30 && code <= 37) || (code >= 40 && code <= 47) ||
+                                        (code >= 90 && code <= 97) || (code >= 100 && code <= 107))
+                                    {
+                                        if (!iAttribute)
+                                            iAttribute.emplace(color::White, color::Black);
+                                        if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97))
                                             iAttribute.value().ink = attribute_color(code);
                                         else
                                             iAttribute.value().paper = attribute_color(code);
+                                    }
+                                    else if (code == 38 || code == 48)
+                                    {
+                                        try
+                                        {
+                                            if (!iAttribute)
+                                                iAttribute.emplace(color::White, color::Black);
+                                            auto subcode = std::stoi(params.at(1));
+                                            if (subcode == 5)
+                                            {
+                                                (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
+                                                    attribute_color_8bit(std::stoi(params.at(2)));
+                                            }
+                                            else if (subcode == 2)
+                                            {
+                                                auto r = std::stoi(params.at(2));
+                                                auto g = std::stoi(params.at(3));
+                                                auto b = std::stoi(params.at(4));
+                                                (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
+                                                    attribute_color_24bit(r, g, b);
+                                            }
+                                        }
+                                        catch (...) {}
+                                        break;
+                                    }
+                                    else if (code == 39)
+                                    {
+                                        if (iAttribute)
+                                            iAttribute.value().ink = color::White;
+                                    }
+                                    else if (code == 49)
+                                    {
+                                        if (iAttribute)
+                                            iAttribute.value().paper = color::Black;
+                                    }
+                                    else
+                                    {
+                                        service<debug::logger>() << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
                                     }
                                 }
                             }
@@ -328,7 +533,7 @@ namespace neogfx
                                 std::int32_t col = 1;
                                 if (!params.empty())
                                     try { row = std::stoi(params[0]); if (params.size() >= 2) col = std::stoi(params[1]); } catch (...) {}
-                                cursorPos.y = row - 1 + static_cast<std::int32_t>(vertical_scrollbar().position() / font().height());
+                                cursorPos.y = row - 1;
                                 cursorPos.x = col - 1;
                             }
                             break;
@@ -340,13 +545,19 @@ namespace neogfx
                                 switch (n)
                                 {
                                 case 0:
-                                    iBuffer.erase(std::next(iBuffer.begin(), cursorPos.y), iBuffer.end());
+                                    erase_in_display(bufferPos, to_buffer_pos(iTerminalSize));
                                     break;
                                 case 1:
-                                    iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), cursorPos.y));
+                                    erase_in_display(iBufferOrigin, bufferPos);
                                     break;
                                 case 2:
+                                    erase_in_display(iBufferOrigin, to_buffer_pos(iTerminalSize));
+                                    break;
+                                case 3:
                                     iBuffer.clear();
+                                    iBufferOrigin = {};
+                                    cursorPos = point{};
+                                    updateBuffer = true;
                                     break;
                                 }
                             }
@@ -356,17 +567,17 @@ namespace neogfx
                                 std::int32_t n = 0;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                auto& line = iBuffer[cursorPos.y];
+                                auto& line = terminal::line(bufferPos.y);
                                 switch (n)
                                 {
                                 case 0:
-                                    line.text.erase(std::next(line.text.begin(), cursorPos.x), line.text.end());
-                                    line.attributes.erase(std::next(line.attributes.begin(), cursorPos.x), line.attributes.end());
+                                    line.text.erase(std::next(line.text.begin(), bufferPos.x), line.text.end());
+                                    line.attributes.erase(std::next(line.attributes.begin(), bufferPos.x), line.attributes.end());
                                     line.glyphs = std::nullopt;
                                     break;
                                 case 1:
-                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), cursorPos.x));
-                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), cursorPos.x));
+                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), bufferPos.x));
+                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), bufferPos.x));
                                     line.glyphs = std::nullopt;
                                     break;
                                 case 2:
@@ -382,11 +593,14 @@ namespace neogfx
                                 std::int32_t n = 1;
                                 if (!params.empty())
                                     try { n = std::stoi(params[0]); } catch (...) {}
-                                auto& line = iBuffer[cursorPos.y];
-                                line.text.erase(std::next(line.text.begin(), cursorPos.x), std::next(line.text.begin(), cursorPos.x + n));
-                                line.attributes.erase(std::next(line.attributes.begin(), cursorPos.x), std::next(line.attributes.begin(), cursorPos.x + n));
+                                auto& line = terminal::line(bufferPos.y);
+                                line.text.erase(std::next(line.text.begin(), bufferPos.x), std::next(line.text.begin(), bufferPos.x + n));
+                                line.attributes.erase(std::next(line.attributes.begin(), bufferPos.x), std::next(line.attributes.begin(), bufferPos.x + n));
                                 line.glyphs = std::nullopt;
                             }
+                            break;
+                        default:
+                            service<debug::logger>() << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
                             break;
                         }
                         iEscapeSequence = std::nullopt;
@@ -398,7 +612,11 @@ namespace neogfx
                     break;
                 }
             }
-            else
+            else if (ch == U'\x1B')
+            {
+                iEscapeSequence.emplace();
+            }
+            else 
             {
                 switch (ch)
                 {
@@ -409,36 +627,44 @@ namespace neogfx
                     cursorPos.x = 0;
                     break;
                 case U'\n':
-                    if (cursorPos.x != 0 || cursorPos.y == 0 || !iBuffer[cursorPos.y - 1].eol)
+                    if (cursorPos.x != 0 || bufferPos.y == 0 || !line(bufferPos.y - 1).eol)
                         ++cursorPos.y;
                     else
-                        iBuffer[cursorPos.y - 1].eol = false;
+                        line(bufferPos.y - 1).eol = false;
+                    updateBuffer = true;
                     break;
                 case U'\0':
                     break;
-                case U'\x1B':
-                    iEscapeSequence.emplace();
+                case U'\b':
+                    if (cursorPos.x > 0)
+                        --cursorPos.x;
                     break;
                 default:
-                    if (iBuffer[cursorPos.y].text.size() <= cursorPos.x)
-                        iBuffer[cursorPos.y].text.resize(cursorPos.x + 1, U' ');
-                    iBuffer[cursorPos.y].text[cursorPos.x] = ch;
-                    if (iBuffer[cursorPos.y].attributes.size() <= cursorPos.x)
-                        iBuffer[cursorPos.y].attributes.resize(cursorPos.x + 1, iAttribute ? iAttribute.value() : attribute{ color::White, color::Black });
-                    iBuffer[cursorPos.y].glyphs = std::nullopt;
+                    updateBuffer = true;
+                    if (line(bufferPos.y).text.size() <= bufferPos.x)
+                        line(bufferPos.y).text.resize(bufferPos.x + 1, U' ');
+                    if (line(bufferPos.y).attributes.size() <= bufferPos.x)
+                        line(bufferPos.y).attributes.resize(bufferPos.x + 1, iAttribute ? iAttribute.value() : attribute{ color::White, color::Black });
+                    if (bufferPos.x != iTerminalSize.cx - 1 || !line(bufferPos.y).eol)
+                        line(bufferPos.y).text[bufferPos.x] = ch;
+                    line(bufferPos.y).glyphs = std::nullopt;
                     ++cursorPos.x;
                     if (cursorPos.x == iTerminalSize.cx)
                     {
-                        iBuffer[cursorPos.y].eol = true;
-                        cursorPos.x = 0;
-                        ++cursorPos.y;
+                        if (iAutoWrap)
+                        {
+                            line(bufferPos.y).eol = true;
+                            cursorPos.x = 0;
+                            ++cursorPos.y;
+                            updateBuffer = false;
+                        }
                     }
-                    else if (cursorPos.x == 1 && cursorPos.y > 0)
-                        iBuffer[cursorPos.y - 1].eol = false;
+                    else if (cursorPos.x == 1 && bufferPos.y > 0)
+                        line(bufferPos.y - 1).eol = false;
                     break;
                 }
             }
-            set_cursor_pos(cursorPos, true);
+            set_cursor_pos(cursorPos, updateBuffer);
         }
         update_cursor();
     }
@@ -452,10 +678,10 @@ namespace neogfx
     {
         vertical_scrollbar().set_style(vertical_scrollbar().style() | scrollbar_style::AlwaysVisible);
         horizontal_scrollbar().set_style(scrollbar_style::None);
-        set_ideal_size(size{ font().max_advance(), font().height() } * size { iTerminalSize } +
+        set_ideal_size(character_extents() * size{ iTerminalSize } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
         cursor().set_style(cursor_style::Xor);
-        cursor().set_width(font().max_advance());
+        cursor().set_width(character_extents().cx);
 
         iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
             {
@@ -476,7 +702,70 @@ namespace neogfx
                 update();
             });
 
-        set_cursor_pos({}, true);
+        set_cursor_pos({});
+    }
+
+    font const& terminal::font(font_style aStyle) const
+    {
+        switch (aStyle & (font_style::Normal | font_style::Bold | font_style::Italic))
+        {
+        case font_style::Normal:
+            return normal_font();
+        case font_style::Bold:
+            return bold_font();
+        case font_style::Italic:
+            return italic_font();
+        case font_style::Bold | font_style::Italic:
+            return bold_italic_font();
+        default:
+            return normal_font();
+        }
+    }
+    
+    font const& terminal::normal_font() const
+    {
+        if (iNormalFont == std::nullopt)
+            iNormalFont = font();
+        return iNormalFont.value();
+    }
+
+    font const& terminal::bold_font() const
+    {
+        if (iBoldFont == std::nullopt)
+            iBoldFont = neogfx::font{ font().with_style_xor(font_style::Bold) };
+        return iBoldFont.value();
+    }
+
+    font const& terminal::italic_font() const
+    {
+        if (iItalicFont == std::nullopt)
+            iItalicFont = neogfx::font{ font().with_style_xor(font_style::Italic) };
+        return iItalicFont.value();
+    }
+
+    font const& terminal::bold_italic_font() const
+    {
+        if (iBoldItalicFont == std::nullopt)
+            iBoldItalicFont = neogfx::font{ font().with_style_xor(font_style::Italic | font_style::BoldItalic) };
+        return iBoldItalicFont.value();
+    }
+
+    size terminal::character_extents() const
+    {
+        if (iCharacterExtents == std::nullopt)
+        {
+            size result;
+            result.cx = normal_font().max_advance();
+            result.cx = std::min(result.cx, bold_font().max_advance());
+            result.cx = std::min(result.cx, italic_font().max_advance());
+            result.cx = std::min(result.cx, bold_italic_font().max_advance());
+            result.cy = normal_font().height();
+            result.cy = std::min(result.cy, bold_font().height());
+            result.cy = std::min(result.cy, italic_font().height());
+            result.cy = std::min(result.cy, bold_italic_font().height());
+            iCharacterExtents = result;
+        }
+        return iCharacterExtents.value();
     }
 
     void terminal::animate()
@@ -487,23 +776,76 @@ namespace neogfx
             update(cursor_rect());
     }
 
+    void terminal::erase_in_display(point_type const& aBufferPosStart, point_type const& aBufferPosEnd)
+    {
+        auto lineStart = std::min(aBufferPosStart.y, static_cast<coordinate_type>(iBuffer.size()) - 1);
+        auto lineEnd = std::min(aBufferPosEnd.y, static_cast<coordinate_type>(iBuffer.size()));
+        if (aBufferPosStart.x > 0)
+        {
+            ++lineStart;
+            auto& line = terminal::line(aBufferPosStart.y);
+            line.text.erase(std::next(line.text.begin(), aBufferPosStart.x), line.text.end());
+            line.attributes.erase(std::next(line.attributes.begin(), aBufferPosStart.x), line.attributes.end());
+        }
+        if (aBufferPosEnd.x < iBufferSize.cx)
+        {
+            --lineEnd;
+            auto& line = terminal::line(aBufferPosStart.y);
+            auto const eol = std::min(static_cast<coordinate_type>(line.text.size()), aBufferPosStart.y != aBufferPosEnd.y ? aBufferPosEnd.x : aBufferPosEnd.x - aBufferPosStart.x);
+            line.text.erase(line.text.begin(), std::next(line.text.begin(), eol));
+            line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), eol));
+        }
+        auto eraseLineStart = std::next(iBuffer.begin(), lineStart);
+        auto eraseLineEnd = std::next(iBuffer.begin(), lineEnd);
+        iBuffer.erase(eraseLineStart, eraseLineEnd);
+    }
+
+    terminal::buffer_line& terminal::line(coordinate_type aLine)
+    {
+        auto oldBufferSize = iBuffer.size();
+        auto const desiredBufferSize = aLine + 1;
+
+        while (iBuffer.size() < desiredBufferSize)
+        {
+            iBuffer.emplace_back();;
+            iBuffer.back().text.reserve(iBufferSize.cx);
+            iBuffer.back().attributes.reserve(iBufferSize.cx);
+        }
+
+        if (iBuffer.size() > iBufferSize.cy)
+            iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), iBuffer.size() - iBufferSize.cy));
+
+        if (iBuffer.size() - iBufferOrigin.y > iTerminalSize.cy)
+            iBufferOrigin.y += (static_cast<coordinate_type>(iBuffer.size() - oldBufferSize));
+
+        return iBuffer[aLine];
+    }
+
+    terminal::point_type terminal::buffer_pos() const
+    {
+        return to_buffer_pos(cursor_pos());
+    }
+
+    terminal::point_type terminal::to_buffer_pos(point_type aCursorPos) const
+    {
+        return iBufferOrigin + aCursorPos;
+    }
+
     terminal::point_type terminal::cursor_pos() const
     {
         return iCursorPos.value();
     }
 
-    void terminal::set_cursor_pos(point_type aCursorPos, bool aExtendBuffer)
+    void terminal::set_cursor_pos(point_type aCursorPos, bool aUpdateBuffer)
     {
-        if (aCursorPos.y >= iBuffer.size() && aCursorPos.y <= iBufferSize.cy && aExtendBuffer)
+        aCursorPos.y = std::max(0, std::min(aCursorPos.y, iBufferSize.cy - 1));
+        aCursorPos.x = std::max(0, std::min(aCursorPos.x, iTerminalSize.cx - 1));
+        if (aUpdateBuffer)
         {
-            iBuffer.resize(aCursorPos.y + 1);
-            iBuffer.back().text.reserve(iBufferSize.cx);
-            iBuffer.back().attributes.reserve(iBufferSize.cx);
+            auto const bufferPos = to_buffer_pos(aCursorPos);
+            (void) terminal::line(bufferPos.y);
+            aCursorPos.y = std::max(0, std::min(aCursorPos.y, iTerminalSize.cy - 1));
         }
-        if (iBuffer.size() > iBufferSize.cy)
-            iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), iBuffer.size() - iBufferSize.cy));
-        aCursorPos.y = std::max(0, std::min(aCursorPos.y, static_cast<size_type::coordinate_type>(iBuffer.size() - 1)));
-        aCursorPos.x = std::max(0, std::min(aCursorPos.x, static_cast<size_type::coordinate_type>(iBuffer[aCursorPos.y].text.size())));
         if (iCursorPos != aCursorPos)
         {
             iCursorPos = aCursorPos;
@@ -517,29 +859,39 @@ namespace neogfx
     void terminal::update_cursor()
     {
         cursor().set_position(iTerminalSize.cx * iCursorPos->y + iCursorPos->x);
-        vertical_scrollbar().set_maximum(iBuffer.size() * font().height());
+        auto scrollAreaY = static_cast<coordinate_type>(iBuffer.size());
+        if (scrollAreaY < iTerminalSize.cy + iBufferOrigin.y && iBufferOrigin.y > 0)
+            scrollAreaY = iTerminalSize.cy + iBufferOrigin.y;
+        vertical_scrollbar().set_maximum(scrollAreaY * character_extents().cy);
         make_cursor_visible();
         update();
     }
     
     rect terminal::cursor_rect() const
     {
-        size const cursorSize{ font().max_advance(), font().height() };
-        return rect{ point{ cursor_pos() } * cursorSize - point{ 0.0, vertical_scrollbar().position() }, cursorSize};
-
+        return rect{ point{ buffer_pos() } * character_extents() - point{0.0, vertical_scrollbar().position() }, character_extents() };
     }
 
-    void terminal::make_cursor_visible()
+    void terminal::make_cursor_visible(bool aToBufferOrigin)
     {
-        auto const& cr = cursor_rect();
-        if (cr.bottom() <= 0.0)
-            vertical_scrollbar().set_position(vertical_scrollbar().position() + cr.top());
-        else if (cr.top() >= vertical_scrollbar().page())
-            vertical_scrollbar().set_position(vertical_scrollbar().position() + cr.bottom() - vertical_scrollbar().page());
+        if (aToBufferOrigin)
+        {
+            vertical_scrollbar().set_position(iBufferOrigin.y * character_extents().cy);
+        }
+        else
+        {
+            auto const& cr = cursor_rect();
+            if (cr.bottom() <= 0.0)
+                vertical_scrollbar().set_position(vertical_scrollbar().position() + cr.top());
+            else if (cr.top() >= vertical_scrollbar().page())
+                vertical_scrollbar().set_position(vertical_scrollbar().position() + cr.bottom() - vertical_scrollbar().page());
+        }
     }
     
     void terminal::draw_cursor(i_graphics_context& aGc) const
     {
+        if (cursor().hidden())
+            return;
         auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
