@@ -89,6 +89,8 @@ namespace neogfx
         neogfx::font const& bold_font() const;
         neogfx::font const& italic_font() const;
         neogfx::font const& bold_italic_font() const;
+        attribute default_attribute() const;
+        attribute active_attribute() const;
         size character_extents() const;
         void animate();
         void erase_in_display(point_type const& aBufferPosStart, point_type const& aBufferPosEnd);

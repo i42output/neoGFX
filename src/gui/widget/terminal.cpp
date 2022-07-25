@@ -503,27 +503,27 @@ namespace neogfx
                                         else if (code == 1)
                                         {
                                             if (!iAttribute)
-                                                iAttribute.emplace(color::White, color::Black);
+                                                iAttribute.emplace(default_attribute());
                                             iAttribute.value().style |= font_style::Bold;
                                             iAttribute.value().style &= ~font_style::Normal;
                                         }
                                         else if (code == 3)
                                         {
                                             if (!iAttribute)
-                                                iAttribute.emplace(color::White, color::Black);
+                                                iAttribute.emplace(default_attribute());
                                             iAttribute.value().style |= font_style::Italic;
                                             iAttribute.value().style &= ~font_style::Normal;
                                         }
                                         else if (code == 7)
                                         {
                                             if (!iAttribute)
-                                                iAttribute.emplace(color::White, color::Black);
+                                                iAttribute.emplace(default_attribute());
                                             iAttribute.value().reverse = true;
                                         }
                                         else if (code == 9)
                                         {
                                             if (!iAttribute)
-                                                iAttribute.emplace(color::White, color::Black);
+                                                iAttribute.emplace(default_attribute());
                                             iAttribute.value().style |= font_style::Strike;
                                         }
                                         else if (code == 22)
@@ -558,7 +558,7 @@ namespace neogfx
                                             (code >= 90 && code <= 97) || (code >= 100 && code <= 107))
                                         {
                                             if (!iAttribute)
-                                                iAttribute.emplace(color::White, color::Black);
+                                                iAttribute.emplace(default_attribute());
                                             if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97))
                                                 iAttribute.value().ink = attribute_color(code);
                                             else
@@ -569,7 +569,7 @@ namespace neogfx
                                             try
                                             {
                                                 if (!iAttribute)
-                                                    iAttribute.emplace(color::White, color::Black);
+                                                    iAttribute.emplace(default_attribute());
                                                 auto subcode = std::stoi(params.at(1));
                                                 if (subcode == 5)
                                                 {
@@ -849,6 +849,18 @@ namespace neogfx
         return iBoldItalicFont.value();
     }
 
+    terminal::attribute terminal::default_attribute() const
+    {
+        return attribute{ color::White, color::Black };
+    }
+
+    terminal::attribute terminal::active_attribute() const
+    {
+        if (iAttribute)
+            return iAttribute.value();
+        return default_attribute();
+    }
+
     size terminal::character_extents() const
     {
         if (iCharacterExtents == std::nullopt)
@@ -926,9 +938,8 @@ namespace neogfx
         if (line.text.size() <= aBufferPos.x)
             line.text.resize(aBufferPos.x + 1, U' ');
         if (line.attributes.size() <= aBufferPos.x)
-            line.attributes.resize(aBufferPos.x + 1, attribute{ color::White, color::Black });
-        if (iAttribute)
-            line.attributes[aBufferPos.x] = iAttribute.value();
+            line.attributes.resize(aBufferPos.x + 1, default_attribute());
+        line.attributes[aBufferPos.x] = active_attribute();
         return line.text[aBufferPos.x];
     }
 
