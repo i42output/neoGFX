@@ -117,6 +117,8 @@ namespace neogfx
         std::optional<std::string> iEscapeSequence;
         bool iAutoWrap = true;
         bool iBracketedPaste = false;
+        struct scrolling_region { coordinate_type top; coordinate_type bottom; };
+        std::optional<scrolling_region> iScrollingRegion;
         mutable neogfx::cursor iCursor;
         mutable bool iOutputting = false;
         uint64_t iCursorAnimationStartTime;

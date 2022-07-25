@@ -389,9 +389,63 @@ namespace neogfx
                     // todo
                     if (iEscapeSequence.value().size() > 1 && ch >= U'\x40' && ch <= U'\x7E')
                     {
+                        //service<debug::logger>() << "CSI escape sequence: " << iEscapeSequence.value() << endl;
                         auto params = neolib::tokens(iEscapeSequence.value().substr(1, iEscapeSequence.value().size() - 2), ";"s, 0, false);
                         switch (ch)
                         {
+                        case U'r':
+                            if (params.empty())
+                                iScrollingRegion = std::nullopt;
+                            else
+                            {
+                                try
+                                {
+                                    scrolling_region sr;
+                                    sr.top = std::stoi(params.at(0)) - 1;
+                                    sr.bottom = std::stoi(params.at(1)) - 1;
+                                    iScrollingRegion = sr;
+                                }
+                                catch (...) {}
+                            }
+                            break;
+                        case U'L':
+                            {
+                                coordinate_type lines = 1;
+                                if (!params.empty())
+                                    try { lines = std::stoi(params[0]); } catch (...) {}
+                                coordinate_type top = 0;
+                                coordinate_type bottom = iTerminalSize.cy - 1;
+                                if (iScrollingRegion)
+                                {
+                                    top = iScrollingRegion.value().top;
+                                    bottom = iScrollingRegion.value().bottom;
+                                }
+                                top += iBufferOrigin.y;
+                                bottom += iBufferOrigin.y;
+                                while (lines--)
+                                {
+                                    auto inserted = iBuffer.insert(std::next(iBuffer.begin(), buffer_pos().y), buffer_line{});
+                                    inserted->text.reserve(iBufferSize.cx);
+                                    inserted->attributes.reserve(iBufferSize.cx);
+                                    iBuffer.erase(std::next(iBuffer.begin(), bottom + 1));
+                                }
+                                set_cursor_pos(cursor_pos().with_x(0));
+                            }
+                            break;
+                        case U'c':
+                            if (!params.empty())
+                            {
+                                if (params[0][0] == '>')
+                                {
+                                    int code = 0;
+                                    try { code = std::stoi(params[0].substr(1)); } catch (...) {}
+                                    if (code == 0)
+                                        Input.trigger("\x1B[>0;0;0c"_s);
+                                }
+                            }
+                            break;
+                        case U't': // todo
+                            break;
                         case U'h':
                             if (!params.empty())
                             {
@@ -414,90 +468,140 @@ namespace neogfx
                                     iBracketedPaste = false;
                             }
                             break;
-                        case U'm':
+                        case U'n':
+                            if (!params.empty())
                             {
-                                if (params.empty())
-                                    iAttribute = std::nullopt;
-                                for (auto const& param : params)
+                                auto code = 0;
+                                try { code = std::stoi(params[0]); }
+                                catch (...) {}
+                                if (code == 6)
                                 {
-                                    auto code = 0;
-                                    try { code = std::stoi(param); } catch (...) {}
-                                    if (code == 0)
-                                        iAttribute = std::nullopt;
-                                    else if (code == 1)
+                                    std::ostringstream oss;
+                                    oss << "\x1B[" << cursor_pos().y + 1 << ";" << cursor_pos().x + 1 << "R";
+                                    Input.trigger(string{oss.str()});
+                                }
+                            }
+                            break;
+                        case U'm':
+                            if (params.empty())
+                                iAttribute = std::nullopt;
+                            else
+                            {
+                                if (params[0][0] == '>')
+                                {
+                                    // todo
+                                }
+                                else
+                                {
+                                    for (auto const& param : params)
                                     {
-                                        if (!iAttribute)
-                                            iAttribute.emplace(color::White, color::Black);
-                                        iAttribute.value().style |= font_style::Bold;
-                                        iAttribute.value().style &= ~font_style::Normal;
-                                    }
-                                    else if (code == 7)
-                                    {
-                                        if (!iAttribute)
-                                            iAttribute.emplace(color::White, color::Black);
-                                        iAttribute.value().reverse = true;
-                                    }
-                                    else if (code == 22)
-                                    {
-                                        if (iAttribute)
-                                        {
-                                            iAttribute.value().style &= ~font_style::Bold;
-                                            if ((iAttribute.value().style & font_style::Italic) == font_style::Invalid)
-                                                iAttribute.value().style |= font_style::Normal;
-                                        }
-                                    }
-                                    else if (code == 27)
-                                    {
-                                        if (iAttribute)
-                                            iAttribute.value().reverse = false;
-                                    }
-                                    else if ((code >= 30 && code <= 37) || (code >= 40 && code <= 47) ||
-                                        (code >= 90 && code <= 97) || (code >= 100 && code <= 107))
-                                    {
-                                        if (!iAttribute)
-                                            iAttribute.emplace(color::White, color::Black);
-                                        if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97))
-                                            iAttribute.value().ink = attribute_color(code);
-                                        else
-                                            iAttribute.value().paper = attribute_color(code);
-                                    }
-                                    else if (code == 38 || code == 48)
-                                    {
-                                        try
+                                        auto code = 0;
+                                        try { code = std::stoi(param); }
+                                        catch (...) {}
+                                        if (code == 0)
+                                            iAttribute = std::nullopt;
+                                        else if (code == 1)
                                         {
                                             if (!iAttribute)
                                                 iAttribute.emplace(color::White, color::Black);
-                                            auto subcode = std::stoi(params.at(1));
-                                            if (subcode == 5)
+                                            iAttribute.value().style |= font_style::Bold;
+                                            iAttribute.value().style &= ~font_style::Normal;
+                                        }
+                                        else if (code == 3)
+                                        {
+                                            if (!iAttribute)
+                                                iAttribute.emplace(color::White, color::Black);
+                                            iAttribute.value().style |= font_style::Italic;
+                                            iAttribute.value().style &= ~font_style::Normal;
+                                        }
+                                        else if (code == 7)
+                                        {
+                                            if (!iAttribute)
+                                                iAttribute.emplace(color::White, color::Black);
+                                            iAttribute.value().reverse = true;
+                                        }
+                                        else if (code == 9)
+                                        {
+                                            if (!iAttribute)
+                                                iAttribute.emplace(color::White, color::Black);
+                                            iAttribute.value().style |= font_style::Strike;
+                                        }
+                                        else if (code == 22)
+                                        {
+                                            if (iAttribute)
                                             {
-                                                (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
-                                                    attribute_color_8bit(std::stoi(params.at(2)));
-                                            }
-                                            else if (subcode == 2)
-                                            {
-                                                auto r = std::stoi(params.at(2));
-                                                auto g = std::stoi(params.at(3));
-                                                auto b = std::stoi(params.at(4));
-                                                (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
-                                                    attribute_color_24bit(r, g, b);
+                                                iAttribute.value().style &= ~font_style::Bold;
+                                                if ((iAttribute.value().style & font_style::Italic) == font_style::Invalid)
+                                                    iAttribute.value().style |= font_style::Normal;
                                             }
                                         }
-                                        catch (...) {}
-                                        break;
-                                    }
-                                    else if (code == 39)
-                                    {
-                                        if (iAttribute)
-                                            iAttribute.value().ink = color::White;
-                                    }
-                                    else if (code == 49)
-                                    {
-                                        if (iAttribute)
-                                            iAttribute.value().paper = color::Black;
-                                    }
-                                    else
-                                    {
-                                        service<debug::logger>() << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
+                                        else if (code == 23)
+                                        {
+                                            if (iAttribute)
+                                            {
+                                                iAttribute.value().style &= ~font_style::Italic;
+                                                if ((iAttribute.value().style & font_style::Bold) == font_style::Invalid)
+                                                    iAttribute.value().style |= font_style::Normal;
+                                            }
+                                        }
+                                        else if (code == 27)
+                                        {
+                                            if (iAttribute)
+                                                iAttribute.value().reverse = false;
+                                        }
+                                        else if (code == 29)
+                                        {
+                                            if (iAttribute)
+                                                iAttribute.value().style &= ~font_style::Strike;
+                                        }
+                                        else if ((code >= 30 && code <= 37) || (code >= 40 && code <= 47) ||
+                                            (code >= 90 && code <= 97) || (code >= 100 && code <= 107))
+                                        {
+                                            if (!iAttribute)
+                                                iAttribute.emplace(color::White, color::Black);
+                                            if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97))
+                                                iAttribute.value().ink = attribute_color(code);
+                                            else
+                                                iAttribute.value().paper = attribute_color(code);
+                                        }
+                                        else if (code == 38 || code == 48)
+                                        {
+                                            try
+                                            {
+                                                if (!iAttribute)
+                                                    iAttribute.emplace(color::White, color::Black);
+                                                auto subcode = std::stoi(params.at(1));
+                                                if (subcode == 5)
+                                                {
+                                                    (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
+                                                        attribute_color_8bit(std::stoi(params.at(2)));
+                                                }
+                                                else if (subcode == 2)
+                                                {
+                                                    auto r = std::stoi(params.at(2));
+                                                    auto g = std::stoi(params.at(3));
+                                                    auto b = std::stoi(params.at(4));
+                                                    (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
+                                                        attribute_color_24bit(r, g, b);
+                                                }
+                                            }
+                                            catch (...) {}
+                                            break;
+                                        }
+                                        else if (code == 39)
+                                        {
+                                            if (iAttribute)
+                                                iAttribute.value().ink = color::White;
+                                        }
+                                        else if (code == 49)
+                                        {
+                                            if (iAttribute)
+                                                iAttribute.value().paper = color::Black;
+                                        }
+                                        else
+                                        {
+                                            service<debug::logger>() << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
+                                        }
                                     }
                                 }
                             }
@@ -576,19 +680,24 @@ namespace neogfx
                                 switch (n)
                                 {
                                 case 0:
-                                    line.text.erase(std::next(line.text.begin(), buffer_pos().x), line.text.end());
-                                    line.attributes.erase(std::next(line.attributes.begin(), buffer_pos().x), line.attributes.end());
-                                    line.glyphs = std::nullopt;
+                                    if (!line.text.empty())
+                                    {
+                                        line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()) - 1, buffer_pos().x)), line.text.end());
+                                        line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()) - 1, buffer_pos().x)), line.attributes.end());
+                                        line.glyphs = std::nullopt;
+                                    }
                                     break;
                                 case 1:
-                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), buffer_pos().x));
-                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), buffer_pos().x));
+                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x - 1)));
+                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x - 1)));
                                     line.glyphs = std::nullopt;
+                                    set_cursor_pos(cursor_pos().with_x(0));
                                     break;
                                 case 2:
                                     line.text.clear();
                                     line.attributes.clear();
                                     line.glyphs = std::nullopt;
+                                    set_cursor_pos(cursor_pos().with_x(0));
                                     break;
                                 }
                             }
@@ -632,7 +741,13 @@ namespace neogfx
                     set_cursor_pos(cursor_pos().with_x(0));
                     break;
                 case U'\n':
-                    set_cursor_pos(cursor_pos().with_y(cursor_pos().y + 1));
+                    if (!iScrollingRegion || cursor_pos().y < iScrollingRegion.value().bottom)
+                        set_cursor_pos(cursor_pos().with_y(cursor_pos().y + 1));
+                    else
+                    {
+                        iBuffer.erase(std::next(iBuffer.begin(), iScrollingRegion.value().top + iBufferOrigin.y));
+                        iBuffer.insert(std::next(iBuffer.begin(), iScrollingRegion.value().bottom + iBufferOrigin.y), buffer_line{});
+                    }
                     break;
                 case U'\0':
                     break;

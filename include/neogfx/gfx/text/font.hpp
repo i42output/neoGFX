@@ -42,6 +42,7 @@ namespace neogfx
         Subscript           = 0x00000020,
         BelowAscenderLine   = 0x00000040,
         AboveBaseline       = 0x00000040,
+        Strike              = 0x00000100,
         Emulated            = 0x80000000,
         BoldItalic          = Bold | Italic,
         BoldItalicUnderline = Bold | Italic | Underline,
