@@ -360,6 +360,7 @@ namespace neogfx
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
         for (auto ch : utf32)
         {
+            // todo: harden against security exploits due to dodgy input
             if (iEscapeSequence)
             {
                 *iEscapeSequence += static_cast<char>(ch);
@@ -393,6 +394,61 @@ namespace neogfx
                         auto params = neolib::tokens(iEscapeSequence.value().substr(1, iEscapeSequence.value().size() - 2), ";"s, 0, false);
                         switch (ch)
                         {
+                        case U'Z':
+                            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - (cursor_pos().x % iDefaultTabStop)));
+                            break;
+                        case U'd':
+                            try
+                            {
+                                set_cursor_pos(cursor_pos().with_y(params.empty() ? 0 : std::stoi(params[0]) - 1));
+                            }
+                            catch (...) {}
+                            break;
+                        case U'G':
+                            try
+                            {
+                                set_cursor_pos(cursor_pos().with_x(params.empty() ? 0 : std::stoi(params[0]) - 1));
+                            }
+                            catch (...) {}
+                            break;
+                        case U'S':
+                            try
+                            {
+                                auto lines = (params.empty() ? 1 : std::stoi(params[0]));
+                                while (lines--)
+                                {
+                                    iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y));
+                                    (void)line(iBufferOrigin.y + iTerminalSize.cy - 1);
+                                }
+                            }
+                            catch (...) {}
+                            break;
+                        case U'T':
+                            try
+                            {
+                                auto lines = (params.empty() ? 1 : std::stoi(params[0]));
+                                while (lines--)
+                                {
+                                    iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y + iTerminalSize.cy - 1));
+                                    iBuffer.insert(std::next(iBuffer.begin(), iBufferOrigin.y), buffer_line{});
+                                }
+                            }
+                            catch (...) {}
+                            break;
+                        case U'b':
+                            try
+                            {
+                                auto& line = terminal::line(buffer_pos().y);
+                                line.text.insert(std::next(line.text.begin(), buffer_pos().x),
+                                    params.empty() ? 1 : std::stoi(params[0]),
+                                    line.text.at(buffer_pos().x - 1));
+                                line.attributes.insert(std::next(line.attributes.begin(), buffer_pos().x),
+                                    params.empty() ? 1 : std::stoi(params[0]),
+                                    line.attributes.at(buffer_pos().x - 1));
+                                line.glyphs = std::nullopt;
+                            }
+                            catch (...) {}
+                            break;
                         case U'r':
                             if (params.empty())
                                 iScrollingRegion = std::nullopt;
@@ -406,6 +462,21 @@ namespace neogfx
                                     iScrollingRegion = sr;
                                 }
                                 catch (...) {}
+                            }
+                            break;
+                        case U'X':
+                            try
+                            {
+                                auto& line = terminal::line(buffer_pos().y);
+                                if (!line.text.empty())
+                                {
+                                    line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()) - 1, buffer_pos().x)), line.text.end());
+                                    line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()) - 1, buffer_pos().x)), line.attributes.end());
+                                    line.glyphs = std::nullopt;
+                                }
+                            }
+                            catch (...)
+                            {
                             }
                             break;
                         case U'L':
@@ -682,8 +753,8 @@ namespace neogfx
                                 case 0:
                                     if (!line.text.empty())
                                     {
-                                        line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()) - 1, buffer_pos().x)), line.text.end());
-                                        line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()) - 1, buffer_pos().x)), line.attributes.end());
+                                        line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x + 1)), line.text.end());
+                                        line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x + 1)), line.attributes.end());
                                         line.glyphs = std::nullopt;
                                     }
                                     break;
@@ -722,6 +793,7 @@ namespace neogfx
                     break;
                 default:
                     // todo
+                    service<debug::logger>() << "Unknown escape sequence: " << iEscapeSequence.value() << endl;
                     iEscapeSequence = std::nullopt;
                     break;
                 }
@@ -736,6 +808,9 @@ namespace neogfx
                 {
                 case U'\a':
                     service<i_basic_services>().system_beep();
+                    break;
+                case U'\t':
+                    set_cursor_pos(cursor_pos().with_x(cursor_pos().x + iDefaultTabStop - (cursor_pos().x % iDefaultTabStop)));
                     break;
                 case U'\r':
                     set_cursor_pos(cursor_pos().with_x(0));
@@ -756,11 +831,20 @@ namespace neogfx
                         set_cursor_pos(cursor_pos().with_x(cursor_pos().x - 1));
                     break;
                 default:
-                    if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
-                        set_cursor_pos({ 0, cursor_pos().y + 1 });
-                    character(buffer_pos()) = ch;
-                    line(buffer_pos().y).glyphs = std::nullopt;
-                    set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
+                    if (ch >= U'\x20' && ch < U'\x7F')
+                    {
+                        if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
+                            set_cursor_pos({ 0, cursor_pos().y + 1 });
+                        character(buffer_pos()) = ch;
+                        line(buffer_pos().y).glyphs = std::nullopt;
+                        set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
+                    }
+                    else
+                    {
+                        std::ostringstream oss;
+                        oss << "Unknown control char: 0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(ch);
+                        service<debug::logger>() << oss.str() << endl;
+                    }
                     break;
                 }
             }

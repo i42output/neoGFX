@@ -115,6 +115,7 @@ namespace neogfx
         point_type iBufferOrigin;
         std::optional<point_type> iCursorPos;
         std::vector<buffer_line> iBuffer;
+        coordinate_type iDefaultTabStop = 8;
         std::optional<attribute> iAttribute;
         std::optional<std::string> iEscapeSequence;
         bool iAutoWrap = true;
