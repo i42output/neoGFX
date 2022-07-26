@@ -753,8 +753,8 @@ namespace neogfx
                                 case 0:
                                     if (!line.text.empty())
                                     {
-                                        line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x + 1)), line.text.end());
-                                        line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x + 1)), line.attributes.end());
+                                        line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x)), line.text.end());
+                                        line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x)), line.attributes.end());
                                         line.glyphs = std::nullopt;
                                     }
                                     break;
