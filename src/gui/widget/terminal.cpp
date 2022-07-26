@@ -376,6 +376,7 @@ namespace neogfx
                 case '/': // todo
                     if (iEscapeSequence.value().size() > 1)
                     {
+                        service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value() << endl;
                         iEscapeSequence = std::nullopt;
                     }
                     break;
@@ -438,14 +439,17 @@ namespace neogfx
                         case U'b':
                             try
                             {
+                                // todo: wrap??
+                                coordinate_type const n = params.empty() ? 1 : std::stoi(params[0]);
                                 auto& line = terminal::line(buffer_pos().y);
                                 line.text.insert(std::next(line.text.begin(), buffer_pos().x),
-                                    params.empty() ? 1 : std::stoi(params[0]),
+                                    n,
                                     line.text.at(buffer_pos().x - 1));
                                 line.attributes.insert(std::next(line.attributes.begin(), buffer_pos().x),
-                                    params.empty() ? 1 : std::stoi(params[0]),
+                                    n,
                                     line.attributes.at(buffer_pos().x - 1));
                                 line.glyphs = std::nullopt;
+                                set_cursor_pos(cursor_pos().with_x(cursor_pos().x + n));
                             }
                             catch (...) {}
                             break;
