@@ -120,6 +120,21 @@ namespace neogfx
         std::optional<std::string> iEscapeSequence;
         bool iAutoWrap = true;
         bool iBracketedPaste = false;
+        bool iAnsiMode = true;
+        enum class character_set
+        {
+            Unknown,
+            USASCII,
+            DECSpecial
+        };
+        character_set iCharacterSet = character_set::USASCII;
+        enum class keypad_mode
+        {
+            Application,
+            Numeric
+        };
+        keypad_mode iKeypadMode = keypad_mode::Numeric;
+        bool iCursorKeysMode = false;
         struct scrolling_region { coordinate_type top; coordinate_type bottom; };
         std::optional<scrolling_region> iScrollingRegion;
         mutable neogfx::cursor iCursor;

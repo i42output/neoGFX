@@ -208,19 +208,51 @@ namespace neogfx
         switch (aScanCode)
         {
         case ScanCode_LEFT:
-            Input.trigger("\x1B[D"_s);
+            if (iAnsiMode)
+            {
+                if (!iCursorKeysMode)
+                    Input.trigger("\x1B[D"_s);
+                else
+                    Input.trigger("\x1BOD"_s);
+            }
+            else
+                Input.trigger("\x1B""D"_s);
             handled = true;
             break;
         case ScanCode_RIGHT:
-            Input.trigger("\x1B[C"_s);
+            if (iAnsiMode)
+            {
+                if (!iCursorKeysMode)
+                    Input.trigger("\x1B[C"_s);
+                else
+                    Input.trigger("\x1BOC"_s);
+            }
+            else
+                Input.trigger("\x1B""C"_s);
             handled = true;
             break;
         case ScanCode_UP:
-            Input.trigger("\x1B[A"_s);
+            if (iAnsiMode)
+            {
+                if (!iCursorKeysMode)
+                    Input.trigger("\x1B[A"_s);
+                else
+                    Input.trigger("\x1BOA"_s);
+            }
+            else
+                Input.trigger("\x1B""A"_s);
             handled = true;
             break;
         case ScanCode_DOWN:
-            Input.trigger("\x1B[B"_s);
+            if (iAnsiMode)
+            {
+                if (!iCursorKeysMode)
+                    Input.trigger("\x1B[B"_s);
+                else
+                    Input.trigger("\x1BOB"_s);
+            }
+            else
+                Input.trigger("\x1B""B"_s);
             handled = true;
             break;
         case ScanCode_BACKSPACE:
@@ -366,8 +398,52 @@ namespace neogfx
                 *iEscapeSequence += static_cast<char>(ch);
                 switch(iEscapeSequence.value()[0])
                 {
-                case '%': // todo 
+                case 'M':
+                    if (!iScrollingRegion || cursor_pos().y > iScrollingRegion.value().top)
+                        set_cursor_pos(cursor_pos().with_y(cursor_pos().y - 1));
+                    else
+                    {
+                        if (!iScrollingRegion)
+                        {
+                            iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y + iTerminalSize.cy - 1));
+                            iBuffer.insert(std::next(iBuffer.begin(), iBufferOrigin.y), buffer_line{});
+                        }
+                        else
+                        {
+                            iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y + iScrollingRegion.value().bottom));
+                            iBuffer.insert(std::next(iBuffer.begin(), iBufferOrigin.y + iScrollingRegion.value().top), buffer_line{});
+                        }
+                    }
+                    iEscapeSequence = std::nullopt;
+                    break;
+                case '=':
+                    iKeypadMode = keypad_mode::Application;
+                    iEscapeSequence = std::nullopt;
+                    break;
+                case '>':
+                    iKeypadMode = keypad_mode::Numeric;
+                    iEscapeSequence = std::nullopt;
+                    break;
                 case '(': // todo
+                    if (iEscapeSequence.value().size() > 1)
+                    {
+                        switch (iEscapeSequence.value()[1])
+                        {
+                        case 'B':
+                            iCharacterSet = character_set::USASCII;
+                            break;
+                        case '0':
+                            iCharacterSet = character_set::DECSpecial;
+                            break;
+                        // todo
+                        default:
+                            iCharacterSet = character_set::Unknown;
+                            break;
+                        }
+                        iEscapeSequence = std::nullopt;
+                    }
+                    break;
+                case '%': // todo 
                 case ')': // todo
                 case '*': // todo
                 case '+': // todo
@@ -384,6 +460,7 @@ namespace neogfx
                     // todo
                     if (iEscapeSequence.value().size() > 1 && ch == U'\a')
                     {
+                        service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value() << endl;
                         iEscapeSequence = std::nullopt;
                     }
                     break;
@@ -519,8 +596,6 @@ namespace neogfx
                                 }
                             }
                             break;
-                        case U't': // todo
-                            break;
                         case U'h':
                             if (!params.empty())
                             {
@@ -530,6 +605,10 @@ namespace neogfx
                                     iAutoWrap = true;
                                 else if (params[0] == "?2004")
                                     iBracketedPaste = true;
+                                else if (params[0] == "?1")
+                                    iCursorKeysMode = true;
+                                else if (params[0] == "?2")
+                                    iAnsiMode = true;
                             }
                             break;
                         case U'l':
@@ -541,6 +620,10 @@ namespace neogfx
                                     iAutoWrap = false;
                                 else if (params[0] == "?2004")
                                     iBracketedPaste = false;
+                                else if (params[0] == "?1")
+                                    iCursorKeysMode = false;
+                                else if (params[0] == "?2")
+                                    iAnsiMode = false;
                             }
                             break;
                         case U'n':
@@ -564,7 +647,7 @@ namespace neogfx
                             {
                                 if (params[0][0] == '>')
                                 {
-                                    // todo
+                                    service<debug::logger>() << "Unsupported CSI escape sequence: " << iEscapeSequence.value() << endl;
                                 }
                                 else
                                 {
@@ -835,18 +918,26 @@ namespace neogfx
                         set_cursor_pos(cursor_pos().with_x(cursor_pos().x - 1));
                     break;
                 default:
-                    if (ch >= U'\x20' && ch < U'\x7F')
+                    if (ch >= U'\x20' && ch != U'\x7F')
                     {
+                        bool ok = true;
+                        if (iCharacterSet != character_set::USASCII)
+                        {
+                            ok = false;
+                            std::ostringstream oss;
+                            oss << "Unsupported character set, char: '" << std::string(1, static_cast<char>(ch)) << "' (0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(ch) << ")";
+                            service<debug::logger>() << oss.str() << endl;
+                        }
                         if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
                             set_cursor_pos({ 0, cursor_pos().y + 1 });
-                        character(buffer_pos()) = ch;
+                        character(buffer_pos()) = (ok ? ch : 0xFFFD);
                         line(buffer_pos().y).glyphs = std::nullopt;
                         set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
                     }
                     else
                     {
                         std::ostringstream oss;
-                        oss << "Unknown control char: 0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(ch);
+                        oss << "Unsupported control char: 0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(ch);
                         service<debug::logger>() << oss.str() << endl;
                     }
                     break;
