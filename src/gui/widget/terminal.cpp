@@ -920,17 +920,9 @@ namespace neogfx
                 default:
                     if (ch >= U'\x20' && ch != U'\x7F')
                     {
-                        bool ok = true;
-                        if (iCharacterSet != character_set::USASCII)
-                        {
-                            ok = false;
-                            std::ostringstream oss;
-                            oss << "Unsupported character set, char: '" << std::string(1, static_cast<char>(ch)) << "' (0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(ch) << ")";
-                            service<debug::logger>() << oss.str() << endl;
-                        }
                         if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
                             set_cursor_pos({ 0, cursor_pos().y + 1 });
-                        character(buffer_pos()) = (ok ? ch : 0xFFFD);
+                        character(buffer_pos()) = to_unicode(ch);
                         line(buffer_pos().y).glyphs = std::nullopt;
                         set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
                     }
@@ -1088,6 +1080,40 @@ namespace neogfx
         auto eraseLineStart = std::next(iBuffer.begin(), lineStart);
         auto eraseLineEnd = std::next(iBuffer.begin(), lineEnd);
         iBuffer.erase(eraseLineStart, eraseLineEnd);
+    }
+
+    char32_t terminal::to_unicode(char32_t aCharacter) const
+    {
+        switch (iCharacterSet)
+        {
+        case character_set::USASCII:
+            return aCharacter;
+        case character_set::DECSpecial:
+            {
+                static std::unordered_map<char32_t, char32_t> set
+                {
+                    { U'\x60', U'\x25C6' }, { U'\x61', U'\x2592' }, { U'\x62', U'\x2409' }, { U'\x63', U'\x240C' },
+                    { U'\x64', U'\x240D' }, { U'\x65', U'\x240A' }, { U'\x66', U'\x00B0' }, { U'\x67', U'\x00B1' },
+                    { U'\x68', U'\x2424' }, { U'\x69', U'\x240B' }, { U'\x6A', U'\x2518' }, { U'\x6B', U'\x2510' },
+                    { U'\x6C', U'\x250C' }, { U'\x6D', U'\x2514' }, { U'\x6E', U'\x253C' }, { U'\x6F', U'\x23BA' },
+                    { U'\x70', U'\x23BB' }, { U'\x71', U'\x2500' }, { U'\x72', U'\x23BC' }, { U'\x73', U'\x23BD' },
+                    { U'\x74', U'\x251C' }, { U'\x75', U'\x2524' }, { U'\x76', U'\x2534' }, { U'\x77', U'\x252C' },
+                    { U'\x78', U'\x2502' }, { U'\x79', U'\x2264' }, { U'\x7A', U'\x2265' }, { U'\x7B', U'\x03C0' },
+                    { U'\x7C', U'\x2260' }, { U'\x7D', U'\x00A3' }, { U'\x7E', U'\x00B7' }
+                };
+                auto existing = set.find(aCharacter);
+                if (existing != set.end())
+                    return existing->second;
+            }
+            return U' ';
+        default:
+            {
+                std::ostringstream oss;
+                oss << "Unsupported character set, char: '" << std::string(1, static_cast<char>(aCharacter)) << "' (0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(aCharacter) << ")";
+                service<debug::logger>() << oss.str() << endl;
+            }
+            return U'\xFFFD';
+        }
     }
 
     terminal::buffer_line& terminal::line(coordinate_type aLine)

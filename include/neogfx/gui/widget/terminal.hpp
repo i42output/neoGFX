@@ -94,6 +94,7 @@ namespace neogfx
         size character_extents() const;
         void animate();
         void erase_in_display(point_type const& aBufferPosStart, point_type const& aBufferPosEnd);
+        char32_t to_unicode(char32_t aCharacter) const;
         buffer_line& line(coordinate_type aLine);
         char32_t& character(point_type const& aBufferPos);
         point_type buffer_pos() const;
