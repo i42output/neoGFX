@@ -389,6 +389,7 @@ namespace neogfx
     void terminal::output(i_string const& aOutput)
     {
         neolib::scoped_flag sf{ iOutputting };
+
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
         for (auto ch : utf32)
         {
@@ -460,7 +461,7 @@ namespace neogfx
                     // todo
                     if (iEscapeSequence.value().size() > 1 && ch == U'\a')
                     {
-                        service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value() << endl;
+                        service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value().substr(0, iEscapeSequence.value().length() - 1) << endl;
                         iEscapeSequence = std::nullopt;
                     }
                     break;
@@ -548,11 +549,14 @@ namespace neogfx
                         case U'X':
                             try
                             {
+                                coordinate_type const n = params.empty() ? 1 : std::stoi(params[0]);
                                 auto& line = terminal::line(buffer_pos().y);
                                 if (!line.text.empty())
                                 {
-                                    line.text.erase(std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()) - 1, buffer_pos().x)), line.text.end());
-                                    line.attributes.erase(std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()) - 1, buffer_pos().x)), line.attributes.end());
+                                    coordinate_type const start = std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x);
+                                    coordinate_type const end = std::min(static_cast<coordinate_type>(line.text.size()), start + n);
+                                    line.text.erase(std::next(line.text.begin(), start), std::next(line.text.begin(), end));
+                                    line.attributes.erase(std::next(line.attributes.begin(), start), std::next(line.attributes.begin(), end));
                                     line.glyphs = std::nullopt;
                                 }
                             }

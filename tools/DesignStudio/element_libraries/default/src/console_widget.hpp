@@ -240,7 +240,7 @@ namespace neogfx::DesignStudio
         console_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
             window{ aParent, window_placement{ rect{ point{}, size{ 480.0_dip, 480.0_dip } } }, aStyle | window_style::SizeToContents },
             iTerminal{ client_layout() },
-            iTestConnection{ "10.0.0.201" }
+            iTestConnection{ "172.16.0.2" }
         {
             iTerminal.Input([&](i_string const& aText)
             {
