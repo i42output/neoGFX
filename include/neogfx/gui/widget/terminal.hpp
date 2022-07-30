@@ -97,6 +97,7 @@ namespace neogfx
         char32_t to_unicode(char32_t aCharacter) const;
         buffer_line& line(coordinate_type aLine);
         char32_t& character(point_type const& aBufferPos);
+        void output_character(char32_t aCharacter, std::optional<attribute> const& aAttribute = {});
         point_type buffer_pos() const;
         point_type to_buffer_pos(point_type aCursorPos) const;
         point_type cursor_pos() const;
@@ -119,6 +120,7 @@ namespace neogfx
         coordinate_type iDefaultTabStop = 8;
         std::optional<attribute> iAttribute;
         std::optional<std::string> iEscapeSequence;
+        bool iOriginMode = true;
         bool iAutoWrap = true;
         bool iBracketedPaste = false;
         bool iAnsiMode = true;

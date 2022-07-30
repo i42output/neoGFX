@@ -461,7 +461,18 @@ namespace neogfx
                     // todo
                     if (iEscapeSequence.value().size() > 1 && ch == U'\a')
                     {
-                        service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value().substr(0, iEscapeSequence.value().length() - 1) << endl;
+                        auto const paramsInput = iEscapeSequence.value().substr(1, iEscapeSequence.value().size() - 2);
+                        auto const delim = ";"s;
+                        std::vector<std::pair<std::string::const_iterator, std::string::const_iterator>> result;
+                        auto params = neolib::tokens(paramsInput.begin(), paramsInput.end(), delim.begin(), delim.end(), result, 0, false);
+                        if (result.size() >= 2 && 
+                            (std::string_view{ result[0].first, result[0].second } == "0" || std::string_view{ result[0].first, result[0].second } == "2"))
+                        {
+                            if (root().as_widget().is_parent_of(*this) || root().client_widget().is_parent_of(*this))
+                                root().set_title_text(string{ std::string_view{ result[1].first, paramsInput.end() } });
+                        }
+                        else
+                            service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value().substr(0, iEscapeSequence.value().length() - 1) << endl;
                         iEscapeSequence = std::nullopt;
                     }
                     break;
@@ -517,17 +528,12 @@ namespace neogfx
                         case U'b':
                             try
                             {
-                                // todo: wrap??
-                                coordinate_type const n = params.empty() ? 1 : std::stoi(params[0]);
+                                coordinate_type n = params.empty() ? 1 : std::stoi(params[0]);
                                 auto& line = terminal::line(buffer_pos().y);
-                                line.text.insert(std::next(line.text.begin(), buffer_pos().x),
-                                    n,
-                                    line.text.at(buffer_pos().x - 1));
-                                line.attributes.insert(std::next(line.attributes.begin(), buffer_pos().x),
-                                    n,
-                                    line.attributes.at(buffer_pos().x - 1));
-                                line.glyphs = std::nullopt;
-                                set_cursor_pos(cursor_pos().with_x(cursor_pos().x + n));
+                                auto repChar = line.text.at(buffer_pos().x - 1);
+                                auto repAttribute = line.attributes.at(buffer_pos().x - 1);
+                                while (n--)
+                                    output_character(repChar, repAttribute);
                             }
                             catch (...) {}
                             break;
@@ -605,6 +611,8 @@ namespace neogfx
                             {
                                 if (params[0] == "?25")
                                     cursor().show();
+                                else if (params[0] == "?6")
+                                    iOriginMode = true;
                                 else if (params[0] == "?7")
                                     iAutoWrap = true;
                                 else if (params[0] == "?2004")
@@ -622,6 +630,8 @@ namespace neogfx
                                     cursor().hide();
                                 else if (params[0] == "?7")
                                     iAutoWrap = false;
+                                else if (params[0] == "?6")
+                                    iOriginMode = false;
                                 else if (params[0] == "?2004")
                                     iBracketedPaste = false;
                                 else if (params[0] == "?1")
@@ -804,6 +814,8 @@ namespace neogfx
                             {
                                 std::int32_t row = 1;
                                 std::int32_t col = 1;
+                                if (iOriginMode && iScrollingRegion)
+                                    row += iScrollingRegion.value().top;
                                 if (!params.empty())
                                     try { row = std::stoi(params[0]); if (params.size() >= 2) col = std::stoi(params[1]); } catch (...) {}
                                 set_cursor_pos({ col - 1, row - 1 });
@@ -850,16 +862,16 @@ namespace neogfx
                                     }
                                     break;
                                 case 1:
-                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x - 1)));
-                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x - 1)));
+                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x)));
+                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x)));
+                                    line.text.insert(line.text.begin(), buffer_pos().x, U' ');
+                                    line.attributes.insert(line.attributes.begin(), buffer_pos().x, default_attribute());
                                     line.glyphs = std::nullopt;
-                                    set_cursor_pos(cursor_pos().with_x(0));
                                     break;
                                 case 2:
                                     line.text.clear();
                                     line.attributes.clear();
                                     line.glyphs = std::nullopt;
-                                    set_cursor_pos(cursor_pos().with_x(0));
                                     break;
                                 }
                             }
@@ -872,6 +884,8 @@ namespace neogfx
                                 auto& line = terminal::line(buffer_pos().y);
                                 line.text.erase(std::next(line.text.begin(), buffer_pos().x), std::next(line.text.begin(), buffer_pos().x + n));
                                 line.attributes.erase(std::next(line.attributes.begin(), buffer_pos().x), std::next(line.attributes.begin(), buffer_pos().x + n));
+                                line.text.insert(line.text.end(), n, U' ');
+                                line.attributes.insert(line.attributes.end(), n, attribute{});
                                 line.glyphs = std::nullopt;
                             }
                             break;
@@ -923,13 +937,7 @@ namespace neogfx
                     break;
                 default:
                     if (ch >= U'\x20' && ch != U'\x7F')
-                    {
-                        if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
-                            set_cursor_pos({ 0, cursor_pos().y + 1 });
-                        character(buffer_pos()) = to_unicode(ch);
-                        line(buffer_pos().y).glyphs = std::nullopt;
-                        set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
-                    }
+                        output_character(to_unicode(ch), iAttribute);
                     else
                     {
                         std::ostringstream oss;
@@ -1150,6 +1158,20 @@ namespace neogfx
             line.attributes.resize(aBufferPos.x + 1, default_attribute());
         line.attributes[aBufferPos.x] = active_attribute();
         return line.text[aBufferPos.x];
+    }
+
+    void terminal::output_character(char32_t aCharacter, std::optional<attribute> const& aAttribute)
+    {
+        if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
+            set_cursor_pos({ 0, cursor_pos().y + 1 });
+        character(buffer_pos()) = aCharacter;
+        if (aAttribute)
+        {
+            auto& line = terminal::line(buffer_pos().y);
+            line.attributes.at(buffer_pos().x) = aAttribute.value();
+        }
+        line(buffer_pos().y).glyphs = std::nullopt;
+        set_cursor_pos(cursor_pos().with_x(cursor_pos().x + 1));
     }
 
     terminal::point_type terminal::buffer_pos() const
