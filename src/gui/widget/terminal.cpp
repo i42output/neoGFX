@@ -388,6 +388,8 @@ namespace neogfx
 
     void terminal::output(i_string const& aOutput)
     {
+        // todo: apply a bit of functional decomposition to this function which is getting a tad long...
+
         neolib::scoped_flag sf{ iOutputting };
 
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
@@ -563,6 +565,8 @@ namespace neogfx
                                     coordinate_type const end = std::min(static_cast<coordinate_type>(line.text.size()), start + n);
                                     line.text.erase(std::next(line.text.begin(), start), std::next(line.text.begin(), end));
                                     line.attributes.erase(std::next(line.attributes.begin(), start), std::next(line.attributes.begin(), end));
+                                    line.text.insert(std::next(line.text.begin(), start), end - start, U' ');
+                                    line.attributes.insert(std::next(line.attributes.begin(), start), end - start, default_attribute());
                                     line.glyphs = std::nullopt;
                                 }
                             }
@@ -862,10 +866,10 @@ namespace neogfx
                                     }
                                     break;
                                 case 1:
-                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x)));
-                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x)));
-                                    line.text.insert(line.text.begin(), buffer_pos().x, U' ');
-                                    line.attributes.insert(line.attributes.begin(), buffer_pos().x, default_attribute());
+                                    line.text.erase(line.text.begin(), std::next(line.text.begin(), std::min(static_cast<coordinate_type>(line.text.size()), buffer_pos().x + 1)));
+                                    line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), std::min(static_cast<coordinate_type>(line.attributes.size()), buffer_pos().x + 1)));
+                                    line.text.insert(line.text.begin(), buffer_pos().x + 1, U' ');
+                                    line.attributes.insert(line.attributes.begin(), buffer_pos().x + 1, default_attribute());
                                     line.glyphs = std::nullopt;
                                     break;
                                 case 2:
