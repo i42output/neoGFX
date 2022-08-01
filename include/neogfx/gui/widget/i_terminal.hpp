@@ -27,7 +27,15 @@ namespace neogfx
     class i_terminal : public i_widget
     {
     public:
+        typedef basic_size<std::int32_t> size_type;
+        typedef basic_point<std::int32_t> point_type;
+        typedef size_type::dimension_type dimension_type;
+        typedef point_type::coordinate_type coordinate_type;
+    public:
         declare_event(input, i_string const&)
+        declare_event(terminal_resized, size_type)
+    public:
+        virtual size_type terminal_size() const = 0;
     public:
         virtual void output(i_string const& aOutput) = 0;
     };

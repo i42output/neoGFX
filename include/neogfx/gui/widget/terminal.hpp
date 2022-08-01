@@ -30,6 +30,7 @@ namespace neogfx
     {
     public:
         define_declared_event(Input, input, i_string const&)
+        define_declared_event(TerminalResized, terminal_resized, size_type)
     private:
         typedef scrollable_widget<framed_widget<widget<i_terminal>>> base_type;
     private:
@@ -47,9 +48,6 @@ namespace neogfx
             mutable optional_glyph_text glyphs;
             std::vector<attribute> attributes;
         };
-        typedef basic_size<std::int32_t> size_type;
-        typedef basic_point<std::int32_t> point_type;
-        typedef point_type::coordinate_type coordinate_type;
     public:
         terminal();
         terminal(i_widget& aParent);
@@ -58,9 +56,16 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
     public:
+        void resized() override;
+    public:
+        rect scroll_area() const override;
+        size scroll_page() const override;
+        bool use_scrollbar_container_updater() const override;
+    public:
         void paint(i_graphics_context& aGc) const override;
         color palette_color(color_role aColorRole) const override;
     public:
+        using base_type::font;
         void set_font(optional_font const& aFont) override;
     public:
         neogfx::focus_policy focus_policy() const override;
@@ -79,11 +84,12 @@ namespace neogfx
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool text_input(i_string const& aText) override;
     public:
+        size_type terminal_size() const override;
+    public:
         void output(i_string const& aOutput) override;
         neogfx::cursor& cursor() const;
     private:
         void init();
-        using base_type::font;
         neogfx::font const& font(font_style aStyle) const;
         neogfx::font const& normal_font() const;
         neogfx::font const& bold_font() const;
@@ -101,7 +107,7 @@ namespace neogfx
         point_type buffer_pos() const;
         point_type to_buffer_pos(point_type aCursorPos) const;
         point_type cursor_pos() const;
-        void set_cursor_pos(point_type aCursorPos);
+        bool set_cursor_pos(point_type aCursorPos);
         void update_cursor();
         rect cursor_rect() const;
         void make_cursor_visible(bool aToBufferOrigin = true);

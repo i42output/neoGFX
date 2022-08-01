@@ -302,6 +302,15 @@ namespace neogfx
             return widget<i_status_bar>::palette_color(aColorRole);
     }
 
+    void status_bar::set_font(optional_font const& aFont)
+    {
+        widget<i_status_bar>::set_font(aFont);
+        iMessageWidget.set_font(aFont);
+        iIdleWidget.set_font(aFont);
+        for (auto& w : iKeyboardLockStatus.children())
+            w->set_font(aFont);
+    }
+
     const i_widget& status_bar::as_widget() const
     {
         return *this;

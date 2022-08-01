@@ -118,6 +118,8 @@ namespace neogfx
     protected:
         bool has_palette_color(color_role aColorRole) const override;
         color palette_color(color_role aColorRole) const override;
+    public:
+        void set_font(optional_font const& aFont) override;
     protected:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;

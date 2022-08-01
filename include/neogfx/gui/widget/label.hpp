@@ -116,6 +116,7 @@ namespace neogfx
         void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
     public:
         void set_font_role(const optional_font_role& aFontRole) override;
+        void set_font(optional_font const& aFont) override;
     public:
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);

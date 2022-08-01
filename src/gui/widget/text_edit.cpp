@@ -1172,7 +1172,7 @@ namespace neogfx
 
     size text_edit::scroll_page() const
     {
-        return client_rect(false);
+        return client_rect(false).extents();
     }
 
     bool text_edit::use_scrollbar_container_updater() const

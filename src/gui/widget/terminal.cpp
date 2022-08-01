@@ -79,12 +79,54 @@ namespace neogfx
         return base_type::size_policy();
     }
 
+    void terminal::resized()
+    {
+        base_type::resized();
+
+        auto const oldBufferPos = buffer_pos();
+        auto const oldTerminalSize = terminal_size();
+        
+        iTerminalSize.cx = std::max(1, static_cast<dimension_type>(client_rect(false).cx / character_extents().cx));
+        iTerminalSize.cy = std::max(1, static_cast<dimension_type>(client_rect(false).cy / character_extents().cy));
+        iBufferOrigin.y = std::max(0, static_cast<dimension_type>(iBuffer.size()) - iTerminalSize.cy);
+
+        if (terminal_size() != oldTerminalSize)
+            TerminalResized.trigger(terminal_size());
+        
+        if (!set_cursor_pos(cursor_pos().with_y(oldBufferPos.y - iBufferOrigin.y)))
+            update_cursor();
+
+        set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
+            size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
+    }
+
+    rect terminal::scroll_area() const
+    {
+        auto scrollAreaExtents = size{ iBufferSize.with_cy(static_cast<dimension_type>(iBuffer.size())) };
+        if (scrollAreaExtents.cy < iTerminalSize.cy + iBufferOrigin.y && iBufferOrigin.y > 0)
+            scrollAreaExtents.cy = iTerminalSize.cy + iBufferOrigin.y;
+        return rect{ point{}, scrollAreaExtents * character_extents() };
+    }
+
+    size terminal::scroll_page() const
+    {
+        return client_rect(false).extents();
+    }
+
+    bool terminal::use_scrollbar_container_updater() const
+    {
+        return false;
+    }
+
     void terminal::paint(i_graphics_context& aGc) const
     {
         base_type::paint(aGc);
 
         auto const& cr = client_rect(false);
+        auto const& tl = cr.top_left();
         auto const& ce = character_extents();
+
+        scoped_scissor ss{ aGc, cr };
 
         scalar y = -vertical_scrollbar().position();
 
@@ -102,7 +144,6 @@ namespace neogfx
             }
             if (y + ce.cy >= cr.top() && y < cr.bottom())
             {
-                scalar x = 0.0;
                 thread_local text_attribute_spans attributes;
                 attributes.clear();
                 for (auto const& g : *line.glyphs)
@@ -113,7 +154,7 @@ namespace neogfx
                         std::swap(ink, paper);
                     attributes.add(g.source.first, ink, paper);
                 }
-                aGc.draw_glyphs(point{ x, y }, *line.glyphs, attributes);
+                aGc.draw_glyphs(tl + point{ 0, y }, *line.glyphs, attributes);
             }
             y += ce.cy;
         }
@@ -139,7 +180,7 @@ namespace neogfx
         iItalicFont = std::nullopt;
         iBoldItalicFont = std::nullopt;
         iCharacterExtents = std::nullopt;
-        set_ideal_size(character_extents() * size { iTerminalSize } +
+        set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
         cursor().set_width(character_extents().cx);
     }
@@ -390,6 +431,11 @@ namespace neogfx
         {
             return color{ r, g, b };
         }
+    }
+
+    terminal::size_type terminal::terminal_size() const
+    {
+        return iTerminalSize;
     }
 
     void terminal::output(i_string const& aOutput)
@@ -970,7 +1016,7 @@ namespace neogfx
     {
         vertical_scrollbar().set_style(vertical_scrollbar().style() | scrollbar_style::AlwaysVisible);
         horizontal_scrollbar().set_style(scrollbar_style::None);
-        set_ideal_size(character_extents() * size{ iTerminalSize } +
+        set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
         cursor().set_style(cursor_style::Xor);
         cursor().set_width(character_extents().cx);
@@ -1199,37 +1245,36 @@ namespace neogfx
         return iCursorPos.value();
     }
 
-    void terminal::set_cursor_pos(point_type aCursorPos)
+    bool terminal::set_cursor_pos(point_type aCursorPos)
     {
         (void)line(to_buffer_pos(aCursorPos).y);
 
         aCursorPos.y = std::max(0, std::min(aCursorPos.y, iTerminalSize.cy - 1));
         aCursorPos.x = std::max(0, std::min(aCursorPos.x, iTerminalSize.cx));
 
-        if (iCursorPos != aCursorPos)
+        if (iCursorPos == aCursorPos)
+            return false;
+
+        iCursorPos = aCursorPos;
+        if (!iOutputting)
         {
-            iCursorPos = aCursorPos;
-            if (!iOutputting)
-            {
-                update_cursor();
-            }
+            update_cursor();
         }
+
+        return true;
     }
 
     void terminal::update_cursor()
     {
         cursor().set_position(iTerminalSize.cx * iCursorPos->y + iCursorPos->x);
-        auto scrollAreaY = static_cast<coordinate_type>(iBuffer.size());
-        if (scrollAreaY < iTerminalSize.cy + iBufferOrigin.y && iBufferOrigin.y > 0)
-            scrollAreaY = iTerminalSize.cy + iBufferOrigin.y;
-        vertical_scrollbar().set_maximum(scrollAreaY * character_extents().cy);
+        update_scrollbar_visibility();
         make_cursor_visible();
         update();
     }
     
     rect terminal::cursor_rect() const
     {
-        return rect{ point{ buffer_pos() } * character_extents() - point{0.0, vertical_scrollbar().position() }, character_extents() };
+        return rect{ client_rect(false).top_left() + point{buffer_pos()} *character_extents() - point{0.0, vertical_scrollbar().position()}, character_extents()};
     }
 
     void terminal::make_cursor_visible(bool aToBufferOrigin)

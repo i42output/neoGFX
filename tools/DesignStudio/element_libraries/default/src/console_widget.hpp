@@ -75,6 +75,19 @@ namespace neogfx::DesignStudio
             });
         }
     public:
+        void resize_window(std::uint16_t aWidth, std::uint16_t aHeight)
+        {
+            iWindowWidth = aWidth;
+            iWindowHeight = aHeight;
+            iConnection.send_packet(neolib::binary_packet::contents_type{
+                static_cast<char>(code::IAC),
+                static_cast<char>(command::Suboption),
+                static_cast<char>(sub_command::NegotiateAboutWindowSize),
+                static_cast<char>(iWindowWidth >> 8u), static_cast<char>(iWindowWidth),
+                static_cast<char>(iWindowHeight >> 8u), static_cast<char>(iWindowHeight),
+                static_cast<char>(code::IAC),
+                static_cast<char>(command::SuboptionEnd) });
+        }
         void send(std::string const& aText)
         {
             iConnection.send_packet(neolib::binary_packet{ aText.data(), aText.length() });
@@ -242,6 +255,11 @@ namespace neogfx::DesignStudio
             iTerminal{ client_layout() },
             iTestConnection{ "172.16.0.2" }
         {
+            iTerminal.TerminalResized([&](terminal::size_type aTerminalSize)
+            {
+                basic_size<std::uint16_t> newSize(aTerminalSize);
+                iTestConnection.resize_window(newSize.cx, newSize.cy);
+            });
             iTerminal.Input([&](i_string const& aText)
             {
                 iTestConnection.send(aText.to_std_string());
@@ -253,11 +271,17 @@ namespace neogfx::DesignStudio
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
             iTerminal.set_font(font().with_size(7).with_style(ng::font_style::Normal)); // todo: remove
-            //create_status_bar<neogfx::status_bar>(
-            //    neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip | neogfx::status_bar::style::BackgroundAsWindowBorder );
+            create_status_bar<neogfx::status_bar>(neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip);
+            status_bar().set_font(iTerminal.font());
         }
         ~console_widget()
         {
+        }
+    public:
+        void resized() override
+        {
+            window::resized();
+            resize(ideal_size());
         }
     private:
         terminal iTerminal;

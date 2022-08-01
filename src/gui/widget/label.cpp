@@ -273,8 +273,16 @@ namespace neogfx
 
     void label::set_font_role(const optional_font_role& aFontRole)
     {
+        widget::set_font_role(aFontRole);
         text_widget().set_font_role(aFontRole);
         image_widget().set_font_role(aFontRole);
+    }
+
+    void label::set_font(optional_font const& aFont)
+    {
+        widget::set_font(aFont);
+        text_widget().set_font(aFont);
+        image_widget().set_font(aFont);
     }
 
     alignment label::alignment() const
