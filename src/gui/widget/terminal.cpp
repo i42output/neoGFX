@@ -91,23 +91,29 @@ namespace neogfx
         for (auto const& line : iBuffer)
         {
             if (line.glyphs == std::nullopt)
-                line.glyphs = aGc.to_glyph_text(line.text, 
-                    [&](std::size_t n) -> neogfx::font 
-                    { 
+            {
+                line.glyphs = aGc.to_glyph_text(line.text,
+                    [&](std::size_t n) -> neogfx::font
+                    {
                         return n < line.attributes.size() ? font(line.attributes[n].style) : normal_font();
                     });
+                for (auto& g : *line.glyphs)
+                    g.advance.cx = static_cast<float>(ce.cx);
+            }
             if (y + ce.cy >= cr.top() && y < cr.bottom())
             {
                 scalar x = 0.0;
+                thread_local text_attribute_spans attributes;
+                attributes.clear();
                 for (auto const& g : *line.glyphs)
                 {
                     auto ink = line.attributes[g.source.first].ink;
                     auto paper = line.attributes[g.source.first].paper;
                     if (line.attributes[g.source.first].reverse)
                         std::swap(ink, paper);
-                    aGc.draw_glyph(point{ x, y }, *line.glyphs, g, { ink, paper });
-                    x += ce.cx;
+                    attributes.add(g.source.first, ink, paper);
                 }
+                aGc.draw_glyphs(point{ x, y }, *line.glyphs, attributes);
             }
             y += ce.cy;
         }

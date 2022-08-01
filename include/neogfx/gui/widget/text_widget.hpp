@@ -55,9 +55,9 @@ namespace neogfx
         bool has_text_color() const override;
         color text_color() const override;
         void set_text_color(const optional_color& aTextColor) override;
-        bool has_text_appearance() const override;
-        neogfx::text_appearance text_appearance() const override;
-        void set_text_appearance(const optional_text_appearance& aTextAppearance) override;
+        bool has_text_attributes() const override;
+        neogfx::text_attributes text_attributes() const override;
+        void set_text_attributes(const optional_text_attributes& aTextAppearance) override;
     protected:
         size text_extent() const;
         size size_hint_extent() const;
@@ -74,7 +74,7 @@ namespace neogfx
         text_widget_type iType;
         text_widget_flags iFlags;
         neogfx::alignment iAlignment;
-        optional_text_appearance iTextAppearance;
+        optional_text_attributes iTextAppearance;
         sink iSink;
     };
 }

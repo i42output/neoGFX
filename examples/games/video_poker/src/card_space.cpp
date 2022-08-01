@@ -142,7 +142,7 @@ namespace video_poker
         iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);
         iHoldButton.set_base_color(neogfx::color::Black);
         iHoldButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
-        iHoldButton.text_widget().set_text_appearance(neogfx::text_appearance{ neogfx::color::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black.with_alpha(0.5) } });
+        iHoldButton.text_widget().set_text_attributes(neogfx::text_attributes{ neogfx::color::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black.with_alpha(0.5) } });
         iHoldButton.set_checkable();
         auto update_hold = [this]() 
         { 

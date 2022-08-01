@@ -221,22 +221,24 @@ namespace neogfx
         virtual multiline_glyph_text to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual bool is_text_left_to_right(std::string const& aText, const font& aFont) const = 0;
         virtual bool is_text_right_to_left(std::string const& aText, const font& aFont) const = 0;
-        virtual void draw_text(const point& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance) const = 0;
-        virtual void draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const = 0;
-        virtual void draw_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance) const = 0;
-        virtual void draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const = 0;
-        virtual void draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const = 0;
-        virtual void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
-        virtual void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const = 0;
+        virtual void draw_text(const point& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_attributes& aTextAttributes) const = 0;
+        virtual void draw_glyphs(const point& aPoint, const glyph_text& aText, const text_attribute_spans& aAttributes) const = 0;
+        virtual void draw_glyphs(const vec3& aPoint, const glyph_text& aText, const text_attribute_spans& aAttributes) const = 0;
         virtual char mnemonic() const = 0;
         virtual bool mnemonic_set() const = 0;
         virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const = 0;
@@ -270,12 +272,12 @@ namespace neogfx
     };
 
     template <typename Iter>
-    inline void draw_glyph_text(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_appearance& aAppearance)
+    inline void draw_glyph_text(i_graphics_context const& aGc, const vec3& aPoint, const glyph_text& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, const text_attributes& aTextAttributes)
     {
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
         {
-            aGc.draw_glyph(pos, aGlyphText, *iterGlyph, aAppearance);
+            aGc.draw_glyph(pos, aGlyphText, *iterGlyph, aTextAttributes);
             pos.x += advance(*iterGlyph).cx;
         }
     }

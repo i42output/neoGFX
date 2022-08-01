@@ -61,7 +61,7 @@ namespace video_poker
                 neogfx::graphics_context{ aCanvas },
                 aOutcome,
                 neogfx::font{ "Exo 2", "Black", 48.0 },
-                neogfx::text_appearance{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
+                neogfx::text_attributes{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
                 neogfx::alignment::Center}
         {
             neogfx::game::scoped_component_lock<neogfx::game::mesh_renderer, neogfx::game::entity_info, neogfx::game::rigid_body> lock{ aCanvas.ecs() };
@@ -112,12 +112,12 @@ namespace video_poker
         iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
         auto shiny_text = [](const neogfx::color& aColor)
         {
-            return neogfx::text_appearance{
+            return neogfx::text_attributes{
                 neogfx::gradient{ { neogfx::color::Black, aColor, neogfx::color::Black } },
                 neogfx::text_effect{neogfx::text_effect_type::Outline, neogfx::color::White } };
         };
         iLabelTitle.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
-        iLabelTitle.text_widget().set_text_appearance(shiny_text(neogfx::color::Green));
+        iLabelTitle.text_widget().set_text_attributes(shiny_text(neogfx::color::Green));
         iSpacer1.set_weight(neogfx::size{ 0.1 });
         iSpacer2.set_weight(neogfx::size{ 0.25 });
         iSpacer3.set_weight(neogfx::size{ 0.25 });
@@ -141,13 +141,13 @@ namespace video_poker
         set_bet_button_appearance(iDeal);
         neogfx::layout_as_same_size(iAddCredit, iBetMinus);
         iLabelCredits.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCredits.text_widget().set_text_appearance(shiny_text(neogfx::color::Yellow));
+        iLabelCredits.text_widget().set_text_attributes(shiny_text(neogfx::color::Yellow));
         iLabelCreditsValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCreditsValue.text_widget().set_text_appearance(shiny_text(neogfx::color::White));
+        iLabelCreditsValue.text_widget().set_text_attributes(shiny_text(neogfx::color::White));
         iLabelStake.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStake.text_widget().set_text_appearance(shiny_text(neogfx::color::Yellow));
+        iLabelStake.text_widget().set_text_attributes(shiny_text(neogfx::color::Yellow));
         iLabelStakeValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStakeValue.text_widget().set_text_appearance(shiny_text(neogfx::color::White));
+        iLabelStakeValue.text_widget().set_text_attributes(shiny_text(neogfx::color::White));
 
         iAddCredit.clicked([this]() { add_credit(STARTING_CREDIT); });
         iBetMinus.clicked([this]() { bet(-1); });

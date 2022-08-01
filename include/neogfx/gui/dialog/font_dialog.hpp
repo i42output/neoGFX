@@ -38,14 +38,14 @@ namespace neogfx
     public:
         define_event(SelectionChanged, selection_changed)
     public:
-        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_appearance> const& aCurrentAppearance = {});
-        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_appearance> const& aCurrentAppearance = {});
+        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAppearance = {});
+        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAppearance = {});
         ~font_dialog();
     public:
         neogfx::font current_font() const;
         neogfx::font selected_font() const;
-        optional<text_appearance> const& current_appearance() const;
-        optional<text_appearance> const& selected_appearance() const;
+        optional<text_attributes> const& current_appearance() const;
+        optional<text_attributes> const& selected_appearance() const;
         void select_font(neogfx::font const& aFont);
         void set_default_ink(const optional<color>& aColor);
         void set_default_paper(const optional<color>& aColor);
@@ -61,8 +61,8 @@ namespace neogfx
         bool iUpdating;
         neogfx::font iCurrentFont;
         neogfx::font iSelectedFont;
-        optional<text_appearance> iCurrentAppearance;
-        optional<text_appearance> iSelectedAppearance;
+        optional<text_attributes> iCurrentAppearance;
+        optional<text_attributes> iSelectedAppearance;
         optional<color> iDefaultInk;
         optional<color> iDefaultPaper;
         horizontal_layout iLayout0;

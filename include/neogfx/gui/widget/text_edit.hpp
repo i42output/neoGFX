@@ -112,14 +112,14 @@ namespace neogfx
             const color_or_gradient& paper_color() const;
             bool ignore_emoji() const;
             const optional_text_effect& text_effect() const;
-            text_appearance as_text_appearance() const;
+            text_attributes as_text_attributes() const;
             character_style& set_font(optional_font const& aFont = optional_font{});
             character_style& set_font_if_none(neogfx::font const& aFont);
             character_style& set_glyph_color(const color_or_gradient& aColor = color_or_gradient{});
             character_style& set_text_color(const color_or_gradient& aColor = color_or_gradient{});
             character_style& set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
             character_style& set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
-            character_style& set_from_text_appearance(const text_appearance& aAppearance);
+            character_style& set_from_text_attributes(const text_attributes& aTextAttributes);
         public:
             character_style& merge(const character_style& aRhs);
         public:

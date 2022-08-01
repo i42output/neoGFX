@@ -133,7 +133,7 @@ namespace neogfx
         };
     }
 
-    font_dialog::font_dialog(const neogfx::font& aCurrentFont, optional<text_appearance> const& aCurrentAppearance) :
+    font_dialog::font_dialog(const neogfx::font& aCurrentFont, optional<text_attributes> const& aCurrentAppearance) :
         dialog{ "Select Font"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
@@ -182,7 +182,7 @@ namespace neogfx
         init();
     }
 
-    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, optional<text_appearance> const& aCurrentAppearance) :
+    font_dialog::font_dialog(i_widget& aParent, const neogfx::font& aCurrentFont, optional<text_attributes> const& aCurrentAppearance) :
         dialog{ aParent, "Select Font"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iUpdating{ false },
         iCurrentFont{ aCurrentFont },
@@ -245,12 +245,12 @@ namespace neogfx
         return iSelectedFont;
     }
 
-    optional<text_appearance> const& font_dialog::current_appearance() const
+    optional<text_attributes> const& font_dialog::current_appearance() const
     {
         return iCurrentAppearance;
     }
 
-    optional<text_appearance> const& font_dialog::selected_appearance() const
+    optional<text_attributes> const& font_dialog::selected_appearance() const
     {
         return iSelectedAppearance;
     }
@@ -654,7 +654,7 @@ namespace neogfx
         if (&iAdvancedEffectsEmoji == &aUpdatingWidget)
             iSelectedAppearance->effect()->set_ignore_emoji(iAdvancedEffectsEmoji.is_unchecked());
 
-        iSample.set_text_appearance(iSelectedAppearance);
+        iSample.set_text_attributes(iSelectedAppearance);
         
         if (iSelectedAppearance != oldSelectedAppearance)
             SelectionChanged.trigger();

@@ -30,6 +30,7 @@
 #pragma warning( pop )
 #endif
 #include <optional>
+#include <neolib/core/vecarray.hpp>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
@@ -333,21 +334,21 @@ namespace neogfx
     };
     typedef neolib::optional<text_effect> optional_text_effect;
 
-    class text_appearance
+    class text_attributes
     {
     public:
-        struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
-        struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
+        struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_attributes::no_paper") {} };
+        struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_attributes::no_effect") {} };
     public:
-        typedef text_appearance abstract_type; // todo
+        typedef text_attributes abstract_type; // todo
     public:
-        text_appearance() :
+        text_attributes() :
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
         {
         }
-        text_appearance(text_appearance const& aOther) :
+        text_attributes(text_attributes const& aOther) :
             iInk{ aOther.iInk },
             iPaper{ aOther.iPaper },
             iIgnoreEmoji{ aOther.iIgnoreEmoji },
@@ -357,7 +358,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
+        text_attributes(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
             iIgnoreEmoji{ true },
@@ -367,7 +368,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
+        text_attributes(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
             iIgnoreEmoji{ true },
@@ -377,7 +378,7 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(InkType const& aInk, optional_text_effect const& aEffect) :
+        text_attributes(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
@@ -386,7 +387,7 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(InkType const& aInk, text_effect const& aEffect) :
+        text_attributes(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
@@ -395,7 +396,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(InkType const& aInk, PaperType const& aPaper) :
+        text_attributes(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
             iIgnoreEmoji{ true },
@@ -404,7 +405,7 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(InkType const& aInk) :
+        text_attributes(InkType const& aInk) :
             iInk{ aInk },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
@@ -412,11 +413,11 @@ namespace neogfx
         {
         }
     public:
-        bool operator==(text_appearance const& aRhs) const
+        bool operator==(text_attributes const& aRhs) const
         {
             return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iIgnoreEmoji == aRhs.iIgnoreEmoji && iEffect == aRhs.iEffect;
         }
-        bool operator!=(text_appearance const& aRhs) const
+        bool operator!=(text_attributes const& aRhs) const
         {
             return !(*this == aRhs);
         }
@@ -466,27 +467,27 @@ namespace neogfx
             return iBeingFiltered;
         }
     public:
-        text_appearance with_ink(text_color const& aInk) const
+        text_attributes with_ink(text_color const& aInk) const
         {
-            return text_appearance{ aInk, iPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+            return text_attributes{ aInk, iPaper, iEffect }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_paper(optional_text_color const& aPaper) const
+        text_attributes with_paper(optional_text_color const& aPaper) const
         {
-            return text_appearance{ iInk, aPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+            return text_attributes{ iInk, aPaper, iEffect }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_emoji_ignored(bool aIgnored) const
+        text_attributes with_emoji_ignored(bool aIgnored) const
         {
             auto result = *this;
             result.set_ignore_emoji(aIgnored);
             return result;
         }
-        text_appearance with_effect(optional_text_effect const& aEffect) const
+        text_attributes with_effect(optional_text_effect const& aEffect) const
         {
-            return text_appearance{ iInk, iPaper, aEffect }.with_emoji_ignored(ignore_emoji());
+            return text_attributes{ iInk, iPaper, aEffect }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_alpha(color::component aAlpha) const
+        text_attributes with_alpha(color::component aAlpha) const
         {
-            return text_appearance{ 
+            return text_attributes{ 
                 iInk.with_alpha(aAlpha), 
                 iPaper != std::nullopt ? 
                     optional_text_color{ iPaper->with_alpha(aAlpha) } : 
@@ -495,17 +496,17 @@ namespace neogfx
                     iEffect->with_alpha(aAlpha) : 
                     optional_text_effect{} }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_alpha(double aAlpha) const
+        text_attributes with_alpha(double aAlpha) const
         {
             return with_alpha(static_cast<color::component>(aAlpha * 255));
         }
-        text_appearance with_only_effect_calculation() const
+        text_attributes with_only_effect_calculation() const
         {
             auto copy = *this;
             copy.iOnlyCalculateEffect = true;
             return copy;
         }
-        text_appearance as_being_filtered() const
+        text_attributes as_being_filtered() const
         {
             auto copy = *this;
             copy.iBeingFiltered = true;
@@ -520,5 +521,55 @@ namespace neogfx
         bool iBeingFiltered;
     };
 
-    typedef neolib::optional<text_appearance> optional_text_appearance;
+    typedef neolib::optional<text_attributes> optional_text_attributes;
+
+    struct text_attribute_span
+    {
+        std::ptrdiff_t start;
+        std::ptrdiff_t end;
+        text_attributes attributes;
+    };
+
+    class text_attribute_spans
+    {
+    public:
+        typedef neolib::vecarray<text_attribute_span, 1, -1> spans;
+    public:
+        text_attribute_spans()
+        {
+        }
+        text_attribute_spans(text_attribute_span const& aSpan) :
+            iSpans{ aSpan }
+        {
+        }
+    public:
+        void clear()
+        {
+            iSpans.clear();
+        }
+        void add(std::ptrdiff_t aGlyphTextIndex, text_attributes const& aAttributes)
+        {
+            if (iSpans.empty() || iSpans.back().attributes != aAttributes)
+                iSpans.emplace_back(aGlyphTextIndex, aGlyphTextIndex + 1, aAttributes);
+            else
+                iSpans.back().end = aGlyphTextIndex + 1;
+        }
+        template <typename... Args>
+        void add(std::ptrdiff_t aGlyphtTextIndex, Args&&... aArgs)
+        {
+            text_attributes const attributes{ std::forward<Args>(aArgs)... };
+            add(aGlyphtTextIndex, attributes);
+        }
+    public:
+        spans::const_iterator begin() const
+        {
+            return iSpans.begin();
+        }
+        spans::const_iterator end() const
+        {
+            return iSpans.end();
+        }
+    private:
+        spans iSpans;
+    };
 }

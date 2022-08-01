@@ -358,6 +358,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\primitives.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\rect_pack.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_array.hpp" />

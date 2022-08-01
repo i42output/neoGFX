@@ -1907,10 +1907,13 @@ namespace neogfx
         {
             auto& drawOp = static_variant_cast<const graphics_operation::draw_glyphs&>(*op);
             vec3 pos = drawOp.point;
+            auto a = drawOp.attributes.begin();
             for (auto g = drawOp.begin; g != drawOp.end; ++g)
             {
+                while (a != drawOp.attributes.end() && (g - drawOp.begin) >= a->end)
+                    ++a;
                 auto& glyph = *g;
-                drawGlyphCache.emplace_back(pos, &drawOp.glyphText.content(), &glyph, &drawOp.appearance, drawOp.showMnemonics );
+                drawGlyphCache.emplace_back(pos, &drawOp.glyphText.content(), &glyph, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
                 pos.x += advance(glyph).cx;
             }
         }
@@ -1921,7 +1924,8 @@ namespace neogfx
         auto start = drawGlyphCache.begin();
         for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
         {
-            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph, *next->glyph))
+            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph, *next->glyph) ||
+                !graphics_operation::batchable(*start->appearance, *next->appearance))
             {
                 draw_glyphs(&*start, &*next);
                 start = next;

@@ -614,88 +614,88 @@ namespace neogfx
         return !is_text_left_to_right(aText, aFont);
     }
 
-    void graphics_context::draw_text(const point& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance) const
+    void graphics_context::draw_text(const point& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes) const
     {
-        draw_text(aPoint.to_vec3(), aText, aFont, aAppearance);
+        draw_text(aPoint.to_vec3(), aText, aFont, aTextAttributes);
     }
 
-    void graphics_context::draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const
+    void graphics_context::draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_attributes& aTextAttributes) const
     {
-        draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aAppearance);
+        draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aTextAttributes);
     }
 
-    void graphics_context::draw_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance) const
+    void graphics_context::draw_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes) const
     {
-        draw_text(aPoint, aText.begin(), aText.end(), aFont, aAppearance);
+        draw_text(aPoint, aText.begin(), aText.end(), aFont, aTextAttributes);
     }
 
-    void graphics_context::draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_appearance& aAppearance) const
+    void graphics_context::draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_attributes& aTextAttributes) const
     {
-        draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aFont), aAppearance);
+        draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aFont), aTextAttributes);
     }
 
-    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes, alignment aAlignment) const
     {
-        draw_multiline_text(aPoint.to_vec3(), aText, aFont, aAppearance, aAlignment);
+        draw_multiline_text(aPoint.to_vec3(), aText, aFont, aTextAttributes, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment) const
     {
-        draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aAppearance, aAlignment);
+        draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aTextAttributes, aAlignment);
     }
         
-    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_appearance& aAppearance, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_attributes& aTextAttributes, alignment aAlignment) const
     {
-        draw_multiline_text(aPoint, aText, aFont, 0, aAppearance, aAlignment);
+        draw_multiline_text(aPoint, aText, aFont, 0, aTextAttributes, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment) const
     {
         auto multilineGlyphText = to_multiline_glyph_text(aText, aFont, aMaxWidth, aAlignment);
         for (auto& line : multilineGlyphText.lines)
         {
             if (line.begin == line.end)
                 continue;
-            draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aAppearance);
+            draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aTextAttributes);
         }
     }
 
-    void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_attributes& aTextAttributes) const
     {
-        draw_glyph_text(aPoint.to_vec3(), aText, aAppearance);
+        draw_glyph_text(aPoint.to_vec3(), aText, aTextAttributes);
     }
 
-    void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_attributes& aTextAttributes) const
     {
-        draw_glyph_text(aPoint.to_vec3(), aText, aTextBegin, aTextEnd, aAppearance);
+        draw_glyph_text(aPoint.to_vec3(), aText, aTextBegin, aTextEnd, aTextAttributes);
     }
 
-    void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_attributes& aTextAttributes) const
     {
-        draw_glyph_text(aPoint, aText, aText.cbegin(), aText.cend(), aAppearance);
+        draw_glyph_text(aPoint, aText, aText.cbegin(), aText.cend(), aTextAttributes);
     }
 
-    void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_attributes& aTextAttributes) const
     {
         if (aTextBegin == aTextEnd)
             return;
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, aAppearance, mnemonics_shown() });
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, text_attribute_span{ 0, aTextEnd - aTextBegin, aTextAttributes }, mnemonics_shown() });
     }
 
-    void graphics_context::draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
+    void graphics_context::draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment) const
     {
-        draw_multiline_glyph_text(aPoint.to_vec3(), aText, aMaxWidth, aAppearance, aAlignment);
+        draw_multiline_glyph_text(aPoint.to_vec3(), aText, aMaxWidth, aTextAttributes, aAlignment);
     }
 
-    void graphics_context::draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_appearance& aAppearance, alignment aAlignment) const
+    void graphics_context::draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_attributes& aTextAttributes, alignment aAlignment) const
     {
         auto multilineGlyphText = to_multiline_glyph_text(aText, aMaxWidth, aAlignment);
         for (auto& line : multilineGlyphText.lines)
         {
             if (line.begin == line.end)
                 continue;
-            draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aAppearance);
+            draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aTextAttributes);
         }
     }
 
@@ -1130,15 +1130,26 @@ namespace neogfx
         return result;
     }
 
-    void graphics_context::draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_attributes& aTextAttributes) const
     {
-        draw_glyph(aPoint.to_vec3(), aText, aGlyph, aAppearance);
+        draw_glyph(aPoint.to_vec3(), aText, aGlyph, aTextAttributes);
     }
 
-    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_appearance& aAppearance) const
+    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_attributes& aTextAttributes) const
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyph, std::next(&aGlyph), aAppearance, mnemonics_shown() });
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyph, std::next(&aGlyph), text_attribute_span{ 0, 1, aTextAttributes }, mnemonics_shown() });
+    }
+
+    void graphics_context::draw_glyphs(const point& aPoint, const glyph_text& aText, const text_attribute_spans& aAttributes) const
+    {
+        draw_glyphs(aPoint.to_vec3(), aText, aAttributes);
+    }
+
+    void graphics_context::draw_glyphs(const vec3& aPoint, const glyph_text& aText, const text_attribute_spans& aAttributes) const
+    {
+        auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aText.begin(), aText.end(), aAttributes, mnemonics_shown()});
     }
 
     char graphics_context::mnemonic() const
