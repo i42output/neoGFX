@@ -48,6 +48,35 @@ namespace neogfx
             mutable optional_glyph_text glyphs;
             std::vector<attribute> attributes;
         };
+        struct scrolling_region { coordinate_type top; coordinate_type bottom; };
+        enum class character_set
+        {
+            Unknown,
+            USASCII,
+            DECSpecial
+        };
+        enum class keypad_mode
+        {
+            Application,
+            Numeric
+        };
+        struct buffer
+        {
+            point_type bufferOrigin;
+            std::optional<point_type> cursorPos;
+            std::vector<buffer_line> lines;
+            coordinate_type defaultTabStop = 8;
+            std::optional<attribute> attribute;
+            bool originMode = true;
+            bool autoWrap = true;
+            bool bracketedPaste = false;
+            bool ansiMode = true;
+            character_set characterSet = character_set::USASCII;
+            keypad_mode keypadMode = keypad_mode::Numeric;
+            bool cursorKeysMode = false;
+            std::optional<scrolling_region> scrollingRegion;
+            mutable neogfx::cursor cursor;
+        };
     public:
         terminal();
         terminal(i_widget& aParent);
@@ -84,12 +113,15 @@ namespace neogfx
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
         bool text_input(i_string const& aText) override;
     public:
-        size_type terminal_size() const override;
+        size_type terminal_size() const final;
     public:
-        void output(i_string const& aOutput) override;
+        void output(i_string const& aOutput) final;
         neogfx::cursor& cursor() const;
     private:
         void init();
+        buffer& active_buffer() const;
+        void enable_alternate_buffer();
+        void disable_alternate_buffer();
         neogfx::font const& font(font_style aStyle) const;
         neogfx::font const& normal_font() const;
         neogfx::font const& bold_font() const;
@@ -120,33 +152,10 @@ namespace neogfx
         mutable optional_font iItalicFont;
         mutable optional_font iBoldItalicFont;
         mutable optional_size iCharacterExtents;
-        point_type iBufferOrigin;
-        std::optional<point_type> iCursorPos;
-        std::vector<buffer_line> iBuffer;
-        coordinate_type iDefaultTabStop = 8;
-        std::optional<attribute> iAttribute;
+        buffer iPrimaryBuffer = {};
+        buffer iAlternateBuffer = {};
+        buffer* iActiveBuffer = &iPrimaryBuffer;
         std::optional<std::string> iEscapeSequence;
-        bool iOriginMode = true;
-        bool iAutoWrap = true;
-        bool iBracketedPaste = false;
-        bool iAnsiMode = true;
-        enum class character_set
-        {
-            Unknown,
-            USASCII,
-            DECSpecial
-        };
-        character_set iCharacterSet = character_set::USASCII;
-        enum class keypad_mode
-        {
-            Application,
-            Numeric
-        };
-        keypad_mode iKeypadMode = keypad_mode::Numeric;
-        bool iCursorKeysMode = false;
-        struct scrolling_region { coordinate_type top; coordinate_type bottom; };
-        std::optional<scrolling_region> iScrollingRegion;
-        mutable neogfx::cursor iCursor;
         mutable bool iOutputting = false;
         uint64_t iCursorAnimationStartTime;
         widget_timer iAnimator;

@@ -83,28 +83,44 @@ namespace neogfx
     {
         base_type::resized();
 
-        auto const oldBufferPos = buffer_pos();
         auto const oldTerminalSize = terminal_size();
+        auto const oldBufferPos = buffer_pos();
         
         iTerminalSize.cx = std::max(1, static_cast<dimension_type>(client_rect(false).cx / character_extents().cx));
         iTerminalSize.cy = std::max(1, static_cast<dimension_type>(client_rect(false).cy / character_extents().cy));
-        iBufferOrigin.y = std::max(0, static_cast<dimension_type>(iBuffer.size()) - iTerminalSize.cy);
+        
+        auto const yDelta = terminal_size().cy - oldTerminalSize.cy;
+        if (yDelta < 0 && active_buffer().lines.size() > terminal_size().cy)
+        {
+            auto toErase = std::min(static_cast<dimension_type>(active_buffer().lines.size()), -yDelta);
+            if (active_buffer().scrollingRegion)
+                active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y), std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y + toErase));
+            else
+                active_buffer().bufferOrigin.y += toErase;
+        }
+        else if (yDelta > 0 && active_buffer().lines.size() > terminal_size().cy)
+        {
+            active_buffer().bufferOrigin.y = std::max(0, active_buffer().bufferOrigin.y - yDelta);
+        }
+
+        if (active_buffer().bufferOrigin.y + terminal_size().cy > active_buffer().lines.size())
+            active_buffer().bufferOrigin.y = std::max(0, static_cast<dimension_type>(active_buffer().lines.size()) - terminal_size().cy);
+
+        if (!set_cursor_pos(oldBufferPos - active_buffer().bufferOrigin))
+            update_cursor();
 
         if (terminal_size() != oldTerminalSize)
             TerminalResized.trigger(terminal_size());
-        
-        if (!set_cursor_pos(cursor_pos().with_y(oldBufferPos.y - iBufferOrigin.y)))
-            update_cursor();
 
-        set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
+        set_ideal_size(padding().size() + character_extents() * size { terminal_size() } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
     }
 
     rect terminal::scroll_area() const
     {
-        auto scrollAreaExtents = size{ iBufferSize.with_cy(static_cast<dimension_type>(iBuffer.size())) };
-        if (scrollAreaExtents.cy < iTerminalSize.cy + iBufferOrigin.y && iBufferOrigin.y > 0)
-            scrollAreaExtents.cy = iTerminalSize.cy + iBufferOrigin.y;
+        auto scrollAreaExtents = size{ iBufferSize.with_cy(static_cast<dimension_type>(active_buffer().lines.size())) };
+        if (scrollAreaExtents.cy < iTerminalSize.cy + active_buffer().bufferOrigin.y && active_buffer().bufferOrigin.y > 0)
+            scrollAreaExtents.cy = iTerminalSize.cy + active_buffer().bufferOrigin.y;
         return rect{ point{}, scrollAreaExtents * character_extents() };
     }
 
@@ -130,7 +146,7 @@ namespace neogfx
 
         scalar y = -vertical_scrollbar().position();
 
-        for (auto const& line : iBuffer)
+        for (auto const& line : active_buffer().lines)
         {
             if (line.glyphs == std::nullopt)
             {
@@ -182,7 +198,8 @@ namespace neogfx
         iCharacterExtents = std::nullopt;
         set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
-        cursor().set_width(character_extents().cx);
+        iPrimaryBuffer.cursor.set_width(character_extents().cx);
+        iAlternateBuffer.cursor.set_width(character_extents().cx);
     }
 
     focus_policy terminal::focus_policy() const
@@ -254,10 +271,13 @@ namespace neogfx
 
         switch (aScanCode)
         {
+        case ScanCode_ESCAPE:
+            Input.trigger("\x1B"_s);
+            break;
         case ScanCode_LEFT:
-            if (iAnsiMode)
+            if (active_buffer().ansiMode)
             {
-                if (!iCursorKeysMode)
+                if (!active_buffer().cursorKeysMode)
                     Input.trigger("\x1B[D"_s);
                 else
                     Input.trigger("\x1BOD"_s);
@@ -267,9 +287,9 @@ namespace neogfx
             handled = true;
             break;
         case ScanCode_RIGHT:
-            if (iAnsiMode)
+            if (active_buffer().ansiMode)
             {
-                if (!iCursorKeysMode)
+                if (!active_buffer().cursorKeysMode)
                     Input.trigger("\x1B[C"_s);
                 else
                     Input.trigger("\x1BOC"_s);
@@ -279,9 +299,9 @@ namespace neogfx
             handled = true;
             break;
         case ScanCode_UP:
-            if (iAnsiMode)
+            if (active_buffer().ansiMode)
             {
-                if (!iCursorKeysMode)
+                if (!active_buffer().cursorKeysMode)
                     Input.trigger("\x1B[A"_s);
                 else
                     Input.trigger("\x1BOA"_s);
@@ -291,9 +311,9 @@ namespace neogfx
             handled = true;
             break;
         case ScanCode_DOWN:
-            if (iAnsiMode)
+            if (active_buffer().ansiMode)
             {
-                if (!iCursorKeysMode)
+                if (!active_buffer().cursorKeysMode)
                     Input.trigger("\x1B[B"_s);
                 else
                     Input.trigger("\x1BOB"_s);
@@ -447,6 +467,12 @@ namespace neogfx
         auto utf32 = neolib::utf8_to_utf32(aOutput.to_std_string_view());
         for (auto ch : utf32)
         {
+#if 0 // for debugging purposes...
+            if (ch >= U' ')
+                std::cout << (char) ch << std::flush;
+            else
+                std::cout << "\\x" << std::hex << std::uppercase << (std::uint32_t)ch << std::flush;
+#endif
             // todo: harden against security exploits due to dodgy input
             if (iEscapeSequence)
             {
@@ -454,29 +480,29 @@ namespace neogfx
                 switch(iEscapeSequence.value()[0])
                 {
                 case 'M':
-                    if (!iScrollingRegion || cursor_pos().y > iScrollingRegion.value().top)
+                    if (!active_buffer().scrollingRegion || cursor_pos().y > active_buffer().scrollingRegion.value().top)
                         set_cursor_pos(cursor_pos().with_y(cursor_pos().y - 1));
                     else
                     {
-                        if (!iScrollingRegion)
+                        if (!active_buffer().scrollingRegion)
                         {
-                            iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y + iTerminalSize.cy - 1));
-                            iBuffer.insert(std::next(iBuffer.begin(), iBufferOrigin.y), buffer_line{});
+                            active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y + iTerminalSize.cy - 1));
+                            active_buffer().lines.insert(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y), buffer_line{});
                         }
                         else
                         {
-                            iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y + iScrollingRegion.value().bottom));
-                            iBuffer.insert(std::next(iBuffer.begin(), iBufferOrigin.y + iScrollingRegion.value().top), buffer_line{});
+                            active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y + active_buffer().scrollingRegion.value().bottom));
+                            active_buffer().lines.insert(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y + active_buffer().scrollingRegion.value().top), buffer_line{});
                         }
                     }
                     iEscapeSequence = std::nullopt;
                     break;
                 case '=':
-                    iKeypadMode = keypad_mode::Application;
+                    active_buffer().keypadMode = keypad_mode::Application;
                     iEscapeSequence = std::nullopt;
                     break;
                 case '>':
-                    iKeypadMode = keypad_mode::Numeric;
+                    active_buffer().keypadMode = keypad_mode::Numeric;
                     iEscapeSequence = std::nullopt;
                     break;
                 case '(': // todo
@@ -485,14 +511,14 @@ namespace neogfx
                         switch (iEscapeSequence.value()[1])
                         {
                         case 'B':
-                            iCharacterSet = character_set::USASCII;
+                            active_buffer().characterSet = character_set::USASCII;
                             break;
                         case '0':
-                            iCharacterSet = character_set::DECSpecial;
+                            active_buffer().characterSet = character_set::DECSpecial;
                             break;
                         // todo
                         default:
-                            iCharacterSet = character_set::Unknown;
+                            active_buffer().characterSet = character_set::Unknown;
                             break;
                         }
                         iEscapeSequence = std::nullopt;
@@ -539,7 +565,7 @@ namespace neogfx
                         switch (ch)
                         {
                         case U'Z':
-                            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - (cursor_pos().x % iDefaultTabStop)));
+                            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - (cursor_pos().x % active_buffer().defaultTabStop)));
                             break;
                         case U'd':
                             try
@@ -561,8 +587,8 @@ namespace neogfx
                                 auto lines = (params.empty() ? 1 : std::stoi(params[0]));
                                 while (lines--)
                                 {
-                                    iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y));
-                                    (void)line(iBufferOrigin.y + iTerminalSize.cy - 1);
+                                    active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y));
+                                    (void)line(active_buffer().bufferOrigin.y + iTerminalSize.cy - 1);
                                 }
                             }
                             catch (...) {}
@@ -573,8 +599,8 @@ namespace neogfx
                                 auto lines = (params.empty() ? 1 : std::stoi(params[0]));
                                 while (lines--)
                                 {
-                                    iBuffer.erase(std::next(iBuffer.begin(), iBufferOrigin.y + iTerminalSize.cy - 1));
-                                    iBuffer.insert(std::next(iBuffer.begin(), iBufferOrigin.y), buffer_line{});
+                                    active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y + iTerminalSize.cy - 1));
+                                    active_buffer().lines.insert(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y), buffer_line{});
                                 }
                             }
                             catch (...) {}
@@ -593,7 +619,7 @@ namespace neogfx
                             break;
                         case U'r':
                             if (params.empty())
-                                iScrollingRegion = std::nullopt;
+                                active_buffer().scrollingRegion = std::nullopt;
                             else
                             {
                                 try
@@ -601,7 +627,7 @@ namespace neogfx
                                     scrolling_region sr;
                                     sr.top = std::stoi(params.at(0)) - 1;
                                     sr.bottom = std::stoi(params.at(1)) - 1;
-                                    iScrollingRegion = sr;
+                                    active_buffer().scrollingRegion = sr;
                                 }
                                 catch (...) {}
                             }
@@ -633,19 +659,19 @@ namespace neogfx
                                     try { lines = std::stoi(params[0]); } catch (...) {}
                                 coordinate_type top = 0;
                                 coordinate_type bottom = iTerminalSize.cy - 1;
-                                if (iScrollingRegion)
+                                if (active_buffer().scrollingRegion)
                                 {
-                                    top = iScrollingRegion.value().top;
-                                    bottom = iScrollingRegion.value().bottom;
+                                    top = active_buffer().scrollingRegion.value().top;
+                                    bottom = active_buffer().scrollingRegion.value().bottom;
                                 }
-                                top += iBufferOrigin.y;
-                                bottom += iBufferOrigin.y;
+                                top += active_buffer().bufferOrigin.y;
+                                bottom += active_buffer().bufferOrigin.y;
                                 while (lines--)
                                 {
-                                    auto inserted = iBuffer.insert(std::next(iBuffer.begin(), buffer_pos().y), buffer_line{});
+                                    auto inserted = active_buffer().lines.insert(std::next(active_buffer().lines.begin(), buffer_pos().y), buffer_line{});
                                     inserted->text.reserve(iBufferSize.cx);
                                     inserted->attributes.reserve(iBufferSize.cx);
-                                    iBuffer.erase(std::next(iBuffer.begin(), bottom + 1));
+                                    active_buffer().lines.erase(std::next(active_buffer().lines.begin(), bottom + 1));
                                 }
                                 set_cursor_pos(cursor_pos().with_x(0));
                             }
@@ -668,15 +694,17 @@ namespace neogfx
                                 if (params[0] == "?25")
                                     cursor().show();
                                 else if (params[0] == "?6")
-                                    iOriginMode = true;
+                                    active_buffer().originMode = true;
                                 else if (params[0] == "?7")
-                                    iAutoWrap = true;
+                                    active_buffer().autoWrap = true;
+                                else if (params[0] == "?1049")
+                                    enable_alternate_buffer();
                                 else if (params[0] == "?2004")
-                                    iBracketedPaste = true;
+                                    active_buffer().bracketedPaste = true;
                                 else if (params[0] == "?1")
-                                    iCursorKeysMode = true;
+                                    active_buffer().cursorKeysMode = true;
                                 else if (params[0] == "?2")
-                                    iAnsiMode = true;
+                                    active_buffer().ansiMode = true;
                             }
                             break;
                         case U'l':
@@ -685,15 +713,17 @@ namespace neogfx
                                 if (params[0] == "?25")
                                     cursor().hide();
                                 else if (params[0] == "?7")
-                                    iAutoWrap = false;
+                                    active_buffer().autoWrap = false;
                                 else if (params[0] == "?6")
-                                    iOriginMode = false;
+                                    active_buffer().originMode = false;
+                                else if (params[0] == "?1049")
+                                    disable_alternate_buffer();
                                 else if (params[0] == "?2004")
-                                    iBracketedPaste = false;
+                                    active_buffer().bracketedPaste = false;
                                 else if (params[0] == "?1")
-                                    iCursorKeysMode = false;
+                                    active_buffer().cursorKeysMode = false;
                                 else if (params[0] == "?2")
-                                    iAnsiMode = false;
+                                    active_buffer().ansiMode = false;
                             }
                             break;
                         case U'n':
@@ -712,7 +742,7 @@ namespace neogfx
                             break;
                         case U'm':
                             if (params.empty())
-                                iAttribute = std::nullopt;
+                                active_buffer().attribute = std::nullopt;
                             else
                             {
                                 if (params[0][0] == '>')
@@ -727,81 +757,81 @@ namespace neogfx
                                         try { code = std::stoi(param); }
                                         catch (...) {}
                                         if (code == 0)
-                                            iAttribute = std::nullopt;
+                                            active_buffer().attribute = std::nullopt;
                                         else if (code == 1)
                                         {
-                                            if (!iAttribute)
-                                                iAttribute.emplace(default_attribute());
-                                            iAttribute.value().style |= font_style::Bold;
-                                            iAttribute.value().style &= ~font_style::Normal;
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
+                                            active_buffer().attribute.value().style |= font_style::Bold;
+                                            active_buffer().attribute.value().style &= ~font_style::Normal;
                                         }
                                         else if (code == 3)
                                         {
-                                            if (!iAttribute)
-                                                iAttribute.emplace(default_attribute());
-                                            iAttribute.value().style |= font_style::Italic;
-                                            iAttribute.value().style &= ~font_style::Normal;
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
+                                            active_buffer().attribute.value().style |= font_style::Italic;
+                                            active_buffer().attribute.value().style &= ~font_style::Normal;
                                         }
                                         else if (code == 7)
                                         {
-                                            if (!iAttribute)
-                                                iAttribute.emplace(default_attribute());
-                                            iAttribute.value().reverse = true;
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
+                                            active_buffer().attribute.value().reverse = true;
                                         }
                                         else if (code == 9)
                                         {
-                                            if (!iAttribute)
-                                                iAttribute.emplace(default_attribute());
-                                            iAttribute.value().style |= font_style::Strike;
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
+                                            active_buffer().attribute.value().style |= font_style::Strike;
                                         }
                                         else if (code == 22)
                                         {
-                                            if (iAttribute)
+                                            if (active_buffer().attribute)
                                             {
-                                                iAttribute.value().style &= ~font_style::Bold;
-                                                if ((iAttribute.value().style & font_style::Italic) == font_style::Invalid)
-                                                    iAttribute.value().style |= font_style::Normal;
+                                                active_buffer().attribute.value().style &= ~font_style::Bold;
+                                                if ((active_buffer().attribute.value().style & font_style::Italic) == font_style::Invalid)
+                                                    active_buffer().attribute.value().style |= font_style::Normal;
                                             }
                                         }
                                         else if (code == 23)
                                         {
-                                            if (iAttribute)
+                                            if (active_buffer().attribute)
                                             {
-                                                iAttribute.value().style &= ~font_style::Italic;
-                                                if ((iAttribute.value().style & font_style::Bold) == font_style::Invalid)
-                                                    iAttribute.value().style |= font_style::Normal;
+                                                active_buffer().attribute.value().style &= ~font_style::Italic;
+                                                if ((active_buffer().attribute.value().style & font_style::Bold) == font_style::Invalid)
+                                                    active_buffer().attribute.value().style |= font_style::Normal;
                                             }
                                         }
                                         else if (code == 27)
                                         {
-                                            if (iAttribute)
-                                                iAttribute.value().reverse = false;
+                                            if (active_buffer().attribute)
+                                                active_buffer().attribute.value().reverse = false;
                                         }
                                         else if (code == 29)
                                         {
-                                            if (iAttribute)
-                                                iAttribute.value().style &= ~font_style::Strike;
+                                            if (active_buffer().attribute)
+                                                active_buffer().attribute.value().style &= ~font_style::Strike;
                                         }
                                         else if ((code >= 30 && code <= 37) || (code >= 40 && code <= 47) ||
                                             (code >= 90 && code <= 97) || (code >= 100 && code <= 107))
                                         {
-                                            if (!iAttribute)
-                                                iAttribute.emplace(default_attribute());
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
                                             if ((code >= 30 && code <= 37) || (code >= 90 && code <= 97))
-                                                iAttribute.value().ink = attribute_color(code);
+                                                active_buffer().attribute.value().ink = attribute_color(code);
                                             else
-                                                iAttribute.value().paper = attribute_color(code);
+                                                active_buffer().attribute.value().paper = attribute_color(code);
                                         }
                                         else if (code == 38 || code == 48)
                                         {
                                             try
                                             {
-                                                if (!iAttribute)
-                                                    iAttribute.emplace(default_attribute());
+                                                if (!active_buffer().attribute)
+                                                    active_buffer().attribute.emplace(default_attribute());
                                                 auto subcode = std::stoi(params.at(1));
                                                 if (subcode == 5)
                                                 {
-                                                    (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
+                                                    (code == 38 ? active_buffer().attribute.value().ink : active_buffer().attribute.value().paper) =
                                                         attribute_color_8bit(std::stoi(params.at(2)));
                                                 }
                                                 else if (subcode == 2)
@@ -809,7 +839,7 @@ namespace neogfx
                                                     auto r = std::stoi(params.at(2));
                                                     auto g = std::stoi(params.at(3));
                                                     auto b = std::stoi(params.at(4));
-                                                    (code == 38 ? iAttribute.value().ink : iAttribute.value().paper) =
+                                                    (code == 38 ? active_buffer().attribute.value().ink : active_buffer().attribute.value().paper) =
                                                         attribute_color_24bit(r, g, b);
                                                 }
                                             }
@@ -818,13 +848,13 @@ namespace neogfx
                                         }
                                         else if (code == 39)
                                         {
-                                            if (iAttribute)
-                                                iAttribute.value().ink = color::White;
+                                            if (active_buffer().attribute)
+                                                active_buffer().attribute.value().ink = color::White;
                                         }
                                         else if (code == 49)
                                         {
-                                            if (iAttribute)
-                                                iAttribute.value().paper = color::Black;
+                                            if (active_buffer().attribute)
+                                                active_buffer().attribute.value().paper = color::Black;
                                         }
                                         else
                                         {
@@ -870,8 +900,8 @@ namespace neogfx
                             {
                                 std::int32_t row = 1;
                                 std::int32_t col = 1;
-                                if (iOriginMode && iScrollingRegion)
-                                    row += iScrollingRegion.value().top;
+                                if (active_buffer().originMode && active_buffer().scrollingRegion)
+                                    row += active_buffer().scrollingRegion.value().top;
                                 if (!params.empty())
                                     try { row = std::stoi(params[0]); if (params.size() >= 2) col = std::stoi(params[1]); } catch (...) {}
                                 set_cursor_pos({ col - 1, row - 1 });
@@ -888,14 +918,14 @@ namespace neogfx
                                     erase_in_display(buffer_pos(), to_buffer_pos(iTerminalSize));
                                     break;
                                 case 1:
-                                    erase_in_display(iBufferOrigin, buffer_pos());
+                                    erase_in_display(active_buffer().bufferOrigin, buffer_pos());
                                     break;
                                 case 2:
-                                    erase_in_display(iBufferOrigin, to_buffer_pos(iTerminalSize));
+                                    erase_in_display(active_buffer().bufferOrigin, to_buffer_pos(iTerminalSize));
                                     break;
                                 case 3:
-                                    iBuffer.clear();
-                                    iBufferOrigin = {};
+                                    active_buffer().lines.clear();
+                                    active_buffer().bufferOrigin = {};
                                     set_cursor_pos({});
                                     break;
                                 }
@@ -971,18 +1001,18 @@ namespace neogfx
                     service<i_basic_services>().system_beep();
                     break;
                 case U'\t':
-                    set_cursor_pos(cursor_pos().with_x(cursor_pos().x + iDefaultTabStop - (cursor_pos().x % iDefaultTabStop)));
+                    set_cursor_pos(cursor_pos().with_x(cursor_pos().x + active_buffer().defaultTabStop - (cursor_pos().x % active_buffer().defaultTabStop)));
                     break;
                 case U'\r':
                     set_cursor_pos(cursor_pos().with_x(0));
                     break;
                 case U'\n':
-                    if (!iScrollingRegion || cursor_pos().y < iScrollingRegion.value().bottom)
+                    if (!active_buffer().scrollingRegion || cursor_pos().y < active_buffer().scrollingRegion.value().bottom)
                         set_cursor_pos(cursor_pos().with_y(cursor_pos().y + 1));
                     else
                     {
-                        iBuffer.erase(std::next(iBuffer.begin(), iScrollingRegion.value().top + iBufferOrigin.y));
-                        iBuffer.insert(std::next(iBuffer.begin(), iScrollingRegion.value().bottom + iBufferOrigin.y), buffer_line{});
+                        active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().scrollingRegion.value().top + active_buffer().bufferOrigin.y));
+                        active_buffer().lines.insert(std::next(active_buffer().lines.begin(), active_buffer().scrollingRegion.value().bottom + active_buffer().bufferOrigin.y), buffer_line{});
                     }
                     break;
                 case U'\0':
@@ -993,7 +1023,7 @@ namespace neogfx
                     break;
                 default:
                     if (ch >= U'\x20' && ch != U'\x7F')
-                        output_character(to_unicode(ch), iAttribute);
+                        output_character(to_unicode(ch), active_buffer().attribute);
                     else
                     {
                         std::ostringstream oss;
@@ -1009,7 +1039,7 @@ namespace neogfx
 
     cursor& terminal::cursor() const
     {
-        return iCursor;
+        return active_buffer().cursor;
     }
 
     void terminal::init()
@@ -1018,8 +1048,10 @@ namespace neogfx
         horizontal_scrollbar().set_style(scrollbar_style::None);
         set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
-        cursor().set_style(cursor_style::Xor);
-        cursor().set_width(character_extents().cx);
+        iPrimaryBuffer.cursor.set_style(cursor_style::Xor);
+        iPrimaryBuffer.cursor.set_width(character_extents().cx);
+        iAlternateBuffer.cursor.set_style(cursor_style::Xor);
+        iAlternateBuffer.cursor.set_width(character_extents().cx);
 
         iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
             {
@@ -1041,6 +1073,23 @@ namespace neogfx
             });
 
         set_cursor_pos({});
+    }
+
+    terminal::buffer& terminal::active_buffer() const
+    {
+        return *iActiveBuffer;
+    }
+
+    void terminal::enable_alternate_buffer()
+    {
+        iActiveBuffer = &iAlternateBuffer;
+        update_cursor();
+    }
+
+    void terminal::disable_alternate_buffer()
+    {
+        iActiveBuffer = &iPrimaryBuffer;
+        update_cursor();
     }
 
     font const& terminal::font(font_style aStyle) const
@@ -1095,8 +1144,8 @@ namespace neogfx
 
     terminal::attribute terminal::active_attribute() const
     {
-        if (iAttribute)
-            return iAttribute.value();
+        if (active_buffer().attribute)
+            return active_buffer().attribute.value();
         return default_attribute();
     }
 
@@ -1128,8 +1177,8 @@ namespace neogfx
 
     void terminal::erase_in_display(point_type const& aBufferPosStart, point_type const& aBufferPosEnd)
     {
-        auto lineStart = std::min(aBufferPosStart.y, static_cast<coordinate_type>(iBuffer.size()) - 1);
-        auto lineEnd = std::min(aBufferPosEnd.y, static_cast<coordinate_type>(iBuffer.size()));
+        auto lineStart = std::min(aBufferPosStart.y, static_cast<coordinate_type>(active_buffer().lines.size()) - 1);
+        auto lineEnd = std::min(aBufferPosEnd.y, static_cast<coordinate_type>(active_buffer().lines.size()));
         if (aBufferPosStart.x > 0)
         {
             ++lineStart;
@@ -1137,7 +1186,7 @@ namespace neogfx
             line.text.erase(std::next(line.text.begin(), aBufferPosStart.x), line.text.end());
             line.attributes.erase(std::next(line.attributes.begin(), aBufferPosStart.x), line.attributes.end());
         }
-        if (aBufferPosEnd.x < iBufferSize.cx)
+        if (aBufferPosEnd.x < terminal_size().cx)
         {
             --lineEnd;
             auto& line = terminal::line(aBufferPosStart.y);
@@ -1145,14 +1194,14 @@ namespace neogfx
             line.text.erase(line.text.begin(), std::next(line.text.begin(), eol));
             line.attributes.erase(line.attributes.begin(), std::next(line.attributes.begin(), eol));
         }
-        auto eraseLineStart = std::next(iBuffer.begin(), lineStart);
-        auto eraseLineEnd = std::next(iBuffer.begin(), lineEnd);
-        iBuffer.erase(eraseLineStart, eraseLineEnd);
+        auto eraseLineStart = std::next(active_buffer().lines.begin(), lineStart);
+        auto eraseLineEnd = std::next(active_buffer().lines.begin(), lineEnd);
+        active_buffer().lines.erase(eraseLineStart, eraseLineEnd);
     }
 
     char32_t terminal::to_unicode(char32_t aCharacter) const
     {
-        switch (iCharacterSet)
+        switch (active_buffer().characterSet)
         {
         case character_set::USASCII:
             return aCharacter;
@@ -1186,23 +1235,23 @@ namespace neogfx
 
     terminal::buffer_line& terminal::line(coordinate_type aLine)
     {
-        auto oldBufferSize = iBuffer.size();
+        auto oldBufferSize = active_buffer().lines.size();
         auto const desiredBufferSize = aLine + 1;
 
-        while (iBuffer.size() < desiredBufferSize)
+        while (active_buffer().lines.size() < desiredBufferSize)
         {
-            iBuffer.emplace_back();;
-            iBuffer.back().text.reserve(iBufferSize.cx);
-            iBuffer.back().attributes.reserve(iBufferSize.cx);
+            active_buffer().lines.emplace_back();;
+            active_buffer().lines.back().text.reserve(iBufferSize.cx);
+            active_buffer().lines.back().attributes.reserve(iBufferSize.cx);
         }
 
-        if (iBuffer.size() > iBufferSize.cy)
-            iBuffer.erase(iBuffer.begin(), std::next(iBuffer.begin(), iBuffer.size() - iBufferSize.cy));
+        if (active_buffer().lines.size() > iBufferSize.cy)
+            active_buffer().lines.erase(active_buffer().lines.begin(), std::next(active_buffer().lines.begin(), active_buffer().lines.size() - iBufferSize.cy));
 
-        if (iBuffer.size() - iBufferOrigin.y > iTerminalSize.cy)
-            iBufferOrigin.y += (static_cast<coordinate_type>(iBuffer.size() - oldBufferSize));
+        if (active_buffer().lines.size() - active_buffer().bufferOrigin.y > iTerminalSize.cy)
+            active_buffer().bufferOrigin.y += (static_cast<coordinate_type>(active_buffer().lines.size() - oldBufferSize));
 
-        return iBuffer[aLine];
+        return active_buffer().lines[aLine];
     }
 
     char32_t& terminal::character(point_type const& aBufferPos)
@@ -1218,7 +1267,7 @@ namespace neogfx
 
     void terminal::output_character(char32_t aCharacter, std::optional<attribute> const& aAttribute)
     {
-        if (cursor_pos().x == iTerminalSize.cx && iAutoWrap)
+        if (cursor_pos().x == iTerminalSize.cx && active_buffer().autoWrap)
             set_cursor_pos({ 0, cursor_pos().y + 1 });
         character(buffer_pos()) = aCharacter;
         if (aAttribute)
@@ -1237,12 +1286,12 @@ namespace neogfx
 
     terminal::point_type terminal::to_buffer_pos(point_type aCursorPos) const
     {
-        return iBufferOrigin + aCursorPos;
+        return active_buffer().bufferOrigin + aCursorPos;
     }
 
     terminal::point_type terminal::cursor_pos() const
     {
-        return iCursorPos.value();
+        return active_buffer().cursorPos.value();
     }
 
     bool terminal::set_cursor_pos(point_type aCursorPos)
@@ -1252,10 +1301,10 @@ namespace neogfx
         aCursorPos.y = std::max(0, std::min(aCursorPos.y, iTerminalSize.cy - 1));
         aCursorPos.x = std::max(0, std::min(aCursorPos.x, iTerminalSize.cx));
 
-        if (iCursorPos == aCursorPos)
+        if (active_buffer().cursorPos == aCursorPos)
             return false;
 
-        iCursorPos = aCursorPos;
+        active_buffer().cursorPos = aCursorPos;
         if (!iOutputting)
         {
             update_cursor();
@@ -1266,7 +1315,7 @@ namespace neogfx
 
     void terminal::update_cursor()
     {
-        cursor().set_position(iTerminalSize.cx * iCursorPos->y + iCursorPos->x);
+        cursor().set_position(iTerminalSize.cx * active_buffer().cursorPos->y + active_buffer().cursorPos->x);
         update_scrollbar_visibility();
         make_cursor_visible();
         update();
@@ -1280,9 +1329,7 @@ namespace neogfx
     void terminal::make_cursor_visible(bool aToBufferOrigin)
     {
         if (aToBufferOrigin)
-        {
-            vertical_scrollbar().set_position(iBufferOrigin.y * character_extents().cy);
-        }
+            vertical_scrollbar().set_position(padding().top + active_buffer().bufferOrigin.y * character_extents().cy);
         else
         {
             auto const& cr = cursor_rect();
