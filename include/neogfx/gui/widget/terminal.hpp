@@ -136,6 +136,8 @@ namespace neogfx
         buffer_line& line(coordinate_type aLine);
         char32_t& character(point_type const& aBufferPos);
         void output_character(char32_t aCharacter, std::optional<attribute> const& aAttribute = {});
+        point_type buffer_origin() const;
+        void set_buffer_origin(point_type aBufferOrigin);
         point_type buffer_pos() const;
         point_type to_buffer_pos(point_type aCursorPos) const;
         point_type cursor_pos() const;
