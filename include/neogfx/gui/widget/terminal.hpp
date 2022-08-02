@@ -139,7 +139,7 @@ namespace neogfx
         point_type buffer_pos() const;
         point_type to_buffer_pos(point_type aCursorPos) const;
         point_type cursor_pos() const;
-        bool set_cursor_pos(point_type aCursorPos);
+        bool set_cursor_pos(point_type aCursorPos, bool aExtendBuffer = true);
         void update_cursor();
         rect cursor_rect() const;
         void make_cursor_visible(bool aToBufferOrigin = true);

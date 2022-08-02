@@ -89,14 +89,33 @@ namespace neogfx
         iTerminalSize.cx = std::max(1, static_cast<dimension_type>(client_rect(false).cx / character_extents().cx));
         iTerminalSize.cy = std::max(1, static_cast<dimension_type>(client_rect(false).cy / character_extents().cy));
         
+        if (iPrimaryBuffer.scrollingRegion)
+        {
+            // todo: this is just a guess...
+            if (iPrimaryBuffer.scrollingRegion.value().top >= terminal_size().cy)
+                iPrimaryBuffer.scrollingRegion.value().top += (terminal_size().cy - oldTerminalSize.cy);
+            iPrimaryBuffer.scrollingRegion.value().bottom += (terminal_size().cy - oldTerminalSize.cy);
+        }
+        if (iAlternateBuffer.scrollingRegion)
+        {
+            // todo: this is just a guess...
+            if (iAlternateBuffer.scrollingRegion.value().top >= terminal_size().cy)
+                iAlternateBuffer.scrollingRegion.value().top += (terminal_size().cy - oldTerminalSize.cy);
+            iAlternateBuffer.scrollingRegion.value().bottom += (terminal_size().cy - oldTerminalSize.cy);
+        }
+
         auto const yDelta = terminal_size().cy - oldTerminalSize.cy;
         if (yDelta < 0 && active_buffer().lines.size() > terminal_size().cy)
         {
-            auto toErase = std::min(static_cast<dimension_type>(active_buffer().lines.size()), -yDelta);
+            auto overflow = std::min(static_cast<dimension_type>(active_buffer().lines.size()), -yDelta);
             if (active_buffer().scrollingRegion)
-                active_buffer().lines.erase(std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y), std::next(active_buffer().lines.begin(), active_buffer().bufferOrigin.y + toErase));
+            {
+                auto eraseStart = std::next(active_buffer().lines.begin(), std::max(0, active_buffer().bufferOrigin.y - overflow));
+                auto eraseEnd = std::next(eraseStart, std::min(overflow, static_cast<dimension_type>(std::distance(eraseStart, active_buffer().lines.end()))));
+                active_buffer().lines.erase(eraseStart, eraseEnd);
+            }
             else
-                active_buffer().bufferOrigin.y += toErase;
+                active_buffer().bufferOrigin.y += overflow;
         }
         else if (yDelta > 0 && active_buffer().lines.size() > terminal_size().cy)
         {
@@ -565,19 +584,19 @@ namespace neogfx
                         switch (ch)
                         {
                         case U'Z':
-                            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - (cursor_pos().x % active_buffer().defaultTabStop)));
+                            set_cursor_pos(cursor_pos().with_x(cursor_pos().x - (cursor_pos().x % active_buffer().defaultTabStop)), false);
                             break;
                         case U'd':
                             try
                             {
-                                set_cursor_pos(cursor_pos().with_y(params.empty() ? 0 : std::stoi(params[0]) - 1));
+                                set_cursor_pos(cursor_pos().with_y(params.empty() ? 0 : std::stoi(params[0]) - 1), false);
                             }
                             catch (...) {}
                             break;
                         case U'G':
                             try
                             {
-                                set_cursor_pos(cursor_pos().with_x(params.empty() ? 0 : std::stoi(params[0]) - 1));
+                                set_cursor_pos(cursor_pos().with_x(params.empty() ? 0 : std::stoi(params[0]) - 1), false);
                             }
                             catch (...) {}
                             break;
@@ -904,7 +923,7 @@ namespace neogfx
                                     row += active_buffer().scrollingRegion.value().top;
                                 if (!params.empty())
                                     try { row = std::stoi(params[0]); if (params.size() >= 2) col = std::stoi(params[1]); } catch (...) {}
-                                set_cursor_pos({ col - 1, row - 1 });
+                                set_cursor_pos({ col - 1, row - 1 }, false);
                             }
                             break;
                         case U'J':
@@ -1083,6 +1102,10 @@ namespace neogfx
     void terminal::enable_alternate_buffer()
     {
         iActiveBuffer = &iAlternateBuffer;
+        iAlternateBuffer = {};
+        iAlternateBuffer.cursor.set_style(cursor_style::Xor);
+        iAlternateBuffer.cursor.set_width(character_extents().cx);
+        set_cursor_pos({});
         update_cursor();
     }
 
@@ -1294,12 +1317,13 @@ namespace neogfx
         return active_buffer().cursorPos.value();
     }
 
-    bool terminal::set_cursor_pos(point_type aCursorPos)
+    bool terminal::set_cursor_pos(point_type aCursorPos, bool aExtendBuffer)
     {
-        (void)line(to_buffer_pos(aCursorPos).y);
+        if (aExtendBuffer || aCursorPos.y < terminal_size().cy)
+            (void)line(to_buffer_pos(aCursorPos).y);
 
-        aCursorPos.y = std::max(0, std::min(aCursorPos.y, iTerminalSize.cy - 1));
-        aCursorPos.x = std::max(0, std::min(aCursorPos.x, iTerminalSize.cx));
+        aCursorPos.y = std::max(0, std::min(aCursorPos.y, terminal_size().cy - 1));
+        aCursorPos.x = std::max(0, std::min(aCursorPos.x, terminal_size().cx));
 
         if (active_buffer().cursorPos == aCursorPos)
             return false;
@@ -1315,7 +1339,7 @@ namespace neogfx
 
     void terminal::update_cursor()
     {
-        cursor().set_position(iTerminalSize.cx * active_buffer().cursorPos->y + active_buffer().cursorPos->x);
+        cursor().set_position(iTerminalSize.cx * cursor_pos().y + cursor_pos().x);
         update_scrollbar_visibility();
         make_cursor_visible();
         update();
