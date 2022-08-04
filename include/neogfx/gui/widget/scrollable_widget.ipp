@@ -159,9 +159,13 @@ namespace neogfx
         auto const maxDeltaY = std::max(vertical_scrollbar().page() - vertical_scrollbar().step(), vertical_scrollbar().step());
         auto const maxDeltaX = std::max(horizontal_scrollbar().page() - horizontal_scrollbar().step(), horizontal_scrollbar().step());
         if ((aWheel & verticalSense) != mouse_wheel::None && vertical_scrollbar().visible())
-            handledVertical = vertical_scrollbar().set_position(vertical_scrollbar().position() + std::min(std::max(((verticalSense == mouse_wheel::Vertical ? aDelta.dy : aDelta.dx) >= 0.0 ? -maxSteps : maxSteps) * vertical_scrollbar().step(), -maxDeltaY), maxDeltaY));
+            handledVertical = vertical_scrollbar().set_position(
+                vertical_scrollbar().position() + 
+                std::min(std::max(((verticalSense == mouse_wheel::Vertical ? aDelta.dy : aDelta.dx) >= 0.0 ? -maxSteps : maxSteps) * vertical_scrollbar().step(), -maxDeltaY), maxDeltaY));
         if ((aWheel & horizontalSense) != mouse_wheel::None && horizontal_scrollbar().visible())
-            handledHorizontal = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + std::min(std::max(((horizontalSense == mouse_wheel::Horizontal ? aDelta.dx : aDelta.dx) >= 0.0 ? -maxSteps : maxSteps) * horizontal_scrollbar().step(), -maxDeltaX), maxDeltaX));
+            handledHorizontal = horizontal_scrollbar().set_position(
+                horizontal_scrollbar().position() + 
+                std::min(std::max(((horizontalSense == mouse_wheel::Horizontal ? aDelta.dx : aDelta.dx) >= 0.0 ? -maxSteps : maxSteps) * horizontal_scrollbar().step(), -maxDeltaX), maxDeltaX));
         mouse_wheel passOn = static_cast<mouse_wheel>(
             aWheel & ((handledVertical ? ~verticalSense : verticalSense) | (handledHorizontal ? ~horizontalSense : horizontalSense)));
         if (passOn != mouse_wheel::None)

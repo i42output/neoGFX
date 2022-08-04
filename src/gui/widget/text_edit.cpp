@@ -1208,12 +1208,18 @@ namespace neogfx
             else if (resizing())
             {
                 auto zone = vertical_scrollbar().pop_zone();
-                if (zone == scrollbar_zone::Middle)
-                    make_visible(glyph_position(document_hit_test(column_rect(0).top_left()), true));
-                else if (zone == scrollbar_zone::Bottom)
+                switch(zone)
                 {
+                case scrollbar_zone::Top:
+                    make_cursor_visible();
+                    break;
+                case scrollbar_zone::Middle:
+                    make_visible(glyph_position(document_hit_test(column_rect(0).top_left()), true));
+                    break;
+                case scrollbar_zone::Bottom:
                     vertical_scrollbar().set_position(vertical_scrollbar().maximum());
                     horizontal_scrollbar().set_position(0.0);
+                    break;
                 }
             }
             break;
