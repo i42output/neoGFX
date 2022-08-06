@@ -283,6 +283,30 @@ namespace neogfx
                         });
                         result = settingWidget;
                     }
+                    else if (aSetting.value().type_name() == "neogfx::extended_font")
+                    {
+                        auto settingWidget = make_ref<setting_widget<font_widget>>(aSetting, aLayout, 
+                            font{ aSetting.value().get<extended_font>().first() }, aSetting.value().get<extended_font>().second());
+                        settingWidget->set_size_policy(size_constraint::Minimum, size_constraint::Minimum);
+                        aSink += settingWidget->SelectionChanged([&, settingWidget]()
+                            {
+                                if (!settingWidget->updating)
+                                    aSetting.set_value(extended_font{ settingWidget->selected_font(), settingWidget->selected_attributes() });
+                            });
+                        aSink += aSetting.changing([&, settingWidget]()
+                            {
+                                neolib::scoped_flag sf{ settingWidget->updating };
+                                settingWidget->select_font(aSetting.value<extended_font>(true).first());
+                                settingWidget->select_attributes(aSetting.value<extended_font>(true).second());
+                            });
+                        aSink += aSetting.changed([&, settingWidget]()
+                            {
+                                neolib::scoped_flag sf{ settingWidget->updating };
+                                settingWidget->select_font(aSetting.value<extended_font>(true).first());
+                                settingWidget->select_attributes(aSetting.value<extended_font>(true).second());
+                            });
+                        result = settingWidget;
+                    }
                     break;
                 default:
                     break;
@@ -392,7 +416,7 @@ namespace neogfx
 
     void settings_dialog::init()
     {
-        set_minimum_size(size{ 672_dip, 446_dip });
+        set_minimum_size(size{ 700_dip, 446_dip });
         iLayout.set_size_policy(size_constraint::Expanding);
         iTree.set_weight(size{ 1.0, 1.0 });
         iDetails.set_minimum_size(size{});

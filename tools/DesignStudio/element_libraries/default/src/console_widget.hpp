@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <boost/format.hpp>
 #include <neolib/io/packet_stream.hpp>
+#include <neogfx/app/settings.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/terminal.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
@@ -270,7 +271,8 @@ namespace neogfx::DesignStudio
             });
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
-            iTerminal.set_font(font().with_size(7).with_style(ng::font_style::Normal)); // todo: remove
+//            auto const& consoleExtendedFont = aSettings.setting("environment.fonts_and_colors.console_font"_s).value<neogfx::extended_font>(true);
+//            iTerminal.set_font(consoleExtendedFont.first());
             create_status_bar<neogfx::status_bar>(neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip);
             status_bar().set_font(iTerminal.font());
         }

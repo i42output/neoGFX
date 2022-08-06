@@ -20,11 +20,44 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/pair.hpp>
 #include <neolib/app/settings.hpp>
 #include <neogfx/gfx/i_texture.hpp>
+#include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/text/font.hpp>
 
 namespace neogfx
 {
+    typedef neolib::pair<font_info, text_attributes> extended_font;
+}
+
+define_setting_type(neogfx::extended_font)
+
+namespace neogfx
+{
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const neolib::abstract_t<extended_font>& aExtendedFont)
+    {
+        aStream << "[";
+        aStream << aExtendedFont.first();
+        aStream << ",";
+        aStream << aExtendedFont.second();
+        aStream << "]";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, neolib::abstract_t<extended_font>& aExtendedFont)
+    {
+        char ignore;
+        aStream >> ignore;
+        aStream >> aExtendedFont.first();
+        aStream >> ignore;
+        aStream >> aExtendedFont.second();
+        aStream >> ignore;
+        return aStream;
+    }
+
     using neolib::i_setting;
     using neolib::setting;
     using neolib::i_setting_value;

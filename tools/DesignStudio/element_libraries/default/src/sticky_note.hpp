@@ -131,14 +131,14 @@ namespace neogfx::DesignStudio
                     {
                         auto s = iDefaultItem->current_style();
                         s.character().set_font(fontPicker.selected_font());
-                        s.character().set_from_text_attributes(*fontPicker.selected_appearance());
+                        s.character().set_from_text_attributes(*fontPicker.selected_attributes());
                         iDefaultItem->apply_style(s);
                     });
                     if (fontPicker.exec() == dialog_result::Accepted)
                     {
                         auto s = iDefaultItem->current_style();
                         s.character().set_font(fontPicker.selected_font());
-                        s.character().set_from_text_attributes(*fontPicker.selected_appearance());
+                        s.character().set_from_text_attributes(*fontPicker.selected_attributes());
                         iDefaultItem->apply_style(s);
                         if (iDefaultItem->cursor().anchored_over_entire_document())
                             iDefaultItem->set_default_style(s);
@@ -147,7 +147,7 @@ namespace neogfx::DesignStudio
                     {
                         auto s = iDefaultItem->current_style();
                         s.character().set_font(fontPicker.current_font());
-                        s.character().set_from_text_attributes(*fontPicker.current_appearance());
+                        s.character().set_from_text_attributes(*fontPicker.current_attributes());
                         iDefaultItem->apply_style(s);
                     }
                 });

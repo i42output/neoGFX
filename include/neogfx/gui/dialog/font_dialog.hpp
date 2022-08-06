@@ -38,14 +38,14 @@ namespace neogfx
     public:
         define_event(SelectionChanged, selection_changed)
     public:
-        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAppearance = {});
-        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAppearance = {});
+        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAttributes = {});
+        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAttributes = {});
         ~font_dialog();
     public:
         neogfx::font current_font() const;
         neogfx::font selected_font() const;
-        optional<text_attributes> const& current_appearance() const;
-        optional<text_attributes> const& selected_appearance() const;
+        optional<text_attributes> const& current_attributes() const;
+        optional<text_attributes> const& selected_attributes() const;
         void select_font(neogfx::font const& aFont);
         void set_default_ink(const optional<color>& aColor);
         void set_default_paper(const optional<color>& aColor);
@@ -54,15 +54,15 @@ namespace neogfx
     private:
         void init();
         void update_selected_font(i_widget const& aUpdatingWidget);
-        void update_selected_appearance(i_widget const& aUpdatingWidget);
+        void update_selected_attributes(i_widget const& aUpdatingWidget);
         void update_widgets();
     private:
         sink iSink;
         bool iUpdating;
         neogfx::font iCurrentFont;
         neogfx::font iSelectedFont;
-        optional<text_attributes> iCurrentAppearance;
-        optional<text_attributes> iSelectedAppearance;
+        optional<text_attributes> iCurrentAttributes;
+        optional<text_attributes> iSelectedAttributes;
         optional<color> iDefaultInk;
         optional<color> iDefaultPaper;
         horizontal_layout iLayout0;
@@ -83,8 +83,8 @@ namespace neogfx
         check_box iSuperscript;
         check_box iSubscript;
         check_box iBelowAscenderLine;
-        widget<> iAppearanceContainer;
-        horizontal_layout iLayoutAppearance;
+        widget<> iAttributesContainer;
+        horizontal_layout iLayoutAttributes;
         group_box iInkBox;
         radio_button iInkColor;
         radio_button iInkGradient;
