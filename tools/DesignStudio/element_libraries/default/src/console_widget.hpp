@@ -30,10 +30,71 @@
 
 namespace neogfx::DesignStudio
 {
-    class telnet
+    class i_console_client
     {
     public:
-        define_event(Text, text, std::string const&)
+        declare_event(output, std::string const&)
+    public:
+        virtual ~i_console_client() = default;
+    public:
+        virtual void start() = 0;
+        virtual void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) = 0;
+        virtual void input(std::string const& aText) = 0;
+    };
+
+    class console_client : public i_console_client, public neolib::lifetime<>
+    {
+    public:
+        define_declared_event(Output, output, std::string const&)
+    };
+
+    class console : public console_client
+    {
+    public:
+        define_event(Command, command, std::string const&)
+    public:
+        console()
+        {
+        }
+    public:
+        void start() final
+        {
+            output().trigger(">");
+        }
+        void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
+        {
+        }
+        void input(std::string const& aText) final
+        {
+            destroyed_flag destroyed{ *this };
+
+            if (aText == "\x7F")
+            {
+                output().trigger("\b\x1B[K");
+                if (!iBuffer.empty())
+                    iBuffer.pop_back();
+                return;
+            }
+
+            output().trigger(aText);
+            iBuffer += aText;
+            std::size_t next;
+            while (!destroyed && (next = iBuffer.find("\r\n")) != std::string::npos)
+            {
+                auto const nextCommand = iBuffer.substr(0, next);
+                iBuffer = iBuffer.substr(next + 2);
+                if (!nextCommand.empty())
+                    command().trigger(nextCommand);
+                if (!destroyed)
+                    output().trigger(">");
+            }
+        }
+    private:
+        std::string iBuffer;
+    };
+
+    class telnet : public console_client
+    {
     private:
         enum class code : std::uint8_t
         {
@@ -66,21 +127,18 @@ namespace neogfx::DesignStudio
             Suboption       = 250
         };
     public:
-        telnet(std::string const& aHost) :
-            iConnection{ neolib::service<neolib::i_async_task>(), aHost, 23 }
+        telnet()
         {
-            iConnection.PacketArrived([&](neolib::binary_packet const& aData)
-            {
-                iBuffer.insert(iBuffer.end(), aData.data(), aData.data() + aData.length());
-                process_buffer();
-            });
         }
     public:
-        void resize_window(std::uint16_t aWidth, std::uint16_t aHeight)
+        void start() final
+        {
+        }
+        void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
         {
             iWindowWidth = aWidth;
             iWindowHeight = aHeight;
-            iConnection.send_packet(neolib::binary_packet::contents_type{
+            connection().send_packet(neolib::binary_packet::contents_type{
                 static_cast<char>(code::IAC),
                 static_cast<char>(command::Suboption),
                 static_cast<char>(sub_command::NegotiateAboutWindowSize),
@@ -89,11 +147,24 @@ namespace neogfx::DesignStudio
                 static_cast<char>(code::IAC),
                 static_cast<char>(command::SuboptionEnd) });
         }
-        void send(std::string const& aText)
+        void input(std::string const& aText) final
         {
-            iConnection.send_packet(neolib::binary_packet{ aText.data(), aText.length() });
+            connection().send_packet(neolib::binary_packet{ aText.data(), aText.length() });
+        }
+        void connect(std::string const& aHost)
+        {
+            iConnection.emplace(neolib::service<neolib::i_async_task>(), aHost, 23);
+            connection().PacketArrived([&](neolib::binary_packet const& aData)
+            {
+                iBuffer.insert(iBuffer.end(), aData.data(), aData.data() + aData.length());
+                process_buffer();
+            });
         }
     private:
+        neolib::tcp_binary_packet_stream& connection()
+        {
+            return iConnection.value();
+        }
         void process_buffer()
         {
             thread_local std::vector<std::uint8_t> temp;
@@ -158,16 +229,16 @@ namespace neogfx::DesignStudio
                                 switch (static_cast<sub_command>(next))
                                 {
                                 case sub_command::Echo:
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC),
                                         static_cast<char>(code::WILL),
                                         static_cast<char>(sub_command::Echo) });
                                     break;
                                 case sub_command::TerminalType:
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{ 
+                                    connection().send_packet(neolib::binary_packet::contents_type{ 
                                         static_cast<char>(code::IAC), static_cast<char>(code::WILL), 
                                         static_cast<char>(sub_command::TerminalType) });
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC), 
                                         static_cast<char>(command::Suboption), 
                                         static_cast<char>(sub_command::TerminalType),
@@ -176,10 +247,10 @@ namespace neogfx::DesignStudio
                                         static_cast<char>(command::SuboptionEnd) });
                                     break;
                                 case sub_command::NegotiateAboutWindowSize:
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC), static_cast<char>(code::WILL),
                                         static_cast<char>(sub_command::NegotiateAboutWindowSize) });
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC),
                                         static_cast<char>(command::Suboption),
                                         static_cast<char>(sub_command::NegotiateAboutWindowSize),
@@ -189,7 +260,7 @@ namespace neogfx::DesignStudio
                                         static_cast<char>(command::SuboptionEnd) });
                                     break;
                                 default:
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC),
                                         static_cast<char>(code::WONT),
                                         static_cast<char>(next) });
@@ -206,13 +277,13 @@ namespace neogfx::DesignStudio
                                 switch (static_cast<sub_command>(next))
                                 {
                                 case sub_command::Echo:
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC),
                                         static_cast<char>(code::WONT),
                                         static_cast<char>(sub_command::Echo) });
                                     break;
                                 default:
-                                    iConnection.send_packet(neolib::binary_packet::contents_type{
+                                    connection().send_packet(neolib::binary_packet::contents_type{
                                         static_cast<char>(code::IAC),
                                         static_cast<char>(code::WONT),
                                         static_cast<char>(next) });
@@ -238,10 +309,10 @@ namespace neogfx::DesignStudio
             if (!temp.empty())
                 iBuffer = temp;
             if (!someText.empty())
-                Text.trigger(someText);
+                Output.trigger(someText);
         }
     private:
-        neolib::tcp_binary_packet_stream iConnection;
+        std::optional<neolib::tcp_binary_packet_stream> iConnection;
         std::uint16_t iWindowWidth = 80;
         std::uint16_t iWindowHeight = 25;
         std::vector<std::uint8_t> iBuffer;
@@ -253,27 +324,13 @@ namespace neogfx::DesignStudio
     public:
         console_widget(i_element& aElement, i_widget& aParent, window_style aStyle) :
             window{ aParent, window_placement{ rect{ point{}, size{ 480.0_dip, 480.0_dip } } }, aStyle | window_style::SizeToContents },
-            iTerminal{ client_layout() },
-            iTestConnection{ "172.16.0.2" }
+            iTerminal{ client_layout() }
         {
             ref_ptr<i_settings> settings{ aElement.library().application() };
 
-            iTerminal.TerminalResized([&](terminal::size_type aTerminalSize)
-            {
-                basic_size<std::uint16_t> newSize(aTerminalSize);
-                iTestConnection.resize_window(newSize.cx, newSize.cy);
-            });
-            iTerminal.Input([&](i_string const& aText)
-            {
-                iTestConnection.send(aText.to_std_string());
-            });
-            iTestConnection.Text([&](std::string const& aText)
-            {
-                iTerminal.output(string{ aText });
-            });
-
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
+
             auto& consoleExtendedFontSetting = settings->setting("environment.fonts_and_colors.console_font"_s);
             auto font_changed = [&]
             {
@@ -283,8 +340,11 @@ namespace neogfx::DesignStudio
             };
             consoleExtendedFontSetting.changed(font_changed);
             font_changed();
+
             create_status_bar<neogfx::status_bar>(neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip);
             status_bar().set_font(iTerminal.font());
+
+            create_console<>();
         }
         ~console_widget()
         {
@@ -296,8 +356,50 @@ namespace neogfx::DesignStudio
             resize(ideal_size());
         }
     private:
+        template <typename ConsoleT = console>
+        ConsoleT& create_console()
+        {
+            iSink.clear();
+
+            iConsole = std::make_unique<ConsoleT>();
+            auto& newConsole = static_cast<ConsoleT&>(*iConsole);
+
+            iSink += iTerminal.TerminalResized([&](terminal::size_type aTerminalSize)
+                {
+                    basic_size<std::uint16_t> newSize(aTerminalSize);
+                    newConsole.resize_window(newSize.cx, newSize.cy);
+                });
+            iSink += iTerminal.Input([&](i_string const& aText)
+                {
+                    newConsole.input(aText.to_std_string());
+                });
+            iSink += newConsole.output([&](std::string const& aText)
+                {
+                    iTerminal.output(string{ aText });
+                });
+
+            if constexpr (std::is_same_v<ConsoleT, console>)
+            {
+                iSink += newConsole.command([&](std::string const& aCommand)
+                {
+                    auto bits = neolib::tokens(aCommand, " "s);
+                    if (bits.size() >= 2)
+                    {
+                        if (bits[0] == "telnet")
+                        {
+                            create_console<telnet>().connect(bits[1]);
+                        }
+                    }
+                });
+            }
+
+            newConsole.start();
+
+            return newConsole;
+        }
+    private:
         terminal iTerminal;
-        telnet iTestConnection;
+        std::unique_ptr<i_console_client> iConsole;
         sink iSink;
     };
 
