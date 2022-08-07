@@ -256,6 +256,8 @@ namespace neogfx::DesignStudio
             iTerminal{ client_layout() },
             iTestConnection{ "172.16.0.2" }
         {
+            ref_ptr<i_settings> settings{ aElement.library().application() };
+
             iTerminal.TerminalResized([&](terminal::size_type aTerminalSize)
             {
                 basic_size<std::uint16_t> newSize(aTerminalSize);
@@ -269,10 +271,18 @@ namespace neogfx::DesignStudio
             {
                 iTerminal.output(string{ aText });
             });
+
             title_bar().set_icon(aElement.library().element_icon(aElement.type()));
             title_bar().set_title(""_s);
-//            auto const& consoleExtendedFont = aSettings.setting("environment.fonts_and_colors.console_font"_s).value<neogfx::extended_font>(true);
-//            iTerminal.set_font(consoleExtendedFont.first());
+            auto& consoleExtendedFontSetting = settings->setting("environment.fonts_and_colors.console_font"_s);
+            auto font_changed = [&]
+            {
+                auto const& consoleExtendedFont = consoleExtendedFontSetting.value<neogfx::extended_font>(true);
+                iTerminal.set_font(consoleExtendedFont.first());
+                iTerminal.set_text_attributes(consoleExtendedFont.second());
+            };
+            consoleExtendedFontSetting.changed(font_changed);
+            font_changed();
             create_status_bar<neogfx::status_bar>(neogfx::status_bar::style::DisplayMessage | neogfx::status_bar::style::DisplaySizeGrip);
             status_bar().set_font(iTerminal.font());
         }

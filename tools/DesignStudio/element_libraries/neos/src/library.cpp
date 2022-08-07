@@ -84,6 +84,11 @@ namespace neogfx::DesignStudio
     {
     }
 
+    neolib::i_application& neos_element_library::application() const
+    {
+        return iApplication;
+    }
+
     void neos_element_library::ide_ready(i_ide& aIde)
     {
         aIde.add_sub_menu(id::MenuBar, iScriptMenu);

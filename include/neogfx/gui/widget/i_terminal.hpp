@@ -35,6 +35,8 @@ namespace neogfx
         declare_event(input, i_string const&)
         declare_event(terminal_resized, size_type)
     public:
+        virtual void set_text_attributes(optional_text_attributes const& aTextAttributes) = 0;
+    public:
         virtual size_type terminal_size() const = 0;
     public:
         virtual void output(i_string const& aOutput) = 0;

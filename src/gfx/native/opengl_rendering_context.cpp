@@ -2015,7 +2015,7 @@ namespace neogfx
                             filterRegion = bounding_rect();
                     }
                         
-                    if (drawOp.appearance->paper() != std::nullopt)
+                    if (drawOp.appearance->paper() != std::nullopt && !drawOp.appearance->being_filtered())
                     {
                         font const& glyphFont = glyphText.glyph_font(glyph);
                         rect const glyphRect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };

@@ -134,6 +134,11 @@ namespace neogfx::DesignStudio
     {
     }
 
+    neolib::i_application& default_element_library::application() const
+    {
+        return iApplication;
+    }
+
     void default_element_library::ide_ready(i_ide& aIde)
     {
     }

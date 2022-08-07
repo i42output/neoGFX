@@ -188,7 +188,14 @@ namespace neogfx
                     auto paper = line.attributes[g.source.first].paper;
                     if (line.attributes[g.source.first].reverse)
                         std::swap(ink, paper);
-                    attributes.add(g.source.first, ink, paper);
+                    optional_text_effect effect;
+                    if (iTextAttributes)
+                    {
+                        effect = iTextAttributes->effect();
+                        if (std::holds_alternative<color>(effect->color()))
+                            effect->set_color(ink);
+                    }
+                    attributes.add(g.source.first, ink, paper, effect);
                 }
                 aGc.draw_glyphs(tl + point{ 0, y }, *line.glyphs, attributes);
             }
@@ -220,6 +227,12 @@ namespace neogfx
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
         iPrimaryBuffer.cursor.set_width(character_extents().cx);
         iAlternateBuffer.cursor.set_width(character_extents().cx);
+    }
+
+    void terminal::set_text_attributes(optional_text_attributes const& aTextAttributes)
+    {
+        iTextAttributes = aTextAttributes;
+        update();
     }
 
     focus_policy terminal::focus_policy() const

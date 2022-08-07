@@ -44,8 +44,10 @@ namespace neogfx::DesignStudio
                 std::cout << "Element library '" << plugin->name() << "' loaded." << std::endl;
 
             iSettings.emplace();
+            iSettings->add_ref();
             iProjectManager.emplace();
             iMainWindow.emplace(*this, *iSettings, *iProjectManager);
+            iMainWindow->reference_counted<i_ide>::add_ref();
 
             for (auto const& plugin : plugin_manager().plugins())
             {
@@ -61,6 +63,11 @@ namespace neogfx::DesignStudio
             if (aId == i_ide::iid())
             {
                 aObject = static_cast<i_ide*>(&*iMainWindow);
+                return true;
+            }
+            else if (aId == i_settings::iid())
+            {
+                aObject = static_cast<i_settings*>(&*iSettings);
                 return true;
             }
             return main_app::discover(aId, aObject);

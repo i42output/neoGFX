@@ -307,11 +307,23 @@ namespace neogfx
             {
                 font_dialog fd{ *this, selected_font(), has_attributes() ? 
                     optional<text_attributes>{ selected_attributes() } : std::nullopt };
+                fd.SelectionChanged([&]
+                {
+                    select_font(fd.selected_font());
+                    if (has_attributes())
+                        select_attributes(fd.selected_attributes().value());
+                });
                 if (fd.exec() == dialog_result::Accepted)
                 {
                     select_font(fd.selected_font());
                     if (has_attributes())
                         select_attributes(fd.selected_attributes().value());
+                }
+                else
+                {
+                    select_font(current_font());
+                    if (has_attributes())
+                        select_attributes(current_attributes());
                 }
             });
         }
@@ -420,9 +432,11 @@ namespace neogfx
                 iSizePicker->selection_model().set_current_index(*fontSizeIndex);
             else
                 iSizePicker->selection_model().clear_current_index();
-        }
 
-        if (iSelectedFont != oldFont)
+            if (iSelectedFont != oldFont)
+                SelectionChanged.trigger();
+        }
+        else
             SelectionChanged.trigger();
     }
 
