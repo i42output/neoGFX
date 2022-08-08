@@ -40,6 +40,7 @@ namespace neogfx
             color paper;
             bool reverse = false;
             bool blink = false;
+            bool underline = false;
             font_style style = font_style::Normal;
         };
         struct buffer_line

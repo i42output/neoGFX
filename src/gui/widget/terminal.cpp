@@ -182,12 +182,14 @@ namespace neogfx
             {
                 thread_local text_attribute_spans attributes;
                 attributes.clear();
-                for (auto const& g : *line.glyphs)
+                for (auto& g : *line.glyphs)
                 {
                     auto ink = line.attributes[g.source.first].ink;
                     auto paper = line.attributes[g.source.first].paper;
                     if (line.attributes[g.source.first].reverse)
                         std::swap(ink, paper);
+                    if (line.attributes[g.source.first].underline)
+                        set_underline(g, true);
                     optional_text_effect effect;
                     if (iTextAttributes)
                     {
@@ -809,6 +811,12 @@ namespace neogfx
                                             active_buffer().attribute.value().style |= font_style::Italic;
                                             active_buffer().attribute.value().style &= ~font_style::Normal;
                                         }
+                                        else if (code == 4)
+                                        {
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
+                                            active_buffer().attribute.value().underline = true;
+                                        }
                                         else if (code == 7)
                                         {
                                             if (!active_buffer().attribute)
@@ -838,6 +846,12 @@ namespace neogfx
                                                 if ((active_buffer().attribute.value().style & font_style::Bold) == font_style::Invalid)
                                                     active_buffer().attribute.value().style |= font_style::Normal;
                                             }
+                                        }
+                                        else if (code == 24)
+                                        {
+                                            if (!active_buffer().attribute)
+                                                active_buffer().attribute.emplace(default_attribute());
+                                            active_buffer().attribute.value().underline = false;
                                         }
                                         else if (code == 27)
                                         {
