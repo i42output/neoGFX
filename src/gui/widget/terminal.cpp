@@ -192,7 +192,7 @@ namespace neogfx
                     if (iTextAttributes)
                     {
                         effect = iTextAttributes->effect();
-                        if (effect->type() == text_effect_type::Glow)
+                        if (effect && effect->type() == text_effect_type::Glow)
                         {
                             if (std::holds_alternative<color>(effect->color()))
                                 effect->set_color(ink.to_hsv().with_saturation(ink.to_hsv().saturation() * 0.7).to_rgb<color>());
