@@ -22,18 +22,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/project_manager.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/settings.hpp>
+#include <neogfx/tools/DesignStudio/i_console_client.hpp>
 #include <neogfx/audio/i_audio.hpp>
 #include "main_window.hpp"
 
 namespace neogfx::DesignStudio
 {
-    class app : public main_app
+    class app : public main_app, public reference_counted<i_console_client_manager>
     {
+    public:
+        define_declared_event(StartConsoleClientSession, start_console_client_session, i_terminal&, i_string const&, i_ref_ptr<i_console_client>&)
     public:
         template <typename... ArgsT>
         app(ArgsT&&... aArgs) :
             main_app{ std::forward<ArgsT>(aArgs)... }
         {
+            reference_counted<i_console_client_manager>::add_ref();
+
             change_style("Dark");
             current_style().set_spacing(ng::size{ 4.0 });
 
@@ -68,6 +73,11 @@ namespace neogfx::DesignStudio
             else if (aId == i_settings::iid())
             {
                 aObject = static_cast<i_settings*>(&*iSettings);
+                return true;
+            }
+            else if (aId == i_console_client_manager::iid())
+            {
+                aObject = static_cast<i_console_client_manager*>(this);
                 return true;
             }
             return main_app::discover(aId, aObject);

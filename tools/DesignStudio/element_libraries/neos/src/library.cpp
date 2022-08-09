@@ -24,13 +24,24 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/utility.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>
 #include <neogfx/tools/DesignStudio/element.hpp>
+#include <neogfx/tools/DesignStudio/console_client.hpp>
 #include "library.hpp"
 
 namespace neogfx::DesignStudio
 {
+    class neos_session : public console
+    {
+    public:
+        neos_session() :
+            console{ "neos" }
+        {
+        }
+    };
+
     neos_element_library::neos_element_library(neolib::i_application& aApplication, std::string const& aPluginPath) :
         iApplication{ aApplication },
         iPluginPath{ aPluginPath },
+        iClientManager{ aApplication },
         iElementsOrdered
         {
         },
@@ -78,6 +89,19 @@ namespace neogfx::DesignStudio
         iScriptMenu.add_action(iSeparator);
         iScriptMenu.add_action(iImportScriptingLanguage);
         iScriptMenu.add_action(iEditScriptingLanguage);
+
+        iClientManager->start_console_client_session(
+            [&](i_terminal& aTerminal, i_string const& aCommand, i_ref_ptr<i_console_client>& aClient)
+            {
+                auto bits = neolib::tokens(aCommand.to_std_string(), " "s);
+                if (bits.size() >= 1)
+                {
+                    if (bits[0] == "neos")
+                    {
+                        aClient = make_ref<neos_session>();
+                    }
+                }
+            });
     }
 
     neos_element_library::~neos_element_library()

@@ -20,22 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/tools/DesignStudio/i_console_client.hpp>
 
 namespace neogfx::DesignStudio
 {
-    class i_console_client
-    {
-    public:
-        declare_event(output, std::string const&)
-    public:
-        virtual ~i_console_client() = default;
-    public:
-        virtual void start() = 0;
-        virtual void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) = 0;
-        virtual void input(std::string const& aText) = 0;
-    };
-
-    class console_client : public i_console_client, public neolib::lifetime<>
+    class console_client : public reference_counted<i_console_client>, public neolib::lifetime<>
     {
     public:
         define_declared_event(Output, output, std::string const&)
@@ -46,13 +35,14 @@ namespace neogfx::DesignStudio
     public:
         define_event(Command, command, std::string const&)
     public:
-        console()
+        console(std::string const& aName = {}) :
+            iName{ aName }
         {
         }
     public:
         void start() final
         {
-            output().trigger(">");
+            output().trigger(iName + ">");
         }
         void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
         {
@@ -79,10 +69,11 @@ namespace neogfx::DesignStudio
                 if (!nextCommand.empty())
                     command().trigger(nextCommand);
                 if (!destroyed)
-                    output().trigger(">");
+                    output().trigger(iName + ">");
             }
         }
     private:
+        std::string iName;
         std::string iBuffer;
     };
 }

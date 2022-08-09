@@ -31,6 +31,7 @@
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/menu.hpp>
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
+#include <neogfx/tools/DesignStudio/i_console_client.hpp>
 
 namespace neogfx::DesignStudio
 {
@@ -69,6 +70,7 @@ namespace neogfx::DesignStudio
     private:
         neolib::i_application& iApplication;
         std::string iPluginPath;
+        ref_ptr<i_console_client_manager> iClientManager;
         elements_ordered_t iElementsOrdered;
         elements_t iElements;
         mutable std::map<color, std::map<std::string, texture>> iIcons;

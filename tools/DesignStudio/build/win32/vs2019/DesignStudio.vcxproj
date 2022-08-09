@@ -273,6 +273,7 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\console_client.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\context_menu.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\DesignStudio.hpp" />
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_console_client.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_element_component.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_ide.hpp" />
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_node.hpp" />
