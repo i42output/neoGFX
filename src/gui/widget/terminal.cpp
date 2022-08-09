@@ -519,7 +519,8 @@ namespace neogfx
                 switch(iEscapeSequence.value()[0])
                 {
                 case 'M':
-                    if (!active_buffer().scrollingRegion || cursor_pos().y > active_buffer().scrollingRegion.value().top)
+                    if ((!active_buffer().scrollingRegion && cursor_pos().y > 0) ||
+                        (active_buffer().scrollingRegion && cursor_pos().y > active_buffer().scrollingRegion.value().top))
                         set_cursor_pos(cursor_pos().with_y(cursor_pos().y - 1));
                     else
                     {
