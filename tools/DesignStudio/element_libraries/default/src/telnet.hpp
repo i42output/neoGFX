@@ -27,6 +27,9 @@ namespace neogfx::DesignStudio
 {
     class telnet : public console_client
     {
+    public:
+        define_event(ConnectionFailure, connection_failure, const boost::system::error_code&)
+        define_event(Disconnected, disconnected)
     private:
         enum class code : std::uint8_t
         {
@@ -90,6 +93,14 @@ namespace neogfx::DesignStudio
             {
                 iBuffer.insert(iBuffer.end(), aData.data(), aData.data() + aData.length());
                 process_buffer();
+            });
+            connection().ConnectionFailure([&](const boost::system::error_code& aError)
+            {
+                ConnectionFailure.trigger(aError);
+            });
+            connection().ConnectionClosed([&]()
+            {
+                Disconnected.trigger();
             });
         }
     private:

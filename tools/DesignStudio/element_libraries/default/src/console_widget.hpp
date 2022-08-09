@@ -100,7 +100,17 @@ namespace neogfx::DesignStudio
                     {
                         if (bits[0] == "telnet")
                         {
-                            create_console<telnet>().connect(bits[1]);
+                            auto& telnetSession = create_console<telnet>();
+                            telnetSession.disconnected([&]()
+                            {
+                                create_console<>();
+                            });
+                            telnetSession.connection_failure([&](const boost::system::error_code& aError)
+                            {
+                                iTerminal.output(string{ aError.message() + "\r\n" });
+                                create_console<>();
+                            });
+                            telnetSession.connect(bits[1]);
                         }
                     }
                 });
