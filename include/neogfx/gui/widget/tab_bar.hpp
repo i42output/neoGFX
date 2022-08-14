@@ -77,6 +77,7 @@ namespace neogfx
         bool has_parent_container() const override;
         const i_tab_container& parent_container() const override;
         i_tab_container& parent_container() override;
+    public:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
     public:

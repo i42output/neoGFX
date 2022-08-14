@@ -61,6 +61,61 @@ namespace neogfx
             iId = aId;
         }
     public:
+        bool is_layout() const final
+        {
+            return std::is_base_of_v<i_layout, self_type>;
+        }
+        const i_layout& as_layout() const final
+        {
+            if constexpr (std::is_base_of_v<i_layout, self_type>)
+                return static_cast<const i_layout&>(*this);
+            else
+                throw not_a_layout();
+        }
+        i_layout& as_layout() final
+        {
+            if constexpr (std::is_base_of_v<i_layout, self_type>)
+                return static_cast<i_layout&>(*this);
+            else
+                throw not_a_layout();
+        }
+        bool is_spacer() const final
+        {
+            return std::is_base_of_v<i_spacer, self_type>;
+        }
+        const i_spacer& as_spacer() const final
+        {
+            if constexpr (std::is_base_of_v<i_spacer, self_type>)
+                return static_cast<const i_spacer&>(*this);
+            else
+                throw not_a_spacer();
+        }
+        i_spacer& as_spacer() final
+        {
+            if constexpr (std::is_base_of_v<i_spacer, self_type>)
+                return static_cast<i_spacer&>(*this);
+            else
+                throw not_a_spacer();
+        }
+        bool is_widget() const override
+        {
+            return std::is_base_of_v<i_widget, self_type>;
+        }
+        const i_widget& as_widget() const override
+        {
+            if constexpr (std::is_base_of_v<i_widget, self_type>)
+                return static_cast<const i_widget&>(*this);
+            else
+                throw not_a_widget();
+        }
+        i_widget& as_widget() override
+        {
+            if constexpr (std::is_base_of_v<i_widget, self_type>)
+                return static_cast<i_widget&>(*this);
+            else
+                throw not_a_widget();
+        }
+    public:
         bool has_parent_layout_item() const final
         {
             auto& self = as_layout_item();

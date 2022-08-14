@@ -1115,21 +1115,6 @@ namespace neogfx
         return base_type::layout(aStandardLayout, aPosition);
     }
 
-    bool window::is_widget() const
-    {
-        return true;
-    }
-
-    const i_widget& window::as_widget() const
-    {
-        return *this;
-    }
-
-    i_widget& window::as_widget()
-    {
-        return *this;
-    }
-
     const i_drag_drop_target& window::default_drag_drop_target() const
     {
         // dynamic_cast? Something, Something, Something, Dark Side

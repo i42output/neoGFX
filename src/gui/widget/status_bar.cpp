@@ -311,16 +311,6 @@ namespace neogfx
             w->set_font(aFont);
     }
 
-    const i_widget& status_bar::as_widget() const
-    {
-        return *this;
-    }
-
-    i_widget& status_bar::as_widget()
-    {
-        return *this;
-    }
-
     const i_widget& status_bar::size_grip() const
     {
         return iSizeGrip;

@@ -198,10 +198,6 @@ namespace neogfx
         void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) override;
         void dismiss_children(const i_widget* aClickedWidget = nullptr) override;
     public:
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
-    public:
         const i_drag_drop_target& default_drag_drop_target() const override;
         i_drag_drop_target& default_drag_drop_target() override;
     private:

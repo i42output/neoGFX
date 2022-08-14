@@ -160,51 +160,6 @@ namespace neogfx
             layout_owner().set_layout(ref_ptr<i_layout>{});
     }
 
-    bool layout::is_layout() const
-    {
-        return true;
-    }
-
-    const i_layout& layout::as_layout() const
-    {
-        return *this;
-    }
-
-    i_layout& layout::as_layout()
-    {
-        return *this;
-    }
-
-    bool layout::is_spacer() const
-    {
-        return false;
-    }
-
-    const i_spacer& layout::as_spacer() const
-    {
-        throw not_a_spacer();
-    }
-
-    i_spacer& layout::as_spacer()
-    {
-        throw not_a_spacer();
-    }
-
-    bool layout::is_widget() const
-    {
-        return false;
-    }
-
-    const i_widget& layout::as_widget() const
-    {
-        throw not_a_widget();
-    }
-
-    i_widget& layout::as_widget()
-    {
-        throw not_a_widget();
-    }
-
     bool layout::has_parent_layout() const
     {
         return iParent != nullptr;

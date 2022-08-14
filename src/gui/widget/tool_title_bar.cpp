@@ -69,16 +69,6 @@ namespace neogfx
         update_textures();
     }
 
-    const i_widget& tool_title_bar::as_widget() const
-    {
-        return *this;
-    }
-
-    i_widget& tool_title_bar::as_widget()
-    {
-        return *this;
-    }
-
     void tool_title_bar::set_icon(i_texture const& aIcon)
     {
         throw unsupported_operation();

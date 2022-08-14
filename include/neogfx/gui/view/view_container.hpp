@@ -59,6 +59,7 @@ namespace neogfx
         view_container(i_widget& aParent, view_container_style aStyle = view_container_style::Tabbed);
         view_container(i_layout& aLayout, view_container_style aStyle = view_container_style::Tabbed);
     public:
+        bool is_widget() const override;
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
         const i_tab_container& tab_container() const override;

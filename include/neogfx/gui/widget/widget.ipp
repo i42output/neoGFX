@@ -297,7 +297,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::parent_changed()
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (!self_type::is_root())
         {
@@ -620,60 +620,6 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::is_layout() const
-    {
-        return false;
-    }
-
-    template <typename Interface>
-    const i_layout& widget<Interface>::as_layout() const
-    {
-        throw not_a_layout();
-    }
-
-    template <typename Interface>
-    i_layout& widget<Interface>::as_layout()
-    {
-        throw not_a_layout();
-    }
-
-    template <typename Interface>
-    bool widget<Interface>::is_spacer() const
-    {
-        return false;
-    }
-
-    template <typename Interface>
-    const i_spacer& widget<Interface>::as_spacer() const
-    {
-        throw not_a_spacer();
-    }
-
-    template <typename Interface>
-    i_spacer& widget<Interface>::as_spacer()
-    {
-        throw not_a_spacer();
-    }
-
-    template <typename Interface>
-    bool widget<Interface>::is_widget() const
-    {
-        return true;
-    }
-
-    template <typename Interface>
-    const i_widget& widget<Interface>::as_widget() const
-    {
-        return *this;
-    }
-
-    template <typename Interface>
-    i_widget& widget<Interface>::as_widget()
-    {
-        return *this;
-    }
-
-    template <typename Interface>
     rect widget<Interface>::element_rect(skin_element) const
     {
         return client_rect();
@@ -730,7 +676,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::set_layout_owner(i_widget* aOwner)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (aOwner != nullptr && !has_parent())
         {
@@ -750,7 +696,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::layout_items(bool aDefer)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (layout_items_in_progress())
             return;
@@ -894,7 +840,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::move(const point& aPosition)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -906,7 +852,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::moved()
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (!self_type::is_root() || self_type::root().is_nested())
         {
@@ -930,7 +876,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::parent_moved()
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         self.reset_origin();
         for (auto& child : iChildren)
@@ -947,7 +893,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::resize(const size& aSize)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         neolib::scoped_flag sf{ iResizing };
 
@@ -966,7 +912,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::resized()
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (self_type::is_root())
             self_type::root().surface().resize_surface(self.extents());
@@ -990,7 +936,7 @@ namespace neogfx
     template <typename Interface>
     rect widget<Interface>::non_client_rect() const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         return rect{self.origin(), self.extents()};
     }
@@ -998,7 +944,7 @@ namespace neogfx
     template <typename Interface>
     rect widget<Interface>::client_rect(bool aExtendIntoPadding) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
         auto const& internalSpacing = self.internal_spacing(!aExtendIntoPadding);
         auto const& topLeft = internalSpacing.top_left();
         auto const& extents = (self.extents() - internalSpacing.size()).max(size{});
@@ -1061,7 +1007,7 @@ namespace neogfx
     template <typename Interface>
     size_policy widget<Interface>::size_policy() const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1078,7 +1024,7 @@ namespace neogfx
     template <typename Interface>
     size widget<Interface>::minimum_size(optional_size const& aAvailableSpace) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1110,7 +1056,7 @@ namespace neogfx
     template <typename Interface>
     size widget<Interface>::maximum_size(optional_size const& aAvailableSpace) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1146,7 +1092,7 @@ namespace neogfx
     template <typename Interface>
     padding widget<Interface>::padding() const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         auto const& adjustedPadding = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(self_type::is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
         return self.transformation() * units_converter{ *this }.from_device_units(adjustedPadding);
@@ -1155,7 +1101,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::layout_as(const point& aPosition, const size& aSize)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1255,7 +1201,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::render(i_graphics_context& aGc) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (effectively_hidden())
             return;
@@ -1369,7 +1315,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::paint_non_client(i_graphics_context& aGc) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (self.has_background_color() || !self.background_is_transparent())
             aGc.fill_rect(update_rect(), self.background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0));
@@ -1378,7 +1324,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::paint_non_client_after(i_graphics_context& aGc) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
 #ifdef NEOGFX_DEBUG
         // todo: move to debug::layoutItem function/service
@@ -1606,7 +1552,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::set_font(optional_font const& aFont)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (Font != aFont)
         {
@@ -1663,7 +1609,7 @@ namespace neogfx
                     self_type::root().release_focused_widget(self_type::root().focused_widget());
                 }
             }   
-            as_widget().update_layout(true, true);
+            base_type::as_widget().update_layout(true, true);
             return true;
         }
         return false;
@@ -1740,7 +1686,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::set_capture(capture_reason aReason, const optional_point& aPosition)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (can_capture())
         {
@@ -1765,7 +1711,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::release_capture(capture_reason aReason)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         switch (aReason)
         {
@@ -1937,7 +1883,7 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (has_parent() && same_surface(parent()))
             return parent().mouse_wheel_scrolled(aWheel, aPosition + self.position(), aDelta, aKeyModifiers);
@@ -1948,7 +1894,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_pressed(aButton, aPosition + self.position(), aKeyModifiers);
@@ -1959,7 +1905,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_double_clicked(aButton, aPosition + self.position(), aKeyModifiers);
@@ -1970,7 +1916,7 @@ namespace neogfx
     template <typename Interface>
     void widget<Interface>::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_released(aButton, aPosition + self.position());
@@ -1999,7 +1945,7 @@ namespace neogfx
     template <typename Interface>
     point widget<Interface>::mouse_position() const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         auto const rootMousePosition = self_type::root().mouse_position();
         if (self_type::is_root())
@@ -2075,7 +2021,7 @@ namespace neogfx
     template <typename Interface>
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
-        auto& self = as_widget();
+        auto& self = base_type::as_widget();
 
         auto const clientPosition = aPosition - self.origin();
         const i_widget* result = nullptr;

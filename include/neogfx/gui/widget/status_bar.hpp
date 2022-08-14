@@ -121,9 +121,6 @@ namespace neogfx
     public:
         void set_font(optional_font const& aFont) override;
     protected:
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
-    protected:
         const i_widget& size_grip() const override;
     private:
         void init();
