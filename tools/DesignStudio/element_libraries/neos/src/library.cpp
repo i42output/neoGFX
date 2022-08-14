@@ -153,6 +153,8 @@ namespace neogfx::DesignStudio
                     cout << iContext.metrics();
                 else if (command == "q" || command == "quit")
                     return false;
+                else if (command == "cls" || command == "clear")
+                    cout << "\x1B[3J";
                 else
                     throw std::runtime_error("unknown command '" + command + "'");
             }
