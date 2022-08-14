@@ -63,13 +63,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neos", "..\..\..\tools\Desi
 	ProjectSection(ProjectDependencies) = postProject
 		{FAD0194F-355A-4183-B700-3E80AE541BCB} = {FAD0194F-355A-4183-B700-3E80AE541BCB}
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
+		{2FD415FA-62C7-400A-87D8-2C3539FEF004} = {2FD415FA-62C7-400A-87D8-2C3539FEF004}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neos", "..\..\..\..\neos\build\win32\vs2019\neos.vcxproj", "{2FD415FA-62C7-400A-87D8-2C3539FEF004}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core.math.universal", "..\..\..\..\neos\concepts\build\win32\vs2017\core\core.math.universal.vcxproj", "{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2FD415FA-62C7-400A-87D8-2C3539FEF004} = {2FD415FA-62C7-400A-87D8-2C3539FEF004}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "..\..\..\..\neos\concepts\build\win32\vs2017\core\core.vcxproj", "{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2FD415FA-62C7-400A-87D8-2C3539FEF004} = {2FD415FA-62C7-400A-87D8-2C3539FEF004}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

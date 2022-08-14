@@ -302,7 +302,8 @@ namespace neogfx
         if (!self_type::is_root())
         {
             self.reset_origin();
-            self.update_layout();
+            if (self.has_parent_layout())
+                self.update_layout();
         }
     }
 
@@ -753,6 +754,7 @@ namespace neogfx
 
         if (layout_items_in_progress())
             return;
+
         if (!aDefer)
         {
 #ifdef NEOGFX_DEBUG
