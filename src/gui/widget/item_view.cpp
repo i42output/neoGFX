@@ -924,9 +924,12 @@ namespace neogfx
         return aItemIndex.row() < presentation_model().rows() && aItemIndex.column() < presentation_model().columns();
     }
 
-    bool item_view::is_visible(item_presentation_model_index const& aItemIndex) const
+    bool item_view::is_visible(item_presentation_model_index const& aItemIndex, bool aPartiallyVisible) const
     {
-        return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
+        if (aPartiallyVisible)
+            return item_display_rect().intersects(cell_rect(aItemIndex, cell_part::Background));
+        else
+            return item_display_rect().contains(cell_rect(aItemIndex, cell_part::Background));
     }
 
     bool item_view::make_visible(item_presentation_model_index const& aItemIndex)
@@ -934,23 +937,17 @@ namespace neogfx
         iVisibleItem = aItemIndex;
         bool changed = false;
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        auto const& cellRect = cell_rect(aItemIndex, gc, cell_part::Background);
-        auto const& displayRect = item_display_rect();
-        auto const& intersectRect = cellRect.intersection(displayRect);
-        if (intersectRect.height() < cellRect.height())
-        {
-            if (cellRect.top() < displayRect.top())
-                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.top() - displayRect.top())) || changed;
-            else if (cellRect.bottom() > displayRect.bottom() && cellRect.height() <= displayRect.height())
-                changed = vertical_scrollbar().set_position(vertical_scrollbar().position() + (cellRect.bottom() - displayRect.bottom())) || changed;
-        }
-        if (intersectRect.width() < cellRect.width())
-        {
-            if (cellRect.left() < displayRect.left())
-                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.left() - displayRect.left())) || changed;
-            else if (cellRect.right() > displayRect.right() && cellRect.width() <= displayRect.width())
-                changed = horizontal_scrollbar().set_position(horizontal_scrollbar().position() + (cellRect.right() - displayRect.right())) || changed;
-        }
+        auto const currentScrollPos = point{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
+        auto const& cellRect = cell_rect(aItemIndex, gc, cell_part::Background) + currentScrollPos;
+        auto const& displayRect = item_display_rect() + currentScrollPos;
+        if (cellRect.top() < displayRect.top())
+            changed = vertical_scrollbar().set_position(currentScrollPos.y + (cellRect.top() - displayRect.top())) || changed;
+        else if (cellRect.bottom() > displayRect.bottom() && cellRect.height() <= displayRect.height())
+            changed = vertical_scrollbar().set_position(currentScrollPos.y + (cellRect.bottom() - displayRect.bottom())) || changed;
+        if (cellRect.left() < displayRect.left())
+            changed = horizontal_scrollbar().set_position(currentScrollPos.x + (cellRect.left() - displayRect.left())) || changed;
+        else if (cellRect.right() > displayRect.right() && cellRect.width() <= displayRect.width())
+            changed = horizontal_scrollbar().set_position(currentScrollPos.x + (cellRect.right() - displayRect.right())) || changed;
         return changed;
     }
 
@@ -963,6 +960,7 @@ namespace neogfx
     {
         if (editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
             return;
+        suppress_scrollbar_visibility_updates ssvu{ *this };
         neolib::scoped_flag sf{ iBeginningEdit };
         auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
         end_edit(true);
@@ -1073,6 +1071,7 @@ namespace neogfx
             return;
         if (aCommit && !presentation_model().cell_editable(*editing()))
             aCommit = false;
+        suppress_scrollbar_visibility_updates ssvu{ *this };
         neolib::scoped_flag sf{ iEndingEdit };
         bool hadFocus = (editor().has_focus() || (has_root() && root().has_focused_widget() && root().focused_widget().is_descendent_of(editor())));
         if (aCommit)
@@ -1197,7 +1196,7 @@ namespace neogfx
     {
         if (aUpdateReason == header_view_update_reason::FullUpdate)
         {
-            if (iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value()))
+            if (iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value(), true))
                 make_visible(iVisibleItem.value());
         }
         layout_items();

@@ -369,7 +369,7 @@ namespace neogfx
     {
         iSink = base_type::ChildAdded([&](i_widget& aWidget)
         {
-            if (!iScrollbarUpdater)
+            if (!iScrollbarUpdater && !iSuppressScrollbarVisibilityUpdates)
                 iScrollbarUpdater.emplace(*this, [this](widget_timer&) 
             { 
                 update_scrollbar_visibility(); 
@@ -377,7 +377,7 @@ namespace neogfx
         });
         iSink += base_type::ChildRemoved([&](i_widget& aWidget)
         {
-            if (!iScrollbarUpdater)
+            if (!iScrollbarUpdater && !iSuppressScrollbarVisibilityUpdates)
                 iScrollbarUpdater.emplace(*this, [this](widget_timer&) 
             { 
                 update_scrollbar_visibility();

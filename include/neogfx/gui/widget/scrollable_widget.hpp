@@ -57,6 +57,13 @@ namespace neogfx
             UsvStageCheckVertical2,
             UsvStageDone
         };
+        class suppress_scrollbar_visibility_updates : neolib::scoped_flag
+        {
+        public:
+            suppress_scrollbar_visibility_updates(self_type& aParent) :
+                neolib::scoped_flag{ aParent.iSuppressScrollbarVisibilityUpdates }
+            {}
+        };
     public:
         template <typename... Args>
         scrollable_widget(Args&&... aArgs) :
@@ -71,7 +78,8 @@ namespace neogfx
             iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
-            iMovingWidgets{ false }
+            iMovingWidgets{ false },
+            iSuppressScrollbarVisibilityUpdates{ false }
         {
             init();
         }
@@ -88,7 +96,8 @@ namespace neogfx
             iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
-            iMovingWidgets{ false }
+            iMovingWidgets{ false },
+            iSuppressScrollbarVisibilityUpdates{ false }
         {
             init();
         }
@@ -105,7 +114,8 @@ namespace neogfx
             iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
-            iMovingWidgets{ false }
+            iMovingWidgets{ false },
+            iSuppressScrollbarVisibilityUpdates{ false }
         {
             init();
         }
@@ -171,6 +181,7 @@ namespace neogfx
         uint32_t iIgnoreScrollbarUpdates;
         bool iUpdatingScrollbarVisibility;
         bool iMovingWidgets;
+        bool iSuppressScrollbarVisibilityUpdates;
     };
 
     extern template class scrollable_widget<framed_widget<widget<>>>;

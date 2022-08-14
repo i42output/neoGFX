@@ -84,7 +84,7 @@ namespace neogfx
         void disable_hot_tracking();
     public:
         bool is_valid(item_presentation_model_index const& aItemIndex) const;
-        bool is_visible(item_presentation_model_index const& aItemIndex) const;
+        bool is_visible(item_presentation_model_index const& aItemIndex, bool aPartiallyVisible = false) const;
         bool make_visible(item_presentation_model_index const& aItemIndex);
         const optional_item_presentation_model_index& editing() const;
         void edit(item_presentation_model_index const& aItemIndex);

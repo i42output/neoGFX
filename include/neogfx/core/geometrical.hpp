@@ -897,6 +897,11 @@ namespace neogfx
                     return basic_rect{};
             }
         }
+        bool intersects(const self_type& aOther) const
+        {
+            auto const& test = intersection(aOther);
+            return test != basic_rect{};
+        }
         self_type& center_on(const self_type& other)
         {
             *this = centered_on(other);

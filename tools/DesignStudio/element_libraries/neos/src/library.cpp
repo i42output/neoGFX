@@ -34,7 +34,8 @@ namespace neogfx::DesignStudio
     {
     public:
         neos_session() :
-            console{ "neos" }
+            console{ "neos" },
+            iContext{ cout }
         {
             command([&](std::string const& aCommand)
             {
@@ -47,8 +48,8 @@ namespace neogfx::DesignStudio
             auto output_compilation_time = [&]()
             {
                 cout << "Compilation time: "s <<
-                    std::chrono::duration_cast<std::chrono::microseconds>(iContext.compiler().end_time() - iContext.compiler().start_time()).count() / 1000.0 << "ms" << std::endl;
-                output().trigger(cout.str());
+                    std::chrono::duration_cast<std::chrono::microseconds>(iContext.compiler().end_time() - 
+                        iContext.compiler().start_time()).count() / 1000.0 << "ms" << std::endl;
             };
 
             auto previousCurrentPath = std::filesystem::current_path();
@@ -173,19 +174,19 @@ namespace neogfx::DesignStudio
             {
                 cerr << "Unknown error" << std::endl;
             }
-            output().trigger(boost::replace_all_copy(cerr.str(), "\n", "\r\n"));
             output().trigger(boost::replace_all_copy(cout.str(), "\n", "\r\n"));
-            cerr.str({});
+            output().trigger(boost::replace_all_copy(cerr.str(), "\n", "\r\n"));
             cout.str({});
+            cerr.str({});
             std::filesystem::current_path(previousCurrentPath);
 
             return true;
         }
     private:
-        neos::context iContext;
-        bool iInteractive;
         std::ostringstream cout;
         std::ostringstream cerr;
+        neos::context iContext;
+        bool iInteractive;
     };
 
     neos_element_library::neos_element_library(neolib::i_application& aApplication, std::string const& aPluginPath) :
