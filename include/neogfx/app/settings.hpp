@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-    typedef neolib::pair<font_info, text_attributes> extended_font;
+    typedef neolib::pair<font_info, text_format> extended_font;
 }
 
 define_setting_type(neogfx::extended_font)

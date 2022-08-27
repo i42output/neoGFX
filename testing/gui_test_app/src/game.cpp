@@ -234,18 +234,18 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                 debugText << "Collision tree (quadtree) depth: " << ecs.system<ng::game::collision_detector>().broadphase_2d_tree().depth() << "\n";
                 // debugText << "Collision tree (quadtree) update type: " << (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") << "\n";
                 gc.draw_multiline_text(ng::point{ 64.0, 128.0 }, debugText.str(), debugFont,
-                    ng::text_attributes{ ng::color::PowderBlue, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+                    ng::text_format{ ng::color::PowderBlue, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             }
 
             std::ostringstream text;
             auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
             text.fill('0');
             text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
-            gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_attributes{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             text.str({});
             text.fill('0');
             text << std::setw(6) << gameState->score;
-            gc.draw_text(ng::point{ canvas.client_rect().right() - 250.0, 0.0}, text.str(), scoreFont, ng::text_attributes{ ng::color::Goldenrod, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            gc.draw_text(ng::point{ canvas.client_rect().right() - 250.0, 0.0}, text.str(), scoreFont, ng::text_format{ ng::color::Goldenrod, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
         }
     });
 

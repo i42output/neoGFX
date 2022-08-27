@@ -489,7 +489,7 @@ namespace neogfx::nrc
                 }
             }
             else if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::GroupBox)
-                return ".contents_layout()";
+                return ".item_layout()";
             else if ((parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::StatusBar)
                 return ".normal_layout()";
             else

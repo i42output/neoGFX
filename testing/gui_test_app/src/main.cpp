@@ -795,7 +795,7 @@ int main(int argc, char* argv[])
             auto bd = ng::dialog_button_box::standard_button_details(static_cast<ng::standard_button>(standardButton));
             if (bd.first != ng::button_role::Invalid)
             {
-                auto& button = window.groupMessageBoxButtons.contents_layout().emplace<ng::check_box>(bd.second);
+                auto& button = window.groupMessageBoxButtons.item_layout().emplace<ng::check_box>(bd.second);
                 button.checked([&standardButtons, standardButton]() { standardButtons |= standardButton; });
                 button.Unchecked([&standardButtons, standardButton]() { standardButtons &= ~standardButton; });
             }
@@ -1130,7 +1130,7 @@ int main(int argc, char* argv[])
             aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColor, 1.0 });
             aGc.draw_line(aOrigin + ng::point{ 0.0, 0.0 }, aOrigin + ng::point{ 64.0, 64.0 }, ng::pen{ aColor, aDpiScale * 4.0 });
             aGc.draw_line(aOrigin + ng::point{ 64.0, 0.0 }, aOrigin + ng::point{ 0.0, 64.0 }, ng::pen{ aColor, aDpiScale * 4.0 });
-            aGc.draw_multiline_text(aOrigin + ng::point{ 4.0, 4.0 }, aText, renderToTextureFont, ng::text_attributes{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            aGc.draw_multiline_text(aOrigin + ng::point{ 4.0, 4.0 }, aText, renderToTextureFont, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             aGc.draw_pixel(aOrigin + ng::point{ 2.0, 2.0 }, ng::color{ 0xFF, 0x01, 0x01, 0xFF });
             aGc.draw_pixel(aOrigin + ng::point{ 3.0, 2.0 }, ng::color{ 0x02, 0xFF, 0x02, 0xFF });
             aGc.draw_pixel(aOrigin + ng::point{ 4.0, 2.0 }, ng::color{ 0x03, 0x03, 0xFF, 0xFF });
@@ -1335,7 +1335,7 @@ int main(int argc, char* argv[])
             {
                 aGc.draw_multiline_text(ng::point{ 32.0, 32.0 }, 
                     "WARNING\n\n\nTHIS TEST CAN POTENTIALLY TRIGGER\nSEIZURES FOR PEOPLE WITH\nPHOTOSENSITIVE EPILEPSY\n\nDISCRETION IS ADVISED", 
-                    infoFont, 0.0, ng::text_attributes{ ng::color::Coral, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } }, ng::alignment::Center);
+                    infoFont, 0.0, ng::text_format{ ng::color::Coral, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } }, ng::alignment::Center);
                 return;
             }
             if (!ecs)
@@ -1391,7 +1391,7 @@ int main(int argc, char* argv[])
                     currentInfoText = newInfoText.str();
                     infoGlyphText = aGc.to_glyph_text(currentInfoText, infoFont);
                 }
-                aGc.draw_multiline_glyph_text(ng::point{ 32.0, 32.0 }, *infoGlyphText, 0.0, ng::text_attributes{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+                aGc.draw_multiline_glyph_text(ng::point{ 32.0, 32.0 }, *infoGlyphText, 0.0, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
             }
         });
 

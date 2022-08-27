@@ -180,7 +180,7 @@ namespace neogfx
             }
             if (y + ce.cy >= cr.top() && y < cr.bottom())
             {
-                thread_local text_attribute_spans attributes;
+                thread_local text_format_spans attributes;
                 attributes.clear();
                 for (auto& g : *line.glyphs)
                 {
@@ -191,9 +191,9 @@ namespace neogfx
                     if (line.attributes[g.source.first].underline)
                         set_underline(g, true);
                     optional_text_effect effect;
-                    if (iTextAttributes)
+                    if (iTextFormat)
                     {
-                        effect = iTextAttributes->effect();
+                        effect = iTextFormat->effect();
                         if (effect && effect->type() == text_effect_type::Glow)
                         {
                             if (std::holds_alternative<color>(effect->color()))
@@ -235,9 +235,9 @@ namespace neogfx
         iAlternateBuffer.cursor.set_width(character_extents().cx);
     }
 
-    void terminal::set_text_attributes(optional_text_attributes const& aTextAttributes)
+    void terminal::set_text_format(optional_text_format const& aTextFormat)
     {
-        iTextAttributes = aTextAttributes;
+        iTextFormat = aTextFormat;
         update();
     }
 
@@ -1308,7 +1308,7 @@ namespace neogfx
             set_buffer_origin( buffer_origin() + 
                 point_type{ 0, (static_cast<coordinate_type>(active_buffer().lines.size() - oldBufferSize)) });
 
-        return active_buffer().lines[aLine];
+        return active_buffer().lines[std::min(static_cast<coordinate_type>(active_buffer().lines.size() - 1), aLine)];
     }
 
     char32_t& terminal::character(point_type const& aBufferPos)

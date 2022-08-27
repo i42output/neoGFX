@@ -50,7 +50,7 @@ namespace neogfx::DesignStudio
             {
                 auto const& consoleExtendedFont = consoleExtendedFontSetting.value<neogfx::extended_font>(true);
                 iTerminal.set_font(consoleExtendedFont.first());
-                iTerminal.set_text_attributes(consoleExtendedFont.second());
+                iTerminal.set_text_format(consoleExtendedFont.second());
             };
             consoleExtendedFontSetting.changed(font_changed);
             font_changed();

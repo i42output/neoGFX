@@ -38,14 +38,14 @@ namespace neogfx
     public:
         define_event(SelectionChanged, selection_changed)
     public:
-        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAttributes = {});
-        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_attributes> const& aCurrentAttributes = {});
+        font_dialog(neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_format> const& aCurrentTextFormat = {});
+        font_dialog(i_widget& aParent, neogfx::font const& aCurrentFont = neogfx::font{}, optional<text_format> const& aCurrentTextFormat = {});
         ~font_dialog();
     public:
         neogfx::font current_font() const;
         neogfx::font selected_font() const;
-        optional<text_attributes> const& current_attributes() const;
-        optional<text_attributes> const& selected_attributes() const;
+        optional<text_format> const& current_format() const;
+        optional<text_format> const& selected_format() const;
         void select_font(neogfx::font const& aFont);
         void set_default_ink(const optional<color>& aColor);
         void set_default_paper(const optional<color>& aColor);
@@ -54,15 +54,15 @@ namespace neogfx
     private:
         void init();
         void update_selected_font(i_widget const& aUpdatingWidget);
-        void update_selected_attributes(i_widget const& aUpdatingWidget);
+        void update_selected_format(i_widget const& aUpdatingWidget);
         void update_widgets();
     private:
         sink iSink;
         bool iUpdating;
         neogfx::font iCurrentFont;
         neogfx::font iSelectedFont;
-        optional<text_attributes> iCurrentAttributes;
-        optional<text_attributes> iSelectedAttributes;
+        optional<text_format> iCurrentTextFormat;
+        optional<text_format> iSelectedTextFormat;
         optional<color> iDefaultInk;
         optional<color> iDefaultPaper;
         horizontal_layout iLayout0;
@@ -83,8 +83,8 @@ namespace neogfx
         check_box iSuperscript;
         check_box iSubscript;
         check_box iBelowAscenderLine;
-        widget<> iAttributesContainer;
-        horizontal_layout iLayoutAttributes;
+        widget<> iTextFormatContainer;
+        horizontal_layout iLayoutTextFormat;
         group_box iInkBox;
         radio_button iInkColor;
         radio_button iInkGradient;
@@ -109,8 +109,8 @@ namespace neogfx
             group_box box;
             slider_box slider;
             text_effect_width(font_dialog& aParent) :
-                box{ aParent.iAdvancedEffectsBox.contents_layout(), "Width"_t },
-                slider{ box.with_contents_layout<vertical_layout>() }
+                box{ aParent.iAdvancedEffectsBox.item_layout(), "Width"_t },
+                slider{ box.with_item_layout<vertical_layout>() }
             {
             }
         };

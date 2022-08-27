@@ -291,19 +291,19 @@ namespace neogfx
                         aSink += settingWidget->SelectionChanged([&, settingWidget]()
                             {
                                 if (!settingWidget->updating)
-                                    aSetting.set_value(extended_font{ settingWidget->selected_font(), settingWidget->selected_attributes() });
+                                    aSetting.set_value(extended_font{ settingWidget->selected_font(), settingWidget->selected_format() });
                             });
                         aSink += aSetting.changing([&, settingWidget]()
                             {
                                 neolib::scoped_flag sf{ settingWidget->updating };
                                 settingWidget->select_font(aSetting.value<extended_font>(true).first());
-                                settingWidget->select_attributes(aSetting.value<extended_font>(true).second());
+                                settingWidget->select_format(aSetting.value<extended_font>(true).second());
                             });
                         aSink += aSetting.changed([&, settingWidget]()
                             {
                                 neolib::scoped_flag sf{ settingWidget->updating };
                                 settingWidget->select_font(aSetting.value<extended_font>(true).first());
-                                settingWidget->select_attributes(aSetting.value<extended_font>(true).second());
+                                settingWidget->select_format(aSetting.value<extended_font>(true).second());
                             });
                         result = settingWidget;
                     }

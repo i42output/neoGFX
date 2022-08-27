@@ -97,7 +97,7 @@ namespace neogfx
     public:
         using base_type::font;
         void set_font(optional_font const& aFont) override;
-        void set_text_attributes(optional_text_attributes const& aTextAttributes) override;
+        void set_text_format(optional_text_format const& aTextFormat) override;
     public:
         neogfx::focus_policy focus_policy() const override;
         void focus_gained(focus_reason aFocusReason) override;
@@ -156,7 +156,7 @@ namespace neogfx
         mutable optional_font iItalicFont;
         mutable optional_font iBoldItalicFont;
         mutable optional_size iCharacterExtents;
-        optional_text_attributes iTextAttributes;
+        optional_text_format iTextFormat;
         buffer iPrimaryBuffer = {};
         buffer iAlternateBuffer = {};
         buffer* iActiveBuffer = &iPrimaryBuffer;

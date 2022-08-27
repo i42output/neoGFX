@@ -167,8 +167,8 @@ namespace neogfx
         aGc.draw_rect(r, pen{ palette_color(color_role::Void), 1.0 });
         r.deflate(1.0, 1.0);
 
-        if (iParent.has_attributes())
-            aGc.draw_glyph_text(r.top_left(), sample_text(), iParent.selected_attributes());
+        if (iParent.has_format())
+            aGc.draw_glyph_text(r.top_left(), sample_text(), iParent.selected_format());
         else
             aGc.draw_glyph_text(r.top_left(), sample_text(), text_color());
     }
@@ -196,14 +196,14 @@ namespace neogfx
         init();
     }
 
-    font_widget::font_widget(const neogfx::font& aCurrentFont, const text_attributes& aCurrentAttributes, font_widget_style aStyle) :
+    font_widget::font_widget(const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle) :
         framed_widget<>{},
         iUpdating{ false },
         iStyle{ aStyle },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iCurrentAttributes{ aCurrentAttributes },
-        iSelectedAttributes{ aCurrentAttributes },
+        iCurrentTextFormat{ aCurrentTextFormat },
+        iSelectedTextFormat{ aCurrentTextFormat },
         iLayout0{ *this }
     {
         init();
@@ -220,14 +220,14 @@ namespace neogfx
         init();
     }
 
-    font_widget::font_widget(i_widget& aParent, const neogfx::font& aCurrentFont, const text_attributes& aCurrentAttributes, font_widget_style aStyle) :
+    font_widget::font_widget(i_widget& aParent, const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle) :
         framed_widget<>{ aParent },
         iUpdating{ false },
         iStyle{ aStyle },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iCurrentAttributes{ aCurrentAttributes },
-        iSelectedAttributes{ aCurrentAttributes },
+        iCurrentTextFormat{ aCurrentTextFormat },
+        iSelectedTextFormat{ aCurrentTextFormat },
         iLayout0{ *this }
     {
         init();
@@ -244,14 +244,14 @@ namespace neogfx
         init();
     }
 
-    font_widget::font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont, const text_attributes& aCurrentAttributes, font_widget_style aStyle) :
+    font_widget::font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle) :
         framed_widget<>{ aLayout },
         iUpdating{ false },
         iStyle{ aStyle },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iCurrentAttributes{ aCurrentAttributes },
-        iSelectedAttributes{ aCurrentAttributes },
+        iCurrentTextFormat{ aCurrentTextFormat },
+        iSelectedTextFormat{ aCurrentTextFormat },
         iLayout0{ *this }
     {
         init();
@@ -271,19 +271,19 @@ namespace neogfx
         return iSelectedFont;
     }
 
-    bool font_widget::has_attributes() const
+    bool font_widget::has_format() const
     {
-        return iSelectedAttributes.has_value();
+        return iSelectedTextFormat.has_value();
     }
 
-    text_attributes font_widget::current_attributes() const
+    text_format font_widget::current_format() const
     {
-        return iCurrentAttributes.has_value() ? *iCurrentAttributes : text_attributes{};
+        return iCurrentTextFormat.has_value() ? *iCurrentTextFormat : text_format{};
     }
 
-    text_attributes font_widget::selected_attributes() const
+    text_format font_widget::selected_format() const
     {
-        return iSelectedAttributes.has_value() ? *iSelectedAttributes : text_attributes{};
+        return iSelectedTextFormat.has_value() ? *iSelectedTextFormat : text_format{};
     }
     
     void font_widget::select_font(const neogfx::font& aFont)
@@ -292,10 +292,10 @@ namespace neogfx
         update_selected_font(*this);
     }
 
-    void font_widget::select_attributes(const text_attributes& aAttributes)
+    void font_widget::select_format(const text_format& aTextFormat)
     {
-        iSelectedAttributes = aAttributes;
-        update_selected_attributes(*this);
+        iSelectedTextFormat = aTextFormat;
+        update_selected_format(*this);
     }
 
     void font_widget::init()
@@ -305,25 +305,25 @@ namespace neogfx
             iFontPicker.emplace(*this);
             iFontPicker->Clicked([&]()
             {
-                font_dialog fd{ *this, selected_font(), has_attributes() ? 
-                    optional<text_attributes>{ selected_attributes() } : std::nullopt };
+                font_dialog fd{ *this, selected_font(), has_format() ? 
+                    optional<text_format>{ selected_format() } : std::nullopt };
                 fd.SelectionChanged([&]
                 {
                     select_font(fd.selected_font());
-                    if (has_attributes())
-                        select_attributes(fd.selected_attributes().value());
+                    if (has_format())
+                        select_format(fd.selected_format().value());
                 });
                 if (fd.exec() == dialog_result::Accepted)
                 {
                     select_font(fd.selected_font());
-                    if (has_attributes())
-                        select_attributes(fd.selected_attributes().value());
+                    if (has_format())
+                        select_format(fd.selected_format().value());
                 }
                 else
                 {
                     select_font(current_font());
-                    if (has_attributes())
-                        select_attributes(current_attributes());
+                    if (has_format())
+                        select_format(current_format());
                 }
             });
         }
@@ -440,7 +440,7 @@ namespace neogfx
             SelectionChanged.trigger();
     }
 
-    void font_widget::update_selected_attributes(const i_widget& aUpdatingWidget)
+    void font_widget::update_selected_format(const i_widget& aUpdatingWidget)
     {
         if (iUpdating)
             return;

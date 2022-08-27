@@ -323,9 +323,9 @@ namespace neogfx
         return iTextEffect;
     }
 
-    text_attributes text_edit::character_style::as_text_attributes() const
+    text_format text_edit::character_style::as_text_format() const
     {
-        return text_attributes{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
+        return text_format{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
     }
 
     text_edit::character_style& text_edit::character_style::set_font(optional_font const& aFont)
@@ -365,13 +365,13 @@ namespace neogfx
         return *this;
     }
 
-    text_edit::character_style& text_edit::character_style::set_from_text_attributes(const text_attributes& aTextAttributes)
+    text_edit::character_style& text_edit::character_style::set_from_text_format(const text_format& aTextFormat)
     {
-        iGlyphColor = aTextAttributes.ink();
+        iGlyphColor = aTextFormat.ink();
         iTextColor = neolib::none; // todo
-        iPaperColor = aTextAttributes.paper() ? *aTextAttributes.paper() : neolib::none;
-        iIgnoreEmoji = aTextAttributes.ignore_emoji();
-        iTextEffect = aTextAttributes.effect();
+        iPaperColor = aTextFormat.paper() ? *aTextFormat.paper() : neolib::none;
+        iIgnoreEmoji = aTextFormat.ignore_emoji();
+        iTextEffect = aTextFormat.effect();
         return *this;
     }
 
@@ -2767,7 +2767,7 @@ namespace neogfx
             --lineEnd;
         {
             thread_local std::optional<glyph_text> tGlyphText;
-            optional_text_attributes textAppearance;
+            optional_text_format textAppearance;
             point textPos = aPosition;
             point glyphPos = aPosition;
             for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
@@ -2787,11 +2787,11 @@ namespace neogfx
                         default_text_color() : 
                     style.character().glyph_color(), client_rect(), true);
                 auto const& nextTextAppearance = !selected ?
-                    text_attributes{
+                    text_format{
                         glyphColor,
                         style.character().paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.character().paper_color() } } : optional_text_color{},
                         style.character().text_effect() }.with_emoji_ignored(style.character().ignore_emoji()) :
-                    text_attributes{
+                    text_format{
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)

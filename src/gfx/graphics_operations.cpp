@@ -120,7 +120,7 @@ namespace neogfx
             return true;
         };
 
-        bool batchable(text_attributes const& aLeft, text_attributes const& aRight)
+        bool batchable(text_format const& aLeft, text_format const& aRight)
         {
             if (!batchable(aLeft.ink(), aRight.ink()))
                 return false;

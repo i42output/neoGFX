@@ -320,7 +320,7 @@ namespace neogfx
             glyph_text glyphText;
             glyph_text::const_iterator begin;
             glyph_text::const_iterator end;
-            text_attribute_spans attributes;
+            text_format_spans attributes;
             bool showMnemonics;
         };
 
@@ -439,7 +439,7 @@ namespace neogfx
         std::string to_string(operation_type aOpType);
 
         bool batchable(const operation& aLeft, const operation& aRight);
-        bool batchable(text_attributes const& aLeft, text_attributes const& aRight);
+        bool batchable(text_format const& aLeft, text_format const& aRight);
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs);
 
         typedef std::vector<operation> queue;

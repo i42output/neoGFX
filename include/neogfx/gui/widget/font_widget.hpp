@@ -69,32 +69,32 @@ namespace neogfx
         };
     public:
         font_widget(const neogfx::font& aCurrentFont = neogfx::font{}, font_widget_style aStyle = font_widget_style::Dialog);
-        font_widget(const neogfx::font& aCurrentFont, const text_attributes& aCurrentAttributes, font_widget_style aStyle = font_widget_style::Dialog);
+        font_widget(const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle = font_widget_style::Dialog);
         font_widget(i_widget& aParent, const neogfx::font& aCurrentFont = neogfx::font{}, font_widget_style aStyle = font_widget_style::Dialog);
-        font_widget(i_widget& aParent, const neogfx::font& aCurrentFont, const text_attributes& aCurrentAttributes, font_widget_style aStyle = font_widget_style::Dialog);
+        font_widget(i_widget& aParent, const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle = font_widget_style::Dialog);
         font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont = neogfx::font{}, font_widget_style aStyle = font_widget_style::Dialog);
-        font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont, const text_attributes& aCurrentAttributes, font_widget_style aStyle = font_widget_style::Dialog);
+        font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle = font_widget_style::Dialog);
         ~font_widget();
     public:
         neogfx::font current_font() const;
         neogfx::font selected_font() const;
-        bool has_attributes() const;
-        neogfx::text_attributes current_attributes() const;
-        neogfx::text_attributes selected_attributes() const;
+        bool has_format() const;
+        neogfx::text_format current_format() const;
+        neogfx::text_format selected_format() const;
         void select_font(const neogfx::font& aFont);
-        void select_attributes(const text_attributes& aAttributes);
+        void select_format(const text_format& aTextFormat);
     private:
         void init();
         void update_selected_font(const i_widget& aUpdatingWidget);
-        void update_selected_attributes(const i_widget& aUpdatingWidget);
+        void update_selected_format(const i_widget& aUpdatingWidget);
     private:
         sink iSink;
         bool iUpdating;
         font_widget_style iStyle;
         neogfx::font iCurrentFont;
         neogfx::font iSelectedFont;
-        std::optional<text_attributes> iCurrentAttributes;
-        std::optional<text_attributes> iSelectedAttributes;
+        std::optional<text_format> iCurrentTextFormat;
+        std::optional<text_format> iSelectedTextFormat;
         horizontal_layout iLayout0;
         std::optional<drop_list> iFamilyPicker;
         std::optional<drop_list> iStylePicker;

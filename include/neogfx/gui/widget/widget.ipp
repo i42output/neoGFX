@@ -1337,12 +1337,12 @@ namespace neogfx
             {
                 if (debug::layoutItem == this)
                 {
-                    aGc.draw_text(self.position(), typeid(*this).name(), debugFont1, text_attributes{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    aGc.draw_text(self.position(), typeid(*this).name(), debugFont1, text_format{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     std::ostringstream oss;
                     oss << "sizepol: " << size_policy();
                     oss << " minsize: " << minimum_size() << " maxsize: " << maximum_size();
                     oss << " fixsize: " << (self.has_fixed_size() ? self.fixed_size() : optional_size{}) << " weight: " << self.weight() << " extents: " << self.extents();
-                    aGc.draw_text(self.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_attributes{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                    aGc.draw_text(self.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_format{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                 }
             }
             rect const nonClientRect = to_client_coordinates(non_client_rect());
@@ -1364,12 +1364,12 @@ namespace neogfx
                 {
                     if (debug::layoutItem != this)
                     {
-                        aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_attributes{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                        aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_format{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                         std::ostringstream oss;
                         oss << "sizepol: " << debugLayout.size_policy();
                         oss << " minsize: " << debugLayout.minimum_size() << " maxsize: " << debugLayout.maximum_size();
                         oss << " fixsize: " << (debugLayout.has_fixed_size() ? debugLayout.fixed_size() : optional_size{}) << " weight: " << debugLayout.weight() << " extents: " << debugLayout.extents();
-                        aGc.draw_text(debugLayout.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_attributes{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
+                        aGc.draw_text(debugLayout.position() + size{ 0.0, debugFont1.height() }, oss.str(), debugFont2, text_format{ color::Orange.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     }
                 }
                 for (layout_item_index itemIndex = 0; itemIndex < debugLayout.count(); ++itemIndex)
@@ -1384,7 +1384,7 @@ namespace neogfx
                             l = &l->parent_layout();
                             text = typeid(*l).name() + " > "_s + text;
                         }
-                        aGc.draw_text(item.position(), text, debugFont2, text_attributes{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
+                        aGc.draw_text(item.position(), text, debugFont2, text_format{ color::White.with_alpha(0.5), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.5), 2.0 } });
                     }
                     rect const itemRect{ item.position(), item.extents() };
                     aGc.draw_rect(itemRect, color::White.with_alpha(0.5));
