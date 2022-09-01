@@ -33,9 +33,9 @@ namespace neogfx::DesignStudio
     class neos_session : public console
     {
     public:
-        neos_session() :
+        neos_session(neolib::i_service_provider& aServiceProvider) :
             console{ "neos" },
-            iContext{ cout }
+            iContext{ cout, aServiceProvider }
         {
             command([&](std::string const& aCommand)
             {
@@ -251,7 +251,7 @@ namespace neogfx::DesignStudio
                 {
                     if (bits[0] == "neos")
                     {
-                        aClient = make_ref<neos_session>();
+                        aClient = make_ref<neos_session>(neolib::get_service_provider());
                     }
                 }
             });

@@ -454,10 +454,10 @@ namespace neogfx
                 glyph_pixel_mode::LCD);
             // todo: render an invalid glyph symbol
             graphics_context gc{ iInvalidGlyph->texture() };
-            rect r{ point{}, em_size().ceil() };
+            auto const& r = iInvalidGlyph->texture().atlas_location() + point{ 1.0, 1.0 } + neogfx::size{ -1.0, -1.0 };
             gc.draw_rect(r, color::White);
-            gc.draw_line(r.top_left(), r.bottom_right(), color::White);
-            gc.draw_line(r.top_right(), r.bottom_left(), color::White);
+            gc.draw_line(r.top_left(), r.bottom_right() + point{ -1.0, -1.0 }, color::White);
+            gc.draw_line(r.top_right() + point{ -1.0, 0.0 }, r.bottom_left() + point{ 0.0, -1.0 }, color::White);
         }
         return *iInvalidGlyph;
     }
