@@ -23,7 +23,7 @@
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
-#include <neogfx/gui/layout/layout_item_cache.hpp>
+#include <neogfx/gui/layout/i_layout_item_cache.hpp>
 
 namespace neogfx
 {
@@ -42,8 +42,7 @@ namespace neogfx
         typedef self_type property_context_type;
         // construction
     public:
-        layout_item() :
-            iCache{ make_ref<layout_item_cache>(*this) }
+        layout_item()
         {
         }
         ~layout_item()
@@ -52,13 +51,18 @@ namespace neogfx
         }
         // implementation
     public:
-        const i_string& id() const override
+        const i_string& id() const final
         {
             return iId;
         }
-        void set_id(const i_string& aId) override
+        void set_id(const i_string& aId) final
         {
             iId = aId;
+        }
+    public:
+        bool is_cache() const final
+        {
+            return false;
         }
     public:
         bool is_layout() const final
@@ -176,18 +180,6 @@ namespace neogfx
         i_widget& layout_manager() final
         {
             return const_cast<i_widget&>(to_const(*this).layout_manager());
-        }
-        bool is_layout_item_cache() const final
-        {
-            return false;
-        }
-        const i_layout_item_cache& as_layout_item_cache() const final
-        {
-            return *iCache;
-        }
-        i_layout_item_cache& as_layout_item_cache() final
-        {
-            return *iCache;
         }
     public:
         void update_layout(bool aDeferLayout = true, bool aAncestors = false) final
@@ -483,12 +475,12 @@ namespace neogfx
             optional_mat33 newTransformation = (aTransformation != std::nullopt ? *aTransformation : optional_mat33{});
             if (Transformation != newTransformation)
             {
-                invalidate_combined_transformation();
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
                     service<debug::logger>() << typeid(*this).name() << "::set_transformation(" << aTransformation << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 Transformation.assign(newTransformation, aUpdateLayout);
+                invalidate_combined_transformation();
                 if (aUpdateLayout)
                     update_layout();
             }
@@ -687,7 +679,6 @@ namespace neogfx
     private:
         string iId;
         mutable optional_point iOrigin;
-        ref_ptr<i_layout_item_cache> iCache;
         mutable optional_mat33 iCombinedTransformation;
     };
 }

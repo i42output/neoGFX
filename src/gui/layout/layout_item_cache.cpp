@@ -32,8 +32,7 @@ namespace neogfx
     }
 
     layout_item_cache::layout_item_cache(i_ref_ptr<i_layout_item> const& aItem) :
-        iSubject{ aItem }, 
-        iSubjectIsCache{ aItem->is_layout_item_cache() }, 
+        iSubject{ aItem },  
         iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
         iWeight{ static_cast<uint32_t>(-1), {} },
@@ -49,7 +48,6 @@ namespace neogfx
 
     layout_item_cache::layout_item_cache(const layout_item_cache& aOther) :
         iSubject{ aOther.iSubject }, 
-        iSubjectIsCache{ aOther.iSubject->is_layout_item_cache() }, 
         iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } },
         iWeight{ static_cast<uint32_t>(-1), {} },
@@ -69,16 +67,9 @@ namespace neogfx
 
     i_layout_item& layout_item_cache::subject() const
     {
-        if (iSubject->is_layout_item_cache())
-            return iSubject->as_layout_item_cache().subject();
         return *iSubject;
     }
-
-    i_ref_ptr<i_layout_item>& layout_item_cache::subject_ptr()
-    {
-        return iSubject;
-    }
-
+  
     layout_item_disposition& layout_item_cache::cached_disposition() const
     {
         return iCachedDisposition;
@@ -107,6 +98,11 @@ namespace neogfx
     void layout_item_cache::set_id(const i_string& aId)
     {
         subject().set_id(aId);
+    }
+
+    bool layout_item_cache::is_cache() const
+    {
+        return true;
     }
 
     bool layout_item_cache::is_layout() const
@@ -188,8 +184,7 @@ namespace neogfx
 
     void layout_item_cache::set_parent_layout(i_layout* aParentLayout)
     {
-        if (!subject_is_layout_item_cache())
-            subject().set_parent_layout(aParentLayout);
+        subject().set_parent_layout(aParentLayout);
     }
 
     bool layout_item_cache::has_layout_owner() const
@@ -211,8 +206,7 @@ namespace neogfx
 
     void layout_item_cache::set_layout_owner(i_widget* aOwner)
     {
-        if (!subject_is_layout_item_cache())
-            subject().set_layout_owner(aOwner);
+        subject().set_layout_owner(aOwner);
     }
 
     bool layout_item_cache::has_layout_manager() const
@@ -230,21 +224,6 @@ namespace neogfx
     i_widget& layout_item_cache::layout_manager()
     {
         return const_cast<i_widget&>(to_const(*this).layout_manager());
-    }
-
-    bool layout_item_cache::is_layout_item_cache() const
-    {
-        return true;
-    }
-
-    const i_layout_item_cache& layout_item_cache::as_layout_item_cache() const
-    {
-        return *this;
-    }
-
-    i_layout_item_cache& layout_item_cache::as_layout_item_cache()
-    {
-        return *this;
     }
 
     void layout_item_cache::update_layout(bool aDeferLayout, bool aAncestors)
@@ -716,10 +695,5 @@ namespace neogfx
     bool layout_item_cache::operator==(const layout_item_cache& aOther) const
     {
         return iSubject == aOther.iSubject;
-    }
-
-    bool layout_item_cache::subject_is_layout_item_cache() const
-    {
-        return iSubjectIsCache;
     }
 }

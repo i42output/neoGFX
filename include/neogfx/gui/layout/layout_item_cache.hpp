@@ -43,6 +43,8 @@ namespace neogfx
         const i_string& id() const final;
         void set_id(const i_string& aId) final;
     public:
+        bool is_cache() const final;
+    public:
         bool is_layout() const final;
         const i_layout& as_layout() const final;
         i_layout& as_layout() final;
@@ -68,9 +70,6 @@ namespace neogfx
         bool has_layout_manager() const final;
         const i_widget& layout_manager() const final;
         i_widget& layout_manager() final;
-        bool is_layout_item_cache() const final;
-        const i_layout_item_cache& as_layout_item_cache() const final;
-        i_layout_item_cache& as_layout_item_cache() final;
     public:
         bool high_dpi() const final;
         dimension dpi_scale_factor() const final;
@@ -134,16 +133,12 @@ namespace neogfx
         void fix_weightings(bool aRecalculate = true) final;
     public:
         i_layout_item& subject() const final;
-        i_ref_ptr<i_layout_item>& subject_ptr() final;
     public:
         layout_item_disposition& cached_disposition() const final;
     public:
         bool operator==(const layout_item_cache& aOther) const;
     private:
-        bool subject_is_layout_item_cache() const;
-    private:
         ref_ptr<i_layout_item> iSubject;
-        bool iSubjectIsCache;
         mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;

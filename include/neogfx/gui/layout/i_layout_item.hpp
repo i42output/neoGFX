@@ -55,6 +55,8 @@ namespace neogfx
         virtual const i_string& id() const = 0;
         virtual void set_id(const i_string& aId) = 0;
     public:
+        virtual bool is_cache() const = 0;
+    public:
         virtual bool is_layout() const = 0;
         virtual const i_layout& as_layout() const = 0;
         virtual i_layout& as_layout() = 0;
@@ -80,9 +82,6 @@ namespace neogfx
         virtual bool has_layout_manager() const = 0;
         virtual const i_widget& layout_manager() const = 0;
         virtual i_widget& layout_manager() = 0;
-        virtual bool is_layout_item_cache() const = 0;
-        virtual const i_layout_item_cache& as_layout_item_cache() const = 0;
-        virtual i_layout_item_cache& as_layout_item_cache() = 0;
     public:
         virtual void update_layout(bool aDeferLayout = true, bool aAncestors = false) = 0;
         virtual void layout_as(const point& aPosition, const size& aSize) = 0;

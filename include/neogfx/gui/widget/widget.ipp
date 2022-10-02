@@ -344,14 +344,21 @@ namespace neogfx
         auto existing = find(aChild, false);
         if (existing == iChildren.end())
             return;
-        ref_ptr<i_widget> keep = *existing;
+        destroyed_flag childDestroyed{ aChild };
+        ref_ptr<i_widget> keep = **existing;
         iChildren.erase(existing);
+        if (childDestroyed)
+            return;
         if (aSingular)
             keep->set_singular(true);
         if (has_layout())
             layout().remove(aChild);
+        if (childDestroyed)
+            return;
         if (self_type::has_root())
             self_type::root().widget_removed(aChild);
+        if (childDestroyed)
+            return;
         ChildRemoved.trigger(*keep);
         aChildRef = keep;
     }
@@ -683,7 +690,10 @@ namespace neogfx
             auto itemIndex = parent_layout().find(*this);
             if (itemIndex == std::nullopt)
                 throw i_layout::item_not_found();
-            aOwner->add(dynamic_pointer_cast<i_widget>(self.as_layout_item_cache().subject_ptr()));
+            if (self.use_count())
+                aOwner->add(ref_ptr<i_widget>{ this });
+            else
+                aOwner->add(*this);
         }
     }
 

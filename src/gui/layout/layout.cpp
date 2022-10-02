@@ -206,9 +206,12 @@ namespace neogfx
         if (iOwner != aOwner)
         {
             iOwner = aOwner;
-            for (auto& i : items())
-                if (!i.subject().has_layout_owner())
-                    i.subject().set_layout_owner(aOwner);
+            for (auto& itemRef : items())
+            {
+                auto& item = *itemRef;
+                if (!item.subject().has_layout_owner())
+                    item.subject().set_layout_owner(aOwner);
+            }
         }
     }
 
@@ -231,7 +234,7 @@ namespace neogfx
     {
         if (aItem->is_widget() && (aItem->as_widget().widget_type() & widget_type::Floating) == widget_type::Floating)
             throw widget_is_floating();
-        if (aItem->has_parent_layout() && !aItem->is_layout_item_cache())
+        if (aItem->has_parent_layout())
         {
             if (&aItem->parent_layout() != this) // move
                 aItem->parent_layout().remove(*aItem);
@@ -240,10 +243,11 @@ namespace neogfx
         }
         while (aPosition > items().size())
             add_spacer_at(0);
-        auto i = items().insert(std::next(items().begin(), aPosition), item{ aItem });
-        i->set_parent_layout(this);
+        auto i = items().insert(std::next(items().begin(), aPosition), aItem->is_cache() ?
+            dynamic_pointer_cast<i_layout_item_cache>(aItem) : ref_ptr<i_layout_item_cache>{ make_ref<layout_item_cache>(aItem) });
+        (**i).set_parent_layout(this);
         if (has_layout_owner())
-            i->set_layout_owner(&layout_owner());
+            (**i).set_layout_owner(&layout_owner());
         invalidate();
         return *aItem;
     }
@@ -256,13 +260,13 @@ namespace neogfx
     bool layout::remove(i_layout_item& aItem)
     {
         for (auto i = begin(); i != end(); ++i)
-            if (&i->subject() == &aItem)
+            if (&(**i).subject() == &aItem)
             {
                 remove(i);
                 return true;
             }
         for (auto i = rbegin(); i != rend(); ++i)
-            if (i->subject().is_layout() && i->subject().as_layout().remove(aItem))
+            if ((**i).subject().is_layout() && (**i).subject().as_layout().remove(aItem))
                 return true;
         return false;
     }
@@ -281,7 +285,7 @@ namespace neogfx
             auto& compatibleDestination = dynamic_cast<layout&>(aDestination); // dynamic_cast? not a fan but heh.
             compatibleDestination.items().splice(compatibleDestination.items().end(), iItems);
             for (auto& item : compatibleDestination)
-                item.set_parent_layout(&compatibleDestination);
+                item->set_parent_layout(&compatibleDestination);
         }
         catch (std::bad_cast)
         {
@@ -308,7 +312,7 @@ namespace neogfx
     {
         for (auto i = items().begin(); i != items().end(); ++i)
         {
-            auto const& item = *i;
+            auto const& item = **i;
             if (&item.subject() == &aItem)
                 return static_cast<layout_item_index>(std::distance(items().begin(), i));
         }
@@ -320,7 +324,7 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = std::next(items().begin(), aIndex);
-        return item->is_widget();
+        return (**item).is_widget();
     }
 
     const i_layout_item& layout::item_at(layout_item_index aIndex) const
@@ -328,7 +332,7 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = std::next(items().begin(), aIndex);
-        return item->subject();
+        return (**item).subject();
     }
 
     i_layout_item& layout::item_at(layout_item_index aIndex)
@@ -340,7 +344,7 @@ namespace neogfx
     {
         if (aIndex >= items().size())
             throw bad_item_index();
-        auto item = std::next(items().begin(), aIndex);
+        auto item = *std::next(items().begin(), aIndex);
         if (item->subject().is_widget())
             return item->subject().as_widget();
         throw not_a_widget();
@@ -355,7 +359,7 @@ namespace neogfx
     {
         if (aIndex >= items().size())
             throw bad_item_index();
-        auto item = std::next(items().begin(), aIndex);
+        auto item = *std::next(items().begin(), aIndex);
         if (item->subject().is_layout())
             return item->subject().as_layout();
         throw not_a_layout();
@@ -573,17 +577,18 @@ namespace neogfx
         neogfx::size_policy result{ size_constraint::Minimum, size_constraint::Minimum };
         for (auto& i : items())
         {
-            if (i.is_spacer())
+            auto& item = *i;
+            if (item.is_spacer())
                 continue;
-            if (!i.visible() && !ignore_visibility())
+            if (!item.visible() && !ignore_visibility())
                 continue;
-            if (i.effective_size_policy().horizontal_size_policy() == size_constraint::Expanding)
+            if (item.effective_size_policy().horizontal_size_policy() == size_constraint::Expanding)
                 result.set_horizontal_size_policy(size_constraint::Expanding);
-            else if (i.effective_size_policy().horizontal_size_policy() == size_constraint::Maximum)
+            else if (item.effective_size_policy().horizontal_size_policy() == size_constraint::Maximum)
                 result.set_horizontal_size_policy(size_constraint::Maximum);
-            if (i.effective_size_policy().vertical_size_policy() == size_constraint::Expanding)
+            if (item.effective_size_policy().vertical_size_policy() == size_constraint::Expanding)
                 result.set_vertical_size_policy(size_constraint::Expanding);
-            else if (i.effective_size_policy().vertical_size_policy() == size_constraint::Maximum)
+            else if (item.effective_size_policy().vertical_size_policy() == size_constraint::Maximum)
                 result.set_vertical_size_policy(size_constraint::Maximum);
         }
         return result;
@@ -659,7 +664,7 @@ namespace neogfx
     layout::item_list::const_iterator layout::find_item(const i_layout_item& aItem) const
     {
         for (auto i = items().begin(); i != items().end(); ++i)
-            if (&*i == &aItem || &i->subject() == &aItem)
+            if (&**i == &aItem || &(**i).subject() == &aItem)
                 return i;
         return items().end();
     }
@@ -667,7 +672,7 @@ namespace neogfx
     layout::item_list::iterator layout::find_item(i_layout_item& aItem)
     {
         for (auto i = items().begin(); i != items().end(); ++i)
-            if (&*i == &aItem || &i->subject() == &aItem)
+            if (&**i == &aItem || &(**i).subject() == &aItem)
                 return i;
         return items().end();
     }
@@ -686,7 +691,7 @@ namespace neogfx
     {
         uint32_t count = 0u;
         for (auto const& i : items())
-            if (i.is_spacer())
+            if (i->is_spacer())
                 ++count;
         return count;
     }
@@ -698,12 +703,13 @@ namespace neogfx
             service<debug::logger>() << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << endl;
 #endif // NEOGFX_DEBUG
         {
+            auto& item = **aItem;
             item_list toRemove;
             toRemove.splice(toRemove.begin(), iItems, aItem);
-            if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
+            if (item.has_parent_layout() && &item.parent_layout() == this)
             {
-                aItem->set_parent_layout(nullptr);
-                aItem->set_layout_owner(nullptr);
+                item.set_parent_layout(nullptr);
+                item.set_layout_owner(nullptr);
             }
             update_layout();
         }
@@ -712,7 +718,9 @@ namespace neogfx
     uint32_t layout::items_visible(item_type_e aItemType) const
     {
         uint32_t count = 0u;
-        for (auto const& item : items())
+        for (auto const& itemRef : items())
+        {
+            auto const& item = *itemRef;
             if (item.visible() || ignore_visibility())
             {
                 if ((aItemType & ItemTypeWidget) && item.is_widget())
@@ -722,6 +730,7 @@ namespace neogfx
                 else if ((aItemType & ItemTypeSpacer) && item.is_spacer())
                     ++count;
             }
+        }
         return count;
     }
 }

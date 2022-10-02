@@ -77,6 +77,8 @@ namespace neogfx
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
+        void invalidate_combined_transformation() override;
+    public:
         void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;
         grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
         grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);

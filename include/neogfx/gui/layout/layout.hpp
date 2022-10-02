@@ -48,8 +48,8 @@ namespace neogfx
     public:
         typedef i_layout abstract_type;
     protected:
-        typedef layout_item_cache item;
-        typedef std::list<item, neolib::fast_pool_allocator<item>> item_list;
+        typedef ref_ptr<i_layout_item_cache> item;
+        typedef std::list<item> item_list;
         enum item_type_e
         {
             ItemTypeNone = 0x00,
