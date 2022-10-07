@@ -616,6 +616,9 @@ namespace neogfx
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
             horizontal_scrollbar().unlock();
 
+        scrollbar_updated(vertical_scrollbar(), i_scrollbar::update_reason_e::Updated);
+        scrollbar_updated(horizontal_scrollbar(), i_scrollbar::update_reason_e::Updated);
+
         if (debug::layoutItem == this)
             service<debug::logger>() << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scroll_area() << ", scroll_page: " << scroll_page() << endl;
     }
