@@ -33,6 +33,7 @@ namespace neogfx
 
     layout_item_cache::layout_item_cache(i_ref_ptr<i_layout_item> const& aItem) :
         iSubject{ aItem },  
+        iSubjectDestroyed{ *iSubject },
         iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
         iWeight{ static_cast<uint32_t>(-1), {} },
@@ -48,6 +49,7 @@ namespace neogfx
 
     layout_item_cache::layout_item_cache(const layout_item_cache& aOther) :
         iSubject{ aOther.iSubject }, 
+        iSubjectDestroyed{ *iSubject },
         iVisible{ static_cast<uint32_t>(-1), {} },
         iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } },
         iWeight{ static_cast<uint32_t>(-1), {} },
@@ -67,7 +69,14 @@ namespace neogfx
 
     i_layout_item& layout_item_cache::subject() const
     {
-        return *iSubject;
+        if (!subject_destroyed())
+            return *iSubject;
+        throw layout_item_cache_subject_destroyed();
+    }
+
+    bool layout_item_cache::subject_destroyed() const
+    {
+        return iSubjectDestroyed;
     }
   
     layout_item_disposition& layout_item_cache::cached_disposition() const

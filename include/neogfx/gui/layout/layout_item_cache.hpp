@@ -133,12 +133,14 @@ namespace neogfx
         void fix_weightings(bool aRecalculate = true) final;
     public:
         i_layout_item& subject() const final;
+        bool subject_destroyed() const final;
     public:
         layout_item_disposition& cached_disposition() const final;
     public:
         bool operator==(const layout_item_cache& aOther) const;
     private:
         ref_ptr<i_layout_item> iSubject;
+        destroyed_flag iSubjectDestroyed;
         mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
         mutable std::pair<uint32_t, bool> iVisible;
         mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;

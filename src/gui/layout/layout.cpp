@@ -260,14 +260,14 @@ namespace neogfx
     bool layout::remove(i_layout_item& aItem)
     {
         for (auto i = begin(); i != end(); ++i)
-            if (&(**i).subject() == &aItem)
+        {
+            auto& cachedItem = **i;
+            if (!cachedItem.subject_destroyed() && &cachedItem.subject() == &aItem)
             {
                 remove(i);
                 return true;
             }
-        for (auto i = rbegin(); i != rend(); ++i)
-            if ((**i).subject().is_layout() && (**i).subject().as_layout().remove(aItem))
-                return true;
+        }
         return false;
     }
 
@@ -706,7 +706,7 @@ namespace neogfx
             auto& item = **aItem;
             item_list toRemove;
             toRemove.splice(toRemove.begin(), iItems, aItem);
-            if (item.has_parent_layout() && &item.parent_layout() == this)
+            if (!item.subject_destroyed() && item.has_parent_layout() && &item.parent_layout() == this)
             {
                 item.set_parent_layout(nullptr);
                 item.set_layout_owner(nullptr);
