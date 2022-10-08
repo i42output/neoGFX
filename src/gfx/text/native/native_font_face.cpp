@@ -445,19 +445,20 @@ namespace neogfx
         if (iInvalidGlyph == std::nullopt)
         {
             auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
-                em_size().ceil(),
+                neogfx::size{ em_size().cx, ascender() }.ceil(),
                 1.0, texture_sampling::Normal, texture_data_format::SubPixel);
             iInvalidGlyph.emplace(
                 subTexture,
                 true,
                 point{},
                 glyph_pixel_mode::LCD);
-            // todo: render an invalid glyph symbol
             graphics_context gc{ iInvalidGlyph->texture() };
-            auto const& r = iInvalidGlyph->texture().atlas_location() + point{ 1.0, 1.0 } + neogfx::size{ -1.0, -1.0 };
+            auto r = iInvalidGlyph->texture().atlas_location().deflated(neogfx::size{ 1.0, 1.0 });
             gc.draw_rect(r, color::White);
-            gc.draw_line(r.top_left(), r.bottom_right() + point{ -1.0, -1.0 }, color::White);
-            gc.draw_line(r.top_right() + point{ -1.0, 0.0 }, r.bottom_left() + point{ 0.0, -1.0 }, color::White);
+            --r.cx;
+            --r.cy;
+            gc.draw_line(r.top_left(), r.bottom_right(), color::White);
+            gc.draw_line(r.top_right(), r.bottom_left(), color::White);
         }
         return *iInvalidGlyph;
     }
