@@ -18,7 +18,7 @@
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
-#include "element_model.tpp"
+#include "element_model.ipp"
 #include "toolbox_model.hpp"
 #include "workflow_model.hpp"
 

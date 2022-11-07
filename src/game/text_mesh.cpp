@@ -25,7 +25,7 @@ namespace neogfx::game
 {
     namespace shape
     {
-        text::text(i_ecs& aEcs, i_graphics_context const& aGc, std::string const& aText, const neogfx::font& aFont, const neogfx::text_appearance& aAppearance, neogfx::alignment aAlignment) :
+        text::text(i_ecs& aEcs, i_graphics_context const& aGc, std::string const& aText, const neogfx::font& aFont, const neogfx::text_format& aTextFormat, neogfx::alignment aAlignment) :
             entity{ aEcs, archetype().id() }
         {
             neogfx::game::scoped_component_lock<game::text_mesh> lock{ aEcs };
@@ -38,10 +38,10 @@ namespace neogfx::game
                     {},
                     aAlignment,
                     { font },
-                    { to_ecs_component(aAppearance.ink()) },
-                    aAppearance.effect() ? aAppearance.effect()->type() : text_effect_type::None,
-                    { aAppearance.effect() ? to_ecs_component(aAppearance.effect()->color()) : game::material{} },
-                    aAppearance.effect() ? aAppearance.effect()->width() : 0.0
+                    { to_ecs_component(aTextFormat.ink()) },
+                    aTextFormat.effect() ? aTextFormat.effect()->type() : text_effect_type::None,
+                    { aTextFormat.effect() ? to_ecs_component(aTextFormat.effect()->color()) : game::material{} },
+                    aTextFormat.effect() ? aTextFormat.effect()->width() : 0.0
                 });
             game::text_mesh::meta::update(textMesh, aEcs, aGc, id());
         }

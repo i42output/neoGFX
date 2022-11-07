@@ -27,9 +27,9 @@
 
 namespace neogfx
 {
-    class color_widget : public framed_widget<button<>>
+    class color_widget : public button<>
     {
-        typedef framed_widget<button<>> base_type;
+        typedef button<> base_type;
     public:
         define_event(ColorChanged, color_changed)
     public:

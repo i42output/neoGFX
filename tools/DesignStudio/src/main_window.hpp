@@ -51,7 +51,7 @@ namespace neogfx::DesignStudio
         neolib::i_setting& rightDockWidth;
         neolib::i_setting& leftDockWeight;
         neolib::i_setting& rightDockWeight;
-        neolib::i_setting& font;
+        neolib::i_setting& workspaceFont;
         neolib::i_setting& subpixelRendering;
         neolib::i_setting& toolbarIconSize;
         neolib::i_setting& themeColor;

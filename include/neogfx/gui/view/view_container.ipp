@@ -56,6 +56,12 @@ namespace neogfx
     }
 
     template <typename Base>
+    bool view_container<Base>::is_widget() const
+    {
+        return true;
+    }
+
+    template <typename Base>
     inline const i_widget& view_container<Base>::as_widget() const
     {
         return *this;

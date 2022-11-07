@@ -240,7 +240,7 @@ namespace neogfx
     dimension header_view::separator_width() const
     {
         if (iSeparatorWidth != std::nullopt)
-            return units_converter(*this).from_device_units(*iSeparatorWidth);
+            return units_converter{ *this }.from_device_units(*iSeparatorWidth);
         else if (has_presentation_model())
             return presentation_model().cell_spacing(*this).cx;
         else
@@ -250,7 +250,7 @@ namespace neogfx
     void header_view::set_separator_width(const optional_dimension& aWidth)
     {
         if (aWidth != std::nullopt)
-            iSeparatorWidth = std::ceil(units_converter(*this).to_device_units(*aWidth));
+            iSeparatorWidth = std::ceil(units_converter{ *this }.to_device_units(*aWidth));
         else
             iSeparatorWidth = std::nullopt;
     }
@@ -264,7 +264,7 @@ namespace neogfx
     {
         if (iSectionWidths.empty())
             return 0.0;
-        auto result = units_converter(*this).from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
+        auto result = units_converter{ *this }.from_device_units(iSectionWidths[aSectionIndex].manual != std::nullopt ?
             *iSectionWidths[aSectionIndex].manual :
             iSectionWidths[aSectionIndex].calculated);
         auto const lastColumn = presentation_model().columns() - 1u;
@@ -272,7 +272,7 @@ namespace neogfx
         if (aSectionIndex == lastColumn && expand_last_column() && !tInSectionWidth)
         {
             neolib::scoped_flag sf{ tInSectionWidth };
-            auto const delta = units_converter(*this).to_device_units(client_rect(false).cx - total_width());
+            auto const delta = units_converter{ *this }.to_device_units(client_rect(false).cx - total_width());
             if (delta > 0.0)
                 result += delta;
         }
@@ -452,7 +452,7 @@ namespace neogfx
         dimension const oldSectionWidth = iSectionWidths[aColumn].calculated;
         dimension const headingWidth = presentation_model().column_heading_extents(aColumn, *this).cx + presentation_model().cell_padding(*this).size().cx * 2.0;
         auto const lastColumn = presentation_model().columns() - 1u;
-        iSectionWidths[aColumn].calculated = std::max(iSectionWidths[aColumn].calculated, units_converter(*this).to_device_units(std::max(headingWidth, aColumnWidth)));
+        iSectionWidths[aColumn].calculated = std::max(iSectionWidths[aColumn].calculated, units_converter{ *this }.to_device_units(std::max(headingWidth, aColumnWidth)));
         if (section_width(aColumn) != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
         {
             size const widgetSize{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy };

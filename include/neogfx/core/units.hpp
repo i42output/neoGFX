@@ -25,25 +25,21 @@
 
 namespace neogfx
 { 
-    class length_units
+    enum class units
     {
-    public:
-        enum units
-        {
-            Pixels,
-            Default = Pixels,
-            ScaledPixels,
-            Points,
-            Picas,
-            Ems,
-            Millimetres,
-            Millimeters = units::Millimetres,
-            Centimetres,
-            Centimeters = units::Centimetres,
-            Inches,
-            Percentage,
-            NoUnitsAsMaximumLength
-        };
+        Pixels,
+        Default = Pixels,
+        ScaledPixels,
+        Points,
+        Picas,
+        Ems,
+        Millimetres,
+        Millimeters = units::Millimetres,
+        Centimetres,
+        Centimeters = units::Centimetres,
+        Inches,
+        Percentage,
+        NoUnitsAsMaximumLength
     };
 
     class i_units_context
@@ -124,14 +120,14 @@ namespace neogfx
     };
 
     template<typename T>
-    inline T convert_units(i_units_context const& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue);
+    inline T convert_units(i_units_context const& aUnitsContext, units aSourceUnits, units aDestinationUnits, const T& aValue);
 
     template <typename Units>
     class basic_scoped_units
     {
         // exceptions
     public:
-        struct units_scope_ended : std::logic_error { units_scope_ended() : std::logic_error("neogfx::basic_scoped_units::units_scope_ended") {} };
+        struct units_scope_ended : std::logic_error { units_scope_ended() : std::logic_error("neogfx::basic_scoped_units_scope_ended") {} };
         // types
     public:
         typedef Units units;
@@ -191,7 +187,7 @@ namespace neogfx
     };
 
     template <typename T>
-    class basic_length : public length_units
+    class basic_length
     {
         typedef basic_length<T> self_type;
     public:
@@ -199,7 +195,7 @@ namespace neogfx
     public:
         typedef T value_type;
     public:
-        explicit basic_length(value_type aValue = value_type{}, length_units::units aUnits = length_units::Pixels) :
+        explicit basic_length(value_type aValue = value_type{}, neogfx::units aUnits = neogfx::units::Pixels) :
             iValue{ aValue }, iUnits{ aUnits }
         {
         }
@@ -223,21 +219,21 @@ namespace neogfx
         }
         value_type value() const
         {
-            if (units() == length_units::NoUnitsAsMaximumLength)
+            if (units() == units::NoUnitsAsMaximumLength)
                 return std::numeric_limits<value_type>::infinity();
-            return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<length_units::units>::current_units(), unconverted_value());
+            return convert_units(scoped_units_context::current_context(), units(), basic_scoped_units<neogfx::units>::current_units(), unconverted_value());
         }
         value_type unconverted_value() const
         {
             return iValue;
         }
-        length_units::units units() const
+        neogfx::units units() const
         {
             return iUnits;
         }
         std::string to_string(bool aToEmit = true) const
         {
-            if (units() == length_units::NoUnitsAsMaximumLength)
+            if (units() == neogfx::units::NoUnitsAsMaximumLength)
                 return (aToEmit ? "std::numeric_limits<dimension>::infinity()" : "max");
             std::ostringstream oss;
             oss << unconverted_value();
@@ -245,31 +241,31 @@ namespace neogfx
                 oss << "_";
             switch (units())
             {
-            case length_units::Pixels:
+            case neogfx::units::Pixels:
                 oss << "px";
                 break;
-            case length_units::ScaledPixels:
+            case neogfx::units::ScaledPixels:
                 oss << "dip";
                 break;
-            case length_units::Points:
+            case neogfx::units::Points:
                 oss << "pt";
                 break;
-            case length_units::Picas:
+            case neogfx::units::Picas:
                 oss << "pc";
                 break;
-            case length_units::Ems:
+            case neogfx::units::Ems:
                 oss << "em";
                 break;
-            case length_units::Millimetres:
+            case neogfx::units::Millimetres:
                 oss << "mm";
                 break;
-            case length_units::Centimetres:
+            case neogfx::units::Centimetres:
                 oss << "cm";
                 break;
-            case length_units::Inches:
+            case neogfx::units::Inches:
                 oss << "in";
                 break;
-            case length_units::Percentage:
+            case neogfx::units::Percentage:
                 oss << "pct";
                 break;
             }
@@ -277,21 +273,21 @@ namespace neogfx
         }
         static self_type from_string(std::string const& aValue)
         {
-            static const std::unordered_map<std::string, length_units::units> sUnitTypes
+            static const std::unordered_map<std::string, neogfx::units> sUnitTypes
             {
-                { "px", length_units::Pixels },
-                { "dip", length_units::ScaledPixels },
-                { "dp", length_units::ScaledPixels },
-                { "pt", length_units::Points },
-                { "pc", length_units::Picas },
-                { "em", length_units::Ems },
-                { "mm", length_units::Millimetres },
-                { "cm", length_units::Centimetres },
-                { "in", length_units::Inches },
-                { "pct", length_units::Percentage }
+                { "px", neogfx::units::Pixels },
+                { "dip", neogfx::units::ScaledPixels },
+                { "dp", neogfx::units::ScaledPixels },
+                { "pt", neogfx::units::Points },
+                { "pc", neogfx::units::Picas },
+                { "em", neogfx::units::Ems },
+                { "mm", neogfx::units::Millimetres },
+                { "cm", neogfx::units::Centimetres },
+                { "in", neogfx::units::Inches },
+                { "pct", neogfx::units::Percentage }
             };
             if (aValue == "max")
-                return self_type{ 0.0, length_units::NoUnitsAsMaximumLength };
+                return self_type{ 0.0, neogfx::units::NoUnitsAsMaximumLength };
             self_type result;
             std::istringstream iss{ aValue };
             iss >> result.iValue;
@@ -305,24 +301,24 @@ namespace neogfx
         }
     private:
         value_type iValue;
-        length_units::units iUnits;
+        neogfx::units iUnits;
     };
 
-    class length_units_converter
+    class units_converter
     {
     public:
-        struct bad_parameter : std::logic_error { bad_parameter() : std::logic_error("neogfx::length_units_converter::bad_parameter") {} };
-        struct device_metrics_unavailable : std::logic_error { device_metrics_unavailable() : std::logic_error("neogfx::length_units_converter::device_metrics_unavailable") {} };
+        struct bad_parameter : std::logic_error { bad_parameter() : std::logic_error("neogfx::units_converter::bad_parameter") {} };
+        struct device_metrics_unavailable : std::logic_error { device_metrics_unavailable() : std::logic_error("neogfx::units_converter::device_metrics_unavailable") {} };
         // construction
     public:
-        length_units_converter() = delete;
-        length_units_converter(i_units_context const& aContext);
-        length_units_converter(i_units_context const& aContext, length_units::units aUnits);
-        ~length_units_converter();
+        units_converter() = delete;
+        units_converter(i_units_context const& aContext);
+        units_converter(i_units_context const& aContext, neogfx::units aUnits);
+        ~units_converter();
         // operations
     public:
-        length_units::units units() const;
-        void set_units(length_units::units aUnits);
+        neogfx::units units() const;
+        void set_units(neogfx::units aUnits);
     public:
         vector2 to_device_units(const vector2& aValue) const;
         dimension to_device_units(dimension aValue) const;
@@ -386,60 +382,60 @@ namespace neogfx
         // attributes
     private:
         i_units_context const& iContext;
-        length_units::units iUnits;
+        neogfx::units iUnits;
     };
 
     template<typename T>
-    inline T from_units(i_units_context const& aSourceUnitsContext, length_units::units aUnits, const T& aValue)
+    inline T from_units(i_units_context const& aSourceUnitsContext, units aUnits, const T& aValue)
     {
-        if (basic_scoped_units<length_units::units>::current_units() == aUnits)
+        if (basic_scoped_units<units>::current_units() == aUnits)
             return aValue;
-        length_units_converter uc(aSourceUnitsContext);
+        units_converter uc(aSourceUnitsContext);
         uc.set_units(aUnits);
         auto const result = static_cast<T>(uc.to_device_units(aValue));
-        uc.set_units(basic_scoped_units<length_units::units>::current_units());
+        uc.set_units(basic_scoped_units<units>::current_units());
         return static_cast<T>(uc.from_device_units(result));
     }
 
     template<typename T>
-    inline T from_units(length_units::units aUnits, const T& aValue)
+    inline T from_units(units aUnits, const T& aValue)
     {
         return from_units(scoped_units_context::current_context(), aUnits, aValue);
     }
 
     template<typename T>
-    inline T to_units(i_units_context const& aSourceUnitsContext, length_units::units aNewUnits, const T& aValue)
+    inline T to_units(i_units_context const& aSourceUnitsContext, units aNewUnits, const T& aValue)
     {
-        if (basic_scoped_units<length_units::units>::current_units() == aNewUnits)
+        if (basic_scoped_units<units>::current_units() == aNewUnits)
             return aValue;
-        T result = length_units_converter(aSourceUnitsContext).to_device_units(aValue);
-        basic_scoped_units<length_units::units> su(aSourceUnitsContext, aNewUnits);
-        return length_units_converter(aSourceUnitsContext).from_device_units(result);
+        T result = units_converter(aSourceUnitsContext).to_device_units(aValue);
+        basic_scoped_units<units> su(aSourceUnitsContext, aNewUnits);
+        return units_converter(aSourceUnitsContext).from_device_units(result);
     }
 
     template<typename T>
-    inline T to_units(length_units::units aNewUnits, const T& aValue)
+    inline T to_units(units aNewUnits, const T& aValue)
     {
         return to_units(scoped_units_context::current_context(), aNewUnits, aValue);
     }
 
     template<typename T>
-    inline T convert_units(i_units_context const& aSourceUnitsContext, i_units_context const& aDestinationUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue)
+    inline T convert_units(i_units_context const& aSourceUnitsContext, i_units_context const& aDestinationUnitsContext, units aSourceUnits, units aDestinationUnits, const T& aValue)
     {
         if (aSourceUnits == aDestinationUnits)
         {
-            if (aSourceUnits != length_units::Pixels ||
+            if (aSourceUnits != units::Pixels ||
                 (aSourceUnitsContext.device_metrics().horizontal_dpi() == aDestinationUnitsContext.device_metrics().horizontal_dpi() &&
                     aSourceUnitsContext.device_metrics().vertical_dpi() == aDestinationUnitsContext.device_metrics().vertical_dpi()))
             {
                 return aValue;
             }
         }
-        T const sourceInDeviceUnits = length_units_converter(aSourceUnitsContext, aSourceUnits).to_device_units(aValue);
-        T const sourceInMillimetres = length_units_converter(aSourceUnitsContext, length_units::Millimetres).from_device_units(sourceInDeviceUnits);
-        T const destinationInDeviceUnits = length_units_converter(aDestinationUnitsContext, length_units::Millimetres).to_device_units(sourceInMillimetres);
-        auto const result = length_units_converter(aDestinationUnitsContext, aDestinationUnits).from_device_units(destinationInDeviceUnits);
-        if (aDestinationUnits == length_units::Pixels || aDestinationUnits == length_units::ScaledPixels)
+        T const sourceInDeviceUnits = units_converter(aSourceUnitsContext, aSourceUnits).to_device_units(aValue);
+        T const sourceInMillimetres = units_converter(aSourceUnitsContext, units::Millimetres).from_device_units(sourceInDeviceUnits);
+        T const destinationInDeviceUnits = units_converter(aDestinationUnitsContext, units::Millimetres).to_device_units(sourceInMillimetres);
+        auto const result = units_converter(aDestinationUnitsContext, aDestinationUnits).from_device_units(destinationInDeviceUnits);
+        if (aDestinationUnits == units::Pixels || aDestinationUnits == units::ScaledPixels)
         {
             if constexpr (std::is_scalar_v<T>)
                 return std::round(result);
@@ -450,7 +446,7 @@ namespace neogfx
     }
 
     template<typename T>
-    inline T convert_units(i_units_context const& aUnitsContext, length_units::units aSourceUnits, length_units::units aDestinationUnits, const T& aValue)
+    inline T convert_units(i_units_context const& aUnitsContext, units aSourceUnits, units aDestinationUnits, const T& aValue)
     {
         return convert_units(aUnitsContext, aUnitsContext, aSourceUnits, aDestinationUnits, aValue);
     }
@@ -458,271 +454,271 @@ namespace neogfx
     template <typename T>
     inline T from_px(T aValue)
     {
-        return from_units(length_units::Pixels, aValue);
+        return from_units(units::Pixels, aValue);
     }
 
     template <typename T>
     inline T from_dip(T aValue)
     {
-        return from_units(length_units::ScaledPixels, aValue);
+        return from_units(units::ScaledPixels, aValue);
     }
 
     template <typename T>
     inline T from_pt(T aValue)
     {
-        return from_units(length_units::Points, aValue);
+        return from_units(units::Points, aValue);
     }
 
     template <typename T>
     inline T from_pc(T aValue)
     {
-        return from_units(length_units::Picas, aValue);
+        return from_units(units::Picas, aValue);
     }
 
     template <typename T>
     inline T from_em(T aValue)
     {
-        return from_units(length_units::Ems, aValue);
+        return from_units(units::Ems, aValue);
     }
 
     template <typename T>
     inline T from_mm(T aValue)
     {
-        return from_units(length_units::Millimetres, aValue);
+        return from_units(units::Millimetres, aValue);
     }
 
     template <typename T>
     inline T from_cm(T aValue)
     {
-        return from_units(length_units::Centimetres, aValue);
+        return from_units(units::Centimetres, aValue);
     }
 
     template <typename T>
     inline T from_in(T aValue)
     {
-        return from_units(length_units::Inches, aValue);
+        return from_units(units::Inches, aValue);
     }
 
     template <typename T>
     inline T from_pct(T aValue)
     {
-        return from_units(length_units::Percentage, aValue);
+        return from_units(units::Percentage, aValue);
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_px(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Pixels, aValue));
+        return static_cast<ResultT>(from_units(units::Pixels, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_dip(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::ScaledPixels, aValue));
+        return static_cast<ResultT>(from_units(units::ScaledPixels, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_pt(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Points, aValue));
+        return static_cast<ResultT>(from_units(units::Points, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_pc(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Picas, aValue));
+        return static_cast<ResultT>(from_units(units::Picas, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_em(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Ems, aValue));
+        return static_cast<ResultT>(from_units(units::Ems, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_mm(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Millimetres, aValue));
+        return static_cast<ResultT>(from_units(units::Millimetres, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_cm(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Centimetres, aValue));
+        return static_cast<ResultT>(from_units(units::Centimetres, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_in(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Inches, aValue));
+        return static_cast<ResultT>(from_units(units::Inches, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT from_pct(T aValue)
     {
-        return static_cast<ResultT>(from_units(length_units::Percentage, aValue));
+        return static_cast<ResultT>(from_units(units::Percentage, aValue));
     }
 
     template <typename T>
     inline T to_px(T aValue)
     {
-        return to_units(length_units::Pixels, aValue);
+        return to_units(units::Pixels, aValue);
     }
 
     template <typename T>
     inline T to_dip(T aValue)
     {
-        return to_units(length_units::ScaledPixels, aValue);
+        return to_units(units::ScaledPixels, aValue);
     }
 
     template <typename T>
     inline T to_pt(T aValue)
     {
-        return to_units(length_units::Points, aValue);
+        return to_units(units::Points, aValue);
     }
 
     template <typename T>
     inline T to_pc(T aValue)
     {
-        return to_units(length_units::Picas, aValue);
+        return to_units(units::Picas, aValue);
     }
 
     template <typename T>
     inline T to_em(T aValue)
     {
-        return to_units(length_units::Ems, aValue);
+        return to_units(units::Ems, aValue);
     }
 
     template <typename T>
     inline T to_mm(T aValue)
     {
-        return to_units(length_units::Millimetres, aValue);
+        return to_units(units::Millimetres, aValue);
     }
 
     template <typename T>
     inline T to_cm(T aValue)
     {
-        return to_units(length_units::Centimetres, aValue);
+        return to_units(units::Centimetres, aValue);
     }
 
     template <typename T>
     inline T to_in(T aValue)
     {
-        return to_units(length_units::Inches, aValue);
+        return to_units(units::Inches, aValue);
     }
 
     template <typename T>
     inline T to_pct(T aValue)
     {
-        return to_units(length_units::Percentage, aValue);
+        return to_units(units::Percentage, aValue);
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_px(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Pixels, aValue));
+        return static_cast<ResultT>(to_units(units::Pixels, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_dip(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::ScaledPixels, aValue));
+        return static_cast<ResultT>(to_units(units::ScaledPixels, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_pt(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Points, aValue));
+        return static_cast<ResultT>(to_units(units::Points, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_pc(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Picas, aValue));
+        return static_cast<ResultT>(to_units(units::Picas, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_em(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Ems, aValue));
+        return static_cast<ResultT>(to_units(units::Ems, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_mm(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Millimetres, aValue));
+        return static_cast<ResultT>(to_units(units::Millimetres, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_cm(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Centimetres, aValue));
+        return static_cast<ResultT>(to_units(units::Centimetres, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_in(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Inches, aValue));
+        return static_cast<ResultT>(to_units(units::Inches, aValue));
     }
 
     template <typename ResultT, typename T>
     inline ResultT to_pct(T aValue)
     {
-        return static_cast<ResultT>(to_units(length_units::Percentage, aValue));
+        return static_cast<ResultT>(to_units(units::Percentage, aValue));
     }
 
     template <typename T>
     inline basic_length<T> px(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Pixels };
+        return basic_length<T>{ aValue, units::Pixels };
     }
 
     template <typename T>
     inline basic_length<T> dip(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::ScaledPixels };
+        return basic_length<T>{ aValue, units::ScaledPixels };
     }
 
     template <typename T>
     inline basic_length<T> pt(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Points };
+        return basic_length<T>{ aValue, units::Points };
     }
 
     template <typename T>
     inline basic_length<T> pc(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Picas };
+        return basic_length<T>{ aValue, units::Picas };
     }
 
     template <typename T>
     inline basic_length<T> em(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Ems };
+        return basic_length<T>{ aValue, units::Ems };
     }
 
     template <typename T>
     inline basic_length<T> mm(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Millimetres };
+        return basic_length<T>{ aValue, units::Millimetres };
     }
 
     template <typename T>
     inline basic_length<T> cm(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Centimetres };
+        return basic_length<T>{ aValue, units::Centimetres };
     }
 
     template <typename T>
     inline basic_length<T> in(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Inches };
+        return basic_length<T>{ aValue, units::Inches };
     }
 
     template <typename T>
     inline basic_length<T> pct(T aValue)
     {
-        return basic_length<T>{ aValue, length_units::Percentage };
+        return basic_length<T>{ aValue, units::Percentage };
     }
 
     template <typename T>
@@ -909,7 +905,5 @@ namespace neogfx
     using namespace unit_literals;
 
     typedef basic_length<default_geometry_value_type> length;
-    typedef length_units::units units;
     typedef basic_scoped_units<units> scoped_units;
-    typedef length_units_converter units_converter;
 }

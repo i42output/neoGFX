@@ -732,9 +732,10 @@ namespace neogfx
             center(aSetMinimumSize);
     }
 
-    void window::widget_added(i_widget&)
+    void window::widget_added(i_widget& aWidget)
     {
-        layout_items(true);
+        if (aWidget.has_parent_layout())
+            layout_items(true);
     }
 
     void window::widget_removed(i_widget& aWidget)
@@ -745,7 +746,8 @@ namespace neogfx
             surface().release_capture(aWidget);
         if (iFocusedWidget == &aWidget)
             iFocusedWidget = nullptr;
-        layout_items(true);
+        if (aWidget.has_parent_layout())
+            layout_items(true);
     }
 
     bool window::show(bool aVisible)
@@ -1111,21 +1113,6 @@ namespace neogfx
     i_layout& window::layout(standard_layout aStandardLayout, layout_position aPosition)
     {
         return base_type::layout(aStandardLayout, aPosition);
-    }
-
-    bool window::is_widget() const
-    {
-        return true;
-    }
-
-    const i_widget& window::as_widget() const
-    {
-        return *this;
-    }
-
-    i_widget& window::as_widget()
-    {
-        return *this;
     }
 
     const i_drag_drop_target& window::default_drag_drop_target() const

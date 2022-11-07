@@ -70,8 +70,8 @@ namespace neogfx
         virtual bool has_text_color() const = 0;
         virtual color text_color() const = 0;
         virtual void set_text_color(const optional_color& aTextColor) = 0;
-        virtual bool has_text_appearance() const = 0;
-        virtual neogfx::text_appearance text_appearance() const = 0;
-        virtual void set_text_appearance(const optional_text_appearance& aTextAppearance) = 0;
+        virtual bool has_text_format() const = 0;
+        virtual neogfx::text_format text_format() const = 0;
+        virtual void set_text_format(const optional_text_format& aTextAppearance) = 0;
     };
 }

@@ -34,12 +34,16 @@ namespace neogfx
         FixedSize
     };
 
+    struct layout_item_cache_subject_destroyed : std::logic_error { layout_item_cache_subject_destroyed() : std::logic_error{ "neogfx::layout_item_cache_subject_destroyed" } {} };
+
     class i_layout_item_cache : public i_layout_item
     {
         friend class layout;
     public:
+        typedef i_layout_item_cache abstract_type;
+    public:
         virtual i_layout_item& subject() const = 0;
-        virtual i_ref_ptr<i_layout_item>& subject_ptr() = 0;
+        virtual bool subject_destroyed() const = 0;
     public:
         virtual layout_item_disposition& cached_disposition() const = 0;
     };

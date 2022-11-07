@@ -46,51 +46,6 @@ namespace neogfx
             parent_layout().remove(*this);
     }
 
-    bool spacer::is_layout() const
-    {
-        return false;
-    }
-
-    const i_layout& spacer::as_layout() const
-    {
-        throw not_a_layout();
-    }
-
-    i_layout& spacer::as_layout()
-    {
-        throw not_a_layout();
-    }
-
-    bool spacer::is_spacer() const
-    {
-        return true;
-    }
-
-    const i_spacer& spacer::as_spacer() const
-    {
-        return *this;
-    }
-
-    i_spacer& spacer::as_spacer()
-    {
-        return *this;
-    }
-
-    bool spacer::is_widget() const
-    {
-        return false;
-    }
-
-    const i_widget& spacer::as_widget() const
-    {
-        throw not_a_widget();
-    }
-
-    i_widget& spacer::as_widget()
-    {
-        throw not_a_widget();
-    }
-
     bool spacer::has_parent_layout() const
     {
         return iParentLayout != nullptr;

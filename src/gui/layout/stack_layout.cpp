@@ -58,8 +58,9 @@ namespace neogfx
         size result;
         if (items_visible() != 0)
         {
-            for (auto const& item : items())
+            for (auto const& itemRef : items())
             {
+                auto const& item = *itemRef;
                 if (!item.visible() && !ignore_visibility())
                     continue;
                 result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
@@ -76,8 +77,9 @@ namespace neogfx
     size stack_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         size result{ size::max_size() };
-        for (auto const& item : items())
+        for (auto const& itemRef : items())
         {
+            auto const& item = *itemRef;
             if (!item.visible() && !ignore_visibility())
                 continue;
             auto const& itemMaxSize = item.maximum_size(aAvailableSpace);
@@ -111,8 +113,9 @@ namespace neogfx
         validate();
         set_position(aPosition);
         set_extents(aSize);
-        for (auto& item : *this)
+        for (auto& itemRef : *this)
         {
+            auto& item = *itemRef;
             if (!item.visible())
                 continue;
             item.layout_as(aPosition + internal_spacing().top_left(), aSize - internal_spacing().size());

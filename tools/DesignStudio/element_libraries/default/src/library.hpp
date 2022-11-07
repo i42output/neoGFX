@@ -44,6 +44,7 @@ namespace neogfx::DesignStudio
         ~default_element_library();
         //initialisation
     public:
+        neolib::i_application& application() const override;
         void ide_ready(i_ide& aIde) override;
         // meta
     public:

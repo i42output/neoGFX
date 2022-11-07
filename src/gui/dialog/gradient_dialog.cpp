@@ -121,7 +121,7 @@ namespace neogfx
         static scalar constexpr CURSOR_THICKNESS = 2.0;
     public:
         preview_box(gradient_dialog& aOwner) :
-            base_type(aOwner.iPreviewGroupBox.contents_layout()),
+            base_type(aOwner.iPreviewGroupBox.item_layout()),
             iOwner(aOwner),
             iAnimationTimer{ *this, [this](widget_timer& aTimer)
             {
@@ -201,8 +201,8 @@ namespace neogfx
         dialog(aParent, "Select Gradient"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close),
         iLayout{ client_layout() }, iLayout2{ iLayout }, iLayout3{ iLayout2 }, iLayout4{ iLayout2 },
         iSelectorGroupBox{ iLayout3 },
-        iGradientSelector{ *this, iSelectorGroupBox.contents_layout(), aCurrentGradient },
-        iLayout3_1{ iSelectorGroupBox.contents_layout() },
+        iGradientSelector{ *this, iSelectorGroupBox.item_layout(), aCurrentGradient },
+        iLayout3_1{ iSelectorGroupBox.item_layout() },
         iReverse{ iLayout3_1, image{ ":/neogfx/resources/icons/reverse.png" } },
         iReversePartial{ iLayout3_1, image{ ":/neogfx/resources/icons/reversepartial.png" } },
         iHueSlider{ iLayout3_1 },
@@ -210,52 +210,52 @@ namespace neogfx
         iDelete{ iLayout3_1, image{ ":/neogfx/resources/icons/delete.png" } },
         iLayout3_2{ iLayout3, alignment::Top },
         iDirectionGroupBox{ iLayout3_2, "Direction"_t },
-        iDirectionHorizontalRadioButton{ iDirectionGroupBox.contents_layout(), "Horizontal"_t },
-        iDirectionVerticalRadioButton{ iDirectionGroupBox.contents_layout(), "Vertical"_t },
-        iDirectionDiagonalRadioButton{ iDirectionGroupBox.contents_layout(), "Diagonal"_t },
-        iDirectionRectangularRadioButton{ iDirectionGroupBox.contents_layout(), "Rectangular"_t },
-        iDirectionRadialRadioButton{ iDirectionGroupBox.contents_layout(), "Radial"_t },
+        iDirectionHorizontalRadioButton{ iDirectionGroupBox.item_layout(), "Horizontal"_t },
+        iDirectionVerticalRadioButton{ iDirectionGroupBox.item_layout(), "Vertical"_t },
+        iDirectionDiagonalRadioButton{ iDirectionGroupBox.item_layout(), "Diagonal"_t },
+        iDirectionRectangularRadioButton{ iDirectionGroupBox.item_layout(), "Rectangular"_t },
+        iDirectionRadialRadioButton{ iDirectionGroupBox.item_layout(), "Radial"_t },
         iTile{ iLayout3_2, "Tile"_t },
-        iTileWidthLabel{ iTile.with_contents_layout<grid_layout>(3u, 2u).add_span(grid_layout::cell_coordinates{0u, 2u}, grid_layout::cell_coordinates{1u, 2u}), "Width:"_t },
-        iTileWidth{ iTile.contents_layout() },
-        iTileHeightLabel{ iTile.contents_layout(), "Height:"_t },
-        iTileHeight{ iTile.contents_layout() },
-        iTileAligned{ iTile.contents_layout(), "Aligned"_t },
+        iTileWidthLabel{ iTile.with_item_layout<grid_layout>(3u, 2u).add_span(grid_layout::cell_coordinates{0u, 2u}, grid_layout::cell_coordinates{1u, 2u}), "Width:"_t },
+        iTileWidth{ iTile.item_layout() },
+        iTileHeightLabel{ iTile.item_layout(), "Height:"_t },
+        iTileHeight{ iTile.item_layout() },
+        iTileAligned{ iTile.item_layout(), "Aligned"_t },
         iSmoothnessGroupBox{ iLayout3_2, "Smoothness (%)"_t },
-        iSmoothnessSpinBox{ iSmoothnessGroupBox.contents_layout() },
-        iSmoothnessSlider{ iSmoothnessGroupBox.contents_layout() },
+        iSmoothnessSpinBox{ iSmoothnessGroupBox.item_layout() },
+        iSmoothnessSlider{ iSmoothnessGroupBox.item_layout() },
         iLayout5{ iLayout3 },
         iOrientationGroupBox{ iLayout5, "Orientation"_t },
-        iStartingFromGroupBox{ iOrientationGroupBox.with_contents_layout<horizontal_layout>(), "Starting From"_t },
-        iTopLeftRadioButton{ iStartingFromGroupBox.contents_layout(), "Top left corner"_t },
-        iTopRightRadioButton{ iStartingFromGroupBox.contents_layout(), "Top right corner"_t },
-        iBottomRightRadioButton{ iStartingFromGroupBox.contents_layout(), "Bottom right corner"_t },
-        iBottomLeftRadioButton{ iStartingFromGroupBox.contents_layout(), "Bottom left corner"_t },
-        iAngleRadioButton{ iStartingFromGroupBox.contents_layout(), "At a specific angle"_t },
-        iLayout6 { iOrientationGroupBox.contents_layout() },
+        iStartingFromGroupBox{ iOrientationGroupBox.with_item_layout<horizontal_layout>(), "Starting From"_t },
+        iTopLeftRadioButton{ iStartingFromGroupBox.item_layout(), "Top left corner"_t },
+        iTopRightRadioButton{ iStartingFromGroupBox.item_layout(), "Top right corner"_t },
+        iBottomRightRadioButton{ iStartingFromGroupBox.item_layout(), "Bottom right corner"_t },
+        iBottomLeftRadioButton{ iStartingFromGroupBox.item_layout(), "Bottom left corner"_t },
+        iAngleRadioButton{ iStartingFromGroupBox.item_layout(), "At a specific angle"_t },
+        iLayout6 { iOrientationGroupBox.item_layout() },
         iAngleGroupBox{ iLayout6 },
-        iAngle{ iAngleGroupBox.with_contents_layout<grid_layout>(), "Angle:"_t },
-        iAngleSpinBox{ iAngleGroupBox.contents_layout() },
-        iAngleSlider{ iAngleGroupBox.contents_layout() },
+        iAngle{ iAngleGroupBox.with_item_layout<grid_layout>(), "Angle:"_t },
+        iAngleSpinBox{ iAngleGroupBox.item_layout() },
+        iAngleSlider{ iAngleGroupBox.item_layout() },
         iSizeGroupBox{ iLayout5, "Size"_t },
-        iSizeClosestSideRadioButton{ iSizeGroupBox.contents_layout(), "Closest side"_t },
-        iSizeFarthestSideRadioButton{ iSizeGroupBox.contents_layout(), "Farthest side"_t },
-        iSizeClosestCornerRadioButton{ iSizeGroupBox.contents_layout(), "Closest corner"_t },
-        iSizeFarthestCornerRadioButton{ iSizeGroupBox.contents_layout(), "Farthest corner"_t },
+        iSizeClosestSideRadioButton{ iSizeGroupBox.item_layout(), "Closest side"_t },
+        iSizeFarthestSideRadioButton{ iSizeGroupBox.item_layout(), "Farthest side"_t },
+        iSizeClosestCornerRadioButton{ iSizeGroupBox.item_layout(), "Closest corner"_t },
+        iSizeFarthestCornerRadioButton{ iSizeGroupBox.item_layout(), "Farthest corner"_t },
         iShapeGroupBox{ iLayout5, "Shape"_t },
-        iShapeEllipseRadioButton{ iShapeGroupBox.contents_layout(), "Ellipse"_t },
-        iShapeCircleRadioButton{ iShapeGroupBox.contents_layout(), "Circle"_t },
+        iShapeEllipseRadioButton{ iShapeGroupBox.item_layout(), "Ellipse"_t },
+        iShapeCircleRadioButton{ iShapeGroupBox.item_layout(), "Circle"_t },
         iExponentGroupBox{ iLayout5, "Exponents"_t },
-        iLinkedExponents{ iExponentGroupBox.with_contents_layout<grid_layout>(3u, 2u).add_span(grid_layout::cell_coordinates{0u, 0u}, grid_layout::cell_coordinates{1u, 0u}), "Linked"_t },
-        iMExponent{ iExponentGroupBox.contents_layout(), "m:"_t },
-        iMExponentSpinBox{ iExponentGroupBox.contents_layout() },
-        iNExponent{ iExponentGroupBox.contents_layout(), "n:"_t },
-        iNExponentSpinBox{ iExponentGroupBox.contents_layout() },
+        iLinkedExponents{ iExponentGroupBox.with_item_layout<grid_layout>(3u, 2u).add_span(grid_layout::cell_coordinates{0u, 0u}, grid_layout::cell_coordinates{1u, 0u}), "Linked"_t },
+        iMExponent{ iExponentGroupBox.item_layout(), "m:"_t },
+        iMExponentSpinBox{ iExponentGroupBox.item_layout() },
+        iNExponent{ iExponentGroupBox.item_layout(), "n:"_t },
+        iNExponentSpinBox{ iExponentGroupBox.item_layout() },
         iCenterGroupBox{ iLayout5, "Center"_t },
-        iXCenter{ iCenterGroupBox.with_contents_layout<grid_layout>(2u, 2u), "X:"_t },
-        iXCenterSpinBox { iCenterGroupBox.contents_layout() },
-        iYCenter{ iCenterGroupBox.contents_layout(), "Y:"_t },
-        iYCenterSpinBox { iCenterGroupBox.contents_layout() },
+        iXCenter{ iCenterGroupBox.with_item_layout<grid_layout>(2u, 2u), "X:"_t },
+        iXCenterSpinBox { iCenterGroupBox.item_layout() },
+        iYCenter{ iCenterGroupBox.item_layout(), "Y:"_t },
+        iYCenterSpinBox { iCenterGroupBox.item_layout() },
         iSpacer2{ iLayout5 },
         iSpacer3{ iLayout3 },
         iPreviewGroupBox{ iLayout4, "Preview"_t },
@@ -325,7 +325,7 @@ namespace neogfx
         iDelete.set_image_extents(size{ 16_dip, 16_dip });
         iDelete.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
         iTile.set_checkable(true);
-        iTile.contents_layout().set_alignment(alignment::Right);
+        iTile.item_layout().set_alignment(alignment::Right);
         iTileWidth.set_minimum(2);
         iTileWidth.set_maximum(9999);
         iTileWidth.set_step(1);
@@ -340,7 +340,7 @@ namespace neogfx
         iSmoothnessSlider.set_minimum(0.0);
         iSmoothnessSlider.set_maximum(100.0);
         iSmoothnessSlider.set_step(0.1);
-        iOrientationGroupBox.contents_layout().set_alignment(alignment::Top);
+        iOrientationGroupBox.item_layout().set_alignment(alignment::Top);
         iAngleSpinBox.set_minimum(-360.0);
         iAngleSpinBox.set_maximum(360.0);
         iAngleSpinBox.set_step(0.1);
@@ -349,7 +349,7 @@ namespace neogfx
         iAngleSlider.set_maximum(360.0);
         iAngleSlider.set_step(0.1);
         iExponentGroupBox.set_checkable(true);
-        iExponentGroupBox.contents_layout().set_alignment(alignment::Right);
+        iExponentGroupBox.item_layout().set_alignment(alignment::Right);
         iLinkedExponents.set_size_policy(size_constraint::Expanding);
         iLinkedExponents.set_checked(true);
         iMExponentSpinBox.set_minimum(0.0);

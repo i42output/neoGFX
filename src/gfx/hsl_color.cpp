@@ -59,7 +59,7 @@ namespace neogfx
 
     void hsl_color::set_hue(double aHue)
     {
-        iHue = aHue;
+        iHue = std::fmod(aHue, 360.0);
     }
 
     void hsl_color::set_saturation(double aSaturation)
@@ -85,14 +85,14 @@ namespace neogfx
     hsl_color hsl_color::with_hue(double aNewHue) const
     {
         hsl_color result = *this;
-        result.iHue = aNewHue;
+        result.set_hue(aNewHue);
         return result;
     }
 
     hsl_color hsl_color::with_saturation(double aNewSaturation) const
     {
         hsl_color result = *this;
-        result.iSaturation = aNewSaturation;
+        result.set_saturation(aNewSaturation);
         return result;
     }
 

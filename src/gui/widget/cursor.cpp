@@ -135,4 +135,24 @@ namespace neogfx
     {
         iFlashInterval = aInterval;
     }
+
+    bool cursor::visible() const
+    {
+        return iVisible;
+    }
+
+    bool cursor::hidden() const
+    {
+        return !iVisible;
+    }
+
+    void cursor::show()
+    {
+        iVisible = true;
+    }
+
+    void cursor::hide()
+    {
+        iVisible = false;
+    }
 }

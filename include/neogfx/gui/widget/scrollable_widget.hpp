@@ -57,6 +57,13 @@ namespace neogfx
             UsvStageCheckVertical2,
             UsvStageDone
         };
+        class suppress_scrollbar_visibility_updates : neolib::scoped_flag
+        {
+        public:
+            suppress_scrollbar_visibility_updates(self_type& aParent) :
+                neolib::scoped_flag{ aParent.iSuppressScrollbarVisibilityUpdates }
+            {}
+        };
     public:
         template <typename... Args>
         scrollable_widget(Args&&... aArgs) :
@@ -71,7 +78,8 @@ namespace neogfx
             iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
-            iMovingWidgets{ false }
+            iMovingWidgets{ false },
+            iSuppressScrollbarVisibilityUpdates{ false }
         {
             init();
         }
@@ -88,7 +96,8 @@ namespace neogfx
             iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
-            iMovingWidgets{ false }
+            iMovingWidgets{ false },
+            iSuppressScrollbarVisibilityUpdates{ false }
         {
             init();
         }
@@ -105,7 +114,8 @@ namespace neogfx
             iHorizontalScrollbar{ *this, scrollbar_orientation::Horizontal, aScrollbarStyle },
             iIgnoreScrollbarUpdates{ 0 },
             iUpdatingScrollbarVisibility{ false },
-            iMovingWidgets{ false }
+            iMovingWidgets{ false },
+            iSuppressScrollbarVisibilityUpdates{ false }
         {
             init();
         }
@@ -144,6 +154,7 @@ namespace neogfx
         virtual neogfx::scrolling_disposition scrolling_disposition(i_widget const& aChildWidget) const;
     public:
         rect scroll_area() const override;
+        size scroll_page() const override;
     protected:
         rect scrollbar_geometry(i_scrollbar const& aScrollbar) const override;
         void scrollbar_updated(i_scrollbar const& aScrollbar, i_scrollbar::update_reason_e aReason) override;
@@ -154,7 +165,8 @@ namespace neogfx
     protected:
         virtual bool use_scrollbar_container_updater() const;
         void update_scrollbar_visibility() override;
-        virtual void update_scrollbar_visibility(usv_stage_e aStage);
+        virtual bool update_scrollbar_visibility(usv_stage_e aStage);
+        virtual void scroll_page_updated();
     protected:
         void init_scrollbars();
     private:
@@ -169,6 +181,7 @@ namespace neogfx
         uint32_t iIgnoreScrollbarUpdates;
         bool iUpdatingScrollbarVisibility;
         bool iMovingWidgets;
+        bool iSuppressScrollbarVisibilityUpdates;
     };
 
     extern template class scrollable_widget<framed_widget<widget<>>>;

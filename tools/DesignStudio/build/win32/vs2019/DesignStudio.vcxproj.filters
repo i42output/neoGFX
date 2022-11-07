@@ -170,9 +170,15 @@
     <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\script.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\console_client.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\..\include\neogfx\tools\DesignStudio\i_console_client.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\element_model.tpp">
+    <None Include="..\..\..\src\element_model.ipp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>

@@ -332,7 +332,7 @@ namespace neogfx
     path push_button::path() const
     {
         neogfx::path ret;
-        size pixel = units_converter(*this).from_device_units(size(1.0, 1.0));
+        size pixel = units_converter{ *this }.from_device_units(size(1.0, 1.0));
         size currentSize = path_bounding_rect().extents();
         switch (iStyle)
         {

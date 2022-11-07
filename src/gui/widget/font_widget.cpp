@@ -21,6 +21,7 @@
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
+#include <neogfx/gui/dialog/font_dialog.hpp>
 #include <neogfx/gui/widget/font_widget.hpp>
 
 namespace neogfx
@@ -135,41 +136,123 @@ namespace neogfx
         };
     }
 
-    font_widget::font_widget(const neogfx::font& aCurrentFont) :
+    font_widget::font_picker::font_picker(font_widget& aParent) : 
+        button<>{ aParent.iLayout0 },
+        iParent{ aParent }
+    {
+        iParent.SelectionChanged([&]
+        {
+            iSampleText = std::nullopt;
+            update_layout(true, true);
+            update();
+        });
+    }
+
+    size font_widget::font_picker::minimum_size(optional_size const& aAvailableSpace) const
+    {
+        return internal_spacing().size() + 
+            units_converter{ *this }.from_device_units(sample_text().extents()) + 
+            units_converter{ *this }.from_device_units(size{ 2.0 * (2.0 + 2.0_dip), 2.0 * (2 + 2.0_dip) });
+    }
+
+    void font_widget::font_picker::paint(i_graphics_context& aGc) const
+    {
+        button<>::paint(aGc);
+
+        auto r = client_rect(false);
+        r.deflate(0.5, 0.5); // todo: change to use a refactored snap_to_pixel to accomodate SDF polygon primitives
+        aGc.draw_rounded_rect(r, 3.0_dip, pen{ palette_color(color_role::Void), 1.0 });
+        r.deflate(0.5, 0.5); // todo: this shouldn't be necessary as draw_rect should behave the same as draw_rounded_rect
+        r.deflate(2.0_dip, 2.0_dip);
+        aGc.draw_rect(r, pen{ palette_color(color_role::Void), 1.0 });
+        r.deflate(1.0, 1.0);
+
+        if (iParent.has_format())
+            aGc.draw_glyph_text(r.top_left(), sample_text(), iParent.selected_format());
+        else
+            aGc.draw_glyph_text(r.top_left(), sample_text(), text_color());
+    }
+
+    glyph_text const& font_widget::font_picker::sample_text() const
+    {
+        if (iSampleText == std::nullopt)
+        {
+            graphics_context gc{ *this, graphics_context::type::Unattached };
+            iSampleText = gc.to_glyph_text("AaBbYyZz 123", 
+                iParent.selected_font().with_size(
+                    service<i_app>().current_style().font_info(font_role::Widget).size()));
+        }
+        return *iSampleText;
+    }
+
+    font_widget::font_widget(const neogfx::font& aCurrentFont, font_widget_style aStyle) :
         framed_widget<>{},
         iUpdating{ false },
+        iStyle{ aStyle },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iLayout0{ *this },
-        iFamilyPicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
-        iStylePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
-        iSizePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter }
+        iLayout0{ *this }
     {
         init();
     }
 
-    font_widget::font_widget(i_widget& aParent, const neogfx::font& aCurrentFont) :
+    font_widget::font_widget(const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle) :
+        framed_widget<>{},
+        iUpdating{ false },
+        iStyle{ aStyle },
+        iCurrentFont{ aCurrentFont },
+        iSelectedFont{ aCurrentFont },
+        iCurrentTextFormat{ aCurrentTextFormat },
+        iSelectedTextFormat{ aCurrentTextFormat },
+        iLayout0{ *this }
+    {
+        init();
+    }
+
+    font_widget::font_widget(i_widget& aParent, const neogfx::font& aCurrentFont, font_widget_style aStyle) :
         framed_widget<>{ aParent },
         iUpdating{ false },
+        iStyle{ aStyle },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iLayout0{ *this },
-        iFamilyPicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
-        iStylePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
-        iSizePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter }
+        iLayout0{ *this }
     {
         init();
     }
 
-    font_widget::font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont) :
-        framed_widget<>{ aLayout },
+    font_widget::font_widget(i_widget& aParent, const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle) :
+        framed_widget<>{ aParent },
         iUpdating{ false },
+        iStyle{ aStyle },
         iCurrentFont{ aCurrentFont },
         iSelectedFont{ aCurrentFont },
-        iLayout0{ *this },
-        iFamilyPicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
-        iStylePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter },
-        iSizePicker{ iLayout0, drop_list_style::Editable | drop_list_style::NoFilter }
+        iCurrentTextFormat{ aCurrentTextFormat },
+        iSelectedTextFormat{ aCurrentTextFormat },
+        iLayout0{ *this }
+    {
+        init();
+    }
+
+    font_widget::font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont, font_widget_style aStyle) :
+        framed_widget<>{ aLayout },
+        iUpdating{ false },
+        iStyle{ aStyle },
+        iCurrentFont{ aCurrentFont },
+        iSelectedFont{ aCurrentFont },
+        iLayout0{ *this }
+    {
+        init();
+    }
+
+    font_widget::font_widget(i_layout& aLayout, const neogfx::font& aCurrentFont, const text_format& aCurrentTextFormat, font_widget_style aStyle) :
+        framed_widget<>{ aLayout },
+        iUpdating{ false },
+        iStyle{ aStyle },
+        iCurrentFont{ aCurrentFont },
+        iSelectedFont{ aCurrentFont },
+        iCurrentTextFormat{ aCurrentTextFormat },
+        iSelectedTextFormat{ aCurrentTextFormat },
+        iLayout0{ *this }
     {
         init();
     }
@@ -187,6 +270,21 @@ namespace neogfx
     {
         return iSelectedFont;
     }
+
+    bool font_widget::has_format() const
+    {
+        return iSelectedTextFormat.has_value();
+    }
+
+    text_format font_widget::current_format() const
+    {
+        return iCurrentTextFormat.has_value() ? *iCurrentTextFormat : text_format{};
+    }
+
+    text_format font_widget::selected_format() const
+    {
+        return iSelectedTextFormat.has_value() ? *iSelectedTextFormat : text_format{};
+    }
     
     void font_widget::select_font(const neogfx::font& aFont)
     {
@@ -194,47 +292,87 @@ namespace neogfx
         update_selected_font(*this);
     }
 
+    void font_widget::select_format(const text_format& aTextFormat)
+    {
+        iSelectedTextFormat = aTextFormat;
+        update_selected_format(*this);
+    }
+
     void font_widget::init()
     {
-        iFamilyPicker.set_id("neogfx::font_widget::family_picker"_s);
-        iStylePicker.set_id("neogfx::font_widget::style_picker"_s);
-        iSizePicker.set_id("neogfx::font_widget::size_picker"_s);
-
-        iFamilyPicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
-        iStylePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
-        iSizePicker.set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
-        iFamilyPicker.set_fixed_size(size{ 160.0_dip });
-        iStylePicker.set_fixed_size(size{ 128.0_dip });
-        iSizePicker.set_fixed_size(size{ 48.0_dip });
-
-        iFamilyPicker.set_presentation_model(make_ref<family_picker_presentation_model>());
-        iStylePicker.set_presentation_model(make_ref<style_picker_presentation_model>(iStylePicker.selection_model(), iFamilyPicker.selection_model()));
-        iSizePicker.set_presentation_model(make_ref<picker_presentation_model>());
-
-        iFamilyPicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+        if ((iStyle & font_widget_style::Dialog) == font_widget_style::Dialog)
         {
-            update_selected_font(iFamilyPicker);
-        });
-
-        iStylePicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+            iFontPicker.emplace(*this);
+            iFontPicker->Clicked([&]()
+            {
+                font_dialog fd{ *this, selected_font(), has_format() ? 
+                    optional<text_format>{ selected_format() } : std::nullopt };
+                fd.SelectionChanged([&]
+                {
+                    select_font(fd.selected_font());
+                    if (has_format())
+                        select_format(fd.selected_format().value());
+                });
+                if (fd.exec() == dialog_result::Accepted)
+                {
+                    select_font(fd.selected_font());
+                    if (has_format())
+                        select_format(fd.selected_format().value());
+                }
+                else
+                {
+                    select_font(current_font());
+                    if (has_format())
+                        select_format(current_format());
+                }
+            });
+        }
+        else if ((iStyle & font_widget_style::DropList) == font_widget_style::DropList)
         {
-            update_selected_font(iStylePicker);
-        });
+            iFamilyPicker.emplace(iLayout0, drop_list_style::Editable | drop_list_style::NoFilter);
+            iStylePicker.emplace(iLayout0, drop_list_style::Editable | drop_list_style::NoFilter);
+            iSizePicker.emplace(iLayout0, drop_list_style::Editable | drop_list_style::NoFilter);
 
-        iSizePicker.selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
-        {
-            update_selected_font(iSizePicker);
-        });
+            iFamilyPicker->set_id("neogfx::font_widget::family_picker"_s);
+            iStylePicker->set_id("neogfx::font_widget::style_picker"_s);
+            iSizePicker->set_id("neogfx::font_widget::size_picker"_s);
 
-        iSizePicker.input_widget().text_changed([this]()
-        {
-            update_selected_font(iSizePicker);
-        });
+            iFamilyPicker->set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
+            iStylePicker->set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
+            iSizePicker->set_size_policy(neogfx::size_policy{ size_constraint::Fixed, size_constraint::Minimum });
+            iFamilyPicker->set_fixed_size(size{ 160.0_dip });
+            iStylePicker->set_fixed_size(size{ 128.0_dip });
+            iSizePicker->set_fixed_size(size{ 48.0_dip });
 
-        auto& fm = service<i_font_manager>();
+            iFamilyPicker->set_presentation_model(make_ref<family_picker_presentation_model>());
+            iStylePicker->set_presentation_model(make_ref<style_picker_presentation_model>(iStylePicker->selection_model(), iFamilyPicker->selection_model()));
+            iSizePicker->set_presentation_model(make_ref<picker_presentation_model>());
 
-        for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
-            iFamilyPicker.model().insert_item(item_model_index{ fi }, fm.font_family(fi));
+            iFamilyPicker->selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+                {
+                    update_selected_font(*iFamilyPicker);
+                });
+
+            iStylePicker->selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+                {
+                    update_selected_font(*iStylePicker);
+                });
+
+            iSizePicker->selection_model().current_index_changed([this](const optional_item_presentation_model_index&, const optional_item_presentation_model_index&)
+                {
+                    update_selected_font(*iSizePicker);
+                });
+
+            iSizePicker->input_widget().text_changed([this]()
+                {
+                    update_selected_font(*iSizePicker);
+                });
+
+            auto& fm = service<i_font_manager>();
+
+            for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
+                iFamilyPicker->model().insert_item(item_model_index{ fi }, fm.font_family(fi));
+        }
 
         update_selected_font(*this);
     }
@@ -247,50 +385,67 @@ namespace neogfx
 
         auto oldFont = iSelectedFont;
         auto& fm = service<i_font_manager>();
-        if (&aUpdatingWidget == this || &aUpdatingWidget == &iFamilyPicker || &aUpdatingWidget == &iStylePicker)
+
+        if ((iStyle & font_widget_style::DropList) == font_widget_style::DropList)
         {
-            iSizePicker.model().clear();
-            if (!iSelectedFont.is_bitmap_font())
-                for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
-                    iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, sz);
+            if (&aUpdatingWidget == this || &aUpdatingWidget == &*iFamilyPicker || &aUpdatingWidget == &*iStylePicker)
+            {
+                iSizePicker->model().clear();
+                if (!iSelectedFont.is_bitmap_font())
+                    for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
+                        iSizePicker->model().insert_item(item_model_index{ iSizePicker->model().rows() }, sz);
+                else
+                    for (uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
+                        iSizePicker->model().insert_item(item_model_index{ iSizePicker->model().rows() }, iSelectedFont.fixed_size(fsi));
+                iSizePicker->input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
+            }
+            if (&aUpdatingWidget == this)
+            {
+                auto family = iFamilyPicker->presentation_model().find_item(iSelectedFont.family_name());
+                if (family != std::nullopt)
+                    iFamilyPicker->selection_model().set_current_index(*family);
+                auto style = iStylePicker->presentation_model().find_item(iSelectedFont.style_name());
+                if (style != std::nullopt)
+                    iStylePicker->selection_model().set_current_index(*style);
+                auto size = iSizePicker->presentation_model().find_item(boost::lexical_cast<std::string>(iSelectedFont.size()));
+                if (size != std::nullopt)
+                    iSizePicker->selection_model().set_current_index(*size);
+                iSizePicker->input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
+            }
+            else if (iFamilyPicker->selection_model().has_current_index() && iStylePicker->selection_model().has_current_index())
+            {
+                auto fontFamilyIndex = iFamilyPicker->presentation_model().to_item_model_index(iFamilyPicker->selection_model().current_index()).row();
+                auto fontStyleIndex = iStylePicker->presentation_model().to_item_model_index(iStylePicker->selection_model().current_index()).row();
+                auto fontSize = iSelectedFont.size();
+                try { fontSize = boost::lexical_cast<double>(iSizePicker->input_widget().text()); }
+                catch (...) {}
+                fontSize = std::min(std::max(fontSize, 1.0), 1638.0);
+                iSelectedFont = neogfx::font{
+                    fm.font_family(fontFamilyIndex),
+                    fm.font_style_name(fontFamilyIndex, fontStyleIndex),
+                    fontSize };
+            }
             else
-                for (uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
-                    iSizePicker.model().insert_item(item_model_index{ iSizePicker.model().rows() }, iSelectedFont.fixed_size(fsi));
-            iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
-        }
-        if (&aUpdatingWidget == this)
-        {
-            auto family = iFamilyPicker.presentation_model().find_item(iSelectedFont.family_name());
-            if (family != std::nullopt)
-                iFamilyPicker.selection_model().set_current_index(*family);
-            auto style = iStylePicker.presentation_model().find_item(iSelectedFont.style_name());
-            if (style != std::nullopt)
-                iStylePicker.selection_model().set_current_index(*style);
-            auto size = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(iSelectedFont.size()));
-            if (size != std::nullopt)
-                iSizePicker.selection_model().set_current_index(*size);
-            iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
-        }
-        else if (iFamilyPicker.selection_model().has_current_index() && iStylePicker.selection_model().has_current_index())
-        {
-            auto fontFamilyIndex = iFamilyPicker.presentation_model().to_item_model_index(iFamilyPicker.selection_model().current_index()).row();
-            auto fontStyleIndex = iStylePicker.presentation_model().to_item_model_index(iStylePicker.selection_model().current_index()).row();
-            auto fontSize = iSelectedFont.size();
-            try { fontSize = boost::lexical_cast<double>(iSizePicker.input_widget().text()); } catch (...) {}
-            fontSize = std::min(std::max(fontSize, 1.0), 1638.0);
-            iSelectedFont = neogfx::font{ 
-                fm.font_family(fontFamilyIndex), 
-                fm.font_style_name(fontFamilyIndex, fontStyleIndex), 
-                fontSize };
+                iSelectedFont = iCurrentFont;
+            auto fontSizeIndex = iSizePicker->presentation_model().find_item(boost::lexical_cast<std::string>(static_cast<int>(iSelectedFont.size())));
+            if (fontSizeIndex != std::nullopt)
+                iSizePicker->selection_model().set_current_index(*fontSizeIndex);
+            else
+                iSizePicker->selection_model().clear_current_index();
+
+            if (iSelectedFont != oldFont)
+                SelectionChanged.trigger();
         }
         else
-            iSelectedFont = iCurrentFont;
-        auto fontSizeIndex = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(static_cast<int>(iSelectedFont.size())));
-        if (fontSizeIndex != std::nullopt)
-            iSizePicker.selection_model().set_current_index(*fontSizeIndex);
-        else
-            iSizePicker.selection_model().clear_current_index();
-        if (iSelectedFont != oldFont)
             SelectionChanged.trigger();
+    }
+
+    void font_widget::update_selected_format(const i_widget& aUpdatingWidget)
+    {
+        if (iUpdating)
+            return;
+        neolib::scoped_flag sf{ iUpdating };
+
+        SelectionChanged.trigger();
     }
 }

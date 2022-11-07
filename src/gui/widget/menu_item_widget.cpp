@@ -83,7 +83,7 @@ namespace neogfx
     {
         size result = widget::minimum_size();
         if (menu_item().type() == menu_item_type::Action && menu_item().action().is_separator())
-            result.cy = units_converter(*this).from_device_units(7.0_dip);
+            result.cy = units_converter{ *this }.from_device_units(7.0_dip);
         return result;
     }
 

@@ -70,14 +70,21 @@ namespace neogfx
     {
         if (has_minimum_size())
             return base_type::minimum_size(aAvailableSpace);
-        return size{ 24.0_dip, 24.0_dip };
+        return size{ 26.0_dip, 26.0_dip };
     }
 
     void color_widget::paint(i_graphics_context& aGc) const
     {
-        draw_alpha_background(aGc, client_rect(), 4.0);
+        auto r = client_rect(false);
+        r.deflate(0.5, 0.5); // todo: change to use a refactored snap_to_pixel to accomodate SDF polygon primitives
+        aGc.draw_rounded_rect(r, 3.0_dip, pen{ palette_color(color_role::Void), 1.0 });
+        r.deflate(0.5, 0.5); // todo: this shouldn't be necessary as draw_rect should behave the same as draw_rounded_rect
+        r.deflate(2.0_dip, 2.0_dip);
+        aGc.draw_rect(r, pen{ palette_color(color_role::Void), 1.0 });
+        r.deflate(1.0, 1.0);
+        draw_alpha_background(aGc, r, 4.0);
         if (effectively_enabled())
-            aGc.fill_rect(client_rect(), iColor);
+            aGc.fill_rect(r, iColor);
     }
 
     void color_widget::init()

@@ -351,12 +351,48 @@ namespace neogfx
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const color_or_gradient& aColorOrGradient)
     {
-        if (std::holds_alternative<color>(aColorOrGradient))
-            aStream << static_variant_cast<color const&>(aColorOrGradient) << std::endl;
-        else if (std::holds_alternative<gradient>(aColorOrGradient))
-            aStream << static_variant_cast<gradient const&>(aColorOrGradient) << std::endl;
-        else
-            aStream << "(none)" << std::endl;
+        aStream << '[';
+        aStream << aColorOrGradient.index();
+        if (aColorOrGradient.index() != 0)
+        {
+            aStream << ',';
+            if (std::holds_alternative<color>(aColorOrGradient))
+                aStream << static_variant_cast<color const&>(aColorOrGradient);
+            else if (std::holds_alternative<gradient>(aColorOrGradient))
+                aStream << static_variant_cast<gradient const&>(aColorOrGradient);
+        }
+        aStream << ']';
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, color_or_gradient& aColorOrGradient)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_and_brackets_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
+        std::size_t index;
+        aStream >> index;
+        switch (index)
+        {
+        case 0:
+            break;
+        case 1:
+            {
+                color temp;
+                aStream >> temp;
+                aColorOrGradient = temp;
+            }
+            break;
+        case 2:
+            {
+                gradient temp;
+                aStream >> temp;
+                aColorOrGradient = temp;
+            }
+            break;
+        }
+        aStream.imbue(previousImbued);
         return aStream;
     }
 }

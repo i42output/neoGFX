@@ -120,6 +120,17 @@ namespace neogfx
             return true;
         };
 
+        bool batchable(text_format const& aLeft, text_format const& aRight)
+        {
+            if (!batchable(aLeft.ink(), aRight.ink()))
+                return false;
+            if (!batchable(aLeft.paper(), aRight.paper()))
+                return false;
+            if (!batchable(aLeft.effect(), aRight.effect()))
+                return false;
+            return true;
+        }
+
         bool batchable(const operation& aLeft, const operation& aRight)
         {
             auto const leftOp = static_cast<operation_type>(aLeft.index());
@@ -133,6 +144,7 @@ namespace neogfx
             case operation_type::SetPixel:
             case operation_type::DrawPixel:
             case operation_type::DrawMesh:
+            case operation_type::DrawGlyph:
                 return true;
             case operation_type::DrawLine:
             {
@@ -165,18 +177,6 @@ namespace neogfx
                 auto& left = static_variant_cast<const fill_path&>(aLeft);
                 auto& right = static_variant_cast<const fill_path&>(aRight);
                 return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
-            }
-            case operation_type::DrawGlyph:
-            {
-                auto& left = static_variant_cast<const draw_glyphs&>(aLeft);
-                auto& right = static_variant_cast<const draw_glyphs&>(aRight);
-                if (!batchable(left.appearance.ink(), right.appearance.ink()))
-                    return false;
-                if (!batchable(left.appearance.paper(), right.appearance.paper()))
-                    return false;
-                if (!batchable(left.appearance.effect(), right.appearance.effect()))
-                    return false;
-                return true;
             }
             default:
                 return false;

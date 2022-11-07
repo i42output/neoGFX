@@ -897,6 +897,11 @@ namespace neogfx
                     return basic_rect{};
             }
         }
+        bool intersects(const self_type& aOther) const
+        {
+            auto const& test = intersection(aOther);
+            return test != basic_rect{};
+        }
         self_type& center_on(const self_type& other)
         {
             *this = centered_on(other);
@@ -919,6 +924,13 @@ namespace neogfx
                 return self_type{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
             else
                 return self_type{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
+        }
+        self_type with_position(const point_type& p) const
+        {
+            auto result = *this;
+            result.position().x = p.x;
+            result.position().y = p.y;
+            return result;
         }
         self_type with_x(coordinate_type c) const
         {

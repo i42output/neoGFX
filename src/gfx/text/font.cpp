@@ -326,7 +326,12 @@ namespace neogfx
 
     font_info font_info::with_style_xor(font_style aStyle) const
     {
-        return font_info(iInstance->iFamilyName, iInstance->iStyle != std::nullopt ? *iInstance->iStyle ^ aStyle : aStyle, optional_style_name{}, iInstance->iSize);
+        auto s = iInstance->iStyle != std::nullopt ? *iInstance->iStyle ^ aStyle : aStyle;
+        if ((s & (font_style::Bold & font_style::Italic)) == font_style::Invalid)
+            s |= font_style::Normal;
+        if ((s & font_style::Normal) == font_style::Normal && (s & (font_style::Bold & font_style::Italic)) != font_style::Invalid)
+            s &= ~font_style::Normal;
+        return font_info(iInstance->iFamilyName, s, optional_style_name{}, iInstance->iSize);
     }
 
     font_info font_info::with_underline(bool aUnderline) const

@@ -95,21 +95,21 @@ namespace neogfx
     hsv_color hsv_color::with_hue(double aNewHue) const
     {
         hsv_color result = *this;
-        result.iHue = aNewHue;
+        result.set_hue(aNewHue);
         return result;
     }
 
     hsv_color hsv_color::with_saturation(double aNewSaturation) const
     {
         hsv_color result = *this;
-        result.iSaturation = aNewSaturation;
+        result.set_saturation(aNewSaturation);
         return result;
     }
 
     hsv_color hsv_color::with_value(double aNewValue) const
     {
         hsv_color result = *this;
-        result.iValue = aNewValue;
+        result.set_value(aNewValue);
         return result;
     }
 

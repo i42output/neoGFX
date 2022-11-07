@@ -240,6 +240,7 @@
     <ClInclude Include="..\..\..\src\node_widget.hpp" />
     <ClInclude Include="..\..\..\src\script_widget.hpp" />
     <ClInclude Include="..\..\..\src\sticky_note.hpp" />
+    <ClInclude Include="..\..\..\src\telnet.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\default_nel.nrc">

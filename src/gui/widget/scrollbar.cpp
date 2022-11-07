@@ -210,6 +210,9 @@ namespace neogfx
             iMinimum = aMinimum;
             iContainer.scrollbar_updated(*this, AttributeChanged);
         }
+
+        if (position() < minimum())
+            set_position(minimum());
     }
 
     scrollbar::value_type scrollbar::maximum() const
@@ -224,6 +227,9 @@ namespace neogfx
             iMaximum = aMaximum;
             iContainer.scrollbar_updated(*this, AttributeChanged);
         }
+
+        if (position() > maximum_position())
+            set_position(maximum_position());
     }
 
     scrollbar::value_type scrollbar::step() const
@@ -252,6 +258,9 @@ namespace neogfx
             iPage = aPage;
             iContainer.scrollbar_updated(*this, AttributeChanged);
         }
+
+        if (position() > maximum_position())
+            set_position(maximum_position());
     }
 
     bool scrollbar::locked() const

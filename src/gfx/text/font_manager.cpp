@@ -124,7 +124,7 @@ namespace neogfx
                 if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPath)))
                     return neolib::tidy_path(szPath) + "/Microsoft/Windows/Fonts";
                 else
-                    throw std::logic_error("neogfx::detail::platform_specific::get_system_font_directory: Error");
+                    throw std::logic_error("neogfx::detail::platform_specific::get_local_font_directory: Error");
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::get_local_font_directory: Unknown system");
 #endif

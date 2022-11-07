@@ -30,6 +30,7 @@
 #pragma warning( pop )
 #endif
 #include <optional>
+#include <neolib/core/vecarray.hpp>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
@@ -59,34 +60,34 @@ namespace neogfx
 
     enum class shader_effect
     {
-        None               = 0,
-        Colorize           = 1,
-        ColorizeAverage    = Colorize,
-        ColorizeMaximum    = 2,
-        ColorizeSpot       = 3,
-        ColorizeAlpha      = 4,
-        Monochrome         = 5,
-        Filter             = 10,
-        Ignore             = 99
+        None = 0,
+        Colorize = 1,
+        ColorizeAverage = Colorize,
+        ColorizeMaximum = 2,
+        ColorizeSpot = 3,
+        ColorizeAlpha = 4,
+        Monochrome = 5,
+        Filter = 10,
+        Ignore = 99
     };
 
     enum class shader_filter
     {
-        None            = 0,
-        GaussianBlur    = 1
+        None = 0,
+        GaussianBlur = 1
     };
 
     enum class shader_shape
     {
-        None            = 0x00,
-        Line            = 0x01,
-        CubicBezier     = 0x02,
-        Triangle        = 0x03,
-        Circle          = 0x04,
-        Ellipse         = 0x05,
-        Pie             = 0x06,
-        Arc             = 0x07,
-        RoundedRect     = 0x08
+        None = 0x00,
+        Line = 0x01,
+        CubicBezier = 0x02,
+        Triangle = 0x03,
+        Circle = 0x04,
+        Ellipse = 0x05,
+        Pie = 0x06,
+        Arc = 0x07,
+        RoundedRect = 0x08
     };
 
     enum class blurring_algorithm
@@ -189,7 +190,17 @@ namespace neogfx
         Glow,
         Shadow
     };
+}
 
+begin_declare_enum(neogfx::text_effect_type)
+declare_enum_string(neogfx::text_effect_type, None)
+declare_enum_string(neogfx::text_effect_type, Outline)
+declare_enum_string(neogfx::text_effect_type, Glow)
+declare_enum_string(neogfx::text_effect_type, Shadow)
+end_declare_enum(neogfx::text_effect_type)
+
+namespace neogfx
+{
     class text_effect
     {
     public:
@@ -198,6 +209,10 @@ namespace neogfx
         typedef double auxiliary_parameter;
         typedef optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
+        text_effect() :
+            iType{ text_effect_type::None }, iColor{}, iWidth{}, iAux1{}, iIgnoreEmoji{}
+        {
+        }
         text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, bool aIgnoreEmoji = false) :
             iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iIgnoreEmoji{ aIgnoreEmoji }
         {
@@ -291,6 +306,10 @@ namespace neogfx
                 return { std::max(1.0, width() / 2.0), std::max(1.0, width() / 2.0) };
             }
         }
+        void set_offset(vec3 const& aOffset)
+        {
+            iOffset = aOffset;
+        }
         double aux1() const
         {
             if (iAux1 != std::nullopt)
@@ -306,6 +325,10 @@ namespace neogfx
             case text_effect_type::Shadow:
                 return 1.0;
             }
+        }
+        void set_aux1(double aAux1)
+        {
+            iAux1 = aAux1;
         }
         bool ignore_emoji() const
         {
@@ -331,23 +354,71 @@ namespace neogfx
         optional_auxiliary_parameter iAux1;
         bool iIgnoreEmoji;
     };
+
     typedef neolib::optional<text_effect> optional_text_effect;
 
-    class text_appearance
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const text_effect& aEffect)
+    {
+        aStream << '[';
+        aStream << aEffect.type();
+        aStream << ',';
+        aStream << aEffect.color();
+        aStream << ',';
+        aStream << aEffect.width();
+        aStream << ',';
+        aStream << aEffect.offset();
+        aStream << ',';
+        aStream << aEffect.aux1();
+        aStream << ',';
+        aStream << aEffect.ignore_emoji();
+        aStream << ']';
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, text_effect& aEffect)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_and_brackets_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_and_brackets_as_whitespace{} });
+        text_effect_type type;
+        aStream >> type;
+        aEffect.set_type(type);
+        text_color color;
+        aStream >> color;
+        aEffect.set_color(color);
+        dimension width;
+        aStream >> width;
+        aEffect.set_width(width);
+        vec3 offset;
+        aStream >> offset;
+        aEffect.set_offset(offset);
+        double aux1;
+        aStream >> aux1;
+        aEffect.set_aux1(aux1);
+        bool ignoreEmoji;
+        aStream >> ignoreEmoji;
+        aEffect.set_ignore_emoji(ignoreEmoji);
+        aStream.imbue(previousImbued);
+        return aStream;
+    }
+
+    class text_format
     {
     public:
-        struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_appearance::no_paper") {} };
-        struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_appearance::no_effect") {} };
+        struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_format::no_paper") {} };
+        struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_format::no_effect") {} };
     public:
-        typedef text_appearance abstract_type; // todo
+        typedef text_format abstract_type; // todo
     public:
-        text_appearance() :
+        text_format() :
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
         {
         }
-        text_appearance(text_appearance const& aOther) :
+        text_format(text_format const& aOther) :
             iInk{ aOther.iInk },
             iPaper{ aOther.iPaper },
             iIgnoreEmoji{ aOther.iIgnoreEmoji },
@@ -357,7 +428,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
+        text_format(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
             iIgnoreEmoji{ true },
@@ -367,7 +438,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
+        text_format(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
             iIgnoreEmoji{ true },
@@ -377,7 +448,7 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(InkType const& aInk, optional_text_effect const& aEffect) :
+        text_format(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
@@ -386,7 +457,7 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(InkType const& aInk, text_effect const& aEffect) :
+        text_format(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
@@ -395,7 +466,7 @@ namespace neogfx
         {
         }
         template <typename InkType, typename PaperType>
-        text_appearance(InkType const& aInk, PaperType const& aPaper) :
+        text_format(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
             iIgnoreEmoji{ true },
@@ -404,7 +475,7 @@ namespace neogfx
         {
         }
         template <typename InkType>
-        text_appearance(InkType const& aInk) :
+        text_format(InkType const& aInk) :
             iInk{ aInk },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
@@ -412,13 +483,23 @@ namespace neogfx
         {
         }
     public:
-        bool operator==(text_appearance const& aRhs) const
+        bool operator==(text_format const& aRhs) const
         {
             return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iIgnoreEmoji == aRhs.iIgnoreEmoji && iEffect == aRhs.iEffect;
         }
-        bool operator!=(text_appearance const& aRhs) const
+        bool operator<(text_format const& aRhs) const
         {
-            return !(*this == aRhs);
+            return std::forward_as_tuple(ink(), paper(), ignore_emoji(), effect()) <
+                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.ignore_emoji(), aRhs.effect());
+        }
+        std::strong_ordering operator<=>(const text_format& aRhs) const
+        {
+            if (*this == aRhs)
+                return std::strong_ordering::equal;
+            else if (*this < aRhs)
+                return std::strong_ordering::less;
+            else
+                return std::strong_ordering::greater;
         }
     public:
         text_color const& ink() const
@@ -466,46 +547,46 @@ namespace neogfx
             return iBeingFiltered;
         }
     public:
-        text_appearance with_ink(text_color const& aInk) const
+        text_format with_ink(text_color const& aInk) const
         {
-            return text_appearance{ aInk, iPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+            return text_format{ aInk, iPaper, iEffect }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_paper(optional_text_color const& aPaper) const
+        text_format with_paper(optional_text_color const& aPaper) const
         {
-            return text_appearance{ iInk, aPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+            return text_format{ iInk, aPaper, iEffect }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_emoji_ignored(bool aIgnored) const
+        text_format with_emoji_ignored(bool aIgnored) const
         {
             auto result = *this;
             result.set_ignore_emoji(aIgnored);
             return result;
         }
-        text_appearance with_effect(optional_text_effect const& aEffect) const
+        text_format with_effect(optional_text_effect const& aEffect) const
         {
-            return text_appearance{ iInk, iPaper, aEffect }.with_emoji_ignored(ignore_emoji());
+            return text_format{ iInk, iPaper, aEffect }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_alpha(color::component aAlpha) const
+        text_format with_alpha(color::component aAlpha) const
         {
-            return text_appearance{ 
-                iInk.with_alpha(aAlpha), 
-                iPaper != std::nullopt ? 
-                    optional_text_color{ iPaper->with_alpha(aAlpha) } : 
-                    optional_text_color{}, 
-                iEffect != std::nullopt ? 
-                    iEffect->with_alpha(aAlpha) : 
+            return text_format{
+                iInk.with_alpha(aAlpha),
+                iPaper != std::nullopt ?
+                    optional_text_color{ iPaper->with_alpha(aAlpha) } :
+                    optional_text_color{},
+                iEffect != std::nullopt ?
+                    iEffect->with_alpha(aAlpha) :
                     optional_text_effect{} }.with_emoji_ignored(ignore_emoji());
         }
-        text_appearance with_alpha(double aAlpha) const
+        text_format with_alpha(double aAlpha) const
         {
             return with_alpha(static_cast<color::component>(aAlpha * 255));
         }
-        text_appearance with_only_effect_calculation() const
+        text_format with_only_effect_calculation() const
         {
             auto copy = *this;
             copy.iOnlyCalculateEffect = true;
             return copy;
         }
-        text_appearance as_being_filtered() const
+        text_format as_being_filtered() const
         {
             auto copy = *this;
             copy.iBeingFiltered = true;
@@ -520,5 +601,97 @@ namespace neogfx
         bool iBeingFiltered;
     };
 
-    typedef neolib::optional<text_appearance> optional_text_appearance;
+    typedef neolib::optional<text_format> optional_text_format;
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const text_format& aTextFormat)
+    {
+        aStream << "[";
+        aStream << aTextFormat.ink();
+        aStream << ",";
+        aStream << aTextFormat.paper();
+        aStream << ",";
+        aStream << aTextFormat.effect();
+        aStream << ",";
+        aStream << aTextFormat.ignore_emoji();
+        aStream << "]";
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, text_format& aTextFormat)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_and_brackets_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_and_brackets_as_whitespace{} });
+        text_color ink;
+        aStream >> ink;
+        aTextFormat.set_ink(ink);
+        optional_text_color temp;
+        aStream >> temp;
+        aTextFormat.set_paper(temp);
+        optional_text_effect textEffect;
+        aStream >> textEffect;
+        aTextFormat.set_effect(textEffect);
+        bool ignoreEmoji;
+        aStream >> ignoreEmoji;
+        aTextFormat.set_ignore_emoji(ignoreEmoji);
+        aStream.imbue(previousImbued);
+        return aStream;
+    }
+}
+
+define_setting_type(neogfx::text_format)
+
+namespace neogfx
+{
+    struct text_format_span
+    {
+        std::ptrdiff_t start;
+        std::ptrdiff_t end;
+        text_format attributes;
+    };
+
+    class text_format_spans
+    {
+    public:
+        typedef neolib::vecarray<text_format_span, 1, -1> spans;
+    public:
+        text_format_spans()
+        {
+        }
+        text_format_spans(text_format_span const& aSpan) :
+            iSpans{ aSpan }
+        {
+        }
+    public:
+        void clear()
+        {
+            iSpans.clear();
+        }
+        void add(std::ptrdiff_t aGlyphTextIndex, text_format const& aTextFormat)
+        {
+            if (iSpans.empty() || iSpans.back().attributes != aTextFormat)
+                iSpans.emplace_back(aGlyphTextIndex, aGlyphTextIndex + 1, aTextFormat);
+            else
+                iSpans.back().end = aGlyphTextIndex + 1;
+        }
+        template <typename... Args>
+        void add(std::ptrdiff_t aGlyphtTextIndex, Args&&... aArgs)
+        {
+            text_format const attributes{ std::forward<Args>(aArgs)... };
+            add(aGlyphtTextIndex, attributes);
+        }
+    public:
+        spans::const_iterator begin() const
+        {
+            return iSpans.begin();
+        }
+        spans::const_iterator end() const
+        {
+            return iSpans.end();
+        }
+    private:
+        spans iSpans;
+    };
 }

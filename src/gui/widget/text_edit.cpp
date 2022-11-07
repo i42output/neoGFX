@@ -323,9 +323,9 @@ namespace neogfx
         return iTextEffect;
     }
 
-    text_appearance text_edit::character_style::as_text_appearance() const
+    text_format text_edit::character_style::as_text_format() const
     {
-        return text_appearance{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
+        return text_format{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
     }
 
     text_edit::character_style& text_edit::character_style::set_font(optional_font const& aFont)
@@ -365,13 +365,13 @@ namespace neogfx
         return *this;
     }
 
-    text_edit::character_style& text_edit::character_style::set_from_text_appearance(const text_appearance& aAppearance)
+    text_edit::character_style& text_edit::character_style::set_from_text_format(const text_format& aTextFormat)
     {
-        iGlyphColor = aAppearance.ink();
+        iGlyphColor = aTextFormat.ink();
         iTextColor = neolib::none; // todo
-        iPaperColor = aAppearance.paper() ? *aAppearance.paper() : neolib::none;
-        iIgnoreEmoji = aAppearance.ignore_emoji();
-        iTextEffect = aAppearance.effect();
+        iPaperColor = aTextFormat.paper() ? *aTextFormat.paper() : neolib::none;
+        iIgnoreEmoji = aTextFormat.ignore_emoji();
+        iTextEffect = aTextFormat.effect();
         return *this;
     }
 
@@ -1165,19 +1165,27 @@ namespace neogfx
         return neogfx::scrolling_disposition::DontScrollChildWidget;
     }
 
+    rect text_edit::scroll_area() const
+    {
+        return rect{ point{}, iTextExtents.value() };
+    }
+
+    size text_edit::scroll_page() const
+    {
+        return client_rect(false).extents();
+    }
+
     bool text_edit::use_scrollbar_container_updater() const
     {
         return false;
     }
 
-    void text_edit::update_scrollbar_visibility(usv_stage_e aStage)
+    bool text_edit::update_scrollbar_visibility(usv_stage_e aStage)
     {
         std::optional<scoped_property_transition_suppression> sts1;
         std::optional<scoped_property_transition_suppression> sts2;
 
-        bool refreshLines = (iTextExtents == std::nullopt);
-
-        if (!refreshLines) // must be a resize event
+        if (iTextExtents != std::nullopt) // must be a resize event
         {
             sts1.emplace(vertical_scrollbar().Position);
             sts2.emplace(horizontal_scrollbar().Position);
@@ -1188,82 +1196,43 @@ namespace neogfx
         case UsvStageInit:
             if (resizing())
                 vertical_scrollbar().push_zone();
-            if (vertical_scrollbar().visible())
-            {
-                vertical_scrollbar().hide();
-//                refreshLines = true;  // todo: optimize this properly
-            }
-            if (horizontal_scrollbar().visible())
-            {
-                horizontal_scrollbar().hide();
-//                refreshLines = true;  // todo: optimize this properly
-            }
-            refreshLines = true;  // todo: optimize this properly
-            break;
-        case UsvStageCheckVertical1:
-        case UsvStageCheckVertical2:
-            {
-                i_scrollbar::value_type oldPosition = vertical_scrollbar().position();
-                vertical_scrollbar().set_maximum(iTextExtents->cy);
-                vertical_scrollbar().set_step(font().height());
-                vertical_scrollbar().set_page(client_rect(false).height());
-                vertical_scrollbar().set_position(oldPosition);
-                if (vertical_scrollbar().maximum() - vertical_scrollbar().page() > 0.0)
-                {
-                    if (!vertical_scrollbar().visible())
-                    {
-                        vertical_scrollbar().show();
-                        // refreshLines = true;  // todo: optimize this properly
-                    }
-                    refreshLines = true;  // todo: optimize this properly
-                }
-                else
-                {
-                    if (vertical_scrollbar().visible())
-                    {
-                        vertical_scrollbar().hide();
-                        // refreshLines = true;  // todo: optimize this properly
-                    }
-                    refreshLines = true;  // todo: optimize this properly
-                }
-                framed_scrollable_widget::update_scrollbar_visibility(aStage);
-            }
-            break;
-        case UsvStageCheckHorizontal:
-            {
-                i_scrollbar::value_type oldPosition = horizontal_scrollbar().position();
-                horizontal_scrollbar().set_maximum(iTextExtents->cx <= client_rect(false).width() ? 0.0 : iTextExtents->cx);
-                horizontal_scrollbar().set_step(font().height());
-                horizontal_scrollbar().set_page(client_rect(false).width());
-                horizontal_scrollbar().set_position(oldPosition);
-                if (horizontal_scrollbar().maximum() - horizontal_scrollbar().page() > 0.0)
-                    horizontal_scrollbar().show();
-                else
-                    horizontal_scrollbar().hide();
-                framed_scrollable_widget::update_scrollbar_visibility(aStage);
-            }
+            vertical_scrollbar().set_step(font().height());
+            horizontal_scrollbar().set_step(font().height());
+            if (!framed_scrollable_widget::update_scrollbar_visibility(aStage))
+                refresh_lines();
             break;
         case UsvStageDone:
+            framed_scrollable_widget::update_scrollbar_visibility(aStage);
             if (has_focus() && !read_only())
                 make_cursor_visible();
             else if (resizing())
             {
                 auto zone = vertical_scrollbar().pop_zone();
-                if (zone == scrollbar_zone::Middle)
-                    make_visible(glyph_position(document_hit_test(column_rect(0).top_left()), true));
-                else if (zone == scrollbar_zone::Bottom)
+                switch(zone)
                 {
+                case scrollbar_zone::Top:
+                    make_cursor_visible();
+                    break;
+                case scrollbar_zone::Middle:
+                    make_visible(glyph_position(document_hit_test(column_rect(0).top_left()), true));
+                    break;
+                case scrollbar_zone::Bottom:
                     vertical_scrollbar().set_position(vertical_scrollbar().maximum());
                     horizontal_scrollbar().set_position(0.0);
+                    break;
                 }
             }
             break;
         default:
-            break;
+            return framed_scrollable_widget::update_scrollbar_visibility(aStage);
         }
 
-        if (refreshLines)
-            refresh_lines();
+        return true;
+    }
+
+    void text_edit::scroll_page_updated()
+    {
+        refresh_lines();
     }
 
     color text_edit::frame_color() const
@@ -2205,7 +2174,7 @@ namespace neogfx
 
     void text_edit::set_tab_stops(const optional_dimension& aTabStops)
     {
-        optional_dimension newTabStops = (aTabStops != std::nullopt ? optional_dimension{ units_converter(*this).to_device_units(size{ *aTabStops, 0.0 }).cx } : optional_dimension{});
+        optional_dimension newTabStops = (aTabStops != std::nullopt ? optional_dimension{ units_converter{ *this }.to_device_units(size{ *aTabStops, 0.0 }).cx } : optional_dimension{});
         if (iTabStops != newTabStops)
         {
             iTabStops = newTabStops;
@@ -2798,7 +2767,7 @@ namespace neogfx
             --lineEnd;
         {
             thread_local std::optional<glyph_text> tGlyphText;
-            optional_text_appearance textAppearance;
+            optional_text_format textAppearance;
             point textPos = aPosition;
             point glyphPos = aPosition;
             for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
@@ -2818,11 +2787,11 @@ namespace neogfx
                         default_text_color() : 
                     style.character().glyph_color(), client_rect(), true);
                 auto const& nextTextAppearance = !selected ?
-                    text_appearance{
+                    text_format{
                         glyphColor,
                         style.character().paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.character().paper_color() } } : optional_text_color{},
                         style.character().text_effect() }.with_emoji_ignored(style.character().ignore_emoji()) :
-                    text_appearance{
+                    text_format{
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
                         has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
                 if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
@@ -2853,12 +2822,12 @@ namespace neogfx
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
         auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
-        if (cursorColor == neolib::none && cursor().style() == cursor_style::Standard)
-            cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);
         if (cursorColor == neolib::none)
+            cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);
+        if (cursor().style() == cursor_style::Xor)
         {
             aGc.push_logical_operation(logical_operation::Xor);
-            aGc.fill_rect(cursor_rect(), color::White.with_combined_alpha(cursorAlpha));
+            aGc.fill_rect(cursor_rect(), (cursorAlpha >= 0.5 ? color::White : color::Black));
             aGc.pop_logical_operation();
         }
         else if (std::holds_alternative<color>(cursorColor))

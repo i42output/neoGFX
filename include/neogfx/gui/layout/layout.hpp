@@ -48,8 +48,8 @@ namespace neogfx
     public:
         typedef i_layout abstract_type;
     protected:
-        typedef layout_item_cache item;
-        typedef std::list<item, neolib::fast_pool_allocator<item>> item_list;
+        typedef ref_ptr<i_layout_item_cache> item;
+        typedef std::list<item> item_list;
         enum item_type_e
         {
             ItemTypeNone = 0x00,
@@ -71,24 +71,14 @@ namespace neogfx
         layout(const layout&) = delete;
         ~layout();
     public:
-        bool is_layout() const override;
-        const i_layout& as_layout() const override;
-        i_layout& as_layout() override;
-        bool is_spacer() const override;
-        const i_spacer& as_spacer() const override;
-        i_spacer& as_spacer() override;
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
-    public:
-        bool has_parent_layout() const override;
-        const i_layout& parent_layout() const override;
-        i_layout& parent_layout() override;
-        void set_parent_layout(i_layout* aParentLayout) override;
-        bool has_layout_owner() const override;
-        const i_widget& layout_owner() const override;
-        i_widget& layout_owner() override;
-        void set_layout_owner(i_widget* aOwner) override;
+        bool has_parent_layout() const final;
+        const i_layout& parent_layout() const final;
+        i_layout& parent_layout() final;
+        void set_parent_layout(i_layout* aParentLayout) final;
+        bool has_layout_owner() const final;
+        const i_widget& layout_owner() const final;
+        i_widget& layout_owner() final;
+        void set_layout_owner(i_widget* aOwner) final;
     public:
         i_layout_item& add(i_layout_item& aItem) override;
         i_layout_item& add_at(layout_item_index aPosition, i_layout_item& aItem) override;

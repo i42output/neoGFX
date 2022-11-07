@@ -147,11 +147,13 @@ namespace neogfx
         }
         void set_decoration_style(neogfx::decoration_style aStyle)
         {
+            auto& self = widget_type::as_widget();
+
             if (iStyle != aStyle)
             {
                 iStyle = aStyle;
-                as_widget().update();
-                as_widget().update_layout();
+                self.update();
+                self.update_layout();
             }
         }
         neogfx::decoration decoration() const
@@ -301,6 +303,8 @@ namespace neogfx
         }
         widget_part part(const point& aPosition) const override
         {
+            auto& self = widget_type::as_widget();
+
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
                 service<debug::logger>() << "decorated<>::part(...) --> ";
@@ -312,8 +316,8 @@ namespace neogfx
                 {
                     enum { left = 1, top = 2, right = 4, bottom = 8 };
                     int hit = 0;
-                    auto const nonClientRect = as_widget().to_client_coordinates(as_widget().non_client_rect());
-                    auto const nonClientBorder = as_widget().is_root() ? as_widget().root().window_border() : as_widget().internal_spacing();
+                    auto const nonClientRect = self.to_client_coordinates(self.non_client_rect());
+                    auto const nonClientBorder = self.is_root() ? self.root().window_border() : self.internal_spacing();
                     if (aPosition.x < nonClientRect.left() + nonClientBorder.left)
                         hit |= left;
                     if (aPosition.x > nonClientRect.right() - nonClientBorder.right)
@@ -324,12 +328,12 @@ namespace neogfx
                         hit |= bottom;
                     if (iTitleBar != nullptr)
                     {
-                        if (as_widget().to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
+                        if (self.to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
                             result.part = widget_part::TitleBar;
                     }
                     if (iStatusBar != nullptr)
                     {
-                        point const sizeGripPos = as_widget().to_client_coordinates(iStatusBar->size_grip().non_client_rect().position());
+                        point const sizeGripPos = self.to_client_coordinates(iStatusBar->size_grip().non_client_rect().position());
                         rect const sizeGripRect = { sizeGripPos, size{ nonClientRect.bottom_right() - sizeGripPos } };
                         if (sizeGripRect.contains(aPosition))
                             hit |= (right | bottom);
@@ -363,10 +367,12 @@ namespace neogfx
         using widget_type::layout;
         bool has_layout(standard_layout aStandardLayout) const override
         {
+            auto& self = widget_type::as_widget();
+
             switch (aStandardLayout)
             {
             case standard_layout::Default:
-                return as_widget().has_layout();
+                return self.has_layout();
             case standard_layout::Client:
                 return !!iClientLayout;
             case standard_layout::NonClient:
@@ -387,12 +393,15 @@ namespace neogfx
         }
         const i_layout& layout(standard_layout aStandardLayout, layout_position aPosition = layout_position::None) const override
         {
+            auto& self = widget_type::as_widget();
+
             if (!has_layout(aStandardLayout))
                 throw standard_layout_not_found();
+
             switch (aStandardLayout)
             {
             case standard_layout::Default:
-                return as_widget().layout();
+                return self.layout();
             case standard_layout::Client:
                 return has_client_widget() ? client_widget().layout() : *iClientLayout;
             case standard_layout::NonClient:
@@ -434,13 +443,17 @@ namespace neogfx
     protected:
         neogfx::size_policy size_policy() const override
         {
-            if (as_widget().has_size_policy() || as_widget().is_root())
+            auto& self = widget_type::as_widget();
+
+            if (self.has_size_policy() || self.is_root())
                 return widget_type::size_policy();
             return size_constraint::MinimumExpanding;
         }
         size weight() const override
         {
-            if (as_widget().has_weight() || as_widget().is_root())
+            auto& self = widget_type::as_widget();
+
+            if (self.has_weight() || self.is_root())
                 return widget_type::weight();
             return size{ 1.0 };
         }
@@ -453,16 +466,18 @@ namespace neogfx
     protected:
         void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
+            auto& self = widget_type::as_widget();
+
             widget_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
-            if (aButton == mouse_button::Left && as_widget().capturing() && 
-                (!as_widget().is_root() || as_widget().root().is_nested()))
+            if (aButton == mouse_button::Left && self.capturing() && 
+                (!self.is_root() || self.root().is_nested()))
             {
                 auto const clickedPart = part(aPosition);
                 if (part_active(clickedPart))
                 {
                     iTracking = tracking{ clickedPart.part, resizing_context().position(), resizing_context().extents(), widget_type::to_window_coordinates(aPosition) };
-                    if (as_widget().has_root())
-                        as_widget().root().window_manager().update_mouse_cursor(as_widget().root());
+                    if (self.has_root())
+                        self.root().window_manager().update_mouse_cursor(self.root());
                 }
             }
         }
@@ -483,13 +498,15 @@ namespace neogfx
     protected:
         void init()
         {
+            auto& self = widget_type::as_widget();
+
             if (iInitialized)
                 return;
 
-            if ((decoration_style() & neogfx::decoration_style::NestedWindow) == neogfx::decoration_style::Window && !as_widget().is_root())
+            if ((decoration_style() & neogfx::decoration_style::NestedWindow) == neogfx::decoration_style::Window && !self.is_root())
                 return; // surface not yet created
 
-            as_widget().set_padding(neogfx::padding{});
+            self.set_padding(neogfx::padding{});
 
             iNonClientLayout.emplace(*this);
             non_client_layout().set_padding(neogfx::padding{});
@@ -538,8 +555,10 @@ namespace neogfx
         }
         i_layout_item const& resizing_context() const
         {
+            auto& self = widget_type::as_widget();
+
             return (decoration_style() & neogfx::decoration_style::Dock) == neogfx::decoration_style::Dock ?
-                static_cast<i_layout_item const&>(as_widget().parent_layout()) : static_cast<i_layout_item const&>(as_widget());
+                static_cast<i_layout_item const&>(self.parent_layout()) : static_cast<i_layout_item const&>(self);
         }
         i_layout_item& resizing_context()
         {
@@ -547,6 +566,8 @@ namespace neogfx
         }
         void update_tracking(const point& aPosition)
         {
+            auto& self = widget_type::as_widget();
+
             if (iTracking)
             {
                 i_layout_item& resizingContext = resizing_context();
@@ -606,7 +627,7 @@ namespace neogfx
                         // todo - undock/float
                     }
                     else
-                        as_widget().move(newPosition.value());
+                        self.move(newPosition.value());
                 }
                 if (newSize && newSize != currentSize)
                 {                
@@ -620,7 +641,7 @@ namespace neogfx
                         fix_weightings();
                     }
                     else
-                        as_widget().resize(newSize.value());
+                        self.resize(newSize.value());
                 }
             }
         }

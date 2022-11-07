@@ -44,7 +44,7 @@ namespace neogfx
     {
         if (widget::has_minimum_size())
             return widget::minimum_size(aAvailableSpace);
-        return units_converter(*this).from_device_units(size{ 2.0, 2.0 }) + internal_spacing().size();
+        return units_converter{ *this }.from_device_units(size{ 2.0, 2.0 }) + internal_spacing().size();
     }
 
     void status_bar::separator::paint(i_graphics_context& aGc) const
@@ -302,14 +302,13 @@ namespace neogfx
             return widget<i_status_bar>::palette_color(aColorRole);
     }
 
-    const i_widget& status_bar::as_widget() const
+    void status_bar::set_font(optional_font const& aFont)
     {
-        return *this;
-    }
-
-    i_widget& status_bar::as_widget()
-    {
-        return *this;
+        widget<i_status_bar>::set_font(aFont);
+        iMessageWidget.set_font(aFont);
+        iIdleWidget.set_font(aFont);
+        for (auto& w : iKeyboardLockStatus.children())
+            w->set_font(aFont);
     }
 
     const i_widget& status_bar::size_grip() const

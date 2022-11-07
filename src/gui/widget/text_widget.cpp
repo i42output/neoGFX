@@ -79,7 +79,7 @@ namespace neogfx
             if (debug::layoutItem == this)
                 service<debug::logger>() << "text_widget::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
-            return units_converter(*this).from_device_units(result);
+            return units_converter{ *this }.from_device_units(result);
         }
     }
 
@@ -121,7 +121,7 @@ namespace neogfx
         default:
             break;
         }
-        auto appearance = text_appearance();
+        auto appearance = text_format();
         if (appearance.ink() == neolib::none)
             appearance.set_ink(text_color());
         if (appearance.effect())
@@ -212,7 +212,7 @@ namespace neogfx
 
     bool text_widget::has_text_color() const
     {
-        return has_text_appearance() && text_appearance().ink() != neolib::none && std::holds_alternative<color>(text_appearance().ink());
+        return has_text_format() && text_format().ink() != neolib::none && std::holds_alternative<color>(text_format().ink());
     }
 
     color text_widget::text_color() const
@@ -224,25 +224,25 @@ namespace neogfx
 
     void text_widget::set_text_color(const optional_color& aTextColor)
     {
-        if (has_text_appearance())
-            set_text_appearance(neogfx::text_appearance{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{}, iTextAppearance->paper(), iTextAppearance->effect() });
+        if (has_text_format())
+            set_text_format(neogfx::text_format{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{}, iTextAppearance->paper(), iTextAppearance->effect() });
         else
-            set_text_appearance(neogfx::text_appearance{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{} });
+            set_text_format(neogfx::text_format{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{} });
     }
 
-    bool text_widget::has_text_appearance() const
+    bool text_widget::has_text_format() const
     {
         return iTextAppearance != std::nullopt;
     }
 
-    text_appearance text_widget::text_appearance() const
+    text_format text_widget::text_format() const
     {
-        if (has_text_appearance())
+        if (has_text_format())
             return *iTextAppearance;
-        return neogfx::text_appearance{ text_color() };
+        return neogfx::text_format{ text_color() };
     }
 
-    void text_widget::set_text_appearance(const optional_text_appearance& aTextAppearance)
+    void text_widget::set_text_format(const optional_text_format& aTextAppearance)
     {
         if (iTextAppearance != aTextAppearance)
         {
@@ -273,8 +273,8 @@ namespace neogfx
             iTextExtent = gc.glyph_text_extent(glyph_text());
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
-        if (text_appearance().effect())
-            *iTextExtent += size{ text_appearance().effect()->width() * 2.0 };
+        if (text_format().effect())
+            *iTextExtent += size{ text_format().effect()->width() * 2.0 };
         return *iTextExtent;
     }
 

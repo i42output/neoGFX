@@ -121,7 +121,7 @@ namespace neogfx
 
     color virtual_window::read_pixel(const point& aPosition) const
     {
-        return parent().read_pixel(surface_position() - parent().surface_position());
+        return parent().read_pixel(surface_position());
     }
 
     neogfx::logical_coordinate_system virtual_window::logical_coordinate_system() const
@@ -310,17 +310,17 @@ namespace neogfx
 
     point virtual_window::surface_position() const
     {
-        return iPosition + service<i_surface_manager>().find_nest(*this).widget().origin() + parent().surface_position();
+        return iPosition + service<i_surface_manager>().find_nest(*this).widget().origin();
     }
 
     void virtual_window::move_surface(const point& aPosition)
     {
         if (!initialising())
-            invalidate(rect{ surface_position() - parent().surface_position(), surface_extents()});
+            invalidate(rect{ surface_position(), surface_extents()});
         iPosition = aPosition;
         as_widget().move(iPosition);
         if (!initialising())
-            invalidate(rect{ surface_position() - parent().surface_position(), surface_extents() });
+            invalidate(rect{ surface_position(), surface_extents() });
     }
 
     size virtual_window::surface_extents() const
@@ -331,11 +331,11 @@ namespace neogfx
     void virtual_window::resize_surface(const size& aExtents)
     {
         if (!initialising())
-            invalidate(rect{ surface_position() - parent().surface_position(), surface_extents() });
+            invalidate(rect{ surface_position(), surface_extents() });
         iExtents = aExtents;
         as_widget().resize(iExtents);
         if (!initialising())
-            invalidate(rect{ surface_position() - parent().surface_position(), surface_extents() });
+            invalidate(rect{ surface_position(), surface_extents() });
     }
 
     bool virtual_window::can_render() const

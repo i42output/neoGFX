@@ -23,7 +23,7 @@
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
-#include <neogfx/gui/layout/layout_item_cache.hpp>
+#include <neogfx/gui/layout/i_layout_item_cache.hpp>
 
 namespace neogfx
 {
@@ -42,8 +42,7 @@ namespace neogfx
         typedef self_type property_context_type;
         // construction
     public:
-        layout_item() :
-            iCache{ make_ref<layout_item_cache>(*this) }
+        layout_item()
         {
         }
         ~layout_item()
@@ -52,13 +51,73 @@ namespace neogfx
         }
         // implementation
     public:
-        const i_string& id() const override
+        const i_string& id() const final
         {
             return iId;
         }
-        void set_id(const i_string& aId) override
+        void set_id(const i_string& aId) final
         {
             iId = aId;
+        }
+    public:
+        bool is_cache() const final
+        {
+            return false;
+        }
+    public:
+        bool is_layout() const final
+        {
+            return std::is_base_of_v<i_layout, self_type>;
+        }
+        const i_layout& as_layout() const final
+        {
+            if constexpr (std::is_base_of_v<i_layout, self_type>)
+                return static_cast<const i_layout&>(*this);
+            else
+                throw not_a_layout();
+        }
+        i_layout& as_layout() final
+        {
+            if constexpr (std::is_base_of_v<i_layout, self_type>)
+                return static_cast<i_layout&>(*this);
+            else
+                throw not_a_layout();
+        }
+        bool is_spacer() const final
+        {
+            return std::is_base_of_v<i_spacer, self_type>;
+        }
+        const i_spacer& as_spacer() const final
+        {
+            if constexpr (std::is_base_of_v<i_spacer, self_type>)
+                return static_cast<const i_spacer&>(*this);
+            else
+                throw not_a_spacer();
+        }
+        i_spacer& as_spacer() final
+        {
+            if constexpr (std::is_base_of_v<i_spacer, self_type>)
+                return static_cast<i_spacer&>(*this);
+            else
+                throw not_a_spacer();
+        }
+        bool is_widget() const override
+        {
+            return std::is_base_of_v<i_widget, self_type>;
+        }
+        const i_widget& as_widget() const override
+        {
+            if constexpr (std::is_base_of_v<i_widget, self_type>)
+                return static_cast<const i_widget&>(*this);
+            else
+                throw not_a_widget();
+        }
+        i_widget& as_widget() override
+        {
+            if constexpr (std::is_base_of_v<i_widget, self_type>)
+                return static_cast<i_widget&>(*this);
+            else
+                throw not_a_widget();
         }
     public:
         bool has_parent_layout_item() const final
@@ -122,25 +181,14 @@ namespace neogfx
         {
             return const_cast<i_widget&>(to_const(*this).layout_manager());
         }
-        bool is_layout_item_cache() const final
-        {
-            return false;
-        }
-        const i_layout_item_cache& as_layout_item_cache() const final
-        {
-            return *iCache;
-        }
-        i_layout_item_cache& as_layout_item_cache() final
-        {
-            return *iCache;
-        }
     public:
         void update_layout(bool aDeferLayout = true, bool aAncestors = false) final
         {
             auto& self = as_layout_item();
             if (self.has_parent_layout_item())
             {
-                if (!self.is_widget() || !self.as_widget().is_managing_layout() || aAncestors)
+                if (!self.is_widget() || 
+                    (self.as_widget().has_parent_layout() && !self.as_widget().is_managing_layout()) || aAncestors)
                     self.parent_layout_item().update_layout(aDeferLayout, aAncestors);
             }
 
@@ -190,27 +238,27 @@ namespace neogfx
         {
             auto& self = as_layout_item();
             return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
-                units_converter(*this).from_device_units(!Anchor_Position.active() ? 
+                units_converter{ *this }.from_device_units(!Anchor_Position.active() ? 
                     static_cast<point>(Position) : static_cast<point>(Position) + Anchor_Position.evaluate_constraints() - unconstrained_origin());
         }
         size extents() const final
         {
             auto& self = as_layout_item();
             return (self.has_parent_layout_item() ? self.parent_layout_item().transformation(true) : mat33::identity()) *
-                units_converter(*this).from_device_units(!Anchor_Size.active() ? 
+                units_converter{ *this }.from_device_units(!Anchor_Size.active() ? 
                     static_cast<size>(Size) : Anchor_Size.evaluate_constraints());
         }
     protected:
         void set_position(const point& aPosition) override
         {
             reset_origin();
-            if (Position != units_converter(*this).to_device_units(aPosition))
-                Position.assign(units_converter(*this).to_device_units(aPosition), false);
+            if (Position != units_converter{ *this }.to_device_units(aPosition))
+                Position.assign(units_converter{ *this }.to_device_units(aPosition), false);
         }
         void set_extents(const size& aExtents) override
         {
-            if (Size != units_converter(*this).to_device_units(aExtents))
-                Size.assign(units_converter(*this).to_device_units(aExtents), false);
+            if (Size != units_converter{ *this }.to_device_units(aExtents))
+                Size.assign(units_converter{ *this }.to_device_units(aExtents), false);
         }
     public:
         bool has_size_policy() const noexcept override
@@ -279,9 +327,9 @@ namespace neogfx
         {
             size result;
             if (has_ideal_size())
-                result = units_converter(*this).from_device_units(*IdealSize);
+                result = units_converter{ *this }.from_device_units(*IdealSize);
             else if (Anchor_IdealSize.active())
-                result = units_converter(*this).from_device_units(Anchor_IdealSize.evaluate_constraints(aAvailableSpace));
+                result = units_converter{ *this }.from_device_units(Anchor_IdealSize.evaluate_constraints(aAvailableSpace));
             else
             {
                 scoped_query_ideal_size sqis;
@@ -295,7 +343,7 @@ namespace neogfx
         }
         void set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout = true) override
         {
-            optional_size newIdealSize = (aIdealSize != std::nullopt ? units_converter(*this).to_device_units(*aIdealSize) : optional_size{});
+            optional_size newIdealSize = (aIdealSize != std::nullopt ? units_converter{ *this }.to_device_units(*aIdealSize) : optional_size{});
             if (IdealSize != newIdealSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -319,9 +367,9 @@ namespace neogfx
         {
             size result;
             if (has_minimum_size())
-                result = units_converter(*this).from_device_units(*MinimumSize);
+                result = units_converter{ *this }.from_device_units(*MinimumSize);
             else if (Anchor_MinimumSize.active())
-                result = units_converter(*this).from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
+                result = units_converter{ *this }.from_device_units(Anchor_MinimumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = {};
 #ifdef NEOGFX_DEBUG
@@ -332,7 +380,7 @@ namespace neogfx
         }
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override
         {
-            optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter(*this).to_device_units(*aMinimumSize) : optional_size{});
+            optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter{ *this }.to_device_units(*aMinimumSize) : optional_size{});
             if (MinimumSize != newMinimumSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -356,16 +404,16 @@ namespace neogfx
         {
             size result;
             if (has_maximum_size())
-                result = units_converter(*this).from_device_units(*MaximumSize);
+                result = units_converter{ *this }.from_device_units(*MaximumSize);
             else if (Anchor_MaximumSize.active())
-                result = units_converter(*this).from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
+                result = units_converter{ *this }.from_device_units(Anchor_MaximumSize.evaluate_constraints(aAvailableSpace));
             else
                 result = size::max_size();
             return result;
         }
         void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override
         {
-            optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter(*this).to_device_units(*aMaximumSize) : optional_size{});
+            optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter{ *this }.to_device_units(*aMaximumSize) : optional_size{});
             if (MaximumSize != newMaximumSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -384,12 +432,12 @@ namespace neogfx
         size fixed_size(optional_size const& aAvailableSpace = {}) const override
         {
             if (has_fixed_size())
-                return units_converter(*this).from_device_units(*FixedSize);
+                return units_converter{ *this }.from_device_units(*FixedSize);
             return minimum_size(aAvailableSpace);
         }
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true)
         {
-            optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter(*this).to_device_units(*aFixedSize) : optional_size{});
+            optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter{ *this }.to_device_units(*aFixedSize) : optional_size{});
             if (FixedSize != newFixedSize)
             {
 #ifdef NEOGFX_DEBUG
@@ -427,12 +475,12 @@ namespace neogfx
             optional_mat33 newTransformation = (aTransformation != std::nullopt ? *aTransformation : optional_mat33{});
             if (Transformation != newTransformation)
             {
-                invalidate_combined_transformation();
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
                     service<debug::logger>() << typeid(*this).name() << "::set_transformation(" << aTransformation << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 Transformation.assign(newTransformation, aUpdateLayout);
+                invalidate_combined_transformation();
                 if (aUpdateLayout)
                     update_layout();
             }
@@ -448,7 +496,7 @@ namespace neogfx
         }
         void set_margin(optional_margin const& aMargin, bool aUpdateLayout = true) override
         {
-            auto newMargin = (aMargin != std::nullopt ? units_converter(*this).to_device_units(*aMargin) : optional_margin{});
+            auto newMargin = (aMargin != std::nullopt ? units_converter{ *this }.to_device_units(*aMargin) : optional_margin{});
             if (Margin != newMargin)
             {
                 Margin = newMargin;
@@ -466,7 +514,7 @@ namespace neogfx
         }
         void set_border(optional_border const& aBorder, bool aUpdateLayout = true) override
         {
-            auto newBorder = (aBorder != std::nullopt ? units_converter(*this).to_device_units(*aBorder) : optional_border{});
+            auto newBorder = (aBorder != std::nullopt ? units_converter{ *this }.to_device_units(*aBorder) : optional_border{});
             if (Border != newBorder)
             {
                 Border = newBorder;
@@ -484,7 +532,7 @@ namespace neogfx
         }
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override
         {
-            auto newPadding = (aPadding != std::nullopt ? units_converter(*this).to_device_units(*aPadding) : optional_padding{});
+            auto newPadding = (aPadding != std::nullopt ? units_converter{ *this }.to_device_units(*aPadding) : optional_padding{});
             if (Padding != newPadding)
             {
                 Padding = newPadding;
@@ -631,7 +679,6 @@ namespace neogfx
     private:
         string iId;
         mutable optional_point iOrigin;
-        ref_ptr<i_layout_item_cache> iCache;
         mutable optional_mat33 iCombinedTransformation;
     };
 }

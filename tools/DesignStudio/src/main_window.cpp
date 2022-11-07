@@ -34,7 +34,7 @@ namespace neogfx::DesignStudio
         rightDockWidth{ aSettings.setting("environment.windows_and_tabs.right_dock_width"_s) },
         leftDockWeight{ aSettings.setting("environment.windows_and_tabs.left_dock_weight"_s) },
         rightDockWeight{ aSettings.setting("environment.windows_and_tabs.right_dock_weight"_s) },
-        font{ aSettings.setting("environment.fonts_and_colors.font"_s) },
+        workspaceFont{ aSettings.setting("environment.fonts_and_colors.workspace_font"_s) },
         subpixelRendering{ aSettings.setting("environment.fonts_and_colors.subpixel"_s) },
         toolbarIconSize{ aSettings.setting("environment.toolbars.icon_size"_s) },
         themeColor{ aSettings.setting("environment.fonts_and_colors.theme"_s) },
@@ -130,10 +130,10 @@ namespace neogfx::DesignStudio
 
         auto fontChanged = [&]()
         {
-            ng::service<ng::i_app>().current_style().set_font_info(font.value<ng::font_info>(true));
+            ng::service<ng::i_app>().current_style().set_font_info(workspaceFont.value<ng::font_info>(true));
         };
-        font.changing(fontChanged);
-        font.changed(fontChanged);
+        workspaceFont.changing(fontChanged);
+        workspaceFont.changed(fontChanged);
         fontChanged();
 
         auto subpixelRenderingChanged = [&]()

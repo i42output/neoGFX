@@ -126,11 +126,11 @@ namespace neogfx
         for (cell_coordinate col = 0; col < aColumn; ++col)
             if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
                 add_spacer_at_position(aRow, col);
-        auto& proxy = layout::add(aItem).as_layout_item_cache();
-        iCells[cell_coordinates{ aColumn, aRow }] = &proxy;
+        auto& proxy = *layout::find_item(layout::add(aItem));
+        iCells[cell_coordinates{ aColumn, aRow }] = proxy.ptr();
         iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
         iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
-        row_layout(aRow).replace_item_at(aColumn, proxy);
+        row_layout(aRow).replace_item_at(aColumn, *proxy);
         if (cursor() == cell_coordinates{ aColumn, aRow })
             increment_cursor();
         return *aItem;
@@ -177,7 +177,7 @@ namespace neogfx
     grid_layout::cell_coordinates grid_layout::item_position(const i_layout_item& aItem) const
     {
         for (auto i = iCells.begin(); i != iCells.end(); ++i)
-            if (&i->second->as_layout_item_cache().subject() == &aItem)
+            if (&static_cast<i_layout_item_cache const&>(*i->second).subject() == &aItem)
                 return cell_coordinates{ i->first.x, i->first.y };
         throw item_not_found();
     }
@@ -312,6 +312,14 @@ namespace neogfx
         if (result.cy != size::max_dimension())
             result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
         return result;
+    }
+
+    void grid_layout::invalidate_combined_transformation()
+    {
+        iRowLayout.invalidate_combined_transformation();
+        for (auto& row : iRows)
+            row->invalidate_combined_transformation();
+        layout::invalidate_combined_transformation();
     }
 
     void grid_layout::set_spacing(optional_size const& aSpacing, bool aUpdateLayout)
@@ -475,7 +483,7 @@ namespace neogfx
 
     void grid_layout::remove(item_list::iterator aItem)
     {
-        auto& item = aItem->subject();
+        auto& item = (**aItem).subject();
         auto itemPos = item_position(item);
         row_layout(itemPos.y).remove_at(itemPos.x);
         if (itemPos.x < row_layout(itemPos.y).count())

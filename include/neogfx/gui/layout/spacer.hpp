@@ -41,24 +41,14 @@ namespace neogfx
         spacer(i_layout& aParent, neogfx::expansion_policy aExpansionPolicy);
         virtual ~spacer();
     public:
-        bool is_layout() const override;
-        const i_layout& as_layout() const override;
-        i_layout& as_layout() override;
-        bool is_spacer() const override;
-        const i_spacer& as_spacer() const override;
-        i_spacer& as_spacer() override;
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
-    public:
-        bool has_parent_layout() const override;
-        const i_layout& parent_layout() const override;
-        i_layout& parent_layout() override;
-        void set_parent_layout(i_layout* aParentLayout) override;
-        bool has_layout_owner() const override;
-        const i_widget& layout_owner() const override;
-        i_widget& layout_owner() override;
-        void set_layout_owner(i_widget* aOwner) override;
+        bool has_parent_layout() const final;
+        const i_layout& parent_layout() const final;
+        i_layout& parent_layout() final;
+        void set_parent_layout(i_layout* aParentLayout) final;
+        bool has_layout_owner() const final;
+        const i_widget& layout_owner() const final;
+        i_widget& layout_owner() final;
+        void set_layout_owner(i_widget* aOwner) final;
     public:
         neogfx::expansion_policy expansion_policy() const override;
         void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) override;

@@ -147,10 +147,6 @@ namespace neogfx
         size minimum_size(optional_size const& aAvailableSpace = {}) const override;
         size maximum_size(optional_size const& aAvailableSpace = {}) const override;
         neogfx::padding padding() const override;
-        // i_skinnable_item
-    public:
-        bool is_widget() const override;
-        const i_widget& as_widget() const override;
     public:
         rect element_rect(skin_element aElement) const override;
         // i_widget
@@ -174,22 +170,14 @@ namespace neogfx
         widget_part hit_test(const point& aPosition) const override;
         // i_layout_item
     public:
-        bool is_layout() const override;
-        const i_layout& as_layout() const override;
-        i_layout& as_layout() override;
-        bool is_spacer() const override;
-        const i_spacer& as_spacer() const override;
-        i_spacer& as_spacer() override;
-        i_widget& as_widget() override;
-    public:
-        bool has_parent_layout() const override;
-        const i_layout& parent_layout() const override;
-        i_layout& parent_layout() override;
-        void set_parent_layout(i_layout* aParentLayout) override;
-        bool has_layout_owner() const override;
-        const i_widget& layout_owner() const override;
-        i_widget& layout_owner() override;
-        void set_layout_owner(i_widget* aOwner) override;
+        bool has_parent_layout() const final;
+        const i_layout& parent_layout() const final;
+        i_layout& parent_layout() final;
+        void set_parent_layout(i_layout* aParentLayout) final;
+        bool has_layout_owner() const final;
+        const i_widget& layout_owner() const final;
+        i_widget& layout_owner() final;
+        void set_layout_owner(i_widget* aOwner) final;
     public:
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
