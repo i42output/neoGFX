@@ -202,7 +202,7 @@ namespace chess
                     if (from == piece::None)
                         continue;
                     auto const playerFrom = static_cast<chess::player>(piece_color(from));
-                    auto const valueFrom = piece_value<Player>(from);
+                    auto const valueFrom = player_piece_value<Player>(from);
                     material += valueFrom;
                     for (coordinate yTo = 0u; yTo <= 7u; ++yTo)
                         for (coordinate xTo = 0u; xTo <= 7u; ++xTo)
@@ -212,7 +212,7 @@ namespace chess
                                 continue;
                             auto const to = piece_at(aPosition, candidateMove.to );
                             auto const playerTo = static_cast<chess::player>(piece_color(to));
-                            auto const valueTo = piece_value<Player>(to);
+                            auto const valueTo = player_piece_value<Player>(to);
                             if (can_move<true, false, true>(aTables, Player, aPosition, candidateMove))
                             {
                                 if (playerFrom != playerTo)
@@ -224,7 +224,7 @@ namespace chess
                                     if (to == (piece::King | static_cast<piece>(opponent_v<Player>)))
                                         checkedOpponentKing = 1.0;
                                     if (from == (piece::Pawn | static_cast<piece>(Player)) && yTo == promotion_rank_v<Player>)
-                                        material += (piece_value<Player>(piece::Queen) * scalePromotion);
+                                        material += (player_piece_value<Player>(piece::Queen) * scalePromotion);
                                     mobility += 1.0;
                                     if (playerTo == opponent_v<Player>)
                                         attack -= valueTo * scaleAttackAdvantage;
@@ -243,7 +243,7 @@ namespace chess
                                     if (to == (piece::King | static_cast<piece>(Player)))
                                         checkedPlayerKing = 1.0;
                                     if (from == (piece::Pawn | static_cast<piece>(opponent_v<Player>)) && yTo == promotion_rank_v<opponent_v<Player>>)
-                                        material -= (piece_value<Player>(piece::Queen) * scalePromotion);
+                                        material -= (player_piece_value<Player>(piece::Queen) * scalePromotion);
                                     mobility -= 1.0;
                                     if (playerTo == Player)
                                         attack -= valueTo;

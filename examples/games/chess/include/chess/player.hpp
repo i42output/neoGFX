@@ -36,6 +36,21 @@ namespace chess
         return static_cast<uint8_t>(lhs) < static_cast<uint8_t>(rhs);
     }
 
+    template <player Player>
+    inline double player_piece_value(chess::piece piece);
+
+    template <>
+    inline double player_piece_value<chess::player::White>(chess::piece piece)
+    {
+        return piece_value<chess::piece::White>(piece);
+    }
+
+    template <>
+    inline double player_piece_value<chess::player::Black>(chess::piece piece)
+    {
+        return piece_value<chess::piece::Black>(piece);
+    }
+
     template <typename T = std::size_t>
     inline T as_cardinal(player p)
     {

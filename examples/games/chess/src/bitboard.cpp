@@ -134,8 +134,8 @@ namespace chess
                 auto playerPieces = pieces & aPosition.rep.byPieceColor[as_cardinal<>(Player)];
                 auto opponentPieces = pieces & aPosition.rep.byPieceColor[as_cardinal<>(opponent_v<Player>)];
 
-                material += std::popcount(playerPieces) * (piece_value<Player>(cardinal_to_piece(playerPieceTypeIndex)));
-                material -= std::popcount(opponentPieces) * (piece_value<opponent_v<Player>>(cardinal_to_piece(playerPieceTypeIndex)));
+                material += std::popcount(playerPieces) * (player_piece_value<Player>(cardinal_to_piece(playerPieceTypeIndex)));
+                material -= std::popcount(opponentPieces) * (player_piece_value<opponent_v<Player>>(cardinal_to_piece(playerPieceTypeIndex)));
 
                 // todo: pawn promotion value
             }
