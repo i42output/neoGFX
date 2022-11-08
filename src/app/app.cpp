@@ -63,7 +63,7 @@ namespace neogfx
             ("directx", "use DirectX (ANGLE) renderer")
             ("software", "use software renderer")
             ("turbo", "use turbo mode")
-            ("double", "enable window double buffering");
+            ("double-buffer", "enable window double buffering");
         boost::program_options::store(boost::program_options::parse_command_line(argc, argv, description), iOptions);
         if (options().count("vulkan") + options().count("directx") + options().count("software") > 1)
             throw invalid_options("more than one renderer specified");
@@ -116,7 +116,7 @@ namespace neogfx
 
     bool program_options::double_buffering() const
     {
-        return options().count("single") == 0;
+        return options().count("double-buffer") == 1;
     }
 
     bool program_options::turbo() const

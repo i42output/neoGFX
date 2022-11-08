@@ -27,26 +27,25 @@ namespace neogfx
     tab_page::tab_page(i_tab_page_container& aContainer, std::string const& aTabText) :
         tab_page{ aContainer, aContainer.add_tab(string{ aTabText }) }
     {
-        set_background_opacity(1.0);
     }
 
     tab_page::tab_page(i_tab_page_container& aContainer, i_tab& aTab) :
         framed_scrollable_widget{ aContainer.page_layout(), frame_style::ContainerFrame }, iTab{ aTab }
     {
+        init();
         aContainer.add_tab_page(aTab, *this);
-        set_background_opacity(1.0);
     }
 
     tab_page::tab_page(i_widget& aParent, i_tab& aTab) :
         framed_scrollable_widget{ aParent, frame_style::ContainerFrame }, iTab{ aTab }
     {
-        set_background_opacity(1.0);
+        init();
     }
 
     tab_page::tab_page(i_layout& aLayout, i_tab& aTab) :
         framed_scrollable_widget{ aLayout, frame_style::ContainerFrame }, iTab{ aTab }
     {
-        set_background_opacity(1.0);
+        init();
     }
 
     neogfx::size_policy tab_page::size_policy() const
@@ -150,5 +149,10 @@ namespace neogfx
     widget<>& tab_page::as_widget()
     {
         return *this;
+    }
+
+    void tab_page::init()
+    {
+        set_background_opacity(1.0);
     }
 }

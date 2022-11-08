@@ -815,8 +815,8 @@ namespace neogfx
     bool widget<Interface>::high_dpi() const
     {
         return device_metrics_available() ?
-            self_type::root().surface().ppi() >= 150.0 : 
-            service<i_surface_manager>().display().metrics().ppi() >= 150.0;
+            self_type::root().surface().ppi() >= HIGH_DPI_PPI :
+            service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
     }
 
     template <typename Interface>

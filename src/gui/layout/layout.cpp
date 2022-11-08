@@ -373,8 +373,8 @@ namespace neogfx
     bool layout::high_dpi() const
     {
         return has_layout_owner() && layout_owner().has_surface() ?
-            layout_owner().surface().ppi() >= 150.0 :
-            service<i_surface_manager>().display().metrics().ppi() >= 150.0;
+            layout_owner().surface().ppi() >= HIGH_DPI_PPI :
+            service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
     }
 
     dimension layout::dpi_scale_factor() const

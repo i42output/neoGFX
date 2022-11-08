@@ -25,10 +25,11 @@
 
 namespace neogfx
 { 
+    constexpr dimension HIGH_DPI_PPI = 144.0;
 
     inline dimension default_dpi_scale_factor(dimension aPpi)
     {
-        return static_cast<dimension>(static_cast<int32_t>(aPpi / 150.0) + 1);
+        return static_cast<dimension>(static_cast<int32_t>(aPpi / HIGH_DPI_PPI) + 1);
     }
 
     class i_device_resolution

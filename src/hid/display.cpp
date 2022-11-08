@@ -44,7 +44,7 @@ namespace neogfx
 
     bool display::high_dpi() const
     {
-        return device_metrics().ppi() >= 150.0;
+        return device_metrics().ppi() >= HIGH_DPI_PPI;
     }
 
     dimension display::dpi_scale_factor() const

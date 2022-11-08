@@ -769,8 +769,9 @@ namespace neogfx
 
     neogfx::padding text_edit::padding() const
     {
+        scoped_units su{ *this, units::Pixels };
         auto result = framed_scrollable_widget::padding();
-        return result + padding_adjust();
+        return to_units(*this, su.saved_units(), result + padding_adjust());
     }
 
     void text_edit::paint(i_graphics_context& aGc) const
