@@ -381,8 +381,8 @@ namespace neogfx
     {
         return default_dpi_scale_factor(
             has_layout_owner() && layout_owner().has_surface() ?
-            layout_owner().surface().ppi() :
-            service<i_surface_manager>().display().metrics().ppi());
+                layout_owner().surface().ppi() :
+                service<i_surface_manager>().display().metrics().ppi());
     }
 
     margin layout::margin() const
