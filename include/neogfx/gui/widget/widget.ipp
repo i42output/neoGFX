@@ -1103,9 +1103,8 @@ namespace neogfx
     padding widget<Interface>::padding() const
     {
         auto& self = base_type::as_widget();
-
-        auto const& adjustedPadding = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(self_type::is_root() ? padding_role::Window : padding_role::Widget) * 1.0_dip);
-        return self.transformation() * units_converter{ *this }.from_device_units(adjustedPadding);
+        auto const& result = (self.has_padding() ? *base_type::Padding : service<i_app>().current_style().padding(self_type::is_root() ? padding_role::Window : padding_role::Widget));
+        return self.transformation() * units_converter{ *this }.from_device_units(result);
     }
 
     template <typename Interface>

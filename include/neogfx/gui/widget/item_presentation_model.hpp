@@ -503,6 +503,9 @@ namespace neogfx
         {
             if (iCellSpacing == std::nullopt)
             {
+                std::optional<scoped_units> su;
+                if (attached())
+                    su.emplace(attachment(), scoped_units::current_units());
                 size result{ 1.0_mm, 1.0_mm };
                 if (to_px<uint32_t>(result.cx) % 2u == 1u)
                     result.cx = from_px<dimension>(to_px<uint32_t>(result.cx) + 1u);

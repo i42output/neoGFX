@@ -733,11 +733,13 @@ namespace neogfx
 
     rect item_view::scroll_area() const
     {
+        scoped_units su{ *this, units::Pixels };
         return rect{ point{}, total_item_area(*this) };
     }
 
     size item_view::scroll_page() const
     {
+        scoped_units su{ *this, units::Pixels };
         return item_display_rect();
     }
 
@@ -1360,6 +1362,7 @@ namespace neogfx
 
     optional_item_presentation_model_index item_view::item_at(const point& aPosition, bool aIncludeEntireRow) const
     {
+        scoped_units su{ *this, units::Pixels };
         if (model().rows() == 0 || !item_display_rect(true).contains(aPosition) && !capturing())
             return optional_item_presentation_model_index{};
         size const cellSpacing = presentation_model().cell_spacing(*this);
