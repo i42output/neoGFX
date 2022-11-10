@@ -141,7 +141,10 @@ namespace neogfx
         if (iDeviceMetrics == std::nullopt)
         {
             if (self_type::has_root() && self_type::root().has_native_window())
+            {
                 iDeviceMetrics = &self_type::surface();
+                DeviceMetricsUpdated.trigger(*this);
+            }
         }
         return iDeviceMetrics != std::nullopt;
     }
@@ -151,7 +154,7 @@ namespace neogfx
     {
         if (self_type::device_metrics_available())
             return **iDeviceMetrics;
-        throw no_device_metrics();
+        return service<i_surface_manager>().display().metrics();
     }
 
     template <typename Interface>
@@ -721,8 +724,8 @@ namespace neogfx
                 else
                     service<debug::logger>() << "widget:layout_items: layout a deferred layout now" << endl;
             }
-            iLayoutPending = false;
 #endif
+            iLayoutPending = false;
             service<i_async_layout>().validate(*this);
             if (has_layout())
             {
@@ -958,7 +961,8 @@ namespace neogfx
         auto const& internalSpacing = self.internal_spacing(!aExtendIntoPadding);
         auto const& topLeft = internalSpacing.top_left();
         auto const& extents = (self.extents() - internalSpacing.size()).max(size{});
-        return rect{ topLeft, extents };
+        rect const result{ topLeft, extents };
+        return result;
     }
 
     template <typename Interface>

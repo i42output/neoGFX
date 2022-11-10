@@ -367,21 +367,21 @@ namespace neogfx
     template <typename Base>
     void scrollable_widget<Base>::init()
     {
-        iSink = base_type::ChildAdded([&](i_widget& aWidget)
+        auto async_update = [&]()
         {
             if (!iScrollbarUpdater && !iSuppressScrollbarVisibilityUpdates)
-                iScrollbarUpdater.emplace(*this, [this](widget_timer&) 
-            { 
-                update_scrollbar_visibility(); 
-            }, std::chrono::seconds{});
+                iScrollbarUpdater.emplace(*this, [this](widget_timer&)
+                {
+                    update_scrollbar_visibility();
+                }, std::chrono::seconds{});
+        };
+        iSink += base_type::ChildAdded([&, async_update](i_widget& aWidget)
+        {
+            async_update();
         });
-        iSink += base_type::ChildRemoved([&](i_widget& aWidget)
+        iSink += base_type::ChildRemoved([&, async_update](i_widget& aWidget)
         {
-            if (!iScrollbarUpdater && !iSuppressScrollbarVisibilityUpdates)
-                iScrollbarUpdater.emplace(*this, [this](widget_timer&) 
-            { 
-                update_scrollbar_visibility();
-            }, std::chrono::seconds{});
+            async_update();
         });
         init_scrollbars();
     }
@@ -569,6 +569,7 @@ namespace neogfx
     {
         if (!base_type::device_metrics_available())
             return;
+
         if (iUpdatingScrollbarVisibility)
             return;
 
@@ -618,7 +619,7 @@ namespace neogfx
 
         scrollbar_updated(vertical_scrollbar(), i_scrollbar::update_reason_e::Updated);
         scrollbar_updated(horizontal_scrollbar(), i_scrollbar::update_reason_e::Updated);
-
+        
         if (debug::layoutItem == this)
             service<debug::logger>() << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scroll_area() << ", scroll_page: " << scroll_page() << endl;
     }
@@ -668,12 +669,14 @@ namespace neogfx
             {
                 auto const& sa = units_converter{ *this }.to_device_units(scroll_area());
                 auto const& sp = units_converter{ *this }.to_device_units(scroll_page());
+                neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
                 vertical_scrollbar().set_minimum(sa.top());
                 vertical_scrollbar().set_maximum(sa.bottom());
                 vertical_scrollbar().set_page(sp.cy);
                 horizontal_scrollbar().set_minimum(sa.left());
                 horizontal_scrollbar().set_maximum(sa.right());
                 horizontal_scrollbar().set_page(sp.cx);
+                iOldScrollPosition = scroll_position();
             }
             break;
         default:

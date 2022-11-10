@@ -175,7 +175,7 @@ namespace neogfx
     {
         if (device_metrics_available())
             return parent_layout().device_metrics();
-        throw no_device_metrics();
+        return service<i_surface_manager>().display().metrics();
     }
 
     void spacer::layout_as(const point&, const size& aSize)

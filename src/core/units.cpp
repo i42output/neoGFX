@@ -82,59 +82,46 @@ namespace neogfx
 
     vector2 units_converter::to_device_units(const vector2& aValue) const
     {
-        return iContext.device_metrics_available() ? to_device_units(iContext.device_metrics().extents(), aValue) : 
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return to_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     dimension units_converter::to_device_units(dimension aValue) const
     {
-        return iContext.device_metrics_available() ? to_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx : 
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return to_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx;
     }
 
     delta units_converter::to_device_units(const delta& aValue) const
     {
-        return iContext.device_metrics_available() ? to_device_units(iContext.device_metrics().extents(), aValue) : 
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return to_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     size units_converter::to_device_units(const size& aValue) const
     {
-        return iContext.device_metrics_available() ? to_device_units(iContext.device_metrics().extents(), aValue) : 
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return to_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     point units_converter::to_device_units(const point& aValue) const
     {
-        return iContext.device_metrics_available() ? to_device_units(iContext.device_metrics().extents(), aValue) : 
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return to_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     rect units_converter::to_device_units(const rect& aValue) const
     {
-        return iContext.device_metrics_available() ? to_device_units(iContext.device_metrics().extents(), aValue) : 
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return to_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     padding units_converter::to_device_units(const padding& aValue) const
     {
-        if (iContext.device_metrics_available())
-        {
-            auto const extents = iContext.device_metrics().extents();
-            return padding{
-                to_device_units(extents, size{ aValue.left, 0 }).cx,
-                to_device_units(extents, size{ 0, aValue.top }).cy,
-                to_device_units(extents, size{ aValue.right, 0 }).cx,
-                to_device_units(extents, size{ 0, aValue.bottom }).cy };
-        }
-        else
-            return units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        auto const extents = iContext.device_metrics().extents();
+        return padding{
+            to_device_units(extents, size{ aValue.left, 0 }).cx,
+            to_device_units(extents, size{ 0, aValue.top }).cy,
+            to_device_units(extents, size{ aValue.right, 0 }).cx,
+            to_device_units(extents, size{ 0, aValue.bottom }).cy };
     }
 
     vector2 units_converter::to_device_units(const size& aExtents, const vector2& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -161,15 +148,11 @@ namespace neogfx
 
     dimension units_converter::to_device_units(const size& aExtents, dimension aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         return to_device_units(aExtents, size{ aValue, 0 }).cx;
     }
 
     delta units_converter::to_device_units(const size& aExtents, const delta& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -196,8 +179,6 @@ namespace neogfx
 
     size units_converter::to_device_units(const size& aExtents, const size& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -224,8 +205,6 @@ namespace neogfx
 
     point units_converter::to_device_units(const size& aExtents, const point& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -252,66 +231,51 @@ namespace neogfx
 
     rect units_converter::to_device_units(const size& aExtents, const rect& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         return rect(to_device_units(aExtents, aValue.position()), to_device_units(aExtents, aValue.extents()));
     }
 
     vector2 units_converter::from_device_units(const vector2& aValue) const
     {
-        return iContext.device_metrics_available() ? from_device_units(iContext.device_metrics().extents(), aValue) :
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return from_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     dimension units_converter::from_device_units(dimension aValue) const
     {
-        return iContext.device_metrics_available() ? from_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx :
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return from_device_units(iContext.device_metrics().extents(), size{ aValue, 0 }).cx;
     }
 
     delta units_converter::from_device_units(const delta& aValue) const
     {
-        return iContext.device_metrics_available() ? from_device_units(iContext.device_metrics().extents(), aValue) :
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return from_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     size units_converter::from_device_units(const size& aValue) const
     {
-        return iContext.device_metrics_available() ? from_device_units(iContext.device_metrics().extents(), aValue) :
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return from_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     point units_converter::from_device_units(const point& aValue) const
     {
-        return iContext.device_metrics_available() ? from_device_units(iContext.device_metrics().extents(), aValue) :
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return from_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     rect units_converter::from_device_units(const rect& aValue) const
     {
-        return iContext.device_metrics_available() ? from_device_units(iContext.device_metrics().extents(), aValue) :
-            units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        return from_device_units(iContext.device_metrics().extents(), aValue);
     }
 
     padding units_converter::from_device_units(const padding& aValue) const
     {
-        if (iContext.device_metrics_available())
-        {
-            auto const extents = iContext.device_metrics().extents();
-            return padding{
-                from_device_units(extents, size{ aValue.left, 0 }).cx,
-                from_device_units(extents, size{ 0, aValue.top }).cy,
-                from_device_units(extents, size{ aValue.right, 0 }).cx,
-                from_device_units(extents, size{ 0, aValue.bottom }).cy };
-        }
-        else
-            return units() == neogfx::units::Pixels ? aValue : throw device_metrics_unavailable();
+        auto const extents = iContext.device_metrics().extents();
+        return padding{
+            from_device_units(extents, size{ aValue.left, 0 }).cx,
+            from_device_units(extents, size{ 0, aValue.top }).cy,
+            from_device_units(extents, size{ aValue.right, 0 }).cx,
+            from_device_units(extents, size{ 0, aValue.bottom }).cy };
     }
 
     vector2 units_converter::from_device_units(const size& aExtents, const vector2& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -338,15 +302,11 @@ namespace neogfx
 
     dimension units_converter::from_device_units(const size& aExtents, dimension aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         return from_device_units(aExtents, size{aValue, 0.0}).cx;
     }
 
     delta units_converter::from_device_units(const size& aExtents, const delta& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -373,8 +333,6 @@ namespace neogfx
 
     size units_converter::from_device_units(const size& aExtents, const size& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -401,8 +359,6 @@ namespace neogfx
 
     point units_converter::from_device_units(const size& aExtents, const point& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         switch (units())
         {
         default:
@@ -429,8 +385,6 @@ namespace neogfx
 
     rect units_converter::from_device_units(const size& aExtents, const rect& aValue) const
     {
-        if (!iContext.device_metrics_available() && units() != neogfx::units::Pixels && units() != neogfx::units::Percentage)
-            throw device_metrics_unavailable();
         return rect{ from_device_units(aExtents, aValue.position()), from_device_units(aExtents, aValue.extents()) };
     }
 }

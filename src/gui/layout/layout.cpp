@@ -608,7 +608,7 @@ namespace neogfx
     {
         if (layout::device_metrics_available())
             return **iDeviceMetrics;
-        throw no_device_metrics();
+        return service<i_surface_manager>().display().metrics();
     }
 
     layout::item_list::const_iterator layout::cbegin() const

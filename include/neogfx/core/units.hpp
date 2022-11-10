@@ -45,8 +45,6 @@ namespace neogfx
     class i_units_context
     {
     public:
-        struct no_device_metrics : std::logic_error { no_device_metrics() : std::logic_error("neogfx::i_units_context::no_device_metrics") {} };
-    public:
         virtual bool high_dpi() const = 0;
         virtual dimension dpi_scale_factor() const = 0;
     public:
@@ -308,7 +306,6 @@ namespace neogfx
     {
     public:
         struct bad_parameter : std::logic_error { bad_parameter() : std::logic_error("neogfx::units_converter::bad_parameter") {} };
-        struct device_metrics_unavailable : std::logic_error { device_metrics_unavailable() : std::logic_error("neogfx::units_converter::device_metrics_unavailable") {} };
         // construction
     public:
         units_converter() = delete;

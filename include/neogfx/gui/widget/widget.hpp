@@ -36,6 +36,7 @@ namespace neogfx
         typedef layout_item<object<Interface>> base_type;
         typedef widget<Interface> self_type;
     public:
+        define_declared_event(DeviceMetricsUpdated, device_metrics_updated, const i_widget&)
         define_declared_event(ChildAdded, child_added, i_widget&)
         define_declared_event(ChildRemoved, child_removed, i_widget&)
         define_declared_event(VisibilityChanged, visibility_changed)
@@ -51,7 +52,6 @@ namespace neogfx
         define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
         define_declared_event(Focus, focus_event, neogfx::focus_event, focus_reason)
     public:
-        using typename base_type::no_device_metrics;
         using typename base_type::no_parent;
         using typename base_type::no_root;
         using typename base_type::no_surface;

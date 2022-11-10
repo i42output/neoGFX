@@ -48,6 +48,7 @@ namespace neogfx
     class i_widget : public i_layout_item, public i_keyboard_handler, public i_mouse_handler, public virtual i_skinnable_item
     {
     public:
+        declare_event(device_metrics_updated, const i_widget&)
         declare_event(child_added, i_widget&)
         declare_event(child_removed, i_widget&)
         declare_event(visibility_changed)
