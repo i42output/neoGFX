@@ -46,7 +46,7 @@ namespace neogfx
 
     typedef window_style surface_style;
 
-    class i_surface : public i_device_metrics, public i_property_owner, public i_reference_counted
+    class i_surface : public i_device_metrics, public i_units_context, public i_property_owner, public i_reference_counted
     {
     public:
         declare_event(dpi_changed)

@@ -77,7 +77,7 @@ namespace neogfx
 
     dimension native_window::em_size() const
     {
-        return 0;
+        return 0; /* todo */
     }
 
     bool native_window::can_render() const

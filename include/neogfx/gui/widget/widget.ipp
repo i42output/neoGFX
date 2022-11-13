@@ -968,6 +968,8 @@ namespace neogfx
     template <typename Interface>
     const i_widget& widget<Interface>::get_widget_at(const point& aPosition) const
     {
+        scoped_units su{ *this, units::Pixels };
+
         if (client_rect().contains(aPosition))
         {
             i_widget const* hitWidget = nullptr;
@@ -1221,6 +1223,8 @@ namespace neogfx
             return;
         if (!requires_update())
             return;
+
+        scoped_units su{ *this, units::Pixels };
 
         iDefaultClipRect = std::make_pair(std::nullopt, std::nullopt);
 
@@ -2036,6 +2040,8 @@ namespace neogfx
     const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
         auto& self = base_type::as_widget();
+
+        scoped_units su{ *this, units::Pixels };
 
         auto const clientPosition = aPosition - self.origin();
         const i_widget* result = nullptr;

@@ -466,6 +466,7 @@ namespace neogfx
     {
         if (!visible())
             return;
+        scoped_units su{ as_widget(), units::Pixels };
         if (clicked_element() != scrollbar_element::None && clicked_element() != element_at(as_widget().mouse_position()))
             pause();
         else
@@ -473,7 +474,6 @@ namespace neogfx
         if (clicked_element() == scrollbar_element::Thumb)
         {
             point delta = (std::holds_alternative<point>(aUpdateParams) ? static_variant_cast<point>(aUpdateParams) : as_widget().mouse_position()) - iThumbClickedPosition;
-            scoped_units su(units::Pixels);
             rect g = iContainer.scrollbar_geometry(*this);
             scoped_property_transition_suppression sts{ Position };
             if (orientation() == scrollbar_orientation::Vertical)

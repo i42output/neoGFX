@@ -578,6 +578,8 @@ namespace neogfx
 
         neolib::scoped_flag sf{ iUpdatingScrollbarVisibility };
 
+        scoped_units su{ *this, units::Pixels };
+
         if (use_scrollbar_container_updater())
         {
             auto& updater = service<i_scrollbar_container_updater>();

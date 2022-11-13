@@ -795,6 +795,7 @@ namespace neogfx
             if (mapEntry == sHandleMap.end())
                 return DefWindowProc(hwnd, msg, wparam, lparam);
             auto& self = *mapEntry->second;
+            scoped_units su{ self.surface_window().as_widget(), units::Pixels};
 #ifdef NEOGFX_DEBUG
             if (debug::item == &self)
                 service<debug::logger>() << typeid(self).name() << ": Windows message (0x" << std::hex << msg << ")" << endl;

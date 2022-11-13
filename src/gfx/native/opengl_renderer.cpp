@@ -362,6 +362,7 @@ namespace neogfx
             for (std::size_t s = 0; s < service<i_surface_manager>().surface_count(); ++s)
             {
                 auto& surface = service<i_surface_manager>().surface(s);
+                scoped_units su{ surface, units::Pixels };
                 if (surface.has_native_surface() && surface.native_surface().pump_event())
                 {
                     didSome = true;
