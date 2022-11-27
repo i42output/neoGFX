@@ -337,9 +337,9 @@ namespace neogfx::DesignStudio
                     tMouseSelectorMousePos = eventPos;
                     iProjectManager.active_project().root().visit([&](i_element& aElement)
                     {
-                        if (aElement.has_layout_item() && (aElement.layout_item().is_widget() || aElement.layout_item().has_layout_owner()))
+                        if (aElement.has_layout_item() && (aElement.layout_item().is_widget() || aElement.layout_item().has_parent_widget()))
                         {
-                            auto& elementWidget = aElement.layout_item().is_widget() ? aElement.layout_item().as_widget() : aElement.layout_item().layout_owner();
+                            auto& elementWidget = aElement.layout_item().is_widget() ? aElement.layout_item().as_widget() : aElement.layout_item().parent_widget();
                             if (rect{ tMouseSelectorAnchor->min(*tMouseSelectorMousePos), tMouseSelectorAnchor->max(*tMouseSelectorMousePos) }.contains(
                                 iWorkspace.view_stack().to_client_coordinates(elementWidget.to_window_coordinates(elementWidget.client_rect())).center()))
                                 aElement.select(true, false);

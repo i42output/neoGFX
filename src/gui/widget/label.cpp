@@ -264,13 +264,6 @@ namespace neogfx
             return size_constraint::Minimum;
     }
 
-    void label::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-    {
-        widget::set_size_policy(aSizePolicy, aUpdateLayout);
-        text_widget().set_size_policy(aSizePolicy, aUpdateLayout);
-        image_widget().set_size_policy(aSizePolicy, aUpdateLayout);
-    }
-
     void label::set_font_role(const optional_font_role& aFontRole)
     {
         widget::set_font_role(aFontRole);

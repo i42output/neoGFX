@@ -94,16 +94,16 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << "flow_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
-        if (has_layout_owner())
-            layout_owner().layout_items_started();
+        if (has_parent_widget())
+            parent_widget().layout_items_started();
         scoped_layout_items layoutItems;
         validate();
         if (iFlowDirection == FlowDirectionHorizontal)
             do_layout_items<layout::column_major<flow_layout>>(aPosition, aSize);
         else
             do_layout_items<layout::row_major<flow_layout>>(aPosition, aSize);
-        if (has_layout_owner())
-            layout_owner().layout_items_completed();
+        if (has_parent_widget())
+            parent_widget().layout_items_completed();
         LayoutCompleted.trigger();
     }
 }

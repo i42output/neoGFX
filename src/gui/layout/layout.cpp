@@ -137,7 +137,7 @@ namespace neogfx
 
     layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
         iParent{ nullptr },
-        iOwner{ aParent.has_layout_owner() ? &aParent.layout_owner() : nullptr },
+        iOwner{ aParent.has_parent_widget() ? &aParent.parent_widget() : nullptr },
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
@@ -156,8 +156,8 @@ namespace neogfx
         remove_all();
         if (has_parent_layout())
             parent_layout().remove(*this);
-        if (has_layout_owner() && layout_owner().has_layout() && &layout_owner().layout() == this)
-            layout_owner().set_layout(ref_ptr<i_layout>{});
+        if (has_parent_widget() && parent_widget().has_layout() && &parent_widget().layout() == this)
+            parent_widget().set_layout(ref_ptr<i_layout>{});
     }
 
     bool layout::has_parent_layout() const
@@ -182,35 +182,35 @@ namespace neogfx
         iParent = aParentLayout;
     }
 
-    bool layout::has_layout_owner() const
+    bool layout::has_parent_widget() const
     {
         return iOwner != nullptr;
     }
 
-    const i_widget& layout::layout_owner() const
+    const i_widget& layout::parent_widget() const
     {
-        if (has_layout_owner())
+        if (has_parent_widget())
             return *iOwner;
         if (has_parent_layout())
-            return *(iOwner = const_cast<i_widget*>(&parent_layout().layout_owner()));
-        throw no_layout_owner();
+            return *(iOwner = const_cast<i_widget*>(&parent_layout().parent_widget()));
+        throw no_parent_widget();
     }
 
-    i_widget& layout::layout_owner()
+    i_widget& layout::parent_widget()
     {
-        return const_cast<i_widget&>(to_const(*this).layout_owner());
+        return const_cast<i_widget&>(to_const(*this).parent_widget());
     }
 
-    void layout::set_layout_owner(i_widget* aOwner)
+    void layout::set_parent_widget(i_widget* aParentWidget)
     {
-        if (iOwner != aOwner)
+        if (iOwner != aParentWidget)
         {
-            iOwner = aOwner;
+            iOwner = aParentWidget;
             for (auto& itemRef : items())
             {
                 auto& item = *itemRef;
-                if (!item.subject().has_layout_owner())
-                    item.subject().set_layout_owner(aOwner);
+                if (!item.subject().has_parent_widget())
+                    item.subject().set_parent_widget(aParentWidget);
             }
         }
     }
@@ -246,8 +246,8 @@ namespace neogfx
         auto i = items().insert(std::next(items().begin(), aPosition), aItem->is_cache() ?
             dynamic_pointer_cast<i_layout_item_cache>(aItem) : ref_ptr<i_layout_item_cache>{ make_ref<layout_item_cache>(aItem) });
         (**i).set_parent_layout(this);
-        if (has_layout_owner())
-            (**i).set_layout_owner(&layout_owner());
+        if (has_parent_widget())
+            (**i).set_parent_widget(&parent_widget());
         invalidate();
         return *aItem;
     }
@@ -372,16 +372,16 @@ namespace neogfx
 
     bool layout::high_dpi() const
     {
-        return has_layout_owner() && layout_owner().has_surface() ?
-            layout_owner().surface().ppi() >= HIGH_DPI_PPI :
+        return has_parent_widget() && parent_widget().has_surface() ?
+            parent_widget().surface().ppi() >= HIGH_DPI_PPI :
             service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
     }
 
     dimension layout::dpi_scale_factor() const
     {
         return default_dpi_scale_factor(
-            has_layout_owner() && layout_owner().has_surface() ?
-                layout_owner().surface().ppi() :
+            has_parent_widget() && parent_widget().has_surface() ?
+                parent_widget().surface().ppi() :
                 service<i_surface_manager>().display().metrics().ppi());
     }
 
@@ -598,8 +598,8 @@ namespace neogfx
     {
         if (iDeviceMetrics == std::nullopt)
         {
-            if (has_layout_owner() && layout_owner().device_metrics_available())
-                iDeviceMetrics = &layout_owner().device_metrics();
+            if (has_parent_widget() && parent_widget().device_metrics_available())
+                iDeviceMetrics = &parent_widget().device_metrics();
         }
         return iDeviceMetrics != std::nullopt;
     }
@@ -709,7 +709,8 @@ namespace neogfx
             if (!item.subject_destroyed() && item.has_parent_layout() && &item.parent_layout() == this)
             {
                 item.set_parent_layout(nullptr);
-                item.set_layout_owner(nullptr);
+                if (!item.is_widget())
+                    item.set_parent_widget(nullptr);
             }
             update_layout();
         }

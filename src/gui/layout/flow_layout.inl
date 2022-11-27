@@ -209,8 +209,8 @@ namespace neogfx
         {
             auto& item = *itemRef;
             item.set_parent_layout(this);
-            if (has_layout_owner())
-                item.set_layout_owner(&layout_owner());
+            if (has_parent_widget())
+                item.set_parent_widget(&parent_widget());
         }
     }
 }

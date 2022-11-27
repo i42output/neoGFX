@@ -115,8 +115,8 @@ namespace neogfx
         if (&*aItem == &iRowLayout)
         {
             iRowLayout.set_parent_layout(this);
-            if (has_layout_owner())
-                iRowLayout.set_layout_owner(&layout_owner());
+            if (has_parent_widget())
+                iRowLayout.set_parent_widget(&parent_widget());
             return iRowLayout;
         }
         if (aItem->has_parent_layout() && &aItem->parent_layout() == this)
@@ -361,8 +361,8 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
-        if (has_layout_owner())
-            layout_owner().layout_items_started();
+        if (has_parent_widget())
+            parent_widget().layout_items_started();
         scoped_layout_items layoutItems;
         validate();
         set_position(aPosition);
@@ -471,8 +471,8 @@ namespace neogfx
             rowPos.y += maxRowHeight[row];
             rowPos.y += spacing().cy;
         }
-        if (has_layout_owner())
-            layout_owner().layout_items_completed();
+        if (has_parent_widget())
+            parent_widget().layout_items_completed();
         LayoutCompleted.trigger();
     }
 
@@ -488,7 +488,7 @@ namespace neogfx
         row_layout(itemPos.y).remove_at(itemPos.x);
         if (itemPos.x < row_layout(itemPos.y).count())
             row_layout(itemPos.y).add_spacer_at(itemPos.x);
-        iCells.erase(iCells.find(itemPos));
+        iCells.erase(itemPos);
         iDimensions = cell_dimensions{};
         for (auto const& cell : iCells)
         {

@@ -107,8 +107,8 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << "stack_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
-        if (has_layout_owner())
-            layout_owner().layout_items_started();
+        if (has_parent_widget())
+            parent_widget().layout_items_started();
         scoped_layout_items layoutItems;
         validate();
         set_position(aPosition);
@@ -120,8 +120,8 @@ namespace neogfx
                 continue;
             item.layout_as(aPosition + internal_spacing().top_left(), aSize - internal_spacing().size());
         }
-        if (has_layout_owner())
-            layout_owner().layout_items_completed();
+        if (has_parent_widget())
+            parent_widget().layout_items_completed();
         LayoutCompleted.trigger();
     }
 }

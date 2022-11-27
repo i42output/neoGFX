@@ -63,10 +63,10 @@ namespace neogfx
         const i_layout& parent_layout() const final;
         i_layout& parent_layout() final;
         void set_parent_layout(i_layout* aParentLayout);
-        bool has_layout_owner() const final;
-        const i_widget& layout_owner() const final;
-        i_widget& layout_owner() final;
-        void set_layout_owner(i_widget* aOwner) final;
+        bool has_parent_widget() const final;
+        const i_widget& parent_widget() const final;
+        i_widget& parent_widget() final;
+        void set_parent_widget(i_widget* aParentWidget) final;
         bool has_layout_manager() const final;
         const i_widget& layout_manager() const final;
         i_widget& layout_manager() final;

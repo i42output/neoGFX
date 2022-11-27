@@ -160,25 +160,18 @@ namespace neogfx
     template <typename ButtonInterface>
     size_policy button<ButtonInterface>::size_policy() const
     {
-        if (as_widget().has_size_policy())
+        if (base_type::has_size_policy())
             return base_type::size_policy();
-        else if (as_widget().has_fixed_size())
+        else if (base_type::has_fixed_size())
             return size_constraint::Fixed;
         else
             return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     template <typename ButtonInterface>
-    void button<ButtonInterface>::set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout)
-    {
-        base_type::set_size_policy(aSizePolicy, aUpdateLayout);
-        label().set_size_policy(aSizePolicy, aUpdateLayout);
-    }
-
-    template <typename ButtonInterface>
     size button<ButtonInterface>::maximum_size(optional_size const&) const
     {
-        if (as_widget().has_maximum_size())
+        if (base_type::has_maximum_size())
             return base_type::maximum_size();
         auto result = base_type::maximum_size();
         if (size_policy().horizontal_size_policy() != size_constraint::Minimum)
@@ -192,7 +185,7 @@ namespace neogfx
     padding button<ButtonInterface>::padding() const
     {
         neogfx::padding result = base_type::padding();
-        if (!as_widget().has_padding() && (label().effective_placement() & label_placement::Text) == label_placement::Text)
+        if (!base_type::has_padding() && (label().effective_placement() & label_placement::Text) == label_placement::Text)
         {
             result.left *= 2.0;
             result.right *= 2.0;

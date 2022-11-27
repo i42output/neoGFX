@@ -352,22 +352,22 @@ namespace neogfx
     public:
         operator bool() const
         {
-            return !iPrimaryHint.empty() || !iSecondaryHint.empty();
+            return !primary_hint().empty() || !secondary_hint().empty();
         }
         bool operator==(const size_hint& aOther) const
         {
-            return iPrimaryHint == aOther.iPrimaryHint && iSecondaryHint == aOther.iSecondaryHint;
+            return primary_hint() == aOther.primary_hint() && secondary_hint() == aOther.secondary_hint();
         }
         bool operator!=(const size_hint& aOther) const
         {
             return !(*this == aOther);
         }
     public:
-        string const& primary_hint() const override
+        string const& primary_hint() const final
         {
             return iPrimaryHint;
         }
-        string const& secondary_hint() const override
+        string const& secondary_hint() const final
         {
             return iSecondaryHint;
         }

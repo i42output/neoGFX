@@ -112,8 +112,6 @@ namespace neogfx
         grid_layout& layout() override;
     public:
         neogfx::size_policy size_policy() const override;
-        using widget::set_size_policy;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
     public:
         void set_font_role(const optional_font_role& aFontRole) override;
         void set_font(optional_font const& aFont) override;
@@ -149,8 +147,8 @@ namespace neogfx
         neogfx::alignment iAlignment;
         label_placement iPlacement;
         grid_layout iLayout;
-        neogfx::text_widget iText;
-        neogfx::image_widget iImage;
+        size_policy_of_parent<neogfx::text_widget, layout_item_category::Widget> iText;
+        size_policy_of_parent<neogfx::image_widget, layout_item_category::Widget> iImage;
         i_spacer* iCenterSpacer;
         std::shared_ptr<i_widget> iBuddy;
     };

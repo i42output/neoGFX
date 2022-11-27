@@ -75,8 +75,6 @@ namespace neogfx
     public:
         using base_type::as_widget;
         neogfx::size_policy size_policy() const override;
-        using base_type::set_size_policy;
-        void set_size_policy(const optional_size_policy& aSizePolicy, bool aUpdateLayout = true) override;
         size maximum_size(optional_size const&) const override;
         neogfx::padding padding() const override;
         // i_button
@@ -131,6 +129,6 @@ namespace neogfx
         button_checkable iCheckable;
         button_checked_state iCheckedState;
         horizontal_layout iLayout;
-        neogfx::label iLabel;
+        size_policy_of_parent<neogfx::label, layout_item_category::Widget> iLabel;
     };
 }

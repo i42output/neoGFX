@@ -68,27 +68,27 @@ namespace neogfx
         iParentLayout = aParentLayout;
     }
 
-    bool spacer::has_layout_owner() const
+    bool spacer::has_parent_widget() const
     {
         if (has_parent_layout())
-            return parent_layout().has_layout_owner();
+            return parent_layout().has_parent_widget();
         else
             return false;
     }
 
-    const i_widget& spacer::layout_owner() const
+    const i_widget& spacer::parent_widget() const
     {
-        if (has_layout_owner())
-            return parent_layout().layout_owner();
-        throw no_layout_owner();
+        if (has_parent_widget())
+            return parent_layout().parent_widget();
+        throw no_parent_widget();
     }
 
-    i_widget& spacer::layout_owner()
+    i_widget& spacer::parent_widget()
     {
-        return const_cast<i_widget&>(to_const(*this).layout_owner());
+        return const_cast<i_widget&>(to_const(*this).parent_widget());
     }
 
-    void spacer::set_layout_owner(i_widget*)
+    void spacer::set_parent_widget(i_widget*)
     {
         // do nothing
     }
@@ -109,16 +109,16 @@ namespace neogfx
 
     bool spacer::high_dpi() const
     {
-        return has_layout_owner() && layout_owner().has_surface() ? 
-            layout_owner().surface().ppi() >= HIGH_DPI_PPI :
+        return has_parent_widget() && parent_widget().has_surface() ? 
+            parent_widget().surface().ppi() >= HIGH_DPI_PPI :
             service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
     }
 
     dimension spacer::dpi_scale_factor() const
     {
         return default_dpi_scale_factor(
-            has_layout_owner() && layout_owner().has_surface() ?
-                layout_owner().surface().ppi() : 
+            has_parent_widget() && parent_widget().has_surface() ?
+                parent_widget().surface().ppi() : 
                 service<i_surface_manager>().display().metrics().ppi());
     }
 

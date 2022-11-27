@@ -74,7 +74,7 @@ namespace neogfx::DesignStudio
             add(itemAsWidget);
         }
         else
-            item().set_layout_owner(this);
+            item().set_parent_widget(this);
     }
     
     widget_caddy::~widget_caddy()
@@ -86,7 +86,7 @@ namespace neogfx::DesignStudio
             if (item().is_widget())
                 remove(item().as_widget());
             else
-                item().set_layout_owner(nullptr);
+                item().set_parent_widget(nullptr);
         }
     }
 

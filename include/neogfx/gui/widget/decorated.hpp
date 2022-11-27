@@ -202,7 +202,7 @@ namespace neogfx
             if (iClient != nullptr)
             {
                 iClientLayout->add(iClient);
-                iClient->set_parent(iClientLayout->layout_owner());
+                iClient->set_parent(iClientLayout->parent_widget());
             }
         }
         const i_title_bar& title_bar() const override

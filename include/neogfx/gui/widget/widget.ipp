@@ -293,7 +293,12 @@ namespace neogfx
                 parent_changed();
             }
             else
-                aParent.add(*this);
+            {
+                if (self_type::use_count())
+                    aParent.add(ref_ptr<i_widget>{ this });
+                else
+                    aParent.add(*this);
+            }
         }
     }
 
@@ -586,7 +591,7 @@ namespace neogfx
         {
             if (has_parent_layout())
                 iLayout->set_parent_layout(&parent_layout());
-            iLayout->set_layout_owner(this);
+            iLayout->set_parent_widget(this);
             if (aMoveExistingItems)
             {
                 if (oldLayout == nullptr)
@@ -664,39 +669,34 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_layout_owner() const
+    bool widget<Interface>::has_parent_widget() const
     {
-        return has_parent_layout() && parent_layout().has_layout_owner();
+        return has_parent();
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::layout_owner() const
+    const i_widget& widget<Interface>::parent_widget() const
     {
-        if (has_layout_owner())
-            return parent_layout().layout_owner();
-        throw no_layout_owner();
+        return parent();
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::layout_owner()
+    i_widget& widget<Interface>::parent_widget()
     {
-        return const_cast<i_widget&>(to_const(*this).layout_owner());
+        return parent();
     }
 
     template <typename Interface>
-    void widget<Interface>::set_layout_owner(i_widget* aOwner)
+    void widget<Interface>::set_parent_widget(i_widget* aParentWidget)
     {
-        auto& self = base_type::as_widget();
-
-        if (aOwner != nullptr && !has_parent())
+        if (aParentWidget != nullptr)
+            set_parent(*aParentWidget);
+        else if (has_parent())
         {
-            auto itemIndex = parent_layout().find(*this);
-            if (itemIndex == std::nullopt)
-                throw i_layout::item_not_found();
-            if (self.use_count())
-                aOwner->add(ref_ptr<i_widget>{ this });
-            else
-                aOwner->add(*this);
+            ref_ptr<i_widget> keep;
+            parent().remove(*this, true, keep);
+            iParent = nullptr;
+            parent_changed();
         }
     }
 

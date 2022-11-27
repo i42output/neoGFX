@@ -85,13 +85,13 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << "vertical_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
-        if (has_layout_owner())
-            layout_owner().layout_items_started();
+        if (has_parent_widget())
+            parent_widget().layout_items_started();
         scoped_layout_items layoutItems;
         validate();
         layout::do_layout_items<layout::row_major<vertical_layout>>(aPosition, aSize);
-        if (has_layout_owner())
-            layout_owner().layout_items_completed();
+        if (has_parent_widget())
+            parent_widget().layout_items_completed();
         LayoutCompleted.trigger();
     }
 }

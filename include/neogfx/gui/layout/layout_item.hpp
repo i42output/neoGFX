@@ -123,9 +123,9 @@ namespace neogfx
         bool has_parent_layout_item() const final
         {
             auto& self = as_layout_item();
-            if (self.has_parent_layout() && self.same_layout_owner_as(self.parent_layout()))
+            if (self.has_parent_layout() && self.same_parent_widget_as(self.parent_layout()))
                 return true;
-            else if (self.is_layout() && self.has_layout_owner())
+            else if (self.is_layout() && self.has_parent_widget())
                 return true;
             else if (self.is_widget() && self.as_widget().has_parent())
                 return true;
@@ -134,10 +134,10 @@ namespace neogfx
         const i_layout_item& parent_layout_item() const final
         {
             auto& self = as_layout_item();
-            if (self.has_parent_layout() && self.same_layout_owner_as(self.parent_layout()))
+            if (self.has_parent_layout() && self.same_parent_widget_as(self.parent_layout()))
                 return self.parent_layout();
-            else if (self.is_layout() && self.has_layout_owner())
-                return self.layout_owner();
+            else if (self.is_layout() && self.has_parent_widget())
+                return self.parent_widget();
             else if (self.is_widget() && self.as_widget().has_parent())
                 return self.as_widget().parent();
             throw no_parent_layout_item();
@@ -150,9 +150,9 @@ namespace neogfx
         bool has_layout_manager() const final
         {
             auto& self = as_layout_item();
-            if (!self.has_layout_owner())
+            if (!self.has_parent_widget())
                 return false;
-            const i_widget* w = &self.layout_owner();
+            const i_widget* w = &self.parent_widget();
             if (w->is_managing_layout())
                 return true;
             while (w->has_parent())
@@ -166,7 +166,7 @@ namespace neogfx
         const i_widget& layout_manager() const final
         {
             auto& self = as_layout_item();
-            const i_widget* w = &self.layout_owner();
+            const i_widget* w = &self.parent_widget();
             if (w->is_managing_layout())
                 return *w;
             while (w->has_parent())

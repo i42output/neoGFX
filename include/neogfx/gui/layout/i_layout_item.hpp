@@ -38,11 +38,19 @@ namespace neogfx
     struct not_a_spacer : std::logic_error { not_a_spacer() : std::logic_error("neogfx::not_a_spacer") {} };
     struct no_parent_layout : std::logic_error { no_parent_layout() : std::logic_error("neogfx::no_parent_layout") {} };
     struct no_parent_layout_item : std::logic_error { no_parent_layout_item() : std::logic_error("neogfx::no_parent_layout_item") {} };
-    struct no_layout_owner : std::logic_error { no_layout_owner() : std::logic_error("neogfx::no_layout_owner") {} };
+    struct no_parent_widget : std::logic_error { no_parent_widget() : std::logic_error("neogfx::no_parent_widget") {} };
     struct no_layout_manager : std::logic_error { no_layout_manager() : std::logic_error("neogfx::no_layout_manager") {} };
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
     struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
     struct cannot_fix_weightings : std::logic_error { cannot_fix_weightings() : std::logic_error{ "neogfx::cannot_fix_weightings" } {} };
+
+    enum class layout_item_category
+    {
+        Unspecified,
+        Layout,
+        Spacer,
+        Widget
+    };
 
     class i_layout_item : public i_reference_counted, public i_property_owner, public i_geometry, public i_anchorable
     {
@@ -75,10 +83,10 @@ namespace neogfx
         virtual const i_layout& parent_layout() const = 0;
         virtual i_layout& parent_layout() = 0;
         virtual void set_parent_layout(i_layout* aParentLayout) = 0;
-        virtual bool has_layout_owner() const = 0;
-        virtual const i_widget& layout_owner() const = 0;
-        virtual i_widget& layout_owner() = 0;
-        virtual void set_layout_owner(i_widget* aOwner) = 0;
+        virtual bool has_parent_widget() const = 0;
+        virtual const i_widget& parent_widget() const = 0;
+        virtual i_widget& parent_widget() = 0;
+        virtual void set_parent_widget(i_widget* aParentWidget) = 0;
         virtual bool has_layout_manager() const = 0;
         virtual const i_widget& layout_manager() const = 0;
         virtual i_widget& layout_manager() = 0;
@@ -119,14 +127,14 @@ namespace neogfx
                 return *existing;
             throw ancestor_layout_type_not_found();
         }
-        bool same_layout_owner_as(i_layout_item const& aOther) const
+        bool same_parent_widget_as(i_layout_item const& aOther) const
         {
-            return has_layout_owner() && aOther.has_layout_owner() && &layout_owner() == &aOther.layout_owner();
+            return has_parent_widget() && aOther.has_parent_widget() && &parent_widget() == &aOther.parent_widget();
         }
     public:
     };
 
-    template <typename LayoutItemType>
+    template <typename LayoutItemType, layout_item_category ParentItemCategory = layout_item_category::Unspecified>
     class size_policy_of_parent : public LayoutItemType
     {
     private:
@@ -142,6 +150,18 @@ namespace neogfx
             }
             else if (base_type::has_parent_layout_item())
             {
+                if constexpr (ParentItemCategory == layout_item_category::Layout)
+                {
+                    if (base_type::has_parent_layout())
+                        return base_type::parent_layout().size_policy();
+                    return base_type::size_policy();
+                }
+                else if constexpr (ParentItemCategory == layout_item_category::Widget)
+                {
+                    if (base_type::has_parent_widget())
+                        return base_type::parent_widget().size_policy();
+                    return base_type::size_policy();
+                }
                 return base_type::parent_layout_item().size_policy();
             }
             return base_type::size_policy();

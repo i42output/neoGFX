@@ -356,7 +356,7 @@ namespace neogfx
         bool is_descendent_of(const i_layout& aAncestor) const
         {
             auto* l = this;
-            while (l->has_parent_layout() && &l->layout_owner() == &aAncestor.layout_owner())
+            while (l->has_parent_layout() && &l->parent_widget() == &aAncestor.parent_widget())
             {
                 l = &l->parent_layout();
                 if (l == &aAncestor)

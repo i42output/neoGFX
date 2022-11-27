@@ -196,26 +196,26 @@ namespace neogfx
         subject().set_parent_layout(aParentLayout);
     }
 
-    bool layout_item_cache::has_layout_owner() const
+    bool layout_item_cache::has_parent_widget() const
     {
-        return subject().has_layout_owner();
+        return subject().has_parent_widget();
     }
 
-    const i_widget& layout_item_cache::layout_owner() const
+    const i_widget& layout_item_cache::parent_widget() const
     {
-        if (has_layout_owner())
-            return subject().layout_owner();
-        throw no_layout_owner();
+        if (has_parent_widget())
+            return subject().parent_widget();
+        throw no_parent_widget();
     }
 
-    i_widget& layout_item_cache::layout_owner()
+    i_widget& layout_item_cache::parent_widget()
     {
-        return const_cast<i_widget&>(to_const(*this).layout_owner());
+        return const_cast<i_widget&>(to_const(*this).parent_widget());
     }
 
-    void layout_item_cache::set_layout_owner(i_widget* aOwner)
+    void layout_item_cache::set_parent_widget(i_widget* aParentWidget)
     {
-        subject().set_layout_owner(aOwner);
+        subject().set_parent_widget(aParentWidget);
     }
 
     bool layout_item_cache::has_layout_manager() const
