@@ -55,7 +55,7 @@ namespace neogfx
         virtual i_native_clipboard& system_clipboard() = 0;
         virtual bool has_system_menu_bar() const = 0;
         virtual i_shared_menu_bar& system_menu_bar() = 0;
-        virtual bool browse_to(std::string const& aUri) = 0;
+        virtual bool open_uri(std::string const& aUri) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x86d1e3fa, 0xbf79, 0x4940, 0xa648, { 0xaf, 0xad, 0xbf, 0xf2, 0x9c, 0xcd } }; return sIid; }
     };

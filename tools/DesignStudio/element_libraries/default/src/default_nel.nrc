@@ -4,6 +4,9 @@
     resource: {
         file: resources/project.png
 
+        file: resources/folder.png
+        file: resources/folder-open.png
+
         file: resources/app.png
         file: resources/gamepad.png
 

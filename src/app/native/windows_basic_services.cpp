@@ -282,7 +282,7 @@ namespace neogfx
             throw no_system_menu_bar();
         }
 
-        bool basic_services::browse_to(std::string const& aUri)
+        bool basic_services::open_uri(std::string const& aUri)
         {
             return (INT_PTR)::ShellExecute(NULL, NULL, reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aUri).c_str()), NULL, NULL, SW_SHOWNORMAL) > 32;
         }

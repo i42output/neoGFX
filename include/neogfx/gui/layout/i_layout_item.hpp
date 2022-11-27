@@ -126,6 +126,28 @@ namespace neogfx
     public:
     };
 
+    template <typename LayoutItemType>
+    class size_policy_of_parent : public LayoutItemType
+    {
+    private:
+        typedef LayoutItemType base_type;
+    public:
+        using base_type::base_type;
+    public:
+        neogfx::size_policy size_policy() const override
+        {
+            if (base_type::has_size_policy())
+            {
+                return base_type::size_policy();
+            }
+            else if (base_type::has_parent_layout_item())
+            {
+                return base_type::parent_layout_item().size_policy();
+            }
+            return base_type::size_policy();
+        }
+    };
+
     class i_item_layout : public i_service
     {
     public:

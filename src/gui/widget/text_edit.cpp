@@ -919,7 +919,7 @@ namespace neogfx
                     std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
                     if (utf32word.find(U"://") != std::u32string::npos)
                     {
-                        if (!service<i_basic_services>().browse_to(neolib::utf32_to_utf8(utf32word)))
+                        if (!service<i_basic_services>().open_uri(neolib::utf32_to_utf8(utf32word)))
                             service<i_basic_services>().system_beep();
                         return;
                     }
@@ -1919,7 +1919,7 @@ namespace neogfx
         return get_text_category(emojiAtlas, iText[aTextPositionLeft]) == get_text_category(emojiAtlas, iText[aTextPositionRight]);
     }
 
-    std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition, bool aOnlyConsiderSpaces) const
+    std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition, bool aWordBreakIsWhitespace) const
     {
         auto is_space = [](char32_t ch)
         {
@@ -1938,11 +1938,11 @@ namespace neogfx
         };
         auto start = aTextPosition;
         auto end = aTextPosition;
-        if (aOnlyConsiderSpaces && (start == iText.size() || is_space(iText[start])))
+        if (aWordBreakIsWhitespace && (start == iText.size() || is_space(iText[start])))
             return std::make_pair(start, end);
-        while (start > 0 && (aOnlyConsiderSpaces ? !is_space(iText[start - 1]) : same_word(start - 1, aTextPosition)))
+        while (start > 0 && (aWordBreakIsWhitespace ? !is_space(iText[start - 1]) : same_word(start - 1, aTextPosition)))
             --start;
-        while (end < iText.size() && (aOnlyConsiderSpaces ? !is_space(iText[end]) : same_word(aTextPosition, end)))
+        while (end < iText.size() && (aWordBreakIsWhitespace ? !is_space(iText[end]) : same_word(aTextPosition, end)))
             ++end;
         return std::make_pair(start, end);
     }

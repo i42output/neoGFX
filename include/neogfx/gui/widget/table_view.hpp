@@ -49,7 +49,7 @@ namespace neogfx
     protected:
         neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
     private:
-        vertical_layout iLayout;
+        size_policy_of_parent<vertical_layout> iLayout;
         header_view iColumnHeader;
         vertical_spacer iSpacer;
     };

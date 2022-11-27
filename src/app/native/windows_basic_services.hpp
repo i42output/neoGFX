@@ -44,7 +44,7 @@ namespace neogfx
             i_native_clipboard& system_clipboard() override;
             bool has_system_menu_bar() const override;
             i_shared_menu_bar& system_menu_bar() override;
-            bool browse_to(std::string const& aUri) override;
+            bool open_uri(std::string const& aUri) override;
         private:
             i_async_task& iAppTask;
             mutable std::optional<uint32_t> iDisplayCount;
