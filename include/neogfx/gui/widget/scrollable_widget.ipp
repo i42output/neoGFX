@@ -573,8 +573,10 @@ namespace neogfx
         if (iUpdatingScrollbarVisibility)
             return;
 
+#ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << "widget:layout_items: update_scrollbar_visibility..."  << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility..."  << endl;
+#endif
 
         neolib::scoped_flag sf{ iUpdatingScrollbarVisibility };
 
@@ -622,8 +624,14 @@ namespace neogfx
         scrollbar_updated(vertical_scrollbar(), i_scrollbar::update_reason_e::Updated);
         scrollbar_updated(horizontal_scrollbar(), i_scrollbar::update_reason_e::Updated);
         
+#ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scroll_area() << ", scroll_page: " << scroll_page() << endl;
+        {
+            auto const scrollArea = scroll_area();
+            auto const scrollPage = scroll_page();
+            service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scrollArea << ", scroll_page: " << scrollPage << endl;
+        }
+#endif
     }
 
     template <typename Base>

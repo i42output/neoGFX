@@ -573,7 +573,7 @@ namespace neogfx
                 case '/': // todo
                     if (iEscapeSequence.value().size() > 1)
                     {
-                        service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value() << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << "Unsupported escape sequence: " << iEscapeSequence.value() << endl;
                         iEscapeSequence = std::nullopt;
                     }
                     break;
@@ -592,7 +592,7 @@ namespace neogfx
                                 root().set_title_text(string{ std::string_view{ result[1].first, paramsInput.end() } });
                         }
                         else
-                            service<debug::logger>() << "Unsupported escape sequence: " << iEscapeSequence.value().substr(0, iEscapeSequence.value().length() - 1) << endl;
+                            service<debug::logger>() << neolib::logger::severity::Debug << "Unsupported escape sequence: " << iEscapeSequence.value().substr(0, iEscapeSequence.value().length() - 1) << endl;
                         iEscapeSequence = std::nullopt;
                     }
                     break;
@@ -600,7 +600,7 @@ namespace neogfx
                     // todo
                     if (iEscapeSequence.value().size() > 1 && ch >= U'\x40' && ch <= U'\x7E')
                     {
-                        //service<debug::logger>() << "CSI escape sequence: " << iEscapeSequence.value() << endl;
+                        //service<debug::logger>() << neolib::logger::severity::Debug << "CSI escape sequence: " << iEscapeSequence.value() << endl;
                         auto params = neolib::tokens(iEscapeSequence.value().substr(1, iEscapeSequence.value().size() - 2), ";"s, 0, false);
                         switch (ch)
                         {
@@ -787,7 +787,7 @@ namespace neogfx
                             {
                                 if (params[0][0] == '>')
                                 {
-                                    service<debug::logger>() << "Unsupported CSI escape sequence: " << iEscapeSequence.value() << endl;
+                                    service<debug::logger>() << neolib::logger::severity::Debug << "Unsupported CSI escape sequence: " << iEscapeSequence.value() << endl;
                                 }
                                 else
                                 {
@@ -910,7 +910,7 @@ namespace neogfx
                                         }
                                         else
                                         {
-                                            service<debug::logger>() << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
+                                            service<debug::logger>() << neolib::logger::severity::Debug << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
                                         }
                                     }
                                 }
@@ -1028,7 +1028,7 @@ namespace neogfx
                             }
                             break;
                         default:
-                            service<debug::logger>() << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
+                            service<debug::logger>() << neolib::logger::severity::Debug << "Unknown CSI escape sequence: " << iEscapeSequence.value() << endl;
                             break;
                         }
                         iEscapeSequence = std::nullopt;
@@ -1036,7 +1036,7 @@ namespace neogfx
                     break;
                 default:
                     // todo
-                    service<debug::logger>() << "Unknown escape sequence: " << iEscapeSequence.value() << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "Unknown escape sequence: " << iEscapeSequence.value() << endl;
                     iEscapeSequence = std::nullopt;
                     break;
                 }
@@ -1080,7 +1080,7 @@ namespace neogfx
                     {
                         std::ostringstream oss;
                         oss << "Unsupported control char: 0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(ch);
-                        service<debug::logger>() << oss.str() << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << oss.str() << endl;
                     }
                     break;
                 }
@@ -1283,7 +1283,7 @@ namespace neogfx
             {
                 std::ostringstream oss;
                 oss << "Unsupported character set, char: '" << std::string(1, static_cast<char>(aCharacter)) << "' (0x" << std::hex << std::uppercase << static_cast<std::uint32_t>(aCharacter) << ")";
-                service<debug::logger>() << oss.str() << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << oss.str() << endl;
             }
             return U'\xFFFD';
         }

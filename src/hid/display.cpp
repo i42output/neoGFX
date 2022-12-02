@@ -112,12 +112,12 @@ namespace neogfx
 
     dimension display::horizontal_dpi() const
     {
-        return iPixelDensityDpi.cx;
+        return service<i_app>().program_options().dpi_override().value_or(iPixelDensityDpi).cx;
     }
 
     dimension display::vertical_dpi() const
     {
-        return iPixelDensityDpi.cy;
+        return service<i_app>().program_options().dpi_override().value_or(iPixelDensityDpi).cy;
     }
 
     dimension display::ppi() const

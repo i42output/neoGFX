@@ -130,7 +130,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::renderItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << endl;
 #endif // NEOGFX_DEBUG
 
             base_type::paint_non_client(aGc);

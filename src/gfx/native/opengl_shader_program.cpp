@@ -88,12 +88,12 @@ namespace neogfx
             glCheck(glGetShaderiv(shaderHandle, GL_COMPILE_STATUS, &result));
             auto dump = [&](std::string const& why)
             {
-                service<debug::logger>() << why << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << why << endl;
                 int32_t lineNumber = 1;
                 std::istringstream iss{ code.to_std_string() };
                 std::string line;
                 while (std::getline(iss, line))
-                    service<debug::logger>() << lineNumber++ << ": " << line << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << lineNumber++ << ": " << line << endl;
             };
             if (GL_FALSE == result)
             {

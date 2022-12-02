@@ -194,7 +194,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << "layout_item::update_layout(" << aDeferLayout << ", " << aAncestors << ")" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item::update_layout(" << aDeferLayout << ", " << aAncestors << ")" << endl;
 #endif // NEOGFX_DEBUG
 
             if (self.is_widget() && (!aDeferLayout || self.as_widget().can_defer_layout()))
@@ -269,7 +269,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::size_policy()" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << endl;
 #endif // NEOGFX_DEBUG
             if (SizePolicy != std::nullopt)
                 return *SizePolicy;
@@ -285,7 +285,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_size_policy(" << aSizePolicy << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 SizePolicy = aSizePolicy;
                 if (aUpdateLayout)
@@ -308,7 +308,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_weight(" << aWeight << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 Weight.assign(aWeight, aUpdateLayout);
                 if (aUpdateLayout)
@@ -337,7 +337,7 @@ namespace neogfx
             }
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::ideal_size(" << aAvailableSpace << ") --> " << result << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::ideal_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
             return result;
         }
@@ -348,7 +348,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_ideal_size(" << aIdealSize << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_ideal_size(" << aIdealSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 IdealSize.assign(newIdealSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -374,7 +374,7 @@ namespace neogfx
                 result = {};
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
             return result;
         }
@@ -385,7 +385,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_minimum_size(" << aMinimumSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 MinimumSize.assign(newMinimumSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -418,7 +418,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_maximum_size(" << aMaximumSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 MaximumSize.assign(newMaximumSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -442,7 +442,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_fixed_size(" << aFixedSize << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 FixedSize.assign(newFixedSize, aUpdateLayout);
                 if (aUpdateLayout)
@@ -477,7 +477,7 @@ namespace neogfx
             {
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == this)
-                    service<debug::logger>() << typeid(*this).name() << "::set_transformation(" << aTransformation << ", " << aUpdateLayout << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::set_transformation(" << aTransformation << ", " << aUpdateLayout << ")" << endl;
 #endif // NEOGFX_DEBUG
                 Transformation.assign(newTransformation, aUpdateLayout);
                 invalidate_combined_transformation();
@@ -598,7 +598,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << typeid(*this).name() << "::fix_weightings(): " << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::fix_weightings(): " << endl;
 #endif // NEOGFX_DEBUG
             auto& self = as_layout_item();
             auto& layout = (self.is_layout() ? self.as_layout() : self.as_widget().layout());
@@ -613,7 +613,7 @@ namespace neogfx
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
             {
-                service<debug::logger>() << typeid(*this).name() << "::fix_weightings: weightings: ";
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::fix_weightings: weightings: ";
                 bool first = true;
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
@@ -621,12 +621,12 @@ namespace neogfx
                     if (!item.visible())
                         continue;
                     if (!first)
-                        service<debug::logger>() << ", ";
+                        service<debug::logger>() << neolib::logger::severity::Debug << ", ";
                     first = false;
-                    service<debug::logger>() << item.weight();
+                    service<debug::logger>() << neolib::logger::severity::Debug << item.weight();
                 }
-                service<debug::logger>() << endl;
-                service<debug::logger>() << typeid(*this).name() << "::fix_weightings() done" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::fix_weightings() done" << endl;
             }
 #endif // NEOGFX_DEBUG
         }

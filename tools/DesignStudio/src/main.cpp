@@ -44,6 +44,8 @@ int main(int argc, char* argv[])
 
     ds::app app{ appInfo };
 
+    ng::service<ng::debug::logger>().set_filter_severity(neolib::logger::severity::Error);
+
 #if 0
     auto& playbackDevice = ng::service<ng::i_audio>().create_playback_device(
         ng::audio_data_format{ ng::audio_sample_format::F32, 2u, 48000u });

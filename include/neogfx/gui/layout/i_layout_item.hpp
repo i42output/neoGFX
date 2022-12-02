@@ -162,7 +162,8 @@ namespace neogfx
                         return base_type::parent_widget().size_policy();
                     return base_type::size_policy();
                 }
-                return base_type::parent_layout_item().size_policy();
+                else
+                    return base_type::parent_layout_item().size_policy();
             }
             return base_type::size_policy();
         }

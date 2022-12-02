@@ -607,7 +607,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (iDebug)
-            service<debug::logger>() << aMessage << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << aMessage << endl;
 #endif // NEOGFX_DEBUG
     }
 }

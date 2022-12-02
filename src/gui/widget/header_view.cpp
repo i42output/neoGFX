@@ -57,7 +57,8 @@ namespace neogfx
         splitter{ splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false }
+        iExpandLastColumn{ false },
+        iUpdatingSectionWidth { false }
     {
         init();
     }
@@ -66,7 +67,8 @@ namespace neogfx
         splitter{ aParent, splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false }
+        iExpandLastColumn{ false },
+        iUpdatingSectionWidth{ false }
     {
         init();
     }
@@ -75,7 +77,8 @@ namespace neogfx
         splitter{ aLayout, splitter_style::ResizeSinglePane | (aType == header_view_type::Horizontal ? splitter_style::Horizontal : splitter_style::Vertical) },
         iOwner{ aOwner },
         iType{ aType },
-        iExpandLastColumn{ false }
+        iExpandLastColumn{ false },
+        iUpdatingSectionWidth{ false }
     {
         init();
     }
@@ -269,10 +272,10 @@ namespace neogfx
             iSectionWidths[aSectionIndex].calculated);
         auto const lastColumn = presentation_model().columns() - 1u;
         thread_local bool tInSectionWidth = false;
-        if (aSectionIndex == lastColumn && expand_last_column() && !tInSectionWidth)
+        if (aSectionIndex == lastColumn && expand_last_column() && !tInSectionWidth && !iUpdatingSectionWidth)
         {
             neolib::scoped_flag sf{ tInSectionWidth };
-            auto const delta = units_converter{ *this }.to_device_units(client_rect(false).cx - total_width());
+            auto const delta = client_rect(false).cx - total_width();
             if (delta > 0.0)
                 result += delta;
         }
@@ -449,13 +452,15 @@ namespace neogfx
 
     bool header_view::update_section_width(uint32_t aColumn, dimension aColumnWidth)
     {
-        dimension const oldSectionWidth = iSectionWidths[aColumn].calculated;
+        neolib::scoped_flag sf{ iUpdatingSectionWidth };
+        auto& calculatedSectionWidth = iSectionWidths[aColumn].calculated;
+        dimension const oldSectionWidth = calculatedSectionWidth;
         dimension const headingWidth = presentation_model().column_heading_extents(aColumn, *this).cx + presentation_model().cell_padding(*this).size().cx * 2.0;
-        auto const lastColumn = presentation_model().columns() - 1u;
-        iSectionWidths[aColumn].calculated = std::max(iSectionWidths[aColumn].calculated, units_converter{ *this }.to_device_units(std::max(headingWidth, aColumnWidth)));
-        if (section_width(aColumn) != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
+        calculatedSectionWidth = std::max(calculatedSectionWidth, units_converter{ *this }.to_device_units(std::max(headingWidth, aColumnWidth)));
+        if (calculatedSectionWidth != oldSectionWidth || layout().get_widget_at(aColumn).minimum_size().cx != section_width(aColumn, true))
         {
             size const widgetSize{ std::max(section_width(aColumn, true), layout().spacing().cx * 3.0), layout().get_widget_at(aColumn).minimum_size().cy };
+            auto const lastColumn = presentation_model().columns() - 1u;
             if (!expand_last_column() || aColumn != lastColumn)
                 layout().get_widget_at(aColumn).set_fixed_size(widgetSize);
             else

@@ -294,7 +294,7 @@ namespace neogfx
         void renderer::activate_context(const i_render_target& aTarget)
         {
             //if constexpr (!ndebug)
-            //    service<debug::logger>() << "renderer: activating context..." << endl;
+            //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: activating context..." << endl;
 
             if (iContext == nullptr)
                 iContext = static_cast<HGLRC>(create_context(aTarget));
@@ -309,13 +309,13 @@ namespace neogfx
             activate_current_target();
 
             //if constexpr (!ndebug)
-            //    service<debug::logger>() << "renderer: context activated" << endl;
+            //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: context activated" << endl;
         }
 
         void renderer::deactivate_context()
         {
             //if constexpr (!ndebug)
-            //    service<debug::logger>() << "renderer: deactivating context..." << endl;
+            //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: deactivating context..." << endl;
 
             if (active_target() != nullptr)
                 deallocate_offscreen_window(active_target());
@@ -334,7 +334,7 @@ namespace neogfx
                 activate_current_target();
 
             //if constexpr (!ndebug)
-            //    service<debug::logger>() << "renderer: context deactivated" << endl;
+            //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: context deactivated" << endl;
         }
 
         renderer::opengl_context renderer::create_context(const i_render_target& aTarget)

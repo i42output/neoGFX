@@ -48,13 +48,14 @@ namespace neogfx
     public:
         program_options(int argc, char* argv[]);
     public:
-        const boost::program_options::variables_map& options() const override;
-        bool console() const override;
-        neogfx::renderer renderer() const override;
-        std::optional<size_u32> full_screen() const override;
-        bool double_buffering() const override;
-        bool turbo() const override;
-        bool nest() const override;
+        const boost::program_options::variables_map& options() const final;
+        bool console() const final;
+        neogfx::renderer renderer() const final;
+        std::optional<size_u32> full_screen() const final;
+        std::optional<size_u32> dpi_override() const final;
+        bool double_buffering() const final;
+        bool turbo() const final;
+        bool nest() const final;
     private:
         boost::program_options::variables_map iOptions;
     };

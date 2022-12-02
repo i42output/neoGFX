@@ -150,7 +150,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << endl;
 #endif // NEOGFX_DEBUG
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
@@ -185,7 +185,7 @@ namespace neogfx
         }
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -195,7 +195,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << endl;
 #endif // NEOGFX_DEBUG
         size result;
         if (has_maximum_size())
@@ -256,7 +256,7 @@ namespace neogfx
         }
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -266,7 +266,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         set_position(aPosition);
         set_extents(aSize);
@@ -289,7 +289,7 @@ namespace neogfx
             auto const& item = *itemRef;
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == &item.subject())
-                service<debug::logger>() << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
             if (!item.visible() && !ignore_visibility())
                 continue;
@@ -333,7 +333,7 @@ namespace neogfx
                     continue;
 #ifdef NEOGFX_DEBUG
                 if (debug::layoutItem == &item.subject())
-                    service<debug::logger>() << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
                 auto const minSize = AxisPolicy::cx(item.minimum_size(availableSpace));
                 auto const maxSize = AxisPolicy::cx(item.maximum_size(availableSpace));
@@ -390,7 +390,7 @@ namespace neogfx
             }
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == &item.subject())
-                service<debug::logger>() << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
             auto const itemMinSize = item.minimum_size(availableSpace);
             auto const itemMaxSize = item.maximum_size(availableSpace);

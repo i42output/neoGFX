@@ -58,6 +58,7 @@ namespace neogfx
         description.add_options()
             ("console", "open console")
             ("fullscreen", boost::program_options::value<std::string>()->implicit_value(""s), "run full screen")
+            ("dpi", boost::program_options::value<std::string>()->implicit_value(""s), "DPI override")
             ("nest", "display child windows nested within main window rather than using the main desktop")
             ("vulkan", "use Vulkan renderer")
             ("directx", "use DirectX (ANGLE) renderer")
@@ -110,6 +111,29 @@ namespace neogfx
                 }
             }
             throw invalid_options("invalid fullscreen resolution");
+        }
+        return std::optional<size_u32>{};
+    }
+
+    std::optional<size_u32> program_options::dpi_override() const
+    {
+        if (options().count("dpi") == 1)
+        {
+            auto dpiOverride = iOptions["dpi"].as<std::string>();
+            if (dpiOverride.empty())
+                return std::optional<size_u32>{};
+            else
+            {
+                neolib::vecarray<std::string, 2> bits;
+                neolib::tokens(dpiOverride, ","s, bits, 2, false, false);
+                if (bits.size() == 2)
+                {
+                    auto result = size_u32{ boost::lexical_cast<uint32_t>(bits[0]), boost::lexical_cast<uint32_t>(bits[1]) };
+                    if (result.cx != 0 && result.cx != 0)
+                        return result;
+                }
+            }
+            throw invalid_options("invalid dpi override");
         }
         return std::optional<size_u32>{};
     }
@@ -304,13 +328,13 @@ namespace neogfx
     }
     catch (std::exception& e)
     {
-        service<debug::logger>() << "neogfx::app::app: terminating with exception: " << e.what() << endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with exception: " << e.what() << endl;
         service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), std::string("main: terminating with exception: ") + e.what());
         throw;
     }
     catch (...)
     {
-        service<debug::logger>() << "neogfx::app::app: terminating with unknown exception" << endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with unknown exception" << endl;
         service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), "main: terminating with unknown exception");
         throw;
     }
@@ -369,14 +393,14 @@ namespace neogfx
         catch (std::exception& e)
         {
             halt();
-            service<debug::logger>() << "neogfx::app::exec: terminating with exception: " << e.what() << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with exception: " << e.what() << endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
             std::exit(EXIT_FAILURE);
         }
         catch (...)
         {
             halt();
-            service<debug::logger>() << "neogfx::app::exec: terminating with unknown exception" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with unknown exception" << endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
             std::exit(EXIT_FAILURE);
         }
@@ -775,7 +799,7 @@ namespace neogfx
             if (!halted())
             {
                 halt();
-                service<debug::logger>() << "neogfx::app::process_events: terminating with exception: " << e.what() << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with exception: " << e.what() << endl;
                 service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
                 std::exit(EXIT_FAILURE);
             }
@@ -785,7 +809,7 @@ namespace neogfx
             if (!halted())
             {
                 halt();
-                service<debug::logger>() << "neogfx::app::process_events: terminating with unknown exception" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with unknown exception" << endl;
                 service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
                 std::exit(EXIT_FAILURE);
             }

@@ -188,7 +188,7 @@ namespace neogfx
         size result = iRows.minimum_size(aAvailableSpace);
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << "border_layout::minimum_size(...) --> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "border_layout::minimum_size(...) --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -198,7 +198,7 @@ namespace neogfx
         size result = iRows.maximum_size(aAvailableSpace);
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << "border_layout::maximum_size(...) --> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "border_layout::maximum_size(...) --> " << result << endl;
 #endif // NEOGFX_DEBUG
         return result;
     }

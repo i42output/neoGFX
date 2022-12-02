@@ -734,13 +734,15 @@ namespace neogfx
     rect item_view::scroll_area() const
     {
         scoped_units su{ *this, units::Pixels };
-        return rect{ point{}, total_item_area(*this) };
+        rect const result{ point{}, total_item_area(*this) };
+        return result;
     }
 
     size item_view::scroll_page() const
     {
         scoped_units su{ *this, units::Pixels };
-        return item_display_rect();
+        size const result{ item_display_rect() };
+        return result;
     }
 
     void item_view::update_scrollbar_visibility()
@@ -1137,7 +1139,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
-                        service<debug::logger>() << typeid(*this).name() << ": dragging object." << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging object." << endl;
 #endif
                     presentation_model().dragging_item().trigger(*iDragDropItem);
                 });
@@ -1145,7 +1147,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
-                        service<debug::logger>() << typeid(*this).name() << ": dragging cancelled." << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging cancelled." << endl;
 #endif
                     presentation_model().dragging_item_cancelled().trigger(*iDragDropItem);
                     iDragDropItem = std::nullopt;
@@ -1154,7 +1156,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
-                        service<debug::logger>() << typeid(*this).name() << ": object dropped." << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": object dropped." << endl;
 #endif
                     presentation_model().item_dropped().trigger(*iDragDropItem, aTarget);
                     iDragDropItem = std::nullopt;

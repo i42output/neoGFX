@@ -83,7 +83,7 @@ namespace neogfx
             return;
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << "vertical_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "vertical_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
         if (has_parent_widget())
             parent_widget().layout_items_started();

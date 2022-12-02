@@ -113,5 +113,6 @@ namespace neogfx
         bool iExpandLastColumn;
         optional_dimension iSeparatorWidth;
         std::vector<section_dimension> iSectionWidths;
+        bool iUpdatingSectionWidth;
     };
 }
