@@ -75,7 +75,7 @@ namespace neogfx::nrc
                 emit("   %1%.set_maximum(%2%);\n", id(), *iMaximum);
             if (iStep)
                 emit("   %1%.set_step(%2%);\n", id(), *iStep);
-            if (iMinimum)
+            if (iValue)
                 emit("   %1%.set_value(%2%);\n", id(), *iValue);
         }
     protected:

@@ -33,6 +33,12 @@ namespace neogfx
         set_padding(neogfx::padding{ 4.0, 0.0 });
     }
 
+    status_bar::separator::separator(i_layout& aStatusBarLayout) :
+        widget{ aStatusBarLayout }, iStatusBar{ parent() }
+    {
+        set_padding(neogfx::padding{ 4.0, 0.0 });
+    }
+
     neogfx::size_policy status_bar::separator::size_policy() const
     {
         if (widget::has_size_policy())

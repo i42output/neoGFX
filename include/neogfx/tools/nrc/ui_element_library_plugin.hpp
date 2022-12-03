@@ -25,6 +25,7 @@
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/app/version.hpp>
 #include <neolib/app/i_application.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/tools/nrc/i_ui_element_library.hpp>
 
 namespace neogfx::nrc
@@ -89,6 +90,7 @@ namespace neogfx::nrc
         }
         bool unload() override
         {
+            service<i_resource_manager>().clean();
             iLoaded = false;
             return true;
         }

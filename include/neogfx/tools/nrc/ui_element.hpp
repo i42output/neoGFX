@@ -54,29 +54,29 @@ namespace neogfx::nrc
         typedef std::set<std::string> data_names_t;
     public:
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType) :
-            iParser{ aParser }, iParent{ nullptr }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
+            iParser{ aParser }, iParent{ nullptr }, iName{ aParser.current_element() }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
-            iParser{ aParser }, iParent{ nullptr }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
+            iParser{ aParser }, iParent{ nullptr }, iName{ aParser.current_element() }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aId }, iAnonymousIdCounter{ 0u }, iType{ aType }
         {
             init();
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType) :
-            iParser{ aParser }, iParent{ &aParent }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iName{ aParser.current_element() }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aParser.get_optional<neolib::string>("id") }, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, ui_element_type aType, const neolib::optional<neolib::string>& aId) :
-            iParser{ aParser }, iParent{ &aParent }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iName{ aParser.current_element() }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iAnonymousIdCounter{ 0u }, iId{ aId }, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
         }
         ui_element(const i_ui_element_parser& aParser, i_ui_element& aParent, member_element_t, ui_element_type aType) :
-            iParser{ aParser }, iParent{ &aParent }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ true }, iAnonymousIdCounter{ 0u }, iId{}, iType{ aType }
+            iParser{ aParser }, iParent{ &aParent }, iName{ aParser.current_element() }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ true }, iAnonymousIdCounter{ 0u }, iId{}, iType{ aType }
         {
             init();
             parent().children().push_back(neolib::ref_ptr<i_ui_element>{ this });
@@ -90,6 +90,10 @@ namespace neogfx::nrc
             return iParser;
         }
     public:
+        const neolib::i_string& name() const override
+        {
+            return iName;
+        }
         const neolib::i_string& fragment_name() const override
         {
             return iFragmentName;
@@ -561,6 +565,7 @@ namespace neogfx::nrc
     private:
         const i_ui_element_parser& iParser;
         i_ui_element* iParent;
+        neolib::string iName;
         neolib::string iFragmentName;
         neolib::string iTypeName;
         neolib::vector<neolib::string> iHeaders;

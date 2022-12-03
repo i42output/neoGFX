@@ -43,6 +43,8 @@ namespace neogfx
             { 0x0007B, text_category::None },
             { 0x00085, text_category::Whitespace },
             { 0x00086, text_category::None },
+            { 0x000A0, text_category::Whitespace },
+            { 0x000A1, text_category::None },
             { 0x000AA, text_category::LTR },
             { 0x000AB, text_category::None },
             { 0x000B2, text_category::Digit },

@@ -271,6 +271,9 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
+        window.labelDPI.set_text(ng::string{ (std::ostringstream{} << "DPI: " <<
+            window.device_metrics().horizontal_dpi() << " x " << window.device_metrics().vertical_dpi()).str() });
+
         auto ds = window.textEdit.default_style();
         ds.paragraph().set_padding(ng::padding{ 0, 4.0_dip });
         window.textEdit.set_default_style(ds);

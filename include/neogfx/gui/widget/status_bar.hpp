@@ -57,6 +57,7 @@ namespace neogfx
         {
         public:
             separator(i_widget& aStatusBar);
+            separator(i_layout& aStatusBarLayout);
         public:
             neogfx::size_policy size_policy() const override;
             size minimum_size(optional_size const& aAvailableSpace) const override;

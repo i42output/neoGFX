@@ -115,6 +115,13 @@
                 status_bar: {
                     id: statusBar
                     label: {
+                        id: labelDPI
+                        .text_widget: {
+                            size_hint: "DPI: 000 x 000"
+                        }
+                    }
+                    separator: {}
+                    label: {
                         id: labelFPS
                         .text_widget: {
                             size_hint: "0000.0000/0000.0000 FPS/PFSP"

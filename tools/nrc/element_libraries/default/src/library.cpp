@@ -73,6 +73,7 @@ namespace neogfx::nrc
             { "menu_bar", ui_element_type::LayoutItem },
             { "toolbar", ui_element_type::LayoutItem },
             { "status_bar", ui_element_type::LayoutItem },
+            { "status_bar::separator", ui_element_type::LayoutItem },
             { "tab_page_container", ui_element_type::LayoutItem },
             { "tab_page", ui_element_type::LayoutItem },
             { "canvas", ui_element_type::LayoutItem },
@@ -124,7 +125,9 @@ namespace neogfx::nrc
 
     bool default_ui_element_library::handles_element(i_ui_element& aParent, const neolib::i_string& aElementType) const
     {
-        auto range = boost::make_iterator_range(iChildElements.to_std_multimap().equal_range(aElementType.to_std_string()));
+        auto range = boost::make_iterator_range(iChildElements.as_std_multimap().equal_range(aElementType.to_std_string()));
+        if (range.empty())
+            range = boost::make_iterator_range(iChildElements.as_std_multimap().equal_range(aParent.name().to_std_string() + "::" + aElementType.to_std_string()));
         for (auto const& ce : range)
         {
             if (ce.second.second() == ui_element_type::None)
@@ -160,6 +163,7 @@ namespace neogfx::nrc
             { "text_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new text_widget{ aParser, aParent }; } },
             { "image_widget", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new image_widget{ aParser, aParent }; } },
             { "status_bar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new status_bar{ aParser, aParent }; } },
+            { "status_bar::separator", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new status_bar::separator{ aParser, aParent }; } },
             { "menu_bar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new menu_bar{ aParser, aParent }; } },
             { "menu", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new menu{ aParser, aParent }; } },
             { "toolbar", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new toolbar{ aParser, aParent }; } },
@@ -201,6 +205,8 @@ namespace neogfx::nrc
             { "horizontal_spacer", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new horizontal_spacer{ aParser, aParent }; } }
         };
         auto method = sFactoryMethods.find(aElementType);
+        if (method == sFactoryMethods.end())
+            method = sFactoryMethods.find(aParent.name() + "::" + aElementType);
         if (method != sFactoryMethods.end())
             return (method->second)(aParser, aParent);
         throw unknown_element_type();
