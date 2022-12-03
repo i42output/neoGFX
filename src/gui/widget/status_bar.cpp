@@ -71,46 +71,43 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         iLayout.set_padding(neogfx::padding{});
+        iLayout.set_ignore_visibility(true);
         iLayout.add(make_ref<separator>(parent()));
         auto insertLock = make_ref<label>();
         insertLock->set_padding(neogfx::padding{});
         insertLock->text_widget().set_padding(neogfx::padding{});
-        insertLock->text_widget().set_size_hint(size_hint{ "Insert" });
+        insertLock->text_widget().set_text("Insert"_s);
         insertLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(insertLock);
         iLayout.add(make_ref<separator>(parent()));
         auto capsLock = make_ref<label>();
         capsLock->set_padding(neogfx::padding{});
         capsLock->text_widget().set_padding(neogfx::padding{});
-        capsLock->text_widget().set_size_hint(size_hint{ "CAP" });
+        capsLock->text_widget().set_text("CAP"_s);
         capsLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(capsLock);
         iLayout.add(make_ref<separator>(parent()));
         auto numLock = make_ref<label>();
         numLock->set_padding(neogfx::padding{});
         numLock->text_widget().set_padding(neogfx::padding{});
-        numLock->text_widget().set_size_hint(size_hint{ "NUM" });
+        numLock->text_widget().set_text("NUM"_s);
         numLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(numLock);
         iLayout.add(make_ref<separator>(parent()));
         auto scrlLock = make_ref<label>();
         scrlLock->set_padding(neogfx::padding{});
         scrlLock->text_widget().set_padding(neogfx::padding{});
-        scrlLock->text_widget().set_size_hint(size_hint{ "SCRL" });
+        scrlLock->text_widget().set_text("SCRL"_s);
         scrlLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(scrlLock);
         iUpdater = std::make_unique<widget_timer>(*this, [insertLock, capsLock, numLock, scrlLock](widget_timer& aTimer)
         {
             aTimer.again();
             auto const& keyboard = service<i_keyboard>();
-            insertLock->set_text((keyboard.locks() & keyboard_locks::InsertLock) == keyboard_locks::InsertLock ?
-                "Insert" : string{});
-            capsLock->set_text((keyboard.locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock ?
-                "CAP" : string{});
-            numLock->set_text((keyboard.locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock ?
-                "NUM" : string{});
-            scrlLock->set_text((keyboard.locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock ?
-                "SCRL" : string{});
+            insertLock->show((keyboard.locks()& keyboard_locks::InsertLock) == keyboard_locks::InsertLock);
+            capsLock->show((keyboard.locks()& keyboard_locks::CapsLock) == keyboard_locks::CapsLock);
+            numLock->show((keyboard.locks()& keyboard_locks::NumLock) == keyboard_locks::NumLock);
+            scrlLock->show((keyboard.locks()& keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock);
         }, std::chrono::milliseconds{ 100 });
     }
 
@@ -351,7 +348,9 @@ namespace neogfx
         iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetLayout.set_padding(neogfx::padding{});
         iNormalWidgetLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iNormalWidgetLayout.set_ignore_visibility(true);
         iPermanentWidgetLayout.set_padding(neogfx::padding{});
+        iPermanentWidgetLayout.set_ignore_visibility(true);
         auto update_size_grip = [this](style_aspect)
         {
             auto ink1 = (has_background_color() ? background_color() : service<i_app>().current_style().palette().color(color_role::Background));
