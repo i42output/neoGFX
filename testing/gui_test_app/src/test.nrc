@@ -114,6 +114,7 @@
                 default_size: [ 960dip 832dip ]
                 status_bar: {
                     id: statusBar
+                    horizontal_spacer: {}
                     label: {
                         id: labelDPI
                         .text_widget: {
