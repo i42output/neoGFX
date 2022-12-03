@@ -423,19 +423,5 @@ namespace neogfx
         iNormalWidgetContainer.show(!showMessage);
         iKeyboardLockStatus.show((iStyle & style::DisplayKeyboardLocks) == style::DisplayKeyboardLocks);
         iSizeGrip.show((iStyle & style::DisplaySizeGrip) == style::DisplaySizeGrip);
-
-        std::cout << 
-            padding().size().cy << ", " <<
-            iLayout.padding().size().cy << ", " <<
-            iNormalLayout.padding().size().cy << ", " <<
-            iMessageLayout.padding().size().cy << ", " <<
-            iMessageLabel.padding().size().cy << ", " <<
-            iIdleLayout.padding().size().cy << ", " <<
-            iIdleLabel.padding().size().cy << ", " <<
-            iNormalWidgetContainer.padding().size().cy << ", " <<
-            iNormalWidgetLayout.padding().size().cy << ", " <<
-            iPermanentWidgetLayout.padding().size().cy << ", " <<
-            iKeyboardLockStatus.padding().size().cy << std::endl;
-
     }
 }
