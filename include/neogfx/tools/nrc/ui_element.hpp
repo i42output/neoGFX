@@ -472,9 +472,14 @@ namespace neogfx::nrc
                 check_element_ref(*iDefaultFocus);
                 emit("   %1%.set_focus();\n", *iDefaultFocus);
             }
-            if ((type() & ui_element_type::Widget) == ui_element_type::Widget && has_parent() &&
+            if ((type() & ui_element_type::Widget) == ui_element_type::Widget &&
+                (type() & ui_element_type::Separator) != ui_element_type::Separator && has_parent() &&
                 (parent().type() & ui_element_type::MASK_RESERVED_SPECIFIC) == ui_element_type::StatusBar)
+            {
+                if (!iPadding)
+                    emit("   %1%.set_padding(neogfx::padding{});\n", id());
                 emit("   %1%.set_font_role(font_role::StatusBar);\n", id());
+            }
             for (auto const& child : children())
                 child->emit_body();
         }

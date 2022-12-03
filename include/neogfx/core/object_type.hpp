@@ -59,6 +59,7 @@ namespace neogfx
         Layout                          = 0x0000800000000000 | HasAlignment | LayoutItem,
         Menu                            = 0x0001000000000000 | HasActions,
         Button                          = 0x0002000000000000 | Widget | HasText | HasLabel | HasImage,
+        Separator                       = 0x0004000000000000 | Widget,
 
         App                             = 0x0000000000000001 | HasActions,
         SurfaceWindow                   = 0x0000000000000002 | Window,

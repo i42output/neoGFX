@@ -74,29 +74,21 @@ namespace neogfx
         iLayout.set_ignore_visibility(true);
         iLayout.add(make_ref<separator>(parent()));
         auto insertLock = make_ref<label>();
-        insertLock->set_padding(neogfx::padding{});
-        insertLock->text_widget().set_padding(neogfx::padding{});
         insertLock->text_widget().set_text("Insert"_s);
         insertLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(insertLock);
         iLayout.add(make_ref<separator>(parent()));
         auto capsLock = make_ref<label>();
-        capsLock->set_padding(neogfx::padding{});
-        capsLock->text_widget().set_padding(neogfx::padding{});
         capsLock->text_widget().set_text("CAP"_s);
         capsLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(capsLock);
         iLayout.add(make_ref<separator>(parent()));
         auto numLock = make_ref<label>();
-        numLock->set_padding(neogfx::padding{});
-        numLock->text_widget().set_padding(neogfx::padding{});
         numLock->text_widget().set_text("NUM"_s);
         numLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(numLock);
         iLayout.add(make_ref<separator>(parent()));
         auto scrlLock = make_ref<label>();
-        scrlLock->set_padding(neogfx::padding{});
-        scrlLock->text_widget().set_padding(neogfx::padding{});
         scrlLock->text_widget().set_text("SCRL"_s);
         scrlLock->text_widget().set_font_role(font_role::StatusBar);
         iLayout.add(scrlLock);
@@ -143,9 +135,9 @@ namespace neogfx
         iLayout{ *this },
         iNormalLayout{ iLayout },
         iMessageLayout{ iNormalLayout },
-        iMessageWidget{ iMessageLayout },
+        iMessageLabel{ iMessageLayout },
         iIdleLayout{ iNormalLayout },
-        iIdleWidget{ iIdleLayout },
+        iIdleLabel{ iIdleLayout },
         iNormalWidgetContainer{ iLayout },
         iNormalWidgetLayout{ iNormalWidgetContainer },
         iPermanentWidgetLayout{ iLayout },
@@ -248,12 +240,12 @@ namespace neogfx
 
     label& status_bar::message_widget()
     {
-        return iMessageWidget;
+        return iMessageLabel;
     }
 
     label& status_bar::idle_widget()
     {
-        return iIdleWidget;
+        return iIdleLabel;
     }
 
     neogfx::size_policy status_bar::size_policy() const
@@ -308,8 +300,8 @@ namespace neogfx
     void status_bar::set_font(optional_font const& aFont)
     {
         widget<i_status_bar>::set_font(aFont);
-        iMessageWidget.set_font(aFont);
-        iIdleWidget.set_font(aFont);
+        iMessageLabel.set_font(aFont);
+        iIdleLabel.set_font(aFont);
         for (auto& w : iKeyboardLockStatus.children())
             w->set_font(aFont);
     }
@@ -330,20 +322,14 @@ namespace neogfx
         iNormalLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iMessageLayout.set_padding(neogfx::padding{});
         iMessageLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iMessageWidget.set_padding(neogfx::padding{});
-        iMessageWidget.layout().set_padding(neogfx::padding{});
-        iMessageWidget.text_widget().set_padding(neogfx::padding{});
-        iMessageWidget.image_widget().set_padding(neogfx::padding{});
-        iMessageWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iMessageWidget.set_font_role(neogfx::font_role::StatusBar);
+        iMessageLabel.set_padding(neogfx::padding{});
+        iMessageLabel.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iMessageLabel.set_font_role(neogfx::font_role::StatusBar);
         iIdleLayout.set_padding(neogfx::padding{});
         iIdleLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iIdleWidget.set_padding(neogfx::padding{});
-        iIdleWidget.layout().set_padding(neogfx::padding{});
-        iIdleWidget.text_widget().set_padding(neogfx::padding{});
-        iIdleWidget.image_widget().set_padding(neogfx::padding{});
-        iIdleWidget.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iIdleWidget.set_font_role(neogfx::font_role::StatusBar);
+        iIdleLabel.set_padding(neogfx::padding{});
+        iIdleLabel.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+        iIdleLabel.set_font_role(neogfx::font_role::StatusBar);
         iNormalWidgetContainer.set_padding(neogfx::padding{});
         iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetLayout.set_padding(neogfx::padding{});
@@ -431,11 +417,25 @@ namespace neogfx
     void status_bar::update_widgets()
     {
         bool showMessage = (iStyle & style::DisplayMessage) == style::DisplayMessage && have_message();
-        iMessageWidget.set_text(have_message() ? string{ message() } : string{});
-        iMessageWidget.show(showMessage);
-        iIdleWidget.show(!showMessage);
+        iMessageLabel.set_text(have_message() ? string{ message() } : string{});
+        iMessageLabel.show(showMessage);
+        iIdleLabel.show(!showMessage);
         iNormalWidgetContainer.show(!showMessage);
         iKeyboardLockStatus.show((iStyle & style::DisplayKeyboardLocks) == style::DisplayKeyboardLocks);
         iSizeGrip.show((iStyle & style::DisplaySizeGrip) == style::DisplaySizeGrip);
+
+        std::cout << 
+            padding().size().cy << ", " <<
+            iLayout.padding().size().cy << ", " <<
+            iNormalLayout.padding().size().cy << ", " <<
+            iMessageLayout.padding().size().cy << ", " <<
+            iMessageLabel.padding().size().cy << ", " <<
+            iIdleLayout.padding().size().cy << ", " <<
+            iIdleLabel.padding().size().cy << ", " <<
+            iNormalWidgetContainer.padding().size().cy << ", " <<
+            iNormalWidgetLayout.padding().size().cy << ", " <<
+            iPermanentWidgetLayout.padding().size().cy << ", " <<
+            iKeyboardLockStatus.padding().size().cy << std::endl;
+
     }
 }

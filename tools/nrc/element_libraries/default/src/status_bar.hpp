@@ -31,7 +31,7 @@ namespace neogfx::nrc
         {
         public:
             separator(const i_ui_element_parser& aParser, i_ui_element& aParent) :
-                ui_element<>{ aParser, aParent, ui_element_type::Widget }
+                ui_element<>{ aParser, aParent, ui_element_type::Separator }
             {
                 add_header("neogfx/gui/widget/status_bar.hpp");
                 // status_bar is a window member function so specify fully qualified type here

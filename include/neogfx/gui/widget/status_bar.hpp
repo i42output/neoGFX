@@ -133,9 +133,9 @@ namespace neogfx
         horizontal_layout iLayout;
         stack_layout iNormalLayout;
         horizontal_layout iMessageLayout;
-        label iMessageWidget;
+        label iMessageLabel;
         horizontal_layout iIdleLayout;
-        label iIdleWidget;
+        label iIdleLabel;
         widget<> iNormalWidgetContainer;
         horizontal_layout iNormalWidgetLayout;
         horizontal_layout iPermanentWidgetLayout;
