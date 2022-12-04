@@ -96,6 +96,7 @@ namespace neogfx
         struct column_info
         {
             column_info(const item_model_index::optional_column_type modelColumn = {}) : modelColumn{ modelColumn } {}
+            ~column_info() {}
             mutable item_model_index::optional_column_type modelColumn;
             item_cell_flags flags = item_cell_flags::Default;
             mutable std::map<dimension, uint32_t> cellWidths;
@@ -183,6 +184,7 @@ namespace neogfx
                 reset_maps();
                 reset_meta();
                 reset_sort();
+                
                 ItemsUpdated.trigger();
             }
         }
@@ -888,8 +890,7 @@ namespace neogfx
                 cellExtents.cy = std::max(cellExtents.cy, maybeCellImageSize->cy);
             }
             cellExtents.cy = std::max(cellExtents.cy, effectiveFont.height());
-            cellMeta.extents = cellExtents.ceil();
-            column(aIndex.column()).add_cell_width(cellMeta.extents->cx);
+            cache_cell_meta_extents(aIndex, cellExtents.ceil());
             if (iTotalHeight != std::nullopt)
                 *iTotalHeight += (item_height(aIndex, aUnitsContext) - oldItemHeight);
             return units_converter(aUnitsContext).from_device_units(*cell_meta(aIndex).extents);
@@ -1172,12 +1173,9 @@ namespace neogfx
                 reset_position_meta(aItemIndex.row());
                 execute_sort();
                 auto const index = from_item_model_index(aItemIndex);
-                auto& col = column(mapped_column(aItemIndex.column()));
                 auto& cellMeta = cell_meta(index);
-                if (cellMeta.extents != std::nullopt)
-                    col.remove_cell_width(cellMeta.extents->cx);
                 cellMeta.text = std::nullopt;
-                cellMeta.extents = std::nullopt;
+                cache_cell_meta_extents(index, std::nullopt);
                 if (attached())
                     cell_extents(index, attachment());
                 ItemChanged.trigger(from_item_model_index(aItemIndex));
@@ -1189,11 +1187,7 @@ namespace neogfx
                 return;
             auto const index = from_item_model_index(aItemIndex);
             for (item_presentation_model_index::column_type col = 0; col < columns(); ++col)
-            {
-                auto& cellMeta = cell_meta(index.with_column(col));
-                if (cellMeta.extents != std::nullopt)
-                    column(col).remove_cell_width(cellMeta.extents->cx);
-            }
+                cache_cell_meta_extents(index.with_column(col), std::nullopt);
             if (!updating())
                 ItemRemoving.trigger(index);
             iRows.erase(std::next(begin(), index.row()));
@@ -1215,6 +1209,19 @@ namespace neogfx
         {
         }
     private:
+        void cache_cell_meta_extents(item_presentation_model_index const& aIndex, const optional_size& aExtents = {}) const
+        {
+            auto& cellMeta = cell_meta(aIndex);
+            if (aExtents != cellMeta.extents)
+            {   
+                auto previousExtents = cellMeta.extents;
+                cellMeta.extents = aExtents;
+                if (previousExtents)
+                    column(aIndex.column()).remove_cell_width(previousExtents->cx);
+                if (cellMeta.extents)
+                    column(aIndex.column()).add_cell_width(cellMeta.extents->cx);
+            }
+        }
         void reset_maps(const item_model_index& aFrom = {}) const
         {
             reset_row_map(aFrom);
@@ -1311,6 +1318,11 @@ namespace neogfx
             reset_cell_meta();
             reset_column_meta();
             reset_position_meta(0);
+
+            if (attached())
+                for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
+                    for (item_presentation_model_index::column_type col = 0; col < iColumns.size(); ++col)
+                        cell_extents(item_presentation_model_index{row, col}, attachment());
         }
         void reset_cell_meta(const std::optional<item_presentation_model_index::column_type>& aColumn = {}) const
         {
@@ -1320,10 +1332,9 @@ namespace neogfx
                 {
                     if (aColumn != std::nullopt && col != *aColumn)
                         continue;
-                    cell_meta(item_presentation_model_index(row, col)).text = std::nullopt;
-                    if (cell_meta(item_presentation_model_index(row, col)).extents != std::nullopt)
-                        column(col).remove_cell_width(cell_meta(item_presentation_model_index(row, col)).extents->cx);
-                    cell_meta(item_presentation_model_index(row, col)).extents = std::nullopt;
+                    item_presentation_model_index const index{ row, col };
+                    cell_meta(index).text = std::nullopt;
+                    cache_cell_meta_extents(index, std::nullopt);
                 }
             }
         }
@@ -1333,7 +1344,6 @@ namespace neogfx
             {
                 if (aColumn != std::nullopt && col != *aColumn)
                     continue;
-                column(col).cellWidths.clear();
                 column(col).headingExtents = std::nullopt;
             }
         }

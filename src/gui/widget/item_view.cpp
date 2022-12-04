@@ -735,6 +735,8 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         rect const result{ point{}, total_item_area(*this) };
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_area: " << result << endl;
         return result;
     }
 
@@ -742,6 +744,8 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         size const result{ item_display_rect() };
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_page: " << result << endl;
         return result;
     }
 
