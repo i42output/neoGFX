@@ -399,6 +399,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size{};
+        scoped_units su{ subject(), units::Pixels };
         auto& cachedIdealSize = iIdealSize.second.second;
         if (iIdealSize.first != global_layout_id() || iIdealSize.second.first != aAvailableSpace || is_minimum_size_constrained())
         {
@@ -434,7 +435,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ") -> " << cachedIdealSize << " -> " << result << endl;
 #endif // NEOGFX_DEBUG
-        return result;
+        return to_units(subject(), su.saved_units(), result);
     }
 
     void layout_item_cache::set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout)
@@ -462,6 +463,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size{};
+        scoped_units su{ subject(), units::Pixels };
         auto& cachedMinSize = iMinimumSize.second.second;
         if (iMinimumSize.first != global_layout_id() || iMinimumSize.second.first != aAvailableSpace || is_minimum_size_constrained())
         {
@@ -497,7 +499,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << " -> " << result << endl;
 #endif // NEOGFX_DEBUG
-        return result;
+        return to_units(subject(), su.saved_units(), result);
     }
 
     void layout_item_cache::set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout)
@@ -525,6 +527,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size::max_size();
+        scoped_units su{ subject(), units::Pixels };
         auto& cachedMaxSize = iMaximumSize.second.second;
         if (iMaximumSize.first != global_layout_id() || iMaximumSize.second.first != aAvailableSpace || is_maximum_size_constrained())
         {
@@ -541,7 +544,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << " ->  " << result << endl;
 #endif // NEOGFX_DEBUG
-        return result;
+        return to_units(subject(), su.saved_units(), result);
     }
 
     void layout_item_cache::set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout)
@@ -562,6 +565,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ")" << endl;
 #endif // NEOGFX_DEBUG
+        scoped_units su{ subject(), units::Pixels };
         auto& cachedFixedSize = iFixedSize.second.second;
         if (iFixedSize.first != global_layout_id() || iFixedSize.second.first != aAvailableSpace)
         {
@@ -578,7 +582,7 @@ namespace neogfx
         if (&subject() == debug::layoutItem)
             service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ") -> " << cachedFixedSize << " -> " << result << endl;
 #endif // NEOGFX_DEBUG
-        return result;
+        return to_units(subject(), su.saved_units(), result);
     }
 
     void layout_item_cache::set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout)
