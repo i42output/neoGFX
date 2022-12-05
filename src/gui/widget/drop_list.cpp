@@ -1095,19 +1095,22 @@ namespace neogfx
 
         update_widgets();
 
-        iSink += service<i_app>().current_style_changed([this](style_aspect) 
+        iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
         { 
-            if (view_created())
+            if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
             {
-                if (view().capturing() && selection_model().has_current_index())
+                if (view_created())
                 {
-                    view().release_capture();
-                    accept_selection();
+                    if (view().capturing() && selection_model().has_current_index())
+                    {
+                        view().release_capture();
+                        accept_selection();
+                    }
+                    else
+                        hide_view();
                 }
-                else
-                    hide_view();
+                update_widgets(true);
             }
-            update_widgets(true);
         });
 
         presentation_model().set_cell_padding(neogfx::padding{ 3.0, 3.0 }, *this);

@@ -2195,7 +2195,7 @@ namespace neogfx
                 update_cursor();
         });
         iDefaultFont = service<i_app>().current_style().font_info();
-        iSink += service<i_app>().current_style_changed([this](style_aspect)
+        iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
             if (iDefaultFont != service<i_app>().current_style().font_info())
             {

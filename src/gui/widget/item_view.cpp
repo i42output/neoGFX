@@ -1399,10 +1399,11 @@ namespace neogfx
         set_focus_policy(focus_policy::ClickTabFocus | 
             focus_policy::ConsumeEscapeKey | focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
         set_padding(neogfx::padding{});
-        iSink += service<i_app>().current_style_changed([this](style_aspect)
+        iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
-            if (selection_model().has_current_index())
-                make_visible(selection_model().current_index());
+            if ((aAspect & (style_aspect::Geometry | style_aspect::Font)) != style_aspect::None)
+                if (selection_model().has_current_index())
+                    make_visible(selection_model().current_index());
         });
     }
 
