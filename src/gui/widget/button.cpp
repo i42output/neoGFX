@@ -25,5 +25,6 @@ namespace neogfx
 {
     template class button<>;
     template class button<i_push_button>;
+    template class button<i_radio_button>;
 }
 

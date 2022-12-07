@@ -45,7 +45,7 @@ namespace neogfx
     }
         
     radio_button::radio_button(std::string const& aText) :
-        button(aText), iDisc(*this)
+        base_type{ aText }, iDisc{ *this }
     {
         set_checkable(button_checkable::BiState);
         set_padding(neogfx::padding{ 0.0 });
@@ -57,7 +57,7 @@ namespace neogfx
     }
 
     radio_button::radio_button(i_widget& aParent, std::string const& aText) :
-        button(aParent, aText), iDisc(*this)
+        base_type{ aParent, aText }, iDisc{ *this }
     {
         set_checkable(button_checkable::BiState);
         set_padding(neogfx::padding{ 0.0 });
@@ -69,7 +69,7 @@ namespace neogfx
     }
 
     radio_button::radio_button(i_layout& aLayout, std::string const& aText) :
-        button(aLayout, aText), iDisc(*this)
+        base_type{ aLayout, aText }, iDisc{ *this }
     {
         set_checkable(button_checkable::BiState);
         set_padding(neogfx::padding{ 0.0 });
@@ -78,6 +78,11 @@ namespace neogfx
         if (!any_siblings_on())
             set_on();
         text_widget().set_alignment(alignment::Left | alignment::VCenter);
+    }
+
+    neogfx::object_type radio_button::object_type() const
+    {
+        return object_type::RadioButton;
     }
 
     bool radio_button::is_on() const
@@ -98,7 +103,7 @@ namespace neogfx
     size_policy radio_button::size_policy() const
     {
         if (has_size_policy())
-            return widget::size_policy();
+            return base_type::size_policy();
         else if (has_fixed_size())
             return size_constraint::Fixed;
         else
@@ -112,7 +117,7 @@ namespace neogfx
         case skin_element::RadioButton:
             return iDisc.client_rect() + iDisc.position();
         default:
-            return button::element_rect(aElement);
+            return base_type::element_rect(aElement);
         }
     }
 
@@ -128,42 +133,37 @@ namespace neogfx
 
     void radio_button::mouse_entered(const point& aPosition)
     {
-        button::mouse_entered(aPosition);
+        base_type::mouse_entered(aPosition);
         update();
     }
 
     void radio_button::mouse_left()
     {
-        button::mouse_left();
+        base_type::mouse_left();
         update();
     }
 
     void radio_button::handle_clicked()
     {
-        button::handle_clicked();
+        base_type::handle_clicked();
         set_on();
     }
 
-    const radio_button* radio_button::next_radio_button() const
+    const i_radio_button* radio_button::next_button() const
     {
         const i_widget* candidate = &after();
         while (candidate != this)
         {
-            if (is_sibling_of(*candidate))
-            {
-                // Teh ghastly dynamic_cast! A simpler CLEAN solution which doesn't leak details everywhere doesn't immediately spring to mind.
-                const radio_button* candidateRadioButton = dynamic_cast<const radio_button*>(candidate);
-                if (candidateRadioButton != nullptr)
-                    return candidateRadioButton;
-            }
+            if ((candidate->object_type() & neogfx::object_type::MASK_RESERVED_SPECIFIC) == neogfx::object_type::RadioButton && is_sibling_of(*candidate))
+                return static_cast<const i_radio_button*>(candidate);
             candidate = &candidate->after();
         }
         return this;
     }
 
-    radio_button* radio_button::next_radio_button()
+    i_radio_button* radio_button::next_button()
     {
-        return const_cast<radio_button*>(to_const(*this).next_radio_button());
+        return const_cast<i_radio_button*>(to_const(*this).next_button());
     }
 
     bool radio_button::can_toggle() const
@@ -176,7 +176,7 @@ namespace neogfx
         if (checked_state() == aCheckedState)
             return false;
         if (aCheckedState != std::nullopt && *aCheckedState)
-            for (radio_button* nextRadioButton = next_radio_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_radio_button())
+            for (i_radio_button* nextRadioButton = next_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_button())
                 nextRadioButton->uncheck();
         button::set_checked_state(aCheckedState);
         if (is_on())
@@ -188,7 +188,7 @@ namespace neogfx
 
     bool radio_button::any_siblings_on() const
     {
-        for (const radio_button* nextRadioButton = next_radio_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_radio_button())
+        for (const i_radio_button* nextRadioButton = next_button(); nextRadioButton != this; nextRadioButton = nextRadioButton->next_button())
             if (nextRadioButton->is_on())
                 return true;
         return false;

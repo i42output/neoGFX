@@ -231,7 +231,7 @@ namespace neogfx
         auto enabledAlphaCoefficient = widget.effectively_enabled() ? 1.0 : 0.25;
         color borderColor = default_border_color(widget);
         aGc.fill_circle(discRect.center(), discRect.width() / 2.0, borderColor.with_combined_alpha(enabledAlphaCoefficient));
-        discRect.deflate(1.0_dip, 1.0_dip);
+        discRect.deflate(1.0, 1.0);
         color hoverColor = service<i_app>().current_style().palette().color(color_role::Hover).same_lightness_as(widget.base_color().shaded(0x20));
         if (widget.capturing())
             widget.base_color().dark() ? hoverColor.lighten(0x20) : hoverColor.darken(0x20);

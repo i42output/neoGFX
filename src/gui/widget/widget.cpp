@@ -32,6 +32,7 @@ namespace neogfx
     template class widget<>;
     template class widget<i_button>;
     template class widget<i_push_button>;
+    template class widget<i_radio_button>;
     template class widget<i_text_widget>;
     template class widget<i_title_bar>;
     template class widget<i_status_bar>;

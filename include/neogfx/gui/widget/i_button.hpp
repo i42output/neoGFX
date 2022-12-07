@@ -71,4 +71,16 @@ namespace neogfx
         virtual void set_checked(bool aChecked) = 0;
         virtual void toggle() = 0;
     };
+
+    class i_radio_button : public i_button
+    {
+    public:
+        virtual bool is_on() const = 0;
+        virtual bool is_off() const = 0;
+        virtual void set_on() = 0;
+    public:
+        virtual const i_radio_button* next_button() const = 0;
+        virtual i_radio_button* next_button() = 0;
+        virtual bool any_siblings_on() const = 0;
+    };
 }

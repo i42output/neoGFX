@@ -24,8 +24,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    class radio_button : public button<>
+    extern template class widget<i_radio_button>;
+    extern template class button<i_radio_button>;
+
+    class radio_button : public button<i_radio_button>
     {
+    private:
+        typedef button<i_radio_button> base_type;
     public:
         define_event(On, on)
         define_event(Off, off)
@@ -42,10 +47,16 @@ namespace neogfx
         radio_button(std::string const& aText = std::string());
         radio_button(i_widget& aParent, std::string const& aText = std::string());
         radio_button(i_layout& aLayout, std::string const& aText = std::string());
+    protected:
+        neogfx::object_type object_type() const override;
     public:
-        bool is_on() const;
-        bool is_off() const;
-        void set_on();
+        bool is_on() const override;
+        bool is_off() const override;
+        void set_on() override;
+    public:
+        const i_radio_button* next_button() const override;
+        i_radio_button* next_button() override;
+        bool any_siblings_on() const override;
     public:
         neogfx::size_policy size_policy() const override;
     public:
@@ -60,10 +71,6 @@ namespace neogfx
     protected:
         bool can_toggle() const override;
         bool set_checked_state(const std::optional<bool>& aCheckedState) override;
-    protected:
-        virtual const radio_button* next_radio_button() const;
-        virtual radio_button* next_radio_button();
-        virtual bool any_siblings_on() const;
     private:
         disc iDisc;
     };
