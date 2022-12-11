@@ -116,7 +116,7 @@ namespace neogfx
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::lighter(view_component aDelta) const
     {
-        return_type ret(*this);
+        return_type ret{ *this };
         ret += aDelta;
         return ret;
     }
@@ -124,7 +124,7 @@ namespace neogfx
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::darker(view_component aDelta) const
     {
-        return_type ret(*this);
+        return_type ret{ *this };
         ret -= aDelta;
         return ret;
     }
