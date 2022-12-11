@@ -101,7 +101,8 @@ namespace neogfx
         bool in_exec() const override;
         void quit(int aResultCode = 0) override;
     public:
-        dimension default_dpi_scale_factor() const override;
+        dimension x2_dpi_scale_factor() const override;
+        dimension xn_dpi_scale_factor() const override;
     public:
         const i_texture& default_window_icon() const override;
         void set_default_window_icon(const i_texture& aIcon) override;

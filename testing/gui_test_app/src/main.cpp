@@ -278,13 +278,13 @@ int main(int argc, char* argv[])
         ds.paragraph().set_padding(ng::padding{ 0, 4.0_dip });
         window.textEdit.set_default_style(ds);
 
-        window.textEdit.ObjectAcceptable([&](ng::i_drag_drop_object const& aObject, ng::drop_operation& aAcceptableAs)
+        window.textEdit.ObjectAcceptable([&](ng::i_drag_drop_object const& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aAcceptableAs)
         {
             if (aObject.ddo_type() == ng::i_drag_drop_file_list::otid())
                 aAcceptableAs = ng::drop_operation::Copy;
         });
 
-        window.textEdit.ObjectDropped([&](ng::i_drag_drop_object const& aObject)
+        window.textEdit.ObjectDropped([&](ng::i_drag_drop_object const& aObject, ng::optional_point const& aDropPosition)
         {
             auto const& files = static_cast<ng::i_drag_drop_file_list const&>(aObject);
             std::ifstream file{ files.file_paths()[0].to_std_string() };

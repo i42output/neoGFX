@@ -369,9 +369,10 @@ namespace neogfx
             "011111111111111110"
             "111111111111111111"
         };
-        iUpArrow.emplace(ink, !high_dpi() ?
-            image{ "neogfx::basic_spin_box<T>::iUpArrow::" + ink.to_string(), sUpArrowImagePattern,{ { "paper", color{} },{ "ink", ink } } } :
-            image{ "neogfx::basic_spin_box<T>::iUpArrowHighDpi::" + ink.to_string(), sUpArrowHighDpiImagePattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
+        iUpArrow.emplace(ink,
+            image{
+                dpi_select("neogfx::basic_spin_box<T>::iUpArrow::"s, "neogfx::basic_spin_box<T>::iUpArrowHighDpi::"s) + ink.to_string(),
+                dpi_select(sUpArrowImagePattern, sUpArrowHighDpiImagePattern), { { "paper", color{} },{ "ink", ink } }, dpi_select(1.0, 2.0) });
         const char* sDownArrowImagePattern
         {
             "[9,5]"
@@ -400,9 +401,10 @@ namespace neogfx
             "000000011110000000"
             "000000001100000000"
         };
-        iDownArrow.emplace(ink, !high_dpi() ?
-            image{ "neogfx::basic_spin_box<T>::iDownArrow::" + ink.to_string(), sDownArrowImagePattern,{ { "paper", color{} },{ "ink", ink } } } :
-            image{ "neogfx::basic_spin_box<T>::iDownArrowHighDpi::" + ink.to_string(), sDownArrowHighDpiImagePattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
+        iDownArrow.emplace(ink,
+            image{
+                dpi_select("neogfx::basic_spin_box<T>::iDownArrow::"s, "neogfx::basic_spin_box<T>::iDownArrowHighDpi::"s) + ink.to_string(), 
+                dpi_select(sDownArrowImagePattern, sDownArrowHighDpiImagePattern), { { "paper", color{} },{ "ink", ink } }, dpi_select(1.0, 2.0) });
         iStepUpButton.label().set_placement(label_placement::ImageVertical);
         iStepDownButton.label().set_placement(label_placement::ImageVertical);
         iStepUpButton.set_image(iUpArrow->second);

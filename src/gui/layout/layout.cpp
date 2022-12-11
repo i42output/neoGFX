@@ -370,21 +370,6 @@ namespace neogfx
         return const_cast<i_layout&>(to_const(*this).get_layout_at(aIndex));
     }
 
-    bool layout::high_dpi() const
-    {
-        return has_parent_widget() && parent_widget().has_surface() ?
-            parent_widget().surface().ppi() >= HIGH_DPI_PPI :
-            service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
-    }
-
-    dimension layout::dpi_scale_factor() const
-    {
-        return default_dpi_scale_factor(
-            has_parent_widget() && parent_widget().has_surface() ?
-                parent_widget().surface().ppi() :
-                service<i_surface_manager>().display().metrics().ppi());
-    }
-
     margin layout::margin() const
     {
         auto const& adjustedMargin = (has_margin() ? *Margin : service<i_app>().current_style().margin(margin_role::Layout) * dpi_scale_factor());

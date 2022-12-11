@@ -750,7 +750,8 @@ namespace neogfx
                 {"ink2", frameColor.mid(backgroundColor)},
                 {"ink3", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection)},
                 {"ink4", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40)},
-                {"ink9", aColorStop.second()}} };
+                {"ink9", aColorStop.second()}},
+                dpi_select(1.0, 2.0) };
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
             stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
@@ -846,7 +847,8 @@ namespace neogfx
                 { "ink2", frameColor.mid(backgroundColor) },
                 { "ink3", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection) },
                 { "ink4", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40) },
-                { "ink9", color::White.with_alpha(aAlphaStop.second()) } } };
+                { "ink9", color::White.with_alpha(aAlphaStop.second()) } },
+            dpi_select(1.0, 2.0) };
         auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
         if (stopGlyphTexture == iStopTextures.end())
             stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;

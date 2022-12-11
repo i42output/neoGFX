@@ -33,23 +33,13 @@ namespace neogfx
         iIndex{ aIndex },
         iRect{ aRect },
         iDesktopRect{ aDesktopRect },
-        iPixelDensityDpi{ 96.0, 96.0 },
+        iPixelDensityDpi{ STANDARD_DPI_PPI, STANDARD_DPI_PPI },
         iSubpixelFormat{ subpixel_format::None }
     {
     }
 
     display::~display()
     {
-    }
-
-    bool display::high_dpi() const
-    {
-        return device_metrics().ppi() >= HIGH_DPI_PPI;
-    }
-
-    dimension display::dpi_scale_factor() const
-    {
-        return default_dpi_scale_factor(device_metrics().ppi());
     }
 
     bool display::device_metrics_available() const

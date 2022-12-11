@@ -815,22 +815,6 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::high_dpi() const
-    {
-        return device_metrics_available() ?
-            self_type::root().surface().ppi() >= HIGH_DPI_PPI :
-            service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
-    }
-
-    template <typename Interface>
-    dimension widget<Interface>::dpi_scale_factor() const
-    {
-        return device_metrics_available() ?
-            default_dpi_scale_factor(self_type::root().surface().ppi()) :
-            service<i_app>().default_dpi_scale_factor();
-    }
-
-    template <typename Interface>
     bool widget<Interface>::has_logical_coordinate_system() const
     {
         return LogicalCoordinateSystem != std::nullopt;
@@ -950,7 +934,6 @@ namespace neogfx
     rect widget<Interface>::non_client_rect() const
     {
         auto& self = base_type::as_widget();
-
         return rect{self.origin(), self.extents()};
     }
 

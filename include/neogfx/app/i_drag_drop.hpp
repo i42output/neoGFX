@@ -142,14 +142,14 @@ namespace neogfx
     class i_drag_drop_target
     {
     public:
-        declare_event(object_acceptable, i_drag_drop_object const&, drop_operation&)
-        declare_event(object_dropped, i_drag_drop_object const&)
+        declare_event(object_acceptable, i_drag_drop_object const&, optional_point const&, drop_operation&)
+        declare_event(object_dropped, i_drag_drop_object const&, optional_point const&)
     public:
         virtual ~i_drag_drop_target() = default;
     public:
-        virtual bool can_accept(i_drag_drop_object const& aObject) const = 0;
-        virtual drop_operation accepted_as(i_drag_drop_object const& aObject) const = 0;
-        virtual bool accept(i_drag_drop_object const& aObject) = 0;
+        virtual bool can_accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const = 0;
+        virtual drop_operation accepted_as(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const = 0;
+        virtual bool accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) = 0;
     public:
         virtual bool is_widget() const = 0;
         virtual i_widget const& as_widget() const = 0;

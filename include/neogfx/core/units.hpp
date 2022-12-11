@@ -45,13 +45,27 @@ namespace neogfx
     class i_units_context
     {
     public:
-        virtual bool high_dpi() const = 0;
-        virtual dimension dpi_scale_factor() const = 0;
-    public:
         virtual bool device_metrics_available() const = 0;
         virtual const i_device_metrics& device_metrics() const = 0;
         // helpers
     public:
+        dimension x2_dpi_scale_factor() const
+        {
+            using neogfx::x2_dpi_scale_factor;
+            return x2_dpi_scale_factor(device_metrics().ppi());
+        }
+        dimension xn_dpi_scale_factor() const
+        {
+            using neogfx::xn_dpi_scale_factor;
+            return xn_dpi_scale_factor(device_metrics().ppi());
+        }
+        dimension dpi_scale_factor() const
+        {
+            if (dpi_scale_type_for_thread() == dpi_scale_type::X2)
+                return x2_dpi_scale_factor();
+            else
+                return xn_dpi_scale_factor();
+        }
         template <typename T>
         std::enable_if_t<std::is_scalar_v<T>, T> dpi_scale(T aValue) const
         {
@@ -94,7 +108,7 @@ namespace neogfx
         template <typename T>
         T&& dpi_select(T&& aLowDpiValue, T&& aHighDpiValue) const
         {
-            return std::forward<T>(high_dpi() ? aHighDpiValue : aLowDpiValue);
+            return std::forward<T>(dpi_scale_factor() >= 1.5 ? aHighDpiValue : aLowDpiValue);
         }
     };
 

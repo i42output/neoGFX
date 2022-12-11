@@ -416,9 +416,14 @@ namespace neogfx
         iQuitResultCode = aResultCode;
     }
 
-    dimension app::default_dpi_scale_factor() const
+    dimension app::x2_dpi_scale_factor() const
     {
-        return neogfx::default_dpi_scale_factor(service<i_surface_manager>().display().metrics().ppi());
+        return neogfx::x2_dpi_scale_factor(service<i_surface_manager>().display().metrics().ppi());
+    }
+
+    dimension app::xn_dpi_scale_factor() const
+    {
+        return neogfx::xn_dpi_scale_factor(service<i_surface_manager>().display().metrics().ppi());
     }
 
     const i_texture& app::default_window_icon() const

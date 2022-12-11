@@ -53,9 +53,6 @@ namespace neogfx
         neogfx::expansion_policy expansion_policy() const override;
         void set_expansion_policy(neogfx::expansion_policy aExpansionPolicy) override;
     public:
-        bool high_dpi() const override;
-        dimension dpi_scale_factor() const override;
-    public:
         neogfx::size_policy size_policy() const override;
     public:
         bool has_margin() const noexcept override;

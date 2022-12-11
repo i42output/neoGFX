@@ -115,9 +115,10 @@ namespace neogfx
             service<i_window_manager>().window_from_position(aPosition);
         if (window)
         {
-            auto const& hitWidget = window->as_widget().get_widget_at(window->as_widget().to_client_coordinates(aPosition - window->window_position()));
+            auto const nonClientPos = window->as_widget().to_client_coordinates(aPosition - window->window_position());
+            auto const& hitWidget = window->as_widget().get_widget_at(nonClientPos);
             for (auto const& target : iTargets)
-                if (target->can_accept(aObject) &&
+                if (target->can_accept(aObject, hitWidget.to_client_coordinates(nonClientPos)) &&
                     target->is_widget() &&
                     target->as_widget().same_physical_surface(hitWidget) &&
                     (&target->as_widget() == &hitWidget || target->as_widget().is_ancestor_of(hitWidget)))

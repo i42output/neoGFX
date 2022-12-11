@@ -91,16 +91,6 @@ namespace neogfx
         return has_native_window() ? native_window().em_size() : 0; /* todo */
     }
 
-    bool surface_window::high_dpi() const
-    {
-        return device_metrics().ppi() >= HIGH_DPI_PPI;
-    }
-
-    dimension surface_window::dpi_scale_factor() const
-    {
-        return default_dpi_scale_factor(device_metrics().ppi());
-    }
-
     bool surface_window::device_metrics_available() const
     {
         return has_native_window();

@@ -195,7 +195,7 @@ namespace neogfx::DesignStudio
         workspaceGridSubdivisions.changing(workspaceGridChanged);
         workspaceGridSubdivisions.changed(workspaceGridChanged);
 
-        iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::drop_operation& aOperation)
+        iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
         {
             aOperation = ng::drop_operation::Move;
         });
@@ -282,8 +282,8 @@ namespace neogfx::DesignStudio
             }
         });
 
-        thread_local std::optional<point> tMouseSelectorAnchor;
-        thread_local std::optional<point> tMouseSelectorMousePos;
+        thread_local optional_point tMouseSelectorAnchor;
+        thread_local optional_point tMouseSelectorMousePos;
 
         iWorkspace.view_stack().Painting([&](ng::i_graphics_context& aGc) 
         { 

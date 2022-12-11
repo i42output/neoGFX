@@ -1230,10 +1230,10 @@ namespace neogfx
                 "00000000111100000000"
                 "00000000011000000000"
             };
-            iDownArrowTexture.emplace(
-                ink, !high_dpi() ?
-                    neogfx::image{ "neogfx::drop_list::iDownArrowTexture::" + ink.to_string(), sDownArrowImagePattern, { { "paper", color{} }, { "ink", ink } } } :
-                    neogfx::image{ "neogfx::drop_list::iDownArrowHighDpiTexture::" + ink.to_string(), sDownArrowHighDpiImagePattern, { { "paper", color{} }, { "ink", ink } }, 2.0 });
+            iDownArrowTexture.emplace(ink,
+                image{
+                    dpi_select("neogfx::drop_list::iDownArrowTexture::"s, "neogfx::drop_list::iDownArrowHighDpiTexture::"s) + ink.to_string(),
+                    dpi_select(sDownArrowImagePattern, sDownArrowHighDpiImagePattern), { { "paper", color{} },{ "ink", ink } }, dpi_select(1.0, 2.0) });
         }
         iDownArrow.set_image(iDownArrowTexture->second);
     }

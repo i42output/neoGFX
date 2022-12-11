@@ -734,16 +734,6 @@ namespace neogfx
         return static_cast<dimension>(iDefaultFont.size() / 72.0 * horizontal_dpi());
     }
 
-    bool graphics_context::high_dpi() const
-    {
-        return device_metrics().ppi() >= HIGH_DPI_PPI;
-    }
-
-    dimension graphics_context::dpi_scale_factor() const
-    {
-        return default_dpi_scale_factor(device_metrics().ppi());
-    }
-
     bool graphics_context::device_metrics_available() const
     {
         return device_metrics().metrics_available();

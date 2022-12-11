@@ -158,9 +158,10 @@ namespace neogfx
                         "001000000000000000"
                         "000000000000000000"
                     };
-                    iSubMenuArrow.emplace(ink, !high_dpi() ? 
-                        image{ "neogfx::menu_item_widget::sArrowImagePattern::" + ink.to_string(), sArrowImagePattern, { { "paper", color{} },{ "ink", ink } } } : 
-                        image{ "neogfx::menu_item_widget::sArrowHighDpiImagePattern::" + ink.to_string(), sArrowHighDpiImagePattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
+                    iSubMenuArrow.emplace(ink,
+                        image{
+                            dpi_select("neogfx::menu_item_widget::sArrowImagePattern::"s, "neogfx::menu_item_widget::sArrowHighDpiImagePattern::"s) + ink.to_string(),
+                            dpi_select(sArrowImagePattern, sArrowHighDpiImagePattern), { { "paper", color{} },{ "ink", ink } }, dpi_select(1.0, 2.0) });
                 }
                 rect rect = client_rect(false);
                 aGc.draw_texture(
@@ -351,9 +352,10 @@ namespace neogfx
                         "00000000000001100000000000000000"
                     };
                     color ink = service<i_app>().current_style().palette().color(color_role::Text);
-                    iIcon.set_image(!high_dpi() ?
-                        image{ "neogfx::menu_item_widget::sTickPattern::" + ink.to_string(), sTickPattern,{ { "paper", color{} },{ "ink", ink } } } :
-                        image{ "neogfx::menu_item_widget::sTickHighDpiPattern::" + ink.to_string(), sTickHighDpiPattern,{ { "paper", color{} },{ "ink", ink } }, 2.0 });
+                    iIcon.set_image(
+                        image{
+                            dpi_select("neogfx::menu_item_widget::sTickPattern::"s, "neogfx::menu_item_widget::sTickHighDpiPattern::"s) + ink.to_string(),
+                            dpi_select(sTickPattern, sTickHighDpiPattern), { { "paper", color{} },{ "ink", ink } }, dpi_select(1.0, 2.0) });
                 }
                 if (!iIcon.image().is_empty())
                     iIcon.set_fixed_size(dpi_scale(iIconSize));

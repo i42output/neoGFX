@@ -48,9 +48,6 @@ namespace neogfx
         size extents() const final;
         dimension em_size() const final;
     public:
-        bool high_dpi() const final;
-        dimension dpi_scale_factor() const final;
-    public:
         bool device_metrics_available() const final;
         const i_device_metrics& device_metrics() const final;
     public:

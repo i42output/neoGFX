@@ -136,9 +136,6 @@ namespace neogfx
         void layout_items_completed() override;
         // i_units_context
     public:
-        bool high_dpi() const override;
-        dimension dpi_scale_factor() const override;
-    public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
         // i_geometry

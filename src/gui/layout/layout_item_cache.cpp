@@ -273,16 +273,6 @@ namespace neogfx
         subject().fix_weightings(aRecalculate);
     }
 
-    bool layout_item_cache::high_dpi() const
-    {
-        return subject().high_dpi();
-    }
-
-    dimension layout_item_cache::dpi_scale_factor() const
-    {
-        return subject().dpi_scale_factor();
-    }
-
     bool layout_item_cache::device_metrics_available() const
     {
         return parent_layout().device_metrics_available();

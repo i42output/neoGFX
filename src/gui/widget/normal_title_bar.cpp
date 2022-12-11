@@ -402,51 +402,31 @@ namespace neogfx
         };
         if (iTextures[TextureMinimize] == std::nullopt || iTextures[TextureMinimize]->first != ink)
         {
-            iTextures[TextureMinimize].emplace(
-                ink,
-                !high_dpi() ? 
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[TextureMinimize]::" + ink.to_string(),
-                        sMinimizeTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } } } :
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[HighDpiTextureMinimize]::" + ink.to_string(),
-                        sMinimizeHighDpiTexturePattern, { { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+            iTextures[TextureMinimize].emplace(ink,
+                image{
+                    dpi_select("neogfx::normal_title_bar::iTextures[TextureMinimize]::"s, "neogfx::normal_title_bar::iTextures[HighDpiTextureMinimize]::"s) + ink.to_string(),
+                    dpi_select(sMinimizeTexturePattern, sMinimizeHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         if (iTextures[TextureMaximize] == std::nullopt || iTextures[TextureMaximize]->first != ink)
         {
-            iTextures[TextureMaximize].emplace(
-                ink,
-                !high_dpi() ?
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[TextureMaximize]::" + ink.to_string(),
-                        sMaximizeTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } } } :
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[HighDpiTextureMaximize]::" + ink.to_string(),
-                        sMaximizeHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+            iTextures[TextureMaximize].emplace(ink,
+                image{
+                    dpi_select("neogfx::normal_title_bar::iTextures[TextureMaximize]::"s, "neogfx::normal_title_bar::iTextures[HighDpiTextureMaximize]::"s) + ink.to_string(),
+                    dpi_select(sMaximizeTexturePattern, sMaximizeHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         if (iTextures[TextureRestore] == std::nullopt || iTextures[TextureRestore]->first != ink)
         {
-            iTextures[TextureRestore].emplace(
-                ink,
-                !high_dpi() ?
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[TextureRestore]::" + ink.to_string(),
-                        sRestoreTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } } } :
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[HighDpiTextureRestore]::" + ink.to_string(),
-                        sRestoreHighDpiTexturePattern,{ { "paper", color{} },{ "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+            iTextures[TextureRestore].emplace(ink,
+                image{
+                    dpi_select("neogfx::normal_title_bar::iTextures[TextureRestore]::"s, "neogfx::normal_title_bar::iTextures[HighDpiTextureRestore]::"s) + ink.to_string(),
+                    dpi_select(sRestoreTexturePattern, sRestoreHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         if (iTextures[TextureClose] == std::nullopt || iTextures[TextureClose]->first != ink)
         {
-            iTextures[TextureClose].emplace(
-                ink,
-                !high_dpi() ?
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[TextureClose]::" + ink.to_string(),
-                        sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0.5) } } } :
-                    neogfx::image{
-                        "neogfx::normal_title_bar::iTextures[HighDpiTextureClose]::" + ink.to_string(),
-                        sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+            iTextures[TextureClose].emplace(ink,
+                image{
+                    dpi_select("neogfx::normal_title_bar::iTextures[TextureClose]::"s, "neogfx::normal_title_bar::iTextures[HighDpiTextureClose]::"s) + ink.to_string(),
+                    dpi_select(sCloseTexturePattern, sCloseHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         iMinimizeButton.set_image(iTextures[TextureMinimize]->second);
         iMaximizeButton.set_image(iTextures[TextureMaximize]->second);

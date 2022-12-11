@@ -352,7 +352,7 @@ namespace neogfx
                                 if (iWidget)
                                     iWidget->set_opacity(1.0);
                                 auto& target = service<i_drag_drop>().target_at(object_being_dragged(), windowPosition);
-                                target.accept(object_being_dragged());
+                                target.accept(object_being_dragged(), target.as_widget().to_client_coordinates(windowPosition - aWidget.root().window_position()));
                                 end_drag_drop(target);
                             }
                             else
@@ -368,11 +368,11 @@ namespace neogfx
         i_drag_drop_object const* iObject;
         i_widget* iMonitor;
         sink iSink;
-        std::optional<point> iTrackStart;
-        std::optional<point> iTrackCurrent;
+        optional_point iTrackStart;
+        optional_point iTrackCurrent;
         scalar iTriggerDistance = 8.0;
         ref_ptr<i_widget> iWidget;
-        std::optional<point> iWidgetOffset;
+        optional_point iWidgetOffset;
     };
 
     template <typename Base>
@@ -380,8 +380,8 @@ namespace neogfx
     {
         typedef Base base_type;
     public:
-        define_declared_event(ObjectAcceptable, object_acceptable, i_drag_drop_object const&, drop_operation&)
-        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&)
+        define_declared_event(ObjectAcceptable, object_acceptable, i_drag_drop_object const&, optional_point const&, drop_operation&)
+        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&, optional_point const&)
     public:
         template <typename... Args>
         drag_drop_target(Args&&... aArgs) : 
@@ -394,21 +394,21 @@ namespace neogfx
             service<i_drag_drop>().unregister_target(*this);
         }
     public:
-        bool can_accept(i_drag_drop_object const& aObject) const override
+        bool can_accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const override
         {
-            return accepted_as(aObject) != drop_operation::None;
+            return accepted_as(aObject, aDropPosition) != drop_operation::None;
         }
-        drop_operation accepted_as(i_drag_drop_object const& aObject) const override
+        drop_operation accepted_as(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const override
         {
             drop_operation acceptableAs = drop_operation::None;
-            ObjectAcceptable.trigger(aObject, acceptableAs);
+            ObjectAcceptable.trigger(aObject, aDropPosition, acceptableAs);
             return acceptableAs;
         }
-        bool accept(i_drag_drop_object const& aObject) override
+        bool accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) override
         {
-            if (can_accept(aObject))
+            if (can_accept(aObject, aDropPosition))
             {
-                ObjectDropped.trigger(aObject);
+                ObjectDropped.trigger(aObject, aDropPosition);
                 return true;
             }
             return false;

@@ -90,7 +90,7 @@ namespace neogfx
     private:
         bool iInGradientDialog;
         unique_gradient iSelection;
-        std::optional<point> iClicked;
+        optional_point iClicked;
         std::optional<gradient::color_stop_list::iterator> iCurrentColorStop;
         std::optional<gradient::alpha_stop_list::iterator> iCurrentAlphaStop;
         bool iTracking;

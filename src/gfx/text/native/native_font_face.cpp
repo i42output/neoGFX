@@ -360,7 +360,7 @@ namespace neogfx
         FT_Bitmap& bitmap = iHandle.freetypeFace->glyph->bitmap;
 
         if ((style() & (font_style::EmulatedBold)) == font_style::EmulatedBold)
-            FT_Bitmap_Embolden(iFontLib, &bitmap, static_cast<FT_F26Dot6>(default_dpi_scale_factor(iPixelDensityDpi.cx) * 64), 0);
+            FT_Bitmap_Embolden(iFontLib, &bitmap, static_cast<FT_F26Dot6>(xn_dpi_scale_factor(iPixelDensityDpi.cx) * 64), 0);
 
         auto pixelMode = to_glyph_pixel_mode(bitmap.pixel_mode);
 

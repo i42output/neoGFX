@@ -488,13 +488,13 @@ namespace neogfx
     template <typename T>
     dimension opengl_texture<T>::horizontal_dpi() const
     {
-        return dpi_scale_factor() * 96.0;
+        return dpi_scale_factor() * STANDARD_DPI_PPI;
     }
 
     template <typename T>
     dimension opengl_texture<T>::vertical_dpi() const
     {
-        return dpi_scale_factor() * 96.0;
+        return dpi_scale_factor() * STANDARD_DPI_PPI;
     }
 
     template <typename T>

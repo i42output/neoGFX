@@ -245,26 +245,18 @@ namespace neogfx
         {
             iCloseTexture.emplace(
                 ink,
-                !high_dpi() ?
-                    neogfx::image{
-                        "neogfx::tool_title_bar::iCloseTexture::" + ink.to_string(),
-                        sCloseTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0.5) } } } :
-                    neogfx::image{
-                        "neogfx::tool_title_bar::iCloseHighDpiTexture::" + ink.to_string(),
-                        sCloseHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+                neogfx::image{
+                    dpi_select("neogfx:tool_title_bar::iCloseTexture::"s, "neogfx::tool_title_bar::iCloseHighDpiTexture::"s) + ink.to_string(),
+                    dpi_select(sCloseTexturePattern, sCloseHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         iCloseButton.set_image(iCloseTexture->second);
         if (iUnpinTexture == std::nullopt || iUnpinTexture->first != ink)
         {
             iUnpinTexture.emplace(
                 ink,
-                !high_dpi() ?
                 neogfx::image{
-                        "neogfx::tool_title_bar::iUnpinTexture::" + ink.to_string(),
-                        sUnpinTexturePattern, { { "paper", color{} },{ "ink", ink },{ "ink_with_alpha", ink.with_alpha(0.5) } } } :
-                    neogfx::image{
-                        "neogfx::tool_title_bar::iUnpinHighDpiTexture::" + ink.to_string(),
-                        sUnpinHighDpiTexturePattern, { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, 2.0 });
+                    dpi_select("neogfx:tool_title_bar::iUnpinTexture::"s, "neogfx::tool_title_bar::iUnpinHighDpiTexture::"s) + ink.to_string(),
+                    dpi_select(sUnpinTexturePattern, sUnpinHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         iUnpinButton.set_image(iUnpinTexture->second);
         update();

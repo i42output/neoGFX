@@ -156,7 +156,7 @@ namespace neogfx
             image_widget iCanvas;
             mutable texture iTexture;
             bool iTracking;
-            std::optional<point> iCursorPosition;
+            optional_point iCursorPosition;
             widget_timer iAnimationTimer;
         };
         class color_selection : public framed_widget<>

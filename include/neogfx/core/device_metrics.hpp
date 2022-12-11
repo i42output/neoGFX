@@ -25,12 +25,47 @@
 
 namespace neogfx
 { 
+    constexpr dimension STANDARD_DPI_PPI = 96.0;
     constexpr dimension HIGH_DPI_PPI = 144.0;
+    constexpr dimension DPI_DIVISOR = 48.0;
 
-    inline dimension default_dpi_scale_factor(dimension aPpi)
+    inline dimension x2_dpi_scale_factor(dimension aPpi)
     {
-        return static_cast<dimension>(static_cast<int32_t>(aPpi / HIGH_DPI_PPI) + 1);
+        return static_cast<dimension>(static_cast<int32_t>(aPpi / HIGH_DPI_PPI) + 1.0);
     }
+
+    inline dimension xn_dpi_scale_factor(dimension aPpi)
+    {
+        return static_cast<dimension>(static_cast<int32_t>(aPpi / (DPI_DIVISOR + 1.0)) + 1) * (DPI_DIVISOR / STANDARD_DPI_PPI);
+    }
+
+    enum class dpi_scale_type
+    {
+        X2,
+        XN
+    };
+
+    inline dpi_scale_type& dpi_scale_type_for_thread()
+    {
+        thread_local dpi_scale_type tDs = dpi_scale_type::X2;
+        return tDs;
+    }
+
+    class scoped_dpi_scale_type
+    {
+    public:
+        scoped_dpi_scale_type(dpi_scale_type aDpiScale = dpi_scale_type::X2) :
+            iPrevious{ dpi_scale_type_for_thread() }
+        {
+            dpi_scale_type_for_thread() = aDpiScale;
+        }
+        ~scoped_dpi_scale_type()
+        {
+            dpi_scale_type_for_thread() = iPrevious;
+        }
+    private:
+        dpi_scale_type iPrevious;
+    };
 
     class i_device_resolution
     {

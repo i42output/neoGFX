@@ -100,9 +100,6 @@ namespace neogfx
         const i_layout& get_layout_at(layout_item_index aIndex) const override;
         i_layout& get_layout_at(layout_item_index aIndex) override;
     public:
-        bool high_dpi() const override;
-        dimension dpi_scale_factor() const override;
-    public:
         neogfx::margin margin() const override;
         neogfx::padding padding() const override;
     public:

@@ -33,9 +33,6 @@ namespace neogfx
         display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect);
         ~display();
     public:
-        bool high_dpi() const override;
-        dimension dpi_scale_factor() const override;
-    public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:

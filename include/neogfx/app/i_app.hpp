@@ -82,7 +82,8 @@ namespace neogfx
         virtual bool in_exec() const = 0;
         virtual void quit(int aResultCode) = 0;
     public:
-        virtual dimension default_dpi_scale_factor() const = 0;
+        virtual dimension x2_dpi_scale_factor() const = 0;
+        virtual dimension xn_dpi_scale_factor() const = 0;
     public:
         virtual const i_texture& default_window_icon() const = 0;
         virtual void set_default_window_icon(const i_texture& aIcon) = 0;

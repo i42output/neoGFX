@@ -71,9 +71,6 @@ namespace neogfx
         const i_widget& layout_manager() const final;
         i_widget& layout_manager() final;
     public:
-        bool high_dpi() const final;
-        dimension dpi_scale_factor() const final;
-    public:
         bool device_metrics_available() const final;
         const i_device_metrics& device_metrics() const final;
     public:

@@ -107,21 +107,6 @@ namespace neogfx
         }
     }
 
-    bool spacer::high_dpi() const
-    {
-        return has_parent_widget() && parent_widget().has_surface() ? 
-            parent_widget().surface().ppi() >= HIGH_DPI_PPI :
-            service<i_surface_manager>().display().metrics().ppi() >= HIGH_DPI_PPI;
-    }
-
-    dimension spacer::dpi_scale_factor() const
-    {
-        return default_dpi_scale_factor(
-            has_parent_widget() && parent_widget().has_surface() ?
-                parent_widget().surface().ppi() : 
-                service<i_surface_manager>().display().metrics().ppi());
-    }
-
     size_policy spacer::size_policy() const
     {
         if (has_size_policy())
