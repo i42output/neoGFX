@@ -117,7 +117,7 @@ namespace neogfx
             push_button::paint(aGc);
         else
         {
-            scoped_units su(*this, units::Pixels);
+            scoped_units su{ *this, units::Pixels };
             rect line = client_rect();
             // todo: vertical toolbars
             line.x = std::floor(line.center().x);

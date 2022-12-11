@@ -302,7 +302,7 @@ namespace neogfx
     {
         if (type() == scrollbar_style::None)
             return rect{};
-        scoped_units su(units::Pixels);
+        scoped_units su{ as_widget(), units::Pixels };
         rect g = iContainer.scrollbar_geometry(*this);
         const dimension padding = 3.0_dip;
         switch (aElement)
@@ -441,6 +441,7 @@ namespace neogfx
 
     scrollbar_element scrollbar::element_at(const point& aPosition) const
     {
+        scoped_units su{ as_widget(), units::Pixels };
         if (type() == scrollbar_style::None)
             return scrollbar_element::None;
         else if (element_geometry(scrollbar_element::UpButton).contains(aPosition))
@@ -615,7 +616,7 @@ namespace neogfx
             {
                 aTimer.again();
                 point delta = as_widget().mouse_position() - *iScrollTrackPosition;
-                scoped_units su(as_widget(), units::Pixels);
+                scoped_units su{ as_widget(), units::Pixels };
                 rect g = iContainer.scrollbar_geometry(*this);
                 if (orientation() == scrollbar_orientation::Vertical)
                 {

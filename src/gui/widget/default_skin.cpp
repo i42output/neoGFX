@@ -78,7 +78,7 @@ namespace neogfx
     {
         if (aScrollbar.auto_hidden())
             return;
-        scoped_units su(aGc, units::Pixels);
+        scoped_units su{ aItem.as_widget(), units::Pixels };
         rect const g = aItem.element_rect(skin_element::Scrollbar);
         auto const width = aScrollbar.width();
         color scrollbarColor = aScrollbar.container().scrollbar_color(aScrollbar).shaded(0x30);
