@@ -102,12 +102,12 @@ namespace neogfx
     public:
         declare_event(dragging_object, i_drag_drop_object const&)
         declare_event(dragging_cancelled, i_drag_drop_object const&)
-        declare_event(object_dropped, i_drag_drop_object const&, i_drag_drop_target&)
+        declare_event(object_dropped_on_target, i_drag_drop_object const&, i_drag_drop_target&)
     public:
         virtual ~i_drag_drop_source() = default;
     public:
-        virtual bool drag_drop_enabled() const = 0;
-        virtual void enable_drag_drop(bool aEnable = true) = 0;
+        virtual bool drag_drop_source_enabled() const = 0;
+        virtual void enable_drag_drop_source(bool aEnable = true) = 0;
         virtual bool drag_drop_active() const = 0;
         virtual i_drag_drop_object const& object_being_dragged() const = 0;
         virtual void start_drag_drop(i_drag_drop_object const& aObject) = 0;
@@ -122,9 +122,9 @@ namespace neogfx
         virtual void monitor_drag_drop_events(i_widget& aWidget) = 0;
         virtual void stop_monitoring_drag_drop_events() = 0;
     public:
-        void enable_drag_drop(i_widget& aWidget)
+        void enable_drag_drop_source(i_widget& aWidget)
         {
-            enable_drag_drop(true);
+            enable_drag_drop_source(true);
             monitor_drag_drop_events(aWidget);
         }
     };
@@ -146,6 +146,9 @@ namespace neogfx
         declare_event(object_dropped, i_drag_drop_object const&, optional_point const&)
     public:
         virtual ~i_drag_drop_target() = default;
+    public:
+        virtual bool drag_drop_target_enabled() const = 0;
+        virtual void enable_drag_drop_target(bool aEnable = true) = 0;
     public:
         virtual bool can_accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const = 0;
         virtual drop_operation accepted_as(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const = 0;

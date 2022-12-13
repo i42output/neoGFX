@@ -68,7 +68,21 @@ namespace neogfx
             base_type::unregister_target(aTarget);
         }
 
-        struct internal_drag_drop_source {};
+        namespace detail
+        {
+            class internal_drag_drop_source : public drag_drop_source<>
+            {
+            protected:
+                bool is_drag_drop_object(point const& aPosition) const override
+                {
+                    return false;
+                }
+                i_drag_drop_object const* drag_drop_object(point const& aPosition) override
+                {
+                    return nullptr;
+                }
+            };
+        }
 
         HRESULT drag_drop::DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect)
         {
@@ -94,7 +108,7 @@ namespace neogfx
                     }
                     if (!files.empty())
                     {
-                        iActiveInternalDragDropSource = std::make_unique<drag_drop_source<internal_drag_drop_source>>();
+                        iActiveInternalDragDropSource = std::make_unique<detail::internal_drag_drop_source>();
                         iActiveInternalDragDropObject = std::make_unique<drag_drop_file_list>(*iActiveInternalDragDropSource, files);
                         iActiveInternalDragDropSource->start_drag_drop(*iActiveInternalDragDropObject);
                         auto target = find_target(*iActiveInternalDragDropObject, basic_point<LONG>{pt.x, pt.y});

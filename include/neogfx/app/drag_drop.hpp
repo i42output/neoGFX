@@ -39,11 +39,11 @@ namespace neogfx
         {
         }
     public:
-        i_drag_drop_source& source() const override
+        i_drag_drop_source& source() const final
         {
             return iSource;
         }
-        drag_drop_object_type_id ddo_type() const override
+        drag_drop_object_type_id ddo_type() const final
         {
             return iType;
         }
@@ -75,7 +75,7 @@ namespace neogfx
         {
         }
     public:
-        neolib::vector<string> const& file_paths() const override
+        neolib::vector<string> const& file_paths() const final
         {
             return iFilePaths;
         }
@@ -94,30 +94,30 @@ namespace neogfx
         {
         }
     public:
-        i_item_presentation_model const& presentation_model() const override
+        i_item_presentation_model const& presentation_model() const final
         {
             return iPresentationModel;
         }
-        item_presentation_model_index const& index() const override
+        item_presentation_model_index const& index() const final
         {
             return iItem;
         }
     public:
-        bool can_render() const override
+        bool can_render() const final
         {
             bool canRender = false;
             size renderExtents;
             presentation_model().dragging_item_render_info().trigger(*this, canRender, renderExtents);
             return canRender;
         }
-        size render_extents() const override
+        size render_extents() const final
         {
             bool canRender = false;
             size renderExtents;
             presentation_model().dragging_item_render_info().trigger(*this, canRender, renderExtents);
             return renderExtents;
         }
-        void render(i_graphics_context& aGc, point const& aPosition = {}) const override
+        void render(i_graphics_context& aGc, point const& aPosition = {}) const final
         {
             presentation_model().dragging_item_render().trigger(*this, aGc, aPosition);
         }
@@ -137,11 +137,11 @@ namespace neogfx
         {
         }
     public:
-        game::i_ecs const& ecs() const override
+        game::i_ecs const& ecs() const final
         {
             return iEcs;
         }
-        game::entity_id entity() const override
+        game::entity_id entity() const final
         {
             return iEntity;
         }
@@ -150,14 +150,16 @@ namespace neogfx
         game::entity_id iEntity;
     };
 
-    template <typename Base>
+    struct drag_drop_source_empty_base {};
+
+    template <typename Base = drag_drop_source_empty_base>
     class drag_drop_source : public Base, public i_drag_drop_source
     {
         typedef Base base_type;
     public:
         define_declared_event(DraggingObject, dragging_object, i_drag_drop_object const&)
         define_declared_event(DraggingCancelled, dragging_cancelled, i_drag_drop_object const&)
-        define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&, i_drag_drop_target&)
+        define_declared_event(ObjectDroppedOnTarget, object_dropped_on_target, i_drag_drop_object const&, i_drag_drop_target&)
     public:
         template <typename... Args>
         drag_drop_source(Args&&... aArgs) :
@@ -166,19 +168,19 @@ namespace neogfx
         }
         ~drag_drop_source()
         {
-            enable_drag_drop(false);
+            enable_drag_drop_source(false);
         }
     public:
-        bool drag_drop_enabled() const override
+        bool drag_drop_source_enabled() const final
         {
             return iEnabled;
         }
-        void enable_drag_drop(bool aEnable = true) override
+        void enable_drag_drop_source(bool aEnable = true) override
         {
             if (iEnabled != aEnable)
             {
                 iEnabled = aEnable;
-                if (drag_drop_enabled())
+                if (drag_drop_source_enabled())
                 {
                     if constexpr (std::is_base_of_v<i_widget, base_type>)
                         monitor_drag_drop_events(*this);
@@ -191,26 +193,26 @@ namespace neogfx
                 }
             }
         }
-        bool drag_drop_active() const override
+        bool drag_drop_active() const final
         {
             return iObject != nullptr;
         }
-        i_drag_drop_object const& object_being_dragged() const override
+        i_drag_drop_object const& object_being_dragged() const final
         {
             if (!drag_drop_active())
                 throw drag_drop_not_active();
             return *iObject;
         }
-        void start_drag_drop(i_drag_drop_object const& aObject) override
+        void start_drag_drop(i_drag_drop_object const& aObject) final
         {
-            if (!drag_drop_enabled())
-                enable_drag_drop(true);
+            if (!drag_drop_source_enabled())
+                enable_drag_drop_source(true);
             if (drag_drop_active())
                 throw drag_drop_already_active();
             iObject = &aObject;
             DraggingObject.trigger(*iObject);
         }
-        void cancel_drag_drop() override
+        void cancel_drag_drop() final
         {
             if (!drag_drop_active())
                 throw drag_drop_not_active();
@@ -220,28 +222,28 @@ namespace neogfx
             iWidget = nullptr;
             iWidgetOffset = std::nullopt;
         }
-        void end_drag_drop(i_drag_drop_target& aTarget) override
+        void end_drag_drop(i_drag_drop_target& aTarget) final
         {
             if (!drag_drop_active())
                 throw drag_drop_not_active();
             auto object = iObject;
             iObject = nullptr;
-            ObjectDropped.trigger(*object, aTarget);
+            ObjectDroppedOnTarget.trigger(*object, aTarget);
             iWidget = nullptr;
             iWidgetOffset = std::nullopt;
         }
     public:
-        point const& drag_drop_tracking_position() const override
+        point const& drag_drop_tracking_position() const final
         {
             if (drag_drop_active())
                 return *iTrackCurrent;
             throw drag_drop_not_active();
         }
-        i_ref_ptr<i_widget> const& drag_drop_widget() const override
+        i_ref_ptr<i_widget> const& drag_drop_widget() const final
         {
             return iWidget;
         }
-        void set_drag_drop_widget(i_ref_ptr<i_widget> const& aWidget) override
+        void set_drag_drop_widget(i_ref_ptr<i_widget> const& aWidget) final
         {
             iWidget = aWidget;
             if (iWidget)
@@ -250,13 +252,13 @@ namespace neogfx
                 iWidgetOffset = std::nullopt;
         }
     public:
-        i_widget& drag_drop_event_monitor() const override
+        i_widget& drag_drop_event_monitor() const final
         {
             if (iMonitor != nullptr)
                 return *iMonitor;
             throw no_drag_drop_event_monitor();
         }
-        void monitor_drag_drop_events(i_widget& aWidget) override
+        void monitor_drag_drop_events(i_widget& aWidget) final
         {
             iMonitor = &aWidget;
             iSink = aWidget.mouse_event([this, &aWidget](const neogfx::mouse_event& aEvent)
@@ -269,7 +271,7 @@ namespace neogfx
                     object_being_dragged().render(aGc, aWidget.to_window_coordinates(*iTrackCurrent));
             });
         }
-        void stop_monitoring_drag_drop_events() override
+        void stop_monitoring_drag_drop_events() final
         {
             iMonitor = nullptr;
             iSink.clear();
@@ -284,14 +286,8 @@ namespace neogfx
             iTriggerDistance = aDistance;
         }
     protected:
-        virtual bool is_drag_drop_object(point const& aPosition) const
-        {
-            return false;
-        }
-        virtual i_drag_drop_object const* drag_drop_object(point const& aPosition)
-        {
-            return nullptr;
-        }
+        virtual bool is_drag_drop_object(point const& aPosition) const = 0;
+        virtual i_drag_drop_object const* drag_drop_object(point const& aPosition) = 0;
     private:
         void handle_drag_drop_event(i_widget& aWidget, const neogfx::mouse_event& aEvent)
         {
@@ -385,26 +381,41 @@ namespace neogfx
     public:
         template <typename... Args>
         drag_drop_target(Args&&... aArgs) : 
-            base_type{ std::forward<Args>(aArgs)... }
+            base_type{ std::forward<Args>(aArgs)... }, iEnabled{ false }
         {
-            service<i_drag_drop>().register_target(*this);
         }
         ~drag_drop_target()
         {
-            service<i_drag_drop>().unregister_target(*this);
+            enable_drag_drop_target(false);
         }
     public:
-        bool can_accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const override
+        bool drag_drop_target_enabled() const final
+        {
+            return iEnabled;
+        }
+        void enable_drag_drop_target(bool aEnable = true) final
+        {
+            if (iEnabled != aEnable)
+            {
+                iEnabled = aEnable;
+                if (drag_drop_target_enabled())
+                    service<i_drag_drop>().register_target(*this);
+                else
+                    service<i_drag_drop>().unregister_target(*this);
+            }
+        }
+    public:
+        bool can_accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const final
         {
             return accepted_as(aObject, aDropPosition) != drop_operation::None;
         }
-        drop_operation accepted_as(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const override
+        drop_operation accepted_as(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const final
         {
             drop_operation acceptableAs = drop_operation::None;
             ObjectAcceptable.trigger(aObject, aDropPosition, acceptableAs);
             return acceptableAs;
         }
-        bool accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) override
+        bool accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) final
         {
             if (can_accept(aObject, aDropPosition))
             {
@@ -414,21 +425,23 @@ namespace neogfx
             return false;
         }
     public:
-        bool is_widget() const override
+        bool is_widget() const final
         {
             return std::is_base_of_v<i_widget, base_type>;
         }
-        i_widget const& as_widget() const override
+        i_widget const& as_widget() const final
         {
             if constexpr (std::is_base_of_v<i_widget, base_type>)
                 return *this;
             else
                 throw drag_drop_target_not_a_widget();
         }
-        i_widget& as_widget() override
+        i_widget& as_widget() final
         {
             return const_cast<i_widget&>(to_const(*this).as_widget());
         }
+    private:
+        bool iEnabled;
     };
 
     class drag_drop : public i_drag_drop
@@ -449,10 +462,10 @@ namespace neogfx
         void register_target(i_drag_drop_target& aTarget) override;
         void unregister_target(i_drag_drop_target& aTarget) override;
     public:
-        bool is_target_for(i_drag_drop_object const& aObject) const override;
-        bool is_target_at(i_drag_drop_object const& aObject, point const& aPosition) const override;
-        i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const override;
-        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, point const& aPosition) const override;
+        bool is_target_for(i_drag_drop_object const& aObject) const final;
+        bool is_target_at(i_drag_drop_object const& aObject, point const& aPosition) const final;
+        i_drag_drop_target& target_for(i_drag_drop_object const& aObject) const final;
+        i_drag_drop_target& target_at(i_drag_drop_object const& aObject, point const& aPosition) const final;
     protected:
         void register_source(std::shared_ptr<i_drag_drop_source> const& aSource);
         i_drag_drop_target* find_target(i_drag_drop_object const& aObject) const;

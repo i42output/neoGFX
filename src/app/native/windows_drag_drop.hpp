@@ -35,13 +35,13 @@ namespace neogfx
         public:
             drag_drop();
         public:
-            void register_target(i_drag_drop_target& aTarget) override;
-            void unregister_target(i_drag_drop_target& aTarget) override;
+            void register_target(i_drag_drop_target& aTarget) final;
+            void unregister_target(i_drag_drop_target& aTarget) final;
         private:
-            HRESULT DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) override;
-            HRESULT DragOver(DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) override;
-            HRESULT DragLeave() override;
-            HRESULT Drop(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) override;
+            HRESULT DragEnter(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) final;
+            HRESULT DragOver(DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) final;
+            HRESULT DragLeave() final;
+            HRESULT Drop(IDataObject* pDataObj, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect) final;
         private:
             i_drag_drop_target* target_for_internal_source(POINTL pt) const;
         private:

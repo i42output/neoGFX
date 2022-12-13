@@ -42,9 +42,9 @@ namespace neogfx
         Editor
     };
 
-    class item_view : public drag_drop_source<framed_scrollable_widget>, protected i_header_view_owner
+    class item_view : public drag_drop_target<drag_drop_source<framed_scrollable_widget>>, protected i_header_view_owner
     {
-        typedef drag_drop_source<framed_scrollable_widget> base_type;
+        typedef drag_drop_target<drag_drop_source<framed_scrollable_widget>> base_type;
     public:
         define_event(CellEntered, cell_entered, item_presentation_model_index const&)
         define_event(CellLeft, cell_left, item_presentation_model_index const&)
@@ -96,7 +96,7 @@ namespace neogfx
         bool editor_has_text_edit() const;
         text_edit& editor_text_edit() const;
     public:
-        void enable_drag_drop(bool aEnable = true) override;
+        void enable_drag_drop_source(bool aEnable = true) final;
     protected:
         bool is_drag_drop_object(point const& aPosition) const override;
         i_drag_drop_object const* drag_drop_object(point const& aPosition) override;

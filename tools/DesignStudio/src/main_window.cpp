@@ -121,8 +121,8 @@ namespace neogfx::DesignStudio
         iObjects.dock(iRightDock);
         iProperties.dock(iRightDock);
 
-        iToolbox.docked_widget<ng::tree_view>().enable_drag_drop();
-        iWorkflow.docked_widget<ng::list_view>().enable_drag_drop();
+        iToolbox.docked_widget<ng::tree_view>().enable_drag_drop_source();
+        iWorkflow.docked_widget<ng::list_view>().enable_drag_drop_source();
 
         ng::i_layout& mainLayout = client_layout();
         mainLayout.set_padding(ng::padding{});
@@ -195,6 +195,7 @@ namespace neogfx::DesignStudio
         workspaceGridSubdivisions.changing(workspaceGridChanged);
         workspaceGridSubdivisions.changed(workspaceGridChanged);
 
+        iWorkspace.view_stack().enable_drag_drop_target();
         iWorkspace.view_stack().object_acceptable([&](const ng::i_drag_drop_object& aObject, ng::optional_point const& aDropPosition, ng::drop_operation& aOperation)
         {
             aOperation = ng::drop_operation::Move;

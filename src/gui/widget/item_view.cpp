@@ -447,7 +447,7 @@ namespace neogfx
                 {
                     if (!iClickedCheckBox)
                     {
-                        if (!drag_drop_enabled())
+                        if (!drag_drop_source_enabled())
                         {
                             iMouseTracker.emplace(*this, [this, aKeyModifiers](widget_timer& aTimer)
                             {
@@ -556,7 +556,7 @@ namespace neogfx
         base_type::mouse_moved(aPosition, aKeyModifiers);
         if (!iIgnoreNextMouseMove)
         {
-            if (!drag_drop_enabled() && (iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
+            if (!drag_drop_source_enabled() && (iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
             {
                 auto item = item_at(aPosition);
                 if (item != std::nullopt)
@@ -1132,12 +1132,12 @@ namespace neogfx
         return iEditor->text_edit();
     }
 
-    void item_view::enable_drag_drop(bool aEnable)
+    void item_view::enable_drag_drop_source(bool aEnable)
     {
-        if (drag_drop_enabled() != aEnable)
+        if (drag_drop_source_enabled() != aEnable)
         {
-            base_type::enable_drag_drop(aEnable);
-            if (drag_drop_enabled())
+            base_type::enable_drag_drop_source(aEnable);
+            if (drag_drop_source_enabled())
             {
                 iDragDropSink = DraggingObject([&](i_drag_drop_object const&)
                 {
@@ -1156,7 +1156,7 @@ namespace neogfx
                     presentation_model().dragging_item_cancelled().trigger(*iDragDropItem);
                     iDragDropItem = std::nullopt;
                 });
-                iDragDropSink += ObjectDropped([&](i_drag_drop_object const&, i_drag_drop_target& aTarget)
+                iDragDropSink += ObjectDroppedOnTarget([&](i_drag_drop_object const&, i_drag_drop_target& aTarget)
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
