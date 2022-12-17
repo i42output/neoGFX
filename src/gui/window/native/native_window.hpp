@@ -80,6 +80,7 @@ namespace neogfx
         void handle_dpi_changed() override;
     protected:
         bool internal_window_activation() const;
+        void mouse_entered(i_surface_window& aWindow);
     private:
         template <typename EventCategory, typename EventType>
         event_queue::const_iterator find_event(EventType aEventType) const
@@ -104,5 +105,7 @@ namespace neogfx
         neolib::callback_timer iUpdater;
         uint32_t iPaused;
         bool iInternalWindowActivation;
+        i_surface_window* iEnteredWindow;
+        sink iEnteredWindowEventSink;
     };
 }

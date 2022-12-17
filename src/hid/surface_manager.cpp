@@ -112,6 +112,12 @@ namespace neogfx
             rect const surfaceRect{ s->as_surface_window().surface_position(), s->as_surface_window().surface_extents() };
             if (surfaceRect.contains(aPosition))
             {
+                if (s->is_nested_window())
+                {
+                    rect const parentSurfaceRect = s->as_surface_window().as_window().parent().non_client_rect();
+                    if (!parentSurfaceRect.contains(aPosition))
+                        continue;
+                }
                 if (match == nullptr || match->is_owner_of(*s))
                     match = s;
             }

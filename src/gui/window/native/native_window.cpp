@@ -51,7 +51,8 @@ namespace neogfx
             }
         }, std::chrono::milliseconds{ 10 } },
         iPaused{ 0 },
-        iInternalWindowActivation{ false }
+        iInternalWindowActivation{ false },
+        iEnteredWindow{ nullptr }
     {
         set_alive();
     }
@@ -283,6 +284,8 @@ namespace neogfx
                 service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
             if (&surfaceWindow != &surface_window())
             {
+                if (mouseEvent.type() == mouse_event_type::Moved)
+                    mouse_entered(surfaceWindow);
                 surfaceWindow.native_window().handle_event(current_event());
                 return;
             }
@@ -309,6 +312,7 @@ namespace neogfx
                 surfaceWindow.native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
                 break;
             case mouse_event_type::Moved:
+                mouse_entered(surfaceWindow);
                 surfaceWindow.native_window_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             default:
@@ -326,6 +330,8 @@ namespace neogfx
                 service<i_surface_manager>().surface_at_position(surface_window(), mouseEvent.position(), true).as_surface_window();
             if (&surfaceWindow != &surface_window())
             {
+                if (mouseEvent.type() == mouse_event_type::Moved)
+                    mouse_entered(surfaceWindow);
                 surfaceWindow.native_window().handle_event(current_event());
                 return;
             }
@@ -352,6 +358,7 @@ namespace neogfx
                 surfaceWindow.native_window_non_client_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
                 break;
             case mouse_event_type::Moved:
+                mouse_entered(surfaceWindow);
                 surfaceWindow.native_window_non_client_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             default:
@@ -483,5 +490,23 @@ namespace neogfx
     bool native_window::internal_window_activation() const
     {
         return iInternalWindowActivation;
+    }
+
+    void native_window::mouse_entered(i_surface_window& aWindow)
+    {
+        if (iEnteredWindow == &aWindow)
+            return;
+        if (iEnteredWindow && iEnteredWindow != &surface_window())
+            iEnteredWindow->as_window().mouse_left();
+        if (&aWindow != &surface_window())
+        {
+            iEnteredWindow = &aWindow;
+            iEnteredWindowEventSink = iEnteredWindow->closed([&]() { iEnteredWindow = nullptr; });
+        }
+        else
+        {
+            iEnteredWindow = nullptr;
+            iEnteredWindowEventSink.clear();
+        }
     }
 }
