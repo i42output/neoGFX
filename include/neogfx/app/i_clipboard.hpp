@@ -95,4 +95,23 @@ namespace neogfx
     public:
         static uuid const& iid() { static uuid const sIid{ 0x441eee78, 0x6c80, 0x464b, 0xb733, { 0x18, 0x91, 0x90, 0xa8, 0x39, 0xb9 } }; return sIid; }
     };
+
+    class scoped_clipboard_sink
+    {
+    public:
+        scoped_clipboard_sink(i_clipboard_sink& aSink) :
+            iPreviousSink{ service<i_clipboard>().sink_active() ? &service<i_clipboard>().active_sink() : nullptr }
+        {
+            service<i_clipboard>().activate(aSink);
+        }
+        ~scoped_clipboard_sink()
+        {
+            if (iPreviousSink != nullptr)
+            {
+                service<i_clipboard>().activate(*iPreviousSink);
+            }
+        }
+    private:
+        i_clipboard_sink* iPreviousSink;
+    };
 }

@@ -890,6 +890,12 @@ namespace neogfx
             }
             set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
         }
+        else if (aButton == mouse_button::Right && focus_policy() == neogfx::focus_policy::NoFocus && capture_ok(hit_test(aPosition)) && can_capture())
+        {
+            set_capture(capture_reason::MouseEvent, aPosition);
+            if (cursor().position() == cursor().anchor())
+                set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
+        }
     }
 
     void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -905,6 +911,7 @@ namespace neogfx
     
     void text_edit::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
+        bool wasCapturing = capturing();
         framed_scrollable_widget::mouse_button_released(aButton, aPosition);
         iDragger = nullptr;
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
@@ -930,27 +937,41 @@ namespace neogfx
         {
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
             ContextMenu.trigger(iMenu->menu());
-            iMenu->menu().add_action(service<i_app>().action_undo());
-            iMenu->menu().add_action(service<i_app>().action_redo());
-            iMenu->menu().add_separator();
-            iMenu->menu().add_action(service<i_app>().action_cut());
+            if (!read_only())
+            {
+                iMenu->menu().add_action(service<i_app>().action_undo());
+                iMenu->menu().add_action(service<i_app>().action_redo());
+                iMenu->menu().add_separator();
+                iMenu->menu().add_action(service<i_app>().action_cut());
+            }
             iMenu->menu().add_action(service<i_app>().action_copy());
-            iMenu->menu().add_action(service<i_app>().action_paste());
-            auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
+            if (!read_only())
+            {
+                iMenu->menu().add_action(service<i_app>().action_paste());
+            }
             auto pastePlainText = make_ref<action>("Plain Text"_t);
             auto pasteRichText = make_ref<action>("Rich Text (HTML)"_t);
             pastePlainText->Triggered([this]() { paste_plain_text(); });
             pasteRichText->Triggered([this]() { paste_rich_text(); });
-            sink pasteAsSink;
-            pasteAsSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
-            pasteAsSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
-            pasteAs.add_action(pastePlainText);
-            pasteAs.add_action(pasteRichText);
-            iMenu->menu().add_action(service<i_app>().action_delete());
+            sink tempSink;
+            tempSink += service<i_app>().action_paste().enabled([&pastePlainText, &pasteRichText]() { pastePlainText->enable(); pasteRichText->enable(); });
+            tempSink += service<i_app>().action_paste().disabled([&pastePlainText, &pasteRichText]() { pastePlainText->disable(); pasteRichText->disable(); });
+            if (!read_only())
+            {
+                auto& pasteAs = iMenu->menu().add_sub_menu("Paste As"_t);
+                pasteAs.add_action(pastePlainText);
+                pasteAs.add_action(pasteRichText);
+                iMenu->menu().add_action(service<i_app>().action_delete());
+            }
             iMenu->menu().add_separator();
             iMenu->menu().add_action(service<i_app>().action_select_all());
+            bool selectAll = false;
+            tempSink += service<i_app>().action_select_all().triggered([&]() { selectAll = true; });
+            scoped_clipboard_sink scs{ *this };
             iMenu->exec();
             iMenu.reset();
+            if (!selectAll && focus_policy() == neogfx::focus_policy::NoFocus && wasCapturing)
+                cursor().set_anchor(cursor().position());
         }
         iSelectedUri = std::nullopt;
     }
