@@ -1222,6 +1222,8 @@ namespace neogfx
         aGc.set_extents(self.extents());
         aGc.set_origin(self.origin());
 
+        aGc.set_default_font(font());
+
         scoped_snap_to_pixel snap{ aGc };
         scoped_opacity sc{ aGc, effectively_enabled() ? opacity() : opacity() * 0.75 };
 
