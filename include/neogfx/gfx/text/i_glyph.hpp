@@ -1,4 +1,4 @@
-// i_glyph_texture.hpp
+// i_glyph.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -38,14 +38,20 @@ namespace neogfx
         BGRA
     };
 
-    class i_glyph_texture
+    struct glyph_metrics
+    {
+        vec2 extents;
+        vec2 bearing;
+    };
+
+    class i_glyph
     {
     public:
-        virtual ~i_glyph_texture() = default;
+        virtual ~i_glyph() = default;
     public:
         virtual const i_sub_texture& texture() const = 0;
         virtual bool subpixel() const = 0;
-        virtual const point& placement() const = 0;
+        virtual const glyph_metrics& metrics() const = 0;
         virtual glyph_pixel_mode pixel_mode() const = 0;
     };
 }

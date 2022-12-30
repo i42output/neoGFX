@@ -23,10 +23,10 @@
 #include <neolib/app/i_power.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gfx/text/i_emoji_atlas.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
-#include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/i_glyph.hpp>
 #include <neogfx/gfx/shapes.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/game/rectangle.hpp>
@@ -1906,15 +1906,13 @@ namespace neogfx
         for (auto op = aDrawGlyphOps.first; op != aDrawGlyphOps.second; ++op)
         {
             auto& drawOp = static_variant_cast<const graphics_operation::draw_glyphs&>(*op);
-            vec3 pos = drawOp.point;
             auto a = drawOp.attributes.begin();
             for (auto g = drawOp.begin; g != drawOp.end; ++g)
             {
                 while (a != drawOp.attributes.end() && (g - drawOp.begin) >= a->end)
                     ++a;
-                auto& glyph = *g;
-                drawGlyphCache.emplace_back(pos, &drawOp.glyphText.content(), &glyph, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
-                pos.x += advance(glyph).cx;
+                auto& glyph_char = *g;
+                drawGlyphCache.emplace_back(drawOp.point, &drawOp.glyphText.content(), &glyph_char, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
             }
         }
 
@@ -1924,7 +1922,7 @@ namespace neogfx
         auto start = drawGlyphCache.begin();
         for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
         {
-            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph, *next->glyph) ||
+            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph_char, *next->glyph_char) ||
                 !graphics_operation::batchable(*start->appearance, *next->appearance))
             {
                 draw_glyphs(&*start, &*next);
@@ -1933,6 +1931,19 @@ namespace neogfx
         }
         if (start != drawGlyphCache.end())
             draw_glyphs(&*start, std::next(&*std::prev(drawGlyphCache.end())));
+    }
+
+    namespace
+    {
+        enum class draw_glyphs_pass : std::int32_t
+        {
+            Paper,
+            SpecialEffects,
+            EmojiFinal,
+            GlyphOutline,
+            GlyphFinal,
+            Adornments
+        };
     }
 
     void opengl_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
@@ -1959,29 +1970,11 @@ namespace neogfx
         auto bounding_rect = [&]()
         {
             optional_rect result;
-            for (auto op = aBegin; op != aEnd; ++op)
+            for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
             {
-                auto& drawOp = *op;
-                auto& glyphText = *drawOp.glyphText;
-                auto& glyph = *drawOp.glyph;
-                font const& glyphFont = glyphText.glyph_font(glyph);
-                rect glyphRect;
-                
-                if (is_emoji(glyph))
-                    glyphRect = rect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
-                else if (!is_whitespace(glyph))
-                {
-                    auto const& glyphTexture = glyphText.glyph_texture(glyph);
-                    auto const glyphOrigin2D = point{
-                        drawOp.point.x + glyphTexture.placement().x,
-                        logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
-                            drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-                            drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy
-                    } + glyph.offset.as<scalar>();
-                    vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
-                    glyphRect = rect{ point{ glyphOrigin }, glyphTexture.texture().extents() };
-                }
-
+                auto const& glyph_char = *drawOp.glyph_char;
+                auto const aabb = to_aabb_2d(glyph_char.shape.begin(), glyph_char.shape.end());
+                rect const glyphRect{ aabb };
                 if (result == std::nullopt)
                     result = glyphRect;
                 else
@@ -1994,18 +1987,22 @@ namespace neogfx
 
         optional_rect filterRegion;
 
-        for (int32_t pass = 1; pass <= 6; ++pass)
+        for (auto pass : { 
+            draw_glyphs_pass::Paper, 
+            draw_glyphs_pass::SpecialEffects, 
+            draw_glyphs_pass::EmojiFinal, 
+            draw_glyphs_pass::GlyphOutline, 
+            draw_glyphs_pass::GlyphFinal, 
+            draw_glyphs_pass::Adornments })
         {
             switch (pass)
             {
-            case 1: // Paper (glyph background)
-                for (auto op = aBegin; op != aEnd; ++op)
+            case draw_glyphs_pass::Paper:
+                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
-                    auto& drawOp = *op;
-                    auto& glyphText = *drawOp.glyphText;
-                    auto& glyph = *drawOp.glyph;
+                    auto const& glyph_char = *drawOp.glyph_char;
 
-                    if (!is_whitespace(glyph) && !is_emoji(glyph))
+                    if (!is_whitespace(glyph_char) && !is_emoji(glyph_char))
                         ++normalGlyphCount;
 
                     if (drawOp.appearance->effect() != std::nullopt && !drawOp.appearance->being_filtered() &&
@@ -2017,12 +2014,7 @@ namespace neogfx
                         
                     if (drawOp.appearance->paper() != std::nullopt && !drawOp.appearance->being_filtered())
                     {
-                        font const& glyphFont = glyphText.glyph_font(glyph);
-                        rect const glyphRect{ point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
-
-                        auto const& mesh = to_ecs_component(
-                            glyphRect,
-                            mesh_type::Triangles);
+                        auto const& mesh = to_ecs_component(drawOp.point + quad{ glyph_char.cell[0], glyph_char.cell[1], glyph_char.cell[2], glyph_char.cell[3] }, mesh_type::Triangles);
 
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         meshRenderers.push_back(
@@ -2035,17 +2027,16 @@ namespace neogfx
                     }
                 }
                 break;
-            case 2: // Special effects
+            case draw_glyphs_pass::SpecialEffects:
                 if (filterRegion)
                 {
                     std::optional<scoped_filter<blur_filter>> filter;
-                    for (auto op = aBegin; op != aEnd; ++op)
+                    for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {
-                        auto& drawOp = *op;
                         auto& glyphText = *drawOp.glyphText;
-                        auto& glyph = *drawOp.glyph;
+                        auto const& glyph_char = *drawOp.glyph_char;
 
-                        if (is_whitespace(glyph))
+                        if (is_whitespace(glyph_char))
                             continue;
 
                         if (drawOp.appearance->being_filtered())
@@ -2055,7 +2046,7 @@ namespace neogfx
                         if (!renderEffects)
                             continue;
 
-                        if (is_emoji(glyph) && drawOp.appearance->effect()->ignore_emoji())
+                        if (is_emoji(glyph_char) && drawOp.appearance->effect()->ignore_emoji())
                             continue;
 
                         if (!filter)
@@ -2064,35 +2055,29 @@ namespace neogfx
                         filter->front_buffer().draw_glyph(
                             drawOp.point + drawOp.appearance->effect()->offset(),
                             glyphText,
-                            glyph,
+                            glyph_char,
                             drawOp.appearance->as_being_filtered());
                     }
                 }
                 break;
-            case 3: // Emoji render (final pass)
-                for (auto op = aBegin; op != aEnd; ++op)
+            case draw_glyphs_pass::EmojiFinal:
+                for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
-                    auto& drawOp = *op;
-                    auto& glyphText = *drawOp.glyphText;
-                    auto& glyph = *drawOp.glyph;
+                    auto& glyph_char = *drawOp.glyph_char;
 
-                    if (is_whitespace(glyph) || !is_emoji(glyph))
+                    if (is_whitespace(glyph_char) || !is_emoji(glyph_char))
                         continue;
 
-                    font const& glyphFont = glyphText.glyph_font(glyph);
+                    auto const& glyphQuad = quad{
+                            (glyph_char.cell[0] + glyph_char.shape[0]).round(),
+                            (glyph_char.cell[0] + glyph_char.shape[1]).round(),
+                            (glyph_char.cell[0] + glyph_char.shape[2]).round(),
+                            (glyph_char.cell[0] + glyph_char.shape[3]).round() } + drawOp.point;
 
-                    rect const outputRect = { point{ drawOp.point } + glyph.offset.as<scalar>(), size{ advance(glyph).cx, glyphFont.height() } };
-
-                    auto const& mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
-                        to_ecs_component(
-                            outputRect,
-                            mesh_type::Triangles) :
-                        to_ecs_component(
-                            game_rect{ outputRect },
-                            mesh_type::Triangles);
+                    auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
 
                     auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
-                    auto const& emojiTexture = emojiAtlas.emoji_texture(glyph.value).as_sub_texture();
+                    auto const& emojiTexture = emojiAtlas.emoji_texture(glyph_char.value).as_sub_texture();
                     meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                         (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) : 
@@ -2102,7 +2087,7 @@ namespace neogfx
                             game::material
                             {
                                 std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(outputRect)) : std::optional<game::gradient>{},
+                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                 {}, 
                                 to_ecs_component(emojiTexture),
                                 !drawOp.appearance->being_filtered() ?
@@ -2114,33 +2099,26 @@ namespace neogfx
                         });
                 }
                 break;
-            case 4: // Glyph render (outline pass)
-            case 5: // Glyph render (final pass)
+            case draw_glyphs_pass::GlyphOutline:
+            case draw_glyphs_pass::GlyphFinal:
                 {
                     bool updateGlyphShader = true;
 
-                    for (auto op = aBegin; op != aEnd; ++op)
+                    for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {
-                        auto& drawOp = *op;
                         auto& glyphText = *drawOp.glyphText;
-                        auto& glyph = *drawOp.glyph;
+                        auto& glyph_char = *drawOp.glyph_char;
 
-                        if (is_whitespace(glyph) || is_emoji(glyph))
+                        if (is_whitespace(glyph_char) || is_emoji(glyph_char))
                             continue;
 
-                        auto const& glyphTexture = glyphText.glyph_texture(glyph);
-
-                        auto const& glyphFont = glyphText.glyph_font(glyph);
-
-                        auto const glyphOrigin2D = point{
-                            drawOp.point.x + glyphTexture.placement().x,
-                            logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame ?
-                                drawOp.point.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-                                drawOp.point.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
-                            drawOp.point.z
-                        } + glyph.offset.as<scalar>();
-
-                        vec3 const glyphOrigin{ glyphOrigin2D.x, glyphOrigin2D.y, drawOp.point.z };
+                        auto const& glyphTexture = glyphText.glyph(glyph_char);
+                        auto const& glyphFont = glyphText.glyph_font(glyph_char);
+                        auto const& glyphQuad = quad{
+                                (glyph_char.cell[0] + glyph_char.shape[0]).round(),
+                                (glyph_char.cell[0] + glyph_char.shape[1]).round(),
+                                (glyph_char.cell[0] + glyph_char.shape[2]).round(),
+                                (glyph_char.cell[0] + glyph_char.shape[3]).round() } + drawOp.point;
 
                         auto const xTransformCoefficient = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? -1.0 : 1.0;
                         auto const transformation = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
@@ -2154,39 +2132,29 @@ namespace neogfx
                         if (updateGlyphShader)
                         {
                             updateGlyphShader = false;
-                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyph);
+                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyph_char);
                         }
 
-                        bool const subpixelRender = subpixel(glyph) && glyphTexture.subpixel();
+                        bool const subpixelRender = subpixel(glyph_char) && glyphTexture.subpixel();
 
-                        if (pass == 4)
+                        if (pass == draw_glyphs_pass::GlyphOutline)
                         {
                             if (drawOp.appearance->effect() && drawOp.appearance->effect()->type() == text_effect_type::Outline)
                             {
                                 auto const scanlineOffsets = static_cast<uint32_t>(drawOp.appearance->effect()->width()) * 2u + 1u;
                                 auto const offsets = scanlineOffsets * scanlineOffsets;
-                                point const offsetOrigin = drawOp.appearance->effect()->offset();
+                                auto const offsetOrigin = drawOp.appearance->effect()->offset();
                                 for (uint32_t offset = 0; offset < offsets; ++offset)
                                 {
-                                    rect const outputRect = {
-                                            point{ glyphOrigin } + offsetOrigin + point{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) },
-                                            glyphTexture.texture().extents() };
-                                    auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
-                                        to_ecs_component(
-                                            outputRect,
-                                            mesh_type::Triangles,
-                                            transformation) :
-                                        to_ecs_component(
-                                            game_rect{ outputRect },
-                                            mesh_type::Triangles, 
-                                            transformation);
+                                    auto const effectQuad = glyphQuad + offsetOrigin + vec3{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) };
+                                    auto const& mesh = to_ecs_component(effectQuad, mesh_type::Triangles, transformation);
                                     meshFilters.push_back(game::mesh_filter{ {}, mesh });
                                     auto const& ink = drawOp.appearance->effect()->color();
                                     meshRenderers.push_back(
                                         game::mesh_renderer{
                                             game::material{
                                                 std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(outputRect)) : std::optional<game::gradient>{},
+                                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(effectQuad.begin(), effectQuad.end()))) : std::optional<game::gradient>{},
                                                 {},
                                                 to_ecs_component(glyphTexture.texture()),
                                                 shader_effect::Ignore
@@ -2199,16 +2167,7 @@ namespace neogfx
                             continue;
                         }
 
-                        rect const outputRect = { point{ glyphOrigin }, glyphTexture.texture().extents() };
-                        auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
-                            to_ecs_component(
-                                outputRect,
-                                mesh_type::Triangles,
-                                transformation) :
-                            to_ecs_component(
-                                game_rect{ outputRect },
-                                mesh_type::Triangles,
-                                transformation);
+                        auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles, transformation);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                             drawOp.appearance->ink() : drawOp.appearance->effect()->color();
@@ -2216,7 +2175,7 @@ namespace neogfx
                             game::mesh_renderer{
                                 game::material{
                                     std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                    std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(outputRect)) : std::optional<game::gradient>{},
+                                    std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(glyphTexture.texture()),
                                     shader_effect::Ignore
@@ -2227,7 +2186,7 @@ namespace neogfx
                     }
                 }
                 break;
-            case 6: // adornments
+            case draw_glyphs_pass::Adornments:
                 {
                     struct y_underline_metrics
                     {
@@ -2240,22 +2199,21 @@ namespace neogfx
                     for (int32_t adornmentPass = 1; adornmentPass <=2; ++adornmentPass)
                     {
                         auto yUnderlineMetricsIter = yUnderlineMetrics.begin();
-                        for (auto op = aBegin; op != aEnd; ++op)
+                        for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
-                            auto& drawOp = *op;
                             auto& glyphText = *drawOp.glyphText;
-                            auto& glyph = *drawOp.glyph;
-                            auto const& glyphFont = glyphText.glyph_font(glyph);
+                            auto& glyph_char = *drawOp.glyph_char;
+                            auto const& glyphFont = glyphText.glyph_font(glyph_char);
                             auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                                 drawOp.appearance->ink() : drawOp.appearance->effect()->color();
-                            if (underline(glyph) || (drawOp.showMnemonics && neogfx::mnemonic(glyph)))
+                            if (underline(glyph_char) || (drawOp.showMnemonics && neogfx::mnemonic(glyph_char)))
                             {
                                 if (adornmentPass == 1)
                                 {
                                     auto const descender = glyphFont.descender();
                                     auto const underlinePosition = glyphFont.native_font_face().underline_position();
                                     auto const dy = descender - underlinePosition;
-                                    auto const yLine = (logical_coordinates().is_gui_orientation() ? glyphFont.height() - 1 + dy : -dy) + glyph.offset.as<scalar>().y;
+                                    auto const yLine = dy;
                                     if (yUnderlineMetrics.empty() || yUnderlineMetrics.back().ypos != drawOp.point.y)
                                         yUnderlineMetrics.emplace_back(drawOp.point.y, yLine + drawOp.point.y, glyphFont.native_font_face().underline_thickness());
                                     else
@@ -2269,8 +2227,8 @@ namespace neogfx
                                     if (yUnderlineMetricsIter->ypos != drawOp.point.y)
                                         ++yUnderlineMetricsIter;
                                     draw_line(
-                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline },
-                                        vec3{ drawOp.point.x + (drawOp.showMnemonics && neogfx::mnemonic(glyph) ? glyphText.extents(glyph).cx : advance(glyph).cx), yUnderlineMetricsIter->yUnderline },
+                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyph_char.cell[0] },
+                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyph_char.cell[1] },
                                         pen{ ink, yUnderlineMetricsIter->cyUnderline });
                                 }
                             }

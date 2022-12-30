@@ -40,7 +40,7 @@
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include "glyph_texture.hpp"
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include "i_native_font.hpp"
 #include "i_native_font_face.hpp"
 
@@ -105,7 +105,7 @@ namespace neogfx
     class native_font_face : public neolib::reference_counted<i_native_font_face>
     {
     private:
-        typedef std::unordered_map<glyph_index_t, neogfx::glyph_texture> glyph_map;
+        typedef std::unordered_map<glyph_index_t, neogfx::glyph> glyph_map;
         typedef std::pair<glyph_index_t, glyph_index_t> kerning_pair;
         typedef std::unordered_map<kerning_pair, dimension, boost::hash<kerning_pair>, std::equal_to<kerning_pair>,
             boost::fast_pool_allocator<std::pair<const kerning_pair, dimension>>> kerning_table;
@@ -143,9 +143,9 @@ namespace neogfx
         i_native_font_face& fallback() const final;
         void* handle() const final;
         glyph_index_t glyph_index(char32_t aCodePoint) const final;
-        i_glyph_texture& glyph_texture(const glyph& aGlyph) const final;
+        i_glyph& glyph(const glyph_char& aGlyphChar) const final;
     private:
-        i_glyph_texture& invalid_glyph() const;
+        i_glyph& invalid_glyph() const;
         void set_metrics();
     private:
         FT_Library iFontLib;
@@ -163,7 +163,7 @@ namespace neogfx
         neogfx::kerning_method iKerningMethod = neogfx::kerning_method::Harfbuzz;
         mutable kerning_table iKerningTable;
         mutable std::optional<bool> iHasFallback;
-        mutable std::optional<neogfx::glyph_texture> iInvalidGlyph;
+        mutable std::optional<neogfx::glyph> iInvalidGlyph;
     };
 
     bool kerning_enabled();

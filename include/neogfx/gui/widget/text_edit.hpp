@@ -25,7 +25,7 @@
 #include <neolib/core/segmented_array.hpp>
 #include <neolib/core/indexitor.hpp>
 #include <neogfx/app/i_clipboard.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/widget/i_text_document.hpp>
@@ -298,8 +298,7 @@ namespace neogfx
 
         typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
 
-        class paragraph_positioned_glyph;
-        typedef neolib::segmented_array<paragraph_positioned_glyph, 256> glyph_container_type;
+        typedef neolib::segmented_array<glyph_char, 256> glyph_container_type;
 
         typedef basic_glyph_text_content<glyph_container_type> document_glyphs;
 
@@ -500,7 +499,7 @@ namespace neogfx
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
         void make_visible(position_info const& aGlyphPosition, point const& aPreview = {});
-        style glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const;
+        style glyph_style(document_glyphs::const_iterator aGlyphChar, const glyph_column& aColumn) const;
         void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
         void draw_cursor(i_graphics_context const& aGc) const;
         rect cursor_rect() const;

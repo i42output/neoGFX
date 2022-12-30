@@ -1,4 +1,4 @@
-// glyph.ipp
+// glyph_char.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 
 namespace neogfx
@@ -34,10 +34,10 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::font_cache::glyph_font(const_reference aGlyph) const
+    const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::font_cache::glyph_font(const_reference aGlyphChar) const
     {
-        cache_glyph_font(aGlyph.font);
-        auto existing = iCache.find(aGlyph.font);
+        cache_glyph_font(aGlyphChar.font);
+        auto existing = iCache.find(aGlyphChar.font);
         if (existing != iCache.end())
             return existing->second.second;
         throw cached_font_not_found();
@@ -192,9 +192,9 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    void basic_glyph_text_content<Container, ConstIterator, Iterator>::push_back(const_reference aGlyph)
+    void basic_glyph_text_content<Container, ConstIterator, Iterator>::push_back(const_reference aGlyphChar)
     {
-        container_type::push_back(aGlyph);
+        container_type::push_back(aGlyphChar);
         iExtents = std::nullopt;
     }
 
@@ -233,40 +233,25 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents(const_reference aGlyph) const
+    size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents(const_reference aGlyphChar) const
     {
-        if (aGlyph.extents == basic_size<float>{})
-        {
-            auto const& glyphFont = glyph_font(aGlyph);
-            if (!has_font_glyph(aGlyph))
-                aGlyph.extents = neogfx::size{ advance(aGlyph).cx, !is_emoji(aGlyph) ? glyphFont.height() : advance(aGlyph).cx };
-            else
-            {
-                auto const& glyphTexture = glyph_texture(aGlyph);
-                aGlyph.extents = neogfx::size{ static_cast<float>(offset(aGlyph).x + glyphTexture.placement().x + glyphTexture.texture().extents().cx), glyphFont.height() };
-            }
-        }
-        return aGlyph.extents;
+        return rect{ to_aabb_2d(aGlyphChar.cell.begin(), aGlyphChar.cell.end()) }.extents().ceil();
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd) const
+    size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents(const_iterator aBegin, const_iterator aEnd) const
     {
         if (aBegin == aEnd)
             return neogfx::size{ 0.0, glyph_font().height() };
-        neogfx::size result;
-        for (basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator i = aBegin; i != aEnd; ++i)
-        {
-            auto const& g = *i;
-            result.cx += advance(g).cx;
-            result.cy = std::max(result.cy, extents(g).cy + std::abs(g.offset.y));
-        }
-        if (aEndIsLineEnd)
-        {
-            auto const& lastGlyph = *std::prev(aEnd);
-            result.cx += (extents(lastGlyph).cx - advance(lastGlyph).cx);
-        }
-        return result.ceil();
+        auto const& firstGlyph = *aBegin;
+        auto const& lastGlyph = *std::prev(aEnd);
+        quad_2d const quadExtents{ 
+            firstGlyph.cell[0],
+            lastGlyph.cell[1],
+            lastGlyph.cell[3],
+            firstGlyph.cell[3] };
+        rect const boundingRect{ to_aabb_2d(quadExtents.begin(), quadExtents.end()) };
+        return boundingRect.extents().ceil();
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -278,37 +263,38 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     typename basic_glyph_text_content<Container, ConstIterator, Iterator>::self_type& basic_glyph_text_content<Container, ConstIterator, Iterator>::bottom_justify()
     {
+        return* this;
         float yMax = 0.0f;
         for (auto& g : *this)
-            yMax = std::max(g.extents.cy + static_cast<float>(glyph_font(g).descender()), yMax);
+            yMax = std::max(quad_extents(g.cell).y + static_cast<float>(glyph_font(g).descender()), yMax);
         for (auto& g : *this)
         {
             auto const& gf = glyph_font(g);
-            g.offset.y += (yMax - (g.extents.cy + static_cast<float>(gf.descender())));
-            if ((g.flags & (glyph::Superscript | glyph::Subscript)) != glyph::Default)
+            g.shape += vec2f{ 0.0f, yMax - (quad_extents(g.shape).y + static_cast<float>(gf.descender())) };
+            if ((g.flags & (glyph_char::Superscript | glyph_char::Subscript)) != glyph_char::Default)
             {
                 scalar const ascender = gf.ascender();
                 scalar const descender = gf.descender();
                 scalar const cy = ascender - descender;
                 scalar const dyLarge = cy / 0.58 * 0.33; // todo: make configurable attributes
                 scalar const dySmall = dyLarge * 0.5; // todo: make configurable attributes
-                if ((g.flags & glyph::Superscript) == glyph::Superscript)
+                if ((g.flags & glyph_char::Superscript) == glyph_char::Superscript)
                 {
                     auto const belowAscenderDelta = static_cast<float>(dySmall);
                     auto const aboveAscenderDelta = static_cast<float>(dyLarge);
-                    if ((g.flags & glyph::BelowAscenderLine) == glyph::BelowAscenderLine)
-                        g.offset.y -= std::ceil(belowAscenderDelta);
+                    if ((g.flags & glyph_char::BelowAscenderLine) == glyph_char::BelowAscenderLine)
+                        g.shape -= vec2f{ 0.0f, std::ceil(belowAscenderDelta) };
                     else
-                        g.offset.y -= std::ceil(aboveAscenderDelta);
+                        g.shape -= vec2f{ 0.0f, std::ceil(aboveAscenderDelta) };
                 }
-                else if ((g.flags & glyph::Subscript) == glyph::Subscript)
+                else if ((g.flags & glyph_char::Subscript) == glyph_char::Subscript)
                 {
                     auto const aboveBaselineDelta = 0.0f;
                     auto const belowBaselineDelta = static_cast<float>(dyLarge + descender / 0.58);
-                    if ((g.flags & glyph::AboveBaseline) == glyph::AboveBaseline)
-                        g.offset.y += aboveBaselineDelta;
+                    if ((g.flags & glyph_char::AboveBaseline) == glyph_char::AboveBaseline)
+                        g.shape += vec2f{ 0.0f, aboveBaselineDelta };
                     else
-                        g.offset.y += belowBaselineDelta;
+                        g.shape += vec2f{ 0.0f, belowBaselineDelta };
                 }
             }
         }
@@ -326,7 +312,7 @@ namespace neogfx
             if (!is_whitespace(*result.first))
             {
                 result.first = aFrom;
-                while (result.first != aBegin && (result.first - 1)->source == aFrom->source)
+                while (result.first != aBegin && (result.first - 1)->clusters == aFrom->clusters)
                     --result.first;
                 result.second = result.first;
                 return result;
@@ -340,6 +326,13 @@ namespace neogfx
         return result;
     }
 
+    template <typename Container, typename ConstIterator, typename Iterator>
+    std::pair<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator, typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator> basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom)
+    {
+        auto result = const_cast<const self_type&>(*this).word_break(aBegin, aFrom);
+        return std::make_pair(std::next(begin(), std::distance(cbegin(), result.first)), std::next(begin(), std::distance(cbegin(), result.second)));
+    }
+        
     template <typename Container, typename ConstIterator, typename Iterator>
     vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type> const& basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks() const
     {
@@ -359,9 +352,9 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::glyph_font(const_reference aGlyph) const
+    const font& basic_glyph_text_content<Container, ConstIterator, Iterator>::glyph_font(const_reference aGlyphChar) const
     {
-        return iCache.glyph_font(aGlyph);
+        return iCache.glyph_font(aGlyphChar);
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -377,8 +370,8 @@ namespace neogfx
     }
     
     template <typename Container, typename ConstIterator, typename Iterator>
-    const i_glyph_texture& basic_glyph_text_content<Container, ConstIterator, Iterator>::glyph_texture(const_reference aGlyph) const
+    const i_glyph& basic_glyph_text_content<Container, ConstIterator, Iterator>::glyph(const_reference aGlyphChar) const
     {
-        return glyph_font(aGlyph).glyph_texture(aGlyph);
+        return glyph_font(aGlyphChar).glyph(aGlyphChar);
     }
 }

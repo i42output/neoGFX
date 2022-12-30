@@ -175,8 +175,15 @@ namespace neogfx
                     {
                         return n < line.attributes.size() ? font(line.attributes[n].style) : normal_font();
                     });
+                float xPrevious = 0.0f;
                 for (auto& g : *line.glyphs)
-                    g.advance.cx = static_cast<float>(ce.cx);
+                {
+                    g.cell[0].x = xPrevious;
+                    g.cell[1].x = xPrevious + static_cast<float>(ce.cx);
+                    g.cell[2].x = xPrevious + static_cast<float>(ce.cx);
+                    g.cell[3].x = xPrevious;
+                    xPrevious += static_cast<float>(ce.cx);
+                }
             }
             if (y + ce.cy >= cr.top() && y < cr.bottom())
             {
@@ -184,11 +191,11 @@ namespace neogfx
                 attributes.clear();
                 for (auto& g : *line.glyphs)
                 {
-                    auto ink = line.attributes[g.source.first].ink;
-                    auto paper = line.attributes[g.source.first].paper;
-                    if (line.attributes[g.source.first].reverse)
+                    auto ink = line.attributes[g.clusters.first].ink;
+                    auto paper = line.attributes[g.clusters.first].paper;
+                    if (line.attributes[g.clusters.first].reverse)
                         std::swap(ink, paper);
-                    if (line.attributes[g.source.first].underline)
+                    if (line.attributes[g.clusters.first].underline)
                         set_underline(g, true);
                     optional_text_effect effect;
                     if (iTextFormat)
@@ -201,7 +208,7 @@ namespace neogfx
                             ink = ink.to_hsv().with_saturation(ink.to_hsv().saturation() * 0.4).to_rgb<color>();
                         }
                     }
-                    attributes.add(g.source.first, ink, paper, effect);
+                    attributes.add(g.clusters.first, ink, paper, effect);
                 }
                 aGc.draw_glyphs(tl + point{ 0, y }, *line.glyphs, attributes);
             }

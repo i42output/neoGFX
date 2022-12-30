@@ -219,7 +219,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\horizontal_layout.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph_text.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font.hpp">
@@ -390,11 +390,8 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\view\i_view.hpp">
       <Filter>Header Files</Filter>
@@ -1122,6 +1119,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\primitives.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1303,7 +1303,7 @@
     <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp">
+    <ClCompile Include="..\..\..\src\gfx\text\native\glyph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp">
@@ -1381,7 +1381,7 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\text\glyph.cpp">
+    <ClCompile Include="..\..\..\src\gfx\text\glyph_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp">
@@ -1689,7 +1689,7 @@
     <None Include="..\..\..\include\neogfx\gui\widget\button.ipp">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="..\..\..\include\neogfx\gfx\text\glyph.ipp">
+    <None Include="..\..\..\include\neogfx\gfx\text\glyph_text.ipp">
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.ipp">

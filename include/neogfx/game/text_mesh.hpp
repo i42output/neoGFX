@@ -139,29 +139,21 @@ namespace neogfx::game
                     aEcs.component<mesh_renderer>().populate(aEntity, mesh_renderer{});
                 mf.mesh = mesh{};
                 mr.patches = patches{};
-                auto glyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
-                for (auto const& line : glyphText.lines)
+                auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
+                for (auto const& line : multilineGlyphText.lines)
                 {
-                    auto mesh_line = [&](const point& aOffset, const material& aMaterial) 
+                    auto mesh_line = [&](const vec3& aOffset, const material& aMaterial) 
                     {
-                        auto pos = line.pos + aOffset;
+                        auto pos = line.bbox[0] + aOffset;
                         for (auto i = line.begin; i < line.end; ++i)
                         {
-                            auto const& glyph = *std::next(glyphText.glyphText.begin(), i);
-                            if (!is_whitespace(glyph))
+                            auto const& glyph_char = *std::next(multilineGlyphText.glyphText.begin(), i);
+                            if (!is_whitespace(glyph_char))
                             {
-                                auto const& glyphFont = glyphText.glyphText.glyph_font(glyph);
-                                auto const& glyphTexture = glyphText.glyphText.glyph_texture(glyph);
-                                vec3 glyphOrigin(
-                                    pos.x + glyphTexture.placement().x,
-                                    aGc.logical_coordinates().is_game_orientation() ?
-                                        pos.y + (glyphTexture.placement().y + -glyphFont.descender()) :
-                                        pos.y + glyphFont.height() - (glyphTexture.placement().y + -glyphFont.descender()) - glyphTexture.texture().extents().cy,
-                                    0.0);
-                                add_patch(*mf.mesh, mr, rect{ glyphOrigin, glyphTexture.texture().extents() }, glyphTexture.texture());
+                                auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyph_char);
+                                add_patch(*mf.mesh, mr, pos + vec3{ glyph_char.cell[1] } + quad{ glyph_char.shape[0], glyph_char.shape[1], glyph_char.shape[2], glyph_char.shape[3] }, glyphTexture.texture());
                                 mr.patches.back().material = material{ aMaterial.color, aMaterial.gradient, aMaterial.sharedTexture, mr.patches.back().material.texture, aMaterial.shaderEffect };
                             }
-                            pos.x += advance(glyph).cx;
                         }
                     };
                     switch(aData.textEffect)
@@ -169,13 +161,13 @@ namespace neogfx::game
                     case text_effect_type::Outline:
                         for (scalar oy = -aData.textEffectWidth; oy <= aData.textEffectWidth; ++oy)
                             for (scalar ox = -aData.textEffectWidth; ox <= aData.textEffectWidth; ++ox)
-                                mesh_line(point{ ox, oy }, aData.textEffectMaterial);
+                                mesh_line(vec2{ ox, oy }, aData.textEffectMaterial);
                         break;
                     default:
                         // todo
                         break;
                     }
-                    mesh_line(point{}, aData.ink);
+                    mesh_line(vec2{}, aData.ink);
                 }
             }
         };

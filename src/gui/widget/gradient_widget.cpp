@@ -742,7 +742,7 @@ namespace neogfx
         color backgroundColor = background_color();
         color frameColor = background_color().shaded(0x20);
         bool const selected = (iCurrentColorStop != std::nullopt && (**iCurrentColorStop).first() == aColorStop.first());
-        image stopGlyph{
+        image stopImage{
             dpi_select(stopGlpyhPattern, stopGlpyhHighDpiPattern),
             {
                 {"paper", transparentColor},
@@ -752,10 +752,10 @@ namespace neogfx
                 {"ink4", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40)},
                 {"ink9", aColorStop.second()}},
                 dpi_select(1.0, 2.0) };
-        auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
-        if (stopGlyphTexture == iStopTextures.end())
-            stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
-        aGc.draw_texture(r.top_left(), stopGlyphTexture->second);
+        auto stopTexture = iStopTextures.find(stopImage.hash());
+        if (stopTexture == iStopTextures.end())
+            stopTexture = iStopTextures.emplace(stopImage.hash(), stopImage).first;
+        aGc.draw_texture(r.top_left(), stopTexture->second);
     }
 
     void gradient_widget::draw_alpha_stop(i_graphics_context& aGc, neogfx::gradient::alpha_stop const& aAlphaStop) const
@@ -839,7 +839,7 @@ namespace neogfx
         color backgroundColor = background_color();
         color frameColor = background_color().shaded(0x20);
         bool const selected = (iCurrentAlphaStop != std::nullopt && (**iCurrentAlphaStop).first() == aAlphaStop.first());
-        image stopGlyph{
+        image stopImage{
             dpi_select(stopGlpyhPattern, stopGlpyhHighDpiPattern),
             {
                 { "paper", transparentColor },
@@ -849,9 +849,9 @@ namespace neogfx
                 { "ink4", !selected ? backgroundColor : service<i_app>().current_style().palette().color(color_role::Selection).lighter(0x40) },
                 { "ink9", color::White.with_alpha(aAlphaStop.second()) } },
             dpi_select(1.0, 2.0) };
-        auto stopGlyphTexture = iStopTextures.find(stopGlyph.hash());
-        if (stopGlyphTexture == iStopTextures.end())
-            stopGlyphTexture = iStopTextures.emplace(stopGlyph.hash(), stopGlyph).first;
-        aGc.draw_texture(r.top_left(), stopGlyphTexture->second);
+        auto stopTexture = iStopTextures.find(stopImage.hash());
+        if (stopTexture == iStopTextures.end())
+            stopTexture = iStopTextures.emplace(stopImage.hash(), stopImage).first;
+        aGc.draw_texture(r.top_left(), stopTexture->second);
     }
 }

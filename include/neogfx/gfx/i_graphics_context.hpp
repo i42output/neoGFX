@@ -79,12 +79,11 @@ namespace neogfx
             glyph_text glyphText;
             struct line
             {
-                point pos;
-                size extents;
+                quad bbox;
                 glyph_text::difference_type begin;
                 glyph_text::difference_type end;
             };
-            typedef neolib::vecarray<line, 8> lines_t;
+            typedef neolib::vecarray<line, 8, -1> lines_t;
             lines_t lines;
         };
         // exceptions
@@ -258,8 +257,8 @@ namespace neogfx
         virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_format& aTextFormat) const = 0;
         virtual void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
         virtual void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_format& aTextFormat) const = 0;
-        virtual void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_format& aTextFormat) const = 0;
+        virtual void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const = 0;
+        virtual void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const = 0;
         virtual void draw_glyphs(const point& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const = 0;
         virtual void draw_glyphs(const vec3& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const = 0;
         virtual char mnemonic() const = 0;

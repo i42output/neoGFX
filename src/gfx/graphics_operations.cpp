@@ -99,7 +99,7 @@ namespace neogfx
             return !!lhs == !!rhs && (lhs == std::nullopt || batchable(*lhs, *rhs));
         }
 
-        bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs)
+        bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph_char const& lhs, glyph_char const& rhs)
         {
             // either whitespace?
             if (is_whitespace(lhs) || is_whitespace(rhs))
@@ -113,9 +113,9 @@ namespace neogfx
             // neither are emoji...
             if (subpixel(lhs) != subpixel(rhs))
                 return false;
-            const i_glyph_texture& leftGlyphTexture = lhsText.glyph_texture(lhs);
-            const i_glyph_texture& rightGlyphTexture = rhsText.glyph_texture(rhs);
-            if (leftGlyphTexture.subpixel() != rightGlyphTexture.subpixel())
+            const i_glyph& leftGlyph = lhsText.glyph(lhs);
+            const i_glyph& rightGlyph = rhsText.glyph(rhs);
+            if (leftGlyph.subpixel() != rightGlyph.subpixel())
                 return false;
             return true;
         };

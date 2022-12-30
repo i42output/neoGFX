@@ -30,7 +30,6 @@
 #include "../../native/opengl.hpp"
 #include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
-#include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/i_texture_atlas.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
@@ -297,12 +296,12 @@ namespace neogfx
         }
     }
          
-    i_glyph_texture& native_font_face::glyph_texture(const glyph& aGlyph) const
+    i_glyph& native_font_face::glyph(const glyph_char& aGlyphChar) const
     {
         // todo: investigate why turning off sub-pixel doesn't produce same grayscale bitmap as Windows with ClearType disabled
         bool useSubpixelFiltering = true;
 
-        auto existingGlyph = iGlyphs.find(aGlyph.value);
+        auto existingGlyph = iGlyphs.find(aGlyphChar.value);
         if (existingGlyph != iGlyphs.end())
             return existingGlyph->second;
         try
@@ -311,11 +310,11 @@ namespace neogfx
             {
                 if (useSubpixelFiltering)
                 {
-                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
                 }
                 else
                 {
-                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyph.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
                 }
             }
             catch (freetype_error fe)
@@ -346,12 +345,12 @@ namespace neogfx
             if (!inHere)
             {
                 neolib::scoped_flag sf{ inHere };
-                glyph invalid = aGlyph;
+                glyph_char invalid = aGlyphChar;
                 auto const replacementGlyph = FT_Get_Char_Index(iHandle.freetypeFace, 0xFFFD);
                 if (replacementGlyph != 0)
                 {
                     invalid.value = replacementGlyph;
-                    return glyph_texture(invalid);
+                    return glyph(invalid);
                 }
             }
             return invalid_glyph();
@@ -376,25 +375,25 @@ namespace neogfx
             1.0, texture_sampling::Normal, pixelMode == glyph_pixel_mode::LCD ? texture_data_format::SubPixel : texture_data_format::Red);
 
         rect glyphRect{ subTexture.atlas_location() };
-        i_glyph_texture& glyphTexture = iGlyphs.insert(std::make_pair(aGlyph.value,
-            neogfx::glyph_texture{
+        i_glyph& glyphTexture = iGlyphs.insert(std::make_pair(aGlyphChar.value,
+            neogfx::glyph{
                 subTexture,
                 useSubpixelFiltering,
-                point{
-                    iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0,
-                    (iHandle.freetypeFace->glyph->metrics.horiBearingY - iHandle.freetypeFace->glyph->metrics.height) / 64.0 },
+                glyph_metrics{
+                    vec2{ iHandle.freetypeFace->glyph->metrics.width / 64.0, iHandle.freetypeFace->glyph->metrics.height / 64.0 }.round(),
+                    vec2{ iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0, iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0 }.round() },
                 pixelMode })).first->second;
 
         thread_local std::vector<GLubyte> glyphTextureData;
-        thread_local std::vector<std::array<GLubyte, 4>> subpixelGlyphTextureData;
+        thread_local std::vector<std::array<GLubyte, 4>> subpixelGlyphData;
         glyphTextureData.clear();
-        subpixelGlyphTextureData.clear();
+        subpixelGlyphData.clear();
 
         const GLubyte* textureData = 0;
         
         if (useSubpixelFiltering)
         {
-            subpixelGlyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
+            subpixelGlyphData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
             // sub-pixel FIR filter.
             static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
             for (uint32_t y = 0; y < bitmap.rows; y++)
@@ -408,10 +407,10 @@ namespace neogfx
                         if (s >= 0 && s <= static_cast<int32_t>(bitmap.width) - 1)
                             alpha += static_cast<uint8_t>(bitmap.buffer[s + bitmap.pitch * y] * coefficients[z + 2]);
                     }
-                    subpixelGlyphTextureData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+                    subpixelGlyphData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
                 }
             }
-            textureData = &subpixelGlyphTextureData[0][0];
+            textureData = &subpixelGlyphData[0][0];
         }
         else
         {
@@ -440,7 +439,7 @@ namespace neogfx
         return glyphTexture;
     }
 
-    i_glyph_texture& native_font_face::invalid_glyph() const
+    i_glyph& native_font_face::invalid_glyph() const
     {
         if (iInvalidGlyph == std::nullopt)
         {
@@ -450,7 +449,9 @@ namespace neogfx
             iInvalidGlyph.emplace(
                 subTexture,
                 true,
-                point{},
+                glyph_metrics{
+                    vec2{ em_size().cx, ascender() }.ceil(),
+                    vec2{} },
                 glyph_pixel_mode::LCD);
             graphics_context gc{ iInvalidGlyph->texture() };
             auto r = iInvalidGlyph->texture().atlas_location().deflated(neogfx::size{ 1.0, 1.0 });

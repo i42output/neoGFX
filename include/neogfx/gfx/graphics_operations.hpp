@@ -440,7 +440,7 @@ namespace neogfx
 
         bool batchable(const operation& aLeft, const operation& aRight);
         bool batchable(text_format const& aLeft, text_format const& aRight);
-        bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph const& lhs, glyph const& rhs);
+        bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph_char const& lhs, glyph_char const& rhs);
 
         typedef std::vector<operation> queue;
         typedef std::pair<operation const*, operation const*> batch;

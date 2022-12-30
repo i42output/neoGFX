@@ -623,8 +623,8 @@ namespace neogfx
         auto multilineGlyphText = to_multiline_glyph_text(aText, aMaxWidth);
         size result;
         for (auto& line : multilineGlyphText.lines)
-            result.cx = std::max(result.cx, line.extents.cx);
-        result.cy = (!multilineGlyphText.lines.empty() ? multilineGlyphText.lines.back().pos.y + multilineGlyphText.lines.back().extents.cy : 0.0);
+            result.cx = std::max(result.cx, line.bbox[1].x);
+        result.cy = (!multilineGlyphText.lines.empty() ? multilineGlyphText.lines.back().bbox[1].y : 0.0);
         return result;
     }
 
@@ -731,7 +731,7 @@ namespace neogfx
         {
             if (line.begin == line.end)
                 continue;
-            draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aTextFormat);
+            draw_glyph_text(aPoint, multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aTextFormat);
         }
     }
 
@@ -770,7 +770,7 @@ namespace neogfx
         {
             if (line.begin == line.end)
                 continue;
-            draw_glyph_text(aPoint + line.pos.to_vec3(), multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aTextFormat);
+            draw_glyph_text(aPoint, multilineGlyphText.glyphText, multilineGlyphText.glyphText.begin() + line.begin, multilineGlyphText.glyphText.begin() + line.end, aTextFormat);
         }
     }
 
@@ -1151,99 +1151,113 @@ namespace neogfx
     graphics_context::multiline_glyph_text graphics_context::to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment) const
     {
         multiline_glyph_text result{ aText };
-        typedef std::pair<glyph_text::const_iterator, glyph_text::const_iterator> line_t;
+        typedef std::pair<glyph_text::iterator, glyph_text::iterator> line_t;
         typedef std::vector<line_t> lines_t;
         lines_t lines;
-        std::array<glyph, 2> delimeters = { glyph{ text_category::Whitespace, '\r' }, glyph{ text_category::Whitespace, '\n' } };
-        neolib::tokens(result.glyphText.cbegin(), result.glyphText.cend(), delimeters.begin(), delimeters.end(), lines, 0, false);
+        std::array<glyph_char, 2> delimeters = { glyph_char{ '\r', {}, text_category::Whitespace }, glyph_char{ '\n', {}, text_category::Whitespace } };
+        neolib::tokens(result.glyphText.begin(), result.glyphText.end(), delimeters.begin(), delimeters.end(), lines, 0, false);
         vec3 pos;
         dimension maxLineWidth = 0.0;
         for (lines_t::const_iterator i = lines.begin(); i != lines.end(); ++i)
         {
             auto const& line = (logical_coordinates().is_gui_orientation() ? *i : *(lines.rbegin() + (i - lines.begin())));
-            if (aMaxWidth == 0)
+            glyph_text::iterator lineStart = line.first;
+            glyph_text::iterator lineEnd = line.second;
+            if (lineStart != lineEnd)
             {
-                vec3 linePos = pos;
-                size lineExtent = from_device_units(result.glyphText.extents(line.first, line.second));
-                result.lines.push_back(multiline_glyph_text::line{ linePos, lineExtent.to_vec2(), std::distance(result.glyphText.cbegin(), line.first), std::distance(result.glyphText.cbegin(), line.second) });
-                maxLineWidth = std::max(maxLineWidth, lineExtent.cx);
-                pos.y += lineExtent.cy;
-            }
-            else
-            {
-                glyph_text::const_iterator next = line.first;
-                glyph_text::const_iterator lineStart = next;
-                glyph_text::const_iterator lineEnd = line.second;
-                dimension maxWidth = to_device_units(size(aMaxWidth, 0.0)).cx;
-                dimension lineWidth = 0.0;
-                while (next != line.second)
+                if (aMaxWidth == 0)
                 {
-                    bool gotLine = false;
-                    if (lineWidth + result.glyphText.extents(*next).cx > maxWidth)
+                    auto const& glyphs = std::ranges::subrange(lineStart, lineEnd);
+                    result.lines.push_back(multiline_glyph_text::line{
+                        {},
+                        std::distance(result.glyphText.begin(), lineStart), std::distance(result.glyphText.begin(), lineEnd) });
+                    auto const& firstGlyph = *glyphs.begin();
+                    for (auto& glyph : glyphs)
+                        glyph.cell += vec2f{ static_cast<float>(-firstGlyph.cell[0].x), static_cast<float>(pos.y) };
+                    size lineExtent = from_device_units(result.glyphText.extents(lineStart, lineEnd));
+                    maxLineWidth = std::max(maxLineWidth, lineExtent.cx);
+                    pos.y += lineExtent.cy;
+                }
+                else
+                {
+                    dimension maxWidth = to_device_units(size(aMaxWidth, 0.0)).cx;
+                    glyph_text::iterator next = lineStart;
+                    while (next != line.second)
                     {
-                        if (next != lineStart)
+                        bool gotLine = false;
+                        if (next->cell[1].x - lineStart->cell[0].x > maxWidth)
                         {
-                            std::pair<glyph_text::const_iterator, glyph_text::const_iterator> wordBreak = result.glyphText.word_break(lineStart, next);
-                            lineWidth -= result.glyphText.extents(wordBreak.first, next, false).cx;
-                            lineEnd = wordBreak.first;
-                            next = wordBreak.second;
-                            if (lineEnd == next)
+                            if (next != lineStart)
                             {
-                                while (lineEnd != line.second && (lineEnd + 1)->source == wordBreak.first->source)
-                                    ++lineEnd;
-                                next = lineEnd;
+                                std::pair<glyph_text::iterator, glyph_text::iterator> wordBreak = result.glyphText.word_break(lineStart, next);
+                                lineEnd = wordBreak.first;
+                                next = wordBreak.second;
+                                if (lineEnd == next)
+                                {
+                                    while (lineEnd != line.second && (lineEnd + 1)->clusters == wordBreak.first->clusters)
+                                        ++lineEnd;
+                                    next = lineEnd;
+                                }
                             }
+                            else
+                                ++next;
+                            gotLine = true;
                         }
                         else
-                        {
-                            lineWidth += advance(*next).cx;
                             ++next;
+                        if (gotLine || next == line.second)
+                        {
+                            auto const& glyphs = std::ranges::subrange(lineStart, lineEnd);
+                            result.lines.push_back(multiline_glyph_text::line{
+                                {},
+                                std::distance(result.glyphText.begin(), lineStart), std::distance(result.glyphText.begin(), lineEnd) });
+                            for (auto& glyph : glyphs)
+                                glyph.cell += vec2f{ static_cast<float>(-lineStart->cell[0].x), static_cast<float>(pos.y) };
+                            size lineExtent = from_device_units(result.glyphText.extents(lineStart, lineEnd));
+                            maxLineWidth = std::max(maxLineWidth, lineExtent.cx);
+                            pos.y += lineExtent.cy;
+                            lineStart = next;
+                            lineEnd = line.second;
                         }
-                        gotLine = true;
-                    }
-                    else
-                    {
-                        lineWidth += advance(*next).cx;
-                        ++next;
-                    }
-                    if (gotLine || next == line.second)
-                    {
-                        lineWidth += (result.glyphText.extents(*std::prev(next)).cx - advance(*std::prev(next)).cx);
-                        vec3 linePos = pos;
-                        result.lines.push_back(multiline_glyph_text::line{ linePos, result.glyphText.extents(lineStart, lineEnd).to_vec2(), std::distance(result.glyphText.cbegin(), lineStart), std::distance(result.glyphText.cbegin(), lineEnd) });
-                        maxLineWidth = std::max(maxLineWidth, lineWidth);
-                        pos.y += result.lines.back().extents.cy;
-                        lineStart = next;
-                        lineEnd = line.second;
-                        lineWidth = 0;
                     }
                 }
             }
-            if (line.first == line.second)
+            else
                 pos.y += aText.glyph_font().height();
         }
 
         for (auto& line : result.lines)
         {
-            auto const textDirection = glyph_text_direction(result.glyphText.cbegin() + line.begin, result.glyphText.cbegin() + line.end);
+            auto const glyphs = std::ranges::subrange(result.glyphText.cbegin() + line.begin, result.glyphText.cbegin() + line.end);
+            auto const textDirection = glyph_text_direction(glyphs.begin(), glyphs.end());
+            line.bbox[0] = glyphs.begin()->cell[0];
+            line.bbox[1] = std::prev(glyphs.end())->cell[1];
+            line.bbox[2] = std::prev(glyphs.end())->cell[2];
+            line.bbox[3] = glyphs.begin()->cell[3];
             if ((aAlignment == alignment::Left && textDirection == text_direction::RTL) || (aAlignment == alignment::Right && textDirection == text_direction::LTR))
-                line.pos.x += maxLineWidth - from_device_units(size{ line.extents.cx, 0.0 }).cx;
+            {
+                auto const adjust = maxLineWidth - from_device_units(size{ line.bbox[1].x - line.bbox[0].x, 0.0 }).cx;
+                line.bbox += vec3{ adjust, 0.0 };
+            }
             else if (aAlignment == alignment::Center)
-                line.pos.x += std::ceil((maxLineWidth - from_device_units(size{ line.extents.cx, 0.0 }).cx) / 2);
+            {
+                auto const adjust = maxLineWidth - from_device_units(size{ line.bbox[1].x - line.bbox[0].x, 0.0 }).cx / 2;
+                line.bbox += vec3{ adjust, 0.0 };
+            }
         }
 
         return result;
     }
 
-    void graphics_context::draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph(const point& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const
     {
-        draw_glyph(aPoint.to_vec3(), aText, aGlyph, aTextFormat);
+        draw_glyph(aPoint.to_vec3(), aText, aGlyphChar, aTextFormat);
     }
 
-    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyph, std::next(&aGlyph), text_format_span{ 0, 1, aTextFormat }, mnemonics_shown() });
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyphChar, std::next(&aGlyphChar), text_format_span{ 0, 1, aTextFormat }, mnemonics_shown() });
     }
 
     void graphics_context::draw_glyphs(const point& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const

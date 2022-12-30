@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/group_box.hpp>

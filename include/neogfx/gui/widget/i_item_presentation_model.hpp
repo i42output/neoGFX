@@ -24,7 +24,7 @@
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/app/i_palette.hpp>
 #include <neogfx/gui/widget/i_button.hpp>

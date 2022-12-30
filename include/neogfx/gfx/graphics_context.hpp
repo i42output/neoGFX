@@ -195,8 +195,8 @@ namespace neogfx
         void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_format& aTextFormat) const final;
         void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment = alignment::Left) const final;
         void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_format& aTextFormat) const final;
-        void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph& aGlyph, const text_format& aTextFormat) const final;
+        void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const final;
+        void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const final;
         void draw_glyphs(const point& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const final;
         void draw_glyphs(const vec3& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const final;
         char mnemonic() const final;

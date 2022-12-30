@@ -28,8 +28,8 @@ namespace neogfx
 {
     class i_native_font;
 
-    struct glyph;
-    class i_glyph_texture;
+    struct glyph_char;
+    class i_glyph;
 
     enum class kerning_method
     {
@@ -76,6 +76,6 @@ namespace neogfx
         virtual i_native_font_face& fallback() const = 0;
         virtual void* handle() const = 0;
         virtual glyph_index_t glyph_index(char32_t aCodePoint) const = 0;
-        virtual i_glyph_texture& glyph_texture(const glyph& aGlyph) const = 0;
+        virtual i_glyph& glyph(const glyph_char& aGlyphChar) const = 0;
     };
 }

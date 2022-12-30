@@ -25,7 +25,7 @@
 #include <neogfx/core/units.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/gradient.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 
 namespace neogfx
 {

@@ -1,4 +1,4 @@
-// glyph_texture.hpp
+// glyph_text.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -17,27 +17,37 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/glyph.hpp>
 
 namespace neogfx
 {
-    class glyph_texture : public i_glyph_texture
+    glyph::glyph(const i_sub_texture& aTexture, bool aSubpixel, const glyph_metrics& aMetrics, glyph_pixel_mode aPixelMode) :
+        iTexture(aTexture), iSubpixel{ aSubpixel }, iMetrics{ aMetrics }, iPixelMode{ aPixelMode }
     {
-    public:
-        glyph_texture(const i_sub_texture& aTexture, bool aSubpixel, const point& aPlacement, glyph_pixel_mode aPixelMode);
-        ~glyph_texture();
-    public:
-        const i_sub_texture& texture() const override;
-        bool subpixel() const override;
-        const point& placement() const override;
-        glyph_pixel_mode pixel_mode() const override;
-    private:
-        const i_sub_texture& iTexture;
-        bool iSubpixel;
-        const point iPlacement;
-        glyph_pixel_mode iPixelMode;
-    };
+    }
+
+    glyph::~glyph()
+    {
+    }
+
+    const i_sub_texture& glyph::texture() const
+    {
+        return iTexture;
+    }
+
+    bool glyph::subpixel() const
+    {
+        return iSubpixel && iPixelMode == glyph_pixel_mode::LCD;
+    }
+
+    const glyph_metrics& glyph::metrics() const
+    {
+        return iMetrics;
+    }
+
+    glyph_pixel_mode glyph::pixel_mode() const
+    {
+        return iPixelMode;
+    }
 }

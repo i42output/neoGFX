@@ -1,4 +1,4 @@
-// glyph.cpp
+// glyph_char.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -21,12 +21,11 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
-#include <neogfx/gfx/text/glyph.ipp>
+#include <neogfx/gfx/text/glyph_text.ipp>
 
 namespace neogfx
 {
-    template class basic_glyph_text_content<neolib::vecarray<glyph, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph const*, glyph*>;
+    template class basic_glyph_text_content<neolib::vecarray<glyph_char, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph_char const*, glyph_char*>;
 
     glyph_text::glyph_text(font const& aFont) :
         iContent{ service<i_font_manager>().glyph_text_factory().create_glyph_text(aFont).content() }
@@ -59,14 +58,14 @@ namespace neogfx
         return content().glyph_font();
     }
 
-    const font& glyph_text::glyph_font(const_reference aGlyph) const
+    const font& glyph_text::glyph_font(const_reference aGlyphChar) const
     {
-        return content().glyph_font(aGlyph);
+        return content().glyph_font(aGlyphChar);
     }
 
-    const i_glyph_texture& glyph_text::glyph_texture(const_reference aGlyph) const
+    const i_glyph& glyph_text::glyph(const_reference aGlyphChar) const
     {
-        return content().glyph_texture(aGlyph);
+        return content().glyph(aGlyphChar);
     }
 
     bool glyph_text::empty() const
@@ -89,14 +88,14 @@ namespace neogfx
         return content().extents();
     }
 
-    size glyph_text::extents(const_reference aGlyph) const
+    size glyph_text::extents(const_reference aGlyphChar) const
     {
-        return content().extents(aGlyph);
+        return content().extents(aGlyphChar);
     }
 
-    size glyph_text::extents(const_iterator aBegin, const_iterator aEnd, bool aEndIsLineEnd) const
+    size glyph_text::extents(const_iterator aBegin, const_iterator aEnd) const
     {
-        return content().extents(aBegin, aEnd, aEndIsLineEnd);
+        return content().extents(aBegin, aEnd);
     }
 
     void glyph_text::set_extents(const neogfx::size& aExtents)
@@ -105,6 +104,11 @@ namespace neogfx
     }
 
     std::pair<glyph_text::const_iterator, glyph_text::const_iterator> glyph_text::word_break(const_iterator aBegin, const_iterator aFrom) const
+    {
+        return content().word_break(aBegin, aFrom);
+    }
+
+    std::pair<glyph_text::iterator, glyph_text::iterator> glyph_text::word_break(const_iterator aBegin, const_iterator aFrom)
     {
         return content().word_break(aBegin, aFrom);
     }

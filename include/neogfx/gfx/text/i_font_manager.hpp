@@ -24,7 +24,7 @@
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 
 namespace neogfx
 {

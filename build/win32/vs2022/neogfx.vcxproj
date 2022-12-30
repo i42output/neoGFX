@@ -373,9 +373,10 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph_text.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_emoji_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph_texture.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\text_category_map.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\utility.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_buffer.hpp" />
@@ -558,7 +559,6 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\text\native\glyph_texture.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\virtual_window.hpp" />
@@ -645,10 +645,10 @@
     <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font_manager.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\text\glyph.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\text\glyph_text.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\text\native\glyph_texture.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\text\native\glyph.cpp" />
     <ClCompile Include="..\..\..\src\gfx\vertex_shader.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\color_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
@@ -791,7 +791,7 @@
     <None Include="..\..\..\include\neogfx\gfx\color.inl" />
     <None Include="..\..\..\include\neogfx\gfx\path.inl" />
     <None Include="..\..\..\include\neogfx\gfx\shader_program.inl" />
-    <None Include="..\..\..\include\neogfx\gfx\text\glyph.ipp" />
+    <None Include="..\..\..\include\neogfx\gfx\text\glyph_text.ipp" />
     <None Include="..\..\..\include\neogfx\gui\view\view_container.ipp" />
     <None Include="..\..\..\include\neogfx\gui\widget\button.ipp" />
     <None Include="..\..\..\include\neogfx\gui\widget\scrollable_widget.ipp" />

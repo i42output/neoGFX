@@ -46,6 +46,7 @@
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
+#include <neogfx/gfx/text/glyph_text.ipp>
 #include "../../gfx/text/native/native_font_face.hpp"
 #include "../../gfx/text/native/native_font.hpp"
 
@@ -171,7 +172,7 @@ namespace neogfx
         struct cluster
         {
             std::string::size_type from;
-            glyph::flags_e flags;
+            glyph_char::flags_e flags;
         };
         typedef std::vector<cluster> cluster_map_t;
         typedef std::tuple<const char32_t*, const char32_t*, text_direction, bool, hb_script_t> glyph_run;
@@ -205,9 +206,9 @@ namespace neogfx
                 hb_buffer_set_direction(iBuf, std::get<2>(aGlyphRun) == text_direction::RTL ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
                 hb_buffer_set_cluster_level(iBuf, HB_BUFFER_CLUSTER_LEVEL_CHARACTERS);
-                std::vector<uint32_t> reversed;
+                std::vector<std::uint32_t> reversed;
                 if (std::get<2>(aGlyphRun) != text_direction::None_RTL)
-                    hb_buffer_add_utf32(iBuf, reinterpret_cast<const uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
+                    hb_buffer_add_utf32(iBuf, reinterpret_cast<const std::uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
                 else
                 {
                     reversed.reserve(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
@@ -248,29 +249,29 @@ namespace neogfx
                 iGlyphPos.assign(glyphPos, glyphPos + glyphCount);
                 iGlyphCount = glyphCount;
                 if (std::get<2>(aGlyphRun) == text_direction::None_RTL)
-                    for (uint32_t i = 0; i < iGlyphCount; ++i)
-                        iGlyphInfo[i].cluster = static_cast<uint32_t>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster);
+                    for (std::uint32_t i = 0; i < iGlyphCount; ++i)
+                        iGlyphInfo[i].cluster = static_cast<std::uint32_t>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster);
             }
             ~glyphs()
             {
                 hb_buffer_clear_contents(iBuf);
             }
         public:
-            uint32_t glyph_count() const
+            std::uint32_t glyph_count() const
             {
                 return iGlyphCount;
             }
-            const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
+            const hb_glyph_info_t& glyph_info(std::uint32_t aIndex) const
             {
                 return iGlyphInfo[aIndex];
             }
-            const hb_glyph_position_t& glyph_position(uint32_t aIndex) const
+            const hb_glyph_position_t& glyph_position(std::uint32_t aIndex) const
             {
                 return iGlyphPos[aIndex];
             }
             bool needs_fallback_font() const
             {
-                for (uint32_t i = 0; i < glyph_count(); ++i)
+                for (std::uint32_t i = 0; i < glyph_count(); ++i)
                 {
                     auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
                     if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
@@ -283,12 +284,12 @@ namespace neogfx
             hb_font_t* iFont;
             const glyph_text_factory::glyph_run& iGlyphRun;
             hb_buffer_t* iBuf;
-            uint32_t iGlyphCount;
+            std::uint32_t iGlyphCount;
             std::vector<hb_glyph_info_t> iGlyphInfo;
             std::vector<hb_glyph_position_t> iGlyphPos;
         };
         typedef std::list<glyphs> glyphs_list;
-        typedef std::vector<std::pair<glyphs_list::const_iterator, uint32_t>> result_type;
+        typedef std::vector<std::pair<glyphs_list::const_iterator, std::uint32_t>> result_type;
     public:
         glyph_shapes(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun)
         {
@@ -307,7 +308,7 @@ namespace neogfx
                 else
                 {
                     std::u32string lastResort{ std::get<0>(aGlyphRun), std::get<1>(aGlyphRun) };
-                    for (uint32_t i = 0; i < iGlyphsList.back().glyph_count(); ++i)
+                    for (std::uint32_t i = 0; i < iGlyphsList.back().glyph_count(); ++i)
                         if (iGlyphsList.back().glyph_info(i).codepoint == 0)
                             lastResort[iGlyphsList.back().glyph_info(i).cluster] = neolib::INVALID_CHAR32; // replacement character
                     iGlyphsList.emplace_back(glyphs{ aParent, aFont, glyph_text_factory::glyph_run{&lastResort[0], &lastResort[0] + lastResort.size(), std::get<2>(aGlyphRun), std::get<3>(aGlyphRun), std::get<4>(aGlyphRun) } });
@@ -317,10 +318,10 @@ namespace neogfx
             fontsTried.clear();
             auto const g = iGlyphsList.begin();
             iResults.reserve(g->glyph_count());
-            for (uint32_t i = 0; i < g->glyph_count(); ++i)
+            for (std::uint32_t i = 0; i < g->glyph_count(); ++i)
             {
                 auto const& gi = g->glyph_info(i);
-                auto glyph_match = [&](glyphs const& aGlyphs, uint32_t aIndex) -> bool
+                auto glyph_match = [&](glyphs const& aGlyphs, std::uint32_t aIndex) -> bool
                 {
                     auto const& hgi = aGlyphs.glyph_info(aIndex);
                     if (hgi.cluster != gi.cluster)
@@ -336,7 +337,7 @@ namespace neogfx
                     bool found = false;
                     while (!found && next != iGlyphsList.end())
                     {
-                        for (uint32_t j = 0; j < next->glyph_count(); ++j)
+                        for (std::uint32_t j = 0; j < next->glyph_count(); ++j)
                         {
                             if (glyph_match(*next, j))
                             {
@@ -350,27 +351,27 @@ namespace neogfx
             }
         }
     public:
-        uint32_t glyph_count() const
+        std::uint32_t glyph_count() const
         {
-            return static_cast<uint32_t>(iResults.size());
+            return static_cast<std::uint32_t>(iResults.size());
         }
-        const hb_glyph_info_t& glyph_info(uint32_t aIndex) const
+        const hb_glyph_info_t& glyph_info(std::uint32_t aIndex) const
         {
             return iResults[aIndex].first->glyph_info(iResults[aIndex].second);
         }
-        const hb_glyph_position_t& glyph_position(uint32_t aIndex) const
+        const hb_glyph_position_t& glyph_position(std::uint32_t aIndex) const
         {
             return iResults[aIndex].first->glyph_position(iResults[aIndex].second);
         }
-        bool using_fallback(uint32_t aIndex) const
+        bool using_fallback(std::uint32_t aIndex) const
         {
             return iResults[aIndex].first != iGlyphsList.begin();
         }
-        uint32_t fallback_index(uint32_t aIndex) const
+        std::uint32_t fallback_index(std::uint32_t aIndex) const
         {
             if (!using_fallback(aIndex))
                 throw not_using_fallback();
-            return static_cast<uint32_t>(std::distance(iGlyphsList.begin(), iResults[aIndex].first) - 1);
+            return static_cast<std::uint32_t>(std::distance(iGlyphsList.begin(), iResults[aIndex].first) - 1);
         }
     private:
         glyphs_list iGlyphsList;
@@ -403,7 +404,7 @@ namespace neogfx
         } });
     }
 
-    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char32_t const*  aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector)
     {
         auto refResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
         auto& result = *refResult;
@@ -631,21 +632,24 @@ namespace neogfx
             bool drawMnemonic = (i > 0 && std::get<3>(runs[i - 1]));
             std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
             glyph_shapes shapes{ aGc, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
+
+            vec2f previousAdvance = {};
+            quadf_2d previousQuad = {};
             
-            for (uint32_t j = 0; j < shapes.glyph_count(); ++j)
+            for (std::uint32_t j = 0; j < shapes.glyph_count(); ++j)
             {
                 std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;
                 std::u32string::size_type endCluster;
                 if (std::get<2>(runs[i]) != text_direction::RTL)
                 {
-                    uint32_t k = j + 1;
+                    std::uint32_t k = j + 1;
                     while (k < shapes.glyph_count() && shapes.glyph_info(k).cluster == startCluster)
                         ++k;
                     endCluster = (k < shapes.glyph_count() ? shapes.glyph_info(k).cluster : startCluster + 1);
                 }
                 else
                 {
-                    uint32_t k = j;
+                    std::uint32_t k = j;
                     while (k > 0 && shapes.glyph_info(k).cluster == startCluster)
                         --k;
                     endCluster = (shapes.glyph_info(k).cluster != startCluster ? shapes.glyph_info(k).cluster : startCluster + 1);
@@ -664,19 +668,50 @@ namespace neogfx
                     for (auto fi = shapes.fallback_index(j); font != selectedFont && fi > 0; --fi)
                         font = font.has_fallback() ? font.fallback() : selectedFont;
                 }
-                size advance = textDirections[startCluster].category != text_category::Emoji ?
-                    size{ shapes.glyph_position(j).x_advance / 64.0, shapes.glyph_position(j).y_advance / 64.0 } :
-                    size{ font.height(), 0.0 };
+                    
+                auto const& glyphPosition = shapes.glyph_position(j);
+
+                vec2f const advance = textDirections[startCluster].category != text_category::Emoji ?
+                    vec2{ glyphPosition.x_advance / 64.0, glyphPosition.y_advance / 64.0 }.round() :
+                    vec2{ font.height(), 0.0 }.round();
+                vec2f const offset = vec2{ glyphPosition.x_offset / 64.0, glyphPosition.y_offset / 64.0 }.round();
+                float const minCellHeight = static_cast<float>(font.height());
+                
                 auto& newGlyph = result.emplace_back(
-                    textDirections[startCluster],
                     shapes.glyph_info(j).codepoint,
-                    glyph::flags_e{},
-                    glyph::source_type{ static_cast<uint32_t>(startCluster), static_cast<uint32_t>(endCluster) },
+                    glyph_char::cluster_range{ static_cast<std::uint32_t>(startCluster), static_cast<std::uint32_t>(endCluster) },
+                    textDirections[startCluster],
+                    glyph_char::flags_e{},
                     font.id(),
-                    advance, point(shapes.glyph_position(j).x_offset / 64.0, shapes.glyph_position(j).y_offset / 64.0),
-                    size{advance.cx, font.height()});
-                if (aGc.logical_coordinates().is_gui_orientation())
-                    newGlyph.offset.y = -newGlyph.offset.y;
+                    quadf_2d{},
+                    quadf_2d{});
+
+                auto const& glyphTexture = font.glyph(newGlyph);
+                auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
+                float const minCellWidth = glyphTextureExtents.cx;
+                auto const& glyphMetrics = glyphTexture.metrics();
+
+                newGlyph.cell = quadf_2d{
+                    previousQuad[0] + previousAdvance,
+                    previousQuad[0] + previousAdvance + vec2f{ std::max(advance.x, minCellWidth), 0.0f },
+                    previousQuad[0] + previousAdvance + advance.max(vec2f{ minCellWidth, minCellHeight }),
+                    previousQuad[0] + previousAdvance + vec2f{ 0.0f, std::max(advance.y, minCellHeight) } };
+
+                newGlyph.shape = quadf_2d{
+                    offset,
+                    offset + vec2f{ glyphTextureExtents.cx, 0.0f },
+                    offset + vec2f{ glyphTextureExtents.cx, glyphTextureExtents.cy },
+                    offset + vec2f{ 0.0f, glyphTextureExtents.cy } };
+
+                vec2f const shapeAdjust = vec2{
+                    glyphMetrics.bearing.x,
+                    glyphMetrics.bearing.y - glyphMetrics.extents.y + -font.descender() }.as<float>();
+                newGlyph.shape += shapeAdjust;
+
+                if (aGc.logical_coordinate_system() == logical_coordinate_system::AutomaticGui)
+                    for (auto& v : newGlyph.shape)
+                        v.y = -v.y + minCellHeight;
+
                 if (category(newGlyph) == text_category::Whitespace)
                     newGlyph.value = aUtf32Begin[startCluster];
                 else if (category(newGlyph) == text_category::Emoji)
@@ -691,6 +726,9 @@ namespace neogfx
                     set_subpixel(newGlyph, true);
                 if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
                     set_mnemonic(newGlyph, true);
+
+                previousAdvance = advance;
+                previousQuad = newGlyph.cell;
             }
         }
         if (hasEmojis)
@@ -700,21 +738,21 @@ namespace neogfx
             emojiResult.line_breaks() = result.line_breaks();
             for (auto i = result.begin(); i != result.end(); ++i)
             {
-                auto cluster = i->source.first;
+                auto cluster = i->clusters.first;
                 auto chStart = aUtf32Begin[cluster];
                 if (category(*i) == text_category::Emoji)
                 {
-                    if (!emojiResult.empty() && is_emoji(emojiResult.back()) && emojiResult.back().source == i->source)
+                    if (!emojiResult.empty() && is_emoji(emojiResult.back()) && emojiResult.back().clusters == i->clusters)
                     {
                         // probable variant selector fubar'd by harfbuzz
-                        auto s = emojiResult.back().source;
+                        auto s = emojiResult.back().clusters;
                         if (s.second < codePointCount && get_text_category(service<i_font_manager>().emoji_atlas(), aUtf32Begin[s.second]) == text_category::Control)
                         {
                             ++s.first;
                             ++s.second;
-                            i->source = s;
+                            i->clusters = s;
                             set_category(*i, text_category::Control);
-                            i->advance = size{};
+                            i->cell = {};
                         }
                     }
                     std::u32string sequence;
@@ -740,7 +778,7 @@ namespace neogfx
                     {
                         auto g = *i;
                         g.value = service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height());
-                        g.source = glyph::source_type{ g.source.first, g.source.first + static_cast<uint32_t>(sequence.size()) };
+                        g.clusters = glyph_char::cluster_range{ g.clusters.first, g.clusters.first + static_cast<std::uint32_t>(sequence.size()) };
                         emojiResult.push_back(g);
                         i = j - 1;
                     }
@@ -748,7 +786,7 @@ namespace neogfx
                         emojiResult.push_back(*i);
                     if (absorbNext)
                     {
-                        emojiResult.back().source = glyph::source_type{ emojiResult.back().source.first, emojiResult.back().source.first + static_cast<uint32_t>(sequence.size()) + 1u };
+                        emojiResult.back().clusters = glyph_char::cluster_range{ emojiResult.back().clusters.first, emojiResult.back().clusters.first + static_cast<std::uint32_t>(sequence.size()) + 1u };
                         ++i;
                     }
                 }
@@ -997,23 +1035,23 @@ namespace neogfx
         (void)aDevice;
     }
 
-    uint32_t font_manager::font_family_count() const
+    std::uint32_t font_manager::font_family_count() const
     {
-        return static_cast<uint32_t>(iFontFamilies.size());
+        return static_cast<std::uint32_t>(iFontFamilies.size());
     }
 
-    i_string const& font_manager::font_family(uint32_t aFamilyIndex) const
+    i_string const& font_manager::font_family(std::uint32_t aFamilyIndex) const
     {
         if (aFamilyIndex < font_family_count())
             return std::next(iFontFamilies.begin(), aFamilyIndex)->first;
         throw bad_font_family_index();
     }
 
-    uint32_t font_manager::font_style_count(uint32_t aFamilyIndex) const
+    std::uint32_t font_manager::font_style_count(std::uint32_t aFamilyIndex) const
     {
         if (aFamilyIndex < font_family_count())
         {
-            uint32_t styles = 0;
+            std::uint32_t styles = 0;
             for (auto& font : std::next(iFontFamilies.begin(), aFamilyIndex)->second)
                 styles += font->style_count();
             return styles;
@@ -1021,7 +1059,7 @@ namespace neogfx
         throw bad_font_family_index();
     }
 
-    font_style font_manager::font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
+    font_style font_manager::font_style(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const
     {
         if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
         {
@@ -1035,7 +1073,7 @@ namespace neogfx
         throw bad_font_family_index();
     }
 
-    i_string const& font_manager::font_style_name(uint32_t aFamilyIndex, uint32_t aStyleIndex) const
+    i_string const& font_manager::font_style_name(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const
     {
         if (aFamilyIndex < font_family_count() && aStyleIndex < font_style_count(aFamilyIndex))
         {
@@ -1106,10 +1144,10 @@ namespace neogfx
             family = iFontFamilies.find(default_system_font_info(system_font_role::Widget)->family_name());
         if (family == iFontFamilies.end())
             throw no_matching_font_found();
-        std::multimap<uint32_t, native_font_list::iterator> matches;
+        std::multimap<std::uint32_t, native_font_list::iterator> matches;
         for (auto& f : family->second)
         {
-            for (uint32_t s = 0; s < f->style_count(); ++s)
+            for (std::uint32_t s = 0; s < f->style_count(); ++s)
                 if (neolib::ci_equal_to{}(f->style_name(s), aStyleName))
                     return *f;
         }
@@ -1118,12 +1156,12 @@ namespace neogfx
 
     namespace
     {
-        uint32_t matching_bits(uint32_t lhs, uint32_t rhs)
+        std::uint32_t matching_bits(std::uint32_t lhs, std::uint32_t rhs)
         {
             if (lhs == rhs)
                 return 32;
-            uint32_t matches = 0;
-            uint32_t test = 1;
+            std::uint32_t matches = 0;
+            std::uint32_t test = 1;
             while (test != 0)
             {
                 if ((lhs & rhs) & test)
@@ -1145,7 +1183,7 @@ namespace neogfx
             throw no_matching_font_found();
         struct match
         {
-            uint32_t matchingBits;
+            std::uint32_t matchingBits;
             neogfx::font_style style;
             font_weight weight;
             i_native_font* font;
@@ -1155,9 +1193,9 @@ namespace neogfx
         std::optional<match> bestOtherFont;
         for (auto& f : family->second)
         {
-            for (uint32_t s = 0; s < f->style_count(); ++s)
+            for (std::uint32_t s = 0; s < f->style_count(); ++s)
             {
-                auto const matchingBits = matching_bits(static_cast<uint32_t>(f->style(s)), static_cast<uint32_t>(aStyle));
+                auto const matchingBits = matching_bits(static_cast<std::uint32_t>(f->style(s)), static_cast<std::uint32_t>(aStyle));
                 auto const& styleName = f->style_name(s);
                 auto const weight = font::weight_from_style_name(styleName);
                 if (weight <= font_weight::Normal && (

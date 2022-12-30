@@ -22,8 +22,8 @@
 #include <boost/algorithm/string.hpp> 
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
-#include <neogfx/gfx/text/i_glyph_texture.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
+#include <neogfx/gfx/text/i_glyph.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include "native/i_native_font.hpp"
 
@@ -628,9 +628,9 @@ namespace neogfx
         return native_font_face().fixed_size(aFixedSizeIndex);
     }
 
-    const i_glyph_texture& font::glyph_texture(const glyph& aGlyph) const
+    const i_glyph& font::glyph(const glyph_char& aGlyphChar) const
     {
-        return native_font_face().glyph_texture(aGlyph);
+        return native_font_face().glyph(aGlyphChar);
     }
 
     bool font::operator==(const font& aRhs) const

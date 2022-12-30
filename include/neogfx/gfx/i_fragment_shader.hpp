@@ -25,7 +25,7 @@
 #include <neogfx/game/gradient.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
-#include <neogfx/gfx/text/glyph.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 
 namespace neogfx
@@ -75,7 +75,7 @@ namespace neogfx
         typedef i_glyph_shader abstract_type;
     public:
         virtual void clear_glyph() = 0;
-        virtual void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph& aGlyph) = 0;
+        virtual void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar) = 0;
     };
 
     class i_stipple_shader : public i_fragment_shader
