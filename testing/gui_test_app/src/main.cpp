@@ -271,15 +271,6 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
-        ng::window testWindow{ng::size{400, 400}, ng::window_style::Default};
-
-        testWindow.painted([&](ng::i_graphics_context& aGc)
-            {
-                aGc.flush();
-                aGc.draw_multiline_text(ng::point{ 50.0, 50.0 }, "This is,\na test.", window.font().with_size(20), ng::text_format{ng::color::White, ng::color::Grey50});
-                aGc.flush();
-            });
-        
         window.labelDPI.set_text(ng::string{ (std::ostringstream{} << "DPI: " <<
             window.device_metrics().horizontal_dpi() << " x " << window.device_metrics().vertical_dpi()).str() });
 

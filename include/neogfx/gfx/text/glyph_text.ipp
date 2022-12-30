@@ -115,6 +115,12 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
+    void basic_glyph_text_content<Container, ConstIterator, Iterator>::clone(i_ref_ptr<abstract_type>& aClone) const
+    {
+        aClone = make_ref<self_type>(*this);
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
     bool basic_glyph_text_content<Container, ConstIterator, Iterator>::empty() const
     {
         return container_type::empty();

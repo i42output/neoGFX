@@ -29,6 +29,8 @@ namespace neogfx
     public:
         define_event(TextChanged, text_changed)
         define_event(TextGeometryChanged, text_geometry_changed)
+    private:
+        typedef std::variant<std::monostate, neogfx::glyph_text, neogfx::multiline_glyph_text> glyph_text_t;
     public:
         text_widget(std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
         text_widget(i_widget& aParent, std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
@@ -63,11 +65,11 @@ namespace neogfx
         size size_hint_extent() const;
     private:
         void init();
-        const neogfx::glyph_text& glyph_text() const;
+        const glyph_text_t& glyph_text() const;
         void reset_cache();
     private:
         string iText;
-        mutable std::optional<neogfx::glyph_text> iGlyphText;
+        mutable glyph_text_t iGlyphText;
         mutable optional_size iTextExtent;
         size_hint iSizeHint;
         mutable optional_size iSizeHintExtent;

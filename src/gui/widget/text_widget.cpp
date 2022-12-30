@@ -127,9 +127,9 @@ namespace neogfx
         if (appearance.effect())
             textPosition += size{ appearance.effect()->width() };
         if (multi_line())
-            aGc.draw_multiline_glyph_text(textPosition, glyph_text(), textSize.cx, appearance, iAlignment & neogfx::alignment::Horizontal);
+            aGc.draw_multiline_glyph_text(textPosition, std::get<multiline_glyph_text>(glyph_text()), appearance);
         else
-            aGc.draw_glyph_text(textPosition, glyph_text(), appearance);
+            aGc.draw_glyph_text(textPosition, std::get<neogfx::glyph_text>(glyph_text()), appearance);
     }
 
     void text_widget::set_font(optional_font const& aFont)
@@ -261,16 +261,9 @@ namespace neogfx
         graphics_context gc{ *this, graphics_context::type::Unattached };
         scoped_mnemonics sm{ gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) };
         if (multi_line())
-        {
-            if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
-                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), widget::minimum_size().cx - internal_spacing().size().cx);
-            else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
-                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), widget::maximum_size().cx - internal_spacing().size().cx);
-            else
-                iTextExtent = gc.multiline_glyph_text_extent(glyph_text(), 0);
-        }
+            iTextExtent = size{ std::get<multiline_glyph_text>(glyph_text()).bbox[2] - std::get<multiline_glyph_text>(glyph_text()).bbox[0] };
         else
-            iTextExtent = gc.glyph_text_extent(glyph_text());
+            iTextExtent = gc.glyph_text_extent(std::get<neogfx::glyph_text>(glyph_text()));
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
         if (text_format().effect())
@@ -327,21 +320,31 @@ namespace neogfx
         iSink += service<i_rendering_engine>().subpixel_rendering_changed(style_changed);
     }
 
-    const neogfx::glyph_text& text_widget::glyph_text() const
+    const text_widget::glyph_text_t& text_widget::glyph_text() const
     {
-        if (iGlyphText == std::nullopt)
+        if (std::holds_alternative<std::monostate>(iGlyphText))
         {
             graphics_context gc{ *this, graphics_context::type::Unattached };
             scoped_mnemonics sm(gc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
-            iGlyphText = gc.to_glyph_text(iText, font());
+            if (multi_line())
+            {
+                if (widget::has_minimum_size() && widget::minimum_size().cx != 0 && widget::minimum_size().cy == 0)
+                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), widget::minimum_size().cx - internal_spacing().size().cx, iAlignment & neogfx::alignment::Horizontal);
+                else if (widget::has_maximum_size() && widget::maximum_size().cx != size::max_dimension())
+                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), widget::maximum_size().cx - internal_spacing().size().cx, iAlignment & neogfx::alignment::Horizontal);
+                else
+                    iGlyphText = gc.to_multiline_glyph_text(iText, font(), 0.0, iAlignment & neogfx::alignment::Horizontal);
+            }
+            else
+                iGlyphText = gc.to_glyph_text(iText, font());
         }
-        return *iGlyphText;
+        return iGlyphText;
     }
 
     void text_widget::reset_cache()
     {
         iTextExtent = std::nullopt;
         iSizeHintExtent = std::nullopt;
-        iGlyphText = std::nullopt;
+        iGlyphText = std::monostate{};
     }
 }

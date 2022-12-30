@@ -74,18 +74,6 @@ namespace neogfx
             Attached,
             Unattached
         };
-        struct multiline_glyph_text
-        {
-            glyph_text glyphText;
-            struct line
-            {
-                quad bbox;
-                glyph_text::difference_type begin;
-                glyph_text::difference_type end;
-            };
-            typedef neolib::vecarray<line, 8, -1> lines_t;
-            lines_t lines;
-        };
         // exceptions
     public:
         struct unattached : std::logic_error { unattached() : std::logic_error("neogfx::i_graphics_context::unattached") {} };
@@ -257,6 +245,8 @@ namespace neogfx
         virtual void draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_format& aTextFormat) const = 0;
         virtual void draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
         virtual void draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_glyph_text(const point& aPoint, const multiline_glyph_text& aText, const text_format& aTextFormat) const = 0;
+        virtual void draw_multiline_glyph_text(const vec3& aPoint, const multiline_glyph_text& aText, const text_format& aTextFormat) const = 0;
         virtual void draw_glyph(const point& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const = 0;
         virtual void draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const = 0;
         virtual void draw_glyphs(const point& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const = 0;

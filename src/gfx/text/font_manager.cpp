@@ -624,6 +624,9 @@ namespace neogfx
             } while (i < runs.size());
         }
 
+        vec2f previousAdvance = {};
+        quadf_2d previousQuad = {};
+
         for (std::size_t i = 0; i < runs.size(); ++i)
         {
             if (std::get<3>(runs[i]))
@@ -633,9 +636,6 @@ namespace neogfx
             std::string::size_type sourceClusterRunStart = std::get<0>(runs[i]) - &codePoints[0];
             glyph_shapes shapes{ aGc, aFontSelector.select_font(sourceClusterRunStart), runs[i] };
 
-            vec2f previousAdvance = {};
-            quadf_2d previousQuad = {};
-            
             for (std::uint32_t j = 0; j < shapes.glyph_count(); ++j)
             {
                 std::u32string::size_type startCluster = shapes.glyph_info(j).cluster;

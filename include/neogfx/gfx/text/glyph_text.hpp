@@ -260,6 +260,14 @@ namespace neogfx
         typedef std::size_t size_type;
         typedef std::ptrdiff_t difference_type;
     public:
+        virtual void clone(i_ref_ptr<self_type>& aClone) const = 0;
+        ref_ptr<self_type> clone() const
+        {
+            ref_ptr<self_type> result;
+            clone(result);
+            return result;
+        }
+    public:
         virtual const font& glyph_font() const = 0;
         virtual const font& glyph_font(const_reference aGlyphChar) const = 0;
         virtual void cache_glyph_font(font_id aFontId) const = 0;
@@ -354,6 +362,8 @@ namespace neogfx
         container_type const& container() const;
         container_type& container();
     public:
+        void clone(i_ref_ptr<abstract_type>& aClone) const override;
+    public:
         bool empty() const override;
         size_type size() const override;
         void clear() override;
@@ -425,6 +435,7 @@ namespace neogfx
         glyph_text(glyph_text const& aOther);
     public:
         glyph_text operator=(const glyph_text& aOther);
+        glyph_text clone() const;
     public:
         i_glyph_text& content() const;
     public:
@@ -455,6 +466,20 @@ namespace neogfx
         iterator end();
     private:
         mutable ref_ptr<i_glyph_text> iContent;
+    };
+
+    struct multiline_glyph_text
+    {
+        glyph_text glyphText;
+        quad bbox;
+        struct line
+        {
+            quad bbox;
+            glyph_text::difference_type begin;
+            glyph_text::difference_type end;
+        };
+        typedef neolib::vecarray<line, 8, -1> lines_t;
+        lines_t lines;
     };
 
     template <typename Iter>

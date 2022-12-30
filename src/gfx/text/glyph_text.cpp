@@ -48,6 +48,11 @@ namespace neogfx
         return *this;
     }
 
+    glyph_text glyph_text::clone() const
+    {
+        return glyph_text{ *iContent->clone() };
+    }
+
     i_glyph_text& glyph_text::content() const
     {
         return *iContent;
