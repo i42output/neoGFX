@@ -263,14 +263,13 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     typename basic_glyph_text_content<Container, ConstIterator, Iterator>::self_type& basic_glyph_text_content<Container, ConstIterator, Iterator>::bottom_justify()
     {
-        return* this;
         float yMax = 0.0f;
         for (auto& g : *this)
             yMax = std::max(quad_extents(g.cell).y + static_cast<float>(glyph_font(g).descender()), yMax);
         for (auto& g : *this)
         {
             auto const& gf = glyph_font(g);
-            g.shape += vec2f{ 0.0f, yMax - (quad_extents(g.shape).y + static_cast<float>(gf.descender())) };
+            g.shape += vec2f{ 0.0f, yMax - (quad_extents(g.cell).y + static_cast<float>(gf.descender())) };
             if ((g.flags & (glyph_char::Superscript | glyph_char::Subscript)) != glyph_char::Default)
             {
                 scalar const ascender = gf.ascender();
