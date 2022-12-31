@@ -895,7 +895,7 @@ namespace neogfx
                         edit(*aCurrentIndex);
                     else if (editing())
                         end_edit(true);
-                }
+                } 
             }
         }
         if (needUpdate)
