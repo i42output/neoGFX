@@ -2107,35 +2107,54 @@ namespace neogfx
                     for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {
                         auto& glyphText = *drawOp.glyphText;
-                        auto& glyph_char = *drawOp.glyph_char;
+                        auto& glyphChar = *drawOp.glyph_char;
 
-                        if (is_whitespace(glyph_char) || is_emoji(glyph_char))
+                        if (is_whitespace(glyphChar) || is_emoji(glyphChar))
                             continue;
 
-                        auto const& glyphTexture = glyphText.glyph(glyph_char);
-                        auto const& glyphFont = glyphText.glyph_font(glyph_char);
-                        auto const& glyphQuad = quad{
-                                (glyph_char.cell[0] + glyph_char.shape[0]).round(),
-                                (glyph_char.cell[0] + glyph_char.shape[1]).round(),
-                                (glyph_char.cell[0] + glyph_char.shape[2]).round(),
-                                (glyph_char.cell[0] + glyph_char.shape[3]).round() } + drawOp.point;
+                        auto const& glyphTexture = glyphText.glyph(glyphChar);
+                        auto const& glyphFont = glyphText.glyph_font(glyphChar);
 
-                        auto const xTransformCoefficient = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? -1.0 : 1.0;
-                        auto const transformation = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
-                            optional_mat44{} :
-                            mat44{ 
-                                { 1.0, 0.0, 0.0, 0.0 }, 
-                                { xTransformCoefficient * 0.25, 1.0, 0.0, 0.0 },
-                                { 0.0, 0.0, 1.0, 0.0 }, 
-                                { 0.0, 0.0, 0.0, 1.0 } };
+                        static optional_mat44f const italicTransformGui = mat44f{
+                                { 1.0f, 0.0f, 0.0f, 0.0f },
+                                { -0.25f, 1.0f, 0.0f, 0.0f },
+                                { 0.0f, 0.0f, 1.0f, 0.0f },
+                                { 0.0f, 0.0f, 0.0f, 1.0f } };
+                        static optional_mat44f const italicTransformGame = mat44f{
+                                { 1.0f, 0.0f, 0.0f, 0.0f },
+                                { 0.25f, 1.0f, 0.0f, 0.0f },
+                                { 0.0f, 0.0f, 1.0f, 0.0f },
+                                { 0.0f, 0.0f, 0.0f, 1.0f } };
+                        auto const& italicTransform = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
+                            optional_mat44f{} :
+                            logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
+                                italicTransformGui : italicTransformGame;
+    
+                        auto const& shapeQuad = [&]()
+                        {
+                            if (!italicTransform)
+                                return glyphChar.shape;
+                            thread_local quadf_2d transformedQuad;
+                            vec2f centeringTranslation;
+                            transformedQuad = center_quad(glyphChar.shape, centeringTranslation);
+                            for (auto& v : transformedQuad)
+                                v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
+                            return transformedQuad;
+                        }();
+
+                        auto const& glyphQuad = quad{
+                                (glyphChar.cell[0] + shapeQuad[0]).round(),
+                                (glyphChar.cell[0] + shapeQuad[1]).round(),
+                                (glyphChar.cell[0] + shapeQuad[2]).round(),
+                                (glyphChar.cell[0] + shapeQuad[3]).round() } + drawOp.point;
 
                         if (updateGlyphShader)
                         {
                             updateGlyphShader = false;
-                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyph_char);
+                            rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyphChar);
                         }
 
-                        bool const subpixelRender = subpixel(glyph_char) && glyphTexture.subpixel();
+                        bool const subpixelRender = subpixel(glyphChar) && glyphTexture.subpixel();
 
                         if (pass == draw_glyphs_pass::GlyphOutline)
                         {
@@ -2147,7 +2166,7 @@ namespace neogfx
                                 for (uint32_t offset = 0; offset < offsets; ++offset)
                                 {
                                     auto const effectQuad = glyphQuad + offsetOrigin + vec3{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) };
-                                    auto const& mesh = to_ecs_component(effectQuad, mesh_type::Triangles, transformation);
+                                    auto const& mesh = to_ecs_component(effectQuad, mesh_type::Triangles);
                                     meshFilters.push_back(game::mesh_filter{ {}, mesh });
                                     auto const& ink = drawOp.appearance->effect()->color();
                                     meshRenderers.push_back(
@@ -2167,7 +2186,7 @@ namespace neogfx
                             continue;
                         }
 
-                        auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles, transformation);
+                        auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                             drawOp.appearance->ink() : drawOp.appearance->effect()->color();

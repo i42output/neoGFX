@@ -56,12 +56,48 @@ namespace neogfx
         return to_ecs_component(result, aRect, aMeshType, aTransformation, aOffset);
     }
 
+    template <typename T, std::size_t D>
+    inline std::array<basic_vector<T, D>, 4> center_quad(const std::array<basic_vector<T, D>, 4>& aQuad, basic_vector<T, D>& aCenteringTranslation)
+    {
+        // todo: this is a naive solution
+        std::optional<basic_vector<T, D>> min;
+        std::optional<basic_vector<T, D>> max;
+        for (auto const& v : aQuad)
+        {
+            if (!min)
+                min = v;
+            else
+                min = min->min(v);
+            if (!max)
+                max = v;
+            else
+                max = max->max(v);
+        }
+        aCenteringTranslation = basic_vector<T, D>{ -(max->x - min->x) / static_cast<T>(2.0), -(max->y - min->y) / static_cast<T>(2.0) };
+        std::array<basic_vector<T, D>, 4> result = aQuad;
+        for (auto& v : result)
+            v += aCenteringTranslation;
+        return result;
+    }
+
     inline game::mesh const& to_ecs_component(game::mesh& aResult, const quad& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
     {
-        aResult.vertices = {
-            aQuad[3], aQuad[2], aQuad[0],
-            aQuad[2], aQuad[1], aQuad[0]
-        };
+        if (!aTransformation)
+        {
+            aResult.vertices = {
+                aQuad[3], aQuad[2], aQuad[0],
+                aQuad[2], aQuad[1], aQuad[0] };
+        }
+        else
+        {
+            vec3 centeringTranslation;
+            auto centeredQuad = center_quad(aQuad, centeringTranslation);
+            for (auto& v : centeredQuad)
+                v = *aTransformation * v + -centeringTranslation;
+            aResult.vertices = {
+                centeredQuad[3], centeredQuad[2], centeredQuad[0],
+                centeredQuad[2], centeredQuad[1], centeredQuad[0] };
+        }
         aResult.uv = {
             vec2{ 0.0, 1.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 0.0 },
             vec2{ 1.0, 1.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 0.0 } };
