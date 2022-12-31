@@ -768,8 +768,9 @@ namespace neogfx
         {
             if (line.begin == line.end)
                 continue;
-            auto const adjust = line.bbox[0] - vec3{ std::next(aText.glyphText.cbegin(), line.begin)->cell[0] };
-            draw_glyph_text(aPoint + adjust, aText.glyphText, aText.glyphText.begin() + line.begin, aText.glyphText.begin() + line.end, aTextFormat);
+            auto const glyphs = std::ranges::subrange(aText.glyphText.begin() + line.begin, aText.glyphText.begin() + line.end);
+            auto const adjust = line.bbox[0] - vec3{ glyphs.begin()->cell[0] };
+            draw_glyph_text(aPoint + adjust, aText.glyphText, glyphs.begin(), glyphs.end(), aTextFormat);
         }
     }
 
