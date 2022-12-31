@@ -1922,7 +1922,7 @@ namespace neogfx
         auto start = drawGlyphCache.begin();
         for (auto next = std::next(start); next != drawGlyphCache.end(); ++next)
         {
-            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyph_char, *next->glyph_char) ||
+            if (!graphics_operation::batchable(*start->glyphText, *next->glyphText, *start->glyphChar, *next->glyphChar) ||
                 !graphics_operation::batchable(*start->appearance, *next->appearance))
             {
                 draw_glyphs(&*start, &*next);
@@ -1972,9 +1972,11 @@ namespace neogfx
             optional_rect result;
             for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
             {
-                auto const& glyph_char = *drawOp.glyph_char;
-                auto const aabb = to_aabb_2d(glyph_char.shape.begin(), glyph_char.shape.end());
-                rect const glyphRect{ aabb };
+                auto const& glyphChar = *drawOp.glyphChar;
+                // todo: union of AABB of cell and shape quads(, and transform?)
+                auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
+                rect glyphRect{ aabb };
+                glyphRect.translate(point{ drawOp.point });
                 if (result == std::nullopt)
                     result = glyphRect;
                 else
@@ -2000,9 +2002,9 @@ namespace neogfx
             case draw_glyphs_pass::Paper:
                 for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
-                    auto const& glyph_char = *drawOp.glyph_char;
+                    auto const& glyphChar = *drawOp.glyphChar;
 
-                    if (!is_whitespace(glyph_char) && !is_emoji(glyph_char))
+                    if (!is_whitespace(glyphChar) && !is_emoji(glyphChar))
                         ++normalGlyphCount;
 
                     if (drawOp.appearance->effect() != std::nullopt && !drawOp.appearance->being_filtered() &&
@@ -2014,7 +2016,7 @@ namespace neogfx
                         
                     if (drawOp.appearance->paper() != std::nullopt && !drawOp.appearance->being_filtered())
                     {
-                        auto const& mesh = to_ecs_component(drawOp.point + quad{ glyph_char.cell[0], glyph_char.cell[1], glyph_char.cell[2], glyph_char.cell[3] }, mesh_type::Triangles);
+                        auto const& mesh = to_ecs_component(drawOp.point + quad{ glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3] }, mesh_type::Triangles);
 
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         meshRenderers.push_back(
@@ -2034,9 +2036,9 @@ namespace neogfx
                     for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {
                         auto& glyphText = *drawOp.glyphText;
-                        auto const& glyph_char = *drawOp.glyph_char;
+                        auto const& glyphChar = *drawOp.glyphChar;
 
-                        if (is_whitespace(glyph_char))
+                        if (is_whitespace(glyphChar))
                             continue;
 
                         if (drawOp.appearance->being_filtered())
@@ -2046,7 +2048,7 @@ namespace neogfx
                         if (!renderEffects)
                             continue;
 
-                        if (is_emoji(glyph_char) && drawOp.appearance->effect()->ignore_emoji())
+                        if (is_emoji(glyphChar) && drawOp.appearance->effect()->ignore_emoji())
                             continue;
 
                         if (!filter)
@@ -2055,7 +2057,7 @@ namespace neogfx
                         filter->front_buffer().draw_glyph(
                             drawOp.point + drawOp.appearance->effect()->offset(),
                             glyphText,
-                            glyph_char,
+                            glyphChar,
                             drawOp.appearance->as_being_filtered());
                     }
                 }
@@ -2063,7 +2065,7 @@ namespace neogfx
             case draw_glyphs_pass::EmojiFinal:
                 for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
-                    auto& glyph_char = *drawOp.glyph_char;
+                    auto& glyph_char = *drawOp.glyphChar;
 
                     if (is_whitespace(glyph_char) || !is_emoji(glyph_char))
                         continue;
@@ -2107,7 +2109,7 @@ namespace neogfx
                     for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {
                         auto& glyphText = *drawOp.glyphText;
-                        auto& glyphChar = *drawOp.glyph_char;
+                        auto& glyphChar = *drawOp.glyphChar;
 
                         if (is_whitespace(glyphChar) || is_emoji(glyphChar))
                             continue;
@@ -2221,11 +2223,11 @@ namespace neogfx
                         for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                         {
                             auto& glyphText = *drawOp.glyphText;
-                            auto& glyph_char = *drawOp.glyph_char;
-                            auto const& glyphFont = glyphText.glyph_font(glyph_char);
+                            auto& glyphChar = *drawOp.glyphChar;
+                            auto const& glyphFont = glyphText.glyph_font(glyphChar);
                             auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                                 drawOp.appearance->ink() : drawOp.appearance->effect()->color();
-                            if (underline(glyph_char) || (drawOp.showMnemonics && neogfx::mnemonic(glyph_char)))
+                            if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                             {
                                 if (adornmentPass == 1)
                                 {
@@ -2246,8 +2248,8 @@ namespace neogfx
                                     if (yUnderlineMetricsIter->ypos != drawOp.point.y)
                                         ++yUnderlineMetricsIter;
                                     draw_line(
-                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyph_char.cell[0] },
-                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyph_char.cell[1] },
+                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyphChar.cell[0] },
+                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyphChar.cell[1] },
                                         pen{ ink, yUnderlineMetricsIter->cyUnderline });
                                 }
                             }

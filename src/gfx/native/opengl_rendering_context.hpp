@@ -170,7 +170,7 @@ namespace neogfx
         {
             vec3 point;
             i_glyph_text* glyphText;
-            glyph_char const* glyph_char;
+            glyph_char const* glyphChar;
             text_format const* appearance;
             bool showMnemonics;
         };
