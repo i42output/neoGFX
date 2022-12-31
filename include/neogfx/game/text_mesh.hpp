@@ -144,14 +144,14 @@ namespace neogfx::game
                 {
                     auto mesh_line = [&](const vec3& aOffset, const material& aMaterial) 
                     {
-                        auto pos = line.bbox[0] + aOffset;
-                        for (auto i = line.begin; i < line.end; ++i)
+                        auto const glyphs = std::ranges::subrange(std::next(multilineGlyphText.glyphText.cbegin(), line.begin), std::next(multilineGlyphText.glyphText.cbegin(), line.end));
+                        auto const pos = aOffset + line.bbox[0] - vec3{ glyphs.begin()->cell[0] };
+                        for (auto const& glyphChar : glyphs)
                         {
-                            auto const& glyph_char = *std::next(multilineGlyphText.glyphText.begin(), i);
-                            if (!is_whitespace(glyph_char))
+                            if (!is_whitespace(glyphChar))
                             {
-                                auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyph_char);
-                                add_patch(*mf.mesh, mr, pos + vec3{ glyph_char.cell[1] } + quad{ glyph_char.shape[0], glyph_char.shape[1], glyph_char.shape[2], glyph_char.shape[3] }, glyphTexture.texture());
+                                auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyphChar);
+                                add_patch(*mf.mesh, mr, pos + vec3{ glyphChar.cell[0] } + quad{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
                                 mr.patches.back().material = material{ aMaterial.color, aMaterial.gradient, aMaterial.sharedTexture, mr.patches.back().material.texture, aMaterial.shaderEffect };
                             }
                         }
