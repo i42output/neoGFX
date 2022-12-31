@@ -136,6 +136,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\src\test.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="x64\Debug\GeneratedFiles\test.ui.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
