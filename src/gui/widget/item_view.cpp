@@ -751,10 +751,9 @@ namespace neogfx
 
     void item_view::update_scrollbar_visibility()
     {
-        bool wasVisible = iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value());
         base_type::update_scrollbar_visibility();
-        if (wasVisible)
-            make_visible(iVisibleItem.value());
+        if (iItemToMakeVisible && is_valid(iItemToMakeVisible.value()))
+            make_visible(iItemToMakeVisible.value());
     }
 
     bool item_view::update_scrollbar_visibility(usv_stage_e aStage)
@@ -942,7 +941,9 @@ namespace neogfx
 
     bool item_view::make_visible(item_presentation_model_index const& aItemIndex)
     {
-        iVisibleItem = aItemIndex;
+        iItemToMakeVisible = std::nullopt;
+        if (!is_valid(aItemIndex))
+            return false;
         bool changed = false;
         graphics_context gc{ *this, graphics_context::type::Unattached };
         auto const currentScrollPos = point{ horizontal_scrollbar().position(), vertical_scrollbar().position() };
@@ -956,6 +957,8 @@ namespace neogfx
             changed = horizontal_scrollbar().set_position(currentScrollPos.x + (cellRect.left() - displayRect.left())) || changed;
         else if (cellRect.right() > displayRect.right() && cellRect.width() <= displayRect.width())
             changed = horizontal_scrollbar().set_position(currentScrollPos.x + (cellRect.right() - displayRect.right())) || changed;
+        if (!is_visible(aItemIndex))
+            iItemToMakeVisible = aItemIndex;
         return changed;
     }
 
@@ -1204,8 +1207,8 @@ namespace neogfx
     {
         if (aUpdateReason == header_view_update_reason::FullUpdate)
         {
-            if (iVisibleItem && is_valid(iVisibleItem.value()) && is_visible(iVisibleItem.value(), true))
-                make_visible(iVisibleItem.value());
+            if (iItemToMakeVisible && is_valid(iItemToMakeVisible.value()) && is_visible(iItemToMakeVisible.value(), true))
+                make_visible(iItemToMakeVisible.value());
         }
         layout_items();
         if (editing())
