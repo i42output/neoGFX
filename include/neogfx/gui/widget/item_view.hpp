@@ -190,7 +190,7 @@ namespace neogfx
         ref_ptr<i_item_presentation_model> iPresentationModel;
         ref_ptr<i_item_selection_model> iSelectionModel;
         bool iUpdatingModels;
-        optional_item_presentation_model_index iVisibleItem;
+        optional_item_presentation_model_index iItemToMakeVisible;
         bool iHotTracking;
         bool iIgnoreNextMouseMove;
         std::optional<widget_timer> iMouseTracker;
