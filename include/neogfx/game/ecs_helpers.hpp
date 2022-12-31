@@ -85,8 +85,8 @@ namespace neogfx
         if (!aTransformation)
         {
             aResult.vertices = {
-                aQuad[3], aQuad[2], aQuad[0],
-                aQuad[2], aQuad[1], aQuad[0] };
+                aQuad[0], aQuad[3], aQuad[2],
+                aQuad[0], aQuad[1], aQuad[2] };
         }
         else
         {
@@ -95,12 +95,12 @@ namespace neogfx
             for (auto& v : centeredQuad)
                 v = *aTransformation * v + -centeringTranslation;
             aResult.vertices = {
-                centeredQuad[3], centeredQuad[2], centeredQuad[0],
-                centeredQuad[2], centeredQuad[1], centeredQuad[0] };
+                centeredQuad[0], centeredQuad[3], centeredQuad[2],
+                centeredQuad[0], centeredQuad[1], centeredQuad[2] };
         }
         aResult.uv = {
-            vec2{ 0.0, 1.0 }, vec2{ 1.0, 1.0 }, vec2{ 0.0, 0.0 },
-            vec2{ 1.0, 1.0 }, vec2{ 1.0, 0.0 }, vec2{ 0.0, 0.0 } };
+            vec2{ 0.0, 0.0 }, vec2{ 0.0, 1.0 }, vec2{ 1.0, 1.0 },
+            vec2{ 0.0, 0.0 }, vec2{ 1.0, 0.0 }, vec2{ 1.0, 1.0 } };
         aResult.faces = {
             game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
             game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u } };

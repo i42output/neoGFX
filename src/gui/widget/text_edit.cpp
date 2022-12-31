@@ -2763,9 +2763,10 @@ namespace neogfx
             thread_local std::optional<glyph_text> tGlyphText;
             optional_text_format textAppearance;
             point textPos = aPosition;
+            point const lineOrigin = lineStart->cell[0];
             for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
             {
-                point glyphPos = aPosition + point{ i->cell[0] };
+                point glyphPos = aPosition + point{ i->cell[0] } - lineOrigin;
                 bool selected = false;
                 if (cursor().position() != cursor().anchor())
                 {
@@ -2796,7 +2797,9 @@ namespace neogfx
                 }
                 if (tGlyphText == std::nullopt)
                     tGlyphText = glyph_text{ font() };
-                tGlyphText->content().push_back(glyph);
+                auto adjustedGlyph = glyph;
+                adjustedGlyph.cell += -lineOrigin.to_vec2().as<float>();
+                tGlyphText->content().push_back(adjustedGlyph);
                 tGlyphText->content().cache_glyph_font(glyphFont);
                 textAppearance = nextTextAppearance;
             }
