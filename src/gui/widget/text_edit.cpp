@@ -2424,23 +2424,21 @@ namespace neogfx
                 if (paragraphLineStart == paragraphLineEnd)
                     continue;
 
-                std::array<double, 2> xpos = {};
+                avec2 xpos = {};
                 iterColumn = iGlyphColumns.begin();
                 for (auto iterGlyph = paragraphLineStart; iterGlyph != paragraphLineEnd; ++iterGlyph)
                 {
                     auto& glyph = *iterGlyph;
-                    std::array<double, 2> xadvance = {};
+                    avec2 xadvance = { glyph.cell[1].x - glyph.cell[0].x, glyph.cell[2].x - glyph.cell[3].x };
                     if (iText[glyph.clusters.first] == iterColumn->delimiter() && iterColumn + 1 != iGlyphColumns.end())
                         ++iterColumn;
                     else if (is_whitespace(glyph))
                     {
                         if (glyph.value == U'\t')
                             xadvance = { tab_stops() - std::fmod(xpos[0], tab_stops()), tab_stops() - std::fmod(xpos[1], tab_stops()) };
-                        else if (!is_line_breaking_whitespace(glyph))
-                            xadvance = { glyph.cell[1].x - glyph.cell[0].x, glyph.cell[3].x - glyph.cell[2].x };
+                        else if (is_line_breaking_whitespace(glyph))
+                            xadvance = {};
                     }
-                    else
-                        xadvance = { glyph.cell[1].x - glyph.cell[0].x, glyph.cell[3].x - glyph.cell[2].x };
                     glyph.cell[0].x = static_cast<float>(xpos[0]);
                     glyph.cell[1].x = static_cast<float>(xpos[0] + xadvance[0]);
                     glyph.cell[2].x = static_cast<float>(xpos[1] + xadvance[1]);
@@ -2763,7 +2761,7 @@ namespace neogfx
             thread_local std::optional<glyph_text> tGlyphText;
             optional_text_format textAppearance;
             point const lineOrigin = lineStart->cell[0];
-            point textPos = aPosition - lineOrigin;
+            point const textPos = aPosition - lineOrigin;
             for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
             {
                 bool selected = false;
@@ -2792,7 +2790,6 @@ namespace neogfx
                 {
                     aGc.draw_glyph_text(textPos, *tGlyphText, *textAppearance);
                     tGlyphText = glyph_text{ font() };
-                    textPos = aPosition + point{ i->cell[0] } - lineOrigin;
                 }
                 if (tGlyphText == std::nullopt)
                     tGlyphText = glyph_text{ font() };
