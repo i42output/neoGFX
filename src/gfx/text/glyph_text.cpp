@@ -27,6 +27,11 @@ namespace neogfx
 {
     template class basic_glyph_text_content<neolib::vecarray<glyph_char, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph_char const*, glyph_char*>;
 
+    glyph_text::glyph_text() :
+        iContent{ service<i_font_manager>().glyph_text_factory().create_glyph_text().content() }
+    {
+    }
+
     glyph_text::glyph_text(font const& aFont) :
         iContent{ service<i_font_manager>().glyph_text_factory().create_glyph_text(aFont).content() }
     {

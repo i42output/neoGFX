@@ -259,6 +259,12 @@ namespace neogfx
         typedef Iterator iterator;
         typedef std::size_t size_type;
         typedef std::ptrdiff_t difference_type;
+        struct align_baselines_result
+        {
+            float yExtent;
+            font_id majorFont;
+            float baseline;
+        };
     public:
         virtual void clone(i_ref_ptr<self_type>& aClone) const = 0;
         ref_ptr<self_type> clone() const
@@ -274,6 +280,11 @@ namespace neogfx
         virtual void cache_glyph_font(const font& aFont) const = 0;
         virtual const i_glyph& glyph(const_reference aGlyphChar) const = 0;
     public:
+        virtual const font& major_font() const = 0;
+        virtual void set_major_font(const font& aFont) = 0;
+        virtual scalar baseline() const = 0;
+        virtual void set_baseline(scalar aBaseline) = 0;
+    public:
         virtual bool empty() const = 0;
         virtual size_type size() const = 0;
         virtual void clear() = 0;
@@ -285,7 +296,8 @@ namespace neogfx
         virtual neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const = 0;
     public:
         virtual void set_extents(const neogfx::size& aExtents) = 0;
-        virtual self_type& bottom_justify() = 0;
+        virtual self_type& align_baselines() = 0;
+        virtual align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) = 0;
         virtual std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const = 0;
         virtual std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) = 0;
     public:
@@ -325,6 +337,7 @@ namespace neogfx
         using typename abstract_type::iterator;
         using typename abstract_type::size_type;
         using typename abstract_type::difference_type;
+        using typename i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>::align_baselines_result;
     private:
         static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
         typedef Container container_type;
@@ -337,6 +350,7 @@ namespace neogfx
             struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_text_content::font_cache::cached_font_not_found") {} };
         public:
             const font& glyph_font() const;
+            const font& glyph_font(font_id aFontId) const;
             const font& glyph_font(const_reference aGlyphChar) const;
             void cache_glyph_font(font_id aFontId) const;
             void cache_glyph_font(const font& aFont) const;
@@ -346,11 +360,13 @@ namespace neogfx
             mutable cache iCache;
         };
     public:
-        basic_glyph_text_content() = delete;
+        basic_glyph_text_content();
         basic_glyph_text_content(font const& aFont);
         template <typename Iter>
         basic_glyph_text_content(Iter aBegin, Iter aEnd) :
-            base_type{ aBegin, aEnd }
+            container_type{ aBegin, aEnd },
+            iMajorFont{},
+            iBaseline{}
         {
         }
         basic_glyph_text_content(const self_type& aOther);
@@ -394,22 +410,30 @@ namespace neogfx
         neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const override;
     public:
         void set_extents(const neogfx::size& aExtents) override;
-        self_type& bottom_justify() override;
+        self_type& align_baselines() override;
+        align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) override;
         std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const override;
         std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) override;
     public:
-        virtual vector<size_type> const& line_breaks() const override;
-        virtual vector<size_type>& line_breaks() override;
+        vector<size_type> const& line_breaks() const override;
+        vector<size_type>& line_breaks() override;
     public:
         const font& glyph_font() const override;
         const font& glyph_font(const_reference aGlyphChar) const override;
         void cache_glyph_font(font_id aFontId) const override;
         void cache_glyph_font(const font& aFont) const override;
         const i_glyph& glyph(const_reference aGlyphChar) const override;
+    public:
+        const font& major_font() const override;
+        void set_major_font(const font& aFont) override;
+        scalar baseline() const override;
+        void set_baseline(scalar aBaseline) override;
     private:
         font_cache iCache;
         mutable std::optional<neogfx::size> iExtents;
         vector<size_type> iLineBreaks;
+        font_id iMajorFont;
+        scalar iBaseline;
     };
 
     constexpr std::size_t SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT = 16;
@@ -429,10 +453,20 @@ namespace neogfx
         typedef i_glyph_text::size_type size_type;
         typedef i_glyph_text::difference_type difference_type;
     public:
-        glyph_text() = delete;
+        glyph_text();
         glyph_text(font const& aFont);
         glyph_text(i_glyph_text& aContents);
         glyph_text(glyph_text const& aOther);
+        template <typename GlyphIter>
+        glyph_text(GlyphIter aGlyphsBegin, GlyphIter aGlyphsEnd) :
+            glyph_text{}
+        {
+            for (auto const& glyph : std::ranges::subrange(aGlyphsBegin, aGlyphsEnd))
+            {
+                content().push_back(glyph);
+                content().cache_glyph_font(glyph.font);
+            }
+        }
     public:
         glyph_text operator=(const glyph_text& aOther);
         glyph_text clone() const;
@@ -540,29 +574,30 @@ namespace neogfx
     public:
         virtual ~i_glyph_text_factory() = default;
     public:
+        virtual glyph_text create_glyph_text() = 0;
         virtual glyph_text create_glyph_text(font const& aFont) = 0;
-        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector) = 0;
-        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector) = 0;
+        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aBottomJustify = true) = 0;
+        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aBottomJustify = true) = 0;
     public:
-        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, std::function<font(std::size_t)> aFontSelector)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
         {
-            return to_glyph_text(aContext, aUtf32Begin, aUtf32End, font_selector{ aFontSelector });
+            return to_glyph_text(aContext, aUtf32Begin, aUtf32End, font_selector{ aFontSelector }, aBottomJustify);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, std::u32string_view const& aString, std::function<font(std::size_t)> aFontSelector)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, std::u32string_view const& aString, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
         {
-            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector });
+            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector }, aBottomJustify);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, std::function<font(std::size_t)> aFontSelector)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
         {
-            return to_glyph_text(aContext, aUtf8Begin, aUtf8End, font_selector{ aFontSelector });
+            return to_glyph_text(aContext, aUtf8Begin, aUtf8End, font_selector{ aFontSelector }, aBottomJustify);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, std::string_view const& aString, std::function<font(std::size_t)> aFontSelector)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, std::string_view const& aString, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
         {
-            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector });
+            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector }, aBottomJustify);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, i_string const& aString, std::function<font(std::size_t)> aFontSelector)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, i_string const& aString, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
         {
-            return to_glyph_text(aContext, aString.c_str(), aString.c_str() + aString.size(), font_selector{ aFontSelector });
+            return to_glyph_text(aContext, aString.c_str(), aString.c_str() + aString.size(), font_selector{ aFontSelector }, aBottomJustify);
         }
     };
 }

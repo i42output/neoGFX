@@ -199,6 +199,8 @@ namespace neogfx
         std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineEnd;
         coordinate ypos;
         size extents;
+        font_id majorFont;
+        scalar baseline;
     };
 
     class text_edit::glyph_column : public column_info
@@ -2382,7 +2384,7 @@ namespace neogfx
             if (newParagraph || iterChar == iText.end() - 1)
             {
                 paragraphBuffer.assign(nextParagraph, iterChar + 1);
-                auto gt = gc.to_glyph_text(paragraphBuffer.begin(), paragraphBuffer.end(), fs);
+                auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
                 if (gt.cbegin() != gt.cend())
                 {
                     auto paragraphGlyphs = glyphs().container().insert(glyphs().container().end(), gt.cbegin(), gt.cend());
@@ -2525,22 +2527,19 @@ namespace neogfx
                     {
                         auto lineStart = paragraphLineStart;
                         auto lineEnd = paragraphLineEnd;
-                        auto height = paragraph.first.height(lineStart, lineEnd);
-                        if (height == 0.0)
-                        {
-                            if (lines.empty())
-                                height = paragraphStyle.character().font()->height();
-                            else
-                                height = lines.back().extents.cy;
-                        }
+
+                        auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
+
                         lines.push_back(
                             glyph_line{
                                 { p - iGlyphParagraphs.begin(), p },
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
-                                { 0.0, height } });
-                        pos.y += height;
+                                { 0.0, alignBaselinesResult.yExtent },
+                                alignBaselinesResult.majorFont, 
+                                alignBaselinesResult.baseline });
+                        pos.y += lines.back().extents.cy;
                     }
                     else if (WordWrap && (paragraphLineEnd - 1)->cell[0].x + quad_extents((paragraphLineEnd - 1)->cell).x > availableWidth)
                     {
@@ -2583,7 +2582,6 @@ namespace neogfx
                             else
                                 next = paragraphLineEnd;
                             dimension x = (split != glyphs().end() ? split->cell[0].x : (lineStart != lineEnd ? glyphs().back().cell[1].x : 0.0));
-                            auto height = paragraph.first.height(lineStart, lineEnd);
                             if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
                                 --lineEnd;
                             bool rtl = false;
@@ -2595,13 +2593,16 @@ namespace neogfx
                                 rtl = true; // todo: is this sufficient for multi-line RTL text?
                             if (!rtl)
                                 insertionPoint = lines.end();
+                            auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
                             insertionPoint = lines.insert(insertionPoint,
                                 glyph_line{
                                     { p - iGlyphParagraphs.begin(), p },
                                     { lineStart - glyphs().begin(), lineStart },
                                     { lineEnd - glyphs().begin(), lineEnd },
                                     pos.y,
-                                    { x - offset, height } });
+                                    { x - offset, alignBaselinesResult.yExtent },
+                                    alignBaselinesResult.majorFont, 
+                                    alignBaselinesResult.baseline });
                             if (rtl)
                             {
                                 auto ypos = (insertionPoint + 1)->ypos;
@@ -2611,7 +2612,7 @@ namespace neogfx
                                     ypos += i->extents.cy;
                                 }
                             }
-                            pos.y += height;
+                            pos.y += alignBaselinesResult.yExtent;
                             iTextExtents->cx = std::max(iTextExtents->cx, x - offset);
                             lineStart = next;
                             if (lineStart != paragraphLineEnd)
@@ -2624,16 +2625,18 @@ namespace neogfx
                     {
                         auto lineStart = paragraphLineStart;
                         auto lineEnd = paragraphLineEnd;
-                        auto height = paragraph.first.height(lineStart, lineEnd);
                         if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
                             --lineEnd;
+                        auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
                         lines.push_back(
                             glyph_line{
                                 { p - iGlyphParagraphs.begin(), p },
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
-                                { (lineEnd - 1)->cell[1].x, height} });
+                                { (lineEnd - 1)->cell[1].x, alignBaselinesResult.yExtent},
+                                alignBaselinesResult.majorFont,
+                                alignBaselinesResult.baseline });
                         pos.y += lines.back().extents.cy;
                         iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                     }
@@ -2740,12 +2743,12 @@ namespace neogfx
             horizontal_scrollbar().set_position(aGlyphPosition.pos.x + e.cx + aPreview.x - horizontal_scrollbar().page());
     }
 
-    text_edit::style text_edit::glyph_style(document_glyphs::const_iterator aglyph, const glyph_column& aColumn) const
+    text_edit::style text_edit::glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const
     {
         style result = iDefaultStyle;
         result.merge(column_style(aColumn));
         result.character().set_paper_color();
-        auto const& tagStyle = iText.tag(iText.begin() + from_glyph(aglyph).first).style();
+        auto const& tagStyle = iText.tag(iText.begin() + from_glyph(aGlyph).first).style();
         if (std::holds_alternative<style_list::const_iterator>(tagStyle))
             result.merge(*static_variant_cast<style_list::const_iterator>(tagStyle));
         return result;
@@ -2755,54 +2758,50 @@ namespace neogfx
     {
         auto lineStart = aLine->lineStart.second;
         auto lineEnd = aLine->lineEnd.second;
+
         if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
             --lineEnd;
+
+        auto documentGlyph = lineStart;
+
+        glyph_text lineGlyphs{ lineStart, lineEnd };
+        lineGlyphs.content().align_baselines();
+
+        optional_text_format textAppearance;
+        point const lineOrigin = lineStart->cell[0];
+        point const textPos = aPosition - lineOrigin;
+        auto segmentStart = lineGlyphs.cbegin();
+        for (auto segmentGlyph = segmentStart; segmentGlyph != lineGlyphs.cend(); ++segmentGlyph, ++documentGlyph)
         {
-            thread_local std::optional<glyph_text> tGlyphText;
-            optional_text_format textAppearance;
-            point const lineOrigin = lineStart->cell[0];
-            point const textPos = aPosition - lineOrigin;
-            for (document_glyphs::const_iterator i = lineStart; i != lineEnd; ++i)
+            bool selected = false;
+            if (cursor().position() != cursor().anchor())
             {
-                bool selected = false;
-                if (cursor().position() != cursor().anchor())
-                {
-                    auto gp = static_cast<cursor::position_type>(from_glyph(i).first);
-                    selected = (gp >= std::min(cursor().position(), cursor().anchor()) && gp < std::max(cursor().position(), cursor().anchor()));
-                }
-                auto const& glyph = *i;
-                auto const& style = glyph_style(i, aColumn);
-                auto const& glyphFont = glyphs().glyph_font(glyph);
-                auto const& glyphColor = with_bounding_box(style.character().glyph_color() == neolib::none ?
-                    style.character().text_color() != neolib::none ?
-                        with_bounding_box(style.character().text_color(), column_rect(column_index(aColumn))) :
-                        default_text_color() : 
-                    style.character().glyph_color(), client_rect(), true);
-                auto const& nextTextAppearance = !selected ?
-                    text_format{
-                        glyphColor,
-                        style.character().paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.character().paper_color() } } : optional_text_color{},
-                        style.character().text_effect() }.with_emoji_ignored(style.character().ignore_emoji()) :
-                    text_format{
-                        has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
-                        has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
-                if (textAppearance != std::nullopt && *textAppearance != nextTextAppearance)
-                {
-                    aGc.draw_glyph_text(textPos, *tGlyphText, *textAppearance);
-                    tGlyphText = glyph_text{ font() };
-                }
-                if (tGlyphText == std::nullopt)
-                    tGlyphText = glyph_text{ font() };
-                tGlyphText->content().push_back(glyph);
-                tGlyphText->content().cache_glyph_font(glyphFont);
-                textAppearance = nextTextAppearance;
+                auto gp = static_cast<cursor::position_type>(from_glyph(documentGlyph).first);
+                selected = (gp >= std::min(cursor().position(), cursor().anchor()) && gp < std::max(cursor().position(), cursor().anchor()));
             }
-            if (tGlyphText != std::nullopt && !tGlyphText->empty())
+            auto const& style = glyph_style(documentGlyph, aColumn);
+            auto const& glyphColor = with_bounding_box(style.character().glyph_color() == neolib::none ?
+                style.character().text_color() != neolib::none ?
+                    with_bounding_box(style.character().text_color(), column_rect(column_index(aColumn))) :
+                    default_text_color() : 
+                style.character().glyph_color(), client_rect(), true);
+            auto const& nextTextAppearance = !selected ?
+                text_format{
+                    glyphColor,
+                    style.character().paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.character().paper_color() } } : optional_text_color{},
+                    style.character().text_effect() }.with_emoji_ignored(style.character().ignore_emoji()) :
+                text_format{
+                    has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
+                    has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
+            if (textAppearance && textAppearance.value() != nextTextAppearance)
             {
-                aGc.draw_glyph_text(textPos, *tGlyphText, *textAppearance);
-                tGlyphText = std::nullopt;
+                aGc.draw_glyph_text(textPos, lineGlyphs, segmentStart, segmentGlyph, textAppearance.value());
+                segmentStart = segmentGlyph;
             }
+            textAppearance = nextTextAppearance;
         }
+        if (segmentStart != lineGlyphs.cend())
+            aGc.draw_glyph_text(textPos, lineGlyphs, segmentStart, lineGlyphs.cend(), textAppearance.value());
     }
 
     void text_edit::draw_cursor(i_graphics_context const& aGc) const

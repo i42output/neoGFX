@@ -2209,50 +2209,22 @@ namespace neogfx
                 break;
             case draw_glyphs_pass::Adornments:
                 {
-                    struct y_underline_metrics
+                    for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {
-                        scalar ypos;
-                        scalar yUnderline;
-                        scalar cyUnderline;
-                    };
-                    thread_local std::vector<y_underline_metrics> yUnderlineMetrics;
-                    yUnderlineMetrics.clear();
-                    for (int32_t adornmentPass = 1; adornmentPass <=2; ++adornmentPass)
-                    {
-                        auto yUnderlineMetricsIter = yUnderlineMetrics.begin();
-                        for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
+                        auto& glyphText = *drawOp.glyphText;
+                        auto& glyphChar = *drawOp.glyphChar;
+                        auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
+                            drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+                        if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                         {
-                            auto& glyphText = *drawOp.glyphText;
-                            auto& glyphChar = *drawOp.glyphChar;
-                            auto const& glyphFont = glyphText.glyph_font(glyphChar);
-                            auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                                drawOp.appearance->ink() : drawOp.appearance->effect()->color();
-                            if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
-                            {
-                                if (adornmentPass == 1)
-                                {
-                                    auto const descender = glyphFont.descender();
-                                    auto const underlinePosition = glyphFont.native_font_face().underline_position();
-                                    auto const dy = descender - underlinePosition;
-                                    auto const yLine = dy;
-                                    if (yUnderlineMetrics.empty() || yUnderlineMetrics.back().ypos != drawOp.point.y)
-                                        yUnderlineMetrics.emplace_back(drawOp.point.y, yLine + drawOp.point.y, glyphFont.native_font_face().underline_thickness());
-                                    else
-                                    {
-                                        yUnderlineMetrics.back().yUnderline = std::max(yLine + drawOp.point.y, yUnderlineMetrics.back().yUnderline);
-                                        yUnderlineMetrics.back().cyUnderline = std::max(glyphFont.native_font_face().underline_thickness(), yUnderlineMetrics.back().cyUnderline);
-                                    }
-                                }
-                                else
-                                {
-                                    if (yUnderlineMetricsIter->ypos != drawOp.point.y)
-                                        ++yUnderlineMetricsIter;
-                                    draw_line(
-                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyphChar.cell[0] },
-                                        vec3{ drawOp.point.x, yUnderlineMetricsIter->yUnderline } + vec3{ glyphChar.cell[1] },
-                                        pen{ ink, yUnderlineMetricsIter->cyUnderline });
-                                }
-                            }
+                            // todo: intersection of underline with shape should be clipped?
+                            auto const& majorFont = glyphText.major_font();
+                            auto const yUnderline = std::round(majorFont.native_font_face().underline_position());
+                            auto const cyUnderline = std::ceil(majorFont.native_font_face().underline_thickness());
+                            draw_line(
+                                drawOp.point + vec3{ glyphChar.cell[0].x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
+                                drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                pen{ ink, cyUnderline });
                         }
                     }
                 }
