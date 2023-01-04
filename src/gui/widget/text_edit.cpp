@@ -2536,10 +2536,11 @@ namespace neogfx
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
-                                { 0.0, alignBaselinesResult.yExtent },
+                                { (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x, alignBaselinesResult.yExtent },
                                 alignBaselinesResult.majorFont, 
                                 alignBaselinesResult.baseline });
                         pos.y += lines.back().extents.cy;
+                        iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                     }
                     else if (WordWrap && (paragraphLineEnd - 1)->cell[0].x + quad_extents((paragraphLineEnd - 1)->cell).x > availableWidth)
                     {
@@ -2581,7 +2582,6 @@ namespace neogfx
                             }
                             else
                                 next = paragraphLineEnd;
-                            dimension x = (split != glyphs().end() ? split->cell[0].x : (lineStart != lineEnd ? glyphs().back().cell[1].x : 0.0));
                             if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
                                 --lineEnd;
                             bool rtl = false;
@@ -2600,7 +2600,7 @@ namespace neogfx
                                     { lineStart - glyphs().begin(), lineStart },
                                     { lineEnd - glyphs().begin(), lineEnd },
                                     pos.y,
-                                    { x - offset, alignBaselinesResult.yExtent },
+                                    { (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x, alignBaselinesResult.yExtent },
                                     alignBaselinesResult.majorFont, 
                                     alignBaselinesResult.baseline });
                             if (rtl)
@@ -2612,8 +2612,8 @@ namespace neogfx
                                     ypos += i->extents.cy;
                                 }
                             }
-                            pos.y += alignBaselinesResult.yExtent;
-                            iTextExtents->cx = std::max(iTextExtents->cx, x - offset);
+                            pos.y += insertionPoint->extents.cy;
+                            iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                             lineStart = next;
                             if (lineStart != paragraphLineEnd)
                                 offset = lineStart->cell[0].x;
@@ -2634,7 +2634,7 @@ namespace neogfx
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
-                                { (lineEnd - 1)->cell[1].x, alignBaselinesResult.yExtent},
+                                { (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x, alignBaselinesResult.yExtent},
                                 alignBaselinesResult.majorFont,
                                 alignBaselinesResult.baseline });
                         pos.y += lines.back().extents.cy;
