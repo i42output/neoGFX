@@ -1935,7 +1935,7 @@ namespace neogfx
 
     namespace
     {
-        enum class draw_glyphs_pass : std::int32_t
+        enum class draw_glyphs_stage : std::int32_t
         {
             Paper,
             SpecialEffects,
@@ -1989,17 +1989,17 @@ namespace neogfx
 
         optional_rect filterRegion;
 
-        for (auto pass : { 
-            draw_glyphs_pass::Paper, 
-            draw_glyphs_pass::SpecialEffects, 
-            draw_glyphs_pass::EmojiFinal, 
-            draw_glyphs_pass::GlyphOutline, 
-            draw_glyphs_pass::GlyphFinal, 
-            draw_glyphs_pass::Adornments })
+        for (auto stage : { 
+            draw_glyphs_stage::Paper, 
+            draw_glyphs_stage::SpecialEffects, 
+            draw_glyphs_stage::EmojiFinal, 
+            draw_glyphs_stage::GlyphOutline, 
+            draw_glyphs_stage::GlyphFinal, 
+            draw_glyphs_stage::Adornments })
         {
-            switch (pass)
+            switch (stage)
             {
-            case draw_glyphs_pass::Paper:
+            case draw_glyphs_stage::Paper:
                 for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
                     auto const& glyphChar = *drawOp.glyphChar;
@@ -2029,7 +2029,7 @@ namespace neogfx
                     }
                 }
                 break;
-            case draw_glyphs_pass::SpecialEffects:
+            case draw_glyphs_stage::SpecialEffects:
                 if (filterRegion)
                 {
                     std::optional<scoped_filter<blur_filter>> filter;
@@ -2062,7 +2062,7 @@ namespace neogfx
                     }
                 }
                 break;
-            case draw_glyphs_pass::EmojiFinal:
+            case draw_glyphs_stage::EmojiFinal:
                 for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
                     auto& glyph_char = *drawOp.glyphChar;
@@ -2101,8 +2101,8 @@ namespace neogfx
                         });
                 }
                 break;
-            case draw_glyphs_pass::GlyphOutline:
-            case draw_glyphs_pass::GlyphFinal:
+            case draw_glyphs_stage::GlyphOutline:
+            case draw_glyphs_stage::GlyphFinal:
                 {
                     bool updateGlyphShader = true;
 
@@ -2158,7 +2158,7 @@ namespace neogfx
 
                         bool const subpixelRender = subpixel(glyphChar) && glyphTexture.subpixel();
 
-                        if (pass == draw_glyphs_pass::GlyphOutline)
+                        if (stage == draw_glyphs_stage::GlyphOutline)
                         {
                             if (drawOp.appearance->effect() && drawOp.appearance->effect()->type() == text_effect_type::Outline)
                             {
@@ -2207,7 +2207,7 @@ namespace neogfx
                     }
                 }
                 break;
-            case draw_glyphs_pass::Adornments:
+            case draw_glyphs_stage::Adornments:
                 {
                     for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                     {

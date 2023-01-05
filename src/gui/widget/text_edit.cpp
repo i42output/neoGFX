@@ -2426,27 +2426,28 @@ namespace neogfx
                 if (paragraphLineStart == paragraphLineEnd)
                     continue;
 
-                avec2 xpos = {};
+                vec2f pos = {};
                 iterColumn = iGlyphColumns.begin();
-                for (auto iterGlyph = paragraphLineStart; iterGlyph != paragraphLineEnd; ++iterGlyph)
+                for (auto iterGlyph = std::next(paragraphLineStart); iterGlyph != paragraphLineEnd; ++iterGlyph)
                 {
+                    auto& previousGlyph = *std::prev(iterGlyph);
                     auto& glyph = *iterGlyph;
-                    avec2 xadvance = { glyph.cell[1].x - glyph.cell[0].x, glyph.cell[2].x - glyph.cell[3].x };
+                    vec2f const defaultAdvance{ glyph.cell[0].x - previousGlyph.cell[0].x, glyph.cell[0].y - previousGlyph.cell[0].y };
+                    vec2f advance = defaultAdvance;
                     if (iText[glyph.clusters.first] == iterColumn->delimiter() && iterColumn + 1 != iGlyphColumns.end())
                         ++iterColumn;
                     else if (is_whitespace(glyph))
                     {
                         if (glyph.value == U'\t')
-                            xadvance = { tab_stops() - std::fmod(xpos[0], tab_stops()), tab_stops() - std::fmod(xpos[1], tab_stops()) };
+                        {
+                            float const tabStops = static_cast<float>(tab_stops());
+                            advance = { tabStops - std::fmod(pos.x, tabStops), advance.y };
+                        }
                         else if (is_line_breaking_whitespace(glyph))
-                            xadvance = {};
+                            advance = { 0.0f, advance.y };
                     }
-                    glyph.cell[0].x = static_cast<float>(xpos[0]);
-                    glyph.cell[1].x = static_cast<float>(xpos[0] + xadvance[0]);
-                    glyph.cell[2].x = static_cast<float>(xpos[1] + xadvance[1]);
-                    glyph.cell[3].x = static_cast<float>(xpos[1]);
-                    xpos[0] += xadvance[0];
-                    xpos[1] += xadvance[1];
+                    glyph.cell += (advance - defaultAdvance);
+                    pos += advance;
                 }
             }
         }

@@ -428,7 +428,7 @@
                                 push_button: {
                                     id: button6
                                     size_policy: Expanding
-                                    text: "RGB <-> HSV\ncolor space\nconversion test"
+                                    text: "RGB <-> HSV\ncolor space\nconversion test\n\n\nZ͕̰̦̼͖ͦ͆ͬ̍̋̓̚\n\n"
                                 }
                                 spacer: {
                                     weight: 0.5

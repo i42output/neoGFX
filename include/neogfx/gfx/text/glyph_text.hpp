@@ -576,28 +576,28 @@ namespace neogfx
     public:
         virtual glyph_text create_glyph_text() = 0;
         virtual glyph_text create_glyph_text(font const& aFont) = 0;
-        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aBottomJustify = true) = 0;
-        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aBottomJustify = true) = 0;
+        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aAlignBaselines = true) = 0;
+        virtual glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aAlignBaselines = true) = 0;
     public:
-        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char32_t const* aUtf32Begin, char32_t const* aUtf32End, std::function<font(std::size_t)> aFontSelector, bool aAlignBaselines = true)
         {
-            return to_glyph_text(aContext, aUtf32Begin, aUtf32End, font_selector{ aFontSelector }, aBottomJustify);
+            return to_glyph_text(aContext, aUtf32Begin, aUtf32End, font_selector{ aFontSelector }, aAlignBaselines);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, std::u32string_view const& aString, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, std::u32string_view const& aString, std::function<font(std::size_t)> aFontSelector, bool aAlignBaselines = true)
         {
-            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector }, aBottomJustify);
+            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector }, aAlignBaselines);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, char const* aUtf8Begin, char const* aUtf8End, std::function<font(std::size_t)> aFontSelector, bool aAlignBaselines = true)
         {
-            return to_glyph_text(aContext, aUtf8Begin, aUtf8End, font_selector{ aFontSelector }, aBottomJustify);
+            return to_glyph_text(aContext, aUtf8Begin, aUtf8End, font_selector{ aFontSelector }, aAlignBaselines);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, std::string_view const& aString, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, std::string_view const& aString, std::function<font(std::size_t)> aFontSelector, bool aAlignBaselines = true)
         {
-            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector }, aBottomJustify);
+            return to_glyph_text(aContext, aString.data(), aString.data() + aString.size(), font_selector{ aFontSelector }, aAlignBaselines);
         }
-        glyph_text to_glyph_text(i_graphics_context const& aContext, i_string const& aString, std::function<font(std::size_t)> aFontSelector, bool aBottomJustify = true)
+        glyph_text to_glyph_text(i_graphics_context const& aContext, i_string const& aString, std::function<font(std::size_t)> aFontSelector, bool aAlignBaselines = true)
         {
-            return to_glyph_text(aContext, aString.c_str(), aString.c_str() + aString.size(), font_selector{ aFontSelector }, aBottomJustify);
+            return to_glyph_text(aContext, aString.c_str(), aString.c_str() + aString.size(), font_selector{ aFontSelector }, aAlignBaselines);
         }
     };
 }

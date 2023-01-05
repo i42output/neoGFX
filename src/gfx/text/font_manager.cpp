@@ -180,8 +180,8 @@ namespace neogfx
     public:
         glyph_text create_glyph_text() override;
         glyph_text create_glyph_text(font const& aFont) override;
-        glyph_text to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aBottomJustify = true) override;
-        glyph_text to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aBottomJustify = true) override;
+        glyph_text to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aAlignBaselines = true) override;
+        glyph_text to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aAlignBaselines = true) override;
     private:
         cluster_map_t iClusterMap;
         std::vector<character_type> iTextDirections;
@@ -389,7 +389,7 @@ namespace neogfx
         return *make_ref<glyph_text_content>(aFont);
     }
 
-    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aBottomJustify)
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aAlignBaselines)
     {
         auto& clusterMap = iClusterMap;
         clusterMap.clear();
@@ -407,10 +407,10 @@ namespace neogfx
         return to_glyph_text(aGc, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
         {
             return aFontSelector.select_font(clusterMap[aIndex].from);
-        } }, aBottomJustify);
+        } }, aAlignBaselines);
     }
 
-    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aBottomJustify)
+    glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aAlignBaselines)
     {
         auto refResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
         auto& result = *refResult;
@@ -631,7 +631,7 @@ namespace neogfx
         }
 
         vec2f previousAdvance = {};
-        quadf_2d previousQuad = {};
+        quadf_2d previousCell = {};
 
         for (std::size_t i = 0; i < runs.size(); ++i)
         {
@@ -681,7 +681,7 @@ namespace neogfx
                     vec2{ glyphPosition.x_advance / 64.0, glyphPosition.y_advance / 64.0 }.round() :
                     vec2{ font.height(), 0.0 }.round();
                 vec2f const offset = vec2{ glyphPosition.x_offset / 64.0, glyphPosition.y_offset / 64.0 }.round();
-                float const minCellHeight = static_cast<float>(font.height());
+                float const cellHeight = static_cast<float>(font.height());
                 
                 auto& newGlyph = result.emplace_back(
                     shapes.glyph_info(j).codepoint,
@@ -694,14 +694,14 @@ namespace neogfx
 
                 auto const& glyphTexture = font.glyph(newGlyph);
                 auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
-                float const minCellWidth = (category(newGlyph) != text_category::Whitespace ? glyphTextureExtents.cx : advance.x);
+                float const cellWidth = (category(newGlyph) != text_category::Whitespace ? glyphTextureExtents.cx : advance.x);
                 auto const& glyphMetrics = glyphTexture.metrics();
 
                 newGlyph.cell = quadf_2d{
-                    previousQuad[0] + previousAdvance,
-                    previousQuad[0] + previousAdvance + vec2f{ std::max(advance.x, minCellWidth), 0.0f },
-                    previousQuad[0] + previousAdvance + advance.max(vec2f{ minCellWidth, minCellHeight }),
-                    previousQuad[0] + previousAdvance + vec2f{ 0.0f, std::max(advance.y, minCellHeight) } };
+                    previousCell[0] + previousAdvance,
+                    previousCell[0] + previousAdvance + vec2f{ cellWidth, 0.0f },
+                    previousCell[0] + previousAdvance + vec2f{ cellWidth, cellHeight },
+                    previousCell[0] + previousAdvance + vec2f{ 0.0f, cellHeight } };
 
                 newGlyph.shape = quadf_2d{
                     offset,
@@ -716,7 +716,7 @@ namespace neogfx
 
                 if (aGc.logical_coordinate_system() == logical_coordinate_system::AutomaticGui)
                     for (auto& v : newGlyph.shape)
-                        v.y = -v.y + minCellHeight;
+                        v.y = -v.y + cellHeight;
 
                 if (category(newGlyph) == text_category::Whitespace)
                     newGlyph.value = aUtf32Begin[startCluster];
@@ -734,7 +734,7 @@ namespace neogfx
                     set_mnemonic(newGlyph, true);
 
                 previousAdvance = advance;
-                previousQuad = newGlyph.cell;
+                previousCell = newGlyph.cell;
             }
         }
         if (hasEmojis)
@@ -799,12 +799,12 @@ namespace neogfx
                 else
                     emojiResult.push_back(*i);
             }
-            if (aBottomJustify)
+            if (aAlignBaselines)
                 return emojiResult.align_baselines();
             else
                 return emojiResult;
         }
-        if (aBottomJustify)
+        if (aAlignBaselines)
             return result.align_baselines();
         else
             return result;
