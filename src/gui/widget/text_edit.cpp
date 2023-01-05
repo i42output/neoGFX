@@ -2377,13 +2377,13 @@ namespace neogfx
             if (ch == column.delimiter() && iterColumn + 1 != iGlyphColumns.end())
             {
                 ++iterColumn;
-                columnDelimiters.push_back(iterChar - nextParagraph);
                 continue;
             }
             bool newParagraph = (ch == U'\n');
             if (newParagraph || iterChar == iText.end() - 1)
             {
                 paragraphBuffer.assign(nextParagraph, iterChar + 1);
+                // todo: tab stops (implement in to_glyph_text(...))
                 auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
                 if (gt.cbegin() != gt.cend())
                 {
@@ -2401,54 +2401,6 @@ namespace neogfx
                     paragraph->first.set_line_breaks(gt.content().line_breaks());
                 }
                 nextParagraph = iterChar + 1;
-                columnDelimiters.clear();
-            }
-        }
-        for (auto p = iGlyphParagraphs.begin(); p != iGlyphParagraphs.end(); ++p)
-        {
-            auto& paragraph = *p;
-
-            thread_local std::vector<std::pair<document_glyphs::iterator, document_glyphs::iterator>> paragraphLines;
-            paragraphLines.clear();
-            glyph_text::size_type lastBreak = 0;
-            for (auto lineBreak : paragraph.first.line_breaks())
-            {
-                paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.start() + lineBreak);
-                lastBreak = lineBreak + 1;
-            }
-            paragraphLines.emplace_back(paragraph.first.start() + lastBreak, paragraph.first.end());
-
-            for (auto const& paragraphLine : paragraphLines)
-            {
-                auto const paragraphLineStart = paragraphLine.first;
-                auto const paragraphLineEnd = paragraphLine.second;
-
-                if (paragraphLineStart == paragraphLineEnd)
-                    continue;
-
-                vec2f pos = {};
-                iterColumn = iGlyphColumns.begin();
-                for (auto iterGlyph = std::next(paragraphLineStart); iterGlyph != paragraphLineEnd; ++iterGlyph)
-                {
-                    auto& previousGlyph = *std::prev(iterGlyph);
-                    auto& glyph = *iterGlyph;
-                    vec2f const defaultAdvance{ glyph.cell[0].x - previousGlyph.cell[0].x, glyph.cell[0].y - previousGlyph.cell[0].y };
-                    vec2f advance = defaultAdvance;
-                    if (iText[glyph.clusters.first] == iterColumn->delimiter() && iterColumn + 1 != iGlyphColumns.end())
-                        ++iterColumn;
-                    else if (is_whitespace(glyph))
-                    {
-                        if (glyph.value == U'\t')
-                        {
-                            float const tabStops = static_cast<float>(tab_stops());
-                            advance = { tabStops - std::fmod(pos.x, tabStops), advance.y };
-                        }
-                        else if (is_line_breaking_whitespace(glyph))
-                            advance = { 0.0f, advance.y };
-                    }
-                    glyph.cell += (advance - defaultAdvance);
-                    pos += advance;
-                }
             }
         }
         refresh_columns();

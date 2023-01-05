@@ -694,7 +694,7 @@ namespace neogfx
 
                 auto const& glyphTexture = font.glyph(newGlyph);
                 auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
-                float const cellWidth = (category(newGlyph) != text_category::Whitespace ? glyphTextureExtents.cx : advance.x);
+                float const cellWidth = (category(newGlyph) != text_category::Whitespace ? std::max(advance.x, glyphTextureExtents.cx) : advance.x);
                 auto const& glyphMetrics = glyphTexture.metrics();
 
                 newGlyph.cell = quadf_2d{
