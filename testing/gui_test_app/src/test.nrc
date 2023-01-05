@@ -348,7 +348,6 @@
                                 text_edit: {
                                     id: textEditSmall
                                     maximum_width: 100
-                                    alignment: Right
                                 }
                             }
                             horizontal_layout: {

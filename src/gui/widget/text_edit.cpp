@@ -2489,7 +2489,7 @@ namespace neogfx
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
-                                { (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x, alignBaselinesResult.yExtent },
+                                { lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, alignBaselinesResult.yExtent },
                                 alignBaselinesResult.majorFont, 
                                 alignBaselinesResult.baseline });
                         pos.y += lines.back().extents.cy;
@@ -2502,7 +2502,7 @@ namespace neogfx
                         auto next = paragraphLineStart;
                         auto lineStart = next;
                         auto lineEnd = paragraphLineEnd;
-                        coordinate offset = 0.0;
+                        coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x : 0.0);
                         while (next != paragraphLineEnd)
                         {
                             glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f } }, {} };
@@ -2553,7 +2553,7 @@ namespace neogfx
                                     { lineStart - glyphs().begin(), lineStart },
                                     { lineEnd - glyphs().begin(), lineEnd },
                                     pos.y,
-                                    { (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x, alignBaselinesResult.yExtent },
+                                    { lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, alignBaselinesResult.yExtent },
                                     alignBaselinesResult.majorFont, 
                                     alignBaselinesResult.baseline });
                             if (rtl)
@@ -2587,7 +2587,7 @@ namespace neogfx
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
-                                { (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x, alignBaselinesResult.yExtent},
+                                { lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, alignBaselinesResult.yExtent},
                                 alignBaselinesResult.majorFont,
                                 alignBaselinesResult.baseline });
                         pos.y += lines.back().extents.cy;
