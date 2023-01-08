@@ -677,12 +677,12 @@ namespace neogfx
                     
                 auto const& glyphPosition = shapes.glyph_position(j);
 
-                vec2f const advance = textDirections[startCluster].category != text_category::Emoji ?
+                vec2f advance = textDirections[startCluster].category != text_category::Emoji ?
                     vec2{ glyphPosition.x_advance / 64.0, glyphPosition.y_advance / 64.0 }.round() :
                     vec2{ font.height(), 0.0 }.round();
                 vec2f const offset = vec2{ glyphPosition.x_offset / 64.0, glyphPosition.y_offset / 64.0 }.round();
                 float const cellHeight = static_cast<float>(font.height());
-                
+
                 auto& newGlyph = result.emplace_back(
                     shapes.glyph_info(j).codepoint,
                     glyph_char::cluster_range{ static_cast<std::uint32_t>(startCluster), static_cast<std::uint32_t>(endCluster) },
@@ -691,6 +691,18 @@ namespace neogfx
                     font.id(),
                     quadf_2d{},
                     quadf_2d{});
+
+                if (category(newGlyph) == text_category::Whitespace)
+                    newGlyph.value = codePoints[startCluster];
+
+                if (category(newGlyph) == text_category::Whitespace && newGlyph.value == U'\t' && aGc.has_tab_stops())
+                {
+                    // todo: tab stop list and tab alignment
+                    if (!aGc.tab_stops().stops().empty() || aGc.tab_stops().default_stop().alignment != alignment::Left)
+                        throw not_yet_implemented("Extended tab stop functionality not yet implemented");
+                    auto const tabStopPos = static_cast<float>(aGc.tab_stops().default_stop().pos);
+                    advance.x = tabStopPos - std::fmod((previousCell[0] + previousAdvance).x, tabStopPos);
+                }
 
                 auto const& glyphTexture = font.glyph(newGlyph);
                 auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
