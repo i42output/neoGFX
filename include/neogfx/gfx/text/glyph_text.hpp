@@ -568,7 +568,7 @@ namespace neogfx
     private:
         function_type iSelectorFunction;
     };
-
+    
     class i_glyph_text_factory
     {
     public:

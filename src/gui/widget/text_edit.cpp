@@ -2383,7 +2383,7 @@ namespace neogfx
             if (newParagraph || iterChar == iText.end() - 1)
             {
                 paragraphBuffer.assign(nextParagraph, iterChar + 1);
-                // todo: tab stops (implement in to_glyph_text(...))
+                scoped_tab_stops sts{ gc, tab_stop{ tab_stops() } };
                 auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
                 if (gt.cbegin() != gt.cend())
                 {

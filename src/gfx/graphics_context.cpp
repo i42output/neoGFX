@@ -548,6 +548,28 @@ namespace neogfx
                 aFill });
     }
 
+    bool graphics_context::has_tab_stops() const
+    {
+        return iTabStops.has_value();
+    }
+
+    i_tab_stops const& graphics_context::tab_stops() const
+    {
+        if (iTabStops.has_value())
+            return iTabStops.value();;
+        throw no_tab_stops();
+    }
+
+    void graphics_context::set_tab_stops(i_tab_stops const& aTabStops)
+    {
+        iTabStops.emplace(aTabStops);
+    }
+
+    void graphics_context::clear_tab_stops()
+    {
+        iTabStops = std::nullopt;
+    }
+
     size graphics_context::text_extent(std::string const& aText) const
     {
         return text_extent(aText, default_font());

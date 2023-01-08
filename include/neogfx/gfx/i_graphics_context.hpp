@@ -62,9 +62,53 @@ namespace neogfx
     };
         
     ping_pong_buffers create_ping_pong_buffers(const i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} });
-        
-    // todo: move to i_string
 
+    struct tab_stop
+    {
+        typedef tab_stop abstract_type;
+
+        scalar pos;
+        neogfx::alignment alignment = neogfx::alignment::Left;
+    };
+
+    class i_tab_stops
+    {
+    public:
+        virtual tab_stop const& default_stop() const = 0;
+        virtual neolib::i_vector<tab_stop> const& stops() const = 0;
+    };
+
+    class tab_stops : public i_tab_stops
+    {
+    public:
+        tab_stops(tab_stop const& aDefaultStop) :
+            iDefaultStop{ aDefaultStop }
+        {
+        }
+        template <typename TabStopIter>
+        tab_stops(tab_stop const& aDefaultStop, TabStopIter aStopsBegin, TabStopIter aStopsEnd) :
+            iDefaultStop{ aDefaultStop },
+            iStops{ aStopsBegin, aStopsEnd }
+        {
+        }
+        tab_stops(i_tab_stops const& aOther) :
+            tab_stops(aOther.default_stop(), aOther.stops().begin(), aOther.stops().end())
+        {
+        }
+    public:
+        tab_stop const& default_stop() const override 
+        {
+            return iDefaultStop;
+        }
+        neolib::i_vector<tab_stop> const& stops() const override
+        {
+            return iStops;
+        }
+    private:
+        tab_stop iDefaultStop;
+        neolib::vector<tab_stop> iStops;
+    };
+        
     class i_graphics_context : public i_rendering_context, public i_device_metrics, public i_units_context
     {
         // types
@@ -77,6 +121,7 @@ namespace neogfx
         // exceptions
     public:
         struct unattached : std::logic_error { unattached() : std::logic_error("neogfx::i_graphics_context::unattached") {} };
+        struct no_tab_stops : std::logic_error { no_tab_stops() : std::logic_error("neogfx::i_graphics_context::no_tab_stops") {} };
         struct password_not_set : std::logic_error { password_not_set() : std::logic_error("neogfx::i_graphics_context::password_not_set") {} };
         // construction
     public:
@@ -181,6 +226,10 @@ namespace neogfx
     public:
         virtual font const& default_font() const = 0;
         virtual void set_default_font(const font& aDefaultFont) const = 0;
+        virtual bool has_tab_stops() const = 0;
+        virtual i_tab_stops const& tab_stops() const = 0;
+        virtual void set_tab_stops(i_tab_stops const& aTabStops) = 0;
+        virtual void clear_tab_stops() = 0;
         virtual size text_extent(std::string const& aText) const = 0;
         virtual size text_extent(std::string const& aText, const font& aFont) const = 0;
         virtual size text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
@@ -540,4 +589,29 @@ namespace neogfx
             kernel[mean][mean] = static_cast<ValueType>(1.0);
         return kernel;
     }
+
+    class scoped_tab_stops
+    {
+    public:
+        scoped_tab_stops(i_graphics_context& aGc, std::optional<tab_stops> const& aTabStops) :
+            iGc{ aGc }
+        {
+            if (iGc.has_tab_stops())
+                iPrevious.emplace(iGc.tab_stops());
+            if (aTabStops.has_value())
+                iGc.set_tab_stops(aTabStops.value());
+            else
+                iGc.clear_tab_stops();
+        }
+        ~scoped_tab_stops()
+        {
+            if (iPrevious.has_value())
+                iGc.set_tab_stops(iPrevious.value());
+            else
+                iGc.clear_tab_stops();
+        }
+    private:
+        i_graphics_context& iGc;
+        std::optional<tab_stops> iPrevious;
+    };
 }

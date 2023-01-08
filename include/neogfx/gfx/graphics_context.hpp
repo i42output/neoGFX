@@ -131,6 +131,10 @@ namespace neogfx
         void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const final;
         void fill_path(const path& aPath, const brush& aFill) const final;
         void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const final;
+        bool has_tab_stops() const override;
+        i_tab_stops const& tab_stops() const override;
+        void set_tab_stops(i_tab_stops const& aTabStops) override;
+        void clear_tab_stops() override;
         size text_extent(std::string const& aText) const final;
         size text_extent(std::string const& aText, const font& aFont) const final;
         size text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const final;
@@ -255,6 +259,7 @@ namespace neogfx
         mutable neogfx::blending_mode iBlendingMode;
         mutable neogfx::smoothing_mode iSmoothingMode;
         mutable bool iSubpixelRendering;
+        mutable std::optional<neogfx::tab_stops> iTabStops;
         mutable std::optional<std::pair<bool, char>> iMnemonic;
         mutable std::optional<std::string> iPassword;
         mutable std::optional<size> iPreviousPingPongBufferSize;
