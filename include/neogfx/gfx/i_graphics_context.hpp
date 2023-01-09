@@ -69,6 +69,8 @@ namespace neogfx
 
         scalar pos;
         neogfx::alignment alignment = neogfx::alignment::Left;
+
+        std::partial_ordering operator<=>(tab_stop const&) const noexcept = default;
     };
 
     class i_tab_stops
@@ -94,6 +96,15 @@ namespace neogfx
         tab_stops(i_tab_stops const& aOther) :
             tab_stops(aOther.default_stop(), aOther.stops().begin(), aOther.stops().end())
         {
+        }
+    public:
+        bool operator==(tab_stops const& aOther) const noexcept
+        {
+            return std::forward_as_tuple(iDefaultStop, iStops) == std::forward_as_tuple(aOther.iDefaultStop, aOther.iStops);
+        }
+        std::partial_ordering operator<=>(tab_stops const& aOther) const noexcept
+        {
+            return std::forward_as_tuple(iDefaultStop, iStops) <=> std::forward_as_tuple(aOther.iDefaultStop, aOther.iStops);
         }
     public:
         tab_stop const& default_stop() const override 

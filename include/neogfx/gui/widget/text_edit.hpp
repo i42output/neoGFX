@@ -459,9 +459,9 @@ namespace neogfx
     public:
         const neogfx::size_hint& size_hint() const;
         void set_size_hint(const neogfx::size_hint& aSizeHint);
-        dimension tab_stops() const;
         void set_tab_stop_hint(i_string const& aTabStopHint = string{ "0000" });
-        void set_tab_stops(const optional_dimension& aTabStops);
+        neogfx::tab_stops const& tab_stops() const;
+        void set_tab_stops(std::optional<neogfx::tab_stops> const& aTabStops);
     public:
         position_type document_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
@@ -537,10 +537,10 @@ namespace neogfx
         mutable std::optional<find_in_paragraph_cache::iterator> iGlyphToParagraphCacheLastAccess;
         neogfx::size_hint iSizeHint;
         mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
-        optional_dimension iTabStops;
+        std::optional<neogfx::tab_stops> iTabStops;
         string iTabStopHint;
+        mutable std::optional<std::pair<neogfx::font, neogfx::tab_stops>> iCalculatedTabStops;
         basic_point<std::optional<dimension>> iCursorHint;
-        mutable std::optional<std::pair<neogfx::font, dimension>> iCalculatedTabStops;
         widget_timer iAnimator;
         std::unique_ptr<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;

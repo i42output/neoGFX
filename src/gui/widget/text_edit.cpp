@@ -2152,12 +2152,12 @@ namespace neogfx
         }
     }
 
-    dimension text_edit::tab_stops() const
+    neogfx::tab_stops const& text_edit::tab_stops() const
     {
+        if (iTabStops != std::nullopt)
+            return iTabStops.value();
         if (iCalculatedTabStops == std::nullopt || iCalculatedTabStops->first != font())
-            iCalculatedTabStops = std::make_pair(font(), (iTabStops != std::nullopt ?
-                *iTabStops : 
-                graphics_context{ *this, graphics_context::type::Unattached }.text_extent(iTabStopHint, font()).cx));
+            iCalculatedTabStops = std::make_pair(font(), tab_stop{ graphics_context{ *this, graphics_context::type::Unattached }.text_extent(iTabStopHint, font()).cx });
         return iCalculatedTabStops->second;
     }
 
@@ -2167,18 +2167,18 @@ namespace neogfx
         {
             iTabStopHint = aTabStopHint;
             iCalculatedTabStops.reset();
+            refresh_columns();
         }
     }
 
-    void text_edit::set_tab_stops(const optional_dimension& aTabStops)
+    void text_edit::set_tab_stops(std::optional<neogfx::tab_stops> const& aTabStops)
     {
-        optional_dimension newTabStops = (aTabStops != std::nullopt ? optional_dimension{ units_converter{ *this }.to_device_units(size{ *aTabStops, 0.0 }).cx } : optional_dimension{});
-        if (iTabStops != newTabStops)
+        if (iTabStops != aTabStops)
         {
-            iTabStops = newTabStops;
+            iTabStops = aTabStops;
+            iCalculatedTabStops.reset();
             refresh_columns();
         }
-        iCalculatedTabStops.reset();
     }
 
     void text_edit::init()
@@ -2383,7 +2383,7 @@ namespace neogfx
             if (newParagraph || iterChar == iText.end() - 1)
             {
                 paragraphBuffer.assign(nextParagraph, iterChar + 1);
-                scoped_tab_stops sts{ gc, tab_stop{ tab_stops() } };
+                scoped_tab_stops sts{ gc, tab_stops() };
                 auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
                 if (gt.cbegin() != gt.cend())
                 {
