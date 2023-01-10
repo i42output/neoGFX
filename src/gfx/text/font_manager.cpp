@@ -630,6 +630,7 @@ namespace neogfx
             } while (i < runs.size());
         }
 
+        float lineStart = 0.0f;
         vec2f previousAdvance = {};
         quadf_2d previousCell = {};
 
@@ -693,15 +694,22 @@ namespace neogfx
                     quadf_2d{});
 
                 if (category(newGlyph) == text_category::Whitespace)
+                {
                     newGlyph.value = codePoints[startCluster];
 
-                if (category(newGlyph) == text_category::Whitespace && newGlyph.value == U'\t' && aGc.has_tab_stops())
-                {
-                    // todo: tab stop list and tab alignment
-                    if (!aGc.tab_stops().stops().empty() || aGc.tab_stops().default_stop().alignment != alignment::Left)
-                        throw not_yet_implemented("Extended tab stop functionality not yet implemented");
-                    auto const tabStopPos = static_cast<float>(aGc.tab_stops().default_stop().pos);
-                    advance.x = tabStopPos - std::fmod((previousCell[0] + previousAdvance).x, tabStopPos);
+                    if (newGlyph.value == U'\r' || newGlyph.value == U'\n')
+                    {
+                        lineStart = previousCell[0].x + previousAdvance.x;
+                        advance = {};
+                    }
+                    else if (newGlyph.value == U'\t' && aGc.has_tab_stops())
+                    {
+                        // todo: tab stop list and tab alignment
+                        if (!aGc.tab_stops().stops().empty() || aGc.tab_stops().default_stop().alignment != alignment::Left)
+                            throw not_yet_implemented("Extended tab stop functionality not yet implemented");
+                        auto const tabStopPos = static_cast<float>(aGc.tab_stops().default_stop().pos);
+                        advance.x = tabStopPos - std::fmod((previousCell[0] + previousAdvance).x - lineStart, tabStopPos);
+                    }
                 }
 
                 auto const& glyphTexture = font.glyph(newGlyph);
