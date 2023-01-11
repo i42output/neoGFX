@@ -1911,8 +1911,8 @@ namespace neogfx
             {
                 while (a != drawOp.attributes.end() && (g - drawOp.begin) >= a->end)
                     ++a;
-                auto& glyph_char = *g;
-                drawGlyphCache.emplace_back(drawOp.point, &drawOp.glyphText.content(), &glyph_char, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
+                auto& glyphChar = *g;
+                drawGlyphCache.emplace_back(drawOp.point, &drawOp.glyphText.content(), &glyphChar, a != drawOp.attributes.end() && (g - drawOp.begin) >= a->start ? &a->attributes : nullptr, drawOp.showMnemonics);
             }
         }
 
@@ -2065,21 +2065,21 @@ namespace neogfx
             case draw_glyphs_stage::EmojiFinal:
                 for (auto const& drawOp : std::ranges::subrange(aBegin, aEnd))
                 {
-                    auto& glyph_char = *drawOp.glyphChar;
+                    auto& glyphChar = *drawOp.glyphChar;
 
-                    if (is_whitespace(glyph_char) || !is_emoji(glyph_char))
+                    if (is_whitespace(glyphChar) || !is_emoji(glyphChar))
                         continue;
 
                     auto const& glyphQuad = quad{
-                            (glyph_char.cell[0] + glyph_char.shape[0]).round(),
-                            (glyph_char.cell[0] + glyph_char.shape[1]).round(),
-                            (glyph_char.cell[0] + glyph_char.shape[2]).round(),
-                            (glyph_char.cell[0] + glyph_char.shape[3]).round() } + drawOp.point;
+                            (glyphChar.cell[0] + glyphChar.shape[0]).round(),
+                            (glyphChar.cell[0] + glyphChar.shape[1]).round(),
+                            (glyphChar.cell[0] + glyphChar.shape[2]).round(),
+                            (glyphChar.cell[0] + glyphChar.shape[3]).round() } + drawOp.point;
 
                     auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
 
                     auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
-                    auto const& emojiTexture = emojiAtlas.emoji_texture(glyph_char.value).as_sub_texture();
+                    auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
                     meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                         (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) : 

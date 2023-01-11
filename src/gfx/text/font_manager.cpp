@@ -432,7 +432,9 @@ namespace neogfx
 
         auto& runs = iRuns;
         runs.clear();
+
         auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
+
         text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
         if (aGc.mnemonic_set() && codePoints[0] == static_cast<char32_t>(aGc.mnemonic()) && 
             (codePointCount == 1 || codePoints[1] != static_cast<char32_t>(aGc.mnemonic())))
@@ -678,11 +680,12 @@ namespace neogfx
                     
                 auto const& glyphPosition = shapes.glyph_position(j);
 
+                float const cellHeight = static_cast<float>(font.height());
+
                 vec2f advance = textDirections[startCluster].category != text_category::Emoji ?
                     vec2{ glyphPosition.x_advance / 64.0, glyphPosition.y_advance / 64.0 }.round() :
-                    vec2{ font.height(), 0.0 }.round();
+                    vec2{ cellHeight, 0.0 }.round();
                 vec2f const offset = vec2{ glyphPosition.x_offset / 64.0, glyphPosition.y_offset / 64.0 }.round();
-                float const cellHeight = static_cast<float>(font.height());
 
                 auto& newGlyph = result.emplace_back(
                     shapes.glyph_info(j).codepoint,
@@ -694,9 +697,22 @@ namespace neogfx
                     quadf_2d{});
 
                 if (category(newGlyph) == text_category::Whitespace)
-                {
                     newGlyph.value = codePoints[startCluster];
+                else if (category(newGlyph) == text_category::Emoji)
+                    newGlyph.value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
+                if ((selectedFont.style() & font_style::Underline) == font_style::Underline)
+                    set_underline(newGlyph, true);
+                if ((selectedFont.style() & font_style::Superscript) == font_style::Superscript)
+                    set_superscript(newGlyph, true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
+                if ((selectedFont.style() & font_style::Subscript) == font_style::Subscript)
+                    set_subscript(newGlyph, true, (selectedFont.style() & font_style::AboveBaseline) == font_style::AboveBaseline);
+                if (aGc.is_subpixel_rendering_on() && !font.is_bitmap_font())
+                    set_subpixel(newGlyph, true);
+                if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
+                    set_mnemonic(newGlyph, true);
 
+                if (category(newGlyph) == text_category::Whitespace)
+                {
                     if (newGlyph.value == U'\r' || newGlyph.value == U'\n')
                     {
                         lineStart = previousCell[0].x + previousAdvance.x;
@@ -712,46 +728,53 @@ namespace neogfx
                     }
                 }
 
-                auto const& glyphTexture = font.glyph(newGlyph);
-                auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
-                float const cellWidth = (category(newGlyph) != text_category::Whitespace ? std::max(advance.x, glyphTextureExtents.cx) : advance.x);
-                auto const& glyphMetrics = glyphTexture.metrics();
+                if (category(newGlyph) != text_category::Emoji)
+                {
+                    auto const& glyphTexture = font.glyph(newGlyph);
+                    auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
+                    float const cellWidth = (category(newGlyph) != text_category::Whitespace ? std::max(advance.x, glyphTextureExtents.cx) : advance.x);
+                    auto const& glyphMetrics = glyphTexture.metrics();
 
-                newGlyph.cell = quadf_2d{
-                    previousCell[0] + previousAdvance,
-                    previousCell[0] + previousAdvance + vec2f{ cellWidth, 0.0f },
-                    previousCell[0] + previousAdvance + vec2f{ cellWidth, cellHeight },
-                    previousCell[0] + previousAdvance + vec2f{ 0.0f, cellHeight } };
+                    newGlyph.cell = quadf_2d{
+                        previousCell[0] + previousAdvance,
+                        previousCell[0] + previousAdvance + vec2f{ cellWidth, 0.0f },
+                        previousCell[0] + previousAdvance + vec2f{ cellWidth, cellHeight },
+                        previousCell[0] + previousAdvance + vec2f{ 0.0f, cellHeight } };
 
-                newGlyph.shape = quadf_2d{
-                    offset,
-                    offset + vec2f{ glyphTextureExtents.cx, 0.0f },
-                    offset + vec2f{ glyphTextureExtents.cx, glyphTextureExtents.cy },
-                    offset + vec2f{ 0.0f, glyphTextureExtents.cy } };
+                    newGlyph.shape = category(newGlyph) != text_category::Whitespace ? 
+                        quadf_2d{
+                            offset,
+                            offset + vec2f{ glyphTextureExtents.cx, 0.0f },
+                            offset + vec2f{ glyphTextureExtents.cx, glyphTextureExtents.cy },
+                            offset + vec2f{ 0.0f, glyphTextureExtents.cy } } : 
+                        quadf_2d{};
 
-                vec2f const shapeAdjust = vec2{
-                    glyphMetrics.bearing.x,
-                    glyphMetrics.bearing.y - glyphMetrics.extents.y + -font.descender() }.as<float>();
-                newGlyph.shape += shapeAdjust;
+                    vec2f const shapeAdjust = vec2{
+                        glyphMetrics.bearing.x,
+                        glyphMetrics.bearing.y - glyphMetrics.extents.y + -font.descender() }.as<float>();
+                    newGlyph.shape += shapeAdjust;
+                }
+                else
+                {
+                    auto const& emojiTexture = emojiAtlas.emoji_texture(newGlyph.value).as_sub_texture();
+                    float const cellWidth = advance.x;
+
+                    newGlyph.cell = quadf_2d{
+                        previousCell[0] + previousAdvance,
+                        previousCell[0] + previousAdvance + vec2f{ cellWidth, 0.0f },
+                        previousCell[0] + previousAdvance + vec2f{ cellWidth, cellHeight },
+                        previousCell[0] + previousAdvance + vec2f{ 0.0f, cellHeight } };
+
+                    newGlyph.shape = quadf_2d{
+                        vec2f{ 0.0f, 0.0f },
+                        vec2f{ cellWidth, 0.0f },
+                        vec2f{ cellWidth, cellHeight },
+                        vec2f{ 0.0f, cellHeight } };
+                }
 
                 if (aGc.logical_coordinate_system() == logical_coordinate_system::AutomaticGui)
                     for (auto& v : newGlyph.shape)
                         v.y = -v.y + cellHeight;
-
-                if (category(newGlyph) == text_category::Whitespace)
-                    newGlyph.value = aUtf32Begin[startCluster];
-                else if (category(newGlyph) == text_category::Emoji)
-                    newGlyph.value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
-                if ((selectedFont.style() & font_style::Underline) == font_style::Underline)
-                    set_underline(newGlyph, true);
-                if ((selectedFont.style() & font_style::Superscript) == font_style::Superscript)
-                    set_superscript(newGlyph, true, (selectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
-                if ((selectedFont.style() & font_style::Subscript) == font_style::Subscript)
-                    set_subscript(newGlyph, true, (selectedFont.style() & font_style::AboveBaseline) == font_style::AboveBaseline);
-                if (aGc.is_subpixel_rendering_on() && !font.is_bitmap_font())
-                    set_subpixel(newGlyph, true);
-                if (drawMnemonic && ((j == 0 && std::get<2>(runs[i]) == text_direction::LTR) || (j == shapes.glyph_count() - 1 && std::get<2>(runs[i]) == text_direction::RTL)))
-                    set_mnemonic(newGlyph, true);
 
                 previousAdvance = advance;
                 previousCell = newGlyph.cell;
