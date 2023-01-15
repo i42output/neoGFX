@@ -453,13 +453,13 @@ namespace neogfx
         typedef i_glyph_text::size_type size_type;
         typedef i_glyph_text::difference_type difference_type;
     public:
-        glyph_text();
+        glyph_text() = delete;
         glyph_text(font const& aFont);
         glyph_text(i_glyph_text& aContents);
         glyph_text(glyph_text const& aOther);
         template <typename GlyphIter>
-        glyph_text(GlyphIter aGlyphsBegin, GlyphIter aGlyphsEnd) :
-            glyph_text{}
+        glyph_text(font const& aFont, GlyphIter aGlyphsBegin, GlyphIter aGlyphsEnd) :
+            glyph_text{ aFont }
         {
             for (auto const& glyph : std::ranges::subrange(aGlyphsBegin, aGlyphsEnd))
             {

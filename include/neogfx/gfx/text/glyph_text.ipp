@@ -305,19 +305,27 @@ namespace neogfx
         align_baselines_result result = {};
         float cyMax = 0.0f;
         float yMax = 0.0f;
-        for (auto const& g : std::ranges::subrange(aBegin, aEnd))
+        if (aBegin != aEnd)
         {
-            auto const& gf = glyph_font(g);
-            auto const existingExtents = quad_extents(g.cell);
-            result.yExtent = std::max(result.yExtent, existingExtents.y);
-            float cy = existingExtents.y + static_cast<float>(gf.descender());
-            if (cy > cyMax)
+            for (auto const& g : std::ranges::subrange(aBegin, aEnd))
             {
-                cyMax = cy;
-                result.majorFont = gf.id();
-                result.baseline = cyMax;
+                auto const& gf = glyph_font(g);
+                auto const existingExtents = quad_extents(g.cell);
+                result.yExtent = std::max(result.yExtent, existingExtents.y);
+                float cy = existingExtents.y + static_cast<float>(gf.descender());
+                if (cy > cyMax)
+                {
+                    cyMax = cy;
+                    result.majorFont = gf.id();
+                    result.baseline = cyMax;
+                }
+                yMax = std::max(yMax, existingExtents.y);
             }
-            yMax = std::max(yMax, existingExtents.y);
+        }
+        else
+        {
+            result.majorFont = major_font().id();
+            result.yExtent = static_cast<float>(major_font().height());
         }
         if (aJustCalculate)
             return result;

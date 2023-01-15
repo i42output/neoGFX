@@ -2716,7 +2716,7 @@ namespace neogfx
 
         auto documentGlyph = lineStart;
 
-        glyph_text lineGlyphs{ lineStart, lineEnd };
+        glyph_text lineGlyphs{ font(), lineStart, lineEnd };
         lineGlyphs.content().align_baselines();
 
         optional_text_format textAppearance;
