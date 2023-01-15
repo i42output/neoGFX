@@ -141,14 +141,14 @@ namespace neogfx
         return category(g) == text_category::Whitespace; 
     };
 
-    inline bool is_non_line_breaking_whitespace(glyph_char const& g)
-    { 
-        return is_whitespace(g) && g.value != U'\n';
-    }
-
     inline bool is_line_breaking_whitespace(glyph_char const& g)
     { 
-        return is_whitespace(g) && g.value == U'\n';
+        return is_whitespace(g) && (g.value == U'\r' || g.value == U'\n');
+    }
+
+    inline bool is_non_line_breaking_whitespace(glyph_char const& g)
+    {
+        return !is_line_breaking_whitespace(g);
     }
 
     inline bool is_digit(glyph_char const& g)

@@ -516,7 +516,6 @@ namespace neogfx
         mutable neogfx::cursor iCursor;
         style_list iStyles;
         bool iUpdatingDocument;
-        std::u32string iNormalizedTextBuffer;
         document_text iPreviousText;
         document_text iText;
         mutable std::optional<string> iUtf8TextCache;

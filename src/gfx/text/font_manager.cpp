@@ -667,7 +667,10 @@ namespace neogfx
                 endCluster += (std::get<0>(runs[i]) - &codePoints[0]);
 
                 if (textDirections[startCluster].category == text_category::Whitespace && aUtf32Begin[startCluster] == U'\r')
-                    result.line_breaks().push_back(result.size());
+                {
+                    if (aUtf32Begin + startCluster + 1 == aUtf32End || aUtf32Begin[startCluster + 1] != U'\n')
+                        result.line_breaks().push_back(result.size());
+                }
 
                 neogfx::font selectedFont = aFontSelector.select_font(startCluster);
                 neogfx::font font = selectedFont;
@@ -756,7 +759,6 @@ namespace neogfx
                 }
                 else
                 {
-                    auto const& emojiTexture = emojiAtlas.emoji_texture(newGlyph.value).as_sub_texture();
                     float const cellWidth = advance.x;
 
                     newGlyph.cell = quadf_2d{

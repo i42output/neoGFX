@@ -1031,6 +1031,7 @@ namespace neogfx
                     else
                         insert_text(string{ "\r" }, next_style());
                     cursor().set_position(cursor().position() + 1);
+                    iCursorHint.x = std::nullopt;
                 }
                 else
                     handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
@@ -2251,37 +2252,35 @@ namespace neogfx
         if (aClearFirst)
             iText.clear();
 
-        std::u32string text = neolib::utf8_to_utf32(aText);
-        if (iNormalizedTextBuffer.capacity() < text.size())
-            iNormalizedTextBuffer.reserve(text.size());
-        iNormalizedTextBuffer.clear();
-        for (auto ti = text.begin(); ti != text.end();)
-        {
-            auto ch = *ti++;
-            if (ch != U'\r' || (ti == text.end() || (*ti) != U'\n'))
-                iNormalizedTextBuffer.push_back(ch);
-        }
-        auto eos = iNormalizedTextBuffer.size();
+        thread_local std::u32string text;
+        text = neolib::utf8_to_utf32(aText);
+        
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
         {
-            auto eol = iNormalizedTextBuffer.find(U'\n');
+            auto eol = text.find_first_of(U"\r\n");
             if (eol != std::u32string::npos)
-                eos = eol;
+                text.erase(eol);
         }
+
         auto s = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
         auto insertionPoint = iText.begin() + aPosition;
         insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type::tag_data{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type::tag_data{ nullptr },
-            insertionPoint, iNormalizedTextBuffer.begin(), iNormalizedTextBuffer.begin() + eos);
-        refresh_paragraph(insertionPoint, eos);
+            insertionPoint, text.begin(), text.end());
+        
+        refresh_paragraph(insertionPoint, text.size());
+        
         update();
+        
         if (aMoveCursor)
         {
-            cursor().set_position(insertionPoint - iText.begin() + eos);
+            cursor().set_position(insertionPoint - iText.begin() + text.size());
             iCursorHint.x = glyph_position(cursor_glyph_position(), true).pos.x;
         }
+        
         if (iPreviousText != iText)
             notify_text_changed();
-        return eos;
+        
+        return text.size();
     }
 
     void text_edit::delete_any_selection()
