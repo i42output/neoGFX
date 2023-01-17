@@ -28,15 +28,6 @@ namespace neogfx
 {
     class i_rendering_context;
 
-    class i_standard_vertex_matrices
-    {
-    public:
-        virtual void set_projection_matrix(const optional_mat44& aProjectionMatrix) = 0;
-        virtual void set_transformation_matrix(const optional_mat44& aProjectionMatrix) = 0;
-    };
-
-    struct no_standard_vertex_matrices : std::logic_error { no_standard_vertex_matrices() : std::logic_error{ "neogfx::no_standard_vertex_matrices" } {} };
-
     class i_vertex_shader : public i_shader
     {
     public:
@@ -52,9 +43,13 @@ namespace neogfx
         {
             return add_attribute(aName, aLocation, static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()));
         }    
+    };
+
+    class i_standard_vertex_shader : public i_vertex_shader
+    {
     public:
-        virtual bool has_standard_vertex_matrices() const = 0;
-        virtual const i_standard_vertex_matrices& standard_vertex_matrices() const = 0;
-        virtual i_standard_vertex_matrices& standard_vertex_matrices() = 0;
+        virtual void set_projection_matrix(const optional_mat44& aProjectionMatrix) = 0;
+        virtual void set_transformation_matrix(const optional_mat44& aProjectionMatrix) = 0;
+        virtual void set_opacity(scalar aOpacity) = 0;
     };
 }

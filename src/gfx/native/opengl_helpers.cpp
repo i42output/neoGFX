@@ -24,7 +24,7 @@
 
 namespace neogfx
 {
-    use_shader_program::use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix, const optional_mat44& aTransformationMatrix) :
+    use_shader_program::use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, scalar aOpacity) :
         iRenderingContext{ aContext },
         iCurrentProgram{ aShaderProgram },
         iPreviousProgram{ service<i_rendering_engine>().is_shader_program_active() ? &service<i_rendering_engine>().active_shader_program() : nullptr }
@@ -32,6 +32,7 @@ namespace neogfx
         iCurrentProgram.activate(iRenderingContext);
         if (iCurrentProgram.type() == shader_program_type::Standard)
         {
+            iCurrentProgram.as<i_standard_shader_program>().standard_vertex_shader().set_opacity(aOpacity);
             if (iRenderingContext.gradient_set())
                 iRenderingContext.apply_gradient(iCurrentProgram.as<i_standard_shader_program>().gradient_shader());
             else

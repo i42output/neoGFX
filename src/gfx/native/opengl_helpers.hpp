@@ -458,11 +458,8 @@ namespace neogfx
                     vertex_type::offset::ijkl,
                     aShaderProgram,
                     standard_vertex_attribute_name(vertex_buffer_type::Function3));
-            if (aShaderProgram.vertex_shader().has_standard_vertex_matrices())
-            {
-                auto& standardMatrices = aShaderProgram.vertex_shader().standard_vertex_matrices();
-                standardMatrices.set_transformation_matrix(iTransformation);
-            }
+            if (aShaderProgram.type() == shader_program_type::Standard)
+                static_cast<i_standard_vertex_shader&>(aShaderProgram.vertex_shader()).set_transformation_matrix(iTransformation);
             vertex_buffer::attach_shader(aContext, aShaderProgram);
             update_attrib_arrays();
         }
@@ -539,7 +536,7 @@ namespace neogfx
     class use_shader_program
     {
     public:
-        use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, const optional_mat44& aProjectionMatrix = optional_mat44{}, const optional_mat44& aTransformationMatrix = optional_mat44{});
+        use_shader_program(i_rendering_context& aContext, i_shader_program& aShaderProgram, scalar aOpacity = 1.0);
         ~use_shader_program();
     private:
         i_rendering_context& iRenderingContext;

@@ -30,19 +30,21 @@ namespace neogfx
     public:
         standard_shader_program(std::string const& aName = "standard_shader_program");
     public:
-        shader_program_type type() const override;
-        const i_gradient_shader& gradient_shader() const override;
-        i_gradient_shader& gradient_shader() override;
-        const i_texture_shader& texture_shader() const override;
-        i_texture_shader& texture_shader() override;
-        const i_filter_shader& filter_shader() const override;
-        i_filter_shader& filter_shader() override;
-        const i_glyph_shader& glyph_shader() const override;
-        i_glyph_shader& glyph_shader() override;
-        const i_stipple_shader& stipple_shader() const override;
-        i_stipple_shader& stipple_shader() override;
-        const i_shape_shader& shape_shader() const override;
-        i_shape_shader& shape_shader() override;
+        shader_program_type type() const final;
+        const i_standard_vertex_shader& standard_vertex_shader() const final;
+        i_standard_vertex_shader& standard_vertex_shader() final;
+        const i_gradient_shader& gradient_shader() const final;
+        i_gradient_shader& gradient_shader() final;
+        const i_texture_shader& texture_shader() const final;
+        i_texture_shader& texture_shader() final;
+        const i_filter_shader& filter_shader() const final;
+        i_filter_shader& filter_shader() final;
+        const i_glyph_shader& glyph_shader() const final;
+        i_glyph_shader& glyph_shader() final;
+        const i_stipple_shader& stipple_shader() const final;
+        i_stipple_shader& stipple_shader() final;
+        const i_shape_shader& shape_shader() const final;
+        i_shape_shader& shape_shader() final;
     private:
         ref_ptr<i_fragment_shader> iDefaultShader;
         ref_ptr<i_gradient_shader> iGradientShader;

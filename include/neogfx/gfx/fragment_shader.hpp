@@ -111,9 +111,9 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
-        void clear_gradient() override;
-        void set_gradient(i_rendering_context& aContext, const gradient& aGradient, double aOpacity) override;
-        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient, double aOpacity) override;
+        void clear_gradient() final;
+        void set_gradient(i_rendering_context& aContext, const gradient& aGradient) final;
+        void set_gradient(i_rendering_context& aContext, const game::gradient& aGradient) final;
     private:
         cache_uniform(uGradientGuiCoordinates)
         cache_uniform(uGradientDirection)
@@ -142,9 +142,9 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
-        void clear_texture() override;
-        void set_texture(const i_texture& aTexture) override;
-        void set_effect(shader_effect aEffect) override;
+        void clear_texture() final;
+        void set_texture(const i_texture& aTexture) final;
+        void set_effect(shader_effect aEffect) final;
     private:
         cache_uniform(uTextureEnabled)
         cache_uniform(uTextureDataFormat)
@@ -162,8 +162,8 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
-        void clear_filter() override;
-        void set_filter(shader_filter aFilter, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) override;
+        void clear_filter() final;
+        void set_filter(shader_filter aFilter, scalar aArgument1 = 0.0, scalar aArgument2 = 0.0, scalar aArgument3 = 0.0, scalar aArgument4 = 0.0) final;
     private:
         cache_uniform(uFilterEnabled)
         cache_uniform(uFilterType)
@@ -180,8 +180,8 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
-        void clear_glyph() override;
-        void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar) override;
+        void clear_glyph() final;
+        void set_first_glyph(const i_rendering_context& aContext, const glyph_text& aText, const glyph_char& aGlyphChar) final;
     private:
         cache_uniform(uGlyphRenderTargetExtents)
         cache_uniform(uGlyphGuiCoordinates)
@@ -198,11 +198,11 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
-        bool stipple_active() const override;
-        void clear_stipple() override;
-        void set_stipple(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) override;
-        void start(const i_rendering_context& aContext, const vec3& aFrom) override;
-        void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) override;
+        bool stipple_active() const final;
+        void clear_stipple() final;
+        void set_stipple(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) final;
+        void start(const i_rendering_context& aContext, const vec3& aFrom) final;
+        void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) final;
     private:
         scalar iPosition;
     private:
@@ -220,9 +220,9 @@ namespace neogfx
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
-        bool shape_active() const override;
-        void clear_shape() override;
-        void set_shape(shader_shape aShape) override;
+        bool shape_active() const final;
+        void clear_shape() final;
+        void set_shape(shader_shape aShape) final;
     private:
         cache_shared_uniform(uShapeEnabled)
         cache_shared_uniform(uShape)

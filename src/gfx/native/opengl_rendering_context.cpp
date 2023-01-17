@@ -416,7 +416,7 @@ namespace neogfx
 
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
     {
-        aShader.set_gradient(*this, *iGradient, iOpacity);
+        aShader.set_gradient(*this, *iGradient);
     }
 
     bool opengl_rendering_context::snap_to_pixel() const
@@ -914,7 +914,7 @@ namespace neogfx
 
     void opengl_rendering_context::draw_pixels(const graphics_operation::batch& aDrawPixelOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
         scoped_anti_alias saa{ *this, smoothing_mode::None };
@@ -933,17 +933,17 @@ namespace neogfx
                                 drawOp.color.red<float>(),
                                 drawOp.color.green<float>(),
                                 drawOp.color.blue<float>(),
-                                drawOp.color.alpha<float>() * static_cast<float>(iOpacity)}} });
+                                drawOp.color.alpha<float>() }} });
             }
         }
     }
 
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto v1 = aFrom.to_vec3();
         auto v2 = aTo.to_vec3();
@@ -964,13 +964,8 @@ namespace neogfx
         auto const function = to_function(aPen.color(), basic_rect<float>{ aFrom, aTo });
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
-                vec4f{{
-                    static_variant_cast<color>(aPen.color()).red<float>(),
-                    static_variant_cast<color>(aPen.color()).green<float>(),
-                    static_variant_cast<color>(aPen.color()).blue<float>(),
-                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{},
+            vertexArrays.push_back({ v, 
+                std::holds_alternative<color>(aPen.color()) ? static_variant_cast<color>(aPen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                 {},
                 function });
 
@@ -979,14 +974,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_triangles(const graphics_operation::batch& aDrawTriangleOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_triangle&>(*aDrawTriangleOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
@@ -1002,13 +997,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.pen.color()) ? static_variant_cast<color>(drawOp.pen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
@@ -1020,13 +1010,13 @@ namespace neogfx
 
     void opengl_rendering_context::draw_rect(const rect& aRect, const pen& aPen)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         scoped_anti_alias saa{ *this, smoothing_mode::None };
         std::optional<disable_multisample> disableMultisample;
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto adjustedRect = aRect;
         if (snap_to_pixel())
@@ -1055,13 +1045,8 @@ namespace neogfx
         auto const function = to_function(aPen.color(), aRect);
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
-                vec4f{{
-                    static_variant_cast<color>(aPen.color()).red<float>(),
-                    static_variant_cast<color>(aPen.color()).green<float>(),
-                    static_variant_cast<color>(aPen.color()).blue<float>(),
-                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{},
+            vertexArrays.push_back({ v, 
+                std::holds_alternative<color>(aPen.color()) ? static_variant_cast<color>(aPen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                 {},
                 function });
 
@@ -1070,14 +1055,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*aDrawRoundedRectOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
@@ -1093,13 +1078,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.pen.color()) ? static_variant_cast<color>(drawOp.pen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.rect.center().x, drawOp.rect.center().y, drawOp.rect.width(), drawOp.rect.height() }.as<float>(),
@@ -1112,14 +1092,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_ellipses(const graphics_operation::batch& aDrawEllipseOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*aDrawEllipseOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
@@ -1135,13 +1115,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.pen.color()) ? static_variant_cast<color>(drawOp.pen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
@@ -1153,14 +1128,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_circles(const graphics_operation::batch& aDrawCircleOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_circle&>(*aDrawCircleOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
@@ -1176,13 +1151,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.pen.color()) ? static_variant_cast<color>(drawOp.pen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.pen.width() }.as<float>(),
@@ -1194,14 +1164,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_pies(const graphics_operation::batch& aDrawPieOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_pie&>(*aDrawPieOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
@@ -1217,13 +1187,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.pen.color()) ? static_variant_cast<color>(drawOp.pen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
@@ -1235,14 +1200,14 @@ namespace neogfx
 
     void opengl_rendering_context::draw_arcs(const graphics_operation::batch& aDrawArcOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_arc&>(*aDrawArcOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
@@ -1258,13 +1223,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.pen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.pen.color()).red<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).green<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.pen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.pen.color()) ? static_variant_cast<color>(drawOp.pen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
@@ -1276,12 +1236,12 @@ namespace neogfx
 
     void opengl_rendering_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::CubicBezier);
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
@@ -1291,29 +1251,23 @@ namespace neogfx
             auto rectVertices = rect_vertices(r, mesh_type::Triangles);
             for (auto const& v : rectVertices)
                 vertexArrays.push_back({ v,
-                    std::holds_alternative<color>(aPen.color()) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(aPen.color()).red<float>(),
-                            static_variant_cast<const color&>(aPen.color()).green<float>(),
-                            static_variant_cast<const color&>(aPen.color()).blue<float>(),
-                            static_variant_cast<const color&>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
-                        {},
-                        function,
-                        vec4{ aP0.x, aP0.y, aP1.x, aP1.y }.as<float>(),
-                        vec4{ aP2.x, aP2.y, aP3.x, aP3.y }.as<float>(),
-                        vec4{ aPen.width() }.as<float>()});
+                    std::holds_alternative<color>(aPen.color()) ? static_variant_cast<color>(aPen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                    {},
+                    function,
+                    vec4{ aP0.x, aP0.y, aP1.x, aP1.y }.as<float>(),
+                    vec4{ aP2.x, aP2.y, aP3.x, aP3.y }.as<float>(),
+                    vec4{ aPen.width() }.as<float>()});
         }
     }
 
     void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto const function = to_function(aPen.color(), aPath.bounding_rect());
 
@@ -1327,15 +1281,10 @@ namespace neogfx
                 {
                     use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, mode, vertices.size() };
                     for (auto const& v : vertices)
-                        vertexArrays.push_back({ v, std::holds_alternative<color>(aPen.color()) ?
-                            vec4f{{
-                                static_variant_cast<color>(aPen.color()).red<float>(),
-                                static_variant_cast<color>(aPen.color()).green<float>(),
-                                static_variant_cast<color>(aPen.color()).blue<float>(),
-                                static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{},
-                            {},
-                            function });
+                        vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(aPen.color()) ? static_variant_cast<color>(aPen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function });
                 }
             }
         }
@@ -1343,10 +1292,10 @@ namespace neogfx
 
     void opengl_rendering_context::draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         if (std::holds_alternative<gradient>(aPen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const neogfx::gradient&>(aPen.color()));
 
         auto const& vertices = aMesh.vertices;
 
@@ -1363,20 +1312,15 @@ namespace neogfx
         auto const function = to_function(aPen.color(), bounding_rect(aMesh));
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v + aPosition, std::holds_alternative<color>(aPen.color()) ?
-                vec4f{{
-                    static_variant_cast<color>(aPen.color()).red<float>(),
-                    static_variant_cast<color>(aPen.color()).green<float>(),
-                    static_variant_cast<color>(aPen.color()).blue<float>(),
-                    static_variant_cast<color>(aPen.color()).alpha<float>() * static_cast<float>(iOpacity)}} :
-                vec4f{},
+            vertexArrays.push_back({ v + aPosition, 
+                std::holds_alternative<color>(aPen.color()) ? static_variant_cast<color>(aPen.color()).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                 {},
                 function });
     }
 
     void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
@@ -1445,14 +1389,14 @@ namespace neogfx
 
     void opengl_rendering_context::fill_triangles(const graphics_operation::batch& aDrawTriangleOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_triangle&>(*aDrawTriangleOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
@@ -1468,13 +1412,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
@@ -1492,7 +1431,7 @@ namespace neogfx
 
     void opengl_rendering_context::fill_rects(const graphics_operation::batch& aFillRectOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
         scoped_anti_alias saa{ *this, smoothing_mode::None };
@@ -1501,7 +1440,7 @@ namespace neogfx
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rect&>(*aFillRectOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
         
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aFillRectOps.second - aFillRectOps.first))};
@@ -1513,29 +1452,23 @@ namespace neogfx
                 auto rectVertices = rect_vertices(drawOp.rect, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
-                        std::holds_alternative<color>(drawOp.fill) ?
-                            vec4f{{
-                                static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                                static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                                static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                                static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{},
-                            {},
-                            function });
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function });
             }
         }
     }
 
     void opengl_rendering_context::fill_rounded_rects(const graphics_operation::batch& aFillRoundedRectOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_rounded_rect&>(*aFillRoundedRectOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
@@ -1551,18 +1484,13 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.rect.center().x, drawOp.rect.center().y, drawOp.rect.width(), drawOp.rect.height() }.as<float>(),
                         drawOp.radius.as<float>(),
-                        vec4{ 0.0, 1.0 }.as<float>() });
+                        vec4f{ 0.0f, 1.0f } });
                 }
             }
         }
@@ -1570,7 +1498,7 @@ namespace neogfx
 
     void opengl_rendering_context::fill_checker_rects(const graphics_operation::batch& aFillCheckerRectOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
         scoped_anti_alias saa{ *this, smoothing_mode::None };
@@ -1583,7 +1511,7 @@ namespace neogfx
             auto& firstOp = static_variant_cast<const graphics_operation::fill_checker_rect&>(*aFillCheckerRectOps.first);
 
             if (std::holds_alternative<gradient>(step == 0 ? firstOp.fill1 : firstOp.fill2))
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(step == 0 ? firstOp.fill1 : firstOp.fill2), iOpacity);
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(step == 0 ? firstOp.fill1 : firstOp.fill2));
 
             {
                 for (auto op = aFillCheckerRectOps.first; op != aFillCheckerRectOps.second; ++op)
@@ -1608,15 +1536,9 @@ namespace neogfx
                                 auto rectVertices = rect_vertices(square, mesh_type::Triangles);
                                 for (auto const& v : rectVertices)
                                     vertexArrays.push_back({ v,
-                                        std::holds_alternative<color>(fill) ?
-                                            vec4f{{
-                                                static_variant_cast<const color&>(fill).red<float>(),
-                                                static_variant_cast<const color&>(fill).green<float>(),
-                                                static_variant_cast<const color&>(fill).blue<float>(),
-                                                static_variant_cast<const color&>(fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                                            vec4f{},
-                                            {},
-                                            function });
+                                        std::holds_alternative<color>(fill) ? static_variant_cast<color>(fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                                        {},
+                                        function });
                             }
                             alt = !alt;
                         }
@@ -1628,14 +1550,14 @@ namespace neogfx
 
     void opengl_rendering_context::fill_ellipses(const graphics_operation::batch& aFillEllipseOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_ellipse&>(*aFillEllipseOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
@@ -1651,13 +1573,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
@@ -1669,14 +1586,14 @@ namespace neogfx
 
     void opengl_rendering_context::fill_circles(const graphics_operation::batch& aFillCircleOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_circle&>(*aFillCircleOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
@@ -1692,13 +1609,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, 0.0 }.as<float>(),
@@ -1710,14 +1622,14 @@ namespace neogfx
 
     void opengl_rendering_context::fill_pies(const graphics_operation::batch& aFillPieOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_pie&>(*aFillPieOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
@@ -1733,13 +1645,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
@@ -1751,14 +1658,14 @@ namespace neogfx
 
     void opengl_rendering_context::fill_arcs(const graphics_operation::batch& aFillArcOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_arc&>(*aFillArcOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
@@ -1774,13 +1681,8 @@ namespace neogfx
 
                 for (auto const& v : vertices)
                 {
-                    vertexArrays.push_back({ v, std::holds_alternative<color>(drawOp.fill) ?
-                        vec4f{{
-                            static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                            static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                        vec4f{},
+                    vertexArrays.push_back({ v, 
+                        std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                         {},
                         function,
                         vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
@@ -1792,7 +1694,7 @@ namespace neogfx
 
     void opengl_rendering_context::fill_path(const path& aPath, const brush& aFill)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
@@ -1801,7 +1703,7 @@ namespace neogfx
             if (subPath.size() > 2)
             {
                 if (std::holds_alternative<gradient>(aFill))
-                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill), iOpacity);
+                    rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
                 GLenum mode;
                 auto vertices = path_vertices(aPath, subPath, 0.0, mode);
@@ -1813,13 +1715,8 @@ namespace neogfx
 
                     for (auto const& v : vertices)
                     {
-                        vertexArrays.push_back({v, std::holds_alternative<color>(aFill) ?
-                            vec4f{{
-                                static_variant_cast<const color&>(aFill).red<float>(),
-                                static_variant_cast<const color&>(aFill).green<float>(),
-                                static_variant_cast<const color&>(aFill).blue<float>(),
-                                static_variant_cast<const color&>(aFill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                            vec4f{},
+                        vertexArrays.push_back({v, 
+                            std::holds_alternative<color>(aFill) ? static_variant_cast<color>(aFill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                             {},
                             function });
                     }
@@ -1830,14 +1727,14 @@ namespace neogfx
 
     void opengl_rendering_context::fill_shapes(const graphics_operation::batch& aFillShapeOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         auto& firstOp = static_variant_cast<const graphics_operation::fill_shape&>(*aFillShapeOps.first);
 
         if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill), iOpacity);
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
 
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES };
@@ -1870,13 +1767,7 @@ namespace neogfx
                         auto const& v = vertices[vi];
                         vertexArrays.push_back({
                             v + drawOp.position,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                vec4f{{
-                                    static_variant_cast<const color&>(drawOp.fill).red<float>(),
-                                    static_variant_cast<const color&>(drawOp.fill).green<float>(),
-                                    static_variant_cast<const color&>(drawOp.fill).blue<float>(),
-                                    static_variant_cast<const color&>(drawOp.fill).alpha<float>() * static_cast<float>(iOpacity)}} :
-                                vec4f{},
+                            std::holds_alternative<color>(drawOp.fill) ? static_variant_cast<color>(drawOp.fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
                             uv[vi],
                             function });
                     }
@@ -2361,10 +2252,15 @@ namespace neogfx
                             if (nextIndex == vertices.size())
                                 vertices.emplace_back(xyz, rgba, uv, xyzw );
                             else
-                                vertices[nextIndex] = { xyz, rgba, uv, xyzw };
+                            {
+                                auto& vertex = vertices[nextIndex];
+                                vertex.xyz = xyz;
+                                vertex.rgba = rgba;
+                                vertex.st = uv;
+                                vertex.xyzw = xyzw;
+                            }
                             if (uvGui)
                                 vertices[nextIndex].st.y = *uvGui - vertices[nextIndex].st.y;
-                            vertices[nextIndex].rgba[3] *= static_cast<float>(iOpacity);
                             ++nextIndex;
                         }
                     }
@@ -2395,7 +2291,7 @@ namespace neogfx
 
     void opengl_rendering_context::draw_patch(patch_drawable& aPatch, const mat44& aTransformation)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program() };
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         std::optional<use_vertex_arrays> vertexArrayUsage;
@@ -2449,9 +2345,9 @@ namespace neogfx
             }
 
             if (item->material->gradient)
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *item->material->gradient, iOpacity);
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *item->material->gradient);
             else if (iGradient)
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient, iOpacity);
+                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, *iGradient);
             else
                 rendering_engine().default_shader_program().gradient_shader().clear_gradient();
 

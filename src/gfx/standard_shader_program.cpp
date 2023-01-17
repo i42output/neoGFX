@@ -44,6 +44,16 @@ namespace neogfx
         return shader_program_type::Standard;
     }
 
+    const i_standard_vertex_shader& standard_shader_program::standard_vertex_shader() const
+    {
+        return static_cast<const i_standard_vertex_shader&>(vertex_shader());
+    }
+
+    i_standard_vertex_shader& standard_shader_program::standard_vertex_shader()
+    {
+        return static_cast<i_standard_vertex_shader&>(vertex_shader());
+    }
+
     const i_gradient_shader& standard_shader_program::gradient_shader() const
     {
         if (iGradientShader != nullptr)

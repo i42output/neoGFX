@@ -27,9 +27,10 @@
 
 namespace neogfx
 {
-    class vertex_shader : public shader<i_vertex_shader>
+    template <typename Base = i_vertex_shader>
+    class vertex_shader : public shader<Base>
     {
-        typedef shader<i_vertex_shader> base_type;
+        typedef shader<Base> base_type;
     public:
         typedef neolib::map<string, abstract_t<shader_variable>*> attribute_map;
     public:
@@ -38,26 +39,26 @@ namespace neogfx
         {
         }
     public:
-        const attribute_map& attributes() const override
+        const attribute_map& attributes() const final
         {
             return iAttributes;
         }
-        void clear_attribute(const i_string& aName) override
+        void clear_attribute(const i_string& aName) final
         {
             auto a = iAttributes.find(aName);
             if (a != iAttributes.end())
             {
                 iAttributes.erase(a);
-                auto v = in_variables().find(*a->second());
-                if (v != in_variables().end())
-                    in_variables().erase(v);
-                set_dirty();
+                auto v = base_type::in_variables().find(*a->second());
+                if (v != base_type::in_variables().end())
+                    base_type::in_variables().erase(v);
+                base_type::set_dirty();
             }
         }
         using base_type::add_attribute;
-        i_shader_variable& add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) override
+        i_shader_variable& add_attribute(const i_string& aName, uint32_t aLocation, shader_data_type aType) final
         {
-            auto& in = add_variable(
+            auto& in = base_type::add_variable(
                 shader_variable
                 {
                     aName,
@@ -66,46 +67,32 @@ namespace neogfx
                     aType
                 });
             iAttributes.emplace(aName, &in);
-            set_dirty();
+            base_type::set_dirty();
             return in;
-        }
-    public:
-        bool has_standard_vertex_matrices() const override
-        {
-            return false;
-        }
-        const i_standard_vertex_matrices& standard_vertex_matrices() const override
-        {
-            throw no_standard_vertex_matrices();
-        }
-        i_standard_vertex_matrices& standard_vertex_matrices() override
-        {
-            throw no_standard_vertex_matrices();
         }
     private:
         attribute_map iAttributes;
     };
 
-    class standard_vertex_shader : public vertex_shader, public i_standard_vertex_matrices
+    class standard_vertex_shader : public vertex_shader<i_standard_vertex_shader>
     {
     public:
         standard_vertex_shader(std::string const& aName = "standard_vertex_shader");
     public:
-        bool has_standard_vertex_matrices() const override;
-        const i_standard_vertex_matrices& standard_vertex_matrices() const override;
-        i_standard_vertex_matrices& standard_vertex_matrices() override;
-    public:
-        void set_projection_matrix(const optional_mat44& aProjectionMatrix) override;
-        void set_transformation_matrix(const optional_mat44& aTransformationMatrix) override;
+        void set_projection_matrix(const optional_mat44& aProjectionMatrix) final;
+        void set_transformation_matrix(const optional_mat44& aTransformationMatrix) final;
+        void set_opacity(scalar aOpacity) final;
     public:
         void prepare_uniforms(const i_rendering_context& aContext, i_shader_program& aProgram) override;
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     private:
         optional_mat44 iProjectionMatrix;
         optional_mat44 iTransformationMatrix;
+        scalar iOpacity;
     private:
         cache_uniform(uProjectionMatrix)
         cache_uniform(uTransformationMatrix)
+        cache_uniform(uOpacity)
         optional_logical_coordinates iLogicalCoordinates;
         optional_vec2 iOffset;
     };

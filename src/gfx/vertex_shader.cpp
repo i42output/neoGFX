@@ -23,7 +23,7 @@
 namespace neogfx
 {
     standard_vertex_shader::standard_vertex_shader(std::string const& aName) :
-        vertex_shader{ aName }
+        vertex_shader{ aName }, iOpacity{ 1.0 }
     {
         auto& coord = add_attribute<vec3f>("VertexPosition"_s, 0u);
         auto& color = add_attribute<vec4f>("VertexColor"_s, 1u);
@@ -37,21 +37,6 @@ namespace neogfx
         add_out_variable<vec4f>("Function1"_s, 4u).link(function1);
         add_out_variable<vec4f>("Function2"_s, 5u).link(function2);
         add_out_variable<vec4f>("Function3"_s, 6u).link(function3);
-    }
-
-    bool standard_vertex_shader::has_standard_vertex_matrices() const
-    {
-        return true;
-    }
-
-    const i_standard_vertex_matrices& standard_vertex_shader::standard_vertex_matrices() const
-    {
-        return *this;
-    }
-
-    i_standard_vertex_matrices& standard_vertex_shader::standard_vertex_matrices()
-    {
-        return *this;
     }
 
     void standard_vertex_shader::set_projection_matrix(const optional_mat44& aProjectionMatrix)
@@ -69,6 +54,15 @@ namespace neogfx
         {
             iTransformationMatrix = aTransformationMatrix;
             uTransformationMatrix.uniform().mutable_value();
+        }
+    }
+
+    void standard_vertex_shader::set_opacity(scalar aOpacity)
+    {
+        if (iOpacity != aOpacity)
+        {
+            iOpacity = aOpacity;
+            uOpacity.uniform().mutable_value();
         }
     }
 
@@ -109,6 +103,9 @@ namespace neogfx
             uTransformationMatrix.uniform().mutable_value().get<mat44f>()[3][0] += static_cast<float>(offset.x);
             uTransformationMatrix.uniform().mutable_value().get<mat44f>()[3][1] += static_cast<float>(offset.y);
         }
+
+        if (uOpacity.uniform().is_dirty())
+            uOpacity = static_cast<float>(iOpacity);
     }
 
     void standard_vertex_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
@@ -121,6 +118,7 @@ namespace neogfx
                 "void standard_vertex_shader(inout vec3 coord, inout vec4 color)\n"
                 "{\n"
                 "    gl_Position = vec4((uProjectionMatrix * (uTransformationMatrix * vec4(coord, 1.0))).xyz, 1.0);\n"
+                "    color.a *= uOpacity;\n"
                 "}\n"_s
             };
             aOutput += code;

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/i_shader_program.hpp>
+#include <neogfx/gfx/i_vertex_shader.hpp>
 #include <neogfx/gfx/i_fragment_shader.hpp>
 
 namespace neogfx
@@ -37,6 +38,8 @@ namespace neogfx
         typedef i_standard_shader_program abstract_type;
         // operations
     public:
+        virtual const i_standard_vertex_shader& standard_vertex_shader() const = 0;
+        virtual i_standard_vertex_shader& standard_vertex_shader() = 0;
         virtual const i_gradient_shader& gradient_shader() const = 0;
         virtual i_gradient_shader& gradient_shader() = 0;
         virtual const i_texture_shader& texture_shader() const = 0;
