@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <functional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/core/tag_array.hpp>
 #include <neolib/core/segmented_array.hpp>
@@ -188,6 +189,10 @@ namespace neogfx
 
         typedef std::set<style> style_list;
 
+        typedef std::function<const style& (std::size_t, std::size_t&)> style_callback;
+        struct ansi {};
+        typedef std::variant<std::monostate, style, style_callback, ansi> format;
+
         class column_info
         {
         public:
@@ -325,7 +330,8 @@ namespace neogfx
 
         // exceptions
     public:
-        struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} }; 
+        struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::text_edit::not_implemented") {} };
+        struct bad_column_index : std::logic_error { bad_column_index() : std::logic_error("neogfx::text_edit::bad_column_index") {} };
 
         // text_edit
     public:
@@ -433,21 +439,21 @@ namespace neogfx
         void delete_paragraph(std::size_t aParagraphIndex);
         i_string const& text() const;
         std::size_t set_text(i_string const& aText);
-        std::size_t set_text(i_string const& aText, const style& aStyle);
+        std::size_t set_text(i_string const& aText, format const& aFormat);
         std::size_t append_text(i_string const& aText, bool aMoveCursor = false);
-        std::size_t append_text(i_string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t append_text(i_string const& aText, format const& aFormat, bool aMoveCursor = false);
         std::size_t insert_text(i_string const& aText, bool aMoveCursor = false);
-        std::size_t insert_text(i_string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(i_string const& aText, format const& aFormat, bool aMoveCursor = false);
         std::size_t insert_text(position_type aPosition, i_string const& aText, bool aMoveCursor = false);
-        std::size_t insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor = false);
+        std::size_t insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor = false);
         std::size_t set_text(std::string const& aText) { return set_text(string{ aText }); }
-        std::size_t set_text(std::string const& aText, const style& aStyle) { return set_text(string{ aText }, aStyle); }
+        std::size_t set_text(std::string const& aText, format const& aFormat) { return set_text(string{ aText }, aFormat); }
         std::size_t append_text(std::string const& aText, bool aMoveCursor = false) { return append_text(string{ aText }, aMoveCursor); }
-        std::size_t append_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false) { return append_text(string{ aText }, aStyle, aMoveCursor); }
+        std::size_t append_text(std::string const& aText, format const& aFormat, bool aMoveCursor = false) { return append_text(string{ aText }, aFormat, aMoveCursor); }
         std::size_t insert_text(std::string const& aText, bool aMoveCursor = false) { return insert_text(string{ aText }, aMoveCursor); }
-        std::size_t insert_text(std::string const& aText, const style& aStyle, bool aMoveCursor = false) { return insert_text(string{ aText }, aStyle, aMoveCursor); }
-        std::size_t insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor = false) { return insert_text(string{ aText }, aMoveCursor); }
-        std::size_t insert_text(position_type aPosition, std::string const& aText, const style& aStyle, bool aMoveCursor = false) { return insert_text(string{ aText }, aStyle, aMoveCursor); }
+        std::size_t insert_text(std::string const& aText, format const& aFormat, bool aMoveCursor = false) { return insert_text(string{ aText }, aFormat, aMoveCursor); }
+        std::size_t insert_text(position_type aPosition, std::string const& aText, bool aMoveCursor = false) { return insert_text(aPosition, string{ aText }, aMoveCursor); }
+        std::size_t insert_text(position_type aPosition, std::string const& aText, format const& aFormat, bool aMoveCursor = false) { return insert_text(aPosition, string{ aText }, aFormat, aMoveCursor); }
         void delete_text(position_type aStart, position_type aEnd);
         std::size_t columns() const;
         void set_columns(std::size_t aColumnCount);
@@ -483,7 +489,7 @@ namespace neogfx
         void init();
         document_glyphs const& glyphs() const;
         document_glyphs& glyphs();
-        std::size_t do_insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst);
+        std::size_t do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;

@@ -1990,42 +1990,42 @@ namespace neogfx
 
     std::size_t text_edit::set_text(i_string const& aText)
     {
-        return set_text(aText, default_style());
+        return set_text(aText, {});
     }
 
-    std::size_t text_edit::set_text(i_string const& aText, const style& aStyle)
+    std::size_t text_edit::set_text(i_string const& aText, format const& aFormat)
     {
-        return do_insert_text(0, aText, aStyle, true, true);
+        return do_insert_text(0, aText, aFormat, true, true);
     }
 
     std::size_t text_edit::append_text(i_string const& aText, bool aMoveCursor)
     {
-        return do_insert_text(iText.size(), aText, default_style(), aMoveCursor, false);
+        return do_insert_text(iText.size(), aText, {}, aMoveCursor, false);
     }
 
-    std::size_t text_edit::append_text(i_string const& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::append_text(i_string const& aText, format const& aFormat, bool aMoveCursor)
     {
-        return do_insert_text(iText.size(), aText, aStyle, aMoveCursor, false);
+        return do_insert_text(iText.size(), aText, aFormat, aMoveCursor, false);
     }
 
     std::size_t text_edit::insert_text(i_string const& aText, bool aMoveCursor)
     {
-        return do_insert_text(cursor().position(), aText, default_style(), aMoveCursor, false);
+        return do_insert_text(cursor().position(), aText, {}, aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(i_string const& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::insert_text(i_string const& aText, format const& aFormat, bool aMoveCursor)
     {
-        return do_insert_text(cursor().position(), aText, aStyle, aMoveCursor, false);
+        return do_insert_text(cursor().position(), aText, aFormat, aMoveCursor, false);
     }
 
     std::size_t text_edit::insert_text(position_type aPosition, i_string const& aText, bool aMoveCursor)
     {
-        return do_insert_text(aPosition, aText, default_style(), aMoveCursor, false);
+        return do_insert_text(aPosition, aText, {}, aMoveCursor, false);
     }
 
-    std::size_t text_edit::insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor)
+    std::size_t text_edit::insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor)
     {
-        return do_insert_text(aPosition, aText, aStyle, aMoveCursor, false);
+        return do_insert_text(aPosition, aText, aFormat, aMoveCursor, false);
     }
 
     void text_edit::delete_text(position_type aStart, position_type aEnd)
@@ -2239,7 +2239,7 @@ namespace neogfx
         return const_cast<document_glyphs&>(to_const(*this).glyphs());
     }
 
-    std::size_t text_edit::do_insert_text(position_type aPosition, i_string const& aText, const style& aStyle, bool aMoveCursor, bool aClearFirst)
+    std::size_t text_edit::do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
         TextFilter.trigger(aText, accept);
@@ -2262,11 +2262,27 @@ namespace neogfx
                 text.erase(eol);
         }
 
-        auto s = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
         auto insertionPoint = iText.begin() + aPosition;
-        insertionPoint = iText.insert(s != iStyles.end() ? document_text::tag_type::tag_data{ static_cast<style_list::const_iterator>(s) } : document_text::tag_type::tag_data{ nullptr },
-            insertionPoint, text.begin(), text.end());
-        
+
+        if (std::holds_alternative<std::monostate>(aFormat) || std::holds_alternative<style>(aFormat))
+        {
+            auto const& formatStyle = std::holds_alternative<std::monostate>(aFormat) ? default_style() : std::get<style>(aFormat);
+            auto existingStyle = (&formatStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, formatStyle)).first : iStyles.end());
+            insertionPoint = iText.insert(
+                existingStyle != iStyles.end() ? 
+                    document_text::tag_type::tag_data{ static_cast<style_list::const_iterator>(existingStyle) } : 
+                    document_text::tag_type::tag_data{ nullptr },
+                insertionPoint, text.begin(), text.end());
+        }
+        else if (std::holds_alternative<style_callback>(aFormat))
+        {
+            throw not_implemented();
+        }
+        else if (std::holds_alternative<ansi>(aFormat))
+        {
+            throw not_implemented();
+        }
+
         refresh_paragraph(insertionPoint, text.size());
         
         update();
