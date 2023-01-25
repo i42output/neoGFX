@@ -189,7 +189,7 @@ namespace neogfx
 
         typedef std::set<style> style_list;
 
-        typedef std::function<const style& (std::size_t, std::size_t&)> style_callback;
+        typedef std::function<std::tuple<const style&, i_string::const_iterator> (i_string::const_iterator)> style_callback;
         struct ansi {};
         typedef std::variant<std::monostate, style, style_callback, ansi> format;
 

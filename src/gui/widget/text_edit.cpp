@@ -2252,51 +2252,76 @@ namespace neogfx
         if (aClearFirst)
             iText.clear();
 
-        thread_local std::u32string text;
-        text = neolib::utf8_to_utf32(aText);
-        
-        if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
-        {
-            auto eol = text.find_first_of(U"\r\n");
-            if (eol != std::u32string::npos)
-                text.erase(eol);
-        }
-
         auto insertionPoint = iText.begin() + aPosition;
+        std::size_t insertionSize = 0;
+
+        auto insert = [&](document_text::const_iterator aWhere, const style& aStyle, std::u32string::const_iterator begin, std::u32string::const_iterator end)
+        {
+            auto existingStyle = (&aStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, aStyle)).first : iStyles.end());
+            return iText.insert(
+                existingStyle != iStyles.end() ?
+                document_text::tag_type::tag_data{ static_cast<style_list::const_iterator>(existingStyle) } :
+                document_text::tag_type::tag_data{ nullptr },
+                aWhere, begin, end);
+        };
 
         if (std::holds_alternative<std::monostate>(aFormat) || std::holds_alternative<style>(aFormat))
         {
+            thread_local std::u32string text;
+            text = neolib::utf8_to_utf32(aText);
+            if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
+            {
+                auto eol = text.find_first_of(U"\r\n");
+                if (eol != std::u32string::npos)
+                    text.erase(eol);
+            }
             auto const& formatStyle = std::holds_alternative<std::monostate>(aFormat) ? default_style() : std::get<style>(aFormat);
-            auto existingStyle = (&formatStyle != &iDefaultStyle || iPersistDefaultStyle ? iStyles.insert(style(*this, formatStyle)).first : iStyles.end());
-            insertionPoint = iText.insert(
-                existingStyle != iStyles.end() ? 
-                    document_text::tag_type::tag_data{ static_cast<style_list::const_iterator>(existingStyle) } : 
-                    document_text::tag_type::tag_data{ nullptr },
-                insertionPoint, text.begin(), text.end());
+            insert(insertionPoint, formatStyle, text.begin(), text.end());
+            insertionSize = text.size();
         }
         else if (std::holds_alternative<style_callback>(aFormat))
         {
-            throw not_implemented();
+            i_string::const_iterator next = aText.begin();
+            bool gotSingleLine = false;
+            while (next != aText.end() && !gotSingleLine)
+            {
+                auto const& [s, nextEnd] = std::get<style_callback>(aFormat)(next);
+                thread_local std::u32string text;
+                text = neolib::utf8_to_utf32(std::string_view{ &*next, std::next(&*next, nextEnd - next) });
+                if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
+                {
+                    auto eol = text.find_first_of(U"\r\n");
+                    if (eol != std::u32string::npos)
+                    {
+                        text.erase(eol);
+                        gotSingleLine = true;
+                    }
+                }
+                insertionPoint = std::next(insert(insertionPoint, s, text.begin(), text.end()), text.size());
+                insertionSize += text.size();
+                next = nextEnd;
+            }
         }
         else if (std::holds_alternative<ansi>(aFormat))
         {
             throw not_implemented();
         }
 
-        refresh_paragraph(insertionPoint, text.size());
+        insertionPoint = iText.begin() + aPosition;
+        refresh_paragraph(insertionPoint, insertionSize);
         
         update();
         
         if (aMoveCursor)
         {
-            cursor().set_position(insertionPoint - iText.begin() + text.size());
+            cursor().set_position(insertionPoint - iText.begin() + insertionSize);
             iCursorHint.x = glyph_position(cursor_glyph_position(), true).pos.x;
         }
         
         if (iPreviousText != iText)
             notify_text_changed();
         
-        return text.size();
+        return insertionSize;
     }
 
     void text_edit::delete_any_selection()
