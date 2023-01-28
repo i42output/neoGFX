@@ -29,12 +29,14 @@ namespace neogfx
         widget{ aContainer.title_bar_layout() },
         iOuterLayout{ *this },
         iInnerLayout{ iOuterLayout },
+        iButtonLayout{ iOuterLayout },
         iIcon{ iInnerLayout, service<i_app>().default_window_icon() },
         iTitle{ iInnerLayout, aTitle, text_widget_type::SingleLine, text_widget_flags::CutOff },
-        iMinimizeButton{ iOuterLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iOuterLayout, push_button_style::TitleBar },
-        iRestoreButton{ iOuterLayout, push_button_style::TitleBar },
-        iCloseButton{ iOuterLayout, push_button_style::TitleBar }
+        iButtonSpacer{ iButtonLayout },
+        iMinimizeButton{ iButtonLayout, push_button_style::TitleBar },
+        iMaximizeButton{ iButtonLayout, push_button_style::TitleBar },
+        iRestoreButton{ iButtonLayout, push_button_style::TitleBar },
+        iCloseButton{ iButtonLayout, push_button_style::TitleBar }
     {
         init();
     }
@@ -43,12 +45,14 @@ namespace neogfx
         widget{ aContainer.title_bar_layout() },
         iOuterLayout{ *this },
         iInnerLayout{ iOuterLayout },
+        iButtonLayout{ iOuterLayout },
         iIcon{ iInnerLayout, aIcon },
         iTitle{ iInnerLayout, aTitle },
-        iMinimizeButton{ iOuterLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iOuterLayout, push_button_style::TitleBar },
-        iRestoreButton{ iOuterLayout, push_button_style::TitleBar },
-        iCloseButton{ iOuterLayout, push_button_style::TitleBar }
+        iButtonSpacer{ iButtonLayout },
+        iMinimizeButton{ iButtonLayout, push_button_style::TitleBar },
+        iMaximizeButton{ iButtonLayout, push_button_style::TitleBar },
+        iRestoreButton{ iButtonLayout, push_button_style::TitleBar },
+        iCloseButton{ iButtonLayout, push_button_style::TitleBar }
     {
         init();
     }
@@ -57,12 +61,14 @@ namespace neogfx
         widget{ aContainer.title_bar_layout() },
         iOuterLayout{ *this },
         iInnerLayout{ iOuterLayout },
+        iButtonLayout{ iOuterLayout },
         iIcon{ iInnerLayout, aIcon },
         iTitle{ iInnerLayout, aTitle },
-        iMinimizeButton{ iOuterLayout, push_button_style::TitleBar },
-        iMaximizeButton{ iOuterLayout, push_button_style::TitleBar },
-        iRestoreButton{ iOuterLayout, push_button_style::TitleBar },
-        iCloseButton{ iOuterLayout, push_button_style::TitleBar }
+        iButtonSpacer{ iButtonLayout },
+        iMinimizeButton{ iButtonLayout, push_button_style::TitleBar },
+        iMaximizeButton{ iButtonLayout, push_button_style::TitleBar },
+        iRestoreButton{ iButtonLayout, push_button_style::TitleBar },
+        iCloseButton{ iButtonLayout, push_button_style::TitleBar }
     {
         init();
     }
@@ -129,34 +135,14 @@ namespace neogfx
         iOuterLayout.set_spacing(size{});
         iInnerLayout.set_padding(neogfx::padding{ 4.0_dip, 4.0_dip, 4.0_dip, 4.0_dip });
         iInnerLayout.set_spacing(size{ 8.0_dip });
+        iButtonLayout.set_padding(neogfx::padding{});
+        iButtonLayout.set_spacing(size{});
+        iButtonLayout.set_alignment(alignment::Right | alignment::Top);
+        iButtonLayout.set_size_policy(size_constraint::Minimum, size_constraint::Expanding);
         icon_widget().set_ignore_mouse_events(false);
-        size iconSize{ 24.0_dip };
-        if (icon_widget().image().is_empty())
-            icon_widget().set_fixed_size(iconSize);
-        else
-            icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
         title_widget().set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
         title_widget().set_font_role(neogfx::font_role::Caption);
-        iMinimizeButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
-        iMaximizeButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
-        iRestoreButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
-        iCloseButton.set_fixed_size(size{ 48.0_dip, 32.0_dip });
-        iMinimizeButton.set_size_policy(size_constraint::Fixed);
-        iMaximizeButton.set_size_policy(size_constraint::Fixed);
-        iRestoreButton.set_size_policy(size_constraint::Fixed);
-        iCloseButton.set_size_policy(size_constraint::Fixed);
-        iSink += service<i_surface_manager>().dpi_changed([this](i_surface&)
-        {
-            size iconSize{ 24.0_dip };
-            if (icon_widget().image().is_empty())
-                icon_widget().set_fixed_size(iconSize);
-            else
-                icon_widget().set_fixed_size(iconSize.min(icon_widget().image().extents()));
-            update_textures();
-            update_layout();
-            update(true);
-        });
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
         { 
             if ((aAspect & style_aspect::Color) == style_aspect::Color) 
@@ -164,6 +150,22 @@ namespace neogfx
         });
         auto update_widgets = [this]()
         {
+            scoped_units su{ *this, units::Pixels };
+
+            auto const idealSize = size{ 12.0_mm, 9.0_mm }.ceil();
+            if (icon_widget().image().is_empty())
+                icon_widget().set_fixed_size(idealSize);
+            else
+                icon_widget().set_fixed_size(idealSize.min(icon_widget().image().extents()));
+            iMinimizeButton.set_fixed_size(idealSize);
+            iMaximizeButton.set_fixed_size(idealSize);
+            iRestoreButton.set_fixed_size(idealSize);
+            iCloseButton.set_fixed_size(idealSize);
+            icon_widget().set_size_policy(size_constraint::Fixed);
+            iMinimizeButton.set_size_policy(size_constraint::Fixed);
+            iMaximizeButton.set_size_policy(size_constraint::Fixed);
+            iRestoreButton.set_size_policy(size_constraint::Fixed);
+            iCloseButton.set_size_policy(size_constraint::Fixed);
             bool isEnabled = root().window_enabled();
             bool isActive = root().is_effectively_active();
             bool isIconic = root().is_iconic();
@@ -175,13 +177,12 @@ namespace neogfx
             iMaximizeButton.enable(!isMaximized && isEnabled);
             iRestoreButton.enable(!isRestored && isEnabled);
             iCloseButton.enable(root().can_close());
-            bool layoutChanged = false;
-            layoutChanged = iMinimizeButton.show(!isIconic && (root().style() & window_style::MinimizeBox) == window_style::MinimizeBox) || layoutChanged;
-            layoutChanged = iMaximizeButton.show(!isMaximized && (root().style() & window_style::MaximizeBox) == window_style::MaximizeBox) || layoutChanged;
-            layoutChanged = iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid) || layoutChanged;
-            layoutChanged = iCloseButton.show((root().style() & window_style::Close) != window_style::Invalid) || layoutChanged;
-            if (layoutChanged)
-                update_layout();
+            iMinimizeButton.show(!isIconic && (root().style() & window_style::MinimizeBox) == window_style::MinimizeBox);
+            iMaximizeButton.show(!isMaximized && (root().style() & window_style::MaximizeBox) == window_style::MaximizeBox);
+            iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid);
+            iCloseButton.show((root().style() & window_style::Close) != window_style::Invalid);
+            update_textures();
+            update_layout();
             update(true);
         };
 
@@ -208,6 +209,7 @@ namespace neogfx
         });
         iSink += root().activated([this, update_widgets]() { update_widgets(); });
         iSink += root().deactivated([this, update_widgets]() { update_widgets(); });
+        iSink += service<i_surface_manager>().dpi_changed([this, update_widgets](i_surface&) { update_widgets(); });
         update_textures();
         update_widgets();
     }
@@ -432,5 +434,15 @@ namespace neogfx
         iMaximizeButton.set_image(iTextures[TextureMaximize]->second);
         iRestoreButton.set_image(iTextures[TextureRestore]->second);
         iCloseButton.set_image(iTextures[TextureClose]->second);
+        if (dpi_scale_factor() >= 1.5)
+        {
+            scoped_units su{ *this, units::Pixels };
+
+            auto const& idealSize = size{ 3.0_mm, 3.0_mm }.ceil();
+            iMinimizeButton.image_widget().set_minimum_size(idealSize);
+            iMaximizeButton.image_widget().set_minimum_size(idealSize);
+            iRestoreButton.image_widget().set_minimum_size(idealSize);
+            iCloseButton.image_widget().set_minimum_size(idealSize);
+        }
     }
 }

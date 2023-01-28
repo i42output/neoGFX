@@ -259,6 +259,15 @@ namespace neogfx
                     dpi_select(sUnpinTexturePattern, sUnpinHighDpiTexturePattern), { { "paper", color{} }, { "ink", ink }, { "ink_with_alpha", ink.with_alpha(0.5) } }, dpi_select(1.0, 2.0) });
         }
         iUnpinButton.set_image(iUnpinTexture->second);
+        if (dpi_scale_factor() >= 1.5)
+        {
+            scoped_units su{ *this, units::Pixels };
+
+            auto const& idealSize = size{ 2.0_mm, 2.0_mm }.ceil();
+            iPinButton.image_widget().set_minimum_size(idealSize);
+            iUnpinButton.image_widget().set_minimum_size(idealSize);
+            iCloseButton.image_widget().set_minimum_size(idealSize);
+        }
         update();
     }
 
