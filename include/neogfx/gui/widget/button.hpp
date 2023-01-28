@@ -79,6 +79,7 @@ namespace neogfx
         neogfx::padding padding() const override;
         // i_button
     public:
+        bool is_pressed() const override;
         button_checkable checkable() const override;
         void set_checkable(button_checkable aCheckable = button_checkable::BiState) override;
         bool is_checked() const override;
@@ -126,6 +127,7 @@ namespace neogfx
         void init();
     private:
         sink iSink;
+        bool iPressed;
         button_checkable iCheckable;
         button_checked_state iCheckedState;
         horizontal_layout iLayout;

@@ -660,6 +660,11 @@ namespace neogfx
         self_type& operator/=(const self_type& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
         self_type& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
     public:
+        self_type with_left(dimension_type d) const { return self_type{ d, top, right, bottom }; }
+        self_type with_top(dimension_type d) const { return self_type{ left, d, right, bottom }; }
+        self_type with_right(dimension_type d) const { return self_type{ left, top, d, bottom }; }
+        self_type with_bottom(dimension_type d) const { return self_type{ left, top, right, d }; }
+    public:
         point_type top_left() const { return point_type{ left, top }; }
         point_type bottom_right() const { return point_type{ right, bottom }; }
         size_type size() const { return size_type{ left + right, top + bottom }; }

@@ -6,6 +6,7 @@
         file: resources/icons/question.png
         file: resources/icons/redo.png
         file: resources/icons/delete.png
+        file: resources/icons/eye-outline.png
         file: resources/icons/reverse.png
         file: resources/icons/reversepartial.png
         file: resources/icons/save.png

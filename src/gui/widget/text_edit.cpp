@@ -35,6 +35,27 @@ namespace neogfx
 {
     template class basic_glyph_text_content<text_edit::glyph_container_type>;
 
+    text_edit::password_bits::password_bits(text_edit& aParent) :
+        parent{ aParent },
+        previousPadding{ aParent.padding() },
+        showPassword{ aParent, image{ ":/neogfx/resources/icons/eye-outline.png" } }
+    {
+        showPassword.set_size_policy(size_constraint::Minimum);
+        showPassword.set_image_extents(size{ 16_dip, 16_dip });
+        showPassword.image_widget().set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        showPassword.show(!aParent.iText.empty());
+
+        parent.set_padding(previousPadding.with_right(previousPadding.right + showPassword.minimum_size().cx));
+
+        showPassword.pressed([&]() { aParent.refresh_paragraph(aParent.iText.begin(), 0); });
+        showPassword.released([&]() { aParent.refresh_paragraph(aParent.iText.begin(), 0); });
+    }
+
+    text_edit::password_bits::~password_bits()
+    {
+        parent.set_padding(previousPadding);
+    }
+
     class text_edit::glyph_paragraph_index
     {
     public:
@@ -709,6 +730,19 @@ namespace neogfx
         framed_scrollable_widget::resized();
     }
 
+    void text_edit::layout_items(bool aDefer)
+    {
+        framed_scrollable_widget::layout_items(aDefer);
+        if (!aDefer && iPasswordBits)
+        {
+            auto r = client_rect();
+            r.x = r.right() - padding().right;
+            auto& spb = iPasswordBits.value().showPassword;
+            spb.resize(spb.minimum_size());
+            spb.move(point{ r.x, std::ceil(r.cy - spb.extents().cy) / 2.0 });
+        }
+    }
+
     size text_edit::minimum_size(optional_size const& aAvailableSpace) const
     {
         if (has_minimum_size())
@@ -1162,6 +1196,13 @@ namespace neogfx
     scrolling_disposition text_edit::scrolling_disposition() const
     {
         return neogfx::scrolling_disposition::DontScrollChildWidget;
+    }
+
+    scrolling_disposition text_edit::scrolling_disposition(const i_widget& aWidget) const
+    {
+        if (iPasswordBits && &iPasswordBits.value().showPassword == &aWidget)
+            return neogfx::scrolling_disposition::DontScrollChildWidget;
+        return framed_scrollable_widget::scrolling_disposition(aWidget);
     }
 
     rect text_edit::scroll_area() const
@@ -2184,9 +2225,6 @@ namespace neogfx
 
     void text_edit::init()
     {
-        if ((iCaps & text_edit_caps::Password) == text_edit_caps::Password)
-            set_password(true);
-
         iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
         {
             if (has_focus())
@@ -2225,6 +2263,17 @@ namespace neogfx
         {
             update();
         });
+        iSink += Password.Changed([&](bool const& aPassword)
+        {
+            if (aPassword)
+                iPasswordBits.emplace(*this);
+            else
+                iPasswordBits = std::nullopt;
+            layout_items(false);
+        });
+
+        if ((iCaps & text_edit_caps::Password) == text_edit_caps::Password)
+            set_password(true);
     }
 
     text_edit::document_glyphs const& text_edit::glyphs() const
@@ -2386,7 +2435,7 @@ namespace neogfx
         /* simple (naive) implementation just to get things moving (so just refresh everything) ... */
         (void)aWhere;
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        if (password())
+        if (password() && !iPasswordBits.value().showPassword.is_pressed())
             gc.set_password(true, PasswordMask.value().empty() ? "\xE2\x97\x8F"_s : PasswordMask);
         glyphs().clear();
         iGlyphParagraphs.clear();
@@ -2443,6 +2492,10 @@ namespace neogfx
                 nextParagraph = iterChar + 1;
             }
         }
+
+        if (iPasswordBits)
+            iPasswordBits.value().showPassword.show(!iText.empty());
+
         refresh_columns();
     }
 

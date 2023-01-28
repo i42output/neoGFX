@@ -60,6 +60,7 @@ namespace neogfx
         declare_event(unchecked)
         declare_event(indeterminate)
     public:
+        virtual bool is_pressed() const = 0;
         virtual button_checkable checkable() const = 0;
         virtual void set_checkable(button_checkable aCheckable = button_checkable::BiState) = 0;
         virtual bool is_checked() const = 0;

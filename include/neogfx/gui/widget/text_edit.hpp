@@ -31,6 +31,9 @@
 #include <neogfx/gui/widget/scrollable_widget.hpp>
 #include <neogfx/gui/widget/i_text_document.hpp>
 #include <neogfx/gui/widget/cursor.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
+#include <neogfx/gui/layout/spacer.hpp>
+#include <neogfx/gui/widget/button.hpp>
 
 namespace neogfx
 {
@@ -92,6 +95,16 @@ namespace neogfx
         // types
     private:
         typedef text_edit property_context_type;
+
+        struct password_bits
+        {
+            text_edit& parent;
+            neogfx::padding previousPadding;
+            button<> showPassword;
+
+            password_bits(text_edit& aParent);
+            ~password_bits();
+        };
 
     public:
         typedef std::optional<string> optional_password_mask;
@@ -343,6 +356,7 @@ namespace neogfx
     public:
         void moved() override;
         void resized() override;
+        void layout_items(bool aDefer) override;
     public:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
@@ -371,6 +385,7 @@ namespace neogfx
         bool text_input(i_string const& aText) override;
     public:
         neogfx::scrolling_disposition scrolling_disposition() const override;
+        neogfx::scrolling_disposition scrolling_disposition(const i_widget&) const override;
     public:
         rect scroll_area() const override;
         size scroll_page() const override;
@@ -552,6 +567,7 @@ namespace neogfx
         uint32_t iSuppressTextChangedNotification;
         uint32_t iWantedToNotfiyTextChanged;
         std::optional<std::pair<text_edit::position_type, text_edit::position_type>> iSelectedUri;
+        std::optional<password_bits> iPasswordBits;
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
