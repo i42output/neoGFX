@@ -2265,7 +2265,7 @@ namespace neogfx
         });
         iSink += Password.Changed([&](bool const& aPassword)
         {
-            if (aPassword)
+            if (aPassword && (iCaps & text_edit_caps::ShowPassword) == text_edit_caps::ShowPassword)
                 iPasswordBits.emplace(*this);
             else
                 iPasswordBits = std::nullopt;
@@ -2330,13 +2330,13 @@ namespace neogfx
         }
         else if (std::holds_alternative<style_callback>(aFormat))
         {
-            i_string::const_iterator next = aText.begin();
+            std::ptrdiff_t next = 0;
             bool gotSingleLine = false;
-            while (next != aText.end() && !gotSingleLine)
+            while (next != aText.size() && !gotSingleLine)
             {
                 auto const& [s, nextEnd] = std::get<style_callback>(aFormat)(next);
                 thread_local std::u32string text;
-                text = neolib::utf8_to_utf32(std::string_view{ &*next, std::next(&*next, nextEnd - next) });
+                text = neolib::utf8_to_utf32(std::string_view{ &aText[next], std::next(&aText[next], nextEnd - next) });
                 if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
                 {
                     auto eol = text.find_first_of(U"\r\n");
@@ -2435,7 +2435,7 @@ namespace neogfx
         /* simple (naive) implementation just to get things moving (so just refresh everything) ... */
         (void)aWhere;
         graphics_context gc{ *this, graphics_context::type::Unattached };
-        if (password() && !iPasswordBits.value().showPassword.is_pressed())
+        if (password() && (!iPasswordBits || !iPasswordBits.value().showPassword.is_pressed()))
             gc.set_password(true, PasswordMask.value().empty() ? "\xE2\x97\x8F"_s : PasswordMask);
         glyphs().clear();
         iGlyphParagraphs.clear();

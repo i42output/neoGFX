@@ -39,19 +39,20 @@ namespace neogfx
 {
     enum class text_edit_caps : uint32_t
     {
-        None        = 0x00000000,
+        None            = 0x00000000,
 
-        SingleLine  = 0x00000001,
-        MultiLine   = 0x00000002,
-        GrowLines   = SingleLine | MultiLine,
+        SingleLine      = 0x00000001,
+        MultiLine       = 0x00000002,
+        GrowLines       = SingleLine | MultiLine,
 
-        Password    = 0x00000100,
+        Password        = 0x00000100,
+        ShowPassword    = 0x00000200,
 
-        ParseURIs   = 0x00001000,
+        ParseURIs       = 0x00001000,
 
-        OnlyAccept  = 0x00010000,
+        OnlyAccept      = 0x00010000,
 
-        LINES_MASK  = SingleLine | MultiLine
+        LINES_MASK      = SingleLine | MultiLine
     };
 }
 
@@ -59,6 +60,7 @@ begin_declare_enum(neogfx::text_edit_caps)
 declare_enum_string(neogfx::text_edit_caps, SingleLine)
 declare_enum_string(neogfx::text_edit_caps, MultiLine)
 declare_enum_string(neogfx::text_edit_caps, Password)  
+declare_enum_string(neogfx::text_edit_caps, ShowPassword)
 declare_enum_string(neogfx::text_edit_caps, ParseURIs)
 declare_enum_string(neogfx::text_edit_caps, OnlyAccept)
 end_declare_enum(neogfx::text_edit_caps)
@@ -202,7 +204,7 @@ namespace neogfx
 
         typedef std::set<style> style_list;
 
-        typedef std::function<std::tuple<const style&, i_string::const_iterator> (i_string::const_iterator)> style_callback;
+        typedef std::function<std::tuple<const style&, std::ptrdiff_t> (std::ptrdiff_t)> style_callback;
         struct ansi {};
         typedef std::variant<std::monostate, style, style_callback, ansi> format;
 
