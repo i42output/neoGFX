@@ -550,8 +550,8 @@ namespace neogfx
         if (!event_consumed(w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event()))))
         {
             w.root().dismiss_children(&w);
-            w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
             w.root().update_click_focus(w, aPosition);
+            w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
         }
     }
 
@@ -562,8 +562,8 @@ namespace neogfx
         if (!event_consumed(w.mouse_event().trigger(std::get<mouse_event>(native_window().current_event()))))
         {
             w.root().dismiss_children(&w);
-            w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
             w.root().update_click_focus(w, aPosition);
+            w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
         }
     }
 
