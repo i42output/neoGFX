@@ -444,11 +444,6 @@ namespace neogfx
             return;
 
         iActive = true;
-        if (service<i_window_manager>().window_activated())
-        {
-            auto& activeSurface = service<i_window_manager>().active_window().native_window().surface_window();
-            activeSurface.native_window_focus_lost();
-        }
         surface_window().as_window().activated().trigger();
         parentWindow.as_widget().update(true);
         surface_window().as_widget().update(true);

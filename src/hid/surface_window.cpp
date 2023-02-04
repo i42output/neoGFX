@@ -477,6 +477,8 @@ namespace neogfx
         native_window().activate();
         if (as_window().has_focused_widget())
             as_window().focused_widget().focus_gained(focus_reason::WindowActivation);
+        if (is_nested_window())
+            parent_surface().as_surface_window().as_window().set_focused_widget(as_window().as_widget(), focus_reason::WindowActivation);
     }
 
     void surface_window::native_window_focus_lost()
@@ -595,9 +597,12 @@ namespace neogfx
     void surface_window::native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
-        w.root().dismiss_children(&w);
         if (!w.ignore_non_client_mouse_events() && !event_consumed(w.non_client_mouse_event().trigger(std::get<non_client_mouse_event>(native_window().current_event()))))
+        {
+            w.root().dismiss_children(&w);
+            w.root().update_click_focus(w, aPosition);
             w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
+        }
     }
 
     void surface_window::native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

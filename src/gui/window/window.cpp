@@ -467,6 +467,7 @@ namespace neogfx
     {
         return (style() & window_style::Nested) == window_style::Nested;
     }
+
     bool window::is_strong() const
     {
         return !is_weak();
@@ -763,6 +764,31 @@ namespace neogfx
         return result;
     }
 
+    focus_policy window::focus_policy() const
+    {
+        if (has_focus_policy())
+            return widget::focus_policy();
+        if (is_nested())
+            return neogfx::focus_policy::StrongFocus;
+        return widget::focus_policy();
+    }
+
+    void window::focus_gained(focus_reason aFocusReason)
+    {
+        base_type::focus_gained(aFocusReason);
+
+        if (is_nested() && !is_active())
+            activate();
+    }
+
+    void window::focus_lost(focus_reason aFocusReason)
+    {
+        base_type::focus_lost(aFocusReason);
+
+        if (is_nested() && is_active())
+            deactivate();
+    }
+
     bool window::requires_owner_focus() const
     {
         return (iStyle & window_style::RequiresOwnerFocus) == window_style::RequiresOwnerFocus;
@@ -792,11 +818,9 @@ namespace neogfx
 
     void window::set_focused_widget(i_widget& aWidget, focus_reason aFocusReason)
     {
-        if (iFocusedWidget == &aWidget)
-            return;
         i_widget* previouslyFocused = iFocusedWidget;
         iFocusedWidget = &aWidget;
-        if (previouslyFocused != nullptr)
+        if (previouslyFocused != nullptr && previouslyFocused != iFocusedWidget)
             previouslyFocused->focus_lost(aFocusReason);
         iFocusedWidget->focus_gained(aFocusReason);
     }
@@ -865,6 +889,11 @@ namespace neogfx
     void window::activate()
     {
         window_manager().activate_window(*this);
+    }
+
+    void window::deactivate()
+    {
+        window_manager().deactivate_window(*this);
     }
 
     bool window::is_iconic() const
@@ -1177,6 +1206,9 @@ namespace neogfx
     void window::update_click_focus(i_widget& aCandidateWidget, const point& aClickPos)
     {
         bool const childHasFocus = has_focused_widget() && focused_widget().is_descendent_of(aCandidateWidget);
+        bool const inClientArea = (aCandidateWidget.hit_test(aClickPos - aCandidateWidget.origin()).part == widget_part::Client);
+        bool const ignoreNonClientArea = (aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient;
+        focus_reason const focusReason = (inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
         if (childHasFocus)
         {
             if (focused_widget().client_rect().contains(aClickPos - focused_widget().origin()))
@@ -1184,9 +1216,6 @@ namespace neogfx
             if ((aCandidateWidget.focus_policy() & focus_policy::KeepChildFocus) == focus_policy::KeepChildFocus)
                 return;
         }
-        bool const inClientArea = (aCandidateWidget.hit_test(aClickPos - aCandidateWidget.origin()).part == widget_part::Client);
-        bool const ignoreNonClientArea = (aCandidateWidget.focus_policy() & focus_policy::IgnoreNonClient) != focus_policy::IgnoreNonClient;
-        focus_reason const focusReason = (inClientArea ? focus_reason::ClickClient : focus_reason::ClickNonClient);
         if (aCandidateWidget.enabled() && aCandidateWidget.can_set_focus(focusReason))
         {
             if ((inClientArea || (!ignoreNonClientArea && !childHasFocus)))

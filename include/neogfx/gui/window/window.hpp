@@ -127,6 +127,9 @@ namespace neogfx
     public:
         using widget::show;
         bool show(bool aVisible) override;
+        neogfx::focus_policy focus_policy() const override;
+        void focus_gained(focus_reason aFocusReason) override;
+        void focus_lost(focus_reason aFocusReason) override;
     public:
         neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
     public:
@@ -136,6 +139,7 @@ namespace neogfx
         bool is_effectively_active() const override;
         bool is_active() const override;
         void activate() override;
+        void deactivate() override;
         bool is_iconic() const override;
         void iconize() override;
         bool is_maximized() const override;

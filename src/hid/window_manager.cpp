@@ -42,7 +42,11 @@ namespace neogfx
         iSink += aWindow.activated([&]()
         {
             if (iActiveWindow && iActiveWindow != &aWindow)
+            {
+                if (iActiveWindow->is_descendent_of(aWindow) && iActiveWindow->is_nested())
+                    return;
                 deactivate_window(*iActiveWindow);
+            }
             iActiveWindow = &aWindow;
             auto existing = std::find(iWindows.begin(), iWindows.end(), &aWindow);
             iWindows.erase(existing);

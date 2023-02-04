@@ -1605,13 +1605,7 @@ namespace neogfx
             }
             VisibilityChanged.trigger();
             if (effectively_hidden())
-            {
-                if (self_type::has_root() && self_type::root().has_focused_widget() &&
-                    (self_type::root().focused_widget().is_descendent_of(*this) || &self_type::root().focused_widget() == this))
-                {
-                    self_type::root().release_focused_widget(self_type::root().focused_widget());
-                }
-            }   
+                release_focus();
             base_type::as_widget().update_layout(true, true);
             return true;
         }
@@ -1811,15 +1805,25 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_focus(focus_reason aFocusReason)
+    bool widget<Interface>::set_focus(focus_reason aFocusReason)
     {
-        self_type::root().set_focused_widget(*this, aFocusReason);
+        if (!has_focus())
+        {
+            self_type::root().set_focused_widget(*this, aFocusReason);
+            return true;
+        }
+        return false;
     }
 
     template <typename Interface>
-    void widget<Interface>::release_focus()
+    bool widget<Interface>::release_focus()
     {
-        self_type::root().release_focused_widget(*this);
+        if (has_focus() || child_has_focus())
+        {
+            self_type::root().release_focused_widget(self_type::root().focused_widget());
+            return true;
+        }
+        return false;
     }
 
     template <typename Interface>
