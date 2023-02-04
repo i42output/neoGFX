@@ -1979,11 +1979,7 @@ namespace neogfx
     {
         char32_t ch = aCodePoint[0];
         if (aEmojiAtlas.is_emoji(ch))
-        {
-            if (aCodePoint + 1 == aCodePointEnd || aCodePoint[1] != 0xEF0E)
-                return text_category::Emoji;
-            return text_category::LTR;
-        }
+            return text_category::Emoji;
         else if (ch == 0xFE0F || ch == 0xFE0E)
             return text_category::Control;
         const detail::text_category_MAP_VALUE_TYPE* rangeStart = std::lower_bound(

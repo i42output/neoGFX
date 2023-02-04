@@ -274,7 +274,7 @@ namespace neogfx
             {
                 for (std::uint32_t i = 0; i < glyph_count(); ++i)
                 {
-                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::get<0>(iGlyphRun), std::get<1>(iGlyphRun));
+                    auto const tc = get_text_category(service<i_font_manager>().emoji_atlas(), std::next(std::get<0>(iGlyphRun), i), std::get<1>(iGlyphRun));
                     if (glyph_info(i).codepoint == 0 && tc != text_category::Whitespace && tc != text_category::Emoji)
                         return true;
                 }

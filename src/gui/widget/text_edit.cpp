@@ -2332,7 +2332,7 @@ namespace neogfx
         {
             std::ptrdiff_t next = 0;
             bool gotSingleLine = false;
-            while (next != aText.size() && !gotSingleLine)
+            while (next != static_cast<std::ptrdiff_t>(aText.size()) && !gotSingleLine)
             {
                 auto const& [s, nextEnd] = std::get<style_callback>(aFormat)(next);
                 thread_local std::u32string text;
