@@ -1,4 +1,4 @@
-// element_model.hpp
+// toolbox_model.hpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -42,7 +42,6 @@ namespace neogfx::DesignStudio
     public:
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
     public:
-        ng::texture projectTexture;
         ng::texture codeTexture;
         ng::texture userInterfaceTexture;
     };

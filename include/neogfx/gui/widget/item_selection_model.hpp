@@ -267,36 +267,36 @@ namespace neogfx
                 if (result.column() > 0u)
                 {
                     result -= item_presentation_model_index{ 0u, 1u };
-                    while (!acceptable(result) && (result -= item_presentation_model_index{ 0u, 1u }).column() != 0u)
-                        ;
+                    while (!acceptable(result) && result.column() > 0u)
+                        result -= item_presentation_model_index{ 0u, 1u };
                 }
                 break;
             case index_location::CellToRight:
                 if (result.column() < presentation_model().columns() - 1u)
                 {
                     result += item_presentation_model_index{ 0u, 1u };
-                    while (!acceptable(result) && (result += item_presentation_model_index{ 0u, 1u }).column() != presentation_model().columns() - 1u)
-                        ;
+                    while (!acceptable(result) && result.column() < presentation_model().columns() - 1u)
+                        result += item_presentation_model_index{ 0u, 1u };
                 }
                 break;
             case index_location::RowAbove:
                 if (result.row() > 0u)
                 {
                     result -= item_presentation_model_index{ 1u, 0u };
-                    while (!acceptable(result) && (result -= item_presentation_model_index{ 1u, 0u }).row() != 0u)
-                        ;
+                    while (!acceptable(result) && result.row() > 0u)
+                        result -= item_presentation_model_index{ 1u, 0u };
                 }
                 break;
             case index_location::RowBelow:
                 if (result.row() < presentation_model().rows() - 1u)
                 {
                     result += item_presentation_model_index{ 1u, 0u };
-                    while (!acceptable(result) && (result += item_presentation_model_index{ 1u, 0u }).row() != presentation_model().rows() - 1u)
-                        ;
+                    while (!acceptable(result) && result.row() < presentation_model().rows() - 1u)
+                        result += item_presentation_model_index{ 1u, 0u };
                 }
                 break;
             }
-            return result;
+            return acceptable(result) ? result : aIndex;
         }
         item_presentation_model_index next_cell() const override
         {
@@ -346,6 +346,9 @@ namespace neogfx
         void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) override
         {
             if (aOperation == item_selection_operation::None)
+                return;
+            if ((aOperation & (item_selection_operation::Toggle | item_selection_operation::Select)) != item_selection_operation::None &&
+                !is_selectable(aIndex))
                 return;
             if (iNotifying && (aOperation & item_selection_operation::Queued) != item_selection_operation::Queued)
                 aOperation |= item_selection_operation::Queued;
@@ -437,7 +440,7 @@ namespace neogfx
                     }
                     if (aUpdateCells)
                         for (auto& cellIndex : *this)
-                            if (cellIndex.row() == aIndex.row())
+                            if (cellIndex.row() == aIndex.row() && is_selectable(cellIndex))
                                 presentation_model().cell_meta(cellIndex).selection |= item_cell_selection_flags::Selected;
                 }
                 else if (deselect)

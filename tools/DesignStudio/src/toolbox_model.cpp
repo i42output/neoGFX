@@ -1,4 +1,4 @@
-// element_model.cpp
+// toolbox_model.cpp
 /*
   neoGFX Design Studio
   Copyright(C) 2020 Leigh Johnston
@@ -38,8 +38,6 @@ namespace neogfx::DesignStudio
         {
             switch (std::get<ds::element_group>(tool))
             {
-            case ds::element_group::Project:
-                return projectTexture;
             case ds::element_group::UserInterface:
                 return userInterfaceTexture;
             case ds::element_group::Code:
@@ -56,10 +54,8 @@ namespace neogfx::DesignStudio
 
     void populate_toolbox_model(toolbox_model& aModel, toolbox_presentation_model& aPresentationModel)
     {
-        auto toolboxProject = aModel.insert_item(aModel.send(), ds::element_group::Project, "Project");
         auto toolboxCode = aModel.insert_item(aModel.send(), ds::element_group::Code, "Code");
         auto toolboxUserInterface = aModel.insert_item(aModel.send(), ds::element_group::UserInterface, "User Interface");
-        auto toolboxApp = aModel.append_item(toolboxProject, ds::element_group::App, "Application");
         auto toolboxMenu = aModel.append_item(toolboxUserInterface, ds::element_group::Menu, "Menu");
         auto toolboxAction = aModel.append_item(toolboxUserInterface, ds::element_group::Action, "Action");
         auto toolboxLayout = aModel.append_item(toolboxUserInterface, ds::element_group::Layout, "Layout");
@@ -89,9 +85,6 @@ namespace neogfx::DesignStudio
                     default:
                     case ds::element_group::Unknown:
                         break;
-                    case ds::element_group::Project:
-                        aPresentationModel.projectTexture = elementLibrary->element_icon("project"_s);
-                        break;
                     case ds::element_group::Code:
                         aPresentationModel.codeTexture = elementLibrary->element_icon("code"_s);
                         break;
@@ -103,9 +96,6 @@ namespace neogfx::DesignStudio
                         break;
                     case ds::element_group::Node:
                         aModel.append_item(toolboxCode, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
-                        break;
-                    case ds::element_group::App:
-                        aModel.append_item(toolboxApp, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));
                         break;
                     case ds::element_group::Menu:
                         aModel.append_item(toolboxMenu, ds::element_tool_t{ &*elementLibrary, tool }, stringify_tool(tool));

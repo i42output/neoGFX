@@ -154,8 +154,8 @@ namespace neogfx
             iPresentationModelSink += presentation_model().item_added([this](item_presentation_model_index const& aItemIndex) { item_added(aItemIndex); });
             iPresentationModelSink += presentation_model().item_changed([this](item_presentation_model_index const& aItemIndex) { item_changed(aItemIndex); });
             iPresentationModelSink += presentation_model().item_removed([this](item_presentation_model_index const& aItemIndex) { item_removed(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
-            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_expanded([this](item_presentation_model_index const& aItemIndex) { tree_changed(); invalidate_item(aItemIndex); });
+            iPresentationModelSink += presentation_model().item_collapsed([this](item_presentation_model_index const& aItemIndex) { tree_changed(); invalidate_item(aItemIndex); });
             iPresentationModelSink += presentation_model().item_toggled([this](item_presentation_model_index const& aItemIndex) { update(cell_rect(aItemIndex, cell_part::Background)); });
             iPresentationModelSink += presentation_model().items_updating([this]() { /* todo: hourglass */ });
             iPresentationModelSink += presentation_model().items_updated([this]() { items_updated(); });
@@ -1459,7 +1459,8 @@ namespace neogfx
 
     void item_view::select(item_presentation_model_index const& aItemIndex, key_modifiers_e aKeyModifiers)
     {
-        select(aItemIndex, to_selection_operation(aKeyModifiers));
+        auto const selectionOperation = to_selection_operation(aKeyModifiers);
+        select(aItemIndex, selectionOperation);
     }
 
     void item_view::select(item_presentation_model_index const& aItemIndex, item_selection_operation aSelectionOperation)

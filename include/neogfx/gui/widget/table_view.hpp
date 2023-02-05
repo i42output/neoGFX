@@ -42,6 +42,7 @@ namespace neogfx
         void model_changed() override;
         void presentation_model_changed() override;
         void selection_model_changed() override;
+        void tree_changed() override;
     protected:
         rect item_display_rect(bool aIntersectItemArea = false) const override;
         size total_item_area(i_units_context const& aUnitsContext) const override;

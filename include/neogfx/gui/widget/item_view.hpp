@@ -108,6 +108,7 @@ namespace neogfx
         virtual void model_changed() = 0;
         virtual void presentation_model_changed() = 0;
         virtual void selection_model_changed() = 0;
+        virtual void tree_changed() = 0;
     protected:
         virtual rect item_display_rect(bool aIntersectItemArea = false) const = 0;
         virtual size total_item_area(i_units_context const& aUnitsContext) const = 0;

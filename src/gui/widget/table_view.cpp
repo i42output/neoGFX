@@ -105,6 +105,11 @@ namespace neogfx
     {
     }
 
+    void table_view::tree_changed()
+    {
+        update_scrollbar_visibility();
+    }
+
     rect table_view::item_display_rect(bool aIntersectItemArea) const
     {
         auto const clientRect = client_rect(false);

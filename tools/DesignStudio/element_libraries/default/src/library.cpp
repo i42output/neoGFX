@@ -72,6 +72,7 @@ namespace neogfx::DesignStudio
         iPluginPath{ aPluginPath },
         iElementsOrdered
     {
+        { "perspective" },
         { "project" },
         { "build" },
         { "scripting_languages" },
@@ -244,6 +245,7 @@ namespace neogfx::DesignStudio
     {
         static const std::map<std::string, DesignStudio::element_group> sElementGroups =
         {
+            { "perspective", DesignStudio::element_group::Perspective },
             { "project", DesignStudio::element_group::Project },
             { "build", DesignStudio::element_group::Workflow },
             { "sticky_note", DesignStudio::element_group::Workflow },
@@ -311,6 +313,13 @@ namespace neogfx::DesignStudio
         auto& icons = iIcons[service<i_app>().current_style().palette().color(color_role::Text)];
         static std::map<std::string, std::function<void(texture&)>> sIconResources =
         {
+            {
+                "perspective",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/perspective.png" }, color::MistyRose);
+                }
+            },
             {
                 "project",
                 [](texture& aTexture)

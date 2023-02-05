@@ -2,6 +2,8 @@
     namespace: "neogfx::DesignStudio::default_nel"
 
     resource: {
+        file: resources/perspective.png
+
         file: resources/project.png
 
         file: resources/folder.png

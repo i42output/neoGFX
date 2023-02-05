@@ -98,6 +98,7 @@ namespace neogfx::DesignStudio
         {
             switch (std::get<ds::element_group>(tool))
             {
+            case ds::element_group::Perspective:
             case ds::element_group::Project:
             case ds::element_group::Code:
             case ds::element_group::UserInterface:

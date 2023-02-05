@@ -24,6 +24,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx::DesignStudio
 {
+    class compact_tree_view : public ng::tree_view
+    {
+    public:
+        using ng::tree_view::tree_view;
+    public:
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override
+        {
+            return ng::tree_view::minimum_size(aAvailableSpace) + total_item_area(*this);
+        }
+    public:
+        void model_changed() override
+        {
+            ng::tree_view::model_changed();
+            update_layout(true, true);
+        }
+        void presentation_model_changed() override
+        {
+            ng::tree_view::presentation_model_changed();
+            update_layout(true, true);
+        }
+        void tree_changed() override
+        {
+            ng::tree_view::tree_changed();
+            update_layout(true, true);
+        }
+    };
+
     main_window_ex::main_window_ex(main_app& aApp, settings& aSettings, project_manager& aProjectManager) :
         main_window{ aApp },
         iProjectManager{ aProjectManager },
@@ -44,6 +71,7 @@ namespace neogfx::DesignStudio
         workspaceGridColor{ aSettings.setting("environment.workspace.grid_color"_s) },
         iLeftDock{ dock_layout(ng::dock_area::Left), ng::dock_area::Left, ng::size{ leftDockWidth.value<double>() }, ng::size{ leftDockWeight.value<double>() } },
         iRightDock{ dock_layout(ng::dock_area::Right), ng::dock_area::Right, ng::size{ rightDockWidth.value<double>() }, ng::size{ rightDockWeight.value<double>() } },
+        iProject{ ng::make_dockable<compact_tree_view>("Project"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iToolbox{ ng::make_dockable<ng::tree_view>("Toolbox"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iWorkflow{ ng::make_dockable<ng::list_view>("Workflow"_t, ng::dock_area::Left, true, ng::frame_style::NoFrame) },
         iObjects{ ng::make_dockable<ng::table_view>("Object Explorer"_t, ng::dock_area::Right, true, ng::frame_style::NoFrame) },
@@ -52,6 +80,7 @@ namespace neogfx::DesignStudio
         iWorkspace{ iWorkspaceLayout },
         iBackgroundTexture1{ ng::image{ ":/neogfx/DesignStudio/resources/neoGFX.png" } },
         iBackgroundTexture2{ ng::image{ ":/neogfx/DesignStudio/resources/logo_i42.png" } },
+        iProjectPresentationModel{ aProjectManager },
         iToolboxPresentationModel{ aProjectManager },
         iWorkflowPresentationModel{ aProjectManager },
         iObjectPresentationModel{ aProjectManager, iObjectSelectionModel }
@@ -113,9 +142,11 @@ namespace neogfx::DesignStudio
                 rightDockWeight.set_value(std::get<ng::size>(aValue).cx);
         });
 
+        iProject.set_weight(ng::size{ 0.0 });
         iToolbox.set_weight(ng::size{ 3.0 });
         iWorkflow.set_weight(ng::size{ 1.0 });
 
+        iProject.dock(iLeftDock);
         iToolbox.dock(iLeftDock);
         iWorkflow.dock(iLeftDock);
         iObjects.dock(iRightDock);
@@ -201,6 +232,12 @@ namespace neogfx::DesignStudio
             aOperation = ng::drop_operation::Move;
         });
         iWorkspace.view_stack().set_focus_policy(ng::focus_policy::ClickFocus);
+
+        populate_project_model(iProjectModel, iProjectPresentationModel);
+        auto& projectTree = iProject.docked_widget<compact_tree_view>();
+        projectTree.set_presentation_model(iProjectPresentationModel);
+        projectTree.selection_model().set_mode(ng::item_selection_mode::SingleSelection);
+        projectTree.set_focus_policy(ng::focus_policy::TabFocus);
 
         populate_toolbox_model(iToolboxModel, iToolboxPresentationModel);
         auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();

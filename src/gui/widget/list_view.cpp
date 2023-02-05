@@ -94,6 +94,11 @@ namespace neogfx
     {
     }
 
+    void list_view::tree_changed()
+    {
+        update_scrollbar_visibility();
+    }
+
     rect list_view::item_display_rect(bool aIntersectItemArea) const
     {
         auto result = client_rect(false);

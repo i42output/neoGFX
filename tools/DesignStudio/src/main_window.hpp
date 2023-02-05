@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/tools/DesignStudio/settings.hpp>
 #include <neogfx/tools/DesignStudio/i_ide.hpp>
 #include "new_project_dialog.hpp"
+#include "project_model.hpp"
 #include "toolbox_model.hpp"
 #include "workflow_model.hpp"
 #include "object_model.hpp"
@@ -87,6 +88,7 @@ namespace neogfx::DesignStudio
         project_manager& iProjectManager;
         ng::dock iLeftDock;
         ng::dock iRightDock;
+        ng::dockable iProject;
         ng::dockable iToolbox;
         ng::dockable iWorkflow;
         ng::dockable iObjects;
@@ -95,6 +97,8 @@ namespace neogfx::DesignStudio
         ng::scrollable_view_container iWorkspace;
         ng::texture iBackgroundTexture1;
         ng::texture iBackgroundTexture2;
+        project_model iProjectModel;
+        project_presentation_model iProjectPresentationModel;
         toolbox_model iToolboxModel;
         toolbox_presentation_model iToolboxPresentationModel;
         workflow_model iWorkflowModel;
