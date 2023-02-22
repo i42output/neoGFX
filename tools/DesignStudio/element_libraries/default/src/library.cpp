@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/app/app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/window/window.hpp>
+#include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
@@ -91,6 +92,7 @@ namespace neogfx::DesignStudio
         { "action" },
         { "menu" },
         { "window" },
+        { "dialog" },
         { "widget" },
         { "text_widget" },
         { "image_widget" },
@@ -195,6 +197,7 @@ namespace neogfx::DesignStudio
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(node, node_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(action)
             MAKE_ELEMENT_FACTORY_FUNCTION(window)
+            MAKE_ELEMENT_FACTORY_FUNCTION(dialog)
             MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(widget, widget<>)
             MAKE_ELEMENT_FACTORY_FUNCTION(text_widget)
             MAKE_ELEMENT_FACTORY_FUNCTION(image_widget)
@@ -263,6 +266,7 @@ namespace neogfx::DesignStudio
             { "3D_game", DesignStudio::element_group::App },
             { "action", DesignStudio::element_group::Action },
             { "window", DesignStudio::element_group::Widget },
+            { "dialog", DesignStudio::element_group::Widget },
             { "widget", DesignStudio::element_group::Widget },
             { "text_widget", DesignStudio::element_group::Widget },
             { "image_widget", DesignStudio::element_group::Widget },
@@ -437,6 +441,13 @@ namespace neogfx::DesignStudio
                 [](texture& aTexture)
                 {
                     aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/window.png" });
+                }
+            },
+            {
+                "dialog",
+                [](texture& aTexture)
+                {
+                    aTexture = colored_icon(image{ ":/neogfx/DesignStudio/default_nel/resources/dialog.png" });
                 }
             },
             {

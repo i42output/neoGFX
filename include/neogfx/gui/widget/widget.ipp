@@ -1964,6 +1964,7 @@ namespace neogfx
     template <typename Interface>
     neogfx::mouse_cursor widget<Interface>::mouse_cursor() const
     {
+        std::optional<neogfx::mouse_cursor> mouseCursor;
         auto const mousePosition = mouse_position();
         auto const partUnderMouse = part(mousePosition);
         if (part_active(partUnderMouse))
@@ -1971,34 +1972,49 @@ namespace neogfx
             switch (partUnderMouse.part)
             {
             case widget_part::Grab:
-                return mouse_system_cursor::Hand;
+                mouseCursor = mouse_system_cursor::Hand;
+                break;
             case widget_part::BorderLeft:
-                return mouse_system_cursor::SizeWE;
+                mouseCursor = mouse_system_cursor::SizeWE;
+                break;
             case widget_part::BorderTopLeft:
-                return mouse_system_cursor::SizeNWSE;
+                mouseCursor = mouse_system_cursor::SizeNWSE;
+                break;
             case widget_part::BorderTop:
-                return mouse_system_cursor::SizeNS;
+                mouseCursor = mouse_system_cursor::SizeNS;
+                break;
             case widget_part::BorderTopRight:
-                return mouse_system_cursor::SizeNESW;
+                mouseCursor = mouse_system_cursor::SizeNESW;
+                break;
             case widget_part::BorderRight:
-                return mouse_system_cursor::SizeWE;
+                mouseCursor = mouse_system_cursor::SizeWE;
+                break;
             case widget_part::BorderBottomRight:
-                return mouse_system_cursor::SizeNWSE;
+                mouseCursor = mouse_system_cursor::SizeNWSE;
+                break;
             case widget_part::BorderBottom:
-                return mouse_system_cursor::SizeNS;
+                mouseCursor = mouse_system_cursor::SizeNS;
+                break;
             case widget_part::BorderBottomLeft:
-                return mouse_system_cursor::SizeNESW;
+                mouseCursor = mouse_system_cursor::SizeNESW;
+                break;
             case widget_part::GrowBox:
-                return mouse_system_cursor::SizeNWSE;
+                mouseCursor = mouse_system_cursor::SizeNWSE;
+                break;
             case widget_part::VerticalScrollbar:
-                return mouse_system_cursor::Arrow;
+                mouseCursor = mouse_system_cursor::Arrow;
+                break;
             case widget_part::HorizontalScrollbar:
-                return mouse_system_cursor::Arrow;
+                mouseCursor = mouse_system_cursor::Arrow;
+                break;
             }
         }
-        if (has_parent())
-            return parent().mouse_cursor();
-        return mouse_system_cursor::Arrow;
+        if (!mouseCursor && has_parent())
+            mouseCursor = parent().mouse_cursor();
+        if (!mouseCursor)
+            mouseCursor = mouse_system_cursor::Arrow;
+        QueryMouseCursor.trigger(*mouseCursor);
+        return mouseCursor.value();
     }
 
     template <typename Interface>

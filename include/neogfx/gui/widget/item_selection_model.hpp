@@ -343,6 +343,16 @@ namespace neogfx
         {
             return (presentation_model().cell_flags(aIndex) & item_cell_flags::Selectable) == item_cell_flags::Selectable;
         }
+        void clear_selection() override
+        {
+            for (item_presentation_model_index::row_type row = 0; row < presentation_model().rows(); ++row)
+                for (item_presentation_model_index::column_type column = 0; column < presentation_model().columns(); ++column)
+                    presentation_model().cell_meta(item_presentation_model_index{ row, column }).selection &= ~item_cell_selection_flags::Selected;
+            iPreviousSelection = iSelection;
+            iSelection.clear();
+            SelectionChanged.trigger(iSelection, iPreviousSelection);
+            iPreviousSelection.clear();
+        }
         void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) override
         {
             if (aOperation == item_selection_operation::None)

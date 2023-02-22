@@ -24,6 +24,7 @@
         file: resources/canvas.png
         file: resources/widget.png
         file: resources/window.png
+        file: resources/dialog.png
         file: resources/statusbar.png
         file: resources/group.png
         file: resources/button.png

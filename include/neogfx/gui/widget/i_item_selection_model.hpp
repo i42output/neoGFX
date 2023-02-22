@@ -308,6 +308,7 @@ namespace neogfx
         virtual const item_selection& selection() const = 0;
         virtual bool is_selected(item_presentation_model_index const& aIndex) const = 0;
         virtual bool is_selectable(item_presentation_model_index const& aIndex) const = 0;
+        virtual void clear_selection() = 0;
         virtual void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) = 0;
         virtual void select(item_model_index const& aIndex, item_selection_operation aOperation) = 0;
     public:

@@ -243,7 +243,7 @@ namespace neogfx::DesignStudio
         auto& toolboxTree = iToolbox.docked_widget<ng::tree_view>();
         toolboxTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
         toolboxTree.set_presentation_model(iToolboxPresentationModel);
-        toolboxTree.selection_model().set_mode(ng::item_selection_mode::NoSelection);
+        toolboxTree.selection_model().set_mode(ng::item_selection_mode::SingleSelection);
         toolboxTree.set_focus_policy(ng::focus_policy::TabFocus);
 
         populate_workflow_model(iWorkflowModel, iWorkflowPresentationModel);
@@ -413,6 +413,20 @@ namespace neogfx::DesignStudio
                 }
                 break;
             }
+        });
+
+        iWorkspace.view_stack().QueryMouseCursor([&](ng::mouse_cursor& cursor)
+        {
+            if (cursor.is_system_cursor() && cursor.system_cursor() == ng::mouse_system_cursor::Arrow)
+            {
+                if (!toolboxTree.selection_model().selection().empty())
+                    cursor = ng::mouse_system_cursor::Crosshair;
+            }
+        });
+
+        toolboxTree.presentation_model().dragging_item([&](i_drag_drop_item const&)
+        {
+            toolboxTree.selection_model().clear_selection();
         });
 
         iWorkspace.view_stack().Keyboard([&](const ng::keyboard_event& aEvent)

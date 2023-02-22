@@ -61,6 +61,7 @@ namespace neogfx
         declare_event(painted, i_graphics_context&)
         declare_event(mouse_event, const neogfx::mouse_event&)
         declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
+        declare_event(query_mouse_cursor, neogfx::mouse_cursor&)
         declare_event(keyboard_event, const neogfx::keyboard_event&)
         declare_event(focus_event, neogfx::focus_event, focus_reason)
     public:
