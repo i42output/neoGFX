@@ -1839,6 +1839,9 @@ namespace neogfx
 
     void opengl_rendering_context::draw_glyphs(const draw_glyph* aBegin, const draw_glyph* aEnd)
     {
+        // Ensure texture shader enabled as glyph shader depends on it...
+        rendering_engine().default_shader_program().texture_shader().clear_texture();
+
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 

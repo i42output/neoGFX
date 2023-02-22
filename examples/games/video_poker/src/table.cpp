@@ -156,10 +156,21 @@ namespace video_poker
         iDeal.clicked([this]() { deal(); });
 
         iTextures = neogfx::service<neogfx::i_rendering_engine>().texture_manager().create_texture_atlas();
-        auto& valueTextures = iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/values.png" });
-        iValueTextures.emplace(card::value::Joker, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position(), neogfx::size{36.0, 36.0} } });
+        // Assumes font "Card Characters" by "Harold's Fonts" has been installed.
+        auto const& values = { 'A', 'K', 'Q', 'J', '=', '9', '8', '7', '6', '5', '4', '3', '2', ' ' };
+        neogfx::size const valueDimensions = { 36.0, 36.0 };
+        auto& valueTextures = iTextures->create_sub_texture(neogfx::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, neogfx::texture_sampling::Multisample);
+        neogfx::font valueFont{ "Card Characters", "Regular", -valueDimensions.cy };
+        neogfx::graphics_context gcValue{ valueTextures };
+        auto cursor = valueTextures.atlas_location().position();
+        for (auto value : values)
+        {
+            gcValue.draw_text(cursor, std::string( 1, value ), valueFont, neogfx::color::White);
+            cursor.y += valueDimensions.cy;
+        }
+        iValueTextures.emplace(card::value::Joker, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position(), valueDimensions } });
         for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<uint32_t>(v) + 1))
-            iValueTextures.emplace(v, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position() + neogfx::point{0.0, (static_cast<uint32_t>(card::value::Ace) - static_cast<uint32_t>(v)) * 36.0}, neogfx::size{ 36.0, 36.0 } } });
+            iValueTextures.emplace(v, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position() + neogfx::point{0.0, (static_cast<uint32_t>(card::value::Ace) - static_cast<uint32_t>(v)) * valueDimensions.cy}, valueDimensions } });
         iSuitTextures.emplace(card::suit::Club, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/club.png" }));
         iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/diamond.png" }));
         iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/spade.png" }));

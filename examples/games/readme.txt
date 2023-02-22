@@ -1,0 +1,1 @@
+For the best results download and install the font "CARD CHARACTERS" from www.haroldsfonts.com before running neoGFX Video Poker.
