@@ -161,6 +161,8 @@ namespace video_poker
         neogfx::size const valueDimensions = { 36.0, 36.0 };
         auto& valueTextures = iTextures->create_sub_texture(neogfx::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, neogfx::texture_sampling::Multisample);
         neogfx::font valueFont{ "Card Characters", "Regular", -valueDimensions.cy };
+        if (valueFont.family_name() != "Card Characters")
+            neogfx::message_box::stop(aLayout.parent_widget(), "Setup", "Please install font \"CARD CHARACTERS\" by \"Harold's Fonts\" before playing neoGFX Video Poker", neogfx::standard_button::Ok);
         neogfx::graphics_context gcValue{ valueTextures };
         auto cursor = valueTextures.atlas_location().position();
         for (auto value : values)
