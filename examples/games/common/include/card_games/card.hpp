@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/core/event.hpp>
+
 #include <card_games/default_game_traits.hpp>
 
 namespace neogames
@@ -30,8 +31,8 @@ namespace neogames
         {
             typedef basic_card<GameTraits> self_type;
         public:
-            neogfx::event<basic_card&> changed;
-            neogfx::event<basic_card&> destroyed;
+            ng::event<basic_card&> changed;
+            ng::event<basic_card&> destroyed;
         public:
             typedef GameTraits game_traits;
         public:

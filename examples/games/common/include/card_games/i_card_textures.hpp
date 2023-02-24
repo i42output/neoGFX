@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/gfx/i_texture.hpp>
+
 #include <card_games/card.hpp>
 
 namespace neogames
@@ -33,9 +34,9 @@ namespace neogames
         public:
             struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogames::card_games::i_basic_card_textures::texture_not_found") {} };
         public:
-            virtual const neogfx::i_texture& value_texture(const card_type& aCard) const = 0;
-            virtual const neogfx::i_texture& suit_texture(const card_type& aCard) const = 0;
-            virtual const neogfx::i_texture& face_texture(const card_type& aCard) const = 0;
+            virtual const ng::i_texture& value_texture(const card_type& aCard) const = 0;
+            virtual const ng::i_texture& suit_texture(const card_type& aCard) const = 0;
+            virtual const ng::i_texture& face_texture(const card_type& aCard) const = 0;
         };
 
         typedef i_basic_card_textures<default_game_traits> i_card_textures;

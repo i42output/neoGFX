@@ -16,7 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/neogfx.hpp>
+#include <video_poker/video_poker.hpp>
+
 #include <neogfx/gui/dialog/message_box.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
@@ -27,10 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/entity_life_span.hpp>
+
 #include <video_poker/table.hpp>
 #include <video_poker/poker.hpp>
 
-using namespace neogfx::unit_literals;
+using namespace ng::unit_literals;
 
 namespace video_poker
 {
@@ -52,32 +54,32 @@ namespace video_poker
         { RoyalFlush, 250 }
     };
 
-    class outcome : public neogfx::game::shape::text
+    class outcome : public ng::game::shape::text
     {
     public:
-        outcome(neogfx::game::canvas& aCanvas, std::string const& aOutcome, const neogfx::color& aColor) :
-            neogfx::game::shape::text{
+        outcome(ng::game::canvas& aCanvas, std::string const& aOutcome, const ng::color& aColor) :
+            ng::game::shape::text{
                 aCanvas.ecs(),
-                neogfx::graphics_context{ aCanvas },
+                ng::graphics_context{ aCanvas },
                 aOutcome,
-                neogfx::font{ "Exo 2", "Black", 48.0 },
-                neogfx::text_format{aColor, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black } },
-                neogfx::alignment::Center}
+                ng::font{ "Exo 2", "Black", 48.0 },
+                ng::text_format{aColor, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } },
+                ng::alignment::Center}
         {
-            neogfx::game::scoped_component_lock<neogfx::game::mesh_renderer, neogfx::game::entity_info, neogfx::game::rigid_body> lock{ aCanvas.ecs() };
-            aCanvas.ecs().component<neogfx::game::mesh_renderer>().entity_record(id()).layer = 1; 
-            aCanvas.ecs().populate(id(), neogfx::game::entity_life_span{ neogfx::game::to_step_time(aCanvas.ecs(), 10.0) });
-            auto const& boundingBox = neogfx::game::bounding_rect(*aCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(id()).mesh);
-            aCanvas.ecs().populate(id(), neogfx::game::rigid_body{ neogfx::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 0.9 }, 1.0, neogfx::vec3{ 0.0, aCanvas.dpi_scale(-300.0), 0.0 } });
+            ng::game::scoped_component_lock<ng::game::mesh_renderer, ng::game::entity_info, ng::game::rigid_body> lock{ aCanvas.ecs() };
+            aCanvas.ecs().component<ng::game::mesh_renderer>().entity_record(id()).layer = 1; 
+            aCanvas.ecs().populate(id(), ng::game::entity_life_span{ ng::game::to_step_time(aCanvas.ecs(), 10.0) });
+            auto const& boundingBox = ng::game::bounding_rect(*aCanvas.ecs().component<ng::game::mesh_filter>().entity_record(id()).mesh);
+            aCanvas.ecs().populate(id(), ng::game::rigid_body{ ng::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 0.9 }, 1.0, ng::vec3{ 0.0, aCanvas.dpi_scale(-300.0), 0.0 } });
         }
     };
     
-    table::table(neogfx::i_layout& aLayout) :
-        neogfx::game::canvas{ aLayout, neogfx::game::make_ecs<neogfx::game::simple_physics>(neogfx::game::ecs_flags::Default | neogfx::game::ecs_flags::CreatePaused) },
+    table::table(ng::i_layout& aLayout) :
+        ng::game::canvas{ aLayout, ng::game::make_ecs<ng::game::simple_physics>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused) },
         iState{ table_state::TakeBet },
         iCredit{ STARTING_CREDIT },
         iStake{ 0 },
-        iMainLayout{ *this, neogfx::alignment::Center },
+        iMainLayout{ *this, ng::alignment::Center },
         iLabelTitle{ iMainLayout, "VIDEO POKER" },
         iSpacer1{ iMainLayout },
         iSpacesLayout{ iMainLayout },
@@ -91,7 +93,7 @@ namespace video_poker
         iSpacer3{ iSpacesLayout },
         iSpacer4{ iMainLayout },
         iGambleLayout{ iMainLayout },
-        iAddCredit{ iGambleLayout, neogfx::image{":/video_poker/resources/coin.png"} },
+        iAddCredit{ iGambleLayout, ng::image{":/video_poker/resources/coin.png"} },
         iBetMinus{ iGambleLayout, "BET\n-" },
         iBetPlus{ iGambleLayout, "BET\n+" },
         iBetMax{ iGambleLayout, "MAX\nBET" },
@@ -104,50 +106,50 @@ namespace video_poker
         iLabelStake{ iInfoBarLayout, "Stake: " },
         iLabelStakeValue{ iInfoBarLayout, "" }
     {
-        set_logical_coordinate_system(neogfx::logical_coordinate_system::AutomaticGui);
+        set_logical_coordinate_system(ng::logical_coordinate_system::AutomaticGui);
 
         set_layers(2);
 
-        iMainLayout.set_spacing(neogfx::size{ 16.0 });
-        iSpacesLayout.set_spacing(neogfx::size{ 16.0 });
-        auto shiny_text = [](const neogfx::color& aColor)
+        iMainLayout.set_spacing(ng::size{ 16.0 });
+        iSpacesLayout.set_spacing(ng::size{ 16.0 });
+        auto shiny_text = [](const ng::color& aColor)
         {
-            return neogfx::text_format{
-                neogfx::gradient{ { neogfx::color::Black, aColor, neogfx::color::Black } },
-                neogfx::text_effect{neogfx::text_effect_type::Outline, neogfx::color::White } };
+            return ng::text_format{
+                ng::gradient{ { ng::color::Black, aColor, ng::color::Black } },
+                ng::text_effect{ng::text_effect_type::Outline, ng::color::White } };
         };
-        iLabelTitle.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 48.0 });
-        iLabelTitle.text_widget().set_text_format(shiny_text(neogfx::color::Green));
-        iSpacer1.set_weight(neogfx::size{ 0.1 });
-        iSpacer2.set_weight(neogfx::size{ 0.25 });
-        iSpacer3.set_weight(neogfx::size{ 0.25 });
-        iSpacer4.set_weight(neogfx::size{ 0.1 });
-        iGambleLayout.set_size_policy(neogfx::size_policy{ neogfx::size_constraint::Expanding, neogfx::size_constraint::Minimum });
-        iAddCredit.image_widget().set_minimum_size(neogfx::size{64.0_dip, 64.0_dip});
-        iAddCredit.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
-        iAddCredit.set_weight(neogfx::size{ 0.0 });
-        auto set_bet_button_appearance = [](neogfx::push_button& aButton)
+        iLabelTitle.text_widget().set_font(ng::font{ "Exo 2", "Black", 48.0 });
+        iLabelTitle.text_widget().set_text_format(shiny_text(ng::color::Green));
+        iSpacer1.set_weight(ng::size{ 0.1 });
+        iSpacer2.set_weight(ng::size{ 0.25 });
+        iSpacer3.set_weight(ng::size{ 0.25 });
+        iSpacer4.set_weight(ng::size{ 0.1 });
+        iGambleLayout.set_size_policy(ng::size_policy{ ng::size_constraint::Expanding, ng::size_constraint::Minimum });
+        iAddCredit.image_widget().set_minimum_size(ng::size{64.0_dip, 64.0_dip});
+        iAddCredit.set_size_policy(ng::size_constraint::Expanding, ng::size{ 1.0 });
+        iAddCredit.set_weight(ng::size{ 0.0 });
+        auto set_bet_button_appearance = [](ng::push_button& aButton)
         {
-            aButton.set_size_policy(neogfx::size_constraint::Expanding, neogfx::size{ 1.0 });
-            aButton.set_weight(neogfx::size{ 0.0 });
-            aButton.set_base_color(neogfx::color::White);
-            aButton.text_widget().set_size_hint(neogfx::size_hint{ "MAX\nBET" });
-            aButton.text_widget().set_text_color(neogfx::color::Black);
-            aButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 24.0 });
+            aButton.set_size_policy(ng::size_constraint::Expanding, ng::size{ 1.0 });
+            aButton.set_weight(ng::size{ 0.0 });
+            aButton.set_base_color(ng::color::White);
+            aButton.text_widget().set_size_hint(ng::size_hint{ "MAX\nBET" });
+            aButton.text_widget().set_text_color(ng::color::Black);
+            aButton.text_widget().set_font(ng::font{ "Exo 2", "Black", 24.0 });
         };
         set_bet_button_appearance(iBetMinus);
         set_bet_button_appearance(iBetPlus);
         set_bet_button_appearance(iBetMax);
         set_bet_button_appearance(iDeal);
-        neogfx::layout_as_same_size(iAddCredit, iBetMinus);
-        iLabelCredits.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCredits.text_widget().set_text_format(shiny_text(neogfx::color::Yellow));
-        iLabelCreditsValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelCreditsValue.text_widget().set_text_format(shiny_text(neogfx::color::White));
-        iLabelStake.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStake.text_widget().set_text_format(shiny_text(neogfx::color::Yellow));
-        iLabelStakeValue.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 36.0 });
-        iLabelStakeValue.text_widget().set_text_format(shiny_text(neogfx::color::White));
+        ng::layout_as_same_size(iAddCredit, iBetMinus);
+        iLabelCredits.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelCredits.text_widget().set_text_format(shiny_text(ng::color::Yellow));
+        iLabelCreditsValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelCreditsValue.text_widget().set_text_format(shiny_text(ng::color::White));
+        iLabelStake.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelStake.text_widget().set_text_format(shiny_text(ng::color::Yellow));
+        iLabelStakeValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelStakeValue.text_widget().set_text_format(shiny_text(ng::color::White));
 
         iAddCredit.clicked([this]() { add_credit(STARTING_CREDIT); });
         iBetMinus.clicked([this]() { bet(-1); });
@@ -155,38 +157,39 @@ namespace video_poker
         iBetMax.clicked([this]() { bet(MAX_BET); });
         iDeal.clicked([this]() { deal(); });
 
-        iTextures = neogfx::service<neogfx::i_rendering_engine>().texture_manager().create_texture_atlas();
+        iTextures = ng::service<ng::i_rendering_engine>().texture_manager().create_texture_atlas();
         // Assumes font "Card Characters" by "Harold's Fonts" has been installed.
         auto const& values = { 'A', 'K', 'Q', 'J', '=', '9', '8', '7', '6', '5', '4', '3', '2', ' ' };
-        neogfx::size const valueDimensions = { 36.0, 36.0 };
-        auto& valueTextures = iTextures->create_sub_texture(neogfx::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, neogfx::texture_sampling::Multisample);
-        neogfx::font valueFont{ "Card Characters", "Regular", -valueDimensions.cy };
-        if (valueFont.family_name() != "Card Characters")
-            neogfx::message_box::stop(aLayout.parent_widget(), "Setup", "Please install font \"CARD CHARACTERS\" by \"Harold's Fonts\" before playing neoGFX Video Poker", neogfx::standard_button::Ok);
-        neogfx::graphics_context gcValue{ valueTextures };
+        ng::size const valueDimensions = { 36.0, 36.0 };
+        auto& valueTextures = iTextures->create_sub_texture(ng::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, ng::texture_sampling::Multisample);
+        ng::font valueFont{ "Card Characters", "Regular", -valueDimensions.cy };
+        if (valueFont.family_name() != "Card Characters" &&
+            ng::message_box::question(*this, "Setup", "Please install font \"CARD CHARACTERS\" by \"Harold's Fonts\" before playing neoGFX Video Poker", "Exit game?") == ng::standard_button::Yes)
+            ng::app::instance().quit(EXIT_FAILURE);
+        ng::graphics_context gcValue{ valueTextures };
         auto cursor = valueTextures.atlas_location().position();
         for (auto value : values)
         {
-            gcValue.draw_text(cursor, std::string( 1, value ), valueFont, neogfx::color::White);
+            gcValue.draw_text(cursor, std::string( 1, value ), valueFont, ng::color::White);
             cursor.y += valueDimensions.cy;
         }
-        iValueTextures.emplace(card::value::Joker, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position(), valueDimensions } });
+        iValueTextures.emplace(card::value::Joker, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position(), valueDimensions } });
         for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<uint32_t>(v) + 1))
-            iValueTextures.emplace(v, neogfx::sub_texture{ valueTextures, neogfx::rect{ valueTextures.atlas_location().position() + neogfx::point{0.0, (static_cast<uint32_t>(card::value::Ace) - static_cast<uint32_t>(v)) * valueDimensions.cy}, valueDimensions } });
-        iSuitTextures.emplace(card::suit::Club, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/club.png" }));
-        iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/diamond.png" }));
-        iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/spade.png" }));
-        iSuitTextures.emplace(card::suit::Heart, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/heart.png" }));
-        iFaceTextures.emplace(card::value::Jack, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/jack.png" }));
-        iFaceTextures.emplace(card::value::Queen, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/queen.png" }));
-        iFaceTextures.emplace(card::value::King, iTextures->create_sub_texture(neogfx::image{ ":/video_poker/resources/king.png" }));
+            iValueTextures.emplace(v, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position() + ng::point{0.0, (static_cast<uint32_t>(card::value::Ace) - static_cast<uint32_t>(v)) * valueDimensions.cy}, valueDimensions } });
+        iSuitTextures.emplace(card::suit::Club, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/club.png" }));
+        iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/diamond.png" }));
+        iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/spade.png" }));
+        iSuitTextures.emplace(card::suit::Heart, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/heart.png" }));
+        iFaceTextures.emplace(card::value::Jack, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/jack.png" }));
+        iFaceTextures.emplace(card::value::Queen, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/queen.png" }));
+        iFaceTextures.emplace(card::value::King, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/king.png" }));
 
         update_widgets();
 
         // Instantiate physics...
-        ecs().system<neogfx::game::simple_physics>();
+        ecs().system<ng::game::simple_physics>();
         // Instantiate non-default components...
-        ecs().component<neogfx::game::text_mesh>();
+        ecs().component<ng::game::text_mesh>();
 
         ecs().resume_all_systems();
     }
@@ -205,7 +208,7 @@ namespace video_poker
         return *this;
     }
 
-    const neogfx::i_texture& table::value_texture(const card& aCard) const
+    const ng::i_texture& table::value_texture(const card& aCard) const
     {
         auto vt = iValueTextures.find(aCard);
         if (vt != iValueTextures.end())
@@ -213,7 +216,7 @@ namespace video_poker
         throw texture_not_found();
     }
 
-    const neogfx::i_texture& table::suit_texture(const card& aCard) const
+    const ng::i_texture& table::suit_texture(const card& aCard) const
     {
         auto st = iSuitTextures.find(aCard);
         if (st != iSuitTextures.end())
@@ -221,7 +224,7 @@ namespace video_poker
         throw texture_not_found();
     }
 
-    const neogfx::i_texture& table::face_texture(const card& aCard) const
+    const ng::i_texture& table::face_texture(const card& aCard) const
     {
         if (aCard == card::value::Ace || aCard < card::value::Jack)
             return suit_texture(aCard);
@@ -280,8 +283,8 @@ namespace video_poker
     {
         iOutcome = std::make_unique<outcome>(
             *this, 
-            to_string(video_poker::to_poker_hand(*iHand)) + neogfx::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
-            neogfx::color::Goldenrod.with_lightness(0.8));
+            to_string(video_poker::to_poker_hand(*iHand)) + ng::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
+            ng::color::Goldenrod.with_lightness(0.8));
         iCredit += aWinnings;
     }
 
@@ -290,7 +293,7 @@ namespace video_poker
         iOutcome = std::make_unique<outcome>(
             *this,
             "No Win",
-            neogfx::color::Blue.with_lightness(0.8));
+            ng::color::Blue.with_lightness(0.8));
     }
 
     void table::change_state(table_state aNewState)
@@ -317,14 +320,14 @@ namespace video_poker
                 }
                 break;
             case table_state::GameOver:
-                if (neogfx::message_box::question(*this, "Out Of Credit - Game Over", "You have run out of credit!\n\nPlay again?", neogfx::standard_button::Yes | neogfx::standard_button::No) == neogfx::standard_button::Yes)
+                if (ng::message_box::question(*this, "Out Of Credit - Game Over", "You have run out of credit!\n\nPlay again?") == ng::standard_button::Yes)
                 {
                     iCredit = STARTING_CREDIT;
                     iHand.emplace();
                     change_state(table_state::TakeBet);
                 }
                 else
-                    neogfx::app::instance().quit();
+                    ng::app::instance().quit();
                 break;
             default:
                 // do nothing
@@ -335,8 +338,8 @@ namespace video_poker
 
     void table::update_widgets()
     {
-        iLabelCreditsValue.set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iCredit));
-        iLabelStakeValue.set_text( neogfx::to_string(u8"£") + boost::lexical_cast<std::string>(iStake));
+        iLabelCreditsValue.set_text( ng::to_string(u8"£") + boost::lexical_cast<std::string>(iCredit));
+        iLabelStakeValue.set_text( ng::to_string(u8"£") + boost::lexical_cast<std::string>(iStake));
         iBetMinus.enable(iState == table_state::TakeBet && iStake > 0);
         iBetPlus.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);
         iBetMax.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);

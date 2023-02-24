@@ -18,17 +18,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <neogfx/neogfx.hpp>
+#include <video_poker/video_poker.hpp>
+
 #include <map>
 #include <unordered_map>
 #include <set>
+
 #include <boost/pool/pool_alloc.hpp>
+
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+
 #include <card_games/card.hpp>
+
 #include <video_poker/flashing_button.hpp>
 #include <video_poker/i_table.hpp>
 
@@ -36,15 +41,15 @@ namespace video_poker
 {
     using namespace neogames::card_games;
 
-    class card_widget : public neogfx::widget<>
+    class card_widget : public ng::widget<>
     {
     public:
-        card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures);
+        card_widget(ng::i_layout& aLayout, ng::game::canvas& aCanvas, const i_card_textures& aCardTextures);
     protected:
-        neogfx::size minimum_size(const neogfx::optional_size& aAvailableSpace = {}) const override;
-        neogfx::size maximum_size(const neogfx::optional_size& aAvailableSpace = {}) const override;
+        ng::size minimum_size(const ng::optional_size& aAvailableSpace = {}) const override;
+        ng::size maximum_size(const ng::optional_size& aAvailableSpace = {}) const override;
     protected:
-        void paint(neogfx::i_graphics_context& aGc) const override;
+        void paint(ng::i_graphics_context& aGc) const override;
     public:
         bool has_card() const;
         video_poker::card& card() const;
@@ -54,19 +59,19 @@ namespace video_poker
         void update_sprite_geometry();
         void toggle_hold();
     private:
-        neogfx::game::canvas& iCanvas;
+        ng::game::canvas& iCanvas;
         const i_card_textures& iCardTextures;
-        neogfx::sink iSink;
+        ng::sink iSink;
         video_poker::card* iCard;
-        neogfx::game::entity_id iCardSprite;
+        ng::game::entity_id iCardSprite;
     };
 
-    class card_space : neogfx::widget<>
+    class card_space : ng::widget<>
     {
     public:
         struct no_card : std::runtime_error { no_card() : std::runtime_error("video_poker::card_space::no_card") {} };
     public:
-        card_space(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, i_table& aTable);
+        card_space(ng::i_layout& aLayout, ng::game::canvas& aCanvas, i_table& aTable);
     public:
         bool has_card() const;
         const video_poker::card& card() const;
@@ -76,12 +81,12 @@ namespace video_poker
     private:
         void update_widgets();
     public:
-        neogfx::game::canvas& iCanvas;
+        ng::game::canvas& iCanvas;
         i_table& iTable;
-        neogfx::vertical_layout iVerticalLayout;
+        ng::vertical_layout iVerticalLayout;
         card_widget iCardWidget;
         flashing_button iHoldButton;
         video_poker::card* iCard;
-        neogfx::sink iSink;
+        ng::sink iSink;
     };
 }

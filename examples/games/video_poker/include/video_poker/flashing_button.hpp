@@ -24,25 +24,25 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace video_poker
 {
-    class flashing_button : public neogfx::push_button
+    class flashing_button : public ng::push_button
     {
     public:
-        flashing_button(neogfx::i_layout& aLayout, const std::string aText) :
+        flashing_button(ng::i_layout& aLayout, const std::string aText) :
             push_button{ aLayout, aText }
         {
-            neogfx::service<neogfx::i_rendering_engine>().register_frame_counter(*this, 250);
+            ng::service<ng::i_rendering_engine>().register_frame_counter(*this, 250);
         }
         ~flashing_button()
         {
-            neogfx::service<neogfx::i_rendering_engine>().unregister_frame_counter(*this, 250);
+            ng::service<ng::i_rendering_engine>().unregister_frame_counter(*this, 250);
         }
     public:
-        neogfx::color face_color() const override
+        ng::color face_color() const override
         {
-            neogfx::color faceColor = push_button::face_color();
+            ng::color faceColor = push_button::face_color();
             faceColor = faceColor.with_lightness(
                 effectively_enabled() && 
-                (push_button::is_checked() || neogfx::service<neogfx::i_rendering_engine>().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);
+                (push_button::is_checked() || ng::service<ng::i_rendering_engine>().frame_counter(250) % 2 == 1) ? 0.9 : 0.5);
             return faceColor;
         }
     private:

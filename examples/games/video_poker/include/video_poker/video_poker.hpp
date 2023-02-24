@@ -1,6 +1,6 @@
 ﻿/*
-neogfx C++ App/Game Engine - Examples - Games
-Copyright(C) 2017 Leigh Johnston
+neogfx C++ App/Game Engine - Examples - Games - Video Poker
+Copyright(C) 2023 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -18,22 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <cstdint>
-#include <type_traits>
+#include <neogfx/neogfx.hpp>
 
 namespace ng = neogfx;
 
-namespace neogames
-{
-    namespace card_games
-    {
-        struct default_game_traits
-        {
-            static inline constexpr uint32_t hand_size = 5u;
-            static inline constexpr bool ace_high = true;
-            static inline constexpr bool jokers_present = false;
-        };
-
-        typedef default_game_traits poker_game_traits;
-    }
-}

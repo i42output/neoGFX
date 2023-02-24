@@ -18,10 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <video_poker/video_poker.hpp>
+
 #include <map>
 #include <unordered_map>
 #include <set>
+
 #include <boost/pool/pool_alloc.hpp>
+
 #include <card_games/card.hpp>
 #include <card_games/deck.hpp>
 #include <card_games/hand.hpp>

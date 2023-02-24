@@ -36,7 +36,7 @@ namespace video_poker
     class i_table
     {
     public:
-        neogfx::event<table_state> state_changed;
+        ng::event<table_state> state_changed;
     public:
         virtual table_state state() const = 0;
     public:

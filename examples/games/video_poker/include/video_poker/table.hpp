@@ -18,10 +18,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <video_poker/video_poker.hpp>
+
 #include <map>
 #include <unordered_map>
 #include <set>
+
 #include <boost/pool/pool_alloc.hpp>
+
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
@@ -30,8 +34,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
+
 #include <card_games/deck.hpp>
 #include <card_games/hand.hpp>
+
 #include <video_poker/flashing_button.hpp>
 #include <video_poker/card_space.hpp>
 #include <video_poker/i_table.hpp>

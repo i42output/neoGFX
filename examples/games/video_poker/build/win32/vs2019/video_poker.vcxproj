@@ -140,6 +140,7 @@
     <ClInclude Include="..\..\..\include\video_poker\i_table.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\poker.hpp" />
     <ClInclude Include="..\..\..\include\video_poker\table.hpp" />
+    <ClInclude Include="..\..\..\include\video_poker\video_poker.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
   </ItemGroup>
   <ItemGroup>

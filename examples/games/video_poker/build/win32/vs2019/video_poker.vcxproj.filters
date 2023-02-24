@@ -71,6 +71,9 @@
     <ClInclude Include="..\..\..\include\video_poker\flashing_button.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\video_poker\video_poker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\..\src\resources\win32\video_poker.rc">

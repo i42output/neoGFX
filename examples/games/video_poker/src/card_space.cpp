@@ -16,47 +16,48 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/neogfx.hpp>
-#include <card_games/card_sprite.hpp>
-#include <video_poker/card_space.hpp>
+#include <video_poker/video_poker.hpp>
 
 #include <neogfx/game/entity_info.hpp>
 
+#include <card_games/card_sprite.hpp>
+#include <video_poker/card_space.hpp>
+
 namespace video_poker
 {
-    card_widget::card_widget(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, const i_card_textures& aCardTextures) :
+    card_widget::card_widget(ng::i_layout& aLayout, ng::game::canvas& aCanvas, const i_card_textures& aCardTextures) :
         widget<>{ aLayout },
         iCanvas{ aCanvas },
         iCardTextures{ aCardTextures },
         iCard{ nullptr },
-        iCardSprite{ neogfx::game::null_entity }
+        iCardSprite{ ng::game::null_entity }
     {
-        set_padding(neogfx::padding{});
-        set_size_policy(neogfx::size_constraint::Expanding, kBridgeCardSize);
+        set_padding(ng::padding{});
+        set_size_policy(ng::size_constraint::Expanding, kBridgeCardSize);
         set_ignore_mouse_events(true);
         iCanvas.LayoutCompleted([this]() { update_sprite_geometry(); });
-        iCanvas.EntityClicked([this](neogfx::game::entity_id aEntity)
+        iCanvas.EntityClicked([this](ng::game::entity_id aEntity)
         { 
             if (aEntity == iCardSprite)
                 toggle_hold(); 
         });
     }
 
-    neogfx::size card_widget::minimum_size(const neogfx::optional_size& aAvailableSpace) const
+    ng::size card_widget::minimum_size(const ng::optional_size& aAvailableSpace) const
     {
-        return ceil_rasterized(neogfx::from_mm(kBridgeCardSize * 0.5));
+        return ceil_rasterized(ng::from_mm(kBridgeCardSize * 0.5));
     }
 
-    neogfx::size card_widget::maximum_size(const neogfx::optional_size& aAvailableSpace) const
+    ng::size card_widget::maximum_size(const ng::optional_size& aAvailableSpace) const
     {
         return ceil_rasterized(minimum_size(aAvailableSpace) * 2.0);
     }
         
-    void card_widget::paint(neogfx::i_graphics_context& aGc) const
+    void card_widget::paint(ng::i_graphics_context& aGc) const
     {
         auto rect = client_rect();
-        aGc.fill_rounded_rect(rect, rect.cx / 10.0, neogfx::color::DarkGreen);
-        rect.deflate(neogfx::size{ 4.0 });
+        aGc.fill_rounded_rect(rect, rect.cx / 10.0, ng::color::DarkGreen);
+        rect.deflate(ng::size{ 4.0 });
         aGc.fill_rounded_rect(rect, rect.cx / 10.0, background_color());
     }
 
@@ -79,7 +80,7 @@ namespace video_poker
                 update_sprite_geometry();  
                 iCanvas.update(); 
         });
-        if (iCardSprite != neogfx::game::null_entity)
+        if (iCardSprite != ng::game::null_entity)
             iCanvas.ecs().destroy_entity(iCardSprite);
         iCardSprite = create_card_sprite(iCanvas.ecs(), iCardTextures, aCard);
         update_sprite_geometry();
@@ -89,28 +90,28 @@ namespace video_poker
     void card_widget::clear_card()
     {
         iCard = nullptr;
-        if (iCardSprite != neogfx::game::null_entity)
+        if (iCardSprite != ng::game::null_entity)
         {
             iCanvas.ecs().destroy_entity(iCardSprite);
-            iCardSprite = neogfx::game::null_entity;
+            iCardSprite = ng::game::null_entity;
         }
         iCanvas.update();
     }
 
     void card_widget::update_sprite_geometry()
     {
-        if (iCardSprite != neogfx::game::null_entity)
+        if (iCardSprite != ng::game::null_entity)
         {
             auto xy = iCanvas.to_client_coordinates(to_window_coordinates(client_rect().center()));
             if (iCard->discarded())
-                xy += neogfx::point{ -8.0, -16.0 };
-            auto& meshFilter = iCanvas.ecs().component<neogfx::game::mesh_filter>().entity_record(iCardSprite);
-            meshFilter.transformation = neogfx::mat44{ 
+                xy += ng::point{ -8.0, -16.0 };
+            auto& meshFilter = iCanvas.ecs().component<ng::game::mesh_filter>().entity_record(iCardSprite);
+            meshFilter.transformation = ng::mat44{ 
                 { extents().cx, 0.0, 0.0, 0.0 },
                 { 0.0, extents().cy * kBridgeCardSize.cx / kBridgeCardSize.cy, 0.0, 0.0 },
                 { 0.0, 0.0, 1.0, 0.0 },
                 { xy.x, xy.y, 0.8, 1.0 } };
-            neogfx::game::set_render_cache_dirty(iCanvas.ecs(), iCardSprite);
+            ng::game::set_render_cache_dirty(iCanvas.ecs(), iCardSprite);
             iCanvas.update();
         }
     }
@@ -126,23 +127,23 @@ namespace video_poker
         }
     }
 
-    card_space::card_space(neogfx::i_layout& aLayout, neogfx::game::canvas& aCanvas, i_table& aTable) :
+    card_space::card_space(ng::i_layout& aLayout, ng::game::canvas& aCanvas, i_table& aTable) :
         widget<>{ aLayout },
         iCanvas{ aCanvas },
         iTable{ aTable },
-        iVerticalLayout{ *this, neogfx::alignment::Center | neogfx::alignment::VCenter },
+        iVerticalLayout{ *this, ng::alignment::Center | ng::alignment::VCenter },
         iCardWidget{ iVerticalLayout, aCanvas, aTable.textures() },
         iHoldButton{ iVerticalLayout, "HOLD\n CANCEL " },
         iCard{ nullptr }
     {
-        set_size_policy(neogfx::size_constraint::ExpandingUniform);
+        set_size_policy(ng::size_constraint::ExpandingUniform);
         set_ignore_mouse_events(true);
-        iVerticalLayout.set_spacing(neogfx::size{ 8.0 });
+        iVerticalLayout.set_spacing(ng::size{ 8.0 });
         iHoldButton.set_consider_ancestors_for_mouse_events(false);
-        iHoldButton.set_size_policy(neogfx::size_constraint::Minimum);
-        iHoldButton.set_base_color(neogfx::color::Black);
-        iHoldButton.text_widget().set_font(neogfx::font{ "Exo 2", "Black", 16.0 });
-        iHoldButton.text_widget().set_text_format(neogfx::text_format{ neogfx::color::White, neogfx::text_effect{ neogfx::text_effect_type::Outline, neogfx::color::Black.with_alpha(0.5) } });
+        iHoldButton.set_size_policy(ng::size_constraint::Minimum);
+        iHoldButton.set_base_color(ng::color::Black);
+        iHoldButton.text_widget().set_font(ng::font{ "Exo 2", "Black", 16.0 });
+        iHoldButton.text_widget().set_text_format(ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black.with_alpha(0.5) } });
         iHoldButton.set_checkable();
         auto update_hold = [this]() 
         { 
@@ -199,7 +200,7 @@ namespace video_poker
     void card_space::update_widgets()
     {
         iCardWidget.enable(has_card() && iTable.state() == table_state::DealtFirst);
-        iHoldButton.set_base_color(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? neogfx::color::LightYellow1 : neogfx::color::Black.with_alpha(0.5));
+        iHoldButton.set_base_color(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? ng::color::LightYellow1 : ng::color::Black.with_alpha(0.5));
         iHoldButton.enable(has_card() && iTable.state() == table_state::DealtFirst);
         iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst);
     }
