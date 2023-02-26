@@ -160,7 +160,7 @@ namespace video_poker
         iTextures = ng::service<ng::i_rendering_engine>().texture_manager().create_texture_atlas();
         // Assumes font "Card Characters" by "Harold's Fonts" has been installed.
         auto const& values = { 'A', 'K', 'Q', 'J', '=', '9', '8', '7', '6', '5', '4', '3', '2', ' ' };
-        ng::size const valueDimensions = { 36.0, 36.0 };
+        ng::size const valueDimensions = { 72.0, 72.0 };
         auto& valueTextures = iTextures->create_sub_texture(ng::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, ng::texture_sampling::Multisample);
         ng::font valueFont{ "Card Characters", "Regular", -valueDimensions.cy };
         if (valueFont.family_name() != "Card Characters" &&

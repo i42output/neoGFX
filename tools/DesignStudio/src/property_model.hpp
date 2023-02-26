@@ -1,7 +1,7 @@
-// object_model.hpp
+// property_model.hpp
 /*
   neoGFX Design Studio
-  Copyright(C) 2020 Leigh Johnston
+  Copyright(C) 2023 Leigh Johnston
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -23,25 +23,20 @@
 #include <neogfx/gui/widget/item_model.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/widget/item_selection_model.hpp>
-#include <neogfx/tools/DesignStudio/element.hpp>
-#include <neogfx/tools/DesignStudio/i_element_library.hpp>
-#include <neogfx/tools/DesignStudio/i_project_manager.hpp>
+#include <neogfx/core/i_property.hpp>
 
 namespace neogfx::DesignStudio
 {
-    typedef ng::basic_item_tree_model<ds::i_element*, 2> object_model;
+    typedef ng::basic_item_model<ng::i_property*, 2> property_model;
 
-    class object_presentation_model : public ng::basic_item_presentation_model<object_model>
+    class property_presentation_model : public ng::basic_item_presentation_model<property_model>
     {
     public:
-        object_presentation_model(i_project_manager& aProjectManager);
-    public:
-        item_selection_model& selection_model();
+        property_presentation_model();
     public:
         ng::optional_size cell_image_size(const ng::item_presentation_model_index& aIndex) const override;
         ng::optional_texture cell_image(const ng::item_presentation_model_index& aIndex) const override;
     private:
-        item_selection_model iSelectionModel;
         sink iSink;
         sink iSink2;
     };

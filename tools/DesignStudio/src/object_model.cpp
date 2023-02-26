@@ -22,10 +22,9 @@
 
 namespace neogfx::DesignStudio
 {
-    object_presentation_model::object_presentation_model(i_project_manager& aProjectManager, item_selection_model& aSelectionModel) :
-        iSelectionModel{ aSelectionModel }
+    object_presentation_model::object_presentation_model(i_project_manager& aProjectManager)
     {
-        aSelectionModel.set_presentation_model(*this);
+        selection_model().set_presentation_model(*this);
         auto update_model = [&]()
         {
             if (aProjectManager.project_active())
@@ -76,15 +75,15 @@ namespace neogfx::DesignStudio
                 {
                     auto const index = from_item_model_index(item_model().find_item(&aElement));
                     if (aElement.mode() == element_mode::Edit)
-                        iSelectionModel.set_current_index(index);
+                        selection_model().set_current_index(index);
                 });
                 iSink2 += aElement.selection_changed([&]()
                 {
                     auto const index = from_item_model_index(item_model().find_item(&aElement));
                     if (aElement.is_selected())
-                        iSelectionModel.select(index, ng::item_selection_operation::SelectRow);
+                        selection_model().select(index, ng::item_selection_operation::SelectRow);
                     else
-                        iSelectionModel.select(index, ng::item_selection_operation::DeselectRow);
+                        selection_model().select(index, ng::item_selection_operation::DeselectRow);
                 });
             }); 
             iSink2 += aProject.element_removed([update_model](i_element&) 
@@ -97,6 +96,11 @@ namespace neogfx::DesignStudio
         iSink += aProjectManager.project_added(project_updated);
         iSink += aProjectManager.project_removed(project_updated);
         iSink += aProjectManager.project_activated(project_updated);
+    }
+
+    item_selection_model& object_presentation_model::selection_model()
+    {
+        return iSelectionModel;
     }
 
     ng::optional_size object_presentation_model::cell_image_size(const ng::item_presentation_model_index& aIndex) const

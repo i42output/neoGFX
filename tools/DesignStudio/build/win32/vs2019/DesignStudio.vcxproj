@@ -299,6 +299,7 @@
     <ClInclude Include="..\..\..\src\new_project_dialog.hpp" />
     <ClInclude Include="..\..\..\src\object_model.hpp" />
     <ClInclude Include="..\..\..\src\project_model.hpp" />
+    <ClInclude Include="..\..\..\src\property_model.hpp" />
     <ClInclude Include="..\..\..\src\resources\win32\resource.h" />
     <ClInclude Include="..\..\..\src\toolbox_model.hpp" />
     <ClInclude Include="..\..\..\src\widget_caddy.hpp" />

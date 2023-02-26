@@ -83,7 +83,7 @@ namespace neogfx::DesignStudio
         iProjectPresentationModel{ aProjectManager },
         iToolboxPresentationModel{ aProjectManager },
         iWorkflowPresentationModel{ aProjectManager },
-        iObjectPresentationModel{ aProjectManager, iObjectSelectionModel }
+        iObjectPresentationModel{ aProjectManager }
     {
         // todo: decompose this ctor body into smaller member initialization functions...
 
@@ -263,11 +263,11 @@ namespace neogfx::DesignStudio
         iObjectPresentationModel.set_alternating_row_color(true);
         auto& objectTree = iObjects.docked_widget<ng::table_view>();
         objectTree.set_minimum_size(ng::size{ 128_dip, 128_dip });
-        objectTree.set_selection_model(iObjectSelectionModel);
-        iObjectSelectionModel.set_mode(ng::item_selection_mode::ExtendedSelection);
+        objectTree.set_selection_model(iObjectPresentationModel.selection_model());
+        iObjectPresentationModel.selection_model().set_mode(ng::item_selection_mode::ExtendedSelection);
         objectTree.set_presentation_model(iObjectPresentationModel);
         objectTree.column_header().set_expand_last_column(true);
-        iObjectSelectionModel.current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
+        iObjectPresentationModel.selection_model().current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
         {
             if (aCurrentIndex)
             {
@@ -276,11 +276,11 @@ namespace neogfx::DesignStudio
             }
             else if (aPreviousIndex)
             {
-                auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aCurrentIndex));
+                auto& element = *iObjectModel.item(iObjectPresentationModel.to_item_model_index(*aPreviousIndex));
                 element.set_mode(element_mode::None);
             }
         });
-        iObjectSelectionModel.selection_changed([&](const ng::item_selection& aCurrentSelection, const ng::item_selection& aPreviousSelection)
+        iObjectPresentationModel.selection_model().selection_changed([&](const ng::item_selection& aCurrentSelection, const ng::item_selection& aPreviousSelection)
         {
             static bool inHere;
             if (inHere)
