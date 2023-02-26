@@ -617,14 +617,6 @@
                                     }
                                 }
                                 radio_button: {
-                                    id: radioMessageBoxIconWarning
-                                    text: "Warning"
-                                    .image: {
-                                        uri: ":/neogfx/resources/icons/warning.png"
-                                        size: 24dip
-                                    }
-                                }
-                                radio_button: {
                                     id: radioMessageBoxIconStop
                                     text: "Stop"
                                     .image: {
@@ -633,18 +625,18 @@
                                     }
                                 }
                                 radio_button: {
-                                    id: radioMessageBoxIconError
-                                    text: "Error"
+                                    id: radioMessageBoxIconWarning
+                                    text: "Warning"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons/error.png"
+                                        uri: ":/neogfx/resources/icons/warning.png"
                                         size: 24dip
                                     }
                                 }
                                 radio_button: {
-                                    id: radioMessageBoxIconCritical
-                                    text: "Critical"
+                                    id: radioMessageBoxIconError
+                                    text: "Error"
                                     .image: {
-                                        uri: ":/neogfx/resources/icons/critical.png"
+                                        uri: ":/neogfx/resources/icons/error.png"
                                         size: 24dip
                                     }
                                 }

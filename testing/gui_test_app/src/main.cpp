@@ -577,14 +577,12 @@ int main(int argc, char* argv[])
                 result = ng::message_box::information(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (window.radioMessageBoxIconQuestion.is_checked())
                 result = ng::message_box::question(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
-            else if (window.radioMessageBoxIconWarning.is_checked())
-                result = ng::message_box::warning(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (window.radioMessageBoxIconStop.is_checked())
                 result = ng::message_box::stop(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
+            else if (window.radioMessageBoxIconWarning.is_checked())
+                result = ng::message_box::warning(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             else if (window.radioMessageBoxIconError.is_checked())
                 result = ng::message_box::error(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
-            else if (window.radioMessageBoxIconCritical.is_checked())
-                result = ng::message_box::critical(window, window.lineEditMessageBoxTitle.text(), window.textEditMessageBoxText.text(), window.textEditMessageBoxDetailedText.text(), static_cast<ng::standard_button>(standardButtons));
             window.labelMessageBoxResult.set_text("Result = "_s + ng::dialog_button_box::standard_button_details(result).second);
         });
 
