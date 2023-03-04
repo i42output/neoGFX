@@ -319,7 +319,7 @@ namespace neogfx
                     result.part = widget_part::Grab;
                 else if (iToolbarLayout && rect{ iToolbarLayout->origin(), iToolbarLayout->extents() }.contains(aPosition))
                     result.part = widget_part::Grab;
-                else if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
+                if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
                 {
                     enum { left = 1, top = 2, right = 4, bottom = 8 };
                     int hit = 0;
