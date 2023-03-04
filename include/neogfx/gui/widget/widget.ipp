@@ -1971,9 +1971,6 @@ namespace neogfx
         {
             switch (partUnderMouse.part)
             {
-            case widget_part::Grab:
-                mouseCursor = mouse_system_cursor::Hand;
-                break;
             case widget_part::BorderLeft:
                 mouseCursor = mouse_system_cursor::SizeWE;
                 break;
