@@ -295,6 +295,7 @@ namespace neogfx
                 return (decoration_style() & neogfx::decoration_style::Resizable) == neogfx::decoration_style::Resizable &&
                     (decoration() & neogfx::decoration::Border) == neogfx::decoration::Border;
             case widget_part::TitleBar:
+            case widget_part::Grab:
                 return true;
                 // todo: the rest
             default:
@@ -312,7 +313,13 @@ namespace neogfx
             auto result = widget_type::part(aPosition);
             if (result.part == widget_part::Client || result.part == widget_part::NonClient)
             {
-                if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
+                if (iTitleBar != nullptr && self.to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
+                    result.part = widget_part::TitleBar;
+                else if (iMenuLayout && rect{ iMenuLayout->origin(), iMenuLayout->extents() }.contains(aPosition))
+                    result.part = widget_part::Grab;
+                else if (iToolbarLayout && rect{ iToolbarLayout->origin(), iToolbarLayout->extents() }.contains(aPosition))
+                    result.part = widget_part::Grab;
+                else if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
                 {
                     enum { left = 1, top = 2, right = 4, bottom = 8 };
                     int hit = 0;
@@ -326,11 +333,6 @@ namespace neogfx
                         hit |= top;
                     if (aPosition.y > nonClientRect.bottom() - nonClientBorder.bottom)
                         hit |= bottom;
-                    if (iTitleBar != nullptr)
-                    {
-                        if (self.to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
-                            result.part = widget_part::TitleBar;
-                    }
                     if (iStatusBar != nullptr)
                     {
                         point const sizeGripPos = self.to_client_coordinates(iStatusBar->size_grip().non_client_rect().position());

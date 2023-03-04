@@ -101,6 +101,7 @@ namespace neogfx
         case widget_part::MinimizeButton:
         case widget_part::RestoreButton: 
         case widget_part::TitleBar:
+        case widget_part::Grab:
             return true;
         case widget_part::Border:
         case widget_part::BorderLeft:
