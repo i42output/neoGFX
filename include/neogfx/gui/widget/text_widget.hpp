@@ -26,6 +26,7 @@ namespace neogfx
 {
     class text_widget : public widget<i_text_widget>
     {
+        meta_object(widget<i_text_widget>)
     public:
         define_event(TextChanged, text_changed)
         define_event(TextGeometryChanged, text_geometry_changed)

@@ -33,6 +33,7 @@ namespace neogfx
 {
     class game_controller_dialog : public dialog
     {
+        meta_object(dialog)
     public:
         game_controller_dialog();
         game_controller_dialog(i_widget& aParent);

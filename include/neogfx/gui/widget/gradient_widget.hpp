@@ -32,6 +32,7 @@ namespace neogfx
 
     class gradient_widget : public widget<>
     {
+        meta_object(widget<>)
     public:
         define_event(GradientChanged, gradient_changed)
         define_event(ColorStopSelected, color_stop_selected)

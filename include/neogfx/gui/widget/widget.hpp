@@ -33,7 +33,7 @@ namespace neogfx
     template <typename Interface = i_widget>
     class widget : public layout_item<object<Interface>>
     {
-        typedef layout_item<object<Interface>> base_type;
+        meta_object(layout_item<object<Interface>>)
         typedef widget<Interface> self_type;
     public:
         define_declared_event(DeviceMetricsUpdated, device_metrics_updated, const i_widget&)

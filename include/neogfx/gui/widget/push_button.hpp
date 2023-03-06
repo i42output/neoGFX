@@ -30,6 +30,7 @@ namespace neogfx
 
     class push_button : public button<i_push_button>
     {
+        meta_object(button<i_push_button>)
     public:
         static const uint32_t kMaxAnimationFrame = 10;
     public:

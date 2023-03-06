@@ -33,6 +33,7 @@ namespace neogfx
 {
     class scrollbar : public object<i_scrollbar>, public i_skinnable_item
     {
+        meta_object(object<i_scrollbar>)
     public:
         typedef i_scrollbar abstract_type;
     private:

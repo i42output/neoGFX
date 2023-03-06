@@ -38,7 +38,7 @@ namespace neogfx
 
     class layout : public layout_item<object<i_layout>>
     {
-        typedef layout_item<object<i_layout>> base_type;
+        meta_object(layout_item<object<i_layout>>)
     public:
         define_declared_event(LayoutCompleted, layout_completed)
         define_declared_event(AlignmentChanged, alignment_changed)

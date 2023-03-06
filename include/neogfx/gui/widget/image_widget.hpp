@@ -29,6 +29,7 @@ namespace neogfx
     // todo: i_image_widget
     class image_widget : public widget<>
     {
+        meta_object(widget<>)
     public:
         define_event(ImageChanged, image_changed)
         define_event(ImageGeometryChanged, image_geometry_changed)

@@ -49,6 +49,7 @@ namespace neogfx
 
     class settings_dialog : public dialog
     {
+        meta_object(dialog)
     public:
         settings_dialog(neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {});
         settings_dialog(i_widget& aParent, neolib::i_settings& aSettings, ref_ptr<i_setting_widget_factory> aWidgetFactory = {}, ref_ptr<i_setting_icons> aIcons = {});

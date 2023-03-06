@@ -43,8 +43,8 @@ namespace neogfx
     template <typename Base = widget<>>
     class framed_widget : public Base
     {
+        meta_object(Base)
         typedef framed_widget<Base> self_type;
-        typedef Base base_type;
     public:
         template <typename... Args>
         framed_widget(Args&&... aArgs) :

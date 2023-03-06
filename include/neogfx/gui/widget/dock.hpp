@@ -30,7 +30,7 @@ namespace neogfx
 {
     class dock : public decorated<splitter, i_dock>
     {
-        typedef decorated<splitter, i_dock> base_type;
+        meta_object(decorated<splitter, i_dock>)
     public:
         using item = ref_ptr<i_dockable>;
         using item_list = neolib::vector<item>;

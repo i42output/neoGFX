@@ -33,7 +33,7 @@ namespace neogfx
     template <typename Base = widget<>>
     class tab_page_container : public Base, public i_tab_page_container
     {
-        typedef Base base_type;
+        meta_object(Base)
     public:
         define_declared_event(StyleChanged, style_changed)
         define_declared_event(TabPageAdded, tab_page_added, i_tab_page&)

@@ -30,6 +30,7 @@ namespace neogfx
 {
     class grid_layout : public layout
     {
+        meta_object(layout)
     public:
         struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
     public:

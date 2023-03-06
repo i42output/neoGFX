@@ -374,7 +374,7 @@ namespace neogfx
     template <typename Base>
     class drag_drop_target : public Base, public i_drag_drop_target
     {
-        typedef Base base_type;
+        meta_object(Base)
     public:
         define_declared_event(ObjectAcceptable, object_acceptable, i_drag_drop_object const&, optional_point const&, drop_operation&)
         define_declared_event(ObjectDropped, object_dropped, i_drag_drop_object const&, optional_point const&)

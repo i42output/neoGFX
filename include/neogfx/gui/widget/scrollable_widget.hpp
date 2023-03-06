@@ -46,8 +46,8 @@ namespace neogfx
     template <typename Base = widget<>>
     class scrollable_widget : public Base, private i_scrollbar_container
     {
+        meta_object(Base)
         typedef scrollable_widget<Base> self_type;
-        typedef Base base_type;
     protected:
         enum usv_stage_e
         {

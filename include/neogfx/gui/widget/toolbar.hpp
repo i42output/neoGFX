@@ -44,6 +44,7 @@ namespace neogfx
 
     class toolbar : public widget<>, public i_action_container
     {
+        meta_object(widget<>)
     private:
         typedef std::unique_ptr<toolbar_button> button_pointer;
         typedef std::vector<button_pointer> button_list;

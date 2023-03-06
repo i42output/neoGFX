@@ -34,7 +34,7 @@ namespace neogfx
     template <typename ButtonInterface = i_button>
     class button : public widget<ButtonInterface>, protected i_mnemonic
     {
-        typedef widget<ButtonInterface> base_type;
+        meta_object(widget<ButtonInterface>)
         // events
     public:
         define_declared_event(Pressed, pressed)

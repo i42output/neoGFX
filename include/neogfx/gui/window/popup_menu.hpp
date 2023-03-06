@@ -28,6 +28,7 @@ namespace neogfx
 {
     class popup_menu : public window
     {
+        meta_object(window)
     public:
         static const window_style DEFAULT_STYLE = 
             window_style::Weak | 

@@ -35,7 +35,7 @@ namespace neogfx
 {
     class view_stack : public drag_drop_target<framed_scrollable_widget>
     {
-        typedef drag_drop_target<framed_scrollable_widget> base_type;
+        meta_object(drag_drop_target<framed_scrollable_widget>)
     public:
         view_stack(i_layout& aLayout, i_view_container& aParent);
     public:
@@ -51,7 +51,7 @@ namespace neogfx
     template <typename Base = scrollable_widget<>>
     class view_container : public tab_page_container<Base>, i_view_container
     {
-        typedef tab_page_container<Base> base_type;
+        meta_object(tab_page_container<Base>)
     public:
         define_declared_event(ViewAdded, view_added, i_view&)
         define_declared_event(ViewRemoved, view_removed, i_view&)

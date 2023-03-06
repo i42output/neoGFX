@@ -27,6 +27,7 @@ namespace neogfx
 {
     class tab_bar : public framed_scrollable_widget, public i_tab_container
     {
+        meta_object(framed_scrollable_widget)
     public:
         define_declared_event(StyleChanged, style_changed)
     private:

@@ -35,6 +35,7 @@ namespace neogfx
 {
     class font_dialog : public dialog
     {
+        meta_object(dialog)
     public:
         define_event(SelectionChanged, selection_changed)
     public:

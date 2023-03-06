@@ -84,6 +84,7 @@ namespace neogfx
 
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
     {
+        meta_object(framed_scrollable_widget)
         // events
     public:
         define_event(CanAcceptText, can_accept_text, i_string const&, bool&)

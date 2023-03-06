@@ -30,6 +30,7 @@ namespace neogfx
 {
     class border_layout : public layout
     {
+        meta_object(border_layout)
     public:
         struct not_implemented : std::logic_error { not_implemented() : std::logic_error("neogfx::border_layout::not_implemented") {} };
     public:

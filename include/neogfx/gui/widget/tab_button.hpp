@@ -28,6 +28,7 @@ namespace neogfx
 {
     class tab_button : public push_button, public i_tab
     {
+        meta_object(push_button)
     public:
         define_declared_event(Selected, selected)
         define_declared_event(Deselected, deselected)

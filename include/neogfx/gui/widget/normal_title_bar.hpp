@@ -33,6 +33,7 @@ namespace neogfx
 
     class normal_title_bar : public widget<i_title_bar>
     {
+        meta_object(widget<i_title_bar>)
     public:
         typedef i_title_bar abstract_type;
     private:

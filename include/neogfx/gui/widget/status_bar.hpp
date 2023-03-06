@@ -34,6 +34,7 @@ namespace neogfx
 
     class status_bar : public widget<i_status_bar>
     {
+        meta_object(widget<i_status_bar>)
     public:
         typedef i_status_bar abstract_type;
         enum class style : uint32_t

@@ -45,6 +45,7 @@ namespace neogfx
 
     class splitter : public widget<>
     {
+        meta_object(widget<>)
     private:
         typedef std::pair<uint32_t, uint32_t> separator_type;
     public:

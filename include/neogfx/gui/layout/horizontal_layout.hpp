@@ -27,6 +27,7 @@ namespace neogfx
 {
     class horizontal_layout : public layout
     {
+        meta_object(layout)
     public:
         horizontal_layout(neogfx::alignment aAlignment = neogfx::alignment::VCenter);
         horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);

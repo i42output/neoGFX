@@ -27,6 +27,7 @@ namespace neogfx
 {
     class check_box : public button<>
     {
+        meta_object(button<>)
     private:
         class box : public widget<>
         {

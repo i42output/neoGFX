@@ -30,6 +30,7 @@ namespace neogfx
 {   
     class progress_bar : public widget<>, public i_progress_bar
     {
+        meta_object(widget<>)
     public:
         class bar : public widget<>
         {

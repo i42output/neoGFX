@@ -30,6 +30,7 @@ namespace neogfx
 
     class menu_bar : public widget<>, public menu
     {
+        meta_object(widget<>)
     public:
         menu_bar();
         menu_bar(i_widget& aParent);

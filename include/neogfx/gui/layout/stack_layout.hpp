@@ -25,6 +25,7 @@ namespace neogfx
 {
     class stack_layout : public layout
     {
+        meta_object(layout)
     public:
         stack_layout(neogfx::alignment aAlignment = neogfx::alignment::VCenter);
         stack_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);

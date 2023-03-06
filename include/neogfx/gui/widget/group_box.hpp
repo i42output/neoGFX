@@ -29,6 +29,7 @@ namespace neogfx
 {
     class group_box : public widget<>
     {
+        meta_object(widget<>)
     private:
         typedef group_box property_context_type;
     private:

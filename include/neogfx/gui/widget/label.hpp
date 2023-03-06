@@ -84,6 +84,7 @@ namespace neogfx
 
     class label : public widget<>
     {
+        meta_object(widget<>)
     public:
         struct no_center_spacer : std::logic_error { no_center_spacer() : std::logic_error("neogfx::label::no_center_spacer") {} };
         struct no_buddy : std::logic_error { no_buddy() : std::logic_error("neogfx::label::no_buddy") {} };

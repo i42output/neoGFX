@@ -29,7 +29,7 @@ namespace neogfx
 {
     class color_widget : public button<>
     {
-        typedef button<> base_type;
+        meta_object(button<>)
     public:
         define_event(ColorChanged, color_changed)
     public:

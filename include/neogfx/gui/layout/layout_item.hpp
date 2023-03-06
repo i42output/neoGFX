@@ -30,8 +30,8 @@ namespace neogfx
     template <typename Base>
     class layout_item : public anchorable<reference_counted<Base>>
     {
+        meta_object(anchorable<reference_counted<Base>>)
         typedef layout_item<Base> self_type;
-        typedef anchorable<reference_counted<Base>> base_type;
         // events
     public:
         define_event(AnchorUpdated, anchor_updated, i_anchor&)

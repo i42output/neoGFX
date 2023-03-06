@@ -113,6 +113,7 @@ namespace neogfx
     template <typename WidgetType, typename... OtherBases>
     class decorated : public WidgetType, public virtual i_standard_layout_container, public OtherBases...
     {
+        meta_object(WidgetType)
         typedef decorated<WidgetType, OtherBases...> self_type;
     public:
         typedef WidgetType widget_type;

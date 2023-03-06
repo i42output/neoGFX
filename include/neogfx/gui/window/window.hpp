@@ -35,7 +35,7 @@ namespace neogfx
 
     class window : public decorated<scrollable_widget<framed_widget<widget<i_window>>>>
     {
-        typedef decorated<scrollable_widget<framed_widget<widget<i_window>>>> base_type;
+        meta_object(decorated<scrollable_widget<framed_widget<widget<i_window>>>>)
     public:
         define_declared_event(Window, window_event, neogfx::window_event&)
         define_declared_event(DismissingChildren, dismissing_children, const i_widget*)

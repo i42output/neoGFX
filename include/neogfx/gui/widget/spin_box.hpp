@@ -30,7 +30,7 @@ namespace neogfx
     template <typename T>
     class basic_spin_box : public framed_widget<>
     {
-        typedef framed_widget<> base_type;
+        meta_object(framed_widget<>)
     public:
         define_event(ValueChanged, value_changed)
         define_event(ConstraintsChanged, constraints_changed)

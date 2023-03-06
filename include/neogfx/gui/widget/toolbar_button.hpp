@@ -27,6 +27,7 @@ namespace neogfx
 {
     class toolbar_button : public push_button
     {
+        meta_object(push_button)
     public:
         toolbar_button(i_action& aAction);
         toolbar_button(ref_ptr<i_action> aAction);

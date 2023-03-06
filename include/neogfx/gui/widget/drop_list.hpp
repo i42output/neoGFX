@@ -31,7 +31,7 @@ namespace neogfx
     template <typename ItemModel = item_model>
     class default_drop_list_presentation_model : public basic_item_presentation_model<ItemModel>
     {
-        typedef basic_item_presentation_model<ItemModel> base_type;
+        meta_object(basic_item_presentation_model<ItemModel>)
     public:
         using item_model_type = ItemModel;
     public:

@@ -28,6 +28,7 @@ namespace neogfx
 {
     class terminal : public scrollable_widget<framed_widget<widget<i_terminal>>>
     {
+        meta_object(scrollable_widget<framed_widget<widget<i_terminal>>>)
     public:
         define_declared_event(Input, input, i_string const&)
         define_declared_event(TerminalResized, terminal_resized, size_type)

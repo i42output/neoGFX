@@ -50,6 +50,7 @@ namespace neogfx
 
     class font_widget : public framed_widget<>
     {
+        meta_object(framed_widget<>)
     public:
         define_event(SelectionChanged, selection_changed)
     private:

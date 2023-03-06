@@ -44,7 +44,7 @@ namespace neogfx
 
     class item_view : public drag_drop_target<drag_drop_source<framed_scrollable_widget>>, protected i_header_view_owner
     {
-        typedef drag_drop_target<drag_drop_source<framed_scrollable_widget>> base_type;
+        meta_object(drag_drop_target<drag_drop_source<framed_scrollable_widget>>)
     public:
         define_event(CellEntered, cell_entered, item_presentation_model_index const&)
         define_event(CellLeft, cell_left, item_presentation_model_index const&)

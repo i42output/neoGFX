@@ -31,6 +31,7 @@ namespace neogfx
 {
     class gradient_dialog : public dialog
     {
+        meta_object(dialog)
         class preview_box;
     public:
         gradient_dialog(i_widget& aParent, const neogfx::gradient& aCurrentGradient);

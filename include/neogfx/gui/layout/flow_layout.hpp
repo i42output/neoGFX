@@ -27,6 +27,7 @@ namespace neogfx
 {
     class flow_layout : public layout
     {
+        meta_object(layout)
     public:
         enum flow_direction_e
         {

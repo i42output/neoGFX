@@ -32,6 +32,7 @@ namespace neogfx
 {
     class tab_page : public framed_scrollable_widget, public reference_counted<i_tab_page>
     {
+        meta_object(framed_scrollable_widget)
     public:
         define_declared_event(Selected, selected)
         define_declared_event(Deselected, deselected)

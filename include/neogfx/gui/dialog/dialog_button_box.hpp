@@ -120,6 +120,7 @@ namespace neogfx
 {
     class dialog_button_box : public widget<>
     {
+        meta_object(widget<>)
     public:
         define_event(Accepted, accepted)
         define_event(Rejected, rejected)

@@ -31,6 +31,7 @@ namespace neogfx
 
     class menu_item_widget : public widget<>, public i_menu_item_widget
     {
+        meta_object(widget<>)
     public:
         menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
         menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem);

@@ -40,6 +40,7 @@ namespace neogfx
 {
     class slider_impl : public widget<>
     {
+        meta_object(widget<>)
     public:
         define_event(ValueChanged, value_changed)
         define_event(ConstraintsChanged, constraints_changed)

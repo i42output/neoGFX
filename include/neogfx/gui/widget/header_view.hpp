@@ -51,6 +51,7 @@ namespace neogfx
 
     class header_view : public splitter
     {
+        meta_object(splitter)
     private:
         struct section_dimension
         {

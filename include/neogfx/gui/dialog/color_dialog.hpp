@@ -31,6 +31,7 @@ namespace neogfx
 {
     class color_dialog : public dialog
     {
+        meta_object(color_dialog)
     public:
         define_event(SelectionChanged, selection_changed)
     protected:

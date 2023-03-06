@@ -29,8 +29,7 @@ namespace neogfx
 
     class radio_button : public button<i_radio_button>
     {
-    private:
-        typedef button<i_radio_button> base_type;
+        meta_object(button<i_radio_button>)
     public:
         define_event(On, on)
         define_event(Off, off)

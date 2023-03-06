@@ -19,9 +19,21 @@
 
 #pragma once
 
+#include <boost/algorithm/string/replace.hpp>
 #include <neolib/neolib.hpp>
+#include <neolib/core/i_string.hpp>
 #include <neolib/app/i_object.hpp>
 #include <neogfx/core/object_type.hpp>
+
+#define meta_object( ... ) \
+        typedef __VA_ARGS__ base_type; \
+    public: \
+        void class_name(neolib::i_string& aClassName) const override \
+        { \
+            aClassName.append(boost::typeindex::type_id<decltype(*this)>().pretty_name()); \
+            aClassName.append("::"sv); \
+            base_type::class_name(aClassName); \
+        }
 
 namespace neogfx
 {
@@ -32,6 +44,36 @@ namespace neogfx
     public:
         virtual i_object& as_object() = 0;
     public:
+        virtual void class_name(neolib::i_string& aClassName) const = 0;
         virtual neogfx::object_type object_type() const = 0;
     };
+
+    inline std::string class_names(i_object const& aObject)
+    {
+        neolib::string temp;
+        aObject.class_name(temp);
+        auto result = temp.to_std_string();
+        boost::replace_all(result, "neogfx::", "");
+        boost::replace_all(result, "class ", "");
+        boost::replace_all(result, " ", "");
+        std::size_t templateCounter = 0;
+        for (auto i = result.begin(); i != result.end();)
+        {
+            if (*i == '<')
+            {
+                ++templateCounter;
+                i = result.erase(i);
+            }
+            else if (*i == '>')
+            {
+                --templateCounter;
+                i = result.erase(i);
+            }
+            else if (templateCounter != 0)
+                i = result.erase(i);
+            else
+                ++i;
+        }
+        return result;
+    }
 }

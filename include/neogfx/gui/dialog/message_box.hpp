@@ -26,6 +26,7 @@ namespace neogfx
 {
     class message_box : public dialog
     {
+        meta_object(dialog)
     public:
         struct no_response : std::logic_error { no_response() : std::logic_error("neogfx::message_box::no_response") {} };
     public:

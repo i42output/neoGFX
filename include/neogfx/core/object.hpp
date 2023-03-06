@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include <boost/type_index.hpp>
 #include <neolib/neolib.hpp>
 #include <neolib/core/lifetime.hpp>
 #include <neolib/core/map.hpp>
@@ -43,6 +44,10 @@ namespace neogfx
         }
         // type
     public:
+        void class_name(neolib::i_string& aClassName) const override
+        {
+            aClassName += neolib::string{ "object" };
+        }
         neogfx::object_type object_type() const override
         {
             return neogfx::object_type{};
