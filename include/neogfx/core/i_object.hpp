@@ -30,7 +30,9 @@
     public: \
         void class_name(neolib::i_string& aClassName) const override \
         { \
-            aClassName.append(boost::typeindex::type_id<decltype(*this)>().pretty_name()); \
+            auto temp = boost::typeindex::type_id<decltype(*this)>().pretty_name(); \
+            boost::replace_all(temp, "::", "--"); \
+            aClassName.append(temp); \
             aClassName.append(":"sv); \
             base_type::class_name(aClassName); \
         }
@@ -53,7 +55,7 @@ namespace neogfx
         neolib::string temp;
         aObject.class_name(temp);
         auto result = temp.to_std_string();
-        boost::replace_all(result, "neogfx::", "");
+        boost::replace_all(result, "neogfx--", "");
         boost::replace_all(result, "class ", "");
         boost::replace_all(result, " ", "");
         std::size_t templateCounter = 0;
