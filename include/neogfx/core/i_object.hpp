@@ -31,7 +31,7 @@
         void class_name(neolib::i_string& aClassName) const override \
         { \
             aClassName.append(boost::typeindex::type_id<decltype(*this)>().pretty_name()); \
-            aClassName.append("::"sv); \
+            aClassName.append(":"sv); \
             base_type::class_name(aClassName); \
         }
 

@@ -30,6 +30,7 @@ namespace neogfx::DesignStudio
 {
     class app : public main_app, public reference_counted<i_console_client_manager>
     {
+        meta_object(main_app)
     public:
         define_declared_event(StartConsoleClientSession, start_console_client_session, i_terminal&, i_string const&, i_ref_ptr<i_console_client>&)
     public:

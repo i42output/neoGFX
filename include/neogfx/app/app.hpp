@@ -42,6 +42,15 @@
 
 namespace neogfx
 {
+    class app_thread : public async_thread
+    {
+        friend class app;
+    public:
+        using async_thread::async_thread;
+    private:
+        using async_task::do_work;
+    };
+
     class program_options : public i_program_options
     {
         struct invalid_options : std::runtime_error { invalid_options(std::string const& aReason) : std::runtime_error("Invalid program options: " + aReason) {} };
@@ -60,9 +69,9 @@ namespace neogfx
         boost::program_options::variables_map iOptions;
     };
 
-    class app : public neolib::application<i_app>, public async_thread, private i_keyboard_handler
+    class app : public neolib::application<object<i_app>>, private i_keyboard_handler
     {
-        typedef neolib::application<i_app> base_type;
+        meta_object(neolib::application<object<i_app>>)
     public:
         define_declared_event(ExecutionStarted, execution_started)
         define_declared_event(NameChanged, name_changed)
@@ -93,6 +102,8 @@ namespace neogfx
         ~app();
     public:
         static app& instance();
+    public:
+        app_thread& thread() const noexcept;;
     public:
         const i_program_options& program_options() const noexcept override;
         std::string const& name() const noexcept override;
@@ -149,8 +160,6 @@ namespace neogfx
         bool process_events() override;
         bool process_events(i_event_processing_context& aContext) override;
         i_event_processing_context& event_processing_context() override;
-    protected:
-        void idle() override;
     public:
         bool discover(const uuid& aId, void*& aObject) override;
     private:
@@ -161,6 +170,7 @@ namespace neogfx
         bool text_input(i_string const& aText) override;
         bool sys_text_input(i_string const& aText) override;
     private:
+        std::unique_ptr<app_thread> iThread;
         neogfx::program_options iProgramOptions;
         std::unique_ptr<loader> iLoader;
         std::string iName;

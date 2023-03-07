@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
             ng::service<ng::i_app>().change_style("Keypad").palette().set_color(ng::color_role::Theme, ng::color::White);
         });
         
-        neolib::callback_timer ct{ app, [&app](neolib::callback_timer& aTimer)
+        neolib::callback_timer ct{ app.thread(), [&app](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             if (ng::service<ng::i_clipboard>().sink_active())
@@ -531,7 +531,7 @@ int main(int argc, char* argv[])
         window.keypad.add_item_at_position(3u, 1u, ng::make_ref<keypad_button>(window.textEdit, 0u));
         window.keypad.add_span(3u, 1u, 1u, 2u);
 
-        neolib::callback_timer animation(app, [&](neolib::callback_timer& aTimer)
+        neolib::callback_timer animation(app.thread(), [&](neolib::callback_timer& aTimer)
         {
             if (!window.has_native_surface()) // todo: shouldn't need this check
                 return;
@@ -545,8 +545,8 @@ int main(int argc, char* argv[])
             if (colorCycle)
             {
                 const double PI = 2.0 * std::acos(0.0);
-                double brightness = ::sin((app.program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
-                neolib::random prng{ app.program_elapsed_ms() / 5000 };
+                double brightness = ::sin((app.thread().program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
+                neolib::random prng{ app.thread().program_elapsed_ms() / 5000 };
                 ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
                 randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb<ng::color>();
                 window.button6.set_base_color(randomColor);
@@ -614,7 +614,7 @@ int main(int argc, char* argv[])
         #else
         itemModel.reserve(100);
         #endif
-        ng::event_processing_context epc{ app };
+        ng::event_processing_context epc{ app.thread() };
         for (uint32_t row = 0; row < itemModel.capacity(); ++row)
         {
             #ifdef NDEBUG
@@ -951,7 +951,7 @@ int main(int argc, char* argv[])
                         aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::color::Goldenrod);
 
             // easing function demo
-            ng::scalar t = static_cast<ng::scalar>(app.program_elapsed_us());
+            ng::scalar t = static_cast<ng::scalar>(app.thread().program_elapsed_us());
             auto const d = 1000000.0;
             auto const x = ng::ease(easingItemModel.item(window.dropListEasing.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
             aGc.draw_texture(ng::point{ x, (window.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
@@ -1162,7 +1162,7 @@ int main(int argc, char* argv[])
             }
         });
 
-        neolib::callback_timer animator{ app, [&](neolib::callback_timer& aTimer)
+        neolib::callback_timer animator{ app.thread(), [&](neolib::callback_timer& aTimer)
         {
             if (!window.has_native_window())
                 return;
@@ -1190,14 +1190,14 @@ int main(int argc, char* argv[])
     }
     catch (std::exception& e)
     {
-        app.halt();
+        app.thread().halt();
         ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with exception: " << e.what() << ng::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
         std::exit(EXIT_FAILURE);
     }
     catch (...)
     {
-        app.halt();
+        app.thread().halt();
         ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with unknown exception" << ng::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
         std::exit(EXIT_FAILURE);

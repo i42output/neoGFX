@@ -65,7 +65,7 @@ namespace neogfx
         virtual bool nest() const = 0;
     };
 
-    class i_app : public neolib::i_application, public i_action_container, public i_service
+    class i_app : public i_property_owner, public neolib::i_application, public i_action_container, public i_service
     {
     public:
         declare_event(execution_started)

@@ -65,6 +65,7 @@ namespace neogfx::nrc
                 "\n"
                 " class %1% : public %2%\n"
                 " {\n"
+                "  meta_object(%2%)\n"
                 " public:\n",
                 element.first, element.second->type_name());
             element.second->emit();

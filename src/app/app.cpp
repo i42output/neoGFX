@@ -42,7 +42,7 @@
 
 template<> neolib::i_async_task& services::start_service<neolib::i_async_task>()
 {
-    return neogfx::app::instance();
+    return neogfx::app::instance().thread();
 }
 
 template<> neogfx::i_app& services::start_service<neogfx::i_app>()
@@ -183,7 +183,7 @@ namespace neogfx
     app::loader::~loader()
     {
         iApp.plugin_manager().unload_plugins();
-        iApp.async_task::cancel();
+        iApp.iThread.reset();
         teardown_service<i_animator>();
         teardown_service<i_gradient_manager>();
         teardown_service<i_rendering_engine>();
@@ -194,8 +194,8 @@ namespace neogfx
 
     app::app(const neolib::i_application_info& aAppInfo)
         try :
-        neolib::application<i_app>{ aAppInfo },
-        async_thread{ "neogfx::app", true },
+        neolib::application<object<i_app>>{ aAppInfo },
+        iThread{ std::make_unique<app_thread>("neogfx::app", true) },
         iProgramOptions{ aAppInfo.arguments().argc(), aAppInfo.arguments().argv() },
         iLoader{ std::make_unique<loader>(iProgramOptions, *this) },
         iName{ aAppInfo.name() },
@@ -203,7 +203,7 @@ namespace neogfx
         iInExec{ false },
         iDefaultWindowIcon{ image{ ":/neogfx/resources/icons/neoGFX.png" } },
         iCurrentStyle{ iStyles.begin() },
-        iStandardActionManager{ *this, [this](neolib::callback_timer& aTimer)
+        iStandardActionManager{ thread(), *this, [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             if (service<i_clipboard>().sink_active())
@@ -249,7 +249,7 @@ namespace neogfx
                 actionSelectAll.disable();
             }
         }, std::chrono::milliseconds{ 100 } },
-        iAppContext{ *this, "neogfx::app::iAppContext" },
+        iAppContext{ thread(), "neogfx::app::iAppContext" },
         actionFileNew{ "&New..."_t, ":/neogfx/resources/icons/new.png" },
         actionFileOpen{ "&Open..."_t, ":/neogfx/resources/icons/open.png" },
         actionFileClose{ "&Close"_t },
@@ -266,7 +266,7 @@ namespace neogfx
         actionSelectAll{ "Select All"_t }
     {
         base_type::add_ref();
-        async_thread::add_ref();
+        thread().add_ref();
             
         neolib::event_mutex().set_multi_threaded_spinlock();
 
@@ -353,6 +353,11 @@ namespace neogfx
         return *instance;
     }
 
+    app_thread& app::thread() const noexcept
+    {
+        return *iThread;
+    }
+
     const i_program_options& app::program_options() const noexcept
     {
         return iProgramOptions;
@@ -383,23 +388,23 @@ namespace neogfx
                 if (!process_events(iAppContext))
                 {
                     if (neolib::service<neolib::i_power>().turbo_mode_active())
-                        thread::yield();
+                        thread().yield();
                     else
-                        thread::sleep(std::chrono::milliseconds{ 1 });
+                        thread().sleep(std::chrono::milliseconds{ 1 });
                 }
             }
             return *iQuitResultCode;
         }
         catch (std::exception& e)
         {
-            halt();
+            thread().halt();
             service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with exception: " << e.what() << endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
             std::exit(EXIT_FAILURE);
         }
         catch (...)
         {
-            halt();
+            thread().halt();
             service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with unknown exception" << endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
             std::exit(EXIT_FAILURE);
@@ -770,7 +775,7 @@ namespace neogfx
 
     bool app::process_events()
     {
-        neogfx::event_processing_context epc{ *this };
+        neogfx::event_processing_context epc{ thread() };
         return process_events(epc);
     }
 
@@ -779,14 +784,14 @@ namespace neogfx
         bool didSome = false;
         try
         {
-            if (!in()) // not app thread
+            if (!thread().in()) // not app thread
                 return didSome;
             
             if (service<i_rendering_engine>().creating_window() || service<i_surface_manager>().initialising_surface())
                 return didSome;
 
             bool hadStrongSurfaces = service<i_surface_manager>().any_strong_surfaces();
-            didSome = (do_work(neolib::yield_type::NoYield) || didSome);
+            didSome = (thread().do_work(neolib::yield_type::NoYield) || didSome);
             didSome = (do_process_events() || didSome);
             bool lastWindowClosed = hadStrongSurfaces && !service<i_surface_manager>().any_strong_surfaces();
             if (!in_exec() && lastWindowClosed)
@@ -801,9 +806,9 @@ namespace neogfx
         }
         catch (std::exception& e)
         {
-            if (!halted())
+            if (!thread().halted())
             {
-                halt();
+                thread().halt();
                 service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with exception: " << e.what() << endl;
                 service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
                 std::exit(EXIT_FAILURE);
@@ -811,9 +816,9 @@ namespace neogfx
         }
         catch (...)
         {
-            if (!halted())
+            if (!thread().halted())
             {
-                halt();
+                thread().halt();
                 service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with unknown exception" << endl;
                 service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
                 std::exit(EXIT_FAILURE);
@@ -827,16 +832,11 @@ namespace neogfx
         return iAppContext;
     }
 
-    void app::idle()
-    {
-        async_thread::idle();
-    }
-
     bool app::discover(const uuid& aId, void*& aObject)
     {
         aObject = nullptr;
         if (aId == i_async_task::iid())
-            aObject = static_cast<i_async_task*>(this);
+            aObject = &static_cast<i_async_task&>(thread());
         if (aObject)
             return true;
         return base_type::discover(aId, aObject);
