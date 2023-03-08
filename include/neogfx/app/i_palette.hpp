@@ -38,6 +38,7 @@ namespace neogfx
         Selection,
         AlternateSelection,
         SelectedText,
+        Focus,
         Hover,
         PrimaryAccent,
         SecondaryAccent,

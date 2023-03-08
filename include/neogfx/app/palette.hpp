@@ -73,6 +73,7 @@ namespace neogfx
         optional_color iSelectionColor;
         optional_color iAlternateSelectionColor;
         optional_color iSelectedTextColor;
+        optional_color iFocusColor;
         optional_color iHoverColor;
         optional_color iPrimaryAccentColor;
         optional_color iSecondaryAccentColor;

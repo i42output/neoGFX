@@ -652,7 +652,7 @@ namespace neogfx
     };
 
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle },
+        framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
@@ -673,7 +673,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle },
+        framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
@@ -694,7 +694,7 @@ namespace neogfx
     }
 
     text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
-        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle },
+        framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
         iCaps{ aCaps },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
@@ -865,7 +865,7 @@ namespace neogfx
             cursor().set_anchor(0);
             cursor().set_position(iText.size(), false);
         }
-        update();
+        update(true);
     }
 
     void text_edit::focus_lost(focus_reason aFocusReason)
@@ -878,7 +878,7 @@ namespace neogfx
             service<i_clipboard>().deactivate(*this);
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
             cursor().set_position(iText.size());
-        update();
+        update(true);
     }
 
     void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
@@ -1279,6 +1279,8 @@ namespace neogfx
     {
         if (has_frame_color())
             return framed_scrollable_widget::frame_color();
+        else if (has_focus())
+            return service<i_app>().current_style().palette().color(color_role::Focus);
         else if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
             return framed_scrollable_widget::frame_color();
         else

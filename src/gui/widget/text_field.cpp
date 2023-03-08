@@ -23,19 +23,14 @@
 
 namespace neogfx
 {
-    text_field::input_box_container::input_box_container(i_layout& aParentLayout, frame_style aFrameStyle) :
-        base_type{ aParentLayout, aFrameStyle }
+    text_field::input_box_container::input_box_container(text_field& aParent, i_layout& aParentLayout, frame_style aFrameStyle) :
+        base_type{ aParentLayout, aFrameStyle, 2.0 }, iParent{ aParent }
     {
     }
 
     color text_field::input_box_container::frame_color() const
     {
-        if (has_frame_color())
-            return base_type::frame_color();
-        else if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
-            return base_type::frame_color();
-        else
-            return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
+        return iParent.iInputBox.frame_color();
     }
 
     color text_field::input_box_container::palette_color(color_role aColorRole) const
@@ -53,7 +48,7 @@ namespace neogfx
         iPlacement{ aPlacement },
         iLayout{ *this },
         iInputLayout{ iLayout },
-        iInputBoxContainer{ iInputLayout, aFrameStyle },
+        iInputBoxContainer{ *this, iInputLayout, aFrameStyle },
         iInputBoxContainerLayout{ iInputBoxContainer },
         iInputBox{ iInputBoxContainerLayout, frame_style::NoFrame },
         iInputBoxLayout{ iInputBox },
@@ -68,7 +63,7 @@ namespace neogfx
         iPlacement{ aPlacement },
         iLayout{ *this },
         iInputLayout{ iLayout },
-        iInputBoxContainer{ iInputLayout, aFrameStyle },
+        iInputBoxContainer{ *this, iInputLayout, aFrameStyle },
         iInputBoxContainerLayout{ iInputBoxContainer },
         iInputBox{ iInputBoxContainerLayout, frame_style::NoFrame },
         iInputBoxLayout{ iInputBox },
@@ -83,7 +78,7 @@ namespace neogfx
         iPlacement{ aPlacement },
         iLayout{ *this },
         iInputLayout{ iLayout },
-        iInputBoxContainer{ iInputLayout, aFrameStyle },
+        iInputBoxContainer{ *this, iInputLayout, aFrameStyle },
         iInputBoxContainerLayout{ iInputBoxContainer },
         iInputBox{ iInputBoxContainerLayout, frame_style::NoFrame },
         iInputBoxLayout{ iInputBox },
@@ -259,5 +254,7 @@ namespace neogfx
         input_box().DefaultStyleChanged(hint_updater);
         input_box().TextChanged(hint_updater);
         hint_updater();
+
+        input_box().focus_event([&](neogfx::focus_event, focus_reason) { iInputBoxContainer.update(true); });
     }
 }

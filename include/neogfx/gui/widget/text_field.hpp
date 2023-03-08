@@ -49,11 +49,13 @@ namespace neogfx
         {
             typedef framed_widget<> base_type;
         public:
-            input_box_container(i_layout& aParentLayout, frame_style aFrameStyle);
+            input_box_container(text_field& aParent, i_layout& aParentLayout, frame_style aFrameStyle);
         public:
             color frame_color() const override;
         public:
             color palette_color(color_role aColorRole) const override;
+        private:
+            text_field& iParent;
         };
     public:
         struct no_label : std::logic_error { no_label() : std::logic_error{ "neogfx::text_field::no_label" } {} };

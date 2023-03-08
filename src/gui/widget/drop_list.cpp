@@ -505,7 +505,7 @@ namespace neogfx
             define_declared_event(TextChanged, text_changed)
         public:
             editable_input_widget(i_layout& aLayout) :
-                base_type{ aLayout, frame_style::SolidFrame },
+                base_type{ aLayout, frame_style::SolidFrame, 2.0 },
                 iLayout{ *this },
                 iImage{ iLayout },
                 iEditor{ iLayout, frame_style::NoFrame }
@@ -515,6 +515,7 @@ namespace neogfx
                 text_widget().set_padding(neogfx::padding{});
                 iImage.hide();
                 set_background_opacity(1.0);
+                iEditor.focus_event([&](neogfx::focus_event, focus_reason) { update(true); });
             }
         public:
             void accept(i_drop_list_input_widget::i_visitor& aVisitor) override

@@ -146,7 +146,7 @@ namespace neogfx
                 break;
             case frame_style::SolidFrame:
             case frame_style::WindowFrame:
-                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, as_widget().non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
+                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, as_widget().non_client_rect().extents() }.deflate(std::floor(effective_frame_width() / 2.0)), pen{ frame_color(), effective_frame_width() });
                 break;
             case frame_style::ContainerFrame:
             {
