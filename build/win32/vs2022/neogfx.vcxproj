@@ -427,6 +427,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dockable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\font_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.ipp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp" />
@@ -680,6 +681,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\dockable.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\font_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\group_box.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\header_view.cpp" />

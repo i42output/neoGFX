@@ -26,6 +26,7 @@ namespace neogfx
     text_field::input_box_container::input_box_container(text_field& aParent, i_layout& aParentLayout, frame_style aFrameStyle) :
         base_type{ aParentLayout, aFrameStyle, 2.0 }, iParent{ aParent }
     {
+        set_frame_radius(vec4{ 4.0, 4.0, 4.0, 4.0 });
     }
 
     color text_field::input_box_container::frame_color() const

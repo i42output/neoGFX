@@ -31,15 +31,16 @@ namespace neogfx
 {
     template <typename T>
     basic_spin_box<T>::basic_spin_box() :
+        base_type{ 2.0 },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
         iSecondaryLayout{ iPrimaryLayout },
         iStepUpButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox },
         iStepDownButton{ iSecondaryLayout, std::string{}, push_button_style::SpinBox },
-        iMinimum{}, 
-        iMaximum{}, 
-        iStep{}, 
-        iValue{}, 
+        iMinimum{},
+        iMaximum{},
+        iStep{},
+        iValue{},
         iFormat{ "%1%" }
     {
         init();
@@ -47,7 +48,7 @@ namespace neogfx
 
     template <typename T>
     basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
-        base_type{ aParent },
+        base_type{ aParent, 2.0 },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
         iSecondaryLayout{ iPrimaryLayout },
@@ -64,7 +65,7 @@ namespace neogfx
 
     template <typename T>
     basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
-        base_type{ aLayout },
+        base_type{ aLayout, 2.0 },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
         iSecondaryLayout{ iPrimaryLayout },
@@ -102,12 +103,7 @@ namespace neogfx
     template <typename T>
     color basic_spin_box<T>::frame_color() const
     {
-        if (has_frame_color())
-            return base_type::frame_color();
-        else if (service<i_app>().current_style().palette().color(color_role::Theme).similar_intensity(background_color(), 0.03125))
-            return base_type::frame_color();
-        else
-            return service<i_app>().current_style().palette().color(color_role::Theme).mid(background_color());
+        return iTextBox.frame_color();
     }
 
     template <typename T>
@@ -172,8 +168,8 @@ namespace neogfx
     template <typename T>
     void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
     {
-        auto result = std::max(minimum(), 
-            std::min(maximum(), 
+        auto result = std::max(minimum(),
+            std::min(maximum(),
                 static_cast<value_type>(aDirection == step_direction::Up ? value() + static_cast<value_type>(aAmount * step()) : value() - static_cast<value_type>(aAmount * step()))));
         if ((aDirection == step_direction::Up && result > value()) || (aDirection == step_direction::Down && result < value()))
             set_value(result, true);
@@ -220,90 +216,92 @@ namespace neogfx
         iTextBox.set_frame_style(frame_style::NoFrame);
 
         iSink += iTextBox.TextFilter([this](std::string const& aText, bool& aAccept)
-        {
-            aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
-            if (!aAccept)
-                service<i_basic_services>().system_beep();
-        });
+            {
+                aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
+                if (!aAccept)
+                    service<i_basic_services>().system_beep();
+            });
 
         iSink += iTextBox.TextChanged([this]()
-        {
-            auto const& text = iTextBox.text();
-            auto result = string_to_value(text);
-            if (result != std::nullopt)
             {
-                neolib::scoped_flag sf{ iDontSetText };
-                iText = text;
-                iTextCursorPos = iTextBox.cursor().position();
-                set_value(std::min(maximum(), std::max(minimum(), *result)));
-            }
-            else if (!text.empty())
-            {
-                iTextBox.set_text(iText);
-                iTextBox.cursor().set_position(iTextCursorPos);
-                service<i_basic_services>().system_beep();
-            }
-            else
-            {
-                neolib::scoped_flag sf{ iDontSetText };
-                iText = text;
-                iTextCursorPos = iTextBox.cursor().position();
-                set_value(minimum());
-            }
-        });
+                auto const& text = iTextBox.text();
+                auto result = string_to_value(text);
+                if (result != std::nullopt)
+                {
+                    neolib::scoped_flag sf{ iDontSetText };
+                    iText = text;
+                    iTextCursorPos = iTextBox.cursor().position();
+                    set_value(std::min(maximum(), std::max(minimum(), *result)));
+                }
+                else if (!text.empty())
+                {
+                    iTextBox.set_text(iText);
+                    iTextBox.cursor().set_position(iTextCursorPos);
+                    service<i_basic_services>().system_beep();
+                }
+                else
+                {
+                    neolib::scoped_flag sf{ iDontSetText };
+                    iText = text;
+                    iTextCursorPos = iTextBox.cursor().position();
+                    set_value(minimum());
+                }
+            });
 
         auto step_up = [this]()
         {
             do_step(step_direction::Up);
             iStepper.emplace(*this, [this](widget_timer& aTimer)
-            {
-                aTimer.set_duration(std::chrono::milliseconds{ 125 }, true);
-                aTimer.again();
-                do_step(step_direction::Up);
-            }, std::chrono::milliseconds{ 500 });
+                {
+                    aTimer.set_duration(std::chrono::milliseconds{ 125 }, true);
+                    aTimer.again();
+                    do_step(step_direction::Up);
+                }, std::chrono::milliseconds{ 500 });
         };
         iSink += iStepUpButton.Pressed(step_up);
         iSink += iStepUpButton.clicked([this]()
-        {
-            if (iStepper == std::nullopt) // key press?
-                do_step(step_direction::Up);
-        });
+            {
+                if (iStepper == std::nullopt) // key press?
+                    do_step(step_direction::Up);
+            });
         iSink += iStepUpButton.DoubleClicked(step_up);
         iSink += iStepUpButton.Released([this]()
-        {
-            iStepper = std::nullopt;
-        });
+            {
+                iStepper = std::nullopt;
+            });
 
         auto step_down = [this]()
         {
             do_step(step_direction::Down);
             iStepper.emplace(*this, [this](widget_timer& aTimer)
-            {
-                aTimer.set_duration(std::chrono::milliseconds{ 125 }, true);
-                aTimer.again();
-                do_step(step_direction::Down);
-            }, std::chrono::milliseconds{ 500 });
+                {
+                    aTimer.set_duration(std::chrono::milliseconds{ 125 }, true);
+                    aTimer.again();
+                    do_step(step_direction::Down);
+                }, std::chrono::milliseconds{ 500 });
         };
         iSink += iStepDownButton.Pressed(step_down);
         iSink += iStepDownButton.clicked([this]()
-        {
-            if (iStepper == std::nullopt) // key press?
-                do_step(step_direction::Down);
-        });
+            {
+                if (iStepper == std::nullopt) // key press?
+                    do_step(step_direction::Down);
+            });
         iSink += iStepDownButton.DoubleClicked(step_down);
         iSink += iStepDownButton.Released([this]()
-        {
-            iStepper = std::nullopt;
-        });
+            {
+                iStepper = std::nullopt;
+            });
 
         update_arrows();
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
-        {
-            if ((aAspect & style_aspect::Color) == style_aspect::Color)
-                update_arrows();
-        });
+            {
+                if ((aAspect & style_aspect::Color) == style_aspect::Color)
+                    update_arrows();
+            });
 
         iSink += service<i_surface_manager>().dpi_changed([this](i_surface&) { update_arrows(); });
+
+        iSink += iTextBox.focus_event([&](neogfx::focus_event, focus_reason) { update(true); });
     }
 
     template <typename T>

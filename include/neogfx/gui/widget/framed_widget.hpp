@@ -121,119 +121,26 @@ namespace neogfx
     public:
         using base_type::as_widget;
     public:
-        neogfx::border border() const override
-        {
-            return neogfx::border{ effective_frame_width(), effective_frame_width(), effective_frame_width(), effective_frame_width() };
-        }
+        neogfx::border border() const override;
     public:
-        void paint_non_client(i_graphics_context& aGc) const override
-        {
-#ifdef NEOGFX_DEBUG
-            if (debug::renderItem == this)
-                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << endl;
-#endif // NEOGFX_DEBUG
-
-            base_type::paint_non_client(aGc);
-            switch (iStyle)
-            {
-            case frame_style::NoFrame:
-            case frame_style::HiddenFrame:
-            default:
-                break;
-            case frame_style::DottedFrame:
-                break;
-            case frame_style::DashedFrame:
-                break;
-            case frame_style::SolidFrame:
-            case frame_style::WindowFrame:
-                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, as_widget().non_client_rect().extents() }.deflate(std::floor(effective_frame_width() / 2.0)), pen{ frame_color(), effective_frame_width() });
-                break;
-            case frame_style::ContainerFrame:
-            {
-                rect rectBorder{ point{ 0.0, 0.0 }, as_widget().non_client_rect().extents() };
-                rectBorder.deflate(line_width(), line_width());
-                aGc.draw_rect(rectBorder, pen(inner_frame_color(), line_width()));
-                rectBorder.inflate(line_width(), line_width());
-                aGc.draw_rect(rectBorder, pen(frame_color(), line_width()));
-            }
-            break;
-            case frame_style::DoubleFrame:
-                break;
-            case frame_style::GrooveFrame:
-                break;
-            case frame_style::RidgeFrame:
-                break;
-            case frame_style::InsetFrame:
-                break;
-            case frame_style::OutsetFrame:
-                break;
-            }
-        }
+        void paint_non_client(i_graphics_context& aGc) const override;
     public:
-        void set_frame_style(frame_style aStyle)
-        {
-            if (iStyle != aStyle)
-            {
-                iStyle = aStyle;
-                as_widget().update_layout();
-            }
-        }
+        void set_frame_style(frame_style aStyle);
     public:
-        virtual bool has_frame_color() const
-        {
-            return iFrameColor != std::nullopt;
-        }
-        virtual color frame_color() const
-        {
-            if (has_frame_color())
-                return *iFrameColor;
-            else
-                return as_widget().background_color().shaded(0x20);
-        }
-        virtual void set_frame_color(const optional_color& aFrameColor = optional_color{})
-        {
-            iFrameColor = aFrameColor;
-            as_widget().update();
-        }
-        virtual color inner_frame_color() const
-        {
-            if (iStyle != frame_style::ContainerFrame)
-                return frame_color();
-            else
-                return (as_widget().has_base_color() ? as_widget().base_color() : as_widget().container_background_color()).lighter(0x40);
-        }
+        virtual bool has_frame_color() const;
+        virtual color frame_color() const;
+        virtual void set_frame_color(const optional_color& aFrameColor = optional_color{});
+        virtual color inner_frame_color() const;
+        virtual bool has_frame_radius() const;
+        virtual vec4 frame_radius() const;
+        virtual void set_frame_radius(const optional_vec4& aFrameRadius = optional_vec4{});
     public:
-        dimension line_width() const
-        {
-            return units_converter{ *this }.from_device_units(iLineWidth);
-        }
-        dimension effective_frame_width() const
-        {
-            switch (iStyle)
-            {
-            case frame_style::NoFrame:
-            default:
-                return 0.0;
-            case frame_style::DottedFrame:
-            case frame_style::DashedFrame:
-            case frame_style::SolidFrame:
-            case frame_style::WindowFrame:
-                return line_width();
-            case frame_style::ContainerFrame:
-                return line_width() * 2.0;
-            case frame_style::DoubleFrame:
-            case frame_style::GrooveFrame:
-            case frame_style::RidgeFrame:
-                return line_width() * 3.0;
-            case frame_style::InsetFrame:
-            case frame_style::OutsetFrame:
-            case frame_style::HiddenFrame:
-                return line_width();
-            }
-        }
+        dimension line_width() const;
+        dimension effective_frame_width() const;
     private:
         frame_style iStyle;
         dimension iLineWidth;
         optional_color iFrameColor;
+        optional_vec4 iFrameRadius;
     };
 }

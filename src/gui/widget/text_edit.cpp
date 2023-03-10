@@ -2227,6 +2227,8 @@ namespace neogfx
 
     void text_edit::init()
     {
+        set_frame_radius(vec4{ 4.0, 4.0, 4.0, 4.0 });
+
         iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
         {
             if (has_focus())
