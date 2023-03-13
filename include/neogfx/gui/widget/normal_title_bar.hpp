@@ -82,6 +82,8 @@ namespace neogfx
     public:
         neogfx::widget_type widget_type() const override;
         widget_part part(const point&) const override;
+    public:
+        color palette_color(color_role aColorRole) const override;
     private:
         void init();
         void update_textures();

@@ -175,7 +175,7 @@ namespace neogfx
     }
 
     css::css(std::string const& aStyle) : 
-        iStyleSheet{std::make_shared<std::istringstream>(aStyle)}
+        iStyleSheet{ std::make_shared<std::istringstream>(aStyle) }
     {
         parse();
     }

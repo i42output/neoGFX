@@ -66,7 +66,7 @@ namespace neogfx
         {
             UINT dpiX = 0;
             UINT dpiY = 0;
-            auto ret = GetDpiForMonitor(reinterpret_cast<HMONITOR>(iNativeDisplayHandle), MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+            auto ret = ::GetDpiForMonitor(reinterpret_cast<HMONITOR>(iNativeDisplayHandle), MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
             if (ret != S_OK)
                 throw failed_to_get_monitor_dpi();
             iPixelDensityDpi = basic_size<UINT>(dpiX, dpiY);

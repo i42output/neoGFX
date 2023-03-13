@@ -61,6 +61,8 @@ namespace neogfx
             iAppTask{ aAppTask }
         {
             ::OleInitialize(NULL);
+
+            ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
         }
 
         basic_services::~basic_services()

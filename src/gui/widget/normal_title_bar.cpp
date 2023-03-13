@@ -128,12 +128,25 @@ namespace neogfx
         return widget_part{ root().as_widget(), widget_part::TitleBar };
     }
 
+    color normal_title_bar::palette_color(color_role aColorRole) const
+    {
+        if (has_palette_color(aColorRole) || !root().is_active())
+            return base_type::palette_color(aColorRole);
+        if (aColorRole == color_role::Background)
+            return palette_color(color_role::Base);
+        return base_type::palette_color(aColorRole);
+    }
+
     void normal_title_bar::init()
     {
+        set_background_opacity(1.0);
+
+        icon_widget().hide();
+
         set_padding(neogfx::padding{});
         iOuterLayout.set_padding(neogfx::padding{});
         iOuterLayout.set_spacing(size{});
-        iInnerLayout.set_padding(neogfx::padding{ 4.0_dip, 4.0_dip, 4.0_dip, 4.0_dip });
+        iInnerLayout.set_padding(neogfx::padding{ 8.0_dip, 4.0_dip, 8.0_dip, 4.0_dip });
         iInnerLayout.set_spacing(size{ 8.0_dip });
         iButtonLayout.set_padding(neogfx::padding{});
         iButtonLayout.set_spacing(size{});
@@ -143,11 +156,13 @@ namespace neogfx
         title_widget().set_size_policy(size_constraint::Expanding, size_constraint::Minimum);
         title_widget().set_alignment(alignment::Left | alignment::VCenter);
         title_widget().set_font_role(neogfx::font_role::Caption);
+
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect) 
         { 
             if ((aAspect & style_aspect::Color) == style_aspect::Color) 
                 update_textures(); 
         });
+        
         auto update_widgets = [this]()
         {
             scoped_units su{ *this, units::Pixels };
@@ -190,6 +205,7 @@ namespace neogfx
         {
             update_widgets();
         });
+
         iSink += root().window_event([this, update_widgets](neogfx::window_event& e)
         {
             switch (e.type())
@@ -207,9 +223,11 @@ namespace neogfx
                 break;
             }
         });
+
         iSink += root().activated([this, update_widgets]() { update_widgets(); });
         iSink += root().deactivated([this, update_widgets]() { update_widgets(); });
         iSink += service<i_surface_manager>().dpi_changed([this, update_widgets](i_surface&) { update_widgets(); });
+        
         update_textures();
         update_widgets();
     }
