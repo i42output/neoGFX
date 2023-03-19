@@ -1899,7 +1899,7 @@ namespace neogfx
 
     text_edit::position_type text_edit::document_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
-        auto columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
+        auto const columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
         auto const& column = static_cast<const glyph_column&>(text_edit::column(columnIndex));
         auto const& columnRectSansPadding = column_rect(columnIndex);
         point adjustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansPadding.top_left();
@@ -1914,7 +1914,7 @@ namespace neogfx
             if (line != lines.begin() && adjustedPosition.y < line->ypos)
                 --line;
             delta alignmentAdjust;
-            auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
+            auto const textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
             if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                 ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
                 alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
@@ -1922,12 +1922,15 @@ namespace neogfx
                 alignmentAdjust.dx = (columnRectSansPadding.cx - line->extents.cx) / 2.0;
             adjustedPosition.x -= alignmentAdjust.dx;
             adjustedPosition = adjustedPosition.max(point{});
-            auto lineStart = (line != lines.end() ? line->lineStart.first : glyphs().size());
-            auto lineEnd = (line != lines.end() ? line->lineEnd.first : glyphs().size());
-            auto lineStartX = line->lineStart.second->cell[0].x;
+            auto const lineStart = (line != lines.end() ? line->lineStart.first : glyphs().size());
+            auto const lineEnd = (line != lines.end() ? line->lineEnd.first : glyphs().size());
+            auto const lineStartX = line->lineStart.second->cell[0].x;
+            auto const lineEndX = std::prev(line->lineEnd.second)->cell[1].x;
+            if (adjustedPosition.x >= lineEndX - lineStartX)
+                return lineEnd;
             for (auto gi = line->lineStart.first; gi != lineEnd; ++gi)
             {
-                auto& glyph = glyphs()[gi];
+                auto const& glyph = glyphs()[gi];
                 auto const glyphAdvance = quad_extents(glyph.cell).x;
                 if (adjustedPosition.x >= glyph.cell[0].x - lineStartX && adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance)
                 {
