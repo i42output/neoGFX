@@ -1929,7 +1929,7 @@ namespace neogfx
             {
                 auto& glyph = glyphs()[gi];
                 auto const glyphAdvance = quad_extents(glyph.cell).x;
-                if (adjustedPosition.x >= glyph.cell[0].x - lineStartX && (adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance || glyphAdvance == 0.0))
+                if (adjustedPosition.x >= glyph.cell[0].x - lineStartX && adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance)
                 {
                     if (direction(glyph) != text_direction::RTL)
                         return adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0 ? gi : gi + 1;

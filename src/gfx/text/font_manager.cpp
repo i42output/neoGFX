@@ -807,26 +807,19 @@ namespace neogfx
                             i->cell = {};
                         }
                     }
-                    std::u32string sequence;
+                    thread_local std::u32string sequence;
+                    sequence.clear();
                     sequence += chStart;
                     auto j = i + 1;
-                    bool absorbNext = false;
                     for (; j != result.end(); ++j)
                     {
                         auto ch = aUtf32Begin[cluster + (j - i)];
-                        if (ch == 0x200D)
-                            continue;
-                        else if (ch >= 0xFE00 && ch <= 0xFE0F)
-                        {
-                            absorbNext = true;
-                            break;
-                        }
-                        else if (service<i_font_manager>().emoji_atlas().is_emoji(sequence + ch))
+                        if (service<i_font_manager>().emoji_atlas().is_emoji(sequence + ch))
                             sequence += ch;
                         else
                             break;
                     }
-                    if (sequence.size() > 1 && service<i_font_manager>().emoji_atlas().is_emoji(sequence))
+                    if (sequence.size() > 1)
                     {
                         auto g = *i;
                         g.value = service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height());
@@ -845,12 +838,6 @@ namespace neogfx
                         auto g = *i;
                         g.cell += advanceAdjust;
                         emojiResult.push_back(g);
-                    }
-                    if (absorbNext)
-                    {
-                        emojiResult.back().clusters = glyph_char::cluster_range{ emojiResult.back().clusters.first, emojiResult.back().clusters.first + static_cast<std::uint32_t>(sequence.size()) + 1u };
-                        advanceAdjust -= vec2f{ i->cell[1].x - i->cell[0].x, 0.0f };
-                        ++i;
                     }
                 }
                 else
