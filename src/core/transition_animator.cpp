@@ -31,7 +31,8 @@ template<> neogfx::i_animator& services::start_service<neogfx::i_animator>()
 
 template<> void services::teardown_service<neogfx::i_animator>()
 {
-    services::service<neogfx::i_animator>().stop();
+    if (services::service_registered<neogfx::i_animator>())
+        services::service<neogfx::i_animator>().stop();
 }
 
 namespace neogfx

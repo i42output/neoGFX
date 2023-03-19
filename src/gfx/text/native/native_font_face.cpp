@@ -367,8 +367,6 @@ namespace neogfx
             useSubpixelFiltering = false;
 
         auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
-        if (subTextureWidth == 0)
-            return invalid_glyph();
 
         auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
             neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
@@ -391,50 +389,52 @@ namespace neogfx
 
         const GLubyte* textureData = 0;
         
-        if (useSubpixelFiltering)
+        if (subTextureWidth != 0)
         {
-            subpixelGlyphData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
-            // sub-pixel FIR filter.
-            static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
-            for (uint32_t y = 0; y < bitmap.rows; y++)
+            if (useSubpixelFiltering)
             {
-                for (uint32_t x = 0; x < bitmap.width; x++)
+                subpixelGlyphData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
+                // sub-pixel FIR filter.
+                static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
+                for (uint32_t y = 0; y < bitmap.rows; y++)
                 {
-                    uint8_t alpha = 0;
-                    for (int32_t z = -2; z <= 2; ++z)
-                    {
-                        int32_t const s = x + z;
-                        if (s >= 0 && s <= static_cast<int32_t>(bitmap.width) - 1)
-                            alpha += static_cast<uint8_t>(bitmap.buffer[s + bitmap.pitch * y] * coefficients[z + 2]);
-                    }
-                    subpixelGlyphData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
-                }
-            }
-            textureData = &subpixelGlyphData[0][0];
-        }
-        else
-        {
-            glyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
-            for (uint32_t y = 0; y < bitmap.rows; y++)
-                switch (bitmap.pixel_mode)
-                {
-                case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
-                    for (uint32_t x = 0; x < bitmap.width; x += 8)
-                        for (uint32_t b = 0; b < std::min(bitmap.width - x, 8u); ++b)
-                            glyphTextureData[(x + b) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
-                                (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
-                    break;
-                case FT_PIXEL_MODE_GRAY:
-                default:
                     for (uint32_t x = 0; x < bitmap.width; x++)
-                        glyphTextureData[x + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
-                            (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : bitmap.buffer[x + bitmap.pitch * y];
-                    break;
+                    {
+                        uint8_t alpha = 0;
+                        for (int32_t z = -2; z <= 2; ++z)
+                        {
+                            int32_t const s = x + z;
+                            if (s >= 0 && s <= static_cast<int32_t>(bitmap.width) - 1)
+                                alpha += static_cast<uint8_t>(bitmap.buffer[s + bitmap.pitch * y] * coefficients[z + 2]);
+                        }
+                        subpixelGlyphData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+                    }
                 }
-            textureData = &glyphTextureData[0];
+                textureData = &subpixelGlyphData[0][0];
+            }
+            else
+            {
+                glyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
+                for (uint32_t y = 0; y < bitmap.rows; y++)
+                    switch (bitmap.pixel_mode)
+                    {
+                    case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
+                        for (uint32_t x = 0; x < bitmap.width; x += 8)
+                            for (uint32_t b = 0; b < std::min(bitmap.width - x, 8u); ++b)
+                                glyphTextureData[(x + b) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
+                                    (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
+                        break;
+                    case FT_PIXEL_MODE_GRAY:
+                    default:
+                        for (uint32_t x = 0; x < bitmap.width; x++)
+                            glyphTextureData[x + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
+                                (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : bitmap.buffer[x + bitmap.pitch * y];
+                        break;
+                    }
+                textureData = &glyphTextureData[0];
+            }
+            static_cast<i_native_texture&>(glyphTexture.texture().native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
         }
-        
-        static_cast<i_native_texture&>(glyphTexture.texture().native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
 
         return glyphTexture;
     }
