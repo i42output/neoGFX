@@ -787,6 +787,7 @@ namespace neogfx
             auto refEmojiResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
             auto& emojiResult = *refEmojiResult;
             emojiResult.line_breaks() = result.line_breaks();
+            vec2f advanceAdjust = {};
             for (auto i = result.begin(); i != result.end(); ++i)
             {
                 auto cluster = i->clusters.first;
@@ -815,7 +816,7 @@ namespace neogfx
                         auto ch = aUtf32Begin[cluster + (j - i)];
                         if (ch == 0x200D)
                             continue;
-                        else if (ch == 0xFE0F)
+                        else if (ch >= 0xFE00 && ch <= 0xFE0F)
                         {
                             absorbNext = true;
                             break;
@@ -830,19 +831,33 @@ namespace neogfx
                         auto g = *i;
                         g.value = service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height());
                         g.clusters = glyph_char::cluster_range{ g.clusters.first, g.clusters.first + static_cast<std::uint32_t>(sequence.size()) };
+                        g.cell += advanceAdjust;
                         emojiResult.push_back(g);
-                        i = j - 1;
+                        while (i != j - 1)
+                        {
+                            advanceAdjust -= vec2f{ i->cell[1].x - i->cell[0].x, 0.0f };
+                            ++i;
+                        }
                     }
                     else
-                        emojiResult.push_back(*i);
+                    {
+                        auto g = *i;
+                        g.cell += advanceAdjust;
+                        emojiResult.push_back(g);
+                    }
                     if (absorbNext)
                     {
                         emojiResult.back().clusters = glyph_char::cluster_range{ emojiResult.back().clusters.first, emojiResult.back().clusters.first + static_cast<std::uint32_t>(sequence.size()) + 1u };
+                        advanceAdjust -= vec2f{ i->cell[1].x - i->cell[0].x, 0.0f };
                         ++i;
                     }
                 }
                 else
-                    emojiResult.push_back(*i);
+                {
+                    auto g = *i;
+                    g.cell += advanceAdjust;
+                    emojiResult.push_back(g);
+                }
             }
             if (aAlignBaselines)
                 return emojiResult.align_baselines();
