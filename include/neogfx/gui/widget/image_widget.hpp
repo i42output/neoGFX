@@ -23,13 +23,13 @@
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/texture.hpp>
+#include <neogfx/gui/widget/i_image_widget.hpp>
 
 namespace neogfx
 {
-    // todo: i_image_widget
-    class image_widget : public widget<>
+    class image_widget : public widget<i_image_widget>
     {
-        meta_object(widget<>)
+        meta_object(widget<i_image_widget>)
     public:
         define_event(ImageChanged, image_changed)
         define_event(ImageGeometryChanged, image_geometry_changed)
@@ -41,20 +41,20 @@ namespace neogfx
         image_widget(i_layout& aLayout, const i_texture& aTexture = texture{}, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Center);
         image_widget(i_layout& aLayout, const i_image& aImage, aspect_ratio aAspectRatio = aspect_ratio::Keep, cardinal aPlacement = cardinal::Center);
     public:
-        virtual neogfx::size_policy size_policy() const;
-        virtual size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const;
+        neogfx::size_policy size_policy() const override;
+        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        virtual void paint(i_graphics_context& aGc) const;
+        void paint(i_graphics_context& aGc) const override;
     public:
-        const texture& image() const;
-        const color_or_gradient& image_color() const;
-        void set_image(i_string const& aImageUri);
-        void set_image(const i_image& aImage);
-        void set_image(const i_texture& aImage);
-        void set_image_color(const color_or_gradient& aImageColor);
-        void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio);
-        void set_placement(cardinal aPlacement);
-        void set_dpi_auto_scale(bool aDpiAutoScale);
+        const texture& image() const override;
+        const color_or_gradient& image_color() const override;
+        void set_image(i_string const& aImageUri) override;
+        void set_image(const i_image& aImage) override;
+        void set_image(const i_texture& aImage) override;
+        void set_image_color(const color_or_gradient& aImageColor) override;
+        void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) override;
+        void set_placement(cardinal aPlacement) override;
+        void set_dpi_auto_scale(bool aDpiAutoScale) override;
     public:
         rect placement_rect() const;
     private:

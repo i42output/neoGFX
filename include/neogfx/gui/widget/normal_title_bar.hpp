@@ -73,8 +73,8 @@ namespace neogfx
         i_string const& title() const override;
         void set_title(i_string const& aTitle) override;
     public:
-        const image_widget& icon_widget() const; // todo, virtual override when i_image_widget available
-        image_widget& icon_widget(); // todo, virtual override when i_image_widget available
+        const image_widget& icon_widget() const override;
+        image_widget& icon_widget() override;
         const text_widget& title_widget() const override;
         text_widget& title_widget() override;
     public:

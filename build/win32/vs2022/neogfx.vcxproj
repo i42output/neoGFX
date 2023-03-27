@@ -445,6 +445,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dockable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_document.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_image_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_presentation_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_selection_model.hpp" />

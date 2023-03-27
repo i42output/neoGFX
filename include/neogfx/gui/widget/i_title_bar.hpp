@@ -22,6 +22,7 @@
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/widget/i_text_widget.hpp>
+#include <neogfx/gui/widget/i_image_widget.hpp>
 
 namespace neogfx
 {
@@ -35,6 +36,8 @@ namespace neogfx
         virtual ~i_title_bar() = default;
     public:
         virtual void set_icon(i_texture const& aIcon) = 0;
+        virtual i_image_widget const& icon_widget() const = 0;
+        virtual i_image_widget& icon_widget() = 0;
         virtual i_string const& title() const = 0;
         virtual void set_title(i_string const& aTitle) = 0;
         virtual i_text_widget const& title_widget() const = 0;

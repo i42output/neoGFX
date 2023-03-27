@@ -74,6 +74,16 @@ namespace neogfx
         throw unsupported_operation();
     }
 
+    const image_widget& tool_title_bar::icon_widget() const
+    {
+        throw unsupported_operation();
+    }
+
+    image_widget& tool_title_bar::icon_widget()
+    {
+        throw unsupported_operation();
+    }
+
     i_string const& tool_title_bar::title() const
     {
         return iTitle.text();

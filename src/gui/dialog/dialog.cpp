@@ -302,11 +302,16 @@ namespace neogfx
                     iButtonBox->disable_role(button_role::Reject);
             }
         }, std::chrono::milliseconds{ 100 });
+
         if (has_layout(standard_layout::StatusBar))
             non_client_layout().add_at(non_client_layout().index_of(status_bar_layout()), iButtonBoxLayout);
         else
             non_client_layout().add(iButtonBoxLayout);
+
         iButtonBoxLayout.set_weight(size{});
+
+        title_bar().icon_widget().hide();
+
         set_standard_layout(size{ 8_dip, 8_dip }, neogfx::padding{ 8_dip, 8_dip }, false);
     }
 }

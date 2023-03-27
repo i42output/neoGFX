@@ -141,8 +141,6 @@ namespace neogfx
     {
         set_background_opacity(1.0);
 
-        icon_widget().hide();
-
         set_padding(neogfx::padding{});
         iOuterLayout.set_padding(neogfx::padding{});
         iOuterLayout.set_spacing(size{});
@@ -167,15 +165,16 @@ namespace neogfx
         {
             scoped_units su{ *this, units::Pixels };
 
-            auto const idealSize = size{ 12.0_mm, 9.0_mm }.ceil();
+            auto const idealIconSize = size{ title_widget().font().height(), title_widget().font().height() }.ceil();
             if (icon_widget().image().is_empty())
-                icon_widget().set_fixed_size(idealSize);
+                icon_widget().set_fixed_size(idealIconSize);
             else
-                icon_widget().set_fixed_size(idealSize.min(icon_widget().image().extents()));
-            iMinimizeButton.set_fixed_size(idealSize);
-            iMaximizeButton.set_fixed_size(idealSize);
-            iRestoreButton.set_fixed_size(idealSize);
-            iCloseButton.set_fixed_size(idealSize);
+                icon_widget().set_fixed_size(idealIconSize.min(icon_widget().image().extents()));
+            auto const idealButtonSize = size{ 12.0_mm, 9.0_mm }.ceil();
+            iMinimizeButton.set_fixed_size(idealButtonSize);
+            iMaximizeButton.set_fixed_size(idealButtonSize);
+            iRestoreButton.set_fixed_size(idealButtonSize);
+            iCloseButton.set_fixed_size(idealButtonSize);
             icon_widget().set_size_policy(size_constraint::Fixed);
             iMinimizeButton.set_size_policy(size_constraint::Fixed);
             iMaximizeButton.set_size_policy(size_constraint::Fixed);
