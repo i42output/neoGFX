@@ -1927,7 +1927,11 @@ namespace neogfx
             auto const lineStartX = line->lineStart.second->cell[0].x;
             auto const lineEndX = std::prev(line->lineEnd.second)->cell[1].x;
             if (adjustedPosition.x >= lineEndX - lineStartX)
+            {
+                if (lineEnd > lineStart && is_line_breaking_whitespace(glyphs()[lineEnd - 1]))
+                    return lineEnd - 1;
                 return lineEnd;
+            }
             for (auto gi = line->lineStart.first; gi != lineEnd; ++gi)
             {
                 auto const& glyph = glyphs()[gi];
@@ -2579,7 +2583,7 @@ namespace neogfx
                     if (paragraphLineStart == paragraphLineEnd || is_line_breaking_whitespace(*paragraphLineStart))
                     {
                         auto lineStart = paragraphLineStart;
-                        auto lineEnd = paragraphLineEnd;
+                        auto lineEnd = !is_line_breaking_whitespace(*paragraphLineStart) ? paragraphLineEnd : paragraphLineStart;
 
                         auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
 
