@@ -216,6 +216,8 @@ namespace neogfx
     struct text_edit::glyph_line
     {
         std::pair<glyph_paragraphs::size_type, glyph_paragraphs::const_iterator> paragraph;
+        std::pair<document_glyphs::size_type, document_glyphs::const_iterator> paragraphStart;
+        std::pair<document_glyphs::size_type, document_glyphs::const_iterator> paragraphEnd;
         std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineStart;
         std::pair<document_glyphs::size_type, document_glyphs::const_iterator> lineEnd;
         coordinate ypos;
@@ -806,7 +808,7 @@ namespace neogfx
             scoped_scissor scissor2{ aGc, columnClipRect };
             auto const& columnRectSansPadding = column_rect(columnIndex);
             auto const& lines = column.lines();
-            auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, vertical_scrollbar().position(), {} },
+            auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, {}, {}, vertical_scrollbar().position(), {} },
                 [](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
             if (line != lines.begin() && (line == lines.end() || line->ypos > vertical_scrollbar().position()))
                 --line;
@@ -1789,16 +1791,38 @@ namespace neogfx
     std::pair<text_edit::glyph_columns::const_iterator, text_edit::glyph_lines::const_iterator> text_edit::glyph_column_line(position_type aGlyphPosition) const
     {
         auto column = iGlyphColumns.begin();
-        glyph_lines::const_iterator line;
+        std::pair<glyph_lines::const_iterator, glyph_lines::const_iterator> lines;
         for (; column != iGlyphColumns.end(); ++column)
         {
-            line = std::lower_bound(column->lines().begin(), column->lines().end(), glyph_line{ {}, { aGlyphPosition, glyphs().begin() + aGlyphPosition }, {}, 0.0, {} },
-                [](const glyph_line& left, const glyph_line& right) { return left.lineStart.first < right.lineStart.first; });
+            auto line = std::lower_bound(column->lines().begin(), column->lines().end(), glyph_line{ {}, {}, { aGlyphPosition, {} }, {}, {}, 0.0, {} },
+                [](const glyph_line& left, const glyph_line& right) 
+                { 
+                    return left.paragraphEnd.first < right.paragraphEnd.first; 
+                });
             if (line != column->lines().end())
+            {
+                lines = std::equal_range(column->lines().begin(), column->lines().end(), glyph_line{ {}, { line->paragraphStart.first, {} }, {}, {}, {}, 0.0, {} },
+                    [](const glyph_line& left, const glyph_line& right)
+                    {
+                        return left.paragraphStart.first < right.paragraphStart.first;
+                    });
                 break;
+            }
         }
         if (column == iGlyphColumns.end())
+        {
             --column;
+            return std::make_pair(column, column->lines().end());
+        }
+        if (lines.first == lines.second)
+            return std::make_pair(column, lines.first);
+        glyph_lines::const_iterator line = column->lines().end();
+        if (lines.first->lineStart.first <= std::prev(lines.second)->lineStart.first)
+            line = std::lower_bound(lines.first, lines.second, glyph_line{ {}, {}, {}, { aGlyphPosition, glyphs().begin() + aGlyphPosition }, {}, 0.0, {} },
+                [](const glyph_line& left, const glyph_line& right) { return left.lineStart.first < right.lineStart.first; });
+        else
+            line = std::lower_bound(lines.first, lines.second, glyph_line{ {}, {}, {}, { aGlyphPosition, glyphs().begin() + aGlyphPosition }, {}, 0.0, {} },
+                [](const glyph_line& left, const glyph_line& right) { return left.lineStart.first > right.lineStart.first; });
         return std::make_pair(column, line);
     }
 
@@ -1905,7 +1929,7 @@ namespace neogfx
         point adjustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansPadding.top_left();
         adjustedPosition = adjustedPosition.max(point{});
         auto const& lines = column.lines();
-        auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, adjustedPosition.y, {} },
+        auto line = std::lower_bound(lines.begin(), lines.end(), glyph_line{ {}, {}, {}, {}, {}, adjustedPosition.y, {} },
             [](const glyph_line& left, const glyph_line& right) { return left.ypos < right.ypos; });
         if (line == lines.end() && !lines.empty() && adjustedPosition.y < lines.back().ypos + lines.back().extents.cy)
             --line;
@@ -2590,6 +2614,8 @@ namespace neogfx
                         lines.push_back(
                             glyph_line{
                                 { p - iGlyphParagraphs.begin(), p },
+                                { paragraphLineStart - glyphs().begin(), paragraphLineStart },
+                                { paragraphLineEnd - glyphs().begin(), paragraphLineEnd },
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
@@ -2599,83 +2625,130 @@ namespace neogfx
                         pos.y += lines.back().extents.cy;
                         iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                     }
-                    else if (WordWrap && (paragraphLineEnd - 1)->cell[0].x + quad_extents((paragraphLineEnd - 1)->cell).x > availableWidth)
+                    else if (WordWrap && static_cast<coordinate>((paragraphLineEnd - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((paragraphLineEnd - 1)->cell).x) > availableWidth)
                     {
-                        auto insertionPoint = lines.end();
-                        bool first = true;
-                        auto next = paragraphLineStart;
-                        auto lineStart = next;
-                        auto lineEnd = paragraphLineEnd;
-                        coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x : 0.0);
-                        while (next != paragraphLineEnd)
+                        if (glyph_text_direction(paragraphLineStart, paragraphLineEnd) == text_direction::LTR)
                         {
-                            glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f } }, {} };
-                            auto split = std::lower_bound(next, paragraphLineEnd, key, [](auto const& lhs, auto const& rhs) { return lhs.cell[0].x < rhs.cell[0].x; });
-                            if (split != next && (split != paragraphLineEnd || (split - 1)->cell[0].x + quad_extents((split - 1)->cell).x >= offset + availableWidth))
-                                --split;
-                            if (split == next)
-                                ++split;
-                            if (split != paragraphLineEnd)
+                            auto insertionPoint = lines.end();
+                            auto next = paragraphLineStart;
+                            auto lineStart = next;
+                            auto lineEnd = paragraphLineEnd;
+                            coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x : 0.0);
+                            while (next != paragraphLineEnd)
                             {
-                                std::pair<document_glyphs::iterator, document_glyphs::iterator> wordBreak = word_break(lineStart, split, paragraphLineEnd);
-                                if (wordBreak.first == wordBreak.second)
+                                glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f } }, {} };
+                                auto split = std::lower_bound(next, paragraphLineEnd, key, [](auto const& lhs, auto const& rhs) { return lhs.cell[0].x < rhs.cell[0].x; });
+                                if (split != next && (split != paragraphLineEnd || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((split - 1)->cell).x) >= offset + availableWidth))
+                                    --split;
+                                if (split == next)
+                                    ++split;
+                                if (split != paragraphLineEnd)
                                 {
-                                    auto previousLineEnd = wordBreak.first;
-                                    while (previousLineEnd != lineStart && (previousLineEnd - 1)->clusters == wordBreak.first->clusters)
-                                        --previousLineEnd;
-                                    if (previousLineEnd != lineStart)
+                                    auto wordBreak = word_break(lineStart, split, paragraphLineEnd);
+                                    if (wordBreak.first == wordBreak.second)
                                     {
-                                        lineEnd = wordBreak.first;
-                                        next = previousLineEnd;
+                                        auto previousLineEnd = wordBreak.first;
+                                        while (previousLineEnd != lineStart && (previousLineEnd - 1)->clusters == wordBreak.first->clusters)
+                                            --previousLineEnd;
+                                        if (previousLineEnd != lineStart)
+                                        {
+                                            lineEnd = wordBreak.first;
+                                            next = previousLineEnd;
+                                        }
+                                        else
+                                            next = lineEnd = split;
                                     }
                                     else
-                                        next = lineEnd = split;
+                                    {
+                                        lineEnd = wordBreak.first;
+                                        next = wordBreak.second;
+                                    }
                                 }
                                 else
-                                {
-                                    lineEnd = wordBreak.first;
-                                    next = wordBreak.second;
-                                }
+                                    next = paragraphLineEnd;
+                                if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
+                                    --lineEnd;
+                                auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
+                                insertionPoint = lines.insert(lines.end(),
+                                    glyph_line{
+                                        { p - iGlyphParagraphs.begin(), p },
+                                        { paragraphLineStart - glyphs().begin(), paragraphLineStart },
+                                        { paragraphLineEnd - glyphs().begin(), paragraphLineEnd },
+                                        { lineStart - glyphs().begin(), lineStart },
+                                        { lineEnd - glyphs().begin(), lineEnd },
+                                        pos.y,
+                                        { lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, alignBaselinesResult.yExtent },
+                                        alignBaselinesResult.majorFont,
+                                        alignBaselinesResult.baseline });
+                                pos.y += insertionPoint->extents.cy;
+                                iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
+                                lineStart = next;
+                                if (lineStart != paragraphLineEnd)
+                                    offset = lineStart->cell[0].x;
+                                lineEnd = paragraphLineEnd;
                             }
-                            else
-                                next = paragraphLineEnd;
-                            if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
-                                --lineEnd;
-                            bool rtl = false;
-                            if (!first &&
-                                insertionPoint->lineStart != insertionPoint->lineEnd &&
-                                lineStart != lineEnd &&
-                                direction(*insertionPoint->lineStart.second) == text_direction::RTL &&
-                                direction(*(lineEnd - 1)) == text_direction::RTL)
-                                rtl = true; // todo: is this sufficient for multi-line RTL text?
-                            if (!rtl)
-                                insertionPoint = lines.end();
-                            auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
-                            insertionPoint = lines.insert(insertionPoint,
-                                glyph_line{
-                                    { p - iGlyphParagraphs.begin(), p },
-                                    { lineStart - glyphs().begin(), lineStart },
-                                    { lineEnd - glyphs().begin(), lineEnd },
-                                    pos.y,
-                                    { lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, alignBaselinesResult.yExtent },
-                                    alignBaselinesResult.majorFont, 
-                                    alignBaselinesResult.baseline });
-                            if (rtl)
+                        }
+                        else // RTL
+                        {
+                            auto insertionPoint = lines.end();
+                            auto next = std::reverse_iterator{ paragraphLineEnd };
+                            auto lineStart = next;
+                            auto lineEnd = std::reverse_iterator{ paragraphLineStart };
+                            coordinate const rightmost = (lineEnd != lineStart ? lineStart->cell[1].x : 0.0);
+                            coordinate offset = rightmost;
+                            while (next != std::reverse_iterator{ paragraphLineStart })
                             {
-                                auto ypos = (insertionPoint + 1)->ypos;
-                                for (auto i = insertionPoint; i != lines.end(); ++i)
+                                glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset - availableWidth, 0.0f } }, {} };
+                                auto split = std::lower_bound(next, std::reverse_iterator{ paragraphLineStart }, key, [=](auto const& lhs, auto const& rhs) { return offset - lhs.cell[0].x < offset - rhs.cell[0].x; });
+                                if (split != next && (split != std::reverse_iterator{ paragraphLineStart } || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((split - 1)->cell).x) >= rightmost - offset + availableWidth))
+                                    --split;
+                                if (split == next)
+                                    ++split;
+                                if (split != std::reverse_iterator{ paragraphLineStart })
                                 {
-                                    i->ypos = ypos;
-                                    ypos += i->extents.cy;
+                                    auto wordBreak = word_break(lineStart, split, std::reverse_iterator{ paragraphLineStart });
+                                    if (wordBreak.first == wordBreak.second)
+                                    {
+                                        auto previousLineEnd = wordBreak.first;
+                                        while (previousLineEnd != lineStart && (previousLineEnd - 1)->clusters == wordBreak.first->clusters)
+                                            --previousLineEnd;
+                                        if (previousLineEnd != lineStart)
+                                        {
+                                            lineEnd = wordBreak.first;
+                                            next = previousLineEnd;
+                                        }
+                                        else
+                                            next = lineEnd = split;
+                                    }
+                                    else
+                                    {
+                                        lineEnd = wordBreak.first;
+                                        next = wordBreak.second;
+                                    }
                                 }
+                                else
+                                    next = std::reverse_iterator{ paragraphLineStart };
+                                if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
+                                    --lineEnd;
+                                auto const alignBaselinesResult = glyphs().align_baselines(lineEnd.base(), lineStart.base(), true);
+                                insertionPoint = lines.insert(lines.end(),
+                                    glyph_line{
+                                        { p - iGlyphParagraphs.begin(), p },
+                                        { paragraphLineStart - glyphs().begin(), paragraphLineStart },
+                                        { paragraphLineEnd - glyphs().begin(), paragraphLineEnd },
+                                        { lineEnd.base() - glyphs().begin(), lineEnd.base() },
+                                        { lineStart.base() - glyphs().begin(), lineStart.base() },
+                                        pos.y,
+                                        { lineEnd != lineStart ? (lineStart)->cell[1].x - (lineEnd - 1)->cell[0].x : 0.0f, alignBaselinesResult.yExtent },
+                                        alignBaselinesResult.majorFont,
+                                        alignBaselinesResult.baseline });
+                                pos.y += insertionPoint->extents.cy;
+                                iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
+                                lineStart = next;
+                                if (lineStart != std::reverse_iterator{ paragraphLineStart })
+                                    offset = lineStart->cell[1].x;
+                                lineEnd = std::reverse_iterator{ paragraphLineStart };  
                             }
-                            pos.y += insertionPoint->extents.cy;
-                            iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
-                            lineStart = next;
-                            if (lineStart != paragraphLineEnd)
-                                offset = lineStart->cell[0].x;
-                            lineEnd = paragraphLineEnd;
-                            first = false;
                         }
                     }
                     else
@@ -2688,6 +2761,8 @@ namespace neogfx
                         lines.push_back(
                             glyph_line{
                                 { p - iGlyphParagraphs.begin(), p },
+                                { paragraphLineStart - glyphs().begin(), paragraphLineStart },
+                                { paragraphLineEnd - glyphs().begin(), paragraphLineEnd },
                                 { lineStart - glyphs().begin(), lineStart },
                                 { lineEnd - glyphs().begin(), lineEnd },
                                 pos.y,
@@ -2944,27 +3019,41 @@ namespace neogfx
         return paddingAdjust;
     }
 
+    namespace
+    {
+        template <typename Iter>
+        std::pair<Iter, Iter> word_break(Iter aBegin, Iter aFrom, Iter aEnd)
+        {
+            std::pair<Iter, Iter> result{ aFrom, aFrom };
+            if (!is_whitespace(*aFrom))
+            {
+                while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
+                    --result.first;
+                result.second = result.first;
+            }
+            else
+            {
+                while (result.first != aBegin && is_whitespace(*(result.first - 1)))
+                    --result.first;
+                while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
+                    --result.first;
+                result.second = result.first;
+            }
+            if (result.second != aEnd && is_line_breaking_whitespace(*result.second))
+                ++result.second;
+            if (result.first == result.second && result.first == aBegin)
+                result = { aFrom, aFrom };
+            return result;
+        }
+    }
+
     std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd)
     {
-        std::pair<document_glyphs::iterator, document_glyphs::iterator> result{ aFrom, aFrom };
-        if (!is_whitespace(*aFrom))
-        {
-            while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
-                --result.first;
-            result.second = result.first;
-        }
-        else 
-        {
-            while (result.first != aBegin && is_whitespace(*(result.first - 1)))
-                --result.first;
-            while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
-                --result.first;
-            result.second = result.first;
-        }
-        if (result.second != aEnd && is_line_breaking_whitespace(*result.second))
-            ++result.second;
-        if (result.first == result.second && result.first == aBegin)
-            result = { aFrom, aFrom };
-        return result;
+        return neogfx::word_break(aBegin, aFrom, aEnd);
+    }
+
+    std::pair<text_edit::document_glyphs::reverse_iterator, text_edit::document_glyphs::reverse_iterator> text_edit::word_break(document_glyphs::reverse_iterator aBegin, document_glyphs::reverse_iterator aFrom, document_glyphs::reverse_iterator aEnd)
+    {
+        return neogfx::word_break(aBegin, aFrom, aEnd);
     }
 }

@@ -528,12 +528,12 @@ namespace neogfx
                 if (!gotOne)
                 {
                     gotOne = true;
-                    result = direction(*i);
+                    result = base_text_direction(direction(*i));
                 }
-                else
+                else if (result != base_text_direction(direction(*i)))
                 {
-                    if (result != direction(*i))
-                        result = text_direction::LTR;
+                    result = text_direction::LTR;
+                    break;
                 }
             }
         }
