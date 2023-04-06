@@ -51,22 +51,8 @@ namespace neogfx
     {
         Invalid     = 0x00,
         LTR         = 0x01,
-        RTL         = 0x02,
-        None_LTR    = 0x04 | LTR,
-        None_RTL    = 0x04 | RTL,
-        Mark_LTR    = 0x08 | LTR,
-        Mark_RTL    = 0x08 | RTL,
-        Digit_LTR   = 0x10 | LTR, // unused
-        Digit_RTL   = 0x10 | RTL,
-        Emoji_LTR   = 0x20 | LTR,
-        Emoji_RTL   = 0x20 | RTL,
-        BaseMask    = LTR | RTL
+        RTL         = 0x02
     };
-
-    inline text_direction base_text_direction(text_direction aDirection)
-    {
-        return static_cast<text_direction>(static_cast<uint8_t>(aDirection) & static_cast<uint8_t>(text_direction::BaseMask));
-    }
 
     class character_type
     {
@@ -521,19 +507,14 @@ namespace neogfx
     {
         text_direction result = text_direction::LTR;
         bool gotOne = false;
-        for (Iter i = aBegin; i != aEnd; ++i)
+        for (Iter i = aBegin; !gotOne && i != aEnd; ++i)
         {
             if (!is_whitespace(*i) && !category_has_no_direction(*i))
             {
                 if (!gotOne)
                 {
                     gotOne = true;
-                    result = base_text_direction(direction(*i));
-                }
-                else if (result != base_text_direction(direction(*i)))
-                {
-                    result = text_direction::LTR;
-                    break;
+                    result = direction(*i);
                 }
             }
         }

@@ -2000,38 +2000,37 @@ namespace neogfx
         return get_text_category(aEmojiAtlas, &aCodePoint, &aCodePoint + 1);
     }
 
-    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, text_direction aExistingDirection)
+    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd, std::optional<text_direction> aLineDirection = std::nullopt, std::optional<text_direction> aCurrentDirection = std::nullopt)
     {
-        switch (get_text_category(aEmojiAtlas, aCodePoint, aCodePointEnd))
+        if (aCodePoint != aCodePointEnd)
         {
-        case text_category::LTR:
-            return text_direction::LTR;
-        case text_category::RTL:
-            return text_direction::RTL;
-        case text_category::Mark:
-            return aExistingDirection;
-        case text_category::None:
-            if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::None_RTL)
-                return text_direction::None_RTL;
-            else
-                return text_direction::LTR;
-        case text_category::Digit:
-            if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::Digit_RTL)
-                return text_direction::Digit_RTL;
-            else
-                return text_direction::LTR;
-        case text_category::Emoji:
-            if (aExistingDirection == text_direction::RTL || aExistingDirection == text_direction::Emoji_RTL)
-                return text_direction::Emoji_RTL;
-            else
-                return text_direction::Emoji_LTR;
-        default:
-            return aExistingDirection;
+            if (*aCodePoint != U'\r' && *aCodePoint != U'\n' && aLineDirection && aLineDirection.value() == text_direction::RTL)
+                return text_direction::RTL;
+            auto nextCodePoint = aCodePoint;
+            while (nextCodePoint != aCodePointEnd)
+            {
+                switch (get_text_category(aEmojiAtlas, nextCodePoint, aCodePointEnd))
+                {
+                case text_category::LTR:
+                    return text_direction::LTR;
+                case text_category::RTL:
+                    return text_direction::RTL;
+                case text_category::Whitespace:
+                case text_category::Mark:
+                    if (aCurrentDirection && aCurrentDirection.value() == text_direction::LTR)
+                        return text_direction::LTR;
+                    break;
+                default:
+                    break;
+                }
+                ++nextCodePoint;
+            }
         }
+        return aCurrentDirection ? aCurrentDirection.value() : text_direction::LTR;
     }
 
-    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint, text_direction aExistingDirection)
+    inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint, std::optional<text_direction> aLineDirection = std::nullopt, std::optional<text_direction> aCurrentDirection = std::nullopt)
     {
-        return get_text_direction(aEmojiAtlas, &aCodePoint, &aCodePoint + 1, aExistingDirection);
+        return get_text_direction(aEmojiAtlas, &aCodePoint, &aCodePoint + 1, aLineDirection, aCurrentDirection);
     }
 }

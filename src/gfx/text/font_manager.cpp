@@ -182,11 +182,6 @@ namespace neogfx
         glyph_text create_glyph_text(font const& aFont) override;
         glyph_text to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aAlignBaselines = true) override;
         glyph_text to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aAlignBaselines = true) override;
-    private:
-        cluster_map_t iClusterMap;
-        std::vector<character_type> iTextDirections;
-        std::u32string iCodePointsBuffer;
-        run_list iRuns;
     };
 
     class glyph_shapes
@@ -208,39 +203,7 @@ namespace neogfx
                 hb_buffer_set_script(iBuf, std::get<4>(aGlyphRun));
                 hb_buffer_set_cluster_level(iBuf, HB_BUFFER_CLUSTER_LEVEL_CHARACTERS);
                 std::vector<std::uint32_t> reversed;
-                if (std::get<2>(aGlyphRun) != text_direction::None_RTL)
-                    hb_buffer_add_utf32(iBuf, reinterpret_cast<const std::uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
-                else
-                {
-                    reversed.reserve(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun));
-                    for (auto ch = std::get<1>(aGlyphRun); ch != std::get<0>(aGlyphRun); --ch)
-                    {
-                        switch (*(ch - 1))
-                        {
-                        case U'(':
-                            reversed.push_back(U')');
-                            break;
-                        case U')':
-                            reversed.push_back(U'(');
-                            break;
-                        case U'[':
-                            reversed.push_back(U']');
-                            break;
-                        case U']':
-                            reversed.push_back(U'[');
-                            break;
-                        case U'{':
-                            reversed.push_back(U'}');
-                            break;
-                        case U'}':
-                            reversed.push_back(U'{');
-                            break;
-                        default:
-                            reversed.push_back(*(ch - 1));
-                        }
-                    }
-                    hb_buffer_add_utf32(iBuf, &*reversed.begin(), static_cast<int>(reversed.size()), 0u, static_cast<int>(reversed.size()));
-                }
+                hb_buffer_add_utf32(iBuf, reinterpret_cast<const std::uint32_t*>(std::get<0>(aGlyphRun)), static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)), 0, static_cast<int>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun)));
                 scoped_kerning sk{ aFont.kerning() };
                 hb_shape(iFont, iBuf, NULL, 0);
                 unsigned int glyphCount = 0;
@@ -249,9 +212,6 @@ namespace neogfx
                 auto glyphPos = hb_buffer_get_glyph_positions(iBuf, &glyphCount);
                 iGlyphPos.assign(glyphPos, glyphPos + glyphCount);
                 iGlyphCount = glyphCount;
-                if (std::get<2>(aGlyphRun) == text_direction::None_RTL)
-                    for (std::uint32_t i = 0; i < iGlyphCount; ++i)
-                        iGlyphInfo[i].cluster = static_cast<std::uint32_t>(std::get<1>(aGlyphRun) - std::get<0>(aGlyphRun) - 1 - iGlyphInfo[i].cluster);
             }
             ~glyphs()
             {
@@ -391,27 +351,31 @@ namespace neogfx
 
     glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char const* aUtf8Begin, char const* aUtf8End, i_font_selector const& aFontSelector, bool aAlignBaselines)
     {
-        auto& clusterMap = iClusterMap;
+        thread_local cluster_map_t clusterMap;
         clusterMap.clear();
-        iCodePointsBuffer.clear();
-        std::u32string& codePoints = iCodePointsBuffer;
 
-        codePoints = neolib::utf8_to_utf32(std::string_view{ aUtf8Begin, aUtf8End }, [&clusterMap](std::string::size_type aFrom, std::u32string::size_type)
+        thread_local std::u32string codePoints;
+        codePoints.clear();
+
+        auto& clusterMapRef = clusterMap;
+        codePoints = neolib::utf8_to_utf32(std::string_view{ aUtf8Begin, aUtf8End }, [&clusterMapRef](std::string::size_type aFrom, std::u32string::size_type)
         {
-            clusterMap.push_back(glyph_text_factory::cluster{ aFrom });
+            clusterMapRef.push_back(glyph_text_factory::cluster{ aFrom });
         });
 
         if (codePoints.empty())
             return aFontSelector.select_font(0);
 
-        return to_glyph_text(aGc, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMap](std::u32string::size_type aIndex)->font
+        return to_glyph_text(aGc, codePoints.data(), codePoints.data() + codePoints.size(), font_selector{ [&aFontSelector, &clusterMapRef](std::u32string::size_type aIndex)->font
         {
-            return aFontSelector.select_font(clusterMap[aIndex].from);
+            return aFontSelector.select_font(clusterMapRef[aIndex].from);
         } }, aAlignBaselines);
     }
 
     glyph_text glyph_text_factory::to_glyph_text(i_graphics_context const& aGc, char32_t const* aUtf32Begin, char32_t const* aUtf32End, i_font_selector const& aFontSelector, bool aAlignBaselines)
     {
+        auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
+
         auto refResult = make_ref<glyph_text_content>(aFontSelector.select_font(0));
         auto& result = *refResult;
 
@@ -420,26 +384,80 @@ namespace neogfx
 
         bool hasEmojis = false;
 
-        auto& textDirections = iTextDirections;
+        thread_local std::vector<character_type> textDirections;
         textDirections.clear();
 
         std::u32string::size_type codePointCount = aUtf32End - aUtf32Begin;
 
-        std::u32string adjustedCodepoints;
-        if (aGc.password())
+        thread_local std::vector<std::u32string::size_type> clusters;
+        clusters.clear();
+        for (std::u32string::size_type c = 0; c < codePointCount; ++c)
+            clusters.push_back(c);
+
+        thread_local std::u32string adjustedCodepoints;
+        adjustedCodepoints.clear();
+
+        if (!aGc.password())
+        {
+            // Reverse LTR embedded in an RTL line...
+            adjustedCodepoints.assign(aUtf32Begin, aUtf32End);
+            auto next = adjustedCodepoints.begin();
+            while (next != adjustedCodepoints.end())
+            {
+                auto nextEnd = std::find_if(next, adjustedCodepoints.end(), [&](auto const& ch) { return ch == U'\n' || ch == U'\r'; });
+                auto nextLtrRtl = std::find_if(next, nextEnd, [&](auto const& ch)
+                    { return get_text_category(emojiAtlas, ch) == text_category::LTR || get_text_category(emojiAtlas, ch) == text_category::RTL; } );
+                if (nextLtrRtl != nextEnd && get_text_category(emojiAtlas, *nextLtrRtl) == text_category::RTL)
+                {
+                    auto nextLtrBit = nextLtrRtl;
+                    while (nextLtrBit != nextEnd)
+                    {
+                        auto from = nextLtrBit;
+                        nextLtrBit = std::find_if(nextLtrBit, nextEnd, [&](auto const& ch)
+                            { return get_text_category(emojiAtlas, ch) == text_category::LTR || 
+                                get_text_category(emojiAtlas, ch) == text_category::Digit; });
+                        if (nextLtrBit != nextEnd)
+                        {
+                            while (nextLtrBit != from && get_text_category(emojiAtlas, *std::prev(nextLtrBit)) != text_category::RTL)
+                                --nextLtrBit;
+                        }
+                        auto nextRtlBit = std::find_if(nextLtrBit, nextEnd, [&](auto const& ch)
+                            { return get_text_category(emojiAtlas, ch) == text_category::RTL; });
+                        if (nextRtlBit == nextEnd)
+                            while (nextLtrBit != nextEnd &&
+                                (get_text_category(emojiAtlas, *nextLtrBit) == text_category::Mark ||
+                                 get_text_category(emojiAtlas, *nextLtrBit) == text_category::None ||
+                                 get_text_category(emojiAtlas, *nextLtrBit) == text_category::Whitespace))
+                                ++nextLtrBit;
+                        std::reverse(nextLtrBit, nextRtlBit);
+                        std::reverse(std::next(clusters.begin(), std::distance(adjustedCodepoints.begin(), nextLtrBit)), 
+                            std::next(clusters.begin(), std::distance(adjustedCodepoints.begin(), nextRtlBit)));
+                        for (auto& ch : std::ranges::subrange{ nextLtrBit, nextRtlBit })
+                            switch (ch) { case '<': ch = '>'; break; case '>': ch = '<'; break; case '(': ch = ')'; break; 
+                                case ')': ch = '('; break; case '{': ch = '}'; break; case '}': ch = '{'; break; 
+                                case '[': ch = ']'; break; case ']': ch = '['; break; }
+                        nextLtrBit = nextRtlBit;
+                    }
+                }
+                next = nextEnd;
+                if (next != adjustedCodepoints.end())
+                    ++next;
+            }
+        }
+        else
             adjustedCodepoints.assign(codePointCount, neolib::utf8_to_utf32(aGc.password_mask())[0]);
-        auto codePoints = adjustedCodepoints.empty() ? &*aUtf32Begin : &adjustedCodepoints[0];
 
-        auto& runs = iRuns;
+        auto codePoints = &adjustedCodepoints[0];
+
+        thread_local run_list runs;
         runs.clear();
-
-        auto const& emojiAtlas = service<i_font_manager>().emoji_atlas();
 
         text_category previousCategory = get_text_category(emojiAtlas, codePoints, codePoints + codePointCount);
         if (aGc.mnemonic_set() && codePoints[0] == static_cast<char32_t>(aGc.mnemonic()) && 
             (codePointCount == 1 || codePoints[1] != static_cast<char32_t>(aGc.mnemonic())))
             previousCategory = text_category::Mnemonic;
-        text_direction previousDirection = (previousCategory != text_category::RTL ? text_direction::LTR : text_direction::RTL);
+        text_direction lineDirection = get_text_direction(emojiAtlas, codePoints, codePoints + codePointCount);
+        text_direction previousDirection = lineDirection;
         const char32_t* runStart = &codePoints[0];
         std::u32string::size_type lastCodePointIndex = codePointCount - 1;
         font previousFont = aFontSelector.select_font(0);
@@ -451,8 +469,6 @@ namespace neogfx
         const char32_t LRO = U'\u202D';
         const char32_t RLO = U'\u202E';
         const char32_t PDF = U'\u202C';
-
-        bool currentLineHasLTR = false;
 
         for (std::size_t codePointIndex = 0; codePointIndex <= lastCodePointIndex; ++codePointIndex)
         {
@@ -480,22 +496,19 @@ namespace neogfx
             }
 
             hb_unicode_funcs_t* unicodeFuncs = static_cast<font_face_handle*>(currentFont.native_font_face().handle())->harfbuzzUnicodeFuncs;
+            
             text_category currentCategory = get_text_category(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
+            
             if (aGc.mnemonic_set() && codePoints[codePointIndex] == static_cast<char32_t>(aGc.mnemonic()) &&
                 (codePointCount - 1 == codePointIndex || codePoints[codePointIndex + 1] != static_cast<char32_t>(aGc.mnemonic())))
                 currentCategory = text_category::Mnemonic;
-            text_direction currentDirection = previousDirection;
-            if (currentCategory == text_category::LTR)
-                currentDirection = text_direction::LTR;
-            else if (currentCategory == text_category::RTL)
-                currentDirection = text_direction::RTL;
-
+            
             bool newLine = (codePoints[codePointIndex] == U'\r' || codePoints[codePointIndex] == U'\n');
             if (newLine)
-            {
-                currentLineHasLTR = false;
-                currentDirection = text_direction::LTR;
-            }
+                lineDirection = get_text_direction(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount);
+
+            text_direction currentDirection = get_text_direction(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount, lineDirection, previousDirection);
+            
             auto bidi_check = [&directionStack](text_category aCategory, text_direction aDirection)
             {
                 if (!directionStack.empty())
@@ -514,86 +527,25 @@ namespace neogfx
                     case text_category::Whitespace:
                     case text_category::Mnemonic:
                         return directionStack.back().first;
-                        break;
                     default:
                         break;
                     }
                 }
                 return aDirection;
             };
+            
             currentDirection = bidi_check(currentCategory, currentDirection);
-            switch (currentCategory)
-            {
-            case text_category::LTR:
-                currentLineHasLTR = true;
-                if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
-                    currentDirection == text_direction::Mark_LTR || currentDirection == text_direction::Mark_RTL ||
-                    currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
-                    currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
-                    currentDirection = text_direction::LTR;
-                break;
-            case text_category::RTL:
-                if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::None_RTL ||
-                    currentDirection == text_direction::Mark_LTR || currentDirection == text_direction::Mark_RTL ||
-                    currentDirection == text_direction::Digit_LTR || currentDirection == text_direction::Digit_RTL ||
-                    currentDirection == text_direction::Emoji_LTR || currentDirection == text_direction::Emoji_RTL)
-                    currentDirection = text_direction::RTL;
-                break;
-            case text_category::Mark:
-                if (currentDirection == text_direction::LTR)
-                    currentDirection = text_direction::Mark_LTR;
-                else if (currentDirection == text_direction::RTL)
-                    currentDirection = text_direction::Mark_RTL;
-                break;
-            case text_category::None:
-                if (currentDirection == text_direction::LTR)
-                    currentDirection = text_direction::None_LTR;
-                else if (currentDirection == text_direction::RTL)
-                    currentDirection = text_direction::None_RTL;
-                break;
-            case text_category::Digit:
-                if (currentDirection == text_direction::LTR)
-                    currentDirection = text_direction::Digit_LTR;
-                else if (currentDirection == text_direction::RTL)
-                    currentDirection = text_direction::Digit_RTL;
-                break;
-            case text_category::Emoji:
-                if (currentDirection == text_direction::LTR)
-                    currentDirection = text_direction::Emoji_LTR;
-                else if (currentDirection == text_direction::RTL)
-                    currentDirection = text_direction::Emoji_RTL;
-                break;
-            }
-            if (currentDirection == text_direction::None_LTR || currentDirection == text_direction::Mark_LTR || currentDirection == text_direction::Digit_LTR) // optimization (less runs for LTR text)
-                currentDirection = text_direction::LTR;
+            
             hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[codePointIndex]);
             if (currentScript == HB_SCRIPT_COMMON || currentScript == HB_SCRIPT_INHERITED)
                 currentScript = previousScript;
+
             bool newRun =
                 previousFont != currentFont ||
-                (newLine && (previousDirection == text_direction::RTL || previousDirection == text_direction::None_RTL || previousDirection == text_direction::Mark_RTL || previousDirection == text_direction::Digit_RTL || previousDirection == text_direction::Emoji_RTL)) ||
                 currentCategory == text_category::Mnemonic ||
                 previousCategory == text_category::Mnemonic ||
                 previousDirection != currentDirection;
-            if (!newRun)
-            {
-                if ((currentCategory == text_category::Whitespace || currentCategory == text_category::None || currentCategory == text_category::Mnemonic) &&
-                    (currentDirection == text_direction::RTL || currentDirection == text_direction::None_RTL || currentDirection == text_direction::Mark_RTL || currentDirection == text_direction::Digit_RTL || currentDirection == text_direction::Emoji_RTL))
-                {
-                    for (std::size_t j = codePointIndex + 1; j <= lastCodePointIndex; ++j)
-                    {
-                        text_direction nextDirection = bidi_check(get_text_category(emojiAtlas, codePoints + j, codePoints + codePointCount), get_text_direction(emojiAtlas, codePoints + j, codePoints + codePointCount, currentDirection));
-                        if (nextDirection == text_direction::RTL)
-                            break;
-                        else if (nextDirection == text_direction::LTR || (j == lastCodePointIndex && currentLineHasLTR))
-                        {
-                            newRun = true;
-                            currentDirection = text_direction::LTR;
-                            break;
-                        }
-                    }
-                }
-            }
+
             textDirections.push_back(character_type{ currentCategory, currentDirection });
             if (currentCategory == text_category::Emoji)
                 hasEmojis = true;
@@ -608,28 +560,6 @@ namespace neogfx
             if (codePointIndex == lastCodePointIndex)
                 runs.push_back(std::make_tuple(runStart, &codePoints[codePointIndex + 1], previousDirection, previousCategory == text_category::Mnemonic, previousScript));
             previousFont = currentFont;
-        }
-
-        for (std::size_t i = 1; i < runs.size(); ++i)
-        {
-            std::size_t j = i - 1;
-            auto startDirection = std::get<2>(runs[j]);
-            do
-            {
-                auto direction = std::get<2>(runs[i]);
-                if ((startDirection == text_direction::RTL || startDirection == text_direction::None_RTL || startDirection == text_direction::Digit_RTL || startDirection == text_direction::Emoji_RTL) &&
-                    (direction == text_direction::RTL || direction == text_direction::None_RTL || direction == text_direction::Digit_RTL || direction == text_direction::Emoji_RTL))
-                {
-                    auto m = runs[i];
-                    runs.erase(runs.begin() + i);
-                    runs.insert(runs.begin() + j, m);
-                    ++i;
-                }
-                else
-                {
-                    break;
-                }
-            } while (i < runs.size());
         }
 
         float lineStart = 0.0f;
@@ -692,7 +622,7 @@ namespace neogfx
 
                 auto& newGlyph = result.emplace_back(
                     shapes.glyph_info(j).codepoint,
-                    glyph_char::cluster_range{ static_cast<std::uint32_t>(startCluster), static_cast<std::uint32_t>(endCluster) },
+                    glyph_char::cluster_range{ static_cast<std::uint32_t>(clusters[startCluster]), static_cast<std::uint32_t>(clusters[startCluster] + (endCluster - startCluster)) },
                     textDirections[startCluster],
                     glyph_char::flags_e{},
                     font.id(),
@@ -798,7 +728,7 @@ namespace neogfx
                     {
                         // probable variant selector fubar'd by harfbuzz
                         auto s = emojiResult.back().clusters;
-                        if (s.second < codePointCount && get_text_category(service<i_font_manager>().emoji_atlas(), aUtf32Begin[s.second]) == text_category::Control)
+                        if (s.second < codePointCount && get_text_category(emojiAtlas, aUtf32Begin[s.second]) == text_category::Control)
                         {
                             ++s.first;
                             ++s.second;
@@ -814,7 +744,7 @@ namespace neogfx
                     for (; j != result.end(); ++j)
                     {
                         auto ch = aUtf32Begin[cluster + (j - i)];
-                        if (service<i_font_manager>().emoji_atlas().is_emoji(sequence + ch))
+                        if (emojiAtlas.is_emoji(sequence + ch))
                             sequence += ch;
                         else
                             break;
@@ -822,7 +752,7 @@ namespace neogfx
                     if (sequence.size() > 1)
                     {
                         auto g = *i;
-                        g.value = service<i_font_manager>().emoji_atlas().emoji(sequence, aFontSelector.select_font(cluster).height());
+                        g.value = emojiAtlas.emoji(sequence, aFontSelector.select_font(cluster).height());
                         g.clusters = glyph_char::cluster_range{ g.clusters.first, g.clusters.first + static_cast<std::uint32_t>(sequence.size()) };
                         g.cell += advanceAdjust;
                         emojiResult.push_back(g);
