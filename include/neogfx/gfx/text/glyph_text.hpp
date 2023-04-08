@@ -44,7 +44,8 @@ namespace neogfx
         Mark        = 0x06,
         Mnemonic    = 0x07,
         Emoji       = 0x08,
-        Control     = 0x09
+        FontEmoji   = 0x09,
+        Control     = 0x0A
     };
 
     enum class text_direction : uint8_t

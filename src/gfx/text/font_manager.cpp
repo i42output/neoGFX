@@ -632,7 +632,8 @@ namespace neogfx
                 if (category(newGlyph) == text_category::Whitespace)
                     newGlyph.value = codePoints[startCluster];
                 else if (category(newGlyph) == text_category::Emoji)
-                    newGlyph.value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height());
+                    try { newGlyph.value = emojiAtlas.emoji(aUtf32Begin[startCluster], font.height()); }
+                    catch (...) { newGlyph.type.category = text_category::FontEmoji; }
                 if ((selectedFont.style() & font_style::Underline) == font_style::Underline)
                     set_underline(newGlyph, true);
                 if ((selectedFont.style() & font_style::Superscript) == font_style::Superscript)
