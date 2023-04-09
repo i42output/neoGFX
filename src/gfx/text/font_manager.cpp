@@ -534,7 +534,10 @@ namespace neogfx
                 return aDirection;
             };
             
-            currentDirection = bidi_check(currentCategory, currentDirection);
+            if (!newLine)
+                currentDirection = bidi_check(currentCategory, currentDirection);
+            else
+                currentDirection = text_direction::LTR;
             
             hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[codePointIndex]);
             if (currentScript == HB_SCRIPT_COMMON || currentScript == HB_SCRIPT_INHERITED)

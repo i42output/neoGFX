@@ -538,9 +538,12 @@ int main(int argc, char* argv[])
 
             aTimer.again();
 
-            std::ostringstream oss;
-            oss << window.fps() << "/" << window.potential_fps() << " FPS/PFPS";
-            window.labelFPS.set_text(ng::string{ oss.str() });
+            if (window.labelFPS.visible())
+            {
+                std::ostringstream oss;
+                oss << window.fps() << "/" << window.potential_fps() << " FPS/PFPS";
+                window.labelFPS.set_text(ng::string{ oss.str() });
+            }
 
             if (colorCycle)
             {
