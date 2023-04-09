@@ -1872,7 +1872,7 @@ namespace neogfx
             if (aGlyphPosition >= lineStart && aGlyphPosition <= lineEnd)
             {
                 delta alignmentAdjust;
-                auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
+                auto textDirection = glyph_text_direction(line->lineStart.second, line->lineEnd.second);
                 if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
                     ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
                     alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
