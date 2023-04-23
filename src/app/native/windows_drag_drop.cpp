@@ -46,7 +46,7 @@ namespace neogfx
                 HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_window().native_handle());
                 if (++iNativeDragDropTargets[hwndTarget].second == 1)
                 {
-                    iNativeDragDropTargets[hwndTarget].first.emplace(aTarget.as_widget().root().native_surface());
+                    iNativeDragDropTargets[hwndTarget].first.emplace(aTarget.as_widget().root().native_window());
                     auto result = ::RegisterDragDrop(hwndTarget, this);
                     if (result != S_OK)
                         throw failed_drag_drop_registration(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(_com_error(result).ErrorMessage())));
@@ -60,12 +60,25 @@ namespace neogfx
             {
                 HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_window().native_handle());
                 auto existing = iNativeDragDropTargets.find(hwndTarget);
-                if (!existing->second.first->is_destroyed() && --existing->second.second == 0)
+                if (existing != iNativeDragDropTargets.end())
                 {
-                    iNativeDragDropTargets.erase(existing);
-                    auto result = ::RevokeDragDrop(hwndTarget);
-                    if (result != S_OK)
-                        throw failed_drag_drop_unregistration(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(_com_error(result).ErrorMessage())));
+                    if (!existing->second.first->is_destroyed() && --existing->second.second == 0)
+                    {
+                        iNativeDragDropTargets.erase(existing);
+                        auto result = ::RevokeDragDrop(hwndTarget);
+                        if (result != S_OK)
+                            throw failed_drag_drop_unregistration(neolib::utf16_to_utf8(reinterpret_cast<const char16_t*>(_com_error(result).ErrorMessage())));
+                    }
+                }
+                else
+                {
+                    for (auto i = iNativeDragDropTargets.begin(); i != iNativeDragDropTargets.end();)
+                    {
+                        if (i->second.first->is_destroyed())
+                            i = iNativeDragDropTargets.erase(i);
+                        else
+                            ++i;
+                    }
                 }
             }
             base_type::unregister_target(aTarget);
