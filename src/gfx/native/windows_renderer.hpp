@@ -55,13 +55,12 @@ namespace neogfx
             struct virtual_surface_cannot_be_fullscreen : std::logic_error { virtual_surface_cannot_be_fullscreen() : std::logic_error("neogfx::native::windows::renderer::virtual_surface_cannot_be_fullscreen") {} };
             struct no_target_active : std::logic_error { no_target_active() : std::logic_error("neogfx::native::windows::renderer::no_target_active") {} };
         public:
-            renderer(neogfx::renderer aRenderer, bool aDoubleBufferedWindows);
+            renderer(neogfx::renderer aRenderer);
             ~renderer();
         public:
             void initialize() override;
             void cleanup() override;
         public:
-            bool double_buffering() const override;
             bool vsync_enabled() const override;
             void enable_vsync() override;
             void disable_vsync() override;
@@ -74,9 +73,9 @@ namespace neogfx
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
             void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
             bool creating_window() const override;
         public:
             void render_now() override;
@@ -91,7 +90,6 @@ namespace neogfx
             void activate_current_target();
         private:
             bool iInitialized;
-            bool iDoubleBuffering;
             bool iVsyncEnabled;
             std::vector<std::shared_ptr<offscreen_window>> iOffscreenWindowPool;
             std::unordered_map<const i_render_target*, std::shared_ptr<offscreen_window>> iOffscreenWindows;

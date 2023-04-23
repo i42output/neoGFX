@@ -1,7 +1,7 @@
-// opengl_window.hpp
+// native_surface.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2023 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,45 +20,64 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_set>
 #include <boost/lexical_cast.hpp>
+
 #include <neolib/core/string_utils.hpp>
-#include <neogfx/gui/widget/timer.hpp>
+
 #include <neogfx/neogfx.hpp>
+#include <neogfx/core/object.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gfx/texture.hpp>
-#include "../../../gfx/native/opengl.hpp"
-#include "../../../gfx/native/opengl.hpp"
-#include "native_window.hpp"
+#include <neogfx/hid/i_native_surface.hpp>
 
 namespace neogfx
 {
     class i_surface_window;
 
-    class opengl_window : public native_window
+    class native_surface : public reference_counted<object<i_native_surface>>
     {
+        typedef reference_counted<object<i_native_surface>> base_type;
     public:
-        opengl_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow);
-        ~opengl_window();
+        define_declared_event(TargetActivating, target_activating)
+        define_declared_event(TargetActivated, target_activated)
+        define_declared_event(TargetDeactivating, target_deactivating)
+        define_declared_event(TargetDeactivated, target_deactivated)
+    public:
+        struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::native_surface::bad_pause_count") {} };
+    public:
+        native_surface(i_rendering_engine& aRenderingEngine, i_surface_window& aWindow);
+        ~native_surface();
+    public:
+        i_rendering_engine& rendering_engine() const;
+        i_surface_window& surface_window() const;
     public:
         render_target_type target_type() const override;
-        const i_texture& target_texture() const override;
+        void* target_handle() const override;
+        void* target_device_handle() const override;
+        pixel_format_t pixel_format() const override;
         point target_origin() const override;
         size target_extents() const override;
+    public:
+        dimension horizontal_dpi() const override;
+        dimension vertical_dpi() const override;
+        dimension ppi() const override;
+    public:
+        bool metrics_available() const override;
+        size extents() const override;
+        dimension em_size() const override;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
         void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
         neogfx::logical_coordinates logical_coordinates() const override;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
     public:
-        rect_i32 viewport() const override;
-        rect_i32 set_viewport(const rect_i32& aViewport) const override;
-    public:
         bool target_active() const override;
         void activate_target() const override;
         void deactivate_target() const override;
     public:
         neogfx::color_space color_space() const override;
-        color read_pixel(const point& aPosition) const override;
     public:
         uint64_t frame_counter() const override;
         double fps() const override;
@@ -68,35 +87,34 @@ namespace neogfx
         bool has_invalidated_area() const override;
         const rect& invalidated_area() const override;
         rect validate() override;
+        bool can_render() const override;
+        void pause() override;
+        void resume() override;
         void render(bool aOOBRequest = false) override;
         bool is_rendering() const override;
     public:
         void debug(bool aEnableDebug) override;
-    public:
-        bool metrics_available() const override;
-        size extents() const override;
     protected:
-        i_surface_window& surface_window() const override;
         void set_destroying() override;
         void set_destroyed() override;
     private:
-        virtual void display() = 0;
+        virtual void do_activate_target() const = 0;
+        virtual void do_render() = 0;
     private:
         void debug_message(std::string const& aMessage);
     private:
+        i_rendering_engine& iRenderingEngine;
         i_surface_window& iSurfaceWindow;
+        mutable std::optional<pixel_format_t> iPixelFormat;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
-        GLuint iFrameBuffer;
-        mutable optional_texture iFrameBufferTexture;
-        GLuint iDepthStencilBuffer;
-        size iFrameBufferExtents;
         std::optional<rect> iInvalidatedArea;
         uint64_t iFrameCounter;
         typedef std::chrono::time_point<std::chrono::high_resolution_clock> frame_time_point;
         typedef std::pair<frame_time_point, frame_time_point> frame_times;
         std::optional<frame_time_point> iLastFrameTime;
         std::deque<frame_times> iFpsData;
+        uint32_t iPaused;
         bool iRendering;
         bool iDebug;
     };

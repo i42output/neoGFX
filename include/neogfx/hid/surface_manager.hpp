@@ -63,7 +63,7 @@ namespace neogfx
         void invalidate_surfaces() override;
         void render_surfaces() override;
         void display_error_message(std::string const& aTitle, std::string const& aMessage) const override;
-        void display_error_message(const i_native_surface& aParent, std::string const& aTitle, std::string const& aMessage) const override;
+        void display_error_message(const i_native_window& aParent, std::string const& aTitle, std::string const& aMessage) const override;
         uint32_t display_count() const override;
         i_display& display(uint32_t aDisplayIndex = 0) const override;
         i_display& display(const i_surface& aSurface) const override;

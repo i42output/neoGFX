@@ -83,13 +83,13 @@ namespace neogfx
         void render_surface() final;
         void pause_rendering() final;
         void resume_rendering() final;
-        bool has_native_surface() const final;
-        const i_native_surface& native_surface() const final;
-        i_native_surface& native_surface() final;
         bool has_native_window() const final;
         const i_native_window& native_window() const final;
         i_native_window& native_window() final;
         void set_native_window(i_native_window& aNativeWindow) final;
+        bool has_native_surface() const final;
+        const i_native_surface& native_surface() const final;
+        i_native_surface& native_surface() final;
     public:
         void handle_dpi_changed() final;
     public:
@@ -158,7 +158,7 @@ namespace neogfx
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false);
     private:
-        std::optional<destroyed_flag> iNativeSurfaceDestroyed;
+        std::optional<destroyed_flag> iNativeWindowDestroyed;
         i_window& iWindow;
         i_rendering_engine& iRenderingEngine;
         ref_ptr<i_native_window> iNativeWindow;

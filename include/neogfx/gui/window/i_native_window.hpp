@@ -30,7 +30,7 @@ namespace neogfx
 {
     class i_surface_window;
 
-    class i_native_window : public i_native_surface
+    class i_native_window : public i_property_owner, public i_reference_counted
     {
     public:
         typedef neolib::variant<window_event, mouse_event, non_client_mouse_event, keyboard_event> native_event;
@@ -38,15 +38,39 @@ namespace neogfx
         declare_event(filter, native_event&)
         declare_event(added_to_nest)
     public:
+        struct window_not_attached_to_surface : std::logic_error { window_not_attached_to_surface() : std::logic_error("neogfx::i_native_window::window_not_attached_to_surface") {} };
         struct no_current_event : std::logic_error { no_current_event() : std::logic_error("neogfx::i_native_window::no_current_event") {} };
+        struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_native_window::no_parent") {} };
     public:
         typedef i_native_window abstract_type;
     public:
         virtual ~i_native_window() = default;
     public:
+        virtual bool has_parent() const = 0;
         virtual const i_native_window& parent() const = 0;
         virtual i_native_window& parent() = 0;
         virtual bool is_nested() const = 0;
+    public:
+        virtual i_surface_window& surface_window() const = 0;
+    public:
+        virtual void* target_handle() const = 0;
+        virtual void* target_device_handle() const = 0;
+        virtual bool attached() const = 0;
+        virtual i_native_surface& attachment() const = 0;
+        virtual void attach(i_native_surface& aSurface) = 0;
+        virtual void detach() = 0;
+    public:
+        virtual size& pixel_density() const = 0;
+        virtual void handle_dpi_changed() = 0;
+    public:
+        virtual bool initialising() const = 0;
+        virtual void initialisation_complete() = 0;
+        virtual void* handle() const = 0;
+        virtual void* native_handle() const = 0;
+        virtual point surface_position() const = 0;
+        virtual void move_surface(const point& aPosition) = 0;
+        virtual size surface_extents() const = 0;
+        virtual void resize_surface(const size& aExtents) = 0;
     public:
         virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
         virtual bool events_queued() const = 0;
@@ -58,7 +82,6 @@ namespace neogfx
         virtual native_event& current_event() = 0;
         virtual void handle_event() = 0;
         virtual bool processing_event() const = 0;
-        virtual i_surface_window& surface_window() const = 0;
         virtual void close(bool aForce = false) = 0;
         virtual bool placement_changed_explicitly() const = 0;
         virtual void set_placement_changed_explicitly() = 0;
@@ -88,9 +111,12 @@ namespace neogfx
         virtual void release_capture() = 0;
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;
-        virtual double rendering_priority() const = 0;
         virtual i_string const& title_text() const = 0;
         virtual void set_title_text(i_string const& aTitleText) = 0;
         virtual border border_thickness() const = 0;
+    public:
+        virtual bool can_render() const = 0;
+        virtual void render(bool aOOBRequest = false) = 0;
+        virtual void display() = 0;
     };
 }

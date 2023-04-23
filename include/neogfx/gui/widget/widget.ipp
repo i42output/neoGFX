@@ -249,15 +249,15 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_surface& widget<Interface>::physical_surface() const
+    const i_surface& widget<Interface>::real_surface() const
     {
-        return self_type::root().physical_surface();
+        return self_type::root().real_surface();
     }
 
     template <typename Interface>
-    i_surface& widget<Interface>::physical_surface()
+    i_surface& widget<Interface>::real_surface()
     {
-        return self_type::root().physical_surface();
+        return self_type::root().real_surface();
     }
 
     template <typename Interface>

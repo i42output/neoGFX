@@ -72,7 +72,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp">
+    <ClInclude Include="..\..\..\src\gui\window\native\opengl_surface.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font_manager.hpp">
@@ -1128,6 +1128,12 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_image_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\native_surface.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gui\window\native\virtual_surface.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1183,7 +1189,7 @@
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\window\native\opengl_window.cpp">
+    <ClCompile Include="..\..\..\src\gui\window\native\opengl_surface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
@@ -1665,6 +1671,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\native\native_surface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\window\native\virtual_surface.cpp">
+      <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -34,7 +34,7 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include "opengl_renderer.hpp"
 #include "i_native_texture.hpp"
-#include "../../gui/window/native/opengl_window.hpp"
+#include "../../gui/window/native/opengl_surface.hpp"
 #include "opengl_shader_program.hpp"
 #include <neogfx/gfx/vertex_shader.hpp>
 #include <neogfx/gfx/fragment_shader.hpp>
@@ -363,7 +363,7 @@ namespace neogfx
             {
                 auto& surface = service<i_surface_manager>().surface(s);
                 scoped_units su{ surface, units::Pixels };
-                if (surface.has_native_surface() && surface.native_surface().pump_event())
+                if (surface.has_native_surface() && surface.as_surface_window().native_window().pump_event())
                 {
                     didSome = true;
                     finished = false;

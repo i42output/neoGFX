@@ -293,7 +293,7 @@ namespace neogfx
                             service<i_rendering_engine>().create_window(
                                 service<i_surface_manager>(), 
                                 aProxy, 
-                                parent_window().surface().native_surface(), 
+                                parent_window().native_window(),
                                 correctedPlacement.normal_geometry()->top_left(), 
                                 correctedPlacement.normal_geometry()->extents(), 
                                 title_text(), 
@@ -361,25 +361,25 @@ namespace neogfx
         return const_cast<i_surface_window&>(to_const(*this).surface());
     }
 
-    const i_surface_window& window::physical_surface() const
+    const i_surface_window& window::real_surface() const
     {
         if (window::is_surface() && !is_nested())
             return *iSurfaceWindow;
-        auto s = find_physical_surface();
+        auto s = find_real_surface();
         if (s != nullptr)
             return *s;
         throw no_surface();
     }
 
-    i_surface_window& window::physical_surface()
+    i_surface_window& window::real_surface()
     {
-        return const_cast<i_surface_window&>(to_const(*this).physical_surface());
+        return const_cast<i_surface_window&>(to_const(*this).real_surface());
     }
 
     void window::set_surface(i_surface_window& aSurfaceWindow)
     {
         iSurfaceWindow.reset(&aSurfaceWindow);
-        iSurfaceDestroyed.emplace(surface().native_surface());
+        iSurfaceDestroyed.emplace(aSurfaceWindow.native_surface());
     }
 
     bool window::has_native_surface() const
@@ -396,7 +396,9 @@ namespace neogfx
 
     i_native_surface& window::native_surface()
     {
-        return const_cast<i_native_surface&>(to_const(*this).window::native_surface());
+        if (!window::has_native_surface())
+            throw no_native_surface();
+        return surface().native_surface();
     }
 
     bool window::has_native_window() const
@@ -406,12 +408,16 @@ namespace neogfx
 
     const i_native_window& window::native_window() const
     {
-        return static_cast<const i_native_window&>(window::native_surface());
+        if (!window::has_native_window())
+            throw no_native_window();
+        return surface().as_surface_window().native_window();
     }
 
     i_native_window& window::native_window()
     {
-        return const_cast<i_native_window&>(to_const(*this).window::native_window());
+        if (!window::has_native_window())
+            throw no_native_window();
+        return surface().as_surface_window().native_window();
     }
 
     bool window::has_parent_window() const
@@ -1010,7 +1016,7 @@ namespace neogfx
             title_bar().set_title(title_text());
         }
 
-        resize(native_surface().surface_extents());
+        resize(native_window().surface_extents());
 
         set_background_opacity(1.0);
 
@@ -1062,16 +1068,16 @@ namespace neogfx
 
     double window::fps() const
     {
-        if (has_surface())
-            return native_window().fps();
+        if (has_native_surface())
+            return native_surface().fps();
         else
             return 0.0;
     }
 
     double window::potential_fps() const
     {
-        if (has_surface())
-            return native_window().potential_fps();
+        if (has_native_surface())
+            return native_surface().potential_fps();
         else
             return 0.0;
     }

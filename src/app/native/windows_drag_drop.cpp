@@ -18,13 +18,16 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neolib/file/file.hpp>
-#include <neogfx/hid/i_native_surface.hpp>
-#include "windows_drag_drop.hpp"
 
 #include <WinUser.h>
 #include <comdef.h>
 #include <shellapi.h>
+
+#include <neolib/file/file.hpp>
+
+#include <neogfx/hid/i_native_surface.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
+#include "windows_drag_drop.hpp"
 
 namespace neogfx
 {
@@ -40,7 +43,7 @@ namespace neogfx
             base_type::register_target(aTarget);
             if (aTarget.is_widget() && aTarget.as_widget().root().has_native_surface())
             {
-                HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_surface().native_handle());
+                HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_window().native_handle());
                 if (++iNativeDragDropTargets[hwndTarget].second == 1)
                 {
                     iNativeDragDropTargets[hwndTarget].first.emplace(aTarget.as_widget().root().native_surface());
@@ -55,7 +58,7 @@ namespace neogfx
         {
             if (aTarget.is_widget() && aTarget.as_widget().root().has_native_surface())
             {
-                HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_surface().native_handle());
+                HWND hwndTarget = static_cast<HWND>(aTarget.as_widget().root().native_window().native_handle());
                 auto existing = iNativeDragDropTargets.find(hwndTarget);
                 if (!existing->second.first->is_destroyed() && --existing->second.second == 0)
                 {

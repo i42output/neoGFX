@@ -53,7 +53,7 @@ namespace neogfx
     {
         for (auto s : iSurfaces)
         {
-            if (s->has_native_surface() && s->native_surface().initialising())
+            if (s->has_native_surface() && s->as_surface_window().native_window().initialising())
                 return true;
         }
         return false;
@@ -181,7 +181,7 @@ namespace neogfx
     bool surface_manager::is_surface_attached(void* aNativeSurfaceHandle) const
     {
         for (auto s : iSurfaces)
-            if (s->has_native_surface() && s->native_surface().handle() == aNativeSurfaceHandle)
+            if (s->has_native_surface() && s->as_surface_window().native_window().handle() == aNativeSurfaceHandle)
                 return true;
         return false;
     }
@@ -189,7 +189,7 @@ namespace neogfx
     i_surface& surface_manager::attached_surface(void* aNativeSurfaceHandle)
     {
         for (auto s : iSurfaces)
-            if (s->has_native_surface() && s->native_surface().handle() == aNativeSurfaceHandle)
+            if (s->has_native_surface() && s->as_surface_window().native_window().handle() == aNativeSurfaceHandle)
                 return *s;
         throw surface_not_found();
     }
@@ -260,14 +260,14 @@ namespace neogfx
                 continue;
             if (s->surface_type() == surface_type::Window && s->as_surface_window().as_window().is_active())
             {
-                display_error_message(s->native_surface(), aTitle, aMessage);
+                display_error_message(s->as_surface_window().native_window(), aTitle, aMessage);
                 return;
             }
         }
         iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), 0);
     }
 
-    void surface_manager::display_error_message(const i_native_surface& aParent, std::string const& aTitle, std::string const& aMessage) const
+    void surface_manager::display_error_message(const i_native_window& aParent, std::string const& aTitle, std::string const& aMessage) const
     {
         iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), aParent.handle());
     }
@@ -308,7 +308,7 @@ namespace neogfx
     rect surface_manager::desktop_rect(const i_surface& aSurface) const
     {
 #ifdef WIN32
-        HMONITOR monitor = MonitorFromWindow(reinterpret_cast<HWND>(aSurface.native_surface().native_handle()), MONITOR_DEFAULTTONEAREST);
+        HMONITOR monitor = MonitorFromWindow(reinterpret_cast<HWND>(aSurface.as_surface_window().native_window().native_handle()), MONITOR_DEFAULTTONEAREST);
         MONITORINFOEX mi;
         mi.cbSize = sizeof(mi);
         GetMonitorInfo(monitor, &mi);

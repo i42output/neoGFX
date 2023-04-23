@@ -138,11 +138,6 @@ namespace neogfx
         return std::optional<size_u32>{};
     }
 
-    bool program_options::double_buffering() const
-    {
-        return options().count("double-buffer") == 1;
-    }
-
     bool program_options::turbo() const
     {
         return options().count("turbo") == 1;
@@ -910,9 +905,9 @@ namespace neogfx
                     return false;
                 else if (rhs->mnemonic_widget().surface().is_owner_of(lhs->mnemonic_widget().surface()))
                     return true;
-                else if (lhs->mnemonic_widget().has_surface() && lhs->mnemonic_widget().surface().surface_type() == surface_type::Window && static_cast<i_native_window&>(lhs->mnemonic_widget().surface().native_surface()).is_active())
+                else if (lhs->mnemonic_widget().has_surface() && lhs->mnemonic_widget().surface().surface_type() == surface_type::Window && lhs->mnemonic_widget().surface().as_surface_window().native_window().is_active())
                     return true;
-                else if (rhs->mnemonic_widget().has_surface() && rhs->mnemonic_widget().surface().surface_type() == surface_type::Window && static_cast<i_native_window&>(rhs->mnemonic_widget().surface().native_surface()).is_active())
+                else if (rhs->mnemonic_widget().has_surface() && rhs->mnemonic_widget().surface().surface_type() == surface_type::Window && rhs->mnemonic_widget().surface().as_surface_window().native_window().is_active())
                     return false;
                 else
                     return &lhs->mnemonic_widget().surface() < &rhs->mnemonic_widget().surface();

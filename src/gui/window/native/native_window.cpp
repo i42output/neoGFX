@@ -32,9 +32,10 @@
 
 namespace neogfx
 {
-    native_window::native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager) :
+    native_window::native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aSurfaceWindow) :
         iRenderingEngine{ aRenderingEngine },
         iSurfaceManager{ aSurfaceManager },
+        iSurfaceWindow{ aSurfaceWindow },
         iProcessingEvent{ 0u },
         iNonClientEntered{ false },
         iUpdater{ service<i_async_task>(), *this, [this](neolib::callback_timer& aTimer)
@@ -50,7 +51,6 @@ namespace neogfx
                     push_event(window_event{ window_event_type::NonClientLeave });
             }
         }, std::chrono::milliseconds{ 10 } },
-        iPaused{ 0 },
         iInternalWindowActivation{ false },
         iEnteredWindow{ nullptr }
     {
@@ -61,46 +61,38 @@ namespace neogfx
     {
     }
 
-    dimension native_window::horizontal_dpi() const
+    bool native_window::attached() const
     {
-        return pixel_density().cx;
+        return iSurface != nullptr;
     }
 
-    dimension native_window::vertical_dpi() const
+    i_native_surface& native_window::attachment() const
     {
-        return pixel_density().cy;
+        if (iSurface == nullptr)
+            throw window_not_attached_to_surface();
+
+        return *iSurface;
     }
 
-    dimension native_window::ppi() const
+    void native_window::attach(i_native_surface& aSurface)
     {
-        return pixel_density().magnitude() / std::sqrt(2.0);
+        iSurface = aSurface;
+        surface_window().as_window().set_surface(surface_window());
     }
 
-    dimension native_window::em_size() const
+    void native_window::detach()
     {
-        return 0; /* todo */
+        iSurface = nullptr;
     }
 
-    bool native_window::can_render() const
+    i_surface_window& native_window::surface_window() const
     {
-        return !iPaused && surface_window().as_window().ready_to_render();
-    }
-
-    void native_window::pause()
-    {
-        ++iPaused;
-    }
-
-    void native_window::resume()
-    {
-        if (iPaused == 0)
-            throw bad_pause_count();
-        --iPaused;
+        return iSurfaceWindow;
     }
 
     void native_window::display_error_message(std::string const& aTitle, std::string const& aMessage) const
     {
-        iSurfaceManager.display_error_message(*this, aTitle, aMessage);
+        surface_manager().display_error_message(*this, aTitle, aMessage);
     }
 
     bool native_window::events_queued() const
@@ -215,7 +207,7 @@ namespace neogfx
                 break;
             case window_event_type::Resizing:
                 surface_window().native_window_resized();
-                invalidate(rect{ surface_extents() });
+                attachment().invalidate(rect{ surface_extents() });
                 render();
                 break;
             case window_event_type::Resized:
@@ -257,7 +249,7 @@ namespace neogfx
             case window_event_type::FocusLost:
                 if (service<i_window_manager>().window_activated() && &service<i_window_manager>().active_window().native_window() != this)
                 {
-                    auto& activeSurface = service<i_window_manager>().active_window().native_window().surface_window();
+                    auto& activeSurface = service<i_window_manager>().active_window().surface().as_surface_window();
                     if (surface_window().is_owner_of(activeSurface))
                     {
                         activeSurface.native_window_focus_lost();
@@ -292,7 +284,7 @@ namespace neogfx
             auto activate_if = [&]()
             {
                 if (!surfaceWindow.native_window().is_active())
-                    surfaceWindow.native_window().surface_window().native_window_focus_gained();
+                    surfaceWindow.native_window_focus_gained();
             };
             switch (mouseEvent.type())
             {
@@ -431,17 +423,6 @@ namespace neogfx
     bool native_window::processing_event() const
     {
         return iProcessingEvent != 0;
-    }
-
-    double native_window::rendering_priority() const
-    {
-        uint32_t surfacesThatCanRender = 0;
-        for (std::size_t i = 0; i < surface_manager().surface_count(); ++i)
-            if (surface_manager().surface(i).has_native_surface() && surface_manager().surface(i).native_surface().can_render())
-                ++surfacesThatCanRender;
-        if (surfacesThatCanRender == 1 && can_render())
-            return 1.0;
-        return surface_window().native_window_rendering_priority();
     }
 
     i_string const& native_window::title_text() const

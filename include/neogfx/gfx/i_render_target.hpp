@@ -72,7 +72,7 @@ namespace neogfx
         virtual neogfx::color_space color_space() const = 0;
         virtual color read_pixel(const point& aPosition) const = 0;
     public:
-        virtual std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0;
+        virtual std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0; // todo: use ref_ptr
     };
 
     class scoped_render_target

@@ -62,7 +62,6 @@ namespace neogfx
         neogfx::renderer renderer() const final;
         std::optional<size_u32> full_screen() const final;
         std::optional<size_u32> dpi_override() const final;
-        bool double_buffering() const final;
         bool turbo() const final;
         bool nest() const final;
     private:

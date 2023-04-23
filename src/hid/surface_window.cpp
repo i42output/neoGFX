@@ -63,32 +63,32 @@ namespace neogfx
 
     dimension surface_window::horizontal_dpi() const
     {
-        return has_native_window() ? native_window().horizontal_dpi() : DEFAULT_DPI;
+        return has_native_window() ? native_surface().horizontal_dpi() : DEFAULT_DPI;
     }
 
     dimension surface_window::vertical_dpi() const
     {
-        return has_native_window() ? native_window().vertical_dpi() : DEFAULT_DPI;
+        return has_native_window() ? native_surface().vertical_dpi() : DEFAULT_DPI;
     }
 
     dimension surface_window::ppi() const
     {
-        return has_native_window() ? native_window().ppi() : DEFAULT_DPI;
+        return has_native_window() ? native_surface().ppi() : DEFAULT_DPI;
     }
 
     bool surface_window::metrics_available() const
     {
-        return has_native_window() && native_window().metrics_available();
+        return has_native_window() && native_surface().metrics_available();
     }
 
     size surface_window::extents() const
     {
-        return has_native_window() ? native_window().extents() : size{};
+        return has_native_window() ? native_surface().extents() : size{};
     }
 
     dimension surface_window::em_size() const
     {
-        return has_native_window() ? native_window().em_size() : 0; /* todo */
+        return has_native_window() ? native_surface().em_size() : 0; /* todo */
     }
 
     bool surface_window::device_metrics_available() const
@@ -98,7 +98,7 @@ namespace neogfx
 
     const i_device_metrics& surface_window::device_metrics() const
     {
-        return metrics_available() ? native_window() : service<i_surface_manager>().display().metrics();
+        return metrics_available() ? native_surface() : service<i_surface_manager>().display().metrics();
     }
 
     i_rendering_engine& surface_window::rendering_engine() const
@@ -138,9 +138,9 @@ namespace neogfx
         as_window().close();
         if (destroyed)
             return;
-        if (has_native_surface() && !iNativeWindowClosing)
+        if (has_native_window() && !iNativeWindowClosing)
         {
-            native_surface().close();
+            native_window().close();
             if (destroyed)
                 return;
         }
@@ -261,6 +261,12 @@ namespace neogfx
 
     double surface_window::rendering_priority() const
     {
+        uint32_t surfacesThatCanRender = 0;
+        for (std::size_t i = 0; i < service<i_surface_manager>().surface_count(); ++i)
+            if (service<i_surface_manager>().surface(i).has_native_surface() && service<i_surface_manager>().surface(i).native_surface().can_render())
+                ++surfacesThatCanRender;
+        if (surfacesThatCanRender == 1 && native_surface().can_render())
+            return 1.0;
         return as_window().rendering_priority();
     }
 
@@ -282,33 +288,16 @@ namespace neogfx
             native_surface().resume();
     }
 
-    bool surface_window::has_native_surface() const
-    {
-        return iNativeWindow != nullptr && !*iNativeSurfaceDestroyed;
-    }
-
-    const i_native_surface& surface_window::native_surface() const
-    {
-        if (has_native_surface())
-            return *iNativeWindow;
-        throw no_native_surface();
-    }
-
-    i_native_surface& surface_window::native_surface()
-    {
-        return const_cast<i_native_surface&>(to_const(*this).native_surface());
-    }
-
     bool surface_window::has_native_window() const
     {
-        return has_native_surface();
+        return iNativeWindow != nullptr;
     }
 
     const i_native_window& surface_window::native_window() const
     {
-        if (has_native_window())
-            return static_cast<const i_native_window&>(native_surface());
-        throw no_native_window();
+        if (!has_native_window())
+            throw no_native_window();
+        return *iNativeWindow;
     }
 
     i_native_window& surface_window::native_window()
@@ -319,8 +308,24 @@ namespace neogfx
     void surface_window::set_native_window(i_native_window& aNativeWindow)
     {
         iNativeWindow.reset(&aNativeWindow);
-        iNativeSurfaceDestroyed.emplace(*iNativeWindow);
-        as_window().set_surface(*this);
+        iNativeWindowDestroyed.emplace(*iNativeWindow);
+    }
+
+    bool surface_window::has_native_surface() const
+    {
+        return has_native_window() && native_window().attached();
+    }
+
+    const i_native_surface& surface_window::native_surface() const
+    {
+        if (!has_native_surface())
+            throw no_native_surface();
+        return native_window().attachment();
+    }
+
+    i_native_surface& surface_window::native_surface()
+    {
+        return const_cast<i_native_surface&>(to_const(*this).native_surface());
     }
 
     void surface_window::handle_dpi_changed()
@@ -330,22 +335,22 @@ namespace neogfx
 
     point surface_window::surface_position() const
     {
-        return native_surface().surface_position();
+        return native_window().surface_position();
     }
 
     void surface_window::move_surface(const point& aPosition)
     {
-        native_surface().move_surface(aPosition);
+        native_window().move_surface(aPosition);
     }
 
     size surface_window::surface_extents() const
     {
-        return native_surface().surface_extents();
+        return native_window().surface_extents();
     }
 
     void surface_window::resize_surface(const size& aExtents)
     {
-        native_surface().resize_surface(aExtents);
+        native_window().resize_surface(aExtents);
     }
 
     double surface_window::surface_opacity() const
@@ -509,12 +514,12 @@ namespace neogfx
 
     void surface_window::native_window_resized()
     {
-        as_widget().resize(native_surface().surface_extents());
+        as_widget().resize(native_window().surface_extents());
     }
 
     void surface_window::native_window_moved()
     {
-        as_widget().move(native_surface().surface_position());
+        as_widget().move(native_window().surface_position());
     }
 
     double surface_window::native_window_rendering_priority() const

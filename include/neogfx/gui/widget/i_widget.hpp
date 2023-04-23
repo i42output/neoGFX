@@ -96,8 +96,8 @@ namespace neogfx
         virtual bool is_surface() const = 0;
         virtual const i_surface& surface() const = 0;
         virtual i_surface& surface() = 0;
-        virtual const i_surface& physical_surface() const = 0;
-        virtual i_surface& physical_surface() = 0;
+        virtual const i_surface& real_surface() const = 0;
+        virtual i_surface& real_surface() = 0;
         virtual bool has_parent() const = 0;
         virtual const i_widget& parent() const = 0;
         virtual i_widget& parent() = 0;
@@ -264,10 +264,10 @@ namespace neogfx
             return has_surface() && aWidget.has_surface() &&
                 &surface() == &aWidget.surface();
         }
-        bool same_physical_surface(const i_widget& aWidget) const
+        bool same_real_surface(const i_widget& aWidget) const
         {
             return has_surface() && aWidget.has_surface() &&
-                &physical_surface() == &aWidget.physical_surface();
+                &real_surface() == &aWidget.real_surface();
         }
     public:
         bool is_parent_of(const i_widget& aWidget) const

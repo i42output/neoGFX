@@ -63,14 +63,14 @@ template<> neogfx::i_mouse& services::start_service<neogfx::i_mouse>()
 template<> neogfx::i_rendering_engine& services::start_service<neogfx::i_rendering_engine>()
 { 
     auto const& programOptions = service<neogfx::i_app>().program_options();
-    static neogfx::native::windows::renderer sWindowsRenderer{ programOptions.renderer(), programOptions.double_buffering() };
+    static neogfx::native::windows::renderer sWindowsRenderer{ programOptions.renderer() };
     return sWindowsRenderer; 
 }
 
 template<> void services::teardown_service<neogfx::i_rendering_engine>()
 {
     static_cast<neogfx::native::windows::renderer&>(service<neogfx::i_rendering_engine>()).~renderer();
-    new(&service<neogfx::i_rendering_engine>()) neogfx::native::windows::renderer{ neogfx::renderer::None, false };
+    new(&service<neogfx::i_rendering_engine>()) neogfx::native::windows::renderer{ neogfx::renderer::None };
 }
 
 template<> neogfx::i_window_manager& services::start_service<neogfx::i_window_manager>()

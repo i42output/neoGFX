@@ -59,6 +59,7 @@ namespace neogfx
         };
     public:
         struct no_native_surface : std::logic_error { no_native_surface() : std::logic_error("neogfx::i_window::no_native_surface") {} };
+        struct no_native_window : std::logic_error { no_native_window() : std::logic_error("neogfx::i_window::no_native_window") {} };
         struct no_parent_window : std::logic_error { no_parent_window() : std::logic_error("neogfx::i_window::no_parent_window") {} };
         struct not_in_nest : std::logic_error { not_in_nest() : std::logic_error("neogfx::i_window::not_in_nest") {} };
         struct not_nested : std::logic_error { not_nested() : std::logic_error("neogfx::i_window::not_nested") {} };
@@ -179,18 +180,18 @@ namespace neogfx
         {
             return const_cast<i_surface_window*>(to_const(*this).find_surface());
         }
-        const i_surface_window* find_physical_surface() const
+        const i_surface_window* find_real_surface() const
         {
             if (is_surface() && !surface().is_nested_window())
                 return &surface().as_surface_window();
             else if (has_parent_window())
-                return parent_window().find_physical_surface();
+                return parent_window().find_real_surface();
             else
                 return nullptr;
         }
-        i_surface_window* find_physical_surface()
+        i_surface_window* find_real_surface()
         {
-            return const_cast<i_surface_window*>(to_const(*this).find_physical_surface());
+            return const_cast<i_surface_window*>(to_const(*this).find_real_surface());
         }
         bool is_ancestor_of(const i_window& aWindow) const
         {

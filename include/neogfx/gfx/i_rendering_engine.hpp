@@ -78,7 +78,6 @@ namespace neogfx
         virtual const i_device_metrics& default_screen_metrics() const = 0;
     public:
         virtual neogfx::renderer renderer() const = 0;
-        virtual bool double_buffering() const = 0;
         virtual bool vsync_enabled() const = 0;
         virtual void enable_vsync() = 0;
         virtual void disable_vsync() = 0;
@@ -109,9 +108,9 @@ namespace neogfx
         virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
         virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
         virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
-        virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
-        virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
-        virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
+        virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
+        virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
+        virtual void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) = 0;
         ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
         {
             ref_ptr<i_native_window> result;
@@ -130,19 +129,19 @@ namespace neogfx
             create_window(aSurfaceManager, aWindow, aPosition, aDimensions, aWindowTitle, aStyle, result);
             return result;
         }
-        ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
+        ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
         {
             ref_ptr<i_native_window> result;
             create_window(aSurfaceManager, aWindow, aParent, aVideoMode, aWindowTitle, aStyle, result);
             return result;
         }
-        ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
+        ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
         {
             ref_ptr<i_native_window> result;
             create_window(aSurfaceManager, aWindow, aParent, aDimensions, aWindowTitle, aStyle, result);
             return result;
         }
-        ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_surface& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
+        ref_ptr<i_native_window> create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default)
         {
             ref_ptr<i_native_window> result;
             create_window(aSurfaceManager, aWindow, aParent, aPosition, aDimensions, aWindowTitle, aStyle, result);

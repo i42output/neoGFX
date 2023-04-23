@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include "native_window.hpp"
+#include "native_surface.hpp"
 
 namespace neogfx
 {
@@ -33,50 +34,12 @@ namespace neogfx
         virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
         virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle = window_style::Default);
         ~virtual_window();
-    public:
-        render_target_type target_type() const final;
-        const i_texture& target_texture() const final;
-        point target_origin() const final;
-        size target_extents() const final;
-    public:
-        neogfx::logical_coordinate_system logical_coordinate_system() const final;
-        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) final;
-        neogfx::logical_coordinates logical_coordinates() const final;
-        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) final;
-    public:
-        rect_i32 viewport() const final;
-        rect_i32 set_viewport(const rect_i32& aViewport) const final;
-    public:
-        bool target_active() const final;
-        void activate_target() const final;
-        void deactivate_target() const final;
-    public:
-        neogfx::color_space color_space() const final;
-        color read_pixel(const point& aPosition) const final;
-    public:
-        uint64_t frame_counter() const final;
-        double fps() const final;
-        double potential_fps() const final;
-    public:
-        void invalidate(const rect& aInvalidatedRect) final;
-        bool has_invalidated_area() const final;
-        const rect& invalidated_area() const final;
-        rect validate() final;
-        void render(bool aOOBRequest = false) final;
-        bool is_rendering() const final;
-    public:
-        void debug(bool aEnableDebug) final;
-    public:
-        bool metrics_available() const final;
-        size extents() const final;
     protected:
-        i_surface_window& surface_window() const final;
         void set_destroying() final;
         void set_destroyed() final;
     public:
         void* target_handle() const final;
         void* target_device_handle() const final;
-        pixel_format_t pixel_format() const final;
     public:
         bool has_parent() const final;
         const i_native_window& parent() const final;
@@ -93,9 +56,8 @@ namespace neogfx
         void resize_surface(const size& aExtents) final;
     public:
         bool can_render() const final;
-    public:
-        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const final;
-        std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const final;
+        void render(bool aOOBRequest = false) final;
+        void display() final;
     public:
         void close(bool aForce = false) final;
         bool placement_changed_explicitly() const final;

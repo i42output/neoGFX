@@ -75,8 +75,6 @@
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
-#include "../../../gfx/native/opengl.hpp"
-#include "../../../gfx/native/opengl_rendering_context.hpp"
 #include "../../../hid/native/windows_keyboard.hpp"
 #include "../../../hid/native/windows_mouse.hpp"
 #include "windows_window.hpp"
@@ -86,8 +84,6 @@
 #include <Uxtheme.h>
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(lib, "Uxtheme.lib")
-#include <GL/glew.h>
-#include <GL/wglew.h>
 
 namespace neogfx
 {
@@ -181,7 +177,7 @@ namespace neogfx
         std::map<void*, window*> sHandleMap;
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) :
-            opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
+            native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
             iHandle{},
@@ -216,7 +212,7 @@ namespace neogfx
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
-            opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
+            native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
             iHandle{},
@@ -249,9 +245,9 @@ namespace neogfx
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
-            opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
+            native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
-            iStyle(aStyle),
+            iStyle{ aStyle },
             iHandle{},
             iHdc{}
         {
@@ -282,7 +278,7 @@ namespace neogfx
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) :
-            opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
+            native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
             iHandle{},
@@ -317,7 +313,7 @@ namespace neogfx
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
-            opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
+            native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
             iHandle{},
@@ -350,12 +346,11 @@ namespace neogfx
         }
 
         window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
-            opengl_window{ aRenderingEngine, aSurfaceManager, aWindow },
+            native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
             iHandle{},
-            iHdc{},
-            iPixelFormat{}
+            iHdc{}
         {
             neolib::scoped_flag sf{ iInMoveResizeCall };
 
@@ -398,26 +393,28 @@ namespace neogfx
             return iHdc;
         }
 
-        pixel_format_t window::pixel_format() const
+        void window::attach(i_native_surface& aSurface)
         {
-            if (iPixelFormat == std::nullopt)
-                iPixelFormat = service<i_rendering_engine>().set_pixel_format(*this);
-            return *iPixelFormat;
+            native_window::attach(aSurface);
+            iSurfaceSink = aSurface.target_activated([&]()
+                {
+                    if (iFirstActivation)
+                    {
+                        iFirstActivation = false;
+                        ::InvalidateRect(iHandle, NULL, true);
+                    }
+                });
+        }
+
+        void window::detach()
+        {
+            native_window::detach();
+            iFirstActivation = true;
         }
 
         bool window::has_parent() const
         {
             return iParent != nullptr;  
-        }
-
-        void window::activate_target() const
-        {
-            opengl_window::activate_target();
-            if (iFirstActivation)
-            {
-                iFirstActivation = false;
-                ::InvalidateRect(iHandle, NULL, true);
-            }
         }
 
         const i_native_window& window::parent() const
@@ -493,7 +490,7 @@ namespace neogfx
 
         bool window::can_render() const
         {
-            return visible() && opengl_window::can_render();
+            return visible() && attached() && attachment().can_render();
         }
 
         void window::render(bool aOOBRequest)
@@ -501,25 +498,15 @@ namespace neogfx
             if (!can_render())
                 return;
             if (!aOOBRequest)
-                opengl_window::render(aOOBRequest);
-            else if (has_invalidated_area())
+                attachment().render(aOOBRequest);
+            else if (attachment().has_invalidated_area())
             {
-                auto const invalidatedArea = invalidated_area().as<LONG>();
+                auto const invalidatedArea = attachment().invalidated_area().as<LONG>();
                 RECT const rect{ invalidatedArea.left(), invalidatedArea.top(), invalidatedArea.right(), invalidatedArea.bottom() };
                 ::InvalidateRect(iHandle, &rect, true);
-                validate();
+                attachment().validate();
                 ::UpdateWindow(iHandle);
             }
-        }
-
-        std::unique_ptr<i_rendering_context> window::create_graphics_context(blending_mode aBlendingMode) const
-        {
-            return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aBlendingMode });
-        }
-
-        std::unique_ptr<i_rendering_context> window::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
-        {
-            return std::unique_ptr<i_rendering_context>(new opengl_rendering_context{ *this, aWidget, aBlendingMode });
         }
 
         void window::close(bool aForce)
@@ -927,7 +914,8 @@ namespace neogfx
                     {
                         PAINTSTRUCT ps;
                         ::BeginPaint(self.iHandle, &ps);
-                        self.invalidate(neogfx::rect{ basic_point<LONG>{ ps.rcPaint.left, ps.rcPaint.top }, basic_size<LONG>{ ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top } });
+                        if (self.attached())
+                            self.attachment().invalidate(neogfx::rect{ basic_point<LONG>{ ps.rcPaint.left, ps.rcPaint.top }, basic_size<LONG>{ ps.rcPaint.right - ps.rcPaint.left, ps.rcPaint.bottom - ps.rcPaint.top } });
                         self.handle_event(window_event{ window_event_type::Paint });
                         ::EndPaint(self.iHandle, &ps);
                     }
@@ -1473,14 +1461,14 @@ namespace neogfx
 
          void window::set_destroying()
         {
-            opengl_window::set_destroying();
+            native_window::set_destroying();
             release_capture();
             surface_window().native_window_closing();
         }
         
         void window::set_destroyed()
         {
-            opengl_window::set_destroyed();
+            native_window::set_destroyed();
             iHandle = 0;
             surface_window().native_window_closed();
         }
@@ -1504,10 +1492,7 @@ namespace neogfx
 
         void window::display()
         {
-            if (rendering_engine().double_buffering())
-                ::SwapBuffers(static_cast<HDC>(iHdc));
-            else
-                glCheck(glDrawBuffer(GL_FRONT));
+            ::SwapBuffers(static_cast<HDC>(iHdc));
         }
 
     }

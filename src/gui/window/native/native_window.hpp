@@ -21,8 +21,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neolib/core/variant.hpp>
-#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/core/object.hpp>
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 
 namespace neogfx
@@ -33,42 +33,32 @@ namespace neogfx
     class native_window : public reference_counted<object<i_native_window>>
     {
     public:
-        define_declared_event(TargetActivating, target_activating)
-        define_declared_event(TargetActivated, target_activated)
-        define_declared_event(TargetDeactivating, target_deactivating)
-        define_declared_event(TargetDeactivated, target_deactivated)
         define_declared_event(Filter, filter, native_event&)
         define_declared_event(AddedToNest, added_to_nest)
-    public:
-        struct busy_rendering : std::logic_error { busy_rendering() : std::logic_error("neogfx::native_window::busy_rendering") {} };
-        struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::native_window::bad_pause_count") {} };
     private:
         typedef std::deque<native_event> event_queue;
     public:
-        native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager);
+        native_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aSurfaceWindow);
         virtual ~native_window();
     public:
-        dimension horizontal_dpi() const override;
-        dimension vertical_dpi() const override;
-        dimension ppi() const override;
-        dimension em_size() const override;
+        bool attached() const final;
+        i_native_surface& attachment() const final;
+        void attach(i_native_surface& aSurface) override;
+        void detach() override;
     public:
-        bool can_render() const override;
-        void pause() override;
-        void resume() override;
+        i_surface_window& surface_window() const final;
     public:
-        void display_error_message(std::string const& aTitle, std::string const& aMessage) const override;
-        bool events_queued() const override;
-        void push_event(const native_event& aEvent) override;
-        bool pump_event() override;
-        void handle_event(const native_event& aEvent) override;
-        bool has_current_event() const override;
-        const native_event& current_event() const override;
-        native_event& current_event() override;
-        void handle_event() override;
-        bool processing_event() const override;
-        double rendering_priority() const override;
-        i_string const& title_text() const override;
+        void display_error_message(std::string const& aTitle, std::string const& aMessage) const final;
+        bool events_queued() const final;
+        void push_event(const native_event& aEvent) final;
+        bool pump_event() final;
+        void handle_event(const native_event& aEvent) final;
+        bool has_current_event() const final;
+        const native_event& current_event() const final;
+        native_event& current_event() final;
+        void handle_event() final;
+        bool processing_event() const final;
+        i_string const& title_text() const final;
         void set_title_text(i_string const& aTitleText) override;
     public:
         i_rendering_engine& rendering_engine() const;
@@ -76,8 +66,8 @@ namespace neogfx
     public:
         bool non_client_entered() const;
     protected:
-        size& pixel_density() const;
-        void handle_dpi_changed() override;
+        size& pixel_density() const final;
+        void handle_dpi_changed() final;
     protected:
         bool internal_window_activation() const;
         void mouse_entered(i_surface_window& aWindow);
@@ -96,6 +86,7 @@ namespace neogfx
     private:
         i_rendering_engine& iRenderingEngine;
         i_surface_manager& iSurfaceManager;
+        i_surface_window& iSurfaceWindow;
         mutable optional_size iPixelDensityDpi;
         event_queue iEventQueue;
         native_event iCurrentEvent;
@@ -103,9 +94,9 @@ namespace neogfx
         string iTitleText;
         bool iNonClientEntered;
         neolib::callback_timer iUpdater;
-        uint32_t iPaused;
         bool iInternalWindowActivation;
         i_surface_window* iEnteredWindow;
         sink iEnteredWindowEventSink;
+        ref_ptr<i_native_surface> iSurface;
     };
 }

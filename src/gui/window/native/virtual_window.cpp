@@ -29,7 +29,7 @@
 namespace neogfx
 {
     virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
-        native_window{ aRenderingEngine, aSurfaceManager },
+        native_window{ aRenderingEngine, aSurfaceManager, aWindow },
         iSurfaceWindow{ aWindow },
         iParent{ aParent },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
@@ -52,7 +52,7 @@ namespace neogfx
     }
 
     virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
-        native_window{ aRenderingEngine, aSurfaceManager },
+        native_window{ aRenderingEngine, aSurfaceManager, aWindow },
         iSurfaceWindow{ aWindow },
         iParent{ aParent },
         iLogicalCoordinateSystem{ neogfx::logical_coordinate_system::AutomaticGui },
@@ -79,170 +79,13 @@ namespace neogfx
         set_destroyed();
     }
 
-    render_target_type virtual_window::target_type() const
-    {
-        return render_target_type::Surface;
-    }
-
-    const i_texture& virtual_window::target_texture() const
-    {
-        return parent().target_texture();
-    }
-
-    point virtual_window::target_origin() const
-    {
-        return parent().target_origin();
-    }
-
-    size virtual_window::target_extents() const
-    {
-        return parent().target_extents();
-    }
-
-    void virtual_window::activate_target() const
-    {
-        parent().activate_target();
-    }
-
-    bool virtual_window::target_active() const
-    {
-        return parent().target_active();
-    }
-
-    void virtual_window::deactivate_target() const
-    {
-        parent().deactivate_target();
-    }
-
-    color_space virtual_window::color_space() const
-    {
-        return surface_manager().display(surface_window()).color_space();
-    }
-
-    color virtual_window::read_pixel(const point& aPosition) const
-    {
-        return parent().read_pixel(surface_position());
-    }
-
-    neogfx::logical_coordinate_system virtual_window::logical_coordinate_system() const
-    {
-        return iLogicalCoordinateSystem;
-    }
-
-    void virtual_window::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
-    {
-        iLogicalCoordinateSystem = aSystem;
-    }
-
-    logical_coordinates virtual_window::logical_coordinates() const
-    {
-        if (iLogicalCoordinates != std::nullopt)
-            return *iLogicalCoordinates;
-        neogfx::logical_coordinates result;
-        switch (iLogicalCoordinateSystem)
-        {
-        case neogfx::logical_coordinate_system::Specified:
-            throw logical_coordinates_not_specified();
-            break;
-        case neogfx::logical_coordinate_system::AutomaticGui:
-            result.bottomLeft = vec2{ 0.0, parent().extents().cy };
-            result.topRight = vec2{ parent().extents().cx, 0.0 };
-            break;
-        case neogfx::logical_coordinate_system::AutomaticGame:
-            result.bottomLeft = vec2{ 0.0, 0.0 };
-            result.topRight = vec2{ parent().extents().cx, parent().extents().cy };
-            break;
-        }
-        return result;
-    }
-
-    void virtual_window::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates)
-    {
-        iLogicalCoordinates = aCoordinates;
-    }
-
-    rect_i32 virtual_window::viewport() const
-    {
-        return parent().viewport();
-    }
-
-    rect_i32 virtual_window::set_viewport(const rect_i32& aViewport) const
-    {
-        return parent().set_viewport(aViewport);
-    }
-
-    uint64_t virtual_window::frame_counter() const
-    {
-        return parent().frame_counter();
-    }
-
-    double virtual_window::fps() const
-    {
-        return parent().fps();
-    }
-
-    double virtual_window::potential_fps() const
-    {
-        return parent().potential_fps();
-    }
-
-    void virtual_window::invalidate(const rect& aInvalidatedRect)
-    {
-        parent().invalidate(aInvalidatedRect);
-    }
-
-    bool virtual_window::has_invalidated_area() const
-    {
-        return parent().has_invalidated_area();
-    }
-
-    const rect& virtual_window::invalidated_area() const
-    {
-        return parent().invalidated_area();
-    }
-
-    rect virtual_window::validate()
-    {
-        return parent().validate();
-    }
-
-    void virtual_window::render(bool aOOBRequest)
-    {
-        parent().render(aOOBRequest);
-    }
-
-    bool virtual_window::is_rendering() const
-    {
-        return parent().is_rendering();
-    }
-
-    void virtual_window::debug(bool aEnableDebug)
-    {
-        iDebug = aEnableDebug;
-    }
-
-    bool virtual_window::metrics_available() const
-    {
-        return true;
-    }
-
-    size virtual_window::extents() const
-    {
-        return surface_extents();
-    }
-
-    i_surface_window& virtual_window::surface_window() const
-    {
-        return iSurfaceWindow;
-    }
-
     void virtual_window::set_destroying()
     {
         if (!is_alive())
             return;
         native_window::set_destroying();
-        if (target_active())
-            deactivate_target();
+        if (surface_window().native_surface().target_active())
+            surface_window().native_surface().deactivate_target();
         release_capture();
         surface_window().native_window_closing();
     }
@@ -261,11 +104,6 @@ namespace neogfx
     void* virtual_window::target_device_handle() const
     {
         return parent().target_device_handle();
-    }
-
-    pixel_format_t virtual_window::pixel_format() const
-    {
-        return parent().pixel_format();
     }
 
     bool virtual_window::has_parent() const
@@ -316,11 +154,11 @@ namespace neogfx
     void virtual_window::move_surface(const point& aPosition)
     {
         if (!initialising())
-            invalidate(rect{ surface_position(), surface_extents()});
+            surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents()});
         iPosition = aPosition;
         as_widget().move(iPosition);
         if (!initialising())
-            invalidate(rect{ surface_position(), surface_extents() });
+            surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
     }
 
     size virtual_window::surface_extents() const
@@ -331,26 +169,26 @@ namespace neogfx
     void virtual_window::resize_surface(const size& aExtents)
     {
         if (!initialising())
-            invalidate(rect{ surface_position(), surface_extents() });
+            surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
         iExtents = aExtents;
         as_widget().resize(iExtents);
         if (!initialising())
-            invalidate(rect{ surface_position(), surface_extents() });
+            surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
     }
 
     bool virtual_window::can_render() const
     {
-        return visible() && native_window::can_render();
+        return visible() && parent().can_render();
     }
 
-    std::unique_ptr<i_rendering_context> virtual_window::create_graphics_context(blending_mode aBlendingMode) const
+    void virtual_window::render(bool aOOBRequest)
     {
-        return parent().create_graphics_context(aBlendingMode);
+        parent().render(aOOBRequest);
     }
 
-    std::unique_ptr<i_rendering_context> virtual_window::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
+    void virtual_window::display()
     {
-        return parent().create_graphics_context(aWidget, aBlendingMode);
+        parent().display();
     }
 
     void virtual_window::close(bool aForce)
@@ -379,7 +217,7 @@ namespace neogfx
         if (iVisible)
             return;
         iVisible = true;
-        invalidate(rect{ surface_position(), surface_extents() });
+        surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
         if (aActivate)
             activate();
     }
@@ -389,7 +227,7 @@ namespace neogfx
         if (!iVisible)
             return;
         iVisible = false;
-        invalidate(rect{ surface_position(), surface_extents() });
+        surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
     }
 
     double virtual_window::opacity() const
@@ -402,7 +240,7 @@ namespace neogfx
         if (iOpacity != aOpacity)
         { 
             iOpacity = aOpacity;
-            invalidate(rect{ surface_position(), surface_extents() });
+            surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
         }
     }
 
@@ -437,7 +275,7 @@ namespace neogfx
         if (!visible())
             show();
 
-        auto& parentWindow = parent().surface_window().as_window();
+        auto& parentWindow = parent();
         if (!parentWindow.is_effectively_active())
             parentWindow.activate();
         if (!parentWindow.is_effectively_active())
@@ -445,7 +283,7 @@ namespace neogfx
 
         iActive = true;
         surface_window().as_window().activated().trigger();
-        parentWindow.as_widget().update(true);
+        parentWindow.surface_window().as_widget().update(true);
         surface_window().as_widget().update(true);
     }
 
@@ -466,9 +304,9 @@ namespace neogfx
     {
         if (iState != window_state::Iconized)
         {
-            invalidate(rect{ surface_position(), surface_extents() });
+            attachment().invalidate(rect{ surface_position(), surface_extents() });
             iState = window_state::Iconized;
-            invalidate(rect{ surface_position(), surface_extents() });
+            attachment().invalidate(rect{ surface_position(), surface_extents() });
         }
     }
 
@@ -481,9 +319,9 @@ namespace neogfx
     {
         if (iState != window_state::Maximized)
         {
-            invalidate(rect{ surface_position(), surface_extents() });
+            attachment().invalidate(rect{ surface_position(), surface_extents() });
             iState = window_state::Maximized;
-            invalidate(rect{ surface_position(), surface_extents() });
+            attachment().invalidate(rect{ surface_position(), surface_extents() });
         }
     }
 
@@ -496,9 +334,9 @@ namespace neogfx
     {
         if (iState != window_state::Normal)
         {
-            invalidate(rect{ surface_position(), surface_extents() });
+            attachment().invalidate(rect{ surface_position(), surface_extents() });
             iState = window_state::Normal;
-            invalidate(rect{ surface_position(), surface_extents() });
+            attachment().invalidate(rect{ surface_position(), surface_extents() });
         }
     }
 

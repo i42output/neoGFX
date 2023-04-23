@@ -20,6 +20,8 @@
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
 #include "windows_mouse.hpp"
 
 namespace neogfx
@@ -76,7 +78,7 @@ namespace neogfx
         {
             if (iCaptureTarget != nullptr)
                 throw already_capturing();
-            ::SetCapture(static_cast<HWND>(aTarget.native_surface().native_handle()));
+            ::SetCapture(static_cast<HWND>(aTarget.as_surface_window().native_window().native_handle()));
             iCaptureTarget = &aTarget;
             iCaptureType = mouse_capture_type::Normal;
         }

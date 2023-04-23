@@ -24,7 +24,7 @@
 #include <neogfx/hid/video_mode.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/window/window_bits.hpp>
-#include "opengl_window.hpp"
+#include "native_window.hpp"
 
 
 namespace neogfx
@@ -33,7 +33,7 @@ namespace neogfx
     {
         class renderer;
 
-        class window : public opengl_window
+        class window : public native_window
         {
             friend class renderer;
         public:
@@ -79,9 +79,8 @@ namespace neogfx
         public:
             void* target_handle() const final;
             void* target_device_handle() const final;
-            pixel_format_t pixel_format() const final;
-        public:
-            void activate_target() const final;
+            void attach(i_native_surface& aSurface) final;
+            void detach() final;
         public:
             bool has_parent() const final;
             const i_native_window& parent() const final;
@@ -96,12 +95,6 @@ namespace neogfx
             void move_surface(const point& aPosition) final;
             size surface_extents() const final;
             void resize_surface(const size& aExtents) final;
-        public:
-            bool can_render() const final;
-            void render(bool aOOBRequest = false) final;
-        public:
-            std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const final;
-            std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode = blending_mode::Default) const final;
         public:
             void close(bool aForce = false) final;
             bool placement_changed_explicitly() const final;
@@ -134,6 +127,10 @@ namespace neogfx
             void non_client_release_capture() final;
             void set_title_text(i_string const& aTitleText) final;
             border border_thickness() const final;
+        public:
+            bool can_render() const final;
+            void render(bool aOOBRequest = false) final;
+            void display() final;
         protected:
             void set_destroying() final;
             void set_destroyed() final;
@@ -143,14 +140,11 @@ namespace neogfx
         private:
             static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
         private:
-            virtual void display();
-        private:
             window* iParent;
             surface_style iStyle;
             HWND iHandle;
             HDC iHdc;
             mutable bool iFirstActivation = true;
-            mutable std::optional<pixel_format_t> iPixelFormat;
             static window* sNewWindow;
             mutable optional_point iPosition;
             mutable optional_size iExtents;
@@ -166,6 +160,7 @@ namespace neogfx
             mutable border iBorderThickness;
             widget_part_e iClickedWidgetPart = widget_part::Nowhere;
             bool iSystemMenuOpen = false;
+            sink iSurfaceSink;
         };
     }
 }

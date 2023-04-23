@@ -120,7 +120,7 @@ namespace neogfx
             for (auto const& target : iTargets)
                 if (target->can_accept(aObject, hitWidget.to_client_coordinates(nonClientPos)) &&
                     target->is_widget() &&
-                    target->as_widget().same_physical_surface(hitWidget) &&
+                    target->as_widget().same_real_surface(hitWidget) &&
                     (&target->as_widget() == &hitWidget || target->as_widget().is_ancestor_of(hitWidget)))
                     return target;
         }

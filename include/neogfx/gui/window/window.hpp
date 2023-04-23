@@ -72,8 +72,8 @@ namespace neogfx
         bool has_surface() const final;
         const i_surface_window& surface() const final;
         i_surface_window& surface() final;
-        const i_surface_window& physical_surface() const final;
-        i_surface_window& physical_surface() final;
+        const i_surface_window& real_surface() const final;
+        i_surface_window& real_surface() final;
         void set_surface(i_surface_window& aSurfaceWindow) override;
         bool has_native_surface() const final;
         const i_native_surface& native_surface() const final;

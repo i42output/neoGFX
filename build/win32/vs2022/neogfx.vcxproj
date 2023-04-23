@@ -561,8 +561,10 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp" />
+    <ClInclude Include="..\..\..\src\gui\window\native\native_surface.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
-    <ClInclude Include="..\..\..\src\gui\window\native\opengl_window.hpp" />
+    <ClInclude Include="..\..\..\src\gui\window\native\opengl_surface.hpp" />
+    <ClInclude Include="..\..\..\src\gui\window\native\virtual_surface.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\virtual_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_directinput_controller.hpp" />
@@ -722,8 +724,10 @@
     <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\native\native_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp" />
-    <ClCompile Include="..\..\..\src\gui\window\native\opengl_window.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\native\opengl_surface.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\native\virtual_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
