@@ -22,32 +22,35 @@
 #include <neolib/core/string_utils.hpp>
 #include "vulkan_error.hpp"
 
-VkResult& vkGetError()
+namespace neogfx
 {
-    thread_local VkResult result = VK_SUCCESS;
-    return result;
-}
-
-std::string vkErrorString(VkResult aErrorCode)
-{
-    return string_VkResult(aErrorCode);
-}
-
-VkResult vkCheckError(const char* file, unsigned int line)
-{
-    // Get the last error
-    VkResult errorCode = vkGetError();
-
-    if (errorCode < VK_SUCCESS)
+    vk::Result& vkGetError()
     {
-        std::string fileString(file);
-        std::string error = vkErrorString(errorCode);
-        std::string errorMessage = "An internal Vulkan call failed in " +
-            fileString.substr(fileString.find_last_of("\\/") + 1) + " (" + neolib::uint32_to_string<char>(line) + ") : " +
-            error;            
-        neogfx::service<neogfx::debug::logger>() << "neogfx (Vulkan): " << errorMessage << neogfx::endl;
-        throw neogfx::vk_error(errorMessage);
+        thread_local vk::Result result = vk::Result::eSuccess;
+        return result;
     }
 
-    return errorCode;
+    std::string vkErrorString(vk::Result aErrorCode)
+    {
+        return to_string(aErrorCode);
+    }
+
+    vk::Result vkCheckError(const char* file, unsigned int line)
+    {
+        // Get the last error
+        vk::Result errorCode = vkGetError();
+
+        if (errorCode < vk::Result::eSuccess)
+        {
+            std::string fileString(file);
+            std::string error = vkErrorString(errorCode);
+            std::string errorMessage = "An internal Vulkan call failed in " +
+                fileString.substr(fileString.find_last_of("\\/") + 1) + " (" + neolib::uint32_to_string<char>(line) + ") : " +
+                error;
+            service<neogfx::debug::logger>() << "neogfx (Vulkan): " << errorMessage << neogfx::endl;
+            throw vk_error(errorMessage);
+        }
+
+        return errorCode;
+    }
 }

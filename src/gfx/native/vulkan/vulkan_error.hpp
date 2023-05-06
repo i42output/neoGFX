@@ -20,35 +20,35 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <vulkan/vulkan.h>
-
-VkResult& vkGetError();
-
-std::string vkErrorString(VkResult aErrorCode);
-VkResult vkCheckError(const char* file, unsigned int line);
-
-class scoped_vk_check
-{
-public:
-    scoped_vk_check(const char* file, unsigned int line) : iFile{ file }, iLine{ line }
-    {
-    }
-    ~scoped_vk_check()
-    {
-        vkCheckError(iFile, iLine);
-    }
-private:
-    const char* const iFile;
-    unsigned int const iLine;
-};
-
-#ifdef vkCheck
-#undef vkCheck 
-#endif
-#define vkCheck(x) { scoped_vk_check sgc{__FILE__, __LINE__}; vkGetError() = x; }
+#include <vulkan/vulkan.hpp>
 
 namespace neogfx
 {
+    vk::Result& vkGetError();
+
+    std::string vkErrorString(vk::Result aErrorCode);
+    vk::Result vkCheckError(const char* file, unsigned int line);
+
+    class scoped_vk_check
+    {
+    public:
+        scoped_vk_check(const char* file, unsigned int line) : iFile{ file }, iLine{ line }
+        {
+        }
+        ~scoped_vk_check()
+        {
+            vkCheckError(iFile, iLine);
+        }
+    private:
+        const char* const iFile;
+        unsigned int const iLine;
+    };
+
+    #ifdef vkCheck
+    #undef vkCheck 
+    #endif
+    #define vkCheck(x) { scoped_vk_check svc{__FILE__, __LINE__}; vkGetError() = x; }
+
     struct vk_error : std::runtime_error
     {
         vk_error(std::string const& aMessage) : std::runtime_error("neogfx::vk_error: " + aMessage) {};

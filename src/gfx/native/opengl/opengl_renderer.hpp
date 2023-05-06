@@ -30,9 +30,6 @@
 #include "opengl_texture_manager.hpp"
 #include "opengl_helpers.hpp"
 
-std::string glErrorString(GLenum aErrorCode);
-GLenum glCheckError(const char* file, unsigned int line);
-
 namespace neogfx
 {
     class frame_counter

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <type_traits>
+#include <vulkan/vulkan.hpp>
 #include "vulkan_error.hpp"
 
 template <typename T>

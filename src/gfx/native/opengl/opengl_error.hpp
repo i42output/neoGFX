@@ -23,31 +23,31 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-std::string glErrorString(GLenum aErrorCode);
-GLenum glCheckError(const char* file, unsigned int line);
-
-class scoped_gl_check
-{
-public:
-    scoped_gl_check(const char* file, unsigned int line) : iFile{ file }, iLine{ line }
-    {
-    }
-    ~scoped_gl_check()
-    {
-        glCheckError(iFile, iLine);
-    }
-private:
-    const char* const iFile;
-    unsigned int const iLine;
-};
-
-#ifdef glCheck
-#undef glCheck 
-#endif
-#define glCheck(x) { scoped_gl_check sgc{__FILE__, __LINE__}; x; }
-
 namespace neogfx
 {
+    std::string glErrorString(GLenum aErrorCode);
+    GLenum glCheckError(const char* file, unsigned int line);
+
+    class scoped_gl_check
+    {
+    public:
+        scoped_gl_check(const char* file, unsigned int line) : iFile{ file }, iLine{ line }
+        {
+        }
+        ~scoped_gl_check()
+        {
+            glCheckError(iFile, iLine);
+        }
+    private:
+        const char* const iFile;
+        unsigned int const iLine;
+    };
+
+    #ifdef glCheck
+    #undef glCheck 
+    #endif
+    #define glCheck(x) { scoped_gl_check sgc{__FILE__, __LINE__}; x; }
+
     struct opengl_error : std::runtime_error
     {
         opengl_error(std::string const& aMessage) : std::runtime_error("neogfx::opengl_error: " + aMessage) {};
