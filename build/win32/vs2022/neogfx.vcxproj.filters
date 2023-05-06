@@ -40,17 +40,14 @@
     <Filter Include="Source Files\3rdparty">
       <UniqueIdentifier>{18609eac-0e1d-4541-b2c0-7861c70518b9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\native\opengl">
+      <UniqueIdentifier>{b7f620fb-db91-4a8a-9ca8-3e3d8da25c67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\native\vulkan">
+      <UniqueIdentifier>{fcc6c7c9-3006-4e91-bb23-586962955cb6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -67,12 +64,6 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gui\window\native\opengl_surface.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font_manager.hpp">
@@ -363,9 +354,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -422,9 +410,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\core\css.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_helpers.hpp">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp">
       <Filter>Header Files</Filter>
@@ -702,9 +687,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_rendering_context.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -755,9 +737,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_program.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_shader_program.hpp">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_fragment_shader.hpp">
       <Filter>Header Files</Filter>
@@ -923,9 +902,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\support\file\gfx\gltf.hpp">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\gfx\native\use_vertex_arrays.hpp">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_buffer.hpp">
       <Filter>Header Files</Filter>
@@ -1134,6 +1110,42 @@
     <ClInclude Include="..\..\..\src\gui\window\native\virtual_surface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_error.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_helpers.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_renderer.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan.hpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_error.hpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_surface.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\use_vertex_arrays.hpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1187,12 +1199,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\window\native\opengl_surface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp">
@@ -1271,15 +1277,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\neogfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_error.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\app\resource_manager.cpp">
@@ -1387,16 +1384,10 @@
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\text\glyph_text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_rendering_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\core\units.cpp">
@@ -1422,9 +1413,6 @@
     </ClCompile>
     <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp">
       <Filter>Source Files</Filter>
@@ -1677,6 +1665,33 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_surface.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_error.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_helpers.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_renderer.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_rendering_context.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp">
+      <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_error.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_surface.cpp">
+      <Filter>Source Files\native\opengl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

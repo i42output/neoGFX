@@ -27,7 +27,6 @@
 #include FT_BITMAP_H
 #include FT_LCD_FILTER_H
 #include FT_ADVANCES_H
-#include "../../native/opengl.hpp"
 #include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
 #include <neogfx/gfx/text/i_font_manager.hpp>
@@ -382,12 +381,12 @@ namespace neogfx
                     vec2{ iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0, iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0 }.round() },
                 pixelMode })).first->second;
 
-        thread_local std::vector<GLubyte> glyphTextureData;
-        thread_local std::vector<std::array<GLubyte, 4>> subpixelGlyphData;
+        thread_local std::vector<std::uint8_t> glyphTextureData;
+        thread_local std::vector<std::array<std::uint8_t, 4>> subpixelGlyphData;
         glyphTextureData.clear();
         subpixelGlyphData.clear();
 
-        const GLubyte* textureData = 0;
+        const std::uint8_t* textureData = 0;
         
         if (subTextureWidth != 0)
         {

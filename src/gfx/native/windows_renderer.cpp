@@ -30,8 +30,8 @@
 #include <neogfx/gui/window/i_window.hpp>
 #include "../../gui/window/native/windows_window.hpp"
 #include "../../gui/window/native/virtual_window.hpp"
-#include "../../gui/window/native/opengl_surface.hpp"
 #include "../../gui/window/native/virtual_surface.hpp"
+#include "opengl/opengl_surface.hpp"
 #include "windows_renderer.hpp"
 
 namespace neogfx

@@ -31,9 +31,9 @@
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 
-#include "../../../gfx/native/opengl.hpp"
+#include "opengl.hpp"
 
-#include "native_surface.hpp"
+#include "../../../gui/window/native/native_surface.hpp"
 
 namespace neogfx
 {

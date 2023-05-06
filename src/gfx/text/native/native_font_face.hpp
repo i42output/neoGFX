@@ -35,7 +35,6 @@
 #include <harfbuzz\hb.h>
 #include <harfbuzz\hb-ot.h>
 #endif
-#include "..\..\native\opengl.hpp"
 #include <neolib/core/reference_counted.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/hid/i_surface.hpp>

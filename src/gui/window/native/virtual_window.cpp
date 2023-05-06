@@ -23,7 +23,7 @@
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
-#include "../../../gfx/native/opengl_rendering_context.hpp"
+#include "../../../gfx/native/opengl/opengl_rendering_context.hpp"
 #include "virtual_window.hpp"
 
 namespace neogfx

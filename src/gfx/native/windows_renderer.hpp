@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <set>
 #include <map>
-#include "opengl_renderer.hpp"
+#include "opengl/opengl_renderer.hpp"
 
 namespace neogfx
 {

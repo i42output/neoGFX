@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include "opengl.hpp"
 #include <neogfx/core/geometrical.hpp>
-#include "i_native_texture.hpp"
+#include "../i_native_texture.hpp"
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/shader_array.hpp>
 

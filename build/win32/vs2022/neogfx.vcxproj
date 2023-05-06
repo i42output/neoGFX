@@ -92,7 +92,7 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;DEBUG_HID;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
@@ -122,7 +122,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -154,7 +154,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -186,7 +186,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
@@ -547,15 +547,18 @@
     <ClInclude Include="..\..\..\src\app\native\windows_drag_drop.hpp" />
     <ClInclude Include="..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h" />
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_error.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_rendering_context.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_helpers.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_renderer.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_shader_program.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_texture.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\opengl_texture_manager.hpp" />
-    <ClInclude Include="..\..\..\src\gfx\native\use_vertex_arrays.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_error.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_helpers.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_renderer.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_surface.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\use_vertex_arrays.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_error.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\windows_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
@@ -563,7 +566,6 @@
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_surface.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\native_window.hpp" />
-    <ClInclude Include="..\..\..\src\gui\window\native\opengl_surface.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\virtual_surface.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\virtual_window.hpp" />
     <ClInclude Include="..\..\..\src\gui\window\native\windows_window.hpp" />
@@ -626,17 +628,15 @@
     <ClCompile Include="..\..\..\src\gfx\hsl_color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\hsv_color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_error.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_rendering_context.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_helpers.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_renderer.cpp">
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">false</ShowIncludes>
-      <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ShowIncludes>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_shader_program.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_texture.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\native\opengl_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_error.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_helpers.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_renderer.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_rendering_context.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_surface.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\windows_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
     <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
@@ -726,7 +726,6 @@
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp" />
-    <ClCompile Include="..\..\..\src\gui\window\native\opengl_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp" />

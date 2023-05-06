@@ -18,24 +18,29 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/filesystem.hpp>
 #ifdef _WIN32
 #include <ShellScalingApi.h>
 #include <D2d1.h>
 #pragma comment(lib, "Shcore.lib")
 #endif
+
 #include <neolib/task/thread.hpp>
 #include <neolib/app/i_power.hpp>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
+
 #include "opengl_renderer.hpp"
-#include "i_native_texture.hpp"
-#include "../../gui/window/native/opengl_surface.hpp"
+#include "opengl_surface.hpp"
 #include "opengl_shader_program.hpp"
+#include "../i_native_texture.hpp"
+
 #include <neogfx/gfx/vertex_shader.hpp>
 #include <neogfx/gfx/fragment_shader.hpp>
 
