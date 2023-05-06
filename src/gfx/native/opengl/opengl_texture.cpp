@@ -29,7 +29,7 @@ namespace neogfx
 {
     namespace
     {
-        inline std::tuple<GLenum, GLenum, GLenum> to_gl_enum(texture_data_format aDataFormat, texture_data_type aDataType)
+        inline std::tuple<GLenum, GLenum, GLenum> to_gl_enums(texture_data_format aDataFormat, texture_data_type aDataType)
         {
             switch (aDataFormat)
             {
@@ -42,7 +42,7 @@ namespace neogfx
                 case texture_data_type::Float:
                     return std::make_tuple(GL_RGBA32F, GL_RGBA, GL_FLOAT);
                 default:
-                    throw std::logic_error("neogfx::to_gl_enum: bad data type");
+                    throw std::logic_error("neogfx::to_gl_enums: bad data type");
                 }
             case texture_data_format::Red:
                 switch (aDataType)
@@ -52,10 +52,10 @@ namespace neogfx
                 case texture_data_type::Float:
                     return std::make_tuple(GL_R32F, GL_RED, GL_FLOAT);
                 default:
-                    throw std::logic_error("neogfx::to_gl_enum: bad data type");
+                    throw std::logic_error("neogfx::to_gl_enums: bad data type");
                 }
             default:
-                throw std::logic_error("neogfx::to_gl_enum: bad data format");
+                throw std::logic_error("neogfx::to_gl_enums: bad data format");
             }
         }
 
@@ -131,6 +131,7 @@ namespace neogfx
                 glCheck(glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
                 break;
             }
+            auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
             if (sampling() != texture_sampling::Multisample)
             {
                 std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
@@ -157,7 +158,7 @@ namespace neogfx
                                         aColor->alpha<float>()
                                     };
                 }
-                glCheck(glTexImage2D(to_gl_enum(sampling()), 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), data.empty() ? nullptr : &data[0]));
+                glCheck(glTexImage2D(to_gl_enum(sampling()), 0, internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, format, type, data.empty() ? nullptr : &data[0]));
                 if (sampling() == texture_sampling::NormalMipmap)
                 {
                     glCheck(glGenerateMipmap(GL_TEXTURE_2D));
@@ -167,7 +168,7 @@ namespace neogfx
             {
                 if (aColor != std::nullopt)
                     throw multisample_texture_initialization_unsupported();
-                glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
+                glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
             }
             glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
         }
@@ -224,6 +225,7 @@ namespace neogfx
                 throw multisample_texture_initialization_unsupported();
                 break;
             }
+            auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
             switch (aImage.color_format())
             {
             case color_format::RGBA8:
@@ -248,7 +250,7 @@ namespace neogfx
                                 for (std::size_t c = 0; c < 4; ++c)
                                     data[(iSize.cy + 1 - y) * iStorageSize.cx + x][c] = imageData[(y + imagePartOrigin.y - 1) * imageExtents.cx * 4 + (imagePartOrigin.x + x - 1) * 4 + c] / 255.0f;
                     }
-                    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, std::get<0>(to_gl_enum(iDataFormat, kDataType)), static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &data[0]));
+                    glCheck(glTexImage2D(GL_TEXTURE_2D, 0, internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), 0, format, type, &data[0]));
                     if (sampling() == texture_sampling::NormalMipmap)
                     {
                         glCheck(glGenerateMipmap(GL_TEXTURE_2D));
@@ -407,10 +409,11 @@ namespace neogfx
             GLint previousPackAlignment;
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
+            auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
             glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
                 static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y), 
                 static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy),
-                std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), aPixelData));
+                format, type, aPixelData));
             if (sampling() == texture_sampling::NormalMipmap)
             {
                 glCheck(glGenerateMipmap(to_gl_enum(sampling())));
@@ -741,7 +744,8 @@ namespace neogfx
             scoped_render_target srt{ *this };
             avec4u8 pixel;
             basic_point<GLint> pos{ aPosition };
-            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, std::get<1>(to_gl_enum(iDataFormat, kDataType)), std::get<2>(to_gl_enum(iDataFormat, kDataType)), &pixel));
+            auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
+            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, format, type, &pixel));
             return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
         }
         else
