@@ -9,21 +9,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neoGFX", "neogfx.vcxproj", 
 		{7860B48A-5793-4F62-BBA3-A4E63F74339C} = {7860B48A-5793-4F62-BBA3-A4E63F74339C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc", "..\..\..\tools\nrc\build\win32\vs2019\nrc.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nrc", "..\..\..\tools\nrc\build\win32\vs\nrc.vcxproj", "{7860B48A-5793-4F62-BBA3-A4E63F74339C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glsl2hpp", "..\..\..\tools\glsl2hpp\build\win32\vs2019\glsl2hpp.vcxproj", "{16B2402F-6B03-4852-84B1-067F1E5148FD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glsl2hpp", "..\..\..\tools\glsl2hpp\build\win32\vs\glsl2hpp.vcxproj", "{16B2402F-6B03-4852-84B1-067F1E5148FD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "..\..\..\testing\gui_test_app\build\win32\vs2019\test.vcxproj", "{EA135436-DFC4-4277-A66A-BCDE83D37104}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "..\..\..\testing\gui_test_app\build\win32\vs\test.vcxproj", "{EA135436-DFC4-4277-A66A-BCDE83D37104}"
 	ProjectSection(ProjectDependencies) = postProject
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "video_poker", "..\..\..\examples\games\video_poker\build\win32\vs2019\video_poker.vcxproj", "{F5F9072F-F651-43EE-8217-41546643C218}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "video_poker", "..\..\..\examples\games\video_poker\build\win32\vs\video_poker.vcxproj", "{F5F9072F-F651-43EE-8217-41546643C218}"
 	ProjectSection(ProjectDependencies) = postProject
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DesignStudio", "..\..\..\tools\DesignStudio\build\win32\vs2019\DesignStudio.vcxproj", "{FAD0194F-355A-4183-B700-3E80AE541BCB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DesignStudio", "..\..\..\tools\DesignStudio\build\win32\vs\DesignStudio.vcxproj", "{FAD0194F-355A-4183-B700-3E80AE541BCB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{16B2402F-6B03-4852-84B1-067F1E5148FD} = {16B2402F-6B03-4852-84B1-067F1E5148FD}
 		{49E42449-D0D4-4083-AC36-11851B0D80DE} = {49E42449-D0D4-4083-AC36-11851B0D80DE}
@@ -54,7 +54,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "default", "..\..\..\tools\D
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chess", "..\..\..\examples\games\chess\build\win32\vs2019\chess\chess.vcxproj", "{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "chess", "..\..\..\examples\games\chess\build\win32\vs\chess\chess.vcxproj", "{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{405D8C5B-DD6B-418A-9331-D1EA18A5A83D} = {405D8C5B-DD6B-418A-9331-D1EA18A5A83D}
 	EndProjectSection
@@ -66,7 +66,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neos", "..\..\..\tools\Desi
 		{2FD415FA-62C7-400A-87D8-2C3539FEF004} = {2FD415FA-62C7-400A-87D8-2C3539FEF004}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neos", "..\..\..\..\neos\build\win32\vs2019\neos.vcxproj", "{2FD415FA-62C7-400A-87D8-2C3539FEF004}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "neos", "..\..\..\..\neos\build\win32\vs\neos.vcxproj", "{2FD415FA-62C7-400A-87D8-2C3539FEF004}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core.math.universal", "..\..\..\..\neos\concepts\build\win32\vs2017\core\core.math.universal.vcxproj", "{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -219,7 +219,7 @@ Global
 		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools_Debug|x64.ActiveCfg = Debug|x64
 		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools_Debug|x86.ActiveCfg = Debug|Win32
 		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools_Debug|x86.Build.0 = Debug|Win32
-		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools|x64.ActiveCfg = Debug|x64
+		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools|x64.ActiveCfg = Release|x64
 		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools|x86.ActiveCfg = Debug|Win32
 		{BEF3AE5C-19B1-40A2-923E-674B49FF98CA}.Tools|x86.Build.0 = Debug|Win32
 		{3E76BFB0-03A3-4C8A-8026-374B6C932BC0}.Debug|x64.ActiveCfg = Debug|x64
@@ -250,8 +250,8 @@ Global
 		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools_Debug|x64.Build.0 = Debug|x64
 		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools_Debug|x86.ActiveCfg = Debug|Win32
 		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools_Debug|x86.Build.0 = Debug|Win32
-		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools|x64.ActiveCfg = Debug|x64
-		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools|x64.Build.0 = Debug|x64
+		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools|x64.ActiveCfg = Release|x64
+		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools|x64.Build.0 = Release|x64
 		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools|x86.ActiveCfg = Debug|Win32
 		{2FD415FA-62C7-400A-87D8-2C3539FEF004}.Tools|x86.Build.0 = Debug|Win32
 		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Debug|x64.ActiveCfg = Debug|x64
@@ -266,8 +266,8 @@ Global
 		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools_Debug|x64.Build.0 = Debug|x64
 		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools_Debug|x86.ActiveCfg = Debug|Win32
 		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools_Debug|x86.Build.0 = Debug|Win32
-		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools|x64.ActiveCfg = Debug|x64
-		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools|x64.Build.0 = Debug|x64
+		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools|x64.ActiveCfg = Release|x64
+		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools|x64.Build.0 = Release|x64
 		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools|x86.ActiveCfg = Debug|Win32
 		{2C5CBBF6-A2C6-44DF-8528-41747E3ED408}.Tools|x86.Build.0 = Debug|Win32
 		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Debug|x64.ActiveCfg = Debug|x64
@@ -282,8 +282,8 @@ Global
 		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools_Debug|x64.Build.0 = Debug|x64
 		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools_Debug|x86.ActiveCfg = Debug|Win32
 		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools_Debug|x86.Build.0 = Debug|Win32
-		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools|x64.ActiveCfg = Debug|x64
-		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools|x64.Build.0 = Debug|x64
+		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools|x64.ActiveCfg = Release|x64
+		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools|x64.Build.0 = Release|x64
 		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools|x86.ActiveCfg = Debug|Win32
 		{506655A5-90BA-4ACF-A5FC-8E68F9CBBB64}.Tools|x86.Build.0 = Debug|Win32
 	EndGlobalSection

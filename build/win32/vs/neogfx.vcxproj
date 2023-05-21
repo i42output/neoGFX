@@ -32,27 +32,27 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -559,6 +559,8 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\use_vertex_arrays.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_error.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\windows_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font.hpp" />
     <ClInclude Include="..\..\..\src\gfx\text\native\i_native_font_face.hpp" />
@@ -637,6 +639,8 @@
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_error.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\windows_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
     <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
@@ -779,6 +783,7 @@
     <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

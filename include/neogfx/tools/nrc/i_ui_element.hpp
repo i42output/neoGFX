@@ -176,31 +176,47 @@ namespace neogfx::nrc
             }
             return result;
         }
+#ifdef _MSC_VER // workaround for VS2022 compiler bug
+        template <typename T>
+        static T ffs1(auto&& v)
+        {
+            return T{ static_cast<typename T::value_type>(v) };
+        }
+        template <typename T>
+        static T ffs2(auto&& v)
+        {
+            return T::from_string(v);
+        }
+#endif
         template <typename T>
         T get_scalar(const data_t& aData) const
         {
             T result;
-            std::visit([&result](auto&& v)
+            std::visit([&result, &aData](auto&& v)
             {
-// For some reason VS2019 is not suppressing warning C4244 for the conversion marked "Flibble cross" below even though an explicit static_cast is used.
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4244 ) // warning C4244: 'argument': conversion from 'const T' to 'double', possible loss of data
-#endif
-// At the time of writing I am unsure if the line marked "Flibble very cross" below is legal or not: g++ and clang++ disagree.
                 typedef std::decay_t<decltype(v)> vt;
-                if constexpr (std::is_same_v<vt, double>)
+                bool constexpr sourceIsBool = std::is_same_v<vt, bool>;
+                bool constexpr destIsBool = std::is_same_v<T, bool>;
+                bool constexpr sourceIsArithmetic = std::is_arithmetic_v<vt> && !sourceIsBool;
+                bool constexpr destIsArithmetic = std::is_arithmetic_v<T> && !destIsBool;
+                if constexpr (sourceIsArithmetic && destIsArithmetic)
                     result = static_cast<T>(v);
-                else if constexpr (std::is_same_v<vt, int64_t>) 
-                    result = static_cast<T>(v); // Flibble cross
-                else if constexpr (std::is_same_v<vt, neolib::i_string> && std::is_class_v<T>)
-                    result = T::from_string(v.to_std_string()); // Flibble very cross
+                else if constexpr (sourceIsBool && destIsBool)
+                    result = v;
+#ifndef _MSC_VER
+                else if constexpr (std::is_class_v<T> && sourceIsArithmetic)
+                    result = T{ static_cast<typename T::value_type>(v) };
+                else if constexpr (std::is_class_v<T> && std::is_same_v<vt, neolib::i_string>)
+                    result = T::from_string(v.to_std_string());
+#else  // workaround for VS2022 compiler bug
+                else if constexpr (std::is_class_v<T> && sourceIsArithmetic)
+                    result = ffs1<T>(v);
+                else if constexpr (std::is_class_v<T> && std::is_same_v<vt, neolib::i_string>)
+                    result = ffs2<T>(v.to_std_string());
+#endif
                 else
                     throw wrong_type();
             }, aData);
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
             return result;
         }
         template <typename T>

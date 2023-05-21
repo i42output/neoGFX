@@ -134,7 +134,9 @@ namespace neogfx
             auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
             if (sampling() != texture_sampling::Multisample)
             {
-                std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
+                thread_local std::vector<value_type> data;
+                data.clear();
+                data.reserve(iStorageSize.cx * 4 * iStorageSize.cy);
                 if (aColor != std::nullopt)
                 {
                     if constexpr (std::is_same_v<value_type, avec4u8>)
@@ -233,7 +235,9 @@ namespace neogfx
                     size_u32 const imageExtents = aImage.extents();
                     point_u32 const imagePartOrigin = aImagePart.position();
                     size_u32 const imagePartExtents = aImagePart.extents();
-                    std::vector<value_type> data(iStorageSize.cx * 4 * iStorageSize.cy);
+                    thread_local std::vector<value_type> data;
+                    data.clear();
+                    data.reserve(iStorageSize.cx * 4 * iStorageSize.cy);
                     if constexpr (std::is_same_v<value_type, avec4u8>)
                     {
                         const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
@@ -442,7 +446,9 @@ namespace neogfx
         case color_format::RGBA8:
             {
                 const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
-                std::vector<uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                thread_local std::vector<uint8_t> data;
+                data.clear();
+                data.reserve(imagePartExtents.cx * 4 * imagePartExtents.cy);
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
                         for (std::size_t c = 0; c < 4; ++c)

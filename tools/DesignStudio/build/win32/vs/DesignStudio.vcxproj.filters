@@ -185,6 +185,9 @@
     <ClInclude Include="..\..\..\src\property_model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Tools\GeneratedFiles\DesignStudio.ui.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\element_model.ipp">

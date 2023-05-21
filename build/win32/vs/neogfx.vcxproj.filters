@@ -1146,6 +1146,12 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\use_vertex_arrays.hpp">
       <Filter>Source Files\native\opengl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.hpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1692,6 +1698,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_surface.cpp">
       <Filter>Source Files\native\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp">
+      <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
