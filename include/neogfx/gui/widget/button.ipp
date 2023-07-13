@@ -174,9 +174,9 @@ namespace neogfx
         if (base_type::has_maximum_size())
             return base_type::maximum_size();
         auto result = base_type::maximum_size();
-        if (size_policy().horizontal_size_policy() != size_constraint::Minimum)
+        if (size_policy().horizontal_constraint() != size_constraint::Minimum)
             result.cx = size::max_dimension();
-        if (size_policy().vertical_size_policy() != size_constraint::Minimum)
+        if (size_policy().vertical_constraint() != size_constraint::Minimum)
             result.cy = size::max_dimension();
         return result;
     }

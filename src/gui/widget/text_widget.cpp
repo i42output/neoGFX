@@ -161,7 +161,7 @@ namespace neogfx
             if (oldSize != minimum_size())
             {
                 TextGeometryChanged.trigger();
-                if (visible() || parent_layout().ignore_visibility())
+                if (visible() || effective_size_policy().ignore_visibility())
                     update_layout(true, true);
             }
             update();
@@ -175,7 +175,7 @@ namespace neogfx
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
             reset_cache();
-            if (visible() || parent_layout().ignore_visibility())
+            if (visible() || effective_size_policy().ignore_visibility())
                 update_layout(true, true);
         }
     }

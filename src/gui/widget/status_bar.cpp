@@ -71,7 +71,7 @@ namespace neogfx
     {
         set_padding(neogfx::padding{});
         iLayout.set_padding(neogfx::padding{});
-        iLayout.set_ignore_visibility(true);
+        iLayout.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum, visibility_constraint::Ignore });
         iLayout.add(make_ref<separator>(parent()));
         auto insertLock = make_ref<label>();
         insertLock->text_widget().set_text("Insert"_s);
@@ -333,10 +333,9 @@ namespace neogfx
         iNormalWidgetContainer.set_padding(neogfx::padding{});
         iNormalWidgetContainer.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
         iNormalWidgetLayout.set_padding(neogfx::padding{});
-        iNormalWidgetLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
-        iNormalWidgetLayout.set_ignore_visibility(true);
+        iNormalWidgetLayout.set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum, visibility_constraint::Ignore });
         iPermanentWidgetLayout.set_padding(neogfx::padding{});
-        iPermanentWidgetLayout.set_ignore_visibility(true);
+        iPermanentWidgetLayout.set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum, visibility_constraint::Ignore });
         auto update_size_grip = [this](style_aspect)
         {
             auto ink1 = (has_background_color() ? background_color() : service<i_app>().current_style().palette().color(color_role::Background));

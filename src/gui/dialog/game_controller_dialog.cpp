@@ -70,7 +70,8 @@ namespace neogfx
                 iControllerSelector.selection_model().set_current_index(iControllerSelector.presentation_model().rows() - 1);
         }
         iControllerSelector.accept_selection();
-        iTabs.layout().set_ignore_visibility(true);
+        iTabs.layout().set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum, visibility_constraint::Ignore });
+
         center_on_parent();
         set_ready_to_render(true);
     }

@@ -733,7 +733,7 @@ namespace neogfx
                 if (self_type::is_root() && size_policy() != size_constraint::Manual)
                 {
                     size desiredSize = self.extents();
-                    switch (size_policy().horizontal_size_policy())
+                    switch (size_policy().horizontal_constraint())
                     {
                     case size_constraint::Fixed:
                         desiredSize.cx = self.has_fixed_size() ? self.fixed_size().cx : minimum_size(self.extents()).cx;
@@ -747,7 +747,7 @@ namespace neogfx
                     default:
                         break;
                     }
-                    switch (size_policy().vertical_size_policy())
+                    switch (size_policy().vertical_constraint())
                     {
                     case size_constraint::Fixed:
                         desiredSize.cy = self.has_fixed_size() ? self.fixed_size().cy : minimum_size(self.extents()).cy;
@@ -1077,9 +1077,9 @@ namespace neogfx
         }
         else
             result = size::max_size();
-        if (size_policy().horizontal_size_policy() == size_constraint::Maximum)
+        if (size_policy().horizontal_constraint() == size_constraint::Maximum)
             result.cx = size::max_size().cx;
-        if (size_policy().vertical_size_policy() == size_constraint::Maximum)
+        if (size_policy().vertical_constraint() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)

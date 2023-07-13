@@ -275,8 +275,6 @@ namespace neogfx
         virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
         virtual neogfx::autoscale autoscale() const = 0;
         virtual void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) = 0;
-        virtual bool ignore_visibility() const = 0;
-        virtual void set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout = true) = 0;
     public:
         virtual void enable(bool aEnable) = 0;
         virtual bool enabled() const = 0;

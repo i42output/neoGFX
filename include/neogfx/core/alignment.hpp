@@ -39,6 +39,8 @@ namespace neogfx
         Horizontal  = Left | Center | Right | Justify,
         Vertical    = Top | VCenter | Bottom
     };
+
+    typedef optional<alignment> optional_alignment;
 }
 
 begin_declare_enum(neogfx::alignment)

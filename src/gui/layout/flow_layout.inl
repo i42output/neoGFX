@@ -37,10 +37,12 @@ namespace neogfx
         size extent;
         point pos;
         bool previousNonZeroSize = false;
+        auto const ourSizePolicy = effective_size_policy();
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            if (!item.visible() && !ignore_visibility())
+            auto const itemSizePolicy = item.effective_size_policy();
+            if (!item.visible() && !ourSizePolicy.ignore_visibility() && !itemSizePolicy.ignore_visibility())
                 continue;
             auto itemMinimumSize = item.minimum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
@@ -85,10 +87,12 @@ namespace neogfx
         size result;
         coordinate extent = 0.0;
         point pos;
+        auto const ourSizePolicy = effective_size_policy();
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            if (!item.visible() && !ignore_visibility())
+            auto const itemSizePolicy = item.effective_size_policy();
+            if (!item.visible() && !ourSizePolicy.ignore_visibility() && !itemSizePolicy.ignore_visibility())
                 continue;
             auto itemMaximumSize = item.maximum_size(availableSpaceForChildren);
             if (AxisPolicy::cx(itemMaximumSize) != size::max_dimension())
@@ -141,12 +145,12 @@ namespace neogfx
             AxisPolicy::cy(result) = std::min(AxisPolicy::cy(result), AxisPolicy::cy(layout::maximum_size(aAvailableSpace)));
         }
         if (AxisPolicy::cx(result) == 0.0 &&
-            (AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Expanding ||
-            AxisPolicy::size_policy_x(effective_size_policy()) == size_constraint::Maximum))
+            (AxisPolicy::size_policy_x(ourSizePolicy) == size_constraint::Expanding ||
+            AxisPolicy::size_policy_x(ourSizePolicy) == size_constraint::Maximum))
             AxisPolicy::cx(result) = size::max_dimension();
         if (AxisPolicy::cy(result) == 0.0 &&
-            (AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Expanding ||
-                AxisPolicy::size_policy_y(effective_size_policy()) == size_constraint::Maximum))
+            (AxisPolicy::size_policy_y(ourSizePolicy) == size_constraint::Expanding ||
+                AxisPolicy::size_policy_y(ourSizePolicy) == size_constraint::Maximum))
             AxisPolicy::cy(result) = size::max_dimension();
         return result;
     }
@@ -162,10 +166,12 @@ namespace neogfx
         point pos;
         bool previousNonZeroSize = false;
         typename AxisPolicy::minor_layout rows(*this);
+        auto const ourSizePolicy = effective_size_policy();
         for (auto& itemRef : *this)
         {
             auto& item = *itemRef;
-            if (!item.visible() && !ignore_visibility())
+            auto const itemSizePolicy = item.effective_size_policy();
+            if (!item.visible() && !ourSizePolicy.ignore_visibility() && !itemSizePolicy.ignore_visibility())
                 continue;
             if (&item == &*items().back())
                 continue;

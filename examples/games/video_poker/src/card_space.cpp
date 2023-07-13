@@ -33,7 +33,7 @@ namespace video_poker
         iCardSprite{ ng::game::null_entity }
     {
         set_padding(ng::padding{});
-        set_size_policy(ng::size_constraint::Expanding, kBridgeCardSize);
+        set_size_policy(ng::size_constraint::Expanding, ng::visibility_constraint::Ignore, kBridgeCardSize);
         set_ignore_mouse_events(true);
         iCanvas.LayoutCompleted([this]() { update_sprite_geometry(); });
         iCanvas.EntityClicked([this](ng::game::entity_id aEntity)

@@ -398,9 +398,10 @@ namespace neogfx
                 service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ") (cache invalid)" << endl;
 #endif // NEOGFX_DEBUG
             cachedIdealSize = subject().ideal_size(aAvailableSpace);
-            if (effective_size_policy().maintain_aspect_ratio())
+            auto const ourSizePolicy = effective_size_policy();
+            if (ourSizePolicy.maintain_aspect_ratio())
             {
-                auto const& aspectRatio = effective_size_policy().aspect_ratio();
+                auto const& aspectRatio = ourSizePolicy.aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
                     if (cachedIdealSize.cx < cachedIdealSize.cy)
@@ -462,9 +463,10 @@ namespace neogfx
                 service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ") (cache invalid)" << endl;
 #endif // NEOGFX_DEBUG
             cachedMinSize = subject().minimum_size(aAvailableSpace);
-            if (effective_size_policy().maintain_aspect_ratio())
+            auto const ourSizePolicy = effective_size_policy();
+            if (ourSizePolicy.maintain_aspect_ratio())
             {
-                auto const& aspectRatio = effective_size_policy().aspect_ratio();
+                auto const& aspectRatio = ourSizePolicy.aspect_ratio();
                 if (aspectRatio.cx < aspectRatio.cy)
                 {
                     if (cachedMinSize.cx < cachedMinSize.cy)
@@ -689,7 +691,7 @@ namespace neogfx
         auto& cachedVisible = iVisible.second;
         if (iVisible.first != global_layout_id())
         {
-            cachedVisible = subject().visible() || parent_layout().ignore_visibility();
+            cachedVisible = subject().visible() || subject().effective_size_policy().ignore_visibility();
             iVisible.first = global_layout_id();
         }
         return cachedVisible;

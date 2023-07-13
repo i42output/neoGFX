@@ -410,15 +410,28 @@ namespace neogfx
     }
 
     text_edit::paragraph_style::paragraph_style(paragraph_style const& aOther) :
+        iAlignment{ aOther.iAlignment },
         iPadding{ aOther.iPadding },
         iLineSpacing{ aOther.iLineSpacing }
     {
     }
 
-    text_edit::paragraph_style::paragraph_style(optional_padding const& aPadding, optional<double> const& aLineSpacing) :
+    text_edit::paragraph_style::paragraph_style(optional_alignment const& aAlignment, optional_padding const& aPadding, optional<double> const& aLineSpacing) :
+        iAlignment{ aAlignment },
         iPadding{ aPadding },
         iLineSpacing{ aLineSpacing }
     {
+    }
+
+    optional_alignment const& text_edit::paragraph_style::alignment() const
+    {
+        return iAlignment;
+    }
+
+    text_edit::paragraph_style& text_edit::paragraph_style::set_alignment(optional_alignment const& aAlignment)
+    {
+        iAlignment = aAlignment;
+        return *this;
     }
 
     optional_padding const& text_edit::paragraph_style::padding() const
@@ -445,6 +458,8 @@ namespace neogfx
 
     text_edit::paragraph_style& text_edit::paragraph_style::merge(const paragraph_style& aRhs)
     {
+        if (aRhs.alignment() != std::nullopt)
+            iAlignment = aRhs.alignment();
         if (aRhs.padding() != std::nullopt)
             iPadding = aRhs.padding();
         if (aRhs.line_spacing() != std::nullopt)
@@ -454,7 +469,7 @@ namespace neogfx
 
     bool text_edit::paragraph_style::operator==(const paragraph_style& aRhs) const
     {
-        return std::forward_as_tuple(iPadding, iLineSpacing) == std::forward_as_tuple(aRhs.iPadding, aRhs.iLineSpacing);
+        return std::forward_as_tuple(iAlignment, iPadding, iLineSpacing) == std::forward_as_tuple(aRhs.iAlignment, aRhs.iPadding, aRhs.iLineSpacing);
     }
 
     bool text_edit::paragraph_style::operator!=(const paragraph_style& aRhs) const
@@ -464,7 +479,7 @@ namespace neogfx
 
     bool text_edit::paragraph_style::operator<(const paragraph_style& aRhs) const
     {
-        return std::forward_as_tuple(iPadding, iLineSpacing) < std::forward_as_tuple(aRhs.iPadding, aRhs.iLineSpacing);
+        return std::forward_as_tuple(iAlignment, iPadding, iLineSpacing) < std::forward_as_tuple(aRhs.iAlignment, aRhs.iPadding, aRhs.iLineSpacing);
     }
 
     text_edit::style::style() : 
@@ -797,8 +812,8 @@ namespace neogfx
             return;
         }
         scoped_scissor scissor{ aGc, clipRect };
-        if (iDefaultStyle.character().paper_color() != neolib::none)
-            aGc.fill_rect(client_rect(), to_brush(iDefaultStyle.character().paper_color()));
+        if (default_style().character().paper_color() != neolib::none)
+            aGc.fill_rect(client_rect(), to_brush(default_style().character().paper_color()));
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < columns(); ++columnIndex)
         {
@@ -822,10 +837,12 @@ namespace neogfx
                 if (linePos.y > columnRectSansPadding.bottom() || linePos.y > update_rect().bottom())
                     break;
                 auto textDirection = glyph_text_direction(paintLine->lineStart.second, paintLine->lineEnd.second);
-                if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-                    ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+                auto const& paragraphStyle = glyph_style(paintLine->lineStart.second, column);
+                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                    ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                     linePos.x += aGc.from_device_units(size{ columnRectSansPadding.width() - paintLine->extents.cx, 0.0 }).cx;
-                else if ((Alignment & alignment::Horizontal) == alignment::Center)
+                else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
                     linePos.x += std::ceil((aGc.from_device_units(size{ columnRectSansPadding.width() - paintLine->extents.cx, 0.0 }).cx) / 2.0);
                 draw_glyphs(aGc, linePos, column, paintLine);
             }
@@ -1660,20 +1677,6 @@ namespace neogfx
         }
     }
 
-    neogfx::alignment text_edit::alignment() const
-    {
-        return Alignment;
-    }
-
-    void text_edit::set_alignment(neogfx::alignment aAlignment)
-    {
-        if (Alignment != aAlignment)
-        {
-            Alignment = aAlignment;
-            update();
-        }
-    }
-
     const text_edit::style& text_edit::default_style() const
     {
         return iDefaultStyle;
@@ -1682,9 +1685,9 @@ namespace neogfx
     void text_edit::set_default_style(const style& aDefaultStyle, bool aPersist)
     {
         neogfx::font oldFont = font();
-        auto oldEffect = (iDefaultStyle.character().text_effect() == std::nullopt);
+        auto oldEffect = (default_style().character().text_effect() == std::nullopt);
         iDefaultStyle = aDefaultStyle;
-        if (oldFont != font() || oldEffect != (iDefaultStyle.character().text_effect() == std::nullopt))
+        if (oldFont != font() || oldEffect != (default_style().character().text_effect() == std::nullopt))
             refresh_paragraph(iText.begin(), 0);
         iPersistDefaultStyle = aPersist;
         DefaultStyleChanged.trigger();
@@ -1699,6 +1702,21 @@ namespace neogfx
             return static_variant_cast<const gradient&>(default_style().character().text_color()).at(0.0);
         else
             return service<i_app>().current_style().palette().default_text_color_for_widget(*this);
+    }
+
+    alignment text_edit::alignment() const
+    {
+        return default_style().paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+    }
+
+    void text_edit::set_alignment(neogfx::alignment aAlignment)
+    {
+        if (alignment() != aAlignment)
+        {
+            iDefaultStyle.paragraph().set_alignment(aAlignment);
+            DefaultStyleChanged.trigger();
+            update();
+        }
     }
 
     text_edit::style text_edit::current_style() const
@@ -1873,10 +1891,12 @@ namespace neogfx
             {
                 delta alignmentAdjust;
                 auto textDirection = glyph_text_direction(line->lineStart.second, line->lineEnd.second);
-                if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-                    ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+                auto const& paragraphStyle = glyph_style(line->lineStart.second, *column);
+                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                    ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                     alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
-                else if ((Alignment & alignment::Horizontal) == alignment::Center)
+                else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
                     alignmentAdjust.dx = (columnRectSansPadding.cx - line->extents.cx) / 2.0;
                 if (lineStart != lineEnd)
                 {
@@ -1896,10 +1916,12 @@ namespace neogfx
         {
             pos.x = 0.0;
             auto textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
-            if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-                ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+            auto const& paragraphStyle = glyph_style(lines.back().lineStart.second, *column);
+            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                 pos.x = columnRectSansPadding.cx;
-            else if ((Alignment & alignment::Horizontal) == alignment::Center)
+            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
                 pos.x = columnRectSansPadding.cx / 2.0;
             pos.y = lines.back().ypos + lines.back().extents.cy;
         }
@@ -1939,10 +1961,12 @@ namespace neogfx
                 --line;
             delta alignmentAdjust;
             auto const textDirection = glyph_text_direction(lines.back().lineStart.second, lines.back().lineEnd.second);
-            if (((Alignment & alignment::Horizontal) == alignment::Left && textDirection == text_direction::RTL) ||
-                ((Alignment & alignment::Horizontal) == alignment::Right && textDirection == text_direction::LTR))
+            auto const& paragraphStyle = glyph_style(lines.back().lineStart.second, column);
+            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                 alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
-            else if ((Alignment & alignment::Horizontal) == alignment::Center)
+            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
                 alignmentAdjust.dx = (columnRectSansPadding.cx - line->extents.cx) / 2.0;
             adjustedPosition.x -= alignmentAdjust.dx;
             adjustedPosition = adjustedPosition.max(point{});
@@ -2822,9 +2846,10 @@ namespace neogfx
             if (iTextExtents->cy < client_rect(false).cy)
             {
                 auto const space = client_rect(false).cy - iTextExtents->cy;
+                auto const defaultAlignment = default_style().paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
                 auto const adjust =
-                    ((Alignment & alignment::Vertical) == alignment::Bottom) ? space :
-                    ((Alignment & alignment::Vertical) == alignment::VCenter) ? std::floor(space / 2.0) : 0.0;
+                    ((defaultAlignment & neogfx::alignment::Vertical) == neogfx::alignment::Bottom) ? space :
+                    ((defaultAlignment & neogfx::alignment::Vertical) == neogfx::alignment::VCenter) ? std::floor(space / 2.0) : 0.0;
                 if (adjust != 0.0)
                     for (auto& column : iGlyphColumns)
                         for (auto& line : column.lines())

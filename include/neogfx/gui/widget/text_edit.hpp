@@ -157,8 +157,10 @@ namespace neogfx
         public:
             paragraph_style();
             paragraph_style(paragraph_style const& aOther);
-            paragraph_style(optional_padding const& aPadding, optional<double> const& aLineSpacing);
+            paragraph_style(optional_alignment const& aAlignment, optional_padding const& aPadding = {}, optional<double> const& aLineSpacing = {});
         public:
+            optional_alignment const& alignment() const;
+            paragraph_style& set_alignment(optional_alignment const& aALignment = {});
             optional_padding const& padding() const;
             paragraph_style& set_padding(optional_padding const& aPadding = {});
             optional<double> const& line_spacing() const;
@@ -170,6 +172,7 @@ namespace neogfx
             bool operator!=(const paragraph_style& aRhs) const;
             bool operator<(const paragraph_style& aRhs) const;
         public:
+            optional_alignment iAlignment;
             optional_padding iPadding;
             optional<double> iLineSpacing;
         };
@@ -441,11 +444,11 @@ namespace neogfx
         bool password() const;
         i_string const& password_mask() const;
         void set_password(bool aPassword, i_string const& aMask = string{ "\xE2\x97\x8F" });
-        neogfx::alignment alignment() const;
-        void set_alignment(neogfx::alignment aAlignment);
         const style& default_style() const;
         void set_default_style(style const& aDefaultStyle, bool aPersist = false);
         color default_text_color() const;
+        neogfx::alignment alignment() const;
+        void set_alignment(neogfx::alignment aAlignment);
     public:
         style current_style() const;
         void apply_style(style const& aStyle);
@@ -579,7 +582,6 @@ namespace neogfx
         define_property(property_category::other, uint32_t, GrowLines, grow_lines, 5u)
         define_property(property_category::other, bool, Password, password, false)
         define_property(property_category::other, string, PasswordMask, password_mask)
-        define_property(property_category::other, neogfx::alignment, Alignment, alignment, neogfx::alignment::Left | neogfx::alignment::Top)
     };
 
     extern template class basic_glyph_text_content<text_edit::glyph_container_type>;

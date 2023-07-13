@@ -121,7 +121,7 @@ namespace neogfx
         if (oldSize != minimum_size() || oldTextureSize != image().extents())
         {
             ImageGeometryChanged.trigger();
-            if (has_parent_layout() && (visible() || parent_layout().ignore_visibility()))
+            if (visible() || effective_size_policy().ignore_visibility())
                 update_layout(true, true);
         }
         update();

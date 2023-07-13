@@ -112,7 +112,6 @@ namespace neogfx
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
-        iIgnoreVisibility{ false },
         iEnabled{ false },
         iLayoutStarted{ false },
         iInvalidated{ false }
@@ -126,7 +125,6 @@ namespace neogfx
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
-        iIgnoreVisibility{ false },
         iEnabled{ false },
         iLayoutStarted{ false },
         iInvalidated{ false }
@@ -141,7 +139,6 @@ namespace neogfx
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
-        iIgnoreVisibility{ false },
         iEnabled{ false },
         iLayoutStarted{ false },
         iInvalidated{ false }
@@ -451,21 +448,6 @@ namespace neogfx
         }
     }
 
-    bool layout::ignore_visibility() const
-    {
-        return iIgnoreVisibility || (has_parent_layout() && parent_layout().ignore_visibility());
-    }
-
-    void layout::set_ignore_visibility(bool aIgnoreVisibility, bool aUpdateLayout)
-    {
-        if (iIgnoreVisibility != aIgnoreVisibility)
-        {
-            iIgnoreVisibility = aIgnoreVisibility;
-            if (aUpdateLayout)
-                invalidate();
-        }
-    }
-
     void layout::enable(bool aEnable)
     {
         if (iEnabled != aEnable)
@@ -565,16 +547,17 @@ namespace neogfx
             auto& item = *i;
             if (item.is_spacer())
                 continue;
-            if (!item.visible() && !ignore_visibility())
+            auto const itemSizePolicy = item.effective_size_policy();
+            if (!item.visible() && !itemSizePolicy.ignore_visibility())
                 continue;
-            if (item.effective_size_policy().horizontal_size_policy() == size_constraint::Expanding)
-                result.set_horizontal_size_policy(size_constraint::Expanding);
-            else if (item.effective_size_policy().horizontal_size_policy() == size_constraint::Maximum)
-                result.set_horizontal_size_policy(size_constraint::Maximum);
-            if (item.effective_size_policy().vertical_size_policy() == size_constraint::Expanding)
-                result.set_vertical_size_policy(size_constraint::Expanding);
-            else if (item.effective_size_policy().vertical_size_policy() == size_constraint::Maximum)
-                result.set_vertical_size_policy(size_constraint::Maximum);
+            if (itemSizePolicy.horizontal_constraint() == size_constraint::Expanding)
+                result.set_horizontal_constraint(size_constraint::Expanding);
+            else if (itemSizePolicy.horizontal_constraint() == size_constraint::Maximum)
+                result.set_horizontal_constraint(size_constraint::Maximum);
+            if (itemSizePolicy.vertical_constraint() == size_constraint::Expanding)
+                result.set_vertical_constraint(size_constraint::Expanding);
+            else if (itemSizePolicy.vertical_constraint() == size_constraint::Maximum)
+                result.set_vertical_constraint(size_constraint::Maximum);
         }
         return result;
     }
@@ -704,10 +687,12 @@ namespace neogfx
     uint32_t layout::items_visible(item_type_e aItemType) const
     {
         uint32_t count = 0u;
+        auto const ourSizePolicy = effective_size_policy();
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            if (item.visible() || ignore_visibility())
+            auto const itemSizePolicy = item.effective_size_policy();
+            if (item.visible() || ourSizePolicy.ignore_visibility() || itemSizePolicy.ignore_visibility())
             {
                 if ((aItemType & ItemTypeWidget) && item.is_widget())
                     ++count;

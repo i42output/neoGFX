@@ -38,6 +38,12 @@ namespace neogfx
         Manual
     };
 
+    enum class visibility_constraint : uint32_t
+    {
+        Ignore,
+        Consider
+    };
+    
     enum class aspect_ratio : uint32_t
     {
         Ignore,
@@ -79,6 +85,11 @@ declare_enum_string(neogfx::size_constraint, ExpandingUniform)
 declare_enum_string(neogfx::size_constraint, Manual)
 end_declare_enum(neogfx::size_constraint)
 
+begin_declare_enum(neogfx::visibility_constraint)
+declare_enum_string(neogfx::visibility_constraint, Ignore)
+declare_enum_string(neogfx::visibility_constraint, Consider)
+end_declare_enum(neogfx::visibility_constraint)
+
 begin_declare_enum(neogfx::aspect_ratio)
 declare_enum_string(neogfx::aspect_ratio, Ignore)
 declare_enum_string(neogfx::aspect_ratio, Stretch)
@@ -114,48 +125,80 @@ namespace neogfx
     public:
         struct no_aspect_ratio : std::logic_error { no_aspect_ratio() : std::logic_error("neogfx::size_policy::no_aspect_ratio") {} };
     public:
-        size_policy(size_constraint aConstraint, optional_size const& aAspectRatio = {}) :
-            iHorizontalConstraint{ aConstraint }, iVerticalConstraint{ aConstraint }, iAspectRatio{ aAspectRatio }
+        size_policy(
+            size_constraint aSizeConstraint, 
+            visibility_constraint aVisibility = visibility_constraint::Consider,
+            optional_size const& aAspectRatio = {}) :
+            iHorizontalConstraint{ aSizeConstraint }, 
+            iVerticalConstraint{ aSizeConstraint }, 
+            iVisibility{ aVisibility },
+            iAspectRatio{ aAspectRatio }
         {
         }
-        size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, optional_size const& aAspectRatio = {}) :
-            iHorizontalConstraint{ aHorizontalConstraint }, iVerticalConstraint{ aVerticalConstraint }, iAspectRatio{ aAspectRatio }
+        size_policy(
+            size_constraint aHorizontalConstraint, 
+            size_constraint aVerticalConstraint, 
+            visibility_constraint aVisibility = visibility_constraint::Consider,
+            optional_size const& aAspectRatio = {}) :
+            iHorizontalConstraint{ aHorizontalConstraint }, 
+            iVerticalConstraint{ aVerticalConstraint }, 
+            iVisibility{ aVisibility },
+            iAspectRatio{ aAspectRatio }
         {
         }
     public:
         bool operator==(const size_policy& aRhs) const
         {
-            return iHorizontalConstraint == aRhs.iHorizontalConstraint && iVerticalConstraint == aRhs.iVerticalConstraint && iAspectRatio == aRhs.iAspectRatio;
+            return iHorizontalConstraint == aRhs.iHorizontalConstraint &&
+                iVerticalConstraint == aRhs.iVerticalConstraint &&
+                iVisibility == aRhs.iVisibility &&
+                iAspectRatio == aRhs.iAspectRatio;
         }
         bool operator!=(const size_policy& aRhs) const
         {
             return !(*this == aRhs);
         }
     public:
-        size_constraint horizontal_size_policy(bool aIgnoreUniformity = true) const
+        size_constraint horizontal_constraint(bool aIgnoreUniformity = true) const
         {
             if (iHorizontalConstraint != size_constraint::ExpandingUniform)
                 return iHorizontalConstraint;
             return aIgnoreUniformity ? size_constraint::Expanding : size_constraint::ExpandingUniform;
         }
-        size_constraint vertical_size_policy(bool aIgnoreUniformity = true) const
+        size_constraint vertical_constraint(bool aIgnoreUniformity = true) const
         {
             if (iVerticalConstraint != size_constraint::ExpandingUniform)
                 return iVerticalConstraint;
             return aIgnoreUniformity ? size_constraint::Expanding : size_constraint::ExpandingUniform;
         }
-        void set_size_policy(size_constraint aConstraint)
+        size_policy& set_constraint(size_constraint aConstraint)
         {
             iHorizontalConstraint = aConstraint;
             iVerticalConstraint = aConstraint;
+            return *this;
         }
-        void set_horizontal_size_policy(size_constraint aHorizontalConstraint)
+        size_policy& set_horizontal_constraint(size_constraint aHorizontalConstraint)
         {
             iHorizontalConstraint = aHorizontalConstraint;
+            return *this;
         }
-        void set_vertical_size_policy(size_constraint aVerticalConstraint)
+        size_policy& set_vertical_constraint(size_constraint aVerticalConstraint)
         {
             iVerticalConstraint = aVerticalConstraint;
+            return *this;
+        }
+        visibility_constraint visibility() const
+        {
+            return iVisibility;
+        }
+        bool ignore_visibility() const
+        {
+            return iVisibility == visibility_constraint::Ignore;
+        }
+        size_policy& set_ignore_visibility(bool aIgnoreVisibility)
+        {
+            iVisibility = (aIgnoreVisibility ? visibility_constraint::Ignore : visibility_constraint::Consider);
+            return *this;
         }
         bool maintain_aspect_ratio() const
         {
@@ -167,9 +210,10 @@ namespace neogfx
                 return *iAspectRatio;
             throw no_aspect_ratio();
         }
-        void set_aspect_ratio(optional_size const& aAspectRatio)
+        size_policy& set_aspect_ratio(optional_size const& aAspectRatio)
         {
             iAspectRatio = aAspectRatio;
+            return *this;
         }
     public:
         static size_policy from_string(std::string const& aHorizontalConstraint, std::string const& aVerticalConstraint)
@@ -180,23 +224,24 @@ namespace neogfx
         }
         void to_string(std::string& aHorizontalConstraint, std::string& aVerticalConstraint) const
         {
-            aHorizontalConstraint = enum_to_string(horizontal_size_policy());
-            aVerticalConstraint = enum_to_string(vertical_size_policy());
+            aHorizontalConstraint = enum_to_string(horizontal_constraint());
+            aVerticalConstraint = enum_to_string(vertical_constraint());
         }
     private:
         size_constraint iHorizontalConstraint;
         size_constraint iVerticalConstraint;
+        visibility_constraint iVisibility;
         optional_size iAspectRatio;
     };
 
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const size_policy& aPolicy)
     {
-        aStream << "{" << aPolicy.horizontal_size_policy() << " " << aPolicy.vertical_size_policy() << " " << (aPolicy.maintain_aspect_ratio() ? aPolicy.aspect_ratio() : optional_size{}) << "}";
+        aStream << "{" << aPolicy.horizontal_constraint() << " " << aPolicy.vertical_constraint() << " " << aPolicy.visibility() << " " << (aPolicy.maintain_aspect_ratio() ? aPolicy.aspect_ratio() : optional_size{}) << "}";
         return aStream;
     }
 
-    typedef optional<size_policy> optional_size_policy;
+    using optional_size_policy = optional<size_policy>;
 
     template <typename Elem, typename Traits>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const optional_size_policy& aPolicy)
@@ -259,40 +304,48 @@ namespace neogfx
         size apply_fixed_size(size const& aResult) const
         {
             auto newResult = aResult;
-            if (size_policy().horizontal_size_policy() == size_constraint::Fixed && has_fixed_size())
+            if (size_policy().horizontal_constraint() == size_constraint::Fixed && has_fixed_size())
                 newResult.cx = fixed_size().cx;
-            if (size_policy().vertical_size_policy() == size_constraint::Fixed && has_fixed_size())
+            if (size_policy().vertical_constraint() == size_constraint::Fixed && has_fixed_size())
                 newResult.cy = fixed_size().cy;
             return newResult;
         }
         neogfx::size_policy effective_size_policy() const
         {
             auto effectivePolicy = size_policy();
-            if (effectivePolicy.horizontal_size_policy() == size_constraint::MinimumExpanding)
-                effectivePolicy.set_horizontal_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
-            else if (effectivePolicy.horizontal_size_policy() == size_constraint::DefaultMinimumExpanding)
-                effectivePolicy.set_horizontal_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
-            if (effectivePolicy.vertical_size_policy() == size_constraint::MinimumExpanding)
-                effectivePolicy.set_vertical_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
-            else if (effectivePolicy.vertical_size_policy() == size_constraint::DefaultMinimumExpanding)
-                effectivePolicy.set_vertical_size_policy(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            if (effectivePolicy.horizontal_constraint() == size_constraint::MinimumExpanding)
+                effectivePolicy.set_horizontal_constraint(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            else if (effectivePolicy.horizontal_constraint() == size_constraint::DefaultMinimumExpanding)
+                effectivePolicy.set_horizontal_constraint(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            if (effectivePolicy.vertical_constraint() == size_constraint::MinimumExpanding)
+                effectivePolicy.set_vertical_constraint(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
+            else if (effectivePolicy.vertical_constraint() == size_constraint::DefaultMinimumExpanding)
+                effectivePolicy.set_vertical_constraint(has_weight() ? size_constraint::Expanding : size_constraint::Minimum);
             return effectivePolicy;
         }
         void set_size_policy(size_constraint aConstraint, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aConstraint }, aUpdateLayout);
         }
-        void set_size_policy(size_constraint aConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
+        void set_size_policy(size_constraint aConstraint, visibility_constraint aVisibility, bool aUpdateLayout = true)
         {
-            set_size_policy(neogfx::size_policy{ aConstraint, aAspectRatio }, aUpdateLayout);
+            set_size_policy(neogfx::size_policy{ aConstraint, aVisibility }, aUpdateLayout);
+        }
+        void set_size_policy(size_constraint aConstraint, visibility_constraint aVisibility, const size& aAspectRatio, bool aUpdateLayout = true)
+        {
+            set_size_policy(neogfx::size_policy{ aConstraint, aVisibility, aAspectRatio }, aUpdateLayout);
         }
         void set_size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, bool aUpdateLayout = true)
         {
             set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint }, aUpdateLayout);
         }
-        void set_size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, const size& aAspectRatio, bool aUpdateLayout = true)
+        void set_size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, visibility_constraint aVisibility, bool aUpdateLayout = true)
         {
-            set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint, aAspectRatio }, aUpdateLayout);
+            set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint, aVisibility }, aUpdateLayout);
+        }
+        void set_size_policy(size_constraint aHorizontalConstraint, size_constraint aVerticalConstraint, visibility_constraint aVisibility, const size& aAspectRatio, bool aUpdateLayout = true)
+        {
+            set_size_policy(neogfx::size_policy{ aHorizontalConstraint, aVerticalConstraint, aVisibility, aAspectRatio }, aUpdateLayout);
         }
         void set_minimum_width(dimension aWidth, bool aUpdateLayout = true)
         {
