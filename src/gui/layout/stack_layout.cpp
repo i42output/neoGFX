@@ -58,12 +58,11 @@ namespace neogfx
         size result;
         if (items_visible() != 0)
         {
-            auto const ourSizePolicy = effective_size_policy();
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
                 auto const itemSizePolicy = item.effective_size_policy();
-                if (!item.visible() && !ourSizePolicy.ignore_visibility() && !itemSizePolicy.ignore_visibility())
+                if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
                     continue;
                 result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
                 result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
@@ -79,12 +78,11 @@ namespace neogfx
     size stack_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
         size result{ size::max_size() };
-        auto const ourSizePolicy = effective_size_policy();
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
             auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible() && !ourSizePolicy.ignore_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
                 continue;
             auto const& itemMaxSize = item.maximum_size(aAvailableSpace);
             if (itemMaxSize.cx != 0.0)

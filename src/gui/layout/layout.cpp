@@ -112,6 +112,7 @@ namespace neogfx
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
+        iChildVisibility{ visibility_constraint::Consider },
         iEnabled{ false },
         iLayoutStarted{ false },
         iInvalidated{ false }
@@ -125,6 +126,7 @@ namespace neogfx
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
+        iChildVisibility{ visibility_constraint::Consider },
         iEnabled{ false },
         iLayoutStarted{ false },
         iInvalidated{ false }
@@ -139,6 +141,7 @@ namespace neogfx
         iAlwaysUseSpacing{ false },
         iAlignment{ aAlignment },
         iAutoscale{ neogfx::autoscale::Default },
+        iChildVisibility{ visibility_constraint::Consider },
         iEnabled{ false },
         iLayoutStarted{ false },
         iInvalidated{ false }
@@ -448,6 +451,21 @@ namespace neogfx
         }
     }
 
+    visibility_constraint layout::child_visibility() const
+    {
+        return iChildVisibility;
+    }
+
+    bool layout::ignore_child_visibility() const
+    {
+        return iChildVisibility == visibility_constraint::Ignore;
+    }
+
+    void layout::set_ignore_child_visibility(bool aIgnoreChildVisibility)
+    {
+        iChildVisibility = (aIgnoreChildVisibility ? visibility_constraint::Ignore : visibility_constraint::Consider);
+    }
+
     void layout::enable(bool aEnable)
     {
         if (iEnabled != aEnable)
@@ -687,12 +705,11 @@ namespace neogfx
     uint32_t layout::items_visible(item_type_e aItemType) const
     {
         uint32_t count = 0u;
-        auto const ourSizePolicy = effective_size_policy();
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
             auto const itemSizePolicy = item.effective_size_policy();
-            if (item.visible() || ourSizePolicy.ignore_visibility() || itemSizePolicy.ignore_visibility())
+            if (item.visible() || ignore_child_visibility() || itemSizePolicy.ignore_visibility())
             {
                 if ((aItemType & ItemTypeWidget) && item.is_widget())
                     ++count;

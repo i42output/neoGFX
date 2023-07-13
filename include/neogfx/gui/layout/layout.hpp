@@ -113,6 +113,9 @@ namespace neogfx
         void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
         neogfx::autoscale autoscale() const override;
         void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) override;
+        visibility_constraint child_visibility() const override;
+        bool ignore_child_visibility() const override;
+        void set_ignore_child_visibility(bool aIgnoreChildVisibility) override;
     public:
         using i_layout::enable;
         void enable(bool aEnable) override;
@@ -171,6 +174,7 @@ namespace neogfx
         bool iAlwaysUseSpacing;
         neogfx::alignment iAlignment;
         neogfx::autoscale iAutoscale;
+        visibility_constraint iChildVisibility;
         bool iEnabled;
         item_list iItems;
         bool iLayoutStarted;
