@@ -29,16 +29,26 @@ namespace neogfx
     // todo: this should adapt a generic (non-rendering API specific) shader program object
     class opengl_shader_program : public standard_shader_program
     {
+    private:
+        typedef std::vector<GLubyte> ubo_block_buffer_t;
     public:
         opengl_shader_program(std::string const& aName = "standard_shader_program");
     public:
         void compile() override;
         void link() override;
         void use() override;
+        void update_uniform_storage() override;
         void update_uniform_locations() override;
         void update_uniforms(const i_rendering_context& aContext) override;
         void deactivate() override;
     private:
         GLuint gl_handle() const;
+        ubo_block_buffer_t& ubo_block_buffer(shader_type aShaderType);
+        GLuint ubo_handle(shader_type aShaderType) const;
+        struct ubo
+        {
+            ubo_block_buffer_t uniformBlockBuffer;
+            mutable std::optional<GLuint> uboHandle;
+        } iUbos[static_cast<std::size_t>(shader_type::COUNT)];
     };
 }

@@ -27,23 +27,40 @@
 
 namespace neogfx
 {
+    template <typename Base = i_shader_stage>
+    class shader_stage : public reference_counted<Base>
+    {
+    public:
+        using i_shader_stage::i_shader_t;
+        using i_shader_stage::i_shaders_t;
+        typedef neolib::ref_ptr<i_shader> shader_t;
+        typedef neolib::vector<shader_t> shaders_t;
+    public:
+        shader_stage(shader_type aType);
+    public:
+        shader_type type() const override;
+        shaders_t const& shaders() const override;
+        shaders_t& shaders() override;
+    private:
+        shader_type iType;
+        shaders_t iShaders;
+    };
+        
     template <typename Base = i_shader_program>
     class shader_program : public reference_counted<Base>
     {
     public:
-        using i_shader_program::i_shader_t;
-        using i_shader_program::i_shaders_t;
         using i_shader_program::i_stage_t;
         using i_shader_program::i_stages_t;
-        typedef neolib::ref_ptr<i_shader> shader_t;
-        typedef neolib::vector<shader_t> shaders_t;
-        typedef neolib::pair<shader_type, shaders_t> stage_t;
+        typedef neolib::ref_ptr<i_shader_stage> stage_t;
         typedef neolib::vector<stage_t> stages_t;
+        typedef neolib::ref_ptr<i_shader> shader_t;
     public:
         using i_shader_program::have_stage;
         using i_shader_program::compile;
         using i_shader_program::link;
         using i_shader_program::use;
+        using i_shader_program::update_uniform_storage;
         using i_shader_program::update_uniform_locations;
         using i_shader_program::update_uniforms;
     private:
@@ -58,8 +75,8 @@ namespace neogfx
         void* handle() const override;
         const stages_t& stages() const override;
         stages_t& stages() override;
-        const shaders_t& stage(shader_type aStage) const override;
-        shaders_t& stage(shader_type aStage) override;
+        const stage_t& stage(shader_type aStage) const override;
+        stage_t& stage(shader_type aStage) override;
         const i_shader& shader(const neolib::i_string& aName) const override;
         i_shader& shader(const neolib::i_string& aName) override;
         const i_vertex_shader& vertex_shader() const override;

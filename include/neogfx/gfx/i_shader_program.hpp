@@ -47,15 +47,31 @@ namespace neogfx
         User
     };
 
+    class i_shader_stage : public i_reference_counted
+    {
+        // types
+    public:
+        typedef i_shader_stage abstract_type;
+    public:
+        typedef neolib::i_ref_ptr<i_shader> i_shader_t;
+        typedef neolib::i_vector<i_shader_t> i_shaders_t;
+        // construction
+    public:
+        virtual ~i_shader_stage() = default;
+        // operations
+    public:
+        virtual shader_type type() const = 0;
+        virtual i_shaders_t const& shaders() const = 0;
+        virtual i_shaders_t& shaders() = 0;
+    };
+
     class i_shader_program : public i_reference_counted
     {
         // types
     public:
         typedef i_shader_program abstract_type;
     public:
-        typedef neolib::i_ref_ptr<i_shader> i_shader_t;
-        typedef neolib::i_vector<i_shader_t> i_shaders_t;
-        typedef neolib::i_pair<shader_type, i_shaders_t> i_stage_t;
+        typedef neolib::i_ref_ptr<i_shader_stage> i_stage_t;
         typedef neolib::i_vector<i_stage_t> i_stages_t;
         // construction
     public:
@@ -69,8 +85,8 @@ namespace neogfx
         virtual void* handle() const = 0;
         virtual const i_stages_t& stages() const = 0;
         virtual i_stages_t& stages() = 0;
-        virtual const i_shaders_t& stage(shader_type aStage) const = 0;
-        virtual i_shaders_t& stage(shader_type aStage) = 0;
+        virtual const i_stage_t& stage(shader_type aStage) const = 0;
+        virtual i_stage_t& stage(shader_type aStage) = 0;
         virtual const i_shader& shader(const neolib::i_string& aName) const = 0;
         virtual i_shader& shader(const neolib::i_string& aName) = 0;
         virtual const i_vertex_shader& vertex_shader() const = 0;
@@ -90,6 +106,7 @@ namespace neogfx
         virtual void compile() = 0;
         virtual void link() = 0;
         virtual void use() = 0;
+        virtual void update_uniform_storage() = 0;
         virtual void update_uniform_locations() = 0;
         virtual bool uniforms_changed() const = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
@@ -110,7 +127,7 @@ namespace neogfx
         }
         bool have_stage(shader_type aStage) const
         {
-            return !stages().at(static_cast<std::size_t>(aStage)).second().empty();
+            return !stages().at(static_cast<std::size_t>(aStage))->shaders().empty();
         }
         bool stage_clean(shader_type aStage) const
         {

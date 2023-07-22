@@ -147,7 +147,7 @@ namespace neogfx
         {
             iDirty = true;
             for (auto& u : uniforms())
-                u.clear_location();
+                u.clear_storage();
         }
         void set_clean() final
         {
@@ -202,6 +202,14 @@ namespace neogfx
             if (u.value().empty() != aValue.empty() || (!u.value().empty() && u.different_type_to(aValue)))
                 set_dirty();
             u.set_value(aValue);
+        }
+        void clear_uniform_storage(shader_uniform_id aUniform) final
+        {
+            uniforms()[aUniform].clear_storage();
+        }
+        void update_uniform_storage(shader_uniform_id aUniform, shader_uniform_storage aStorage) final
+        {
+            uniforms()[aUniform].set_storage(aStorage);
         }
         void clear_uniform_location(shader_uniform_id aUniform) final
         {
@@ -262,21 +270,33 @@ namespace neogfx
                 {
                     static const string sOpenGlSource =
                     {
-                        "#version 410\n"
-                        "precision mediump float;\n"
-                        "\n"
-                        "%UNIFORMS%"
-                        "%VARIABLES%"
-                        "\n"_s
+                        1 + R"glsl(
+#version 420
+precision mediump float;
+
+layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME% 
+{
+%UNIFORMS%
+};
+%SINGULAR_UNIFORMS%
+%VARIABLES%
+
+                        )glsl"
                     };
                     static const string sOpenGlEsSource =
                     {
-                        "#version 110\n"
-                        "precision mediump float;\n"
-                        "\n"
-                        "%UNIFORMS%"
-                        "%VARIABLES%"
-                        "\n"_s
+                        1 + R"glsl(
+#version 110
+precision mediump float;
+
+layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME% 
+{
+%UNIFORMS%
+};
+%SINGULAR_UNIFORMS%
+%VARIABLES%
+
+                        )glsl"
                     };
                     switch (service<i_rendering_engine>().renderer())
                     {
@@ -298,8 +318,9 @@ namespace neogfx
                 if (aLanguage == shader_language::Glsl)
                 {
                     std::map<string, string> uniformDefinitions;
+                    std::map<string, string> singularUniformDefinitions;
                     std::map<std::pair<shader_variable_qualifier, shader_variable_location>, string> variableDefinitions;
-                    for (auto const& s : aProgram.stage(type()))
+                    for (auto const& s : aProgram.stage(type())->shaders())
                     {
                         for (auto const& u : s->uniforms())
                         {
@@ -309,18 +330,24 @@ namespace neogfx
                             switch (u.value().which())
                             {
                             case shader_data_type::FloatArray:
-                                uniformDefinition = "uniform float %I%["_s + to_string(u.value().get<abstract_t<shader_float_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "    float %I%["_s + to_string(u.value().get<abstract_t<shader_float_array>>().size()) +"];\n"_s;
                                 break;
                             case shader_data_type::DoubleArray:
-                                uniformDefinition = "uniform double %I%["_s + to_string(u.value().get<abstract_t<shader_double_array>>().size()) +"];\n"_s;
+                                uniformDefinition = "    double %I%["_s + to_string(u.value().get<abstract_t<shader_double_array>>().size()) +"];\n"_s;
                                 break;
                             default:
-                                uniformDefinition = "uniform %T% %I%;\n"_s;
+                                if (!u.singular())
+                                    uniformDefinition = "    %T% %I%;\n"_s;
+                                else
+                                    uniformDefinition = "uniform %T% %I%;\n"_s;
                                 break;
                             }
                             uniformDefinition.replace_all("%T%"_s, enum_to_string(u.value().which()));
                             uniformDefinition.replace_all("%I%"_s, u.name());
-                            uniformDefinitions[u.name()] = uniformDefinition;
+                            if (!u.singular())
+                                uniformDefinitions[u.name()] = uniformDefinition;
+                            else
+                                singularUniformDefinitions[u.name()] = uniformDefinition;
                         }
                         if (s->disabled())
                             continue;
@@ -344,10 +371,16 @@ namespace neogfx
                     string udefs;
                     for (auto const& udef : uniformDefinitions)
                         udefs += udef.second;
+                    string sudefs;
+                    for (auto const& sudef : singularUniformDefinitions)
+                        sudefs += sudef.second;
                     string vdefs;
                     for (auto const& vdef : variableDefinitions)
                         vdefs += vdef.second;
+                    aOutput.replace_all("%UNIFORM_BLOCK_INDEX%"_s, neolib::string{ std::to_string(static_cast<std::uint32_t>(type())) });
+                    aOutput.replace_all("%UNIFORM_BLOCK_NAME%"_s, enum_to_string(type()) + "Uniforms");
                     aOutput.replace_all("%UNIFORMS%"_s, udefs);
+                    aOutput.replace_all("%SINGULAR_UNIFORMS%"_s, sudefs);
                     aOutput.replace_all("%VARIABLES%"_s, vdefs);
                 }
                 else

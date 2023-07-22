@@ -42,9 +42,9 @@ namespace neogfx
 
         for (auto const& stage : stages())
         {
-            if (stage_clean(stage.first()))
+            if (stage_clean(stage->type()))
                 continue;
-            auto const& shaders = stage.second();
+            auto const& shaders = stage->shaders();
             if (shaders.empty())
                 continue;
             string code;
@@ -145,25 +145,73 @@ namespace neogfx
         }
     }
 
+    void opengl_shader_program::update_uniform_storage()
+    {
+        for (auto& stage : stages())
+        {
+            if (stage->shaders().empty())
+                continue;
+
+            GLuint const uniformBlockIndex = glGetUniformBlockIndex(gl_handle(), (enum_to_string(stage->type()) + "Uniforms").c_str());
+            GLint uniformBlockSize;
+            glCheck(glGetActiveUniformBlockiv(gl_handle(), uniformBlockIndex, GL_UNIFORM_BLOCK_DATA_SIZE, &uniformBlockSize))
+            ubo_block_buffer(stage->type()).resize(uniformBlockSize);
+
+            thread_local std::vector<GLchar const*> uniformNames;
+            thread_local std::vector<std::pair<i_shader*, i_shader_uniform const*>> uniformRefs;
+
+            uniformNames.clear();
+            uniformRefs.clear();
+
+            for (auto& shader : stage->shaders())
+                if (shader->enabled() || shader->has_shared_uniforms())
+                    for (auto& uniform : shader->uniforms())
+                        if (!uniform.singular() && (shader->enabled() || uniform.shared()))
+                        {
+                            uniformNames.push_back(uniform.name().c_str());
+                            uniformRefs.emplace_back(&*shader, &uniform);
+                        }
+
+            thread_local std::vector<GLuint> uniformIndices;
+            uniformIndices.resize(uniformNames.size());
+            glCheck(glGetUniformIndices(gl_handle(), static_cast<GLsizei>(uniformNames.size()), uniformNames.data(), uniformIndices.data()))
+
+            thread_local std::vector<GLint> uniformOffsets;
+            uniformOffsets.resize(uniformIndices.size());
+            glCheck(glGetActiveUniformsiv(gl_handle(), static_cast<GLsizei>(uniformIndices.size()), uniformIndices.data(), GL_UNIFORM_OFFSET, uniformOffsets.data()))
+
+            for (auto uniformRef = uniformRefs.begin(); uniformRef != uniformRefs.end(); ++uniformRef)
+                (*uniformRef).first->update_uniform_storage((*uniformRef).second->id(), std::next(ubo_block_buffer(stage->type()).data(), uniformOffsets[std::distance(uniformRefs.begin(), uniformRef)]));
+        }
+    }
+
     void opengl_shader_program::update_uniform_locations()
     {
         for (auto& stage : stages())
-            for (auto& shader : stage.second())
+            for (auto& shader : stage->shaders())
                 for (auto& uniform : shader->uniforms())
-                {
-                    shader->update_uniform_location(uniform.id(), glGetUniformLocation(gl_handle(), uniform.name().c_str()));
-                    GLenum errorCode = glGetError();
-                    if (errorCode != GL_NO_ERROR)
-                        throw shader_program_error(glErrorString(errorCode));
-                }
+                    if (uniform.singular())
+                    {
+                        shader->update_uniform_location(uniform.id(), glGetUniformLocation(gl_handle(), uniform.name().c_str()));
+                        GLenum errorCode = glGetError();
+                        if (errorCode != GL_NO_ERROR)
+                            throw shader_program_error(glErrorString(errorCode));
+                    }
     }
 
     void opengl_shader_program::update_uniforms(const i_rendering_context& aContext)
     {
         prepare_uniforms(aContext);
+
         bool const updateAllUniforms = need_full_uniform_update();
+
         for (auto& stage : stages())
-            for (auto& shader : stage.second())
+        {
+            glCheck(glBindBuffer(GL_UNIFORM_BUFFER, ubo_handle(stage->type())))
+            
+            auto& blockBuffer = ubo_block_buffer(stage->type());
+            
+            for (auto& shader : stage->shaders())
                 if (shader->enabled() || shader->has_shared_uniforms())
                     for (auto& uniform : shader->uniforms())
                     {
@@ -174,60 +222,63 @@ namespace neogfx
                         if (uniform.value().empty())
                             continue;
                         uniform.clean();
-                        auto const location = uniform.location();
-                        std::visit([this, location](auto&& v)
+                        if (!uniform.singular())
                         {
-                            typedef std::decay_t<decltype(v)> data_type;
-                            if constexpr (std::is_same_v<bool, data_type>)
-                                glCheck(glUniform1i(location, v))
-                            else if constexpr (std::is_same_v<float, data_type>)
-                                glCheck(glUniform1f(location, v))
-                            else if constexpr (std::is_same_v<double, data_type>)
-                                glCheck(glUniform1d(location, v))
-                            else if constexpr (std::is_same_v<int32_t, data_type>)
-                                glCheck(glUniform1i(location, v))
-                            else if constexpr (std::is_same_v<uint32_t, data_type>)
-                                glCheck(glUniform1ui(location, v))
-                            else if constexpr (std::is_same_v<vec2f, data_type>)
-                                glCheck(glUniform2f(location, v[0], v[1]))
-                            else if constexpr (std::is_same_v<vec2, data_type>)
-                                glCheck(glUniform2d(location, v[0], v[1]))
-                            else if constexpr (std::is_same_v<vec2i32, data_type>)
-                                glCheck(glUniform2i(location, v[0], v[1]))
-                            else if constexpr (std::is_same_v<vec2u32, data_type>)
-                                glCheck(glUniform2ui(location, v[0], v[1]))
-                            else if constexpr (std::is_same_v<vec3f, data_type>)
-                                glCheck(glUniform3f(location, v[0], v[1], v[2]))
-                            else if constexpr (std::is_same_v<vec3, data_type>)
-                                glCheck(glUniform3d(location, v[0], v[1], v[2]))
-                            else if constexpr (std::is_same_v<vec3i32, data_type>)
-                                glCheck(glUniform3i(location, v[0], v[1], v[2]))
-                            else if constexpr (std::is_same_v<vec3u32, data_type>)
-                                glCheck(glUniform3ui(location, v[0], v[1], v[2]))
-                            else if constexpr (std::is_same_v<vec4f, data_type>)
-                                glCheck(glUniform4f(location, v[0], v[1], v[2], v[3]))
-                            else if constexpr (std::is_same_v<vec4, data_type>)
-                                glCheck(glUniform4d(location, v[0], v[1], v[2], v[3]))
-                            else if constexpr (std::is_same_v<vec4i32, data_type>)
-                                glCheck(glUniform4i(location, v[0], v[1], v[2], v[3]))
-                            else if constexpr (std::is_same_v<vec4u32, data_type>)
-                                glCheck(glUniform4ui(location, v[0], v[1], v[2], v[3]))
-                            else if constexpr (std::is_same_v<mat4f, data_type>)
-                                glCheck(glUniformMatrix4fv(location, 1, false, v.data()))
-                            else if constexpr (std::is_same_v<mat4, data_type>)
-                                glCheck(glUniformMatrix4dv(location, 1, false, v.data()))
-                            else if constexpr (std::is_same_v<shader_float_array, data_type>)
-                                glCheck(glUniform1fv(location, v.size(), v.data()))
-                            else if constexpr (std::is_same_v<shader_double_array, data_type>)
-                                glCheck(glUniform1dv(location, v.size(), v.data()))
-                            else if constexpr (std::is_same_v<sampler2D, data_type>)
-                                glCheck(glUniform1i(location, v.handle))
-                            else if constexpr (std::is_same_v<sampler2DMS, data_type>)
-                                glCheck(glUniform1i(location, v.handle))
-                            else if constexpr (std::is_same_v<sampler2DRect, data_type>)
-                                glCheck(glUniform1i(location, v.handle))
-                        }, uniform.value());
+                            auto const storage = uniform.storage();
+                            std::visit([this, &blockBuffer, storage, updateAllUniforms](auto&& v)
+                            {
+                                typedef std::decay_t<decltype(v)> data_type;
+                                void const* src = &v;
+                                auto dataOffset = static_cast<GLubyte const*>(storage) - blockBuffer.data();
+                                auto dataSize = sizeof(data_type);
+                                if constexpr (
+                                    std::is_same_v<bool, data_type>)
+                                {
+                                    thread_local std::int32_t boolean;
+                                    boolean = v;
+                                    src = &boolean;
+                                    dataSize = sizeof(boolean);
+                                }
+                                else if constexpr (
+                                    std::is_same_v<mat4f, data_type> ||
+                                    std::is_same_v<mat4, data_type>)
+                                {
+                                    src = v.data();
+                                    dataSize = sizeof(v[0][0]) * 4 * 4;
+                                }
+                                else if constexpr (
+                                    std::is_same_v<shader_float_array, data_type> || 
+                                    std::is_same_v<shader_double_array, data_type>)
+                                {
+                                    src = v.data();
+                                    dataSize = sizeof(v[0]) * v.size();
+                                }
+                                std::memcpy(storage, src, dataSize);
+                                if (!updateAllUniforms)
+                                    glCheck(glBufferSubData(GL_UNIFORM_BUFFER, dataOffset, dataSize, storage));
+                            }, uniform.value());
+                        }
+                        else
+                        {
+                            auto const location = uniform.location();
+                            std::visit([this, location](auto&& v)
+                            {
+                                typedef std::decay_t<decltype(v)> data_type;
+                                if constexpr (std::is_same_v<sampler2D, data_type>)
+                                    glCheck(glUniform1i(location, v.handle))
+                                else if constexpr (std::is_same_v<sampler2DMS, data_type>)
+                                    glCheck(glUniform1i(location, v.handle))
+                                else if constexpr (std::is_same_v<sampler2DRect, data_type>)
+                                    glCheck(glUniform1i(location, v.handle))
+                            }, uniform.value());
+                        }
                     }
+
+            if (updateAllUniforms)
+                glCheck(glBufferData(GL_UNIFORM_BUFFER, blockBuffer.size(), blockBuffer.data(), GL_DYNAMIC_DRAW));
+
+            glCheck(glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(stage->type()), ubo_handle(stage->type())))
+        }
     }
 
     void opengl_shader_program::deactivate()
@@ -242,5 +293,22 @@ namespace neogfx
     GLuint opengl_shader_program::gl_handle() const
     {
         return to_gl_handle<GLuint>(handle());
+    }
+
+    opengl_shader_program::ubo_block_buffer_t& opengl_shader_program::ubo_block_buffer(shader_type aShaderType)
+    {
+        return iUbos[static_cast<std::size_t>(aShaderType)].uniformBlockBuffer;
+    }
+
+    GLuint opengl_shader_program::ubo_handle(shader_type aShaderType) const
+    {
+        auto& ubo = iUbos[static_cast<std::size_t>(aShaderType)];
+        if (ubo.uboHandle == std::nullopt)
+        {
+            GLuint uboHandle;
+            glCheck(glGenBuffers(1, &uboHandle))
+            ubo.uboHandle = uboHandle;
+        }
+        return ubo.uboHandle.value();
     }
 }

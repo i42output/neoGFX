@@ -34,12 +34,12 @@ namespace neogfx
 {
     enum class shader_type : uint32_t
     {
-        Compute,
-        Vertex,
-        TessellationControl,
-        TessellationEvaluation,
-        Geometry,
-        Fragment,
+        Compute                 = 0,
+        Vertex                  = 1,
+        TessellationControl     = 2,
+        TessellationEvaluation  = 3,
+        Geometry                = 4,
+        Fragment                = 5,
         COUNT
     };
 
@@ -83,6 +83,15 @@ namespace neogfx
     };
 }
 
+begin_declare_enum(neogfx::shader_type)
+declare_enum_string(neogfx::shader_type, Compute)
+declare_enum_string(neogfx::shader_type, Vertex)
+declare_enum_string(neogfx::shader_type, TessellationControl)
+declare_enum_string(neogfx::shader_type, TessellationEvaluation)
+declare_enum_string(neogfx::shader_type, Geometry)
+declare_enum_string(neogfx::shader_type, Fragment)
+end_declare_enum(neogfx::shader_type)
+
 begin_declare_enum(neogfx::shader_variable_qualifier)
 declare_enum_string_explicit(neogfx::shader_variable_qualifier, In, in)
 declare_enum_string_explicit(neogfx::shader_variable_qualifier, Out, out)
@@ -121,6 +130,7 @@ end_declare_enum(neogfx::shader_data_type)
 
 namespace neogfx 
 {
+    struct unknown_uniform_storage : std::logic_error { unknown_uniform_storage() : std::logic_error{ "neogfx::unknown_uniform_storage" } {} };
     struct unknown_uniform_location : std::logic_error { unknown_uniform_location() : std::logic_error{ "neogfx::unknown_uniform_location" } {} };
     struct shader_variable_not_linked : std::logic_error { shader_variable_not_linked() : std::logic_error{ "neogfx::shader_variable_not_linked" } {} };
     struct shader_variable_not_found : std::logic_error { shader_variable_not_found() : std::logic_error{ "neogfx::shader_variable_not_found" } {} };
@@ -146,6 +156,7 @@ namespace neogfx
     typedef neolib::plugin_variant<shader_data_type, bool, float, double, int32_t, uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
     typedef uint32_t shader_variable_location;
+    typedef void* shader_uniform_storage;
     typedef int32_t shader_uniform_location;
 
     typedef neolib::cookie shader_uniform_id;
@@ -159,6 +170,11 @@ namespace neogfx
         virtual shader_uniform_id id() const = 0;
         virtual const i_string& name() const = 0;
         virtual bool shared() const = 0;
+        virtual bool singular() const = 0;
+        virtual bool has_storage() const = 0;
+        virtual shader_uniform_storage storage() const = 0;
+        virtual void set_storage(shader_uniform_storage aStorage) = 0;
+        virtual void clear_storage() = 0;
         virtual bool has_location() const = 0;
         virtual shader_uniform_location location() const = 0;
         virtual void set_location(shader_uniform_location aLocation) = 0;
@@ -198,6 +214,8 @@ namespace neogfx
         typedef i_shader_uniform base_type;
     public:
         typedef base_type abstract_type;
+    private:
+        typedef std::variant<std::monostate, shader_uniform_storage, shader_uniform_location> placement;
     public:
         template <typename T>
         shader_uniform(shader_uniform_id aId, const string& aName, bool aShared, const T& aValue) :
@@ -265,23 +283,57 @@ namespace neogfx
         {
             return iShared;
         }
+        bool singular() const final
+        {
+            if (!value().empty())
+            {
+                switch (value().which())
+                {
+                case shader_data_type::Sampler2D:
+                case shader_data_type::Sampler2DMS:
+                case shader_data_type::Sampler2DRect:
+                    return true;
+                }
+            }
+            return false;
+        }
+        bool has_storage() const final
+        {
+            return std::holds_alternative<shader_uniform_storage>(iPlacement);
+        }
+        shader_uniform_storage storage() const final
+        {
+            if (has_storage())
+                return std::get<shader_uniform_storage>(iPlacement);
+            throw unknown_uniform_storage();
+        }
+        void set_storage(shader_uniform_storage aStorage) final
+        {
+            iPlacement = aStorage;
+        }
+        void clear_storage() final
+        {
+            if (has_storage())
+                iPlacement = std::monostate{};
+        }
         bool has_location() const final
         {
-            return iLocation != std::nullopt;
+            return std::holds_alternative<shader_uniform_location>(iPlacement);
         }
         shader_uniform_location location() const final
         {
             if (has_location())
-                return *iLocation;
+                return std::get<shader_uniform_location>(iPlacement);
             throw unknown_uniform_location();
         }
         void set_location(shader_uniform_location aLocation) final
         {
-            iLocation = aLocation;
+            iPlacement = aLocation;
         }
         void clear_location() final
         {
-            iLocation = std::nullopt;
+            if (has_location())
+                iPlacement = std::monostate{};
         }
         const abstract_t<shader_value_type>& value() const final 
         { 
@@ -328,7 +380,7 @@ namespace neogfx
         shader_uniform_id iId;
         string iName;
         bool iShared;
-        mutable std::optional<shader_uniform_location> iLocation;
+        placement iPlacement;
         shader_value_type iValue;
         mutable bool iDirty;
     };
@@ -457,6 +509,8 @@ namespace neogfx
         virtual shader_uniform_id create_uniform(const i_string& aName, bool aShared = false) = 0;
         virtual shader_uniform_id find_uniform(const i_string& aName) const = 0;
         virtual void set_uniform(shader_uniform_id aUniform, value_type const& aValue) = 0;
+        virtual void clear_uniform_storage(shader_uniform_id aUniform) = 0;
+        virtual void update_uniform_storage(shader_uniform_id aUniform, shader_uniform_storage aStorage) = 0;
         virtual void clear_uniform_location(shader_uniform_id aUniform) = 0;
         virtual void update_uniform_location(shader_uniform_id aUniform, shader_uniform_location aLocation) = 0;
         virtual const variable_list& in_variables() const = 0;
