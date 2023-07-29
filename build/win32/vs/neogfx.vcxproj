@@ -581,8 +581,8 @@
     <ClInclude Include="..\..\..\src\hid\native\windows_xinput_controller.hpp" />
     <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp" />
     <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\texture_vertex_shader.glsl.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\vertex_shader.glsl.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard.vert.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\action.cpp" />
@@ -847,23 +847,23 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\texture_vertex_shader.glsl">
+    <CustomBuild Include="..\..\..\src\gfx\standard-texture.vert">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl TextureVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl TextureVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl TextureVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl TextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\vertex_shader.glsl">
+    <CustomBuild Include="..\..\..\src\gfx\standard.vert">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl VertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl VertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl VertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl VertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>

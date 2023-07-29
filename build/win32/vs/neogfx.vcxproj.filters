@@ -1158,10 +1158,10 @@
     <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\texture_vertex_shader.glsl.hpp">
+    <ClInclude Include="x64\Release\GeneratedFiles\standard.vert.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\vertex_shader.glsl.hpp">
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1178,10 +1178,10 @@
     <CustomBuild Include="..\..\..\src\gfx\native\shader.glsl-gles">
       <Filter>Source Files\native</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\texture_vertex_shader.glsl">
+    <CustomBuild Include="..\..\..\src\gfx\standard-texture.vert">
       <Filter>Source Files\native</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\vertex_shader.glsl">
+    <CustomBuild Include="..\..\..\src\gfx\standard.vert">
       <Filter>Source Files\native</Filter>
     </CustomBuild>
   </ItemGroup>

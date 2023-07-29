@@ -19,8 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/vertex_shader.hpp>
-#include "vertex_shader.glsl.hpp"
-#include "texture_vertex_shader.glsl.hpp"
+#include "standard.vert.hpp"
+#include "standard-texture.vert.hpp"
 
 namespace neogfx
 {
@@ -117,7 +117,7 @@ namespace neogfx
         {
             static const string code =
             {
-                glsl::VertexShader
+                glsl::StandardVertexShader
             };
             aOutput += code;
         }
@@ -139,7 +139,7 @@ namespace neogfx
         {
             static const string code =
             {
-                glsl::TextureVertexShader
+                glsl::StandardTextureVertexShader
             };
             aOutput += code;
         }
