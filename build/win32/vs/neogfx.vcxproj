@@ -581,7 +581,14 @@
     <ClInclude Include="..\..\..\src\hid\native\windows_xinput_controller.hpp" />
     <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp" />
     <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-filter.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-glyph.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-gradient.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-shape.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-stipple.frag.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.frag.hpp" />
     <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp" />
+    <ClInclude Include="x64\Release\GeneratedFiles\standard.frag.hpp" />
     <ClInclude Include="x64\Release\GeneratedFiles\standard.vert.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -827,43 +834,120 @@
     <None Include="..\..\..\include\neogfx\gui\widget\widget.ipp" />
     <CustomBuild Include="..\..\..\src\gfx\native\shader.glsl">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl Shader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl Shader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl Shader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\gfx\native\shader.glsl-gles">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl::gles Shader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl::gles Shader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl::gles Shader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl::gles Shader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\standard-texture.vert">
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-texture.vert">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureVertexShader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
-    <CustomBuild Include="..\..\..\src\gfx\standard.vert">
+    <CustomBuild Include="..\..\..\src\gfx\native\standard.vert">
       <FileType>Document</FileType>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardVertexShader</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-filter.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFilterFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-glyph.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGlyphFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-gradient.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardGradientFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-shape.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardShapeFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-stipple.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardStippleFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard-texture.frag">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardTextureFragmentShader</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\standard.frag">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DevDirNeogfx)/tools/bin/src2string %(Identity) $(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp neogfx::glsl StandardFragmentShader</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>

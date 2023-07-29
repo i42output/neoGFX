@@ -114,13 +114,7 @@ namespace neogfx
     {
         vertex_shader::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
-        {
-            static const string code =
-            {
-                glsl::StandardVertexShader
-            };
-            aOutput += code;
-        }
+            aOutput += string{ glsl::StandardVertexShader };
         else
             throw unsupported_shader_language();
     }
@@ -136,13 +130,7 @@ namespace neogfx
     {
         standard_vertex_shader::generate_code(aProgram, aLanguage, aOutput);
         if (aLanguage == shader_language::Glsl)
-        {
-            static const string code =
-            {
-                glsl::StandardTextureVertexShader
-            };
-            aOutput += code;
-        }
+            aOutput += string{ glsl::StandardTextureVertexShader };
         else
             throw unsupported_shader_language();
     }
