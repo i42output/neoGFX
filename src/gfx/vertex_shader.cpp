@@ -19,6 +19,8 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/vertex_shader.hpp>
+#include "vertex_shader.glsl.hpp"
+#include "texture_vertex_shader.glsl.hpp"
 
 namespace neogfx
 {
@@ -115,13 +117,7 @@ namespace neogfx
         {
             static const string code =
             {
-                1 + R"glsl(
-void standard_vertex_shader(inout vec3 coord, inout vec4 color)
-{
-    gl_Position = vec4((uProjectionMatrix * (uTransformationMatrix * vec4(coord, 1.0))).xyz, 1.0);
-    color.a *= uOpacity;
-}
-                )glsl"
+                glsl::VertexShader
             };
             aOutput += code;
         }
@@ -143,12 +139,7 @@ void standard_vertex_shader(inout vec3 coord, inout vec4 color)
         {
             static const string code =
             {
-                1 + R"glsl(
-void standard_texture_vertex_shader(inout vec3 coord, inout vec4 color, inout vec2 texCoord, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)
-{
-    standard_vertex_shader(coord, color);
-}
-                )glsl"
+                glsl::TextureVertexShader
             };
             aOutput += code;
         }
