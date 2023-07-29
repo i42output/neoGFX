@@ -24,6 +24,8 @@
 #include <neolib/core/set.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
+#include "shader.glsl.hpp"
+#include "shader.glsl-gles.hpp"
 
 namespace neogfx
 {
@@ -268,45 +270,15 @@ namespace neogfx
             {
                 if (aLanguage == shader_language::Glsl)
                 {
-                    static const string sOpenGlSource =
-                    {
-                        1 + R"glsl(
-#version 420
-precision mediump float;
-
-layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME% 
-{
-%UNIFORMS%
-};
-%SINGULAR_UNIFORMS%
-%VARIABLES%
-
-                        )glsl"
-                    };
-                    static const string sOpenGlEsSource =
-                    {
-                        1 + R"glsl(
-#version 110
-precision mediump float;
-
-layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME% 
-{
-%UNIFORMS%
-};
-%SINGULAR_UNIFORMS%
-%VARIABLES%
-
-                        )glsl"
-                    };
                     switch (service<i_rendering_engine>().renderer())
                     {
                     case renderer::OpenGL:
                     case renderer::Software:
                     default:
-                        aOutput = sOpenGlSource;
+                        aOutput = glsl::Shader;
                         break;
                     case renderer::DirectX:
-                        aOutput = sOpenGlEsSource;
+                        aOutput = glsl::gles::Shader;
                         break;
                     }
                 }

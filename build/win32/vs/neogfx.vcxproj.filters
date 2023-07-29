@@ -1152,6 +1152,12 @@
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp">
       <Filter>Source Files\native\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1159,6 +1165,12 @@
     </CustomBuild>
     <CustomBuild Include="..\..\..\src\icons.nrc">
       <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\shader.glsl">
+      <Filter>Source Files\native</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\src\gfx\native\shader.glsl-gles">
+      <Filter>Source Files\native</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

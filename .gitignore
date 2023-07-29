@@ -358,3 +358,6 @@ Debug
 /tools/nrc/build/win32/vs/test.res.cpp
 /tools/nrc/build/win32/vs/test.ui.hpp
 /build/win32/vs/.vs/neogfx/FileContentIndex
+/tools/src2string/build/win32/vs/x64/Tools
+/tools/src2string/build/win32/vs/x64/Tools_Debug
+/tools/src2string.exe
