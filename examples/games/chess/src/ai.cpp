@@ -91,6 +91,8 @@ namespace chess
             iFinished = true;
         }
         iSignal.notify_one();
+        iThreads.clear();
+        async_task::cancel();
     }
         
     template <typename Representation, player Player>
@@ -165,7 +167,7 @@ namespace chess
         {
             iSignal.wait_for(lk, std::chrono::seconds{ 1 }, [&]() { return iPlaying || iFinished; });
             lk.unlock();
-            if (iPlaying)
+            if (iPlaying && !iFinished)
             {
                 auto bestMove = execute();
                 iPlaying = false;
