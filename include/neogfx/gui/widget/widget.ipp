@@ -763,7 +763,8 @@ namespace neogfx
                     }
                     resize(desiredSize);
                 }
-                layout().layout_items(client_rect(false).top_left(), client_rect(false).extents());
+                auto const& cr = client_rect(false);
+                layout().layout_items(cr.top_left(), cr.extents());
                 layout_items_completed();
             }
         }
