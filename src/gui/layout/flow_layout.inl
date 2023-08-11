@@ -110,7 +110,7 @@ namespace neogfx
                         AxisPolicy::x(pos) += (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
                     else
                     {
-                        AxisPolicy::x(pos) = AxisPolicy::cx(spacing()));
+                        AxisPolicy::x(pos) = AxisPolicy::cx(spacing());
                         if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
                         {
                             if (AxisPolicy::y(pos) != size::max_dimension())
