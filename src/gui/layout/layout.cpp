@@ -25,7 +25,7 @@
 #include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>
-#include "layout.inl"
+#include "layout.ipp"
 
 namespace neogfx
 {

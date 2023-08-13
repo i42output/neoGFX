@@ -185,7 +185,7 @@ namespace chess
         std::unique_lock lk{ iMutex };
         if (!iRootNode)
         {
-            if (iPosition.moveHistory.empty())
+            if (!iPosition.moveHistory.empty())
                 iRootNode.emplace(iPosition.moveHistory.back());
             else
                 iRootNode.emplace();

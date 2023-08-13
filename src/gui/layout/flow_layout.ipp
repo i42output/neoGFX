@@ -30,6 +30,10 @@ namespace neogfx
     template <typename AxisPolicy>
     size flow_layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ")" << endl;
+#endif
         if (has_minimum_size() || aAvailableSpace == std::nullopt)
             return layout::minimum_size(aAvailableSpace);
         uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
@@ -64,7 +68,7 @@ namespace neogfx
             }
             else
             {
-                AxisPolicy::x(pos) = 0.0;
+                AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
                 AxisPolicy::y(pos) += (AxisPolicy::cy(extent) + AxisPolicy::cy(spacing()));
                 previousNonZeroSize = false;
             }
@@ -83,6 +87,10 @@ namespace neogfx
     template <typename AxisPolicy>
     size flow_layout::do_maximum_size(optional_size const& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ")" << endl;
+#endif
         if (has_maximum_size())
             return layout::maximum_size(aAvailableSpace);
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
@@ -110,7 +118,7 @@ namespace neogfx
                         AxisPolicy::x(pos) += (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
                     else
                     {
-                        AxisPolicy::x(pos) = AxisPolicy::cx(spacing());
+                        AxisPolicy::x(pos) = AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing());
                         if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
                         {
                             if (AxisPolicy::y(pos) != size::max_dimension())
@@ -163,6 +171,10 @@ namespace neogfx
     template <typename AxisPolicy>
     void flow_layout::do_layout_items(const point& aPosition, const size& aSize)
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
+#endif
         set_position(aPosition);
         set_extents(aSize);
         size availableSpace = aSize;
@@ -195,7 +207,7 @@ namespace neogfx
             }
             else
             {
-                AxisPolicy::x(pos) = 0.0;
+                AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
                 addRow = true;
                 previousNonZeroSize = false;
             }

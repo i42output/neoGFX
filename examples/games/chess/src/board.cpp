@@ -34,6 +34,7 @@ namespace chess::gui
         iWhitePlayer{ nullptr },
         iBlackPlayer{ nullptr },
         iInRedo{ false },
+        iFlipped{ false },
         iColorWhiteSquare{ 235, 236, 208 },
         iColorBlackSquare{ 119, 149, 86 },
         iColorWhitePiece{ ng::color::Gray90 },
@@ -77,6 +78,8 @@ namespace chess::gui
         int32_t constexpr RENDER_NON_SELECTED_PIECES    = 2;
         int32_t constexpr RENDER_SELECTED_PIECES        = 3;
         int32_t constexpr RENDER_ANIMATIONS             = 4;
+        coordinate const coordMin = (!iFlipped ? 0u : 7u);
+        coordinate const coordMax = (!iFlipped ? 0u : 7u);
         for (int32_t pass = RENDER_BOARD; pass <= RENDER_ANIMATIONS; ++pass)
             for (coordinate y = 0u; y <= 7u; ++y)
                 for (coordinate x = 0u; x <= 7u; ++x)
@@ -131,13 +134,13 @@ namespace chess::gui
                             case square_identification::None:
                                 break;
                             case square_identification::Outer:
-                                if (x == 0u)
+                                if (x == coordMin)
                                     aGc.draw_text(ng::point{ squareRect.left() - (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0 - yLabelExtents.cx, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::Text));
-                                else if (x == 7u)
+                                else if (x == coordMax)
                                     aGc.draw_text(ng::point{ squareRect.right() + (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::Text));
-                                if (y == 0u)
+                                if (y == coordMin)
                                     aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.bottom() + (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 }, xLabel, labelFont, palette_color(ng::color_role::Text));
-                                else if (y == 7u)
+                                else if (y == coordMax)
                                     aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.top() - (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 - xLabelExtents.cy }, xLabel, labelFont, palette_color(ng::color_role::Text));
                                 break;
                             case square_identification::Inner:
@@ -149,20 +152,20 @@ namespace chess::gui
                                 }
                                 else
                                 {
-                                    if (x == 0)
+                                    if (x == coordMin)
                                         aGc.draw_text(labelRect.top_left(), yLabel, labelFont, labelColor);
-                                    if (y == 0)
+                                    if (y == coordMin)
                                         aGc.draw_text(labelRect.bottom_right() - xLabelExtents, xLabel, labelFont, labelColor);
                                 }
                                 break;
                             case square_identification::Debug:
-                                if (x == 0u)
+                                if (x == coordMin)
                                     aGc.draw_text(ng::point{ squareRect.left() - (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0 - yLabelExtents.cx, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
-                                else if (x == 7u)
+                                else if (x == coordMax)
                                     aGc.draw_text(ng::point{ squareRect.right() + (dpi_scale(BORDER) * scale() - yLabelExtents.cx) / 2.0, squareRect.center().y - yLabelExtents.cy / 2.0 }, yLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
-                                if (y == 0u)
+                                if (y == coordMin)
                                     aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.bottom() + (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 }, xLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
-                                else if (y == 7u)
+                                else if (y == coordMax)
                                     aGc.draw_text(ng::point{ squareRect.center().x - xLabelExtents.cx / 2.0, squareRect.top() - (dpi_scale(BORDER) * scale() - xLabelExtents.cy) / 2.0 - xLabelExtents.cy }, xLabel, labelFont, palette_color(ng::color_role::SecondaryAccent));
                                 break;
                             }
@@ -244,6 +247,13 @@ namespace chess::gui
         if (aKeyCode == ng::key_code_e::KeyCode_i)
         {
             iSquareIdentification = static_cast<square_identification>((static_cast<uint32_t>(iSquareIdentification) + 1u) % static_cast<uint32_t>(square_identification::COUNT));
+            iAnimations.clear();
+            update();
+            return true;
+        }
+        else if (aKeyCode == ng::key_code_e::KeyCode_f)
+        {
+            iFlipped = !iFlipped;
             iAnimations.clear();
             update();
             return true;
@@ -400,10 +410,13 @@ namespace chess::gui
     void board::new_game(i_player_factory& aPlayerFactory, player_type aWhitePlayer, player_type aBlackPlayer)
     {
         setup(chess::setup_position<mailbox_rep>());
+
         iWhitePlayer = std::move(aPlayerFactory.create_player(aWhitePlayer, player::White));
         iBlackPlayer = std::move(aPlayerFactory.create_player(aBlackPlayer, player::Black));
+
         white_player().greet(black_player());
         black_player().greet(white_player());
+
         white_player().moved([&](chess::move const& aMove)
         {
             moved(aMove);
@@ -412,8 +425,11 @@ namespace chess::gui
         {
             moved(aMove);
         });
+
         iUndoneMoves.clear();
         Changed.trigger();
+
+        play();
     }
 
     void board::setup(chess::mailbox_position const& aPosition)
@@ -755,7 +771,7 @@ namespace chess::gui
         if (!root().has_native_surface()) // todo: shouldn't need this check
             return;
 
-        double nodesPerSecond = static_cast<double>(white_player().type() == player_type::AI ? white_player().nodes_per_second() : black_player().nodes_per_second());
+        double nodesPerSecond = static_cast<double>(current_player().nodes_per_second());
         std::ostringstream oss;
         oss << std::setprecision(2) << std::fixed;
         if (nodesPerSecond < 1000.0)
@@ -806,6 +822,11 @@ namespace chess::gui
 
     ng::rect board::square_rect(coordinates aCoordinates) const
     {
+        if (iFlipped)
+        {
+            aCoordinates.x = 7 - aCoordinates.x;
+            aCoordinates.y = 7 - aCoordinates.y;
+        }
         auto const boardRect = board_rect();
         ng::size squareDimensions{ boardRect.extents() / 8.0 };
         return ng::rect{ boardRect.top_left() + ng::point{ squareDimensions * ng::size_u32{ aCoordinates.x, 7u - aCoordinates.y }.as<ng::scalar>() }, squareDimensions };

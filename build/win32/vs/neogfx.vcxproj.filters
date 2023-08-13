@@ -1773,10 +1773,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\src\gui\layout\flow_layout.inl">
+    <None Include="..\..\..\src\gui\layout\flow_layout.ipp">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\..\src\gui\layout\layout.inl">
+    <None Include="..\..\..\src\gui\layout\layout.ipp">
       <Filter>Source Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gfx\path.inl">

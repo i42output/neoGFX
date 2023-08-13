@@ -21,8 +21,8 @@
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/layout/flow_layout.hpp>
-#include "layout.inl"
-#include "flow_layout.inl"
+#include "layout.ipp"
+#include "flow_layout.ipp"
 
 namespace neogfx
 {

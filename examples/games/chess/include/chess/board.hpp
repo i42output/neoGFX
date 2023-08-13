@@ -117,6 +117,7 @@ namespace chess::gui
         std::unique_ptr<i_player> iBlackPlayer;
         std::vector<chess::move> iUndoneMoves;
         bool iInRedo;
+        bool iFlipped;
         ng::color iColorWhiteSquare;
         ng::color iColorBlackSquare;
         ng::color iColorWhitePiece;

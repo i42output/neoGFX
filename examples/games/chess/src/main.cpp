@@ -89,20 +89,21 @@ int main(int argc, char* argv[])
 
         chess::move_validator moveValidator;
         chess::gui::board board{ window.client_layout(), moveValidator };
-        chess::default_player_factory playerFactory;
-        board.new_game(playerFactory, chess::player_type::Human, chess::player_type::AI);
 
-        board.changed([&]()
+        chess::default_player_factory playerFactory;
+        board.new_game(playerFactory, chess::player_type::AI, chess::player_type::AI);
+
+        auto board_changed = [&]()
         {
             undoMove.enable(board.can_undo());
             redoMove.enable(board.can_redo());
             play.enable(board.can_play());
             stop.enable(board.can_stop());
-        });
-        undoMove.enable(board.can_undo());
-        redoMove.enable(board.can_redo());
-        play.enable(board.can_play());
-        stop.enable(board.can_stop());
+        };
+
+        board.changed(board_changed);
+        board_changed();
+
         undoMove.Triggered([&]() { board.undo(); });
         redoMove.Triggered([&]() { board.redo(); });
         play.Triggered([&]() { board.play(); });

@@ -285,9 +285,9 @@ namespace chess
         for (;;)
         {
             std::unique_lock<std::mutex> lk{ iMutex };
-            iSignal.wait(lk, [&]() { return state().finished || !iQueue.empty(); });
+            iSignal.wait(lk, [&]() { return iGameState.load()->finished || !iQueue.empty(); });
             
-            if (state().finished)
+            if (iGameState.load()->finished)
                 return;
 
             std::map<position_type, game_tree_node> work;
