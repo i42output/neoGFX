@@ -58,13 +58,13 @@ namespace neogfx
     };
 
     template <typename Layout>
-    struct layout::column_major : common_axis_policy<column_major<Layout>>
+    struct layout::row_major : common_axis_policy<row_major<Layout>>
     {
         typedef Layout layout_type;
         typedef horizontal_layout major_layout;
         typedef vertical_layout minor_layout;
-        static const bool is_column_major = true;
-        static const bool is_row_major = false;
+        static const bool is_row_major = true;
+        static const bool is_column_major = false;
         static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
         static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
         static const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
@@ -82,13 +82,13 @@ namespace neogfx
     };
 
     template <typename Layout>
-    struct layout::row_major : common_axis_policy<row_major<Layout>>
+    struct layout::column_major : common_axis_policy<column_major<Layout>>
     {
         typedef Layout layout_type;
         typedef vertical_layout major_layout;
         typedef horizontal_layout minor_layout;
-        static const bool is_column_major = false;
-        static const bool is_row_major = true;
+        static const bool is_row_major = false;
+        static const bool is_column_major = true;
         static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
         static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
         static const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }

@@ -69,12 +69,12 @@ namespace neogfx
 
     size horizontal_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
-        return layout::do_minimum_size<layout::column_major<horizontal_layout>>(aAvailableSpace);
+        return layout::do_minimum_size<layout::row_major<horizontal_layout>>(aAvailableSpace);
     }
 
     size horizontal_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
-        return layout::do_maximum_size<layout::column_major<horizontal_layout>>(aAvailableSpace);
+        return layout::do_maximum_size<layout::row_major<horizontal_layout>>(aAvailableSpace);
     }
 
     void horizontal_layout::layout_items(const point& aPosition, const size& aSize)
@@ -89,7 +89,7 @@ namespace neogfx
             parent_widget().layout_items_started();
         scoped_layout_items layoutItems;
         validate();
-        layout::do_layout_items<layout::column_major<horizontal_layout>>(aPosition, aSize);
+        layout::do_layout_items<layout::row_major<horizontal_layout>>(aPosition, aSize);
         if (has_parent_widget())
             parent_widget().layout_items_completed();
         LayoutCompleted.trigger();

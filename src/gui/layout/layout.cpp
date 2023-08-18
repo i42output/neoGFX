@@ -98,13 +98,13 @@ namespace neogfx
             service<i_item_layout>().increment_id();
     }
 
-    template size layout::do_minimum_size<layout::column_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
-    template size layout::do_maximum_size<layout::column_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
-    template void layout::do_layout_items<layout::column_major<horizontal_layout>>(const point& aPosition, const size& aSize);
+    template size layout::do_minimum_size<layout::row_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
+    template size layout::do_maximum_size<layout::row_major<horizontal_layout>>(optional_size const& aAvailableSpace) const;
+    template void layout::do_layout_items<layout::row_major<horizontal_layout>>(const point& aPosition, const size& aSize);
 
-    template size layout::do_minimum_size<layout::row_major<vertical_layout>>(optional_size const& aAvailableSpace) const;
-    template size layout::do_maximum_size<layout::row_major<vertical_layout>>(optional_size const& aAvailableSpace) const;
-    template void layout::do_layout_items<layout::row_major<vertical_layout>>(const point& aPosition, const size& aSize);
+    template size layout::do_minimum_size<layout::column_major<vertical_layout>>(optional_size const& aAvailableSpace) const;
+    template size layout::do_maximum_size<layout::column_major<vertical_layout>>(optional_size const& aAvailableSpace) const;
+    template void layout::do_layout_items<layout::column_major<vertical_layout>>(const point& aPosition, const size& aSize);
 
     layout::layout(neogfx::alignment aAlignment) :
         iParent{ nullptr },
