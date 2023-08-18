@@ -174,6 +174,8 @@ namespace neogfx
 
     void toolbar_button::init()
     {
+        set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Minimum });
+
         iSink += action().changed([this]() { update_state(); });
         update_state();
         iSink += action().enabled([this]() { enable(); });
