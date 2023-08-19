@@ -65,9 +65,9 @@ namespace neogfx
         template <typename Layout>
         struct row_major;
     public:
-        layout(neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
-        layout(i_widget& aOwner, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
-        layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
+        layout(optional_alignment const& aAlignment = {});
+        layout(i_widget& aOwner, optional_alignment const& aAlignment = {});
+        layout(i_layout& aParent, optional_alignment const& aAlignment = {});
         layout(const layout&) = delete;
         ~layout();
     public:
@@ -109,8 +109,9 @@ namespace neogfx
         void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;
         bool always_use_spacing() const override;
         void set_always_use_spacing(bool aAlwaysUseSpacing) override;
+        bool has_alignment() const override;
         neogfx::alignment alignment() const override;
-        void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        void set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout = true) override;
         neogfx::autoscale autoscale() const override;
         void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) override;
         visibility_constraint child_visibility() const override;
@@ -172,7 +173,7 @@ namespace neogfx
         mutable std::optional<const i_device_metrics*> iDeviceMetrics;
         optional_size iSpacing;
         bool iAlwaysUseSpacing;
-        neogfx::alignment iAlignment;
+        optional_alignment iAlignment;
         neogfx::autoscale iAutoscale;
         visibility_constraint iChildVisibility;
         bool iEnabled;

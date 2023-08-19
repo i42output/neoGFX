@@ -106,7 +106,7 @@ namespace neogfx
     template size layout::do_maximum_size<layout::column_major<vertical_layout>>(optional_size const& aAvailableSpace) const;
     template void layout::do_layout_items<layout::column_major<vertical_layout>>(const point& aPosition, const size& aSize);
 
-    layout::layout(neogfx::alignment aAlignment) :
+    layout::layout(optional_alignment const& aAlignment) :
         iParent{ nullptr },
         iOwner{ nullptr },
         iAlwaysUseSpacing{ false },
@@ -120,7 +120,7 @@ namespace neogfx
         enable();
     }
 
-    layout::layout(i_widget& aOwner, neogfx::alignment aAlignment) :
+    layout::layout(i_widget& aOwner, optional_alignment const& aAlignment) :
         iParent{ nullptr },
         iOwner{ &aOwner },
         iAlwaysUseSpacing{ false },
@@ -135,7 +135,7 @@ namespace neogfx
         enable();
     }
 
-    layout::layout(i_layout& aParent, neogfx::alignment aAlignment) :
+    layout::layout(i_layout& aParent, optional_alignment const& aAlignment) :
         iParent{ nullptr },
         iOwner{ aParent.has_parent_widget() ? &aParent.parent_widget() : nullptr },
         iAlwaysUseSpacing{ false },
@@ -420,12 +420,19 @@ namespace neogfx
         iAlwaysUseSpacing = aAlwaysUseSpacing;
     }
 
-    neogfx::alignment layout::alignment() const
+    bool layout::has_alignment() const
     {
-        return iAlignment;
+        return iAlignment != std::nullopt;
     }
 
-    void layout::set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout)
+    alignment layout::alignment() const
+    {
+        if (has_alignment())
+            return *iAlignment;
+        return neogfx::alignment::Center | neogfx::alignment::VCenter;
+    }
+
+    void layout::set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout)
     {
         if (iAlignment != aAlignment)
         {

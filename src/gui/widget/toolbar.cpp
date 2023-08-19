@@ -19,28 +19,60 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
+#include <neogfx/gui/layout/flow_layout.hpp>
+#include <neogfx/gui/layout/vertical_layout.hpp>
+#include <neogfx/gui/layout/horizontal_layout.hpp>
 #include <neogfx/gui/widget/toolbar.hpp>
 
 namespace neogfx
 {
-    // todo: vertical toolbars
+    namespace
+    {
+        std::unique_ptr<i_layout> make_toolbar_layout(toolbar& aToolbar, toolbar_style aStyle)
+        {
+            if ((aStyle & toolbar_style::Flow) == toolbar_style::Flow)
+            {
+                if ((aStyle & toolbar_style::Horizontal) == toolbar_style::Horizontal)
+                    return std::make_unique<flow_layout>(aToolbar, flow_layout_direction::Horizontal);
+                else
+                    return std::make_unique<flow_layout>(aToolbar, flow_layout_direction::Vertical);
+            }
+            else
+            {
+                if ((aStyle & toolbar_style::Horizontal) == toolbar_style::Horizontal)
+                    return std::make_unique<horizontal_layout>(aToolbar);
+                else
+                    return std::make_unique<vertical_layout>(aToolbar);
+            }
+        }
+    }
 
     toolbar::toolbar(toolbar_style aStyle) :
-        iStyle{ aStyle }, iLayout { *this }
+        iStyle{ aStyle }, 
+        iLayout{ make_toolbar_layout(*this, aStyle) }
     {
     }
 
     toolbar::toolbar(i_widget& aParent, toolbar_style aStyle) :
-        widget{ aParent }, iStyle{ aStyle }, iLayout{ *this }
+        widget{ aParent }, 
+        iStyle{ aStyle }, 
+        iLayout{ make_toolbar_layout(*this, aStyle) }
     {
     }
 
     toolbar::toolbar(i_layout& aLayout, toolbar_style aStyle) :
-        widget{ aLayout }, iStyle{ aStyle }, iLayout{ *this }
+        widget{ aLayout }, 
+        iStyle{ aStyle }, 
+        iLayout{ make_toolbar_layout(*this, aStyle) }
     {
     }
 
-    neogfx::size_policy toolbar::size_policy() const
+    toolbar_style toolbar::style() const
+    {
+        return iStyle;
+    }
+
+    size_policy toolbar::size_policy() const
     {
         if (widget::has_size_policy())
             return widget::size_policy();

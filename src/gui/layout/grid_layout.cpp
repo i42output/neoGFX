@@ -345,12 +345,12 @@ namespace neogfx
         return *this;
     }
 
-    void grid_layout::set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout)
+    void grid_layout::set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout)
     {
         layout::set_alignment(aAlignment, aUpdateLayout);
-        iRowLayout.set_alignment(alignment(), aUpdateLayout);
+        iRowLayout.set_alignment(aAlignment, aUpdateLayout);
         for (auto& r : iRows)
-            r->set_alignment(alignment(), aUpdateLayout);
+            r->set_alignment(aAlignment, aUpdateLayout);
     }
 
     void grid_layout::layout_items(const point& aPosition, const size& aSize)

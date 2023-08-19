@@ -83,7 +83,7 @@ namespace neogfx
         void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;
         grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
         grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
-        void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) override;
+        void set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout = true) override;
     public:
         void layout_items(const point& aPosition, const size& aSize) override;
     public:

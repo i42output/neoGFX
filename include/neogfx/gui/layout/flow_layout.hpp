@@ -25,25 +25,28 @@
 
 namespace neogfx
 {
+    enum class flow_layout_direction : std::uint32_t
+    {
+        Horizontal  = 0x00000001,
+        Vertical    = 0x00000002,
+    };
+
     class flow_layout : public layout
     {
         meta_object(layout)
     public:
-        enum flow_direction_e
-        {
-            FlowDirectionHorizontal,
-            FlowDirectionVertical,
-        };
-    public:
-        flow_layout(flow_direction_e aFlowDirection = FlowDirectionHorizontal);
-        flow_layout(i_widget& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
-        flow_layout(i_layout& aParent, flow_direction_e aFlowDirection = FlowDirectionHorizontal);
+        flow_layout(flow_layout_direction aFlowDirection = flow_layout_direction::Horizontal);
+        flow_layout(i_widget& aParent, flow_layout_direction aFlowDirection = flow_layout_direction::Horizontal);
+        flow_layout(i_layout& aParent, flow_layout_direction aFlowDirection = flow_layout_direction::Horizontal);
     public:
         i_spacer& add_spacer() override;
         i_spacer& add_spacer_at(layout_item_index aPosition) override;
     public:
+        neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+    public:
+        neogfx::alignment alignment() const override;
     public:
         void layout_items(const point& aPosition, const size& aSize) override;
     protected:
@@ -54,6 +57,6 @@ namespace neogfx
         template <typename AxisPolicy>
         void do_layout_items(const point& aPosition, const size& aSize);
     private:
-        flow_direction_e iFlowDirection;
+        flow_layout_direction iFlowDirection;
     };
 }

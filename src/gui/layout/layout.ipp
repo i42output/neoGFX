@@ -63,22 +63,22 @@ namespace neogfx
         typedef Layout layout_type;
         typedef horizontal_layout major_layout;
         typedef vertical_layout minor_layout;
-        static const bool is_row_major = true;
-        static const bool is_column_major = false;
-        static const neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
-        static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
-        static const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
-        static point::coordinate_type& x(point& aPoint) { return aPoint.x; }
-        static const point::coordinate_type& y(const point& aPoint) { return aPoint.y; }
-        static point::coordinate_type& y(point& aPoint) { return aPoint.y; }
-        static const size::dimension_type& cx(const size& aSize) { return aSize.cx; }
-        static size::dimension_type& cx(size& aSize) { return aSize.cx; }
-        static const size::dimension_type& cy(const size& aSize) { return aSize.cy; }
-        static size::dimension_type& cy(size& aSize) { return aSize.cy; }
-        static size::dimension_type cx(const neogfx::padding& aPadding) { return aPadding.left + aPadding.right; }
-        static size::dimension_type cy(const neogfx::padding& aPadding) { return aPadding.top + aPadding.bottom; }
-        static neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.horizontal_constraint(aIgnoreBits); }
-        static neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreBits = true) { return aSizePolicy.vertical_constraint(aIgnoreBits); }
+        static constexpr bool is_row_major = true;
+        static constexpr bool is_column_major = false;
+        static constexpr neogfx::alignment AlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
+        static constexpr neogfx::alignment InlineAlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
+        static constexpr const point::coordinate_type& x(const point& aPoint) { return aPoint.x; }
+        static constexpr point::coordinate_type& x(point& aPoint) { return aPoint.x; }
+        static constexpr const point::coordinate_type& y(const point& aPoint) { return aPoint.y; }
+        static constexpr point::coordinate_type& y(point& aPoint) { return aPoint.y; }
+        static constexpr const size::dimension_type& cx(const size& aSize) { return aSize.cx; }
+        static constexpr size::dimension_type& cx(size& aSize) { return aSize.cx; }
+        static constexpr const size::dimension_type& cy(const size& aSize) { return aSize.cy; }
+        static constexpr size::dimension_type& cy(size& aSize) { return aSize.cy; }
+        static constexpr size::dimension_type cx(const neogfx::padding& aPadding) { return aPadding.left + aPadding.right; }
+        static constexpr size::dimension_type cy(const neogfx::padding& aPadding) { return aPadding.top + aPadding.bottom; }
+        static constexpr neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.horizontal_constraint(aIgnoreUniformity); }
+        static constexpr neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.vertical_constraint(aIgnoreUniformity); }
     };
 
     template <typename Layout>
@@ -87,22 +87,22 @@ namespace neogfx
         typedef Layout layout_type;
         typedef vertical_layout major_layout;
         typedef horizontal_layout minor_layout;
-        static const bool is_row_major = false;
-        static const bool is_column_major = true;
-        static const neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
-        static const neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
-        static const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }
-        static point::coordinate_type& x(point& aPoint) { return aPoint.y; }
-        static const point::coordinate_type& y(const point& aPoint) { return aPoint.x; }
-        static point::coordinate_type& y(point& aPoint) { return aPoint.x; }
-        static const size::dimension_type& cx(const size& aSize) { return aSize.cy; }
-        static size::dimension_type& cx(size& aSize) { return aSize.cy; }
-        static const size::dimension_type& cy(const size& aSize) { return aSize.cx; }
-        static size::dimension_type& cy(size& aSize) { return aSize.cx; }
-        static size::dimension_type cx(const neogfx::padding& aPadding) { return aPadding.top + aPadding.bottom; }
-        static size::dimension_type cy(const neogfx::padding& aPadding) { return aPadding.left + aPadding.right; }
-        static neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.vertical_constraint(aIgnoreUniformity); }
-        static neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.horizontal_constraint(aIgnoreUniformity); }
+        static constexpr bool is_row_major = false;
+        static constexpr bool is_column_major = true;
+        static constexpr neogfx::alignment AlignmentMask = neogfx::alignment::Left | neogfx::alignment::Center | neogfx::alignment::Right;
+        static constexpr neogfx::alignment InlineAlignmentMask = neogfx::alignment::Top | neogfx::alignment::VCenter | neogfx::alignment::Bottom;
+        static constexpr const point::coordinate_type& x(const point& aPoint) { return aPoint.y; }
+        static constexpr point::coordinate_type& x(point& aPoint) { return aPoint.y; }
+        static constexpr const point::coordinate_type& y(const point& aPoint) { return aPoint.x; }
+        static constexpr point::coordinate_type& y(point& aPoint) { return aPoint.x; }
+        static constexpr const size::dimension_type& cx(const size& aSize) { return aSize.cy; }
+        static constexpr size::dimension_type& cx(size& aSize) { return aSize.cy; }
+        static constexpr const size::dimension_type& cy(const size& aSize) { return aSize.cx; }
+        static constexpr size::dimension_type& cy(size& aSize) { return aSize.cx; }
+        static constexpr size::dimension_type cx(const neogfx::padding& aPadding) { return aPadding.top + aPadding.bottom; }
+        static constexpr size::dimension_type cy(const neogfx::padding& aPadding) { return aPadding.left + aPadding.right; }
+        static constexpr neogfx::size_constraint size_policy_x(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.vertical_constraint(aIgnoreUniformity); }
+        static constexpr neogfx::size_constraint size_policy_y(const neogfx::size_policy& aSizePolicy, bool aIgnoreUniformity = true) { return aSizePolicy.horizontal_constraint(aIgnoreUniformity); }
     };
 
     namespace

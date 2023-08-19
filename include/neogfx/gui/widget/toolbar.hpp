@@ -22,14 +22,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/neogfx.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/widget.hpp>
-#include <neogfx/gui/layout/flow_layout.hpp>
+#include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/toolbar_button.hpp>
 
 namespace neogfx
 {
     enum class toolbar_style : uint32_t
     {
-        Default = 0x00000000
+        Horizontal  = 0x00000001,
+        Vertical    = 0x00000002,
+
+        Flow        = 0x00000010,
+        Collapsible = 0x00000020, // todo
+
+        Default     = Horizontal | Flow
     };
 
     inline constexpr toolbar_style operator|(toolbar_style aLhs, toolbar_style aRhs)
@@ -57,6 +63,8 @@ namespace neogfx
         toolbar(i_widget& aParent, toolbar_style aStyle = toolbar_style::Default);
         toolbar(i_layout& aLayout, toolbar_style aStyle = toolbar_style::Default);
     public:
+        toolbar_style style() const;
+    public:
         neogfx::size_policy size_policy() const override;
     public:
         virtual size button_image_extents() const;
@@ -72,7 +80,7 @@ namespace neogfx
         virtual void insert_separator(button_index aButtonIndex);
     private:
         toolbar_style iStyle;
-        flow_layout iLayout;
+        std::unique_ptr<i_layout> iLayout;
         button_list iButtons;
         action iSeparator;
         optional_size iButtonImageExtents;

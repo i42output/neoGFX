@@ -183,6 +183,7 @@ namespace neogfx
         point pos;
         bool previousNonZeroSize = false;
         typename AxisPolicy::minor_layout rows(*this);
+        rows.set_alignment(alignment());
         for (auto& itemRef : *this)
         {
             auto& item = *itemRef;
@@ -213,8 +214,12 @@ namespace neogfx
             }
             if (addRow)
             {
-                rows.add(make_ref<typename AxisPolicy::major_layout>());
-                rows.get_layout_at(rows.count() - 1).set_size_policy(size_constraint::Minimum);
+                auto newRow = make_ref<typename AxisPolicy::major_layout>();
+                if constexpr (AxisPolicy::is_row_major)
+                    newRow->set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
+                else
+                    newRow->set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+                rows.add(newRow);
             }
             rows.get_layout_at(rows.count() - 1).add(item);
         }

@@ -271,8 +271,9 @@ namespace neogfx
         virtual void set_spacing(optional_size const& sSpacing, bool aUpdateLayout = true) = 0;
         virtual bool always_use_spacing() const = 0;
         virtual void set_always_use_spacing(bool aAlwaysUseSpacing) = 0;
+        virtual bool has_alignment() const = 0;
         virtual neogfx::alignment alignment() const = 0;
-        virtual void set_alignment(neogfx::alignment aAlignment, bool aUpdateLayout = true) = 0;
+        virtual void set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout = true) = 0;
         virtual neogfx::autoscale autoscale() const = 0;
         virtual void set_autoscale(neogfx::autoscale aAutoscale, bool aUpdateLayout = true) = 0;
         virtual visibility_constraint child_visibility() const = 0;
