@@ -482,7 +482,14 @@ namespace neogfx
         }
         void toggle_check(item_presentation_model_index const& aIndex) final
         {
-            if (is_checked(aIndex) || is_indeterminate(aIndex))
+            if (is_checked(aIndex))
+            {
+                if (cell_tri_state_checkable(aIndex))
+                    set_indeterminate(aIndex);
+                else
+                    set_checked(aIndex, false);
+            }
+            else if (is_indeterminate(aIndex))
                 set_checked(aIndex, false);
             else
                 set_checked(aIndex, true);

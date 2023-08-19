@@ -678,6 +678,7 @@ int main(int argc, char* argv[])
         });
 
         ipm1.ItemChecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.check(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
+        ipm1.ItemIndeterminate([&](const ng::item_presentation_model_index& aIndex) { ipm2.set_indeterminate(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
         ipm1.ItemUnchecked([&](const ng::item_presentation_model_index& aIndex) { ipm2.uncheck(ipm2.from_item_model_index(ipm1.to_item_model_index(aIndex))); });
 
         auto update_column5_heading = [&](bool aReadOnly, bool aUnselectable)
