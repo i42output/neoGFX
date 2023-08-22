@@ -1321,8 +1321,18 @@ namespace neogfx
     {
         auto& self = base_type::as_widget();
 
+        auto const& updateRect = update_rect();
+
+#ifdef NEOGFX_DEBUG
+        if (debug::renderItem == this)
+        {
+            aGc.flush();
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(...), updateRect: " << updateRect << endl;
+        }
+#endif // NEOGFX_DEBUG
+
         if (self.has_background_color() || !self.background_is_transparent())
-            aGc.fill_rect(update_rect(), self.background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0));
+            aGc.fill_rect(updateRect, self.background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0));
     }
 
     template <typename Interface>

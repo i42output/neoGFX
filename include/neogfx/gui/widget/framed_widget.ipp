@@ -54,9 +54,9 @@ namespace neogfx
         case frame_style::SolidFrame:
         case frame_style::WindowFrame:
             if (!has_frame_radius())
-                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }.deflate(std::floor(effective_frame_width() / 2.0)), pen{ frame_color(), effective_frame_width() });
+                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
             else
-                aGc.draw_rounded_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }.deflate(std::floor(effective_frame_width() / 2.0)), frame_radius(), pen{ frame_color(), effective_frame_width() },
+                aGc.draw_rounded_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }, frame_radius(), pen{ frame_color(), effective_frame_width() },
                     base_type::as_widget().has_background_color() || !base_type::as_widget().background_is_transparent() ?
                         brush{ base_type::as_widget().background_color().with_combined_alpha(base_type::as_widget().has_background_opacity() ? base_type::as_widget().background_opacity() : 1.0) } : brush{});
             break;
@@ -162,8 +162,8 @@ namespace neogfx
         case frame_style::DottedFrame:
         case frame_style::DashedFrame:
         case frame_style::SolidFrame:
-        case frame_style::WindowFrame:
             return line_width();
+        case frame_style::WindowFrame:
         case frame_style::ContainerFrame:
             return line_width() * 2.0;
         case frame_style::DoubleFrame:
