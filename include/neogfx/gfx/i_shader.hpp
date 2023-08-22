@@ -45,9 +45,20 @@ namespace neogfx
 
     enum class shader_variable_qualifier : uint32_t
     {
-        In,
-        Out
+        In      = 0x00000001,
+        Out     = 0x00000002,
+        Flat    = 0x00000010
     };
+
+    inline constexpr shader_variable_qualifier operator|(shader_variable_qualifier aLhs, shader_variable_qualifier aRhs)
+    {
+        return static_cast<shader_variable_qualifier>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+    }
+
+    inline constexpr shader_variable_qualifier operator&(shader_variable_qualifier aLhs, shader_variable_qualifier aRhs)
+    {
+        return static_cast<shader_variable_qualifier>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+    }
 
     enum class shader_language : uint32_t
     {
@@ -95,6 +106,7 @@ end_declare_enum(neogfx::shader_type)
 begin_declare_enum(neogfx::shader_variable_qualifier)
 declare_enum_string_explicit(neogfx::shader_variable_qualifier, In, in)
 declare_enum_string_explicit(neogfx::shader_variable_qualifier, Out, out)
+declare_enum_string_explicit(neogfx::shader_variable_qualifier, Flat, flat)
 end_declare_enum(neogfx::shader_variable_qualifier)
 
 begin_declare_enum(neogfx::shader_language)
@@ -557,14 +569,24 @@ namespace neogfx
             set_uniform(aName, shader_double_array{ aArray, aArray + aArraySize });
         }
         template <typename T>
-        i_shader_variable& add_in_variable(const i_string& aName, shader_variable_location aLocation)
+        i_shader_variable& add_in_variable(const i_string& aName, shader_variable_location aLocation, bool aFlat = false)
         {
-            return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::In,  static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()) });
+            return add_variable(
+                shader_variable{ 
+                    aName, 
+                    aLocation, 
+                    aFlat ? shader_variable_qualifier::In | shader_variable_qualifier::Flat : shader_variable_qualifier::In,
+                    static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()) });
         }
         template <typename T>
-        i_shader_variable& add_out_variable(const i_string& aName, shader_variable_location aLocation)
+        i_shader_variable& add_out_variable(const i_string& aName, shader_variable_location aLocation, bool aFlat = false)
         {
-            return add_variable(shader_variable{ aName, aLocation, shader_variable_qualifier::Out,  static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()) });
+            return add_variable(
+                shader_variable{ 
+                    aName, 
+                    aLocation, 
+                    aFlat ? shader_variable_qualifier::Out | shader_variable_qualifier::Flat : shader_variable_qualifier::Out,
+                    static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type::variant_type>()) });
         }
     };
 

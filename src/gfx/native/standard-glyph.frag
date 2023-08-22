@@ -11,7 +11,7 @@ vec3 output_pixel()
     return texelFetch(uGlyphRenderOutput, render_position(), 0).rgb;
 }
                 
-void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void standard_glyph_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
 {
     if (uGlyphEnabled)
     {

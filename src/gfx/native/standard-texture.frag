@@ -36,7 +36,7 @@ vec4 combined_texel_at(vec2 texCoord)
     }
     return sum / float(gl_NumSamples);
 }
-void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void standard_texture_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
 {
     if (uTextureEnabled)
     {

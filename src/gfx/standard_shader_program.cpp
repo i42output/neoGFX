@@ -34,8 +34,8 @@ namespace neogfx
             iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
             iFilterShader = static_cast<i_filter_shader&>(add_shader(neolib::make_ref<standard_filter_shader>().as<i_shader>()));
             iGlyphShader = static_cast<i_glyph_shader&>(add_shader(neolib::make_ref<standard_glyph_shader>().as<i_shader>()));
-            iStippleShader = static_cast<i_stipple_shader&>(add_shader(neolib::make_ref<standard_stipple_shader>().as<i_shader>()));
             iShapeShader = static_cast<i_shape_shader&>(add_shader(neolib::make_ref<standard_shape_shader>().as<i_shader>()));
+            iStippleShader = static_cast<i_stipple_shader&>(add_shader(neolib::make_ref<standard_stipple_shader>().as<i_shader>()));
         }
     }
 

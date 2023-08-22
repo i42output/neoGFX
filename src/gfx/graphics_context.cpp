@@ -386,51 +386,42 @@ namespace neogfx
 
     void graphics_context::draw_triangle(const point& aP0, const point& aP1, const point& aP2, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_triangle(aP0, aP1, aP2, aFill);
-        native_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen });
+        native_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen, aFill });
     }
 
     void graphics_context::draw_rect(const rect& aRect, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_rect(aRect, aFill);
-        native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen });
+        native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen, aFill });
     }
 
     void graphics_context::draw_rounded_rect(const rect& aRect, const vec4& aRadius, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_rounded_rect(aRect, aRadius, aFill);
-        native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen });
+        native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
+    }
+
+    void graphics_context::draw_checker_rect(const rect& aRect, const size& aSquareSize, const pen& aPen, const brush& aFill1, const brush& aFill2) const
+    {
+        native_context().enqueue(graphics_operation::draw_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
     }
 
     void graphics_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_circle(aCenter, aRadius, aFill);
-        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen });
+        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aFill });
     }
 
     void graphics_context::draw_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_ellipse(aCenter, aRadiusA, aRadiusB, aFill);
-        native_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen });
+        native_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen, aFill });
     }
 
     void graphics_context::draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_pie(aCenter, aRadius, aStartAngle, aEndAngle, aFill);
-        native_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
+        native_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
     void graphics_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_arc(aCenter, aRadius, aStartAngle, aEndAngle, aFill);
-        native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen });
+        native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
     void graphics_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const
@@ -440,17 +431,13 @@ namespace neogfx
 
     void graphics_context::draw_path(const path& aPath, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_path(aPath, aFill);
         path path = to_device_units(aPath);
         path.set_position(path.position() + iOrigin);
-        native_context().enqueue(graphics_operation::draw_path{ path, aPen });
+        native_context().enqueue(graphics_operation::draw_path{ path, aPen, aFill });
     }
 
     void graphics_context::draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill) const
     {
-        if (aFill != neolib::none)
-            fill_shape(aShape, aPosition, aFill);
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_shape{
@@ -460,7 +447,9 @@ namespace neogfx
                     { 0.0, 0.0, 1.0, 0.0 }, 
                     { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
                 aPosition,
-                aPen });
+                aPen,
+                aFill
+            });
     }
 
     void graphics_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer) const
@@ -485,67 +474,6 @@ namespace neogfx
         draw_rect(aRect, pen{ color::White });
         line_stipple_off();
         pop_logical_operation();
-    }
-
-    void graphics_context::fill_triangle(const point& aP0, const point& aP1, const point& aP2, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aFill });
-    }
-        
-    void graphics_context::fill_rect(const rect& aRect, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_rect{ to_device_units(aRect) + iOrigin, aFill });
-    }
-
-    void graphics_context::fill_rounded_rect(const rect& aRect, const vec4& aRadius, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aFill });
-    }
-
-    void graphics_context::fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2) const
-    {
-        native_context().enqueue(graphics_operation::fill_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aFill1, aFill2 });
-    }
-
-    void graphics_context::fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_circle{ to_device_units(aCenter) + iOrigin, aRadius, aFill });
-    }
-
-    void graphics_context::fill_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aFill });
-    }
-
-    void graphics_context::fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill });
-    }
-
-    void graphics_context::fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const
-    {
-        native_context().enqueue(graphics_operation::fill_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aFill });
-    }
-
-    void graphics_context::fill_path(const path& aPath, const brush& aFill) const
-    {
-        path path = to_device_units(aPath);
-        path.set_position(path.position() + iOrigin);
-        native_context().enqueue(graphics_operation::fill_path{ path, aFill });
-    }
-
-    void graphics_context::fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const
-    {
-        vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-        native_context().enqueue(
-            graphics_operation::fill_shape{
-                mat44{ 
-                    { toDeviceUnits.x, 0.0, 0.0, 0.0 },
-                    { 0.0, toDeviceUnits.y, 0.0, 0.0 },
-                    { 0.0, 0.0, 1.0, 0.0 }, 
-                    { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
-                aPosition,
-                aFill });
     }
 
     bool graphics_context::has_tab_stops() const

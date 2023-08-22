@@ -60,34 +60,35 @@ namespace neogfx
 
     enum class shader_effect
     {
-        None = 0,
-        Colorize = 1,
+        None            = 0,
+        Colorize        = 1,
         ColorizeAverage = Colorize,
         ColorizeMaximum = 2,
-        ColorizeSpot = 3,
-        ColorizeAlpha = 4,
-        Monochrome = 5,
-        Filter = 10,
-        Ignore = 99
+        ColorizeSpot    = 3,
+        ColorizeAlpha   = 4,
+        Monochrome      = 5,
+        Filter          = 10,
+        Ignore          = 99
     };
 
     enum class shader_filter
     {
-        None = 0,
-        GaussianBlur = 1
+        None            = 0,
+        GaussianBlur    = 1
     };
 
     enum class shader_shape
     {
-        None = 0x00,
-        Line = 0x01,
+        None        = 0x00,
+        Line        = 0x01,
         CubicBezier = 0x02,
-        Triangle = 0x03,
-        Circle = 0x04,
-        Ellipse = 0x05,
-        Pie = 0x06,
-        Arc = 0x07,
-        RoundedRect = 0x08
+        Triangle    = 0x03,
+        Rect        = 0x04,
+        Circle      = 0x05,
+        Ellipse     = 0x06,
+        Pie         = 0x07,
+        Arc         = 0x08,
+        RoundedRect = 0x09
     };
 
     enum class blurring_algorithm

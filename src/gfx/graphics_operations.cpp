@@ -56,17 +56,12 @@ namespace neogfx
             case DrawLine: return "DrawLine";
             case DrawRect: return "DrawRect";
             case DrawRoundedRect: return "DrawRoundedRect";
+            case DrawCheckerRect: return "DrawCheckerRect";
             case DrawCircle: return "DrawCircle";
             case DrawArc: return "DrawArc";
             case DrawPath: return "DrawPath";
             case DrawShape: return "DrawShape";
             case DrawEntities: return "DrawEntities";
-            case FillRect: return "FillRect";
-            case FillRoundedRect: return "FillRoundedRect";
-            case FillCircle: return "FillCircle";
-            case FillArc: return "FillArc";
-            case FillPath: return "FillPath";
-            case FillShape: return "FillShape";
             case DrawGlyph: return "DrawGlyph";
             case DrawMesh: return "DrawMesh";
             default: return "";
@@ -153,30 +148,43 @@ namespace neogfx
                 return left.pen.width() == right.pen.width() &&
                     left.pen.anti_aliased() == right.pen.anti_aliased();
             }
-            case operation_type::FillRect:
+            case operation_type::DrawRect:
             {
-                auto& left = static_variant_cast<const fill_rect&>(aLeft);
-                auto& right = static_variant_cast<const fill_rect&>(aRight);
-                return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
+                auto& left = static_variant_cast<const draw_rect&>(aLeft);
+                auto& right = static_variant_cast<const draw_rect&>(aRight);
+                return left.pen.width() == right.pen.width() &&
+                    left.pen.anti_aliased() == right.pen.anti_aliased() &&
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }
-            case operation_type::FillCheckerRect:
+            case operation_type::DrawCheckerRect:
             {
-                auto& left = static_variant_cast<const fill_checker_rect&>(aLeft);
-                auto& right = static_variant_cast<const fill_checker_rect&>(aRight);
-                return left.fill1.index() == right.fill1.index() && std::holds_alternative<color>(left.fill1) &&
-                    left.fill2.index() == right.fill2.index() && std::holds_alternative<color>(left.fill2);
+                auto& left = static_variant_cast<const draw_checker_rect&>(aLeft);
+                auto& right = static_variant_cast<const draw_checker_rect&>(aRight);
+                return left.pen.width() == right.pen.width() &&
+                    left.pen.anti_aliased() == right.pen.anti_aliased() &&
+                    left.fill1.index() == right.fill1.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill1) || std::holds_alternative<color>(left.fill1)) &&
+                    left.fill2.index() == right.fill2.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill2) || std::holds_alternative<color>(left.fill2));
             }
-            case operation_type::FillShape:
+            case operation_type::DrawShape:
             {
-                auto& left = static_variant_cast<const fill_shape&>(aLeft);
-                auto& right = static_variant_cast<const fill_shape&>(aRight);
-                return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
+                auto& left = static_variant_cast<const draw_shape&>(aLeft);
+                auto& right = static_variant_cast<const draw_shape&>(aRight);
+                return left.pen.width() == right.pen.width() &&
+                    left.pen.anti_aliased() == right.pen.anti_aliased() && 
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }
-            case operation_type::FillPath:
+            case operation_type::DrawPath:
             {
-                auto& left = static_variant_cast<const fill_path&>(aLeft);
-                auto& right = static_variant_cast<const fill_path&>(aRight);
-                return left.fill.index() == right.fill.index() && std::holds_alternative<color>(left.fill);
+                auto& left = static_variant_cast<const draw_path&>(aLeft);
+                auto& right = static_variant_cast<const draw_path&>(aRight);
+                return left.pen.width() == right.pen.width() &&
+                    left.pen.anti_aliased() == right.pen.anti_aliased() && 
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }
             default:
                 return false;

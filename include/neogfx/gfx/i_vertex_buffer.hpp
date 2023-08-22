@@ -38,14 +38,15 @@ namespace neogfx
         Function1   = 0x00000010,
         Function2   = 0x00000020,
         Function3   = 0x00000040,
+        Function4   = 0x00000080,
         // todo
         Custom1     = 0x00010000,
         Custom2     = 0x00020000,
         Custom3     = 0x00040000,
         Custom4     = 0x00080000,
         Persist     = 0x10000000,
-        Default     = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3,
-        DefaultECS  = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Persist
+        Default     = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Function4,
+        DefaultECS  = Vertices | UV | Color | Function0 | Function1 | Function2 | Function3 | Function4 | Persist
     };
 
     inline std::string const& standard_vertex_attribute_name(vertex_buffer_type aType)
@@ -85,6 +86,11 @@ namespace neogfx
         case vertex_buffer_type::Function3:
         {
             static const std::string sName = "VertexFunction3";
+            return sName;
+        }
+        case vertex_buffer_type::Function4:
+        {
+            static const std::string sName = "VertexFunction4";
             return sName;
         }
         default:

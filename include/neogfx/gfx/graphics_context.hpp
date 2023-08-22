@@ -112,6 +112,7 @@ namespace neogfx
         void draw_triangle(const point& aP0, const point& aP1, const point& aP2, const pen& aPen, const brush& aFill = brush{}) const final;
         void draw_rect(const rect& aRect, const pen& aPen, const brush& aFill = brush{}) const final;
         void draw_rounded_rect(const rect& aRect, const vec4& aRadius, const pen& aPen, const brush& aFill = brush{}) const final;
+        void draw_checker_rect(const rect& aRect, const size& aSquareSize, const pen& aPen, const brush& aFill1, const brush& aFill2) const final;
         void draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill = brush{}) const final;
         void draw_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const pen& aPen, const brush& aFill = brush{}) const final;
         void draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill = brush{}) const final;
@@ -121,16 +122,6 @@ namespace neogfx
         void draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill = brush{}) const final;
         void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const final;
         void draw_focus_rect(const rect& aRect) const final;
-        void fill_triangle(const point& aP0, const point& aP1, const point& aP2, const brush& aFill = brush{}) const final;
-        void fill_rect(const rect& aRect, const brush& aFill) const final;
-        void fill_rounded_rect(const rect& aRect, const vec4& aRadius, const brush& aFill) const final;
-        void fill_checker_rect(const rect& aRect, const size& aSquareSize, const brush& aFill1, const brush& aFill2) const final;
-        void fill_circle(const point& aCenter, dimension aRadius, const brush& aFill) const final;
-        void fill_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const brush& aFill = brush{}) const final;
-        void fill_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const final;
-        void fill_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const brush& aFill) const final;
-        void fill_path(const path& aPath, const brush& aFill) const final;
-        void fill_shape(const game::mesh& aShape, const vec3& aPosition, const brush& aFill) const final;
         bool has_tab_stops() const override;
         i_tab_stops const& tab_stops() const override;
         void set_tab_stops(i_tab_stops const& aTabStops) override;

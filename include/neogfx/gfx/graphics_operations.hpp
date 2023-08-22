@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 #include <vector>
+#include <ranges>
 #include <neolib/core/variant.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/primitives.hpp>
@@ -162,12 +163,14 @@ namespace neogfx
             point p1;
             point p2;
             pen pen;
+            brush fill;
         };
 
         struct draw_rect
         {
             rect rect;
             pen pen;
+            brush fill;
         };
 
         struct draw_rounded_rect
@@ -175,6 +178,16 @@ namespace neogfx
             rect rect;
             vec4 radius;
             pen pen;
+            brush fill;
+        };
+
+        struct draw_checker_rect
+        {
+            rect rect;
+            size squareSize;
+            pen pen;
+            brush fill1;
+            brush fill2;
         };
 
         struct draw_circle
@@ -182,6 +195,7 @@ namespace neogfx
             point center;
             dimension radius;
             pen pen;
+            brush fill;
         };
 
         struct draw_ellipse
@@ -190,6 +204,7 @@ namespace neogfx
             dimension radiusA;
             dimension radiusB;
             pen pen;
+            brush fill;
         };
 
         struct draw_pie
@@ -199,6 +214,7 @@ namespace neogfx
             angle startAngle;
             angle endAngle;
             pen pen;
+            brush fill;
         };
 
         struct draw_arc
@@ -208,6 +224,7 @@ namespace neogfx
             angle startAngle;
             angle endAngle;
             pen pen;
+            brush fill;
         };
 
         struct draw_cubic_bezier
@@ -223,6 +240,7 @@ namespace neogfx
         {
             path path;
             pen pen;
+            brush fill;
         };
 
         struct draw_shape
@@ -230,6 +248,7 @@ namespace neogfx
             game::mesh mesh;
             vec3 position;
             pen pen;
+            brush fill;
         };
 
         struct draw_entities
@@ -237,81 +256,6 @@ namespace neogfx
             game::i_ecs& ecs;
             int32_t layer;
             mat44 transformation;
-        };
-
-        struct fill_triangle
-        {
-            point p0;
-            point p1;
-            point p2;
-            brush fill;
-        };
-
-        struct fill_rect
-        {
-            rect rect;
-            brush fill;
-        };
-
-        struct fill_rounded_rect
-        {
-            rect rect;
-            vec4 radius;
-            brush fill;
-        };
-
-        struct fill_checker_rect
-        {
-            rect rect;
-            size squareSize;
-            brush fill1;
-            brush fill2;
-        };
-
-        struct fill_circle
-        {
-            point center;
-            dimension radius;
-            brush fill;
-        };
-
-        struct fill_ellipse
-        {
-            point center;
-            dimension radiusA;
-            dimension radiusB;
-            brush fill;
-        };
-
-        struct fill_pie
-        {
-            point center;
-            dimension radius;
-            angle startAngle;
-            angle endAngle;
-            brush fill;
-        };
-
-        struct fill_arc
-        {
-            point center;
-            dimension radius;
-            angle startAngle;
-            angle endAngle;
-            brush fill;
-        };
-
-        struct fill_path
-        {
-            path path;
-            brush fill;
-        };
-
-        struct fill_shape
-        {
-            game::mesh mesh;
-            vec3 position;
-            brush fill;
         };
 
         struct draw_glyphs
@@ -361,6 +305,7 @@ namespace neogfx
             draw_triangle,
             draw_rect,
             draw_rounded_rect,
+            draw_checker_rect,
             draw_circle,
             draw_ellipse,
             draw_pie,
@@ -369,16 +314,6 @@ namespace neogfx
             draw_path,
             draw_shape,
             draw_entities,
-            fill_triangle,
-            fill_rect,
-            fill_rounded_rect,
-            fill_checker_rect,
-            fill_circle,
-            fill_ellipse,
-            fill_pie,
-            fill_arc,
-            fill_path,
-            fill_shape,
             draw_glyphs,
             draw_mesh
         > operation;
@@ -414,6 +349,7 @@ namespace neogfx
             DrawTriangle,
             DrawRect,
             DrawRoundedRect,
+            DrawCheckerRect,
             DrawCircle,
             DrawEllipse,
             DrawPie,
@@ -422,16 +358,6 @@ namespace neogfx
             DrawPath,
             DrawShape,
             DrawEntities,
-            FillTriangle,
-            FillRect,
-            FillRoundedRect,
-            FillCheckerRect,
-            FillCircle,
-            FillEllipse,
-            FillPie,
-            FillArc,
-            FillPath,
-            FillShape,
             DrawGlyph,
             DrawMesh
         };
@@ -443,6 +369,6 @@ namespace neogfx
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph_char const& lhs, glyph_char const& rhs);
 
         typedef std::vector<operation> queue;
-        typedef std::pair<operation const*, operation const*> batch;
+        typedef std::ranges::subrange<operation const*> batch;
     }
 }

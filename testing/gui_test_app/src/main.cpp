@@ -930,6 +930,9 @@ int main(int argc, char* argv[])
             aGc.fill_arc(ng::point{ 800, 200 }, 50, ng::to_rad(15.0 + 90.0 * 3), ng::to_rad(60.0 + 90.0 * 3), ng::color::Chocolate);
 
             aGc.draw_ellipse(ng::point{ 200, 250 }, 50, 25, ng::pen{ ng::color::White, 3.0_dip }, ng::gradient{ ng::color::ForestGreen, ng::color::Black, ng::gradient_direction::Vertical });
+            aGc.draw_circle(ng::point{ 300, 350 }, 50, ng::pen{ ng::color::White, 3.0_dip }, ng::gradient{ ng::color::ForestGreen, ng::color::Black, ng::gradient_direction::Vertical });
+
+            aGc.draw_rect(ng::rect{ ng::point{ 50, 50}, ng::size{ 16, 16 } }, ng::color::NavyBlue, ng::color::White.with_alpha(0.75));
 
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);

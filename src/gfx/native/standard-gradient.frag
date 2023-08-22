@@ -167,10 +167,13 @@ vec4 color_at(vec2 viewPos, vec4 boundingBox)
     return gradient_color(gradientPos);
 }
                 
-void standard_gradient_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void standard_gradient_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
 {
     if (uGradientEnabled)
     {
+        if (uShapeEnabled && function3.w != 0.0 && function3.z == 1.0)
+            return;
+
         int d = uGradientFilterSize / 2;
         if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)
         {

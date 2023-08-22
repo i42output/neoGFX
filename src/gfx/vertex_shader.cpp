@@ -33,12 +33,14 @@ namespace neogfx
         auto& function1 = add_attribute<vec4f>("VertexFunction1"_s, 4u);
         auto& function2 = add_attribute<vec4f>("VertexFunction2"_s, 5u);
         auto& function3 = add_attribute<vec4f>("VertexFunction3"_s, 6u);
+        auto& function4 = add_attribute<vec4f>("VertexFunction4"_s, 7u);
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
-        add_out_variable<vec4f>("Function0"_s, 3u).link(function0);
-        add_out_variable<vec4f>("Function1"_s, 4u).link(function1);
-        add_out_variable<vec4f>("Function2"_s, 5u).link(function2);
-        add_out_variable<vec4f>("Function3"_s, 6u).link(function3);
+        add_out_variable<vec4f>("Function0"_s, 3u, true).link(function0);
+        add_out_variable<vec4f>("Function1"_s, 4u, true).link(function1);
+        add_out_variable<vec4f>("Function2"_s, 5u, true).link(function2);
+        add_out_variable<vec4f>("Function3"_s, 6u, true).link(function3);
+        add_out_variable<vec4f>("Function4"_s, 7u, true).link(function4);
     }
 
     void standard_vertex_shader::set_projection_matrix(const optional_mat44& aProjectionMatrix)
@@ -122,7 +124,7 @@ namespace neogfx
     standard_texture_vertex_shader::standard_texture_vertex_shader(std::string const& aName) :
         standard_vertex_shader{ aName }
     {
-        auto& texCoord = add_attribute("VertexTextureCoord"_s, 2u, shader_data_type::Vec2);
+        auto& texCoord = add_attribute("VertexTextureCoord"_s, 2u, false, shader_data_type::Vec2);
         add_out_variable<vec2f>("TexCoord"_s, 2u).link(texCoord);
     }
 
