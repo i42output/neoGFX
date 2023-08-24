@@ -267,7 +267,7 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
-        iSnapToPixel{ false },
+        iSnapToPixel{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aBlendingMode);
@@ -292,7 +292,7 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
-        iSnapToPixel{ false },
+        iSnapToPixel{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aBlendingMode);
@@ -318,7 +318,7 @@ namespace neogfx
         iMultisample{ true },
         iOpacity{ 1.0 },
         iSubpixelRendering{ aOther.iSubpixelRendering },
-        iSnapToPixel{ false },
+        iSnapToPixel{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aOther.blending_mode());
@@ -413,7 +413,7 @@ namespace neogfx
 
     vec2 opengl_rendering_context::offset() const
     {
-        return (iOffset != std::nullopt ? *iOffset : vec2{}) + (snap_to_pixel() ? 0.5 : 0.0);
+        return iOffset != std::nullopt ? *iOffset : vec2{};
     }
 
     void opengl_rendering_context::set_offset(const optional_vec2& aOffset)
@@ -438,7 +438,7 @@ namespace neogfx
 
     void opengl_rendering_context::set_snap_to_pixel(bool aSnapToPixel)
     {
-        iSnapToPixel = true;
+        iSnapToPixel = aSnapToPixel;
     }
 
     const graphics_operation::queue& opengl_rendering_context::queue() const
@@ -1007,8 +1007,6 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         auto& firstOp = static_variant_cast<const graphics_operation::draw_rect&>(*aDrawRectOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
@@ -1024,8 +1022,8 @@ namespace neogfx
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(*op);
-                auto const sdfRect = drawOp.rect.deflated(drawOp.pen.width() / 2.0);
-                auto const boundingRect = drawOp.rect;
+                auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
+                auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
@@ -1059,8 +1057,6 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-
         auto& firstOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*aDrawRoundedRectOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
@@ -1076,8 +1072,8 @@ namespace neogfx
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
-                auto const sdfRect = drawOp.rect.deflated(drawOp.pen.width() / 2.0);
-                auto const boundingRect = drawOp.rect;
+                auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
+                auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
@@ -1181,7 +1177,7 @@ namespace neogfx
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width());
+                auto boundingRect = rect{ drawOp.center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
@@ -1230,7 +1226,7 @@ namespace neogfx
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width());
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
@@ -1279,7 +1275,7 @@ namespace neogfx
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width());;
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
@@ -1329,7 +1325,7 @@ namespace neogfx
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width());;
+                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 

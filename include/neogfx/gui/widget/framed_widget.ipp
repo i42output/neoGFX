@@ -35,7 +35,10 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::renderItem == this)
+        {
+            aGc.flush();
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << endl;
+        }
 #endif // NEOGFX_DEBUG
 
         if (!has_frame_radius())
