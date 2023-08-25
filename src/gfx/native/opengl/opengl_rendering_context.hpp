@@ -360,7 +360,7 @@ namespace neogfx
         sink iSink;
         optional_vec2 iOffset;
         bool iSnapToPixel;
-        bool iSuppressSnapToPixelOffsetCheck;
+        bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;
         std::vector<filter> iFilters;
         use_shader_program iUseDefaultShaderProgram; // must be last
