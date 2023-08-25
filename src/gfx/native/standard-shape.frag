@@ -73,8 +73,10 @@ void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2,
     float d0 = sdTriangle(Coord.xy, function1.xy, function1.zw, function2.xy);
     if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+        discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
 float sdBox( in vec2 p, in vec2 b )
@@ -89,8 +91,10 @@ void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
     float d0 = sdBox(p0, function1.zw * 0.5);
     if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+        discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
 void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
@@ -98,8 +102,10 @@ void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, i
     float d0 = distance(function1.xy, Coord.xy) - function1.z;
     if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+        discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
 float sdEllipse(in vec2 p, in vec2 ab)
@@ -141,8 +147,10 @@ void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, 
     float d0 = sdEllipse(Coord.xy - function1.xy, function1.zw);
     if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+        discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
 float sdPie(in vec2 p, in vec2 c, in float r)
@@ -160,8 +168,10 @@ void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
     if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+        discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
 float sdArc(in vec2 p, in vec2 c, in float r)
@@ -184,7 +194,9 @@ void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     else
     {
         float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+            discard;
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
     }
 }
                 
@@ -202,8 +214,10 @@ void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
     float d0 = sdRoundedBox(p0, function1.zw * 0.5, function2);
     if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+        discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)

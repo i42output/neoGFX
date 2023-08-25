@@ -469,6 +469,8 @@ namespace neogfx
 
     void graphics_context::draw_focus_rect(const rect& aRect) const
     {
+        scoped_snap_to_pixel sntp{ *this, true };
+
         push_logical_operation(neogfx::logical_operation::Xor);
         line_stipple_on(1.0, 0x5555);
         draw_rect(aRect, pen{ color::White });
