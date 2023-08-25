@@ -268,6 +268,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iSnapToPixel{ true },
+        iSuppressSnapToPixelOffsetCheck{ false },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aBlendingMode);
@@ -293,6 +294,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iSubpixelRendering{ rendering_engine().is_subpixel_rendering_on() },
         iSnapToPixel{ true },
+        iSuppressSnapToPixelOffsetCheck{ false },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aBlendingMode);
@@ -319,6 +321,7 @@ namespace neogfx
         iOpacity{ 1.0 },
         iSubpixelRendering{ aOther.iSubpixelRendering },
         iSnapToPixel{ true },
+        iSuppressSnapToPixelOffsetCheck{ false },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
         set_blending_mode(aOther.blending_mode());
@@ -413,7 +416,7 @@ namespace neogfx
 
     vec2 opengl_rendering_context::offset() const
     {
-        return iOffset != std::nullopt ? *iOffset : vec2{};
+        return iOffset.value_or(vec2{}) + (snap_to_pixel() && !iSuppressSnapToPixelOffsetCheck ? 0.5 : 0.0);
     }
 
     void opengl_rendering_context::set_offset(const optional_vec2& aOffset)
@@ -1007,6 +1010,8 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
+        neolib::scoped_flag snap{ iSuppressSnapToPixelOffsetCheck, true };
+
         auto& firstOp = static_variant_cast<const graphics_operation::draw_rect&>(*aDrawRectOps.cbegin());
 
         if (std::holds_alternative<gradient>(firstOp.fill))
@@ -1056,6 +1061,8 @@ namespace neogfx
     void opengl_rendering_context::draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
+
+        neolib::scoped_flag snap{ iSuppressSnapToPixelOffsetCheck, true };
 
         auto& firstOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*aDrawRoundedRectOps.cbegin());
 

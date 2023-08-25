@@ -783,7 +783,7 @@ namespace neogfx
             result += iHintedSize->second.max(childLayoutSize);
         }
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::GrowLines)
-            result.cy = std::max(result.cy, frameBits.cy + std::min(iTextExtents.get().cy, grow_lines() * font().height()));
+            result.cy = std::max(result.cy, frameBits.cy + std::min(iTextExtents.value().cy, grow_lines() * font().height()));
         return to_units(*this, su.saved_units(), result);
     }
 
