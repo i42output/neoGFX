@@ -21,8 +21,6 @@
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include "vulkan_error.hpp"
-#include "vulkan_helpers.hpp"
-#include "vulkan_rendering_context.hpp"
 #include "vulkan_texture.hpp"
 
 namespace neogfx

@@ -311,7 +311,7 @@ namespace neogfx
 
         if (aScanCode >= ScanCode_A && aScanCode <= ScanCode_Z && (aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
         {
-            Input.trigger(string{ 1, static_cast<char>(aScanCode - ScanCode_A) + '\x01' });
+            Input.trigger(string{ 1, static_cast<char>(aScanCode - ScanCode_A + '\x01') });
             handled = true;
         }
 
