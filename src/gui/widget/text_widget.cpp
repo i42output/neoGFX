@@ -268,6 +268,7 @@ namespace neogfx
             iTextExtent->cy = font().height();
         if (text_format().effect())
             *iTextExtent += size{ text_format().effect()->width() * 2.0 };
+        iTextExtent = iTextExtent->ceil();
         return *iTextExtent;
     }
 
@@ -299,6 +300,7 @@ namespace neogfx
         }
         if (iSizeHintExtent->cy == 0.0)
             iSizeHintExtent->cy = font().height();
+        iSizeHintExtent = iSizeHintExtent->ceil();
         return *iSizeHintExtent;
     }
 

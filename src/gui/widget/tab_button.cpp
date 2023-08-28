@@ -84,7 +84,7 @@ namespace neogfx
             }
             if (has_focus())
             {
-                rect focusRect = to_client_coordinates(image_widget().to_window_coordinates(rect{ image_widget().client_rect().center() - image().extents() / 2.0, image().extents() }));
+                rect focusRect = to_client_coordinates(image_widget().to_window_coordinates(rect{ image_widget().client_rect().center() - image().extents() / 2.0, image().extents() })).floor();
                 focusRect.inflate(2.0, 2.0);
                 aGc.draw_focus_rect(focusRect);
             }

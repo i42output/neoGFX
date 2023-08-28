@@ -917,6 +917,8 @@ int main(int argc, char* argv[])
 
         window.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
+            ng::scalar t = static_cast<ng::scalar>(app.thread().program_elapsed_us());
+                
             aGc.draw_arc(ng::point{ 20, 70 }, 50, ng::to_rad(0 + 90.0 * 0), ng::to_rad(45.0 + 90.0 * 0), ng::pen{ ng::color::White, 3.0 }, ng::color::Chocolate);
             aGc.draw_arc(ng::point{ 20, 70 }, 40, ng::to_rad(5.0 + 90.0 * 0), ng::to_rad(50.0 + 90.0 * 0), ng::pen{ ng::color::Yellow, 3.0 });
             aGc.draw_pixel(ng::point{ 20, 70 }, ng::color::Red);
@@ -945,6 +947,7 @@ int main(int argc, char* argv[])
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
+            aGc.draw_focus_rect(ng::rect{ ng::point{ 28, 8 }, ng::size{ (ng::scalar)((int)(t / 100000) % 200), 17 } });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::color::Goldenrod);
             aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
@@ -966,7 +969,6 @@ int main(int argc, char* argv[])
                         aGc.set_pixel(ng::point{ 32.0 + x, 32.0 + y }, ng::color::Goldenrod);
 
             // easing function demo
-            ng::scalar t = static_cast<ng::scalar>(app.thread().program_elapsed_us());
             auto const d = 1000000.0;
             auto const x = ng::ease(easingItemModel.item(window.dropListEasing.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
             aGc.draw_texture(ng::point{ x, (window.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);

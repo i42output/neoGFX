@@ -11,16 +11,18 @@ void standard_stipple_shader(inout vec4 color, inout vec4 function0, inout vec4 
                 return;
             if (uShape == SHAPE_Rect)
             {
-                vec2 p0 = (Coord.xy - function1.xy);
+                vec2 p0 = Coord.xy - function1.xy;
                 vec2 b0 = function1.zw * 0.5;
-                if (abs(p0.y - -b0.y) <= function3.w)
-                    d = p0.x + b0.x;
-                else if (abs(p0.x - b0.x) <= function3.w)
-                    d = b0.x * 2.0 + p0.y + b0.y;
-                else if (abs(p0.y - b0.y) <= function3.w)
-                    d = b0.x * 2.0 + b0.y * 2.0 + b0.x - p0.x;
-                else if (abs(p0.x - -b0.x) <= function3.w)
-                    d = b0.x * 2.0 + b0.y * 2.0 + b0.x * 2.0 + b0.y - p0.y;
+                if (p0.y < 0.0 && abs(p0.y + b0.y) < function3.w / 2.0)
+                    d = ceil(b0.x + p0.x);
+                else if (p0.x > 0.0 && abs(p0.x - b0.x) <= function3.w / 2.0)
+                    d = ceil(function1.z + b0.y + p0.y);
+                else if (p0.y > 0.0 && abs(p0.y - b0.y) <= function3.w / 2.0)
+                    d = floor(function1.z + function1.w + b0.x - p0.x);
+                else if (p0.x < 0.0 && abs(p0.x + b0.x) <= function3.w / 2.0)
+                    d = floor(function1.z + function1.w + function1.z + b0.y - p0.y); 
+                else
+                    discard;
             }
             else if (uShape == SHAPE_Circle)
             {
