@@ -148,11 +148,19 @@ namespace neogfx
         });
     }
 
+    size_policy font_widget::font_picker::size_policy() const
+    {
+        if (has_size_policy())
+            return button<>::size_policy();
+        return size_constraint::Minimum;
+    }
+
     size font_widget::font_picker::minimum_size(optional_size const& aAvailableSpace) const
     {
-        return internal_spacing().size() + 
+        auto const result = internal_spacing().size() + 
             units_converter{ *this }.from_device_units(sample_text().extents()) + 
-            units_converter{ *this }.from_device_units(size{ 2.0 * (2.0 + 2.0_dip), 2.0 * (2 + 2.0_dip) });
+            units_converter{ *this }.from_device_units(size{ 2.0 * (1.0 + 2.0_dip), 2.0 * (1 + 2.0_dip) });
+        return result;
     }
 
     void font_widget::font_picker::paint(i_graphics_context& aGc) const
@@ -160,9 +168,8 @@ namespace neogfx
         button<>::paint(aGc);
 
         auto r = client_rect(false);
-        r.deflate(0.5, 0.5); // todo: change to use a refactored snap_to_pixel to accomodate SDF polygon primitives
+
         aGc.draw_rounded_rect(r, 3.0_dip, pen{ palette_color(color_role::Void), 1.0 });
-        r.deflate(0.5, 0.5); // todo: this shouldn't be necessary as draw_rect should behave the same as draw_rounded_rect
         r.deflate(2.0_dip, 2.0_dip);
         aGc.draw_rect(r, pen{ palette_color(color_role::Void), 1.0 });
         r.deflate(1.0, 1.0);

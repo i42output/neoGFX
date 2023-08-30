@@ -107,7 +107,8 @@ namespace neogfx
         else if (has_fixed_size())
             return size_constraint::Fixed;
         else
-            return size_constraint::Minimum;
+            return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
+
     }
 
     rect radio_button::element_rect(skin_element aElement) const

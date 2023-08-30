@@ -81,7 +81,7 @@ namespace neogfx
         else if (has_fixed_size())
             return size_constraint::Fixed;
         else
-            return size_constraint::Minimum;
+            return neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum };
     }
 
     rect check_box::element_rect(skin_element aElement) const

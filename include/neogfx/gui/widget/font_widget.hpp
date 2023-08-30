@@ -59,6 +59,7 @@ namespace neogfx
         public:
             font_picker(font_widget& aParent);
         private:
+            neogfx::size_policy size_policy() const override;
             size minimum_size(optional_size const& aAvailableSpace) const override;
         private:
             void paint(i_graphics_context& aGc) const override;

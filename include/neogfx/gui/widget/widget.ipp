@@ -944,8 +944,9 @@ namespace neogfx
         auto& self = base_type::as_widget();
         auto const& internalSpacing = self.internal_spacing(!aExtendIntoPadding);
         auto const& topLeft = internalSpacing.top_left();
-        auto const& extents = (self.extents() - internalSpacing.size()).max(size{});
-        rect const result{ topLeft, extents };
+        auto const& extents = self.extents();
+        auto const& adjustedExtents = (extents - internalSpacing.size()).max(size{});
+        rect const result{ topLeft, adjustedExtents };
         return result;
     }
 
