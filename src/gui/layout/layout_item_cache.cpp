@@ -691,7 +691,10 @@ namespace neogfx
         auto& cachedVisible = iVisible.second;
         if (iVisible.first != global_layout_id())
         {
-            cachedVisible = subject().visible() || subject().effective_size_policy().ignore_visibility();
+            cachedVisible =
+                subject().visible() ||
+                subject().effective_size_policy().ignore_visibility() ||
+                (subject().has_parent_layout() && subject().parent_layout().ignore_child_visibility());
             iVisible.first = global_layout_id();
         }
         return cachedVisible;

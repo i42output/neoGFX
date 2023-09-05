@@ -49,8 +49,7 @@ namespace neogfx
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!item.visible())
                 continue;
             auto itemMinimumSize = item.minimum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
@@ -106,8 +105,7 @@ namespace neogfx
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!item.visible())
                 continue;
             auto itemMaximumSize = item.maximum_size(availableSpaceForChildren);
             if (AxisPolicy::cx(itemMaximumSize) != size::max_dimension())
@@ -187,8 +185,7 @@ namespace neogfx
         for (auto& itemRef : *this)
         {
             auto& item = *itemRef;
-            auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!item.visible())
                 continue;
             if (&item == &*items().back())
                 continue;

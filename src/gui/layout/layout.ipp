@@ -32,7 +32,7 @@ namespace neogfx
             auto const itemSizePolicy = aItem.effective_size_policy();
             auto const xSizePolicy = SpecializedPolicy::size_policy_x(itemSizePolicy);
             auto const ySizePolicy = SpecializedPolicy::size_policy_y(itemSizePolicy);
-            if (!aItem.visible() && !aLayout.ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!aItem.visible())
                 return false;
             if (!aItem.is_spacer() &&
                 ((xSizePolicy != size_constraint::Expanding && SpecializedPolicy::cx(aSizeTest) == 0.0) ||
@@ -167,8 +167,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                auto const itemSizePolicy = item.effective_size_policy();
-                if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+                if (!item.visible())
                     continue;
                 auto const itemMinSize = item.minimum_size(availableSpaceForChildren);
                 if (!item.is_spacer() && (AxisPolicy::item_zero_sized(*this, item, itemMinSize)))
@@ -223,8 +222,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                auto const itemSizePolicy = item.effective_size_policy();
-                if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+                if (!item.visible())
                     continue;
                 auto const itemMaxSize = item.maximum_size(availableSpaceForChildren);
                 if (!item.is_spacer() && (AxisPolicy::item_zero_sized(*this, item, itemMaxSize)))
@@ -297,7 +295,7 @@ namespace neogfx
                 service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << endl;
 #endif // NEOGFX_DEBUG
             auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!item.visible())
                 continue;
             if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
                 continue;
@@ -331,7 +329,7 @@ namespace neogfx
             {
                 auto const& item = *itemRef;
                 auto const itemSizePolicy = item.effective_size_policy();
-                if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+                if (!item.visible())
                     continue;
                 if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
                     continue;
@@ -372,8 +370,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                auto const itemSizePolicy = item.effective_size_policy();
-                if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+                if (!item.visible())
                     continue;
                 auto& disposition = item.cached_disposition();
                 if (disposition == layout_item_disposition::Weighted)
@@ -390,7 +387,7 @@ namespace neogfx
         {
             auto& item = *itemRef;
             auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+            if (!item.visible())
                 continue;
             if (addSpace)
             {
@@ -474,8 +471,7 @@ namespace neogfx
                 for (auto& itemRef : *this)
                 {
                     auto& item = *itemRef;
-                    auto const itemSizePolicy = item.effective_size_policy();
-                    if (!item.visible() && !ignore_child_visibility() && !itemSizePolicy.ignore_visibility())
+                    if (!item.visible())
                         continue;
                     item.layout_as(item.position() + adjust, item.extents());
                 }
