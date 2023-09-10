@@ -61,16 +61,6 @@ namespace neogfx
         as_window().set_style(aStyle);
     }
 
-    bool surface_window::is_object() const
-    {
-        return true;
-    }
-
-    i_object const& surface_window::as_object() const
-    {
-        return *this;
-    }
-
     dimension surface_window::horizontal_dpi() const
     {
         return has_native_window() ? native_surface().horizontal_dpi() : DEFAULT_DPI;

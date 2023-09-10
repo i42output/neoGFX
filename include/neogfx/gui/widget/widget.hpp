@@ -76,10 +76,6 @@ namespace neogfx
         widget(i_widget& aParent);
         widget(i_layout& aLayout);
         ~widget();
-        // i_units_context
-    public:
-        bool is_object() const final;
-        i_object const& as_object() const final;
         // i_object
     public:
         void property_changed(i_property& aProperty) override;

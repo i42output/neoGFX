@@ -107,18 +107,6 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::is_object() const
-    {
-        return true;
-    }
-
-    template <typename Interface>
-    i_object const& widget<Interface>::as_object() const
-    {
-        return *this;
-    }
-
-    template <typename Interface>
     void widget<Interface>::property_changed(i_property& aProperty)
     {
         static auto invalidate_layout = [](i_widget& self) 

@@ -18,21 +18,41 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <vector>
 #include <neogfx/core/units.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 
 namespace neogfx
 { 
+    namespace
+    {
+        const i_units_context*& current_context_for_this_thread()
+        {
+            shared_thread_local(const i_units_context*, neogfx::current_context_for_this_thread, tCurrentContext);
+            return tCurrentContext;
+        }
+
+        std::vector<scoped_units_context*>& scopes_for_this_thread()
+        {
+            shared_thread_local(std::vector<scoped_units_context*>, neogfx::scopes_for_this_thread, iScopes);
+            return iScopes;
+        }
+    }
+
     scoped_units_context::scoped_units_context(i_units_context const& aNewContext) : iSavedContext{ current_context_for_this_thread() }
     {
-        if (iSavedContext && iSavedContext->is_object())
-            iSink = iSavedContext->as_object().destroyed([&]() { iSavedContext = nullptr; });
+        scopes_for_this_thread().push_back(this);
         set_context(aNewContext);
     }
     
-    scoped_units_context::~scoped_units_context()
+    scoped_units_context::~scoped_units_context() noexcept(false)
     {
         restore_saved_context();
+        auto existing = std::find_if(scopes_for_this_thread().begin(), scopes_for_this_thread().end(), [&](auto const& e) { return e == this; });
+        if (existing != scopes_for_this_thread().end())
+            scopes_for_this_thread().erase(existing);
+        else // scoped_units_context instances must be on the stack of the associated thread (i.e. not heap allocated)
+            throw std::logic_error("neogfx::scoped_units_context::~scoped_units_context: wrong thread");
     }
    
     i_units_context const& scoped_units_context::current_context()
@@ -43,6 +63,13 @@ namespace neogfx
         return service<i_surface_manager>().display();
     }
     
+    void scoped_units_context::context_destroyed(i_units_context const& aContext)
+    {
+        for (auto& s : scopes_for_this_thread())
+            if (s->iSavedContext == &aContext)
+                s->iSavedContext = nullptr;
+    }
+
     void scoped_units_context::set_context(const i_units_context& aNewContext)
     {
         current_context_for_this_thread() = &aNewContext;
@@ -53,12 +80,6 @@ namespace neogfx
         current_context_for_this_thread() = iSavedContext;
     }
     
-    const i_units_context*& scoped_units_context::current_context_for_this_thread()
-    {
-        shared_thread_local(const i_units_context*, neogfx::scoped_units_context::current_context_for_this_thread, tCurrentContext)
-        return tCurrentContext;
-    }
-
     units_converter::units_converter(i_units_context const& aContext) :
         iContext(aContext), iUnits{ basic_scoped_units<neogfx::units>::current_units() }
     {
