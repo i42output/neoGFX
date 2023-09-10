@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <typeindex>
 #include <neolib/core/scoped.hpp>
+#include <neolib/app/i_shared_thread_local.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/widget/widget.hpp>
@@ -103,6 +104,18 @@ namespace neogfx
             parent().remove(*this);
         if (has_parent_layout())
             parent_layout().remove(*this);
+    }
+
+    template <typename Interface>
+    bool widget<Interface>::is_object() const
+    {
+        return true;
+    }
+
+    template <typename Interface>
+    i_object const& widget<Interface>::as_object() const
+    {
+        return *this;
     }
 
     template <typename Interface>
@@ -1269,9 +1282,9 @@ namespace neogfx
             PaintingChildren.trigger(aGc);
 
             typedef std::map<int32_t, std::vector<i_widget const*>> widget_layers_t;
-            thread_local std::vector<std::unique_ptr<widget_layers_t>> widgetLayersStack;
+            shared_thread_local(std::vector<std::unique_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
 
-            thread_local std::size_t stack;
+            shared_thread_local(std::size_t, neogfx::widget::render, stack);
             neolib::scoped_counter<std::size_t> stackCounter{ stack };
             if (widgetLayersStack.size() < stack)
                 widgetLayersStack.push_back(std::make_unique<widget_layers_t>());

@@ -41,6 +41,9 @@ namespace neogfx
         surface_window(i_window& aWindow, std::function<void(i_surface_window&)> aNativeWindowCreator);
         ~surface_window();
     public:
+        bool is_object() const final;
+        i_object const& as_object() const final;
+    public:
         dimension horizontal_dpi() const final;
         dimension vertical_dpi() const final;
         dimension ppi() const final;

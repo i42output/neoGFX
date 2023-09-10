@@ -17,6 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 
@@ -24,7 +25,9 @@ namespace neogfx
 { 
     scoped_units_context::scoped_units_context(i_units_context const& aNewContext) : iSavedContext{ current_context_for_this_thread() }
     {
-        set_context(&aNewContext);
+        if (iSavedContext && iSavedContext->is_object())
+            iSink = iSavedContext->as_object().destroyed([&]() { iSavedContext = nullptr; });
+        set_context(aNewContext);
     }
     
     scoped_units_context::~scoped_units_context()
@@ -40,19 +43,19 @@ namespace neogfx
         return service<i_surface_manager>().display();
     }
     
-    void scoped_units_context::set_context(const i_units_context* aNewContext)
+    void scoped_units_context::set_context(const i_units_context& aNewContext)
     {
-        current_context_for_this_thread() = aNewContext;
+        current_context_for_this_thread() = &aNewContext;
     }
     
     void scoped_units_context::restore_saved_context()
     {
-        set_context(iSavedContext);
+        current_context_for_this_thread() = iSavedContext;
     }
     
     const i_units_context*& scoped_units_context::current_context_for_this_thread()
     {
-        thread_local const i_units_context* tCurrentContext = nullptr;
+        shared_thread_local(const i_units_context*, neogfx::scoped_units_context::current_context_for_this_thread, tCurrentContext)
         return tCurrentContext;
     }
 

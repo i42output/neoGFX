@@ -20,6 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/app/i_shared_thread_local.hpp>
+#include <neogfx/core/i_event.hpp>
+#include <neogfx/core/i_object.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/device_metrics.hpp>
 
@@ -44,6 +47,9 @@ namespace neogfx
 
     class i_units_context
     {
+    public:
+        virtual bool is_object() const { return false; }
+        virtual i_object const& as_object() const { throw std::logic_error("neogfx::i_units_context::as_object"); }
     public:
         virtual bool device_metrics_available() const = 0;
         virtual const i_device_metrics& device_metrics() const = 0;
@@ -123,11 +129,12 @@ namespace neogfx
         static i_units_context const& current_context();
         // implementation
     private:
-        void set_context(const i_units_context* aNewContext);
+        void set_context(const i_units_context& aNewContext);
         void restore_saved_context();
         static const i_units_context*& current_context_for_this_thread();
         // attributes
     private:
+        sink iSink;
         const i_units_context* iSavedContext;
     };
 
@@ -189,7 +196,7 @@ namespace neogfx
         }
         static units& current_units_for_this_thread() 
         {
-            thread_local units tCurrentUnits = units::Default;
+            shared_thread_local_class(units, basic_scoped_units<Units>, current_units_for_this_thread, tCurrentUnits, units::Default);
             return tCurrentUnits;
         }
         // attributes
