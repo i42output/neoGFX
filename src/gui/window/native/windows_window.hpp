@@ -152,6 +152,7 @@ namespace neogfx
             bool iPlacementChangedExplicitly = false;
             bool iVisible = false;
             bool iActive = false;
+            std::optional<char16_t> iHighSurrogate;
             std::optional<point> iActivationMousePos;
             bool iMouseEntered = false;
             bool iCapturingMouse = false;

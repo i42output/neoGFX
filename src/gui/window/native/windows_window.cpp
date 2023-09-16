@@ -945,15 +945,29 @@ namespace neogfx
                 break;
             case WM_UNICHAR:
                 if (wparam == UNICODE_NOCHAR)
-                {
                     result = 1;
-                    break;
+                else
+                {
+                    char32_t characterCode = static_cast<char32_t>(wparam);
+                    std::string text = neolib::utf32_to_utf8(std::u32string(&characterCode, 1));
+                    if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
+                        self.push_event(keyboard_event{ keyboard_event_type::TextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
                 }
-                // fall through
+                break;
             case WM_CHAR:
                 {
-                    char16_t characterCode = static_cast<char16_t>(wparam);
-                    std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
+                    std::string text;
+                    char32_t characterCode = static_cast<char16_t>(wparam);
+                    if (neolib::utf16::is_high_surrogate(characterCode))
+                        self.iHighSurrogate = static_cast<char16_t>(characterCode);
+                    else
+                    {
+                        if (self.iHighSurrogate.has_value() && neolib::utf16::is_surrogate_pair(self.iHighSurrogate.value(), characterCode))
+                            text = neolib::utf16_to_utf8(std::u16string{ self.iHighSurrogate.value(), static_cast<char16_t>(characterCode) });
+                        else
+                            text = neolib::utf32_to_utf8(std::u32string{ characterCode });
+                        self.iHighSurrogate.reset();
+                    }
                     if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
                         self.push_event(keyboard_event{ keyboard_event_type::TextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
                 }
