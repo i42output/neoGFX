@@ -876,27 +876,43 @@ namespace neogfx
     void text_edit::focus_gained(focus_reason aFocusReason)
     {
         framed_scrollable_widget::focus_gained(aFocusReason);
+
+        if (neolib::service<i_keyboard>().layout().has_ime())
+            neolib::service<i_keyboard>().layout().open_ime(*this, cursor_rect().bottom_left());
+
         neolib::service<neolib::i_power>().register_activity();
+
         service<i_clipboard>().activate(*this);
+
         iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
+
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine && aFocusReason == focus_reason::Tab)
         {
             cursor().set_anchor(0);
             cursor().set_position(iText.size(), false);
         }
+
         update(true);
     }
 
     void text_edit::focus_lost(focus_reason aFocusReason)
     {
         destroyed_flag destroyed{ *this };
+
         framed_scrollable_widget::focus_lost(aFocusReason);
+
         if (destroyed)
             return;
+
+        if (neolib::service<i_keyboard>().layout().ime_open() && &neolib::service<i_keyboard>().layout().input_widget() == this)
+            neolib::service<i_keyboard>().layout().close_ime();
+
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
+
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
             cursor().set_position(iText.size());
+
         update(true);
     }
 
@@ -994,6 +1010,25 @@ namespace neogfx
             }
             iMenu->menu().add_separator();
             iMenu->menu().add_action(service<i_app>().action_select_all());
+            if (neolib::service<i_keyboard>().layout().has_ime())
+            {
+                if (!neolib::service<i_keyboard>().layout().ime_open())
+                {
+                    iMenu->menu().add_separator();
+                    iMenu->menu().add_action(make_ref<action>("Open IME"_t)).triggered([&]()
+                    {
+                        neolib::service<i_keyboard>().layout().open_ime(*this, cursor_rect().bottom_left());
+                    });
+                }
+                else if (&neolib::service<i_keyboard>().layout().input_widget() == this)
+                {
+                    iMenu->menu().add_separator();
+                    iMenu->menu().add_action(make_ref<action>("Close IME"_t)).triggered([&]()
+                    {
+                        neolib::service<i_keyboard>().layout().close_ime();
+                    });
+                }
+            }
             bool selectAll = false;
             tempSink += service<i_app>().action_select_all().triggered([&]() { selectAll = true; });
             scoped_clipboard_sink scs{ *this };
@@ -2289,6 +2324,14 @@ namespace neogfx
             if (has_focus())
                 update_cursor();
         });
+
+        iSink += neolib::service<i_keyboard>().input_language_changed([&]() 
+        { 
+            if (has_focus() && neolib::service<i_keyboard>().layout().has_ime() &&
+                !neolib::service<i_keyboard>().layout().ime_open())
+                neolib::service<i_keyboard>().layout().open_ime(*this, cursor_rect().bottom_left());
+        });
+
         iDefaultFont = service<i_app>().current_style().font_info();
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
@@ -2298,17 +2341,22 @@ namespace neogfx
                 refresh_paragraph(iText.begin(), 0);
             }
         });
+
         iSink += service<i_rendering_engine>().subpixel_rendering_changed([this]()
         {
             refresh_paragraph(iText.begin(), 0);
         });
+
         auto focusPolicy = neogfx::focus_policy::ClickTabFocus;
         if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
+        
         cursor().set_width(2.0);
         iSink += cursor().PositionChanged([this]()
         {
+            if (has_focus() && neolib::service<i_keyboard>().layout().ime_open())
+                neolib::service<i_keyboard>().layout().set_ime_position(cursor_rect().bottom_left());
             iNextStyle = std::nullopt;
             iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
             make_cursor_visible();
@@ -2322,6 +2370,7 @@ namespace neogfx
         {
             update();
         });
+
         iSink += Password.Changed([&](bool const& aPassword)
         {
             if (aPassword && (iCaps & text_edit_caps::ShowPassword) == text_edit_caps::ShowPassword)

@@ -48,6 +48,7 @@ namespace neogfx
         define_declared_event(KeyReleased, key_released, scan_code_e, key_code_e, key_modifiers_e)
         define_declared_event(TextInput, text_input, std::string const&)
         define_declared_event(SysTextInput, sys_text_input, std::string const&)
+        define_declared_event(InputLanguageChanged, input_language_changed)
     private:
         friend class keyboard_grabber;
     public:

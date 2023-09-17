@@ -41,6 +41,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/hid/i_native_surface.hpp>
+#include <neogfx/gui/window/i_native_window.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
 #include "windows_keyboard.hpp"
 
 namespace neogfx
@@ -205,14 +209,149 @@ namespace neogfx
             return scanCode;
         }
 
-        keyboard::keyboard() : 
-            iKeymap{}
+        keyboard_layout::keyboard_layout(i_keyboard& aKeyboard) : 
+            iKeyboard{ aKeyboard }
         {
+            iKeyboard.input_language_changed([&]() { input_language_changed(); });
+
+            input_language_changed();
+        }
+
+        keyboard_layout::~keyboard_layout()
+        {
+        }
+
+        bool keyboard_layout::has_ime() const
+        {
+            return ImmIsIME(iLayout);
+        }
+
+        bool keyboard_layout::ime_open() const
+        {
+            return iContext != nullptr;
+        }
+
+        i_widget const& keyboard_layout::input_widget() const
+        {
+            if (!ime_open())
+                throw ime_not_open();
+            return *iInputWidget;
+        }
+
+        bool keyboard_layout::open_ime(i_widget const& aInputWidget, optional_point const& aPosition)
+        {
+            if (!has_ime())
+                return false;
+            if (iContext)
+                close_ime();
+
+            auto inputWidget = &aInputWidget;
+            auto surface = static_cast<HWND>(inputWidget->surface().as_surface_window().native_window().native_handle());
+
+            auto context = ImmGetContext(surface);
+
+            if (!context ||
+                !set_ime_input_area(context, inputWidget->non_client_rect()) ||
+                !set_ime_position(context, *inputWidget, aPosition) ||
+                !ImmSetOpenStatus(context, TRUE))
+            {
+                if (context)
+                {
+                    ImmSetOpenStatus(context, FALSE);
+                    ImmReleaseContext(surface, context);
+                }
+                return false;
+            }
+
+            iContext = context;
+            iInputWidget = inputWidget;
+            iSurface = surface;
+            iSink = inputWidget->destroyed([&, inputWidget]()
+                {
+                    if (ime_open() && &input_widget() == inputWidget)
+                        close_ime();
+                });
+
+            return true;
+        }
+
+        bool keyboard_layout::set_ime_position(point const& aPosition)
+        {
+            if (!ime_open())
+                return false;
+            return set_ime_position(iContext, *iInputWidget, aPosition);
+        }
+
+        bool keyboard_layout::close_ime()
+        {
+            if (iContext == nullptr)
+                return false;
+            ImmSetOpenStatus(iContext, FALSE);
+            bool result = ImmReleaseContext(iSurface, iContext);
+            iContext = nullptr;
+            iSurface = nullptr;
+            iInputWidget = nullptr;
+            return result;
+        }
+
+        void keyboard_layout::input_language_changed()
+        {
+            iLayout = GetKeyboardLayout(0);
+            if (ime_open())
+            {
+                auto& inputWidget = *iInputWidget;
+                close_ime();
+                open_ime(inputWidget);
+            }
+        }
+
+        bool keyboard_layout::set_ime_input_area(HIMC aContext, rect const& aArea)
+        {
+            basic_rect<LONG> wr = aArea;
+            COMPOSITIONFORM cof = {};
+            cof.dwStyle = CFS_RECT;
+            cof.ptCurrentPos.x = wr.bottom_left().x;
+            cof.ptCurrentPos.y = wr.bottom_left().y;
+            cof.rcArea.left = wr.x;
+            cof.rcArea.right = wr.x + wr.width();
+            cof.rcArea.top = wr.y;
+            cof.rcArea.bottom = wr.y + wr.height();
+            return ImmSetCompositionWindow(aContext, &cof);
+        }
+
+        bool keyboard_layout::set_ime_position(HIMC aContext, i_widget const& aInputWidget, optional_point const& aPosition)
+        {
+            basic_rect<LONG> wr = aInputWidget.non_client_rect();
+            basic_point<LONG> cp = aInputWidget.to_window_coordinates(aPosition ? aPosition.value() : aInputWidget.client_rect(false).bottom_left());
+            CANDIDATEFORM caf = {};
+            caf.dwIndex = 0;
+            caf.dwStyle = CFS_EXCLUDE;
+            caf.ptCurrentPos.x = cp.x;
+            caf.ptCurrentPos.y = cp.y;
+            caf.rcArea.left = wr.x;
+            caf.rcArea.right = wr.x + wr.width();
+            caf.rcArea.top = wr.y;
+            caf.rcArea.bottom = wr.y + wr.height();
+            return ImmSetCandidateWindow(aContext, &caf);
+        }
+
+        keyboard::keyboard() :
+            iKeymap{},
+            iLayout{ new keyboard_layout{ *this } }
+        {
+            input_language_changed([&]() { update_keymap(); });
+
             update_keymap();
+
             BYTE kbdState[256];
             GetKeyboardState(kbdState);
             kbdState[VK_INSERT] |= 0x01;
             SetKeyboardState(kbdState);
+        }
+
+        i_keyboard_layout& keyboard::layout() const
+        {
+            return *iLayout;
         }
 
         bool keyboard::is_key_pressed(scan_code_e aScanCode) const

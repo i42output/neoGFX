@@ -44,6 +44,7 @@
 #include <optional>
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/string_ci.hpp>
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_hid_device.hpp>
 
@@ -633,6 +634,23 @@ namespace neogfx
         return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
+    class i_widget;
+
+    class i_keyboard_layout
+    {
+    public:
+        struct ime_not_open : std::logic_error { ime_not_open() : std::logic_error("neogfx::i_keyboard_layout::ime_not_open") {} };
+    public:
+        virtual ~i_keyboard_layout() = default;
+    public:
+        virtual bool has_ime() const = 0;
+        virtual bool ime_open() const = 0;
+        virtual i_widget const& input_widget() const = 0;
+        virtual bool open_ime(i_widget const& aInputWidget, optional_point const& aPosition = {}) = 0;
+        virtual bool set_ime_position(point const& aPosition) = 0;
+        virtual bool close_ime() = 0;
+    };
+
     class i_keyboard : public i_hid_device, public i_service
     {
     public:
@@ -642,9 +660,12 @@ namespace neogfx
         declare_event(key_released, scan_code_e, key_code_e, key_modifiers_e)
         declare_event(text_input, std::string const&)
         declare_event(sys_text_input, std::string const&)
+        declare_event(input_language_changed)
     public:
         struct no_grab : std::logic_error { no_grab() : std::logic_error("neogfx::i_keyboard::no_grab") {} };
         struct already_grabbed : std::logic_error { already_grabbed() : std::logic_error("neogfx::i_keyboard::already_grabbed") {} };
+    public:
+        virtual i_keyboard_layout& layout() const = 0;
     public:
         virtual bool is_key_pressed(scan_code_e aScanCode) const = 0;
         virtual keyboard_locks locks() const = 0;
@@ -661,8 +682,6 @@ namespace neogfx
         virtual i_keyboard_handler& grabber() const = 0;
     public:
         virtual key_code_e scan_code_to_key_code(scan_code_e aScanCode) const = 0;
-    public:
-        virtual void update_keymap() = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x878ef7c6, 0x8d4b, 0x4c0d, 0x81dd, { 0x70, 0xd1, 0x74, 0x3c, 0x6b, 0x82 } }; return sIid; }
     };

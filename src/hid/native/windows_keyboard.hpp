@@ -34,24 +34,51 @@ namespace neogfx
         };
         typedef std::array<kaymapping, ScanCodeCount> keymap_t;
 
+        class keyboard_layout : public i_keyboard_layout
+        {
+        public:
+            keyboard_layout(i_keyboard& aKeyboard);
+            ~keyboard_layout();
+        public:
+            bool has_ime() const final;
+            bool ime_open() const final;
+            i_widget const& input_widget() const final;
+            bool open_ime(i_widget const& aInputWidget, optional_point const& aPosition = {}) final;
+            bool set_ime_position(point const& aPosition) final;
+            bool close_ime() final;
+        private:
+            void input_language_changed();
+            static bool set_ime_input_area(HIMC aContext, rect const& aArea);
+            static bool set_ime_position(HIMC aContext, i_widget const& aInputWidget, optional_point const& aPosition);
+        private:
+            i_keyboard& iKeyboard;
+            sink iSink;
+            HKL iLayout = nullptr;
+            i_widget const* iInputWidget = nullptr;
+            HWND iSurface = nullptr;
+            HIMC iContext = nullptr;
+        };
+
         class keyboard : public neogfx::keyboard
         {
         public:
             keyboard();
         public:
-            bool is_key_pressed(scan_code_e aScanCode) const override;
-            keyboard_locks locks() const override;
-            key_modifiers_e modifiers() const override;
+            i_keyboard_layout& layout() const final;
         public:
-            key_code_e scan_code_to_key_code(scan_code_e aScanCode) const override;
+            bool is_key_pressed(scan_code_e aScanCode) const final;
+            keyboard_locks locks() const final;
+            key_modifiers_e modifiers() const final;
         public:
-            void update_keymap() override;
+            key_code_e scan_code_to_key_code(scan_code_e aScanCode) const final;
         private:
+            void update_keymap();
             void set_keymap(const keymap_t& aKeymap);
         public:
             static scan_code_e scan_code_from_message(LPARAM aLParam, WPARAM aWParam);
         private:
             keymap_t iKeymap;
+            std::unique_ptr<i_keyboard_layout> iLayout;
         };
     }
 }

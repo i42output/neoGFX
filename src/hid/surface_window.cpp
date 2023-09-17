@@ -777,7 +777,7 @@ namespace neogfx
 
     void surface_window::native_window_text_input(i_string const& aText)
     {
-        auto& targetWindow = service<i_window_manager>().active_window();
+        auto& targetWindow = as_window();
         auto& targetWidget = targetWindow.as_widget();
         auto send = [&](i_string const& aText)
         {
@@ -789,9 +789,9 @@ namespace neogfx
                     return false;
                 return true;
             };
-            if (as_window().has_focused_widget())
+            if (targetWindow.has_focused_widget())
             {
-                i_widget* w = &as_window().focused_widget();
+                i_widget* w = &targetWindow.focused_widget();
                 while ((!can_consume(*w) || event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->text_input(aText)) && w != &targetWidget)
                     w = &w->parent();
                 if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
