@@ -49,7 +49,7 @@ namespace neogfx
         private:
             void input_language_changed();
             static bool set_ime_input_area(HIMC aContext, rect const& aArea);
-            static bool set_ime_position(HIMC aContext, i_widget const& aInputWidget, optional_point const& aPosition);
+            static bool set_ime_position(HIMC aContext, rect const& aArea, point const& aPosition);
         private:
             i_keyboard& iKeyboard;
             sink iSink;

@@ -252,7 +252,9 @@ namespace neogfx
 
             if (!context ||
                 !set_ime_input_area(context, inputWidget->non_client_rect()) ||
-                !set_ime_position(context, *inputWidget, aPosition) ||
+                !set_ime_position(context, inputWidget->non_client_rect(), 
+                    aInputWidget.to_window_coordinates(aPosition ? 
+                        aPosition.value() : aInputWidget.client_rect(false).bottom_left())) ||
                 !ImmSetOpenStatus(context, TRUE))
             {
                 if (context)
@@ -279,7 +281,7 @@ namespace neogfx
         {
             if (!ime_open())
                 return false;
-            return set_ime_position(iContext, *iInputWidget, aPosition);
+            return set_ime_position(iContext, iInputWidget->non_client_rect(), iInputWidget->to_window_coordinates(aPosition));
         }
 
         bool keyboard_layout::close_ime()
@@ -319,10 +321,10 @@ namespace neogfx
             return ImmSetCompositionWindow(aContext, &cof);
         }
 
-        bool keyboard_layout::set_ime_position(HIMC aContext, i_widget const& aInputWidget, optional_point const& aPosition)
+        bool keyboard_layout::set_ime_position(HIMC aContext, rect const& aArea, point const& aPosition)
         {
-            basic_rect<LONG> wr = aInputWidget.non_client_rect();
-            basic_point<LONG> cp = aInputWidget.to_window_coordinates(aPosition ? aPosition.value() : aInputWidget.client_rect(false).bottom_left());
+            basic_rect<LONG> wr = aArea;
+            basic_point<LONG> cp = aPosition;
             CANDIDATEFORM caf = {};
             caf.dwIndex = 0;
             caf.dwStyle = CFS_EXCLUDE;
