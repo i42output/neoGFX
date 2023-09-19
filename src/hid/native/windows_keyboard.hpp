@@ -42,10 +42,15 @@ namespace neogfx
         public:
             bool has_ime() const final;
             bool ime_open() const final;
+            bool ime_active() const final;
+            bool ime_active(i_widget const& aInputWidget) const final;
             i_widget const& input_widget() const final;
-            bool open_ime(i_widget const& aInputWidget, optional_point const& aPosition = {}) final;
-            bool set_ime_position(point const& aPosition) final;
-            bool close_ime() final;
+            point const& position() const final;
+            void open_ime() final;
+            void close_ime() final;
+            void activate_ime(i_widget const& aInputWidget, optional_point const& aPosition = {}) final;
+            void deactivate_ime(i_widget const& aInputWidget) final;
+            void update_ime_position(point const& aPosition) final;
         private:
             void input_language_changed();
             static bool set_ime_input_area(HIMC aContext, rect const& aArea);
@@ -53,8 +58,10 @@ namespace neogfx
         private:
             i_keyboard& iKeyboard;
             sink iSink;
+            bool iOpen = false;
             HKL iLayout = nullptr;
             i_widget const* iInputWidget = nullptr;
+            optional_point iPosition;
             HWND iSurface = nullptr;
             HIMC iContext = nullptr;
         };

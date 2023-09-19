@@ -640,15 +640,22 @@ namespace neogfx
     {
     public:
         struct ime_not_open : std::logic_error { ime_not_open() : std::logic_error("neogfx::i_keyboard_layout::ime_not_open") {} };
+        struct ime_not_active : std::logic_error { ime_not_active() : std::logic_error("neogfx::i_keyboard_layout::ime_not_active") {} };
+        struct ime_activation_failure : std::runtime_error { ime_activation_failure() : std::runtime_error("neogfx::i_keyboard_layout::ime_activation_failure") {} };
     public:
         virtual ~i_keyboard_layout() = default;
     public:
         virtual bool has_ime() const = 0;
         virtual bool ime_open() const = 0;
+        virtual bool ime_active() const = 0;
+        virtual bool ime_active(i_widget const& aInputWidget) const = 0;
         virtual i_widget const& input_widget() const = 0;
-        virtual bool open_ime(i_widget const& aInputWidget, optional_point const& aPosition = {}) = 0;
-        virtual bool set_ime_position(point const& aPosition) = 0;
-        virtual bool close_ime() = 0;
+        virtual point const& position() const = 0;
+        virtual void open_ime() = 0;
+        virtual void close_ime() = 0;
+        virtual void activate_ime(i_widget const& aInputWidget, optional_point const& aPosition = {}) = 0;
+        virtual void deactivate_ime(i_widget const& aInputWidget) = 0;
+        virtual void update_ime_position(point const& aPosition) = 0;
     };
 
     class i_keyboard : public i_hid_device, public i_service

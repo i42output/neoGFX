@@ -932,6 +932,8 @@ namespace neogfx
             case WM_INPUTLANGCHANGE:
                 service<i_keyboard>().input_language_changed().trigger();
                 break;
+            case WM_IME_NOTIFY:
+                break;
             case WM_SYSCHAR:
                 result = wndproc(hwnd, msg, wparam, lparam);
                 {

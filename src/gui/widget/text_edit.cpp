@@ -877,8 +877,8 @@ namespace neogfx
     {
         framed_scrollable_widget::focus_gained(aFocusReason);
 
-        if (neolib::service<i_keyboard>().layout().has_ime())
-            neolib::service<i_keyboard>().layout().open_ime(*this, cursor_rect().bottom_left());
+        if (neolib::service<i_keyboard>().layout().ime_open())
+            neolib::service<i_keyboard>().layout().activate_ime(*this, cursor_rect().bottom_left());
 
         neolib::service<neolib::i_power>().register_activity();
 
@@ -904,8 +904,8 @@ namespace neogfx
         if (destroyed)
             return;
 
-        if (neolib::service<i_keyboard>().layout().ime_open() && &neolib::service<i_keyboard>().layout().input_widget() == this)
-            neolib::service<i_keyboard>().layout().close_ime();
+        if (neolib::service<i_keyboard>().layout().ime_open())
+            neolib::service<i_keyboard>().layout().deactivate_ime(*this);
 
         if (service<i_clipboard>().sink_active() && &service<i_clipboard>().active_sink() == this)
             service<i_clipboard>().deactivate(*this);
@@ -1010,24 +1010,21 @@ namespace neogfx
             }
             iMenu->menu().add_separator();
             iMenu->menu().add_action(service<i_app>().action_select_all());
-            if (neolib::service<i_keyboard>().layout().has_ime())
+            iMenu->menu().add_separator();
+            if (!neolib::service<i_keyboard>().layout().ime_open())
             {
-                if (!neolib::service<i_keyboard>().layout().ime_open())
+                iMenu->menu().add_action(make_ref<action>("Open IME"_t)).triggered([&]()
                 {
-                    iMenu->menu().add_separator();
-                    iMenu->menu().add_action(make_ref<action>("Open IME"_t)).triggered([&]()
-                    {
-                        neolib::service<i_keyboard>().layout().open_ime(*this, cursor_rect().bottom_left());
-                    });
-                }
-                else if (&neolib::service<i_keyboard>().layout().input_widget() == this)
+                    neolib::service<i_keyboard>().layout().open_ime();
+                    neolib::service<i_keyboard>().layout().activate_ime(*this, cursor_rect().bottom_left());
+                });
+            }
+            else
+            {
+                iMenu->menu().add_action(make_ref<action>("Close IME"_t)).triggered([&]()
                 {
-                    iMenu->menu().add_separator();
-                    iMenu->menu().add_action(make_ref<action>("Close IME"_t)).triggered([&]()
-                    {
-                        neolib::service<i_keyboard>().layout().close_ime();
-                    });
-                }
+                    neolib::service<i_keyboard>().layout().close_ime();
+                });
             }
             bool selectAll = false;
             tempSink += service<i_app>().action_select_all().triggered([&]() { selectAll = true; });
@@ -2325,13 +2322,6 @@ namespace neogfx
                 update_cursor();
         });
 
-        iSink += neolib::service<i_keyboard>().input_language_changed([&]() 
-        { 
-            if (has_focus() && neolib::service<i_keyboard>().layout().has_ime() &&
-                !neolib::service<i_keyboard>().layout().ime_open())
-                neolib::service<i_keyboard>().layout().open_ime(*this, cursor_rect().bottom_left());
-        });
-
         iDefaultFont = service<i_app>().current_style().font_info();
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {
@@ -2355,8 +2345,8 @@ namespace neogfx
         cursor().set_width(2.0);
         iSink += cursor().PositionChanged([this]()
         {
-            if (has_focus() && neolib::service<i_keyboard>().layout().ime_open())
-                neolib::service<i_keyboard>().layout().set_ime_position(cursor_rect().bottom_left());
+            if (neolib::service<i_keyboard>().layout().ime_active(*this))
+                neolib::service<i_keyboard>().layout().update_ime_position(cursor_rect().bottom_left());
             iNextStyle = std::nullopt;
             iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
             make_cursor_visible();

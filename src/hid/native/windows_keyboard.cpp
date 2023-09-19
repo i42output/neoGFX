@@ -215,6 +215,9 @@ namespace neogfx
             iKeyboard.input_language_changed([&]() { input_language_changed(); });
 
             input_language_changed();
+
+            if (has_ime())
+                open_ime();
         }
 
         keyboard_layout::~keyboard_layout()
@@ -228,33 +231,71 @@ namespace neogfx
 
         bool keyboard_layout::ime_open() const
         {
-            return iContext != nullptr;
+            return iOpen;
+        }
+
+        bool keyboard_layout::ime_active() const
+        {
+            return iContext;
+        }
+
+        bool keyboard_layout::ime_active(i_widget const& aInputWidget) const
+        {
+            return iContext && iInputWidget == &aInputWidget;
         }
 
         i_widget const& keyboard_layout::input_widget() const
         {
-            if (!ime_open())
-                throw ime_not_open();
+            if (!ime_active())
+                throw ime_not_active();
             return *iInputWidget;
         }
 
-        bool keyboard_layout::open_ime(i_widget const& aInputWidget, optional_point const& aPosition)
+        point const& keyboard_layout::position() const
         {
-            if (!has_ime())
-                return false;
-            if (iContext)
-                close_ime();
+            if (!ime_active())
+                throw ime_not_active();
+            return iPosition.value();
+        }
+
+        void keyboard_layout::open_ime()
+        {
+            iOpen = true;
+        }
+
+        void keyboard_layout::close_ime()
+        {
+            if (ime_active())
+                deactivate_ime(input_widget());
+            iOpen = false;
+        }
+
+        void keyboard_layout::activate_ime(i_widget const& aInputWidget, optional_point const& aPosition)
+        {
+            if (!ime_open())
+                return;
 
             auto inputWidget = &aInputWidget;
-            auto surface = static_cast<HWND>(inputWidget->surface().as_surface_window().native_window().native_handle());
+            auto position = inputWidget->to_window_coordinates(aPosition ?
+                aPosition.value() : inputWidget->client_rect(false).bottom_left());
 
+            if (ime_active())
+            {
+                if (&input_widget() == &aInputWidget)
+                {
+                    update_ime_position(position);
+                    return;
+                }
+                else
+                    deactivate_ime(input_widget());
+            }
+
+            auto surface = static_cast<HWND>(inputWidget->surface().as_surface_window().native_window().native_handle());
             auto context = ImmGetContext(surface);
 
             if (!context ||
                 !set_ime_input_area(context, inputWidget->non_client_rect()) ||
-                !set_ime_position(context, inputWidget->non_client_rect(), 
-                    aInputWidget.to_window_coordinates(aPosition ? 
-                        aPosition.value() : aInputWidget.client_rect(false).bottom_left())) ||
+                !set_ime_position(context, inputWidget->non_client_rect(), position) ||
                 !ImmSetOpenStatus(context, TRUE))
             {
                 if (context)
@@ -262,48 +303,56 @@ namespace neogfx
                     ImmSetOpenStatus(context, FALSE);
                     ImmReleaseContext(surface, context);
                 }
-                return false;
+                throw ime_activation_failure();
             }
 
             iContext = context;
             iInputWidget = inputWidget;
+            iPosition = position;
             iSurface = surface;
             iSink = inputWidget->destroyed([&, inputWidget]()
                 {
-                    if (ime_open() && &input_widget() == inputWidget)
-                        close_ime();
+                    if (ime_active() && &input_widget() == inputWidget)
+                        deactivate_ime(input_widget());
                 });
-
-            return true;
         }
 
-        bool keyboard_layout::set_ime_position(point const& aPosition)
+        void keyboard_layout::update_ime_position(point const& aPosition)
         {
-            if (!ime_open())
-                return false;
-            return set_ime_position(iContext, iInputWidget->non_client_rect(), iInputWidget->to_window_coordinates(aPosition));
+            if (!ime_active())
+                return;
+            iPosition = aPosition;
+            set_ime_position(iContext, iInputWidget->non_client_rect(), iInputWidget->to_window_coordinates(aPosition));
         }
 
-        bool keyboard_layout::close_ime()
+        void keyboard_layout::deactivate_ime(i_widget const& aInputWidget)
         {
-            if (iContext == nullptr)
-                return false;
+            if (!ime_active())
+                return;
+            if (&aInputWidget != iInputWidget)
+                return;
+            ImmNotifyIME(iContext, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+            ImmSetCompositionStringW(iContext, SCS_SETSTR, (LPVOID)L"", sizeof(wchar_t), (LPVOID)L"", sizeof(wchar_t));
+            ImmNotifyIME(iContext, NI_CLOSECANDIDATE, 0, 0);
             ImmSetOpenStatus(iContext, FALSE);
-            bool result = ImmReleaseContext(iSurface, iContext);
+            ImmReleaseContext(iSurface, iContext);
             iContext = nullptr;
             iSurface = nullptr;
             iInputWidget = nullptr;
-            return result;
+            iPosition = std::nullopt;
         }
 
         void keyboard_layout::input_language_changed()
         {
             iLayout = GetKeyboardLayout(0);
-            if (ime_open())
+            if (!has_ime() && ime_active())
+                deactivate_ime(input_widget());
+            if (ime_active())
             {
-                auto& inputWidget = *iInputWidget;
-                close_ime();
-                open_ime(inputWidget);
+                auto inputWidget = iInputWidget;
+                auto position = iPosition;
+                deactivate_ime(input_widget());
+                activate_ime(*inputWidget, position);
             }
         }
 
