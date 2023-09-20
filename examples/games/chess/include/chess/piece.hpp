@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    enum class piece_cardinal : uint8_t
+    enum class piece_cardinal : std::uint8_t
     {
         Pawn    = 0x00,
         Knight  = 0x01,
@@ -39,7 +39,7 @@ namespace chess
 
     constexpr std::size_t PIECE_TYPES = static_cast<std::size_t>(piece_cardinal::COUNT);
 
-    enum class piece_color_cardinal : uint8_t
+    enum class piece_color_cardinal : std::uint8_t
     {
         White   = 0x00,
         Black   = 0x01,
@@ -49,7 +49,7 @@ namespace chess
 
     constexpr std::size_t PIECE_COLORS = static_cast<std::size_t>(piece_color_cardinal::COUNT);
 
-    enum class piece : uint8_t
+    enum class piece : std::uint8_t
     {
         None        = 0x00,
 
@@ -155,19 +155,14 @@ namespace chess
         return static_cast<T>(sPieceColorCardinals[static_cast<std::size_t>(p)]);
     }
 
-    inline bool operator<(piece lhs, piece rhs)
-    {
-        return static_cast<uint8_t>(lhs) < static_cast<uint8_t>(rhs);
-    }
-
     inline piece operator&(piece lhs, piece rhs)
     {
-        return static_cast<piece>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
+        return static_cast<piece>(static_cast<std::uint8_t>(lhs) & static_cast<std::uint8_t>(rhs));
     }
 
     inline piece operator|(piece lhs, piece rhs)
     {
-        return static_cast<piece>(static_cast<uint8_t>(lhs) | static_cast<uint8_t>(rhs));
+        return static_cast<piece>(static_cast<std::uint8_t>(lhs) | static_cast<std::uint8_t>(rhs));
     }
 
     std::array<piece, 256> constexpr sPieceTypes = []()

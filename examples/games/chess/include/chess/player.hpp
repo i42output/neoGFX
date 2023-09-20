@@ -23,18 +23,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    enum class player : uint8_t
+    enum class player : std::uint8_t
     {
-        Invalid = static_cast<uint8_t>(piece::None),
+        Invalid = static_cast<std::uint8_t>(piece::None),
 
-        White   = static_cast<uint8_t>(piece::White),
-        Black   = static_cast<uint8_t>(piece::Black)
+        White   = static_cast<std::uint8_t>(piece::White),
+        Black   = static_cast<std::uint8_t>(piece::Black)
     };
-
-    inline bool operator<(player lhs, player rhs)
-    {
-        return static_cast<uint8_t>(lhs) < static_cast<uint8_t>(rhs);
-    }
 
     template <player Player>
     inline double player_piece_value(chess::piece piece);

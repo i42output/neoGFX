@@ -315,7 +315,7 @@ namespace chess
                     if (workGroup.first == workItem.position)
                     {
                         for (auto& childNode : *node.children)
-                            if (workItem.move == childNode.move)
+                            if (workItem.move == childNode.move.value())
                                 workItem.result.set_value(std::move(childNode));
                     }
                 }

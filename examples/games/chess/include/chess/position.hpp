@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <tuple>
 #include <bit>
+#include <vector>
 #include <ostream>
 
 #include <neolib/core/static_vector.hpp>
@@ -54,24 +56,18 @@ namespace chess
         };
         typedef std::array<std::array<bool, static_cast<std::size_t>(castling_piece_index::COUNT)>, PIECE_COLORS> castling_state;
         castling_state castlingState;
+
+        auto operator<=>(move const& rhs) const
+        {
+            // todo: consider castling state?
+            return std::forward_as_tuple(from, to, promoteTo) <=> std::forward_as_tuple(rhs.from, rhs.to, rhs.promoteTo);
+        }
+        bool operator==(move const& rhs) const
+        {
+            // todo: consider castling state?
+            return std::forward_as_tuple(from, to, promoteTo) == std::forward_as_tuple(rhs.from, rhs.to, rhs.promoteTo);
+        }
     };
-
-    inline bool operator==(move const& lhs, move const& rhs)
-    {
-        // todo: consider castling state?
-        return lhs.from == rhs.from && lhs.to == rhs.to && lhs.promoteTo == rhs.promoteTo;
-    }
-
-    inline bool operator!=(move const& lhs, move const& rhs)
-    {
-        return !(lhs == rhs);
-    }
-
-    inline bool operator<(move const& lhs, move const& rhs)
-    {
-        // todo: consider castling state?
-        return std::forward_as_tuple(lhs.from, lhs.to, lhs.promoteTo) < std::forward_as_tuple(rhs.from, rhs.to, rhs.promoteTo);
-    }
 
     inline std::string to_string(move const& aMove)
     {
@@ -124,7 +120,16 @@ namespace chess
         std::array<bitboard, PIECE_TYPES> byPieceType;
         std::array<piece, SQUARES> bySquare;
 
-        std::strong_ordering operator<=>(bitboard_rep const&) const = default;
+        auto operator<=>(bitboard_rep const& rhs) const
+        {
+            return std::forward_as_tuple(pieces, byPieceColor, byPieceType) <=>
+                std::forward_as_tuple(rhs.pieces, rhs.byPieceColor, rhs.byPieceType);
+        };
+        bool operator==(bitboard_rep const& rhs) const
+        {
+            return std::forward_as_tuple(pieces, byPieceColor, byPieceType) ==
+                std::forward_as_tuple(rhs.pieces, rhs.byPieceColor, rhs.byPieceType);
+        };
     };
 
     inline piece piece_at(mailbox_rep const& aRep, coordinates const& aCoordinates)
@@ -178,7 +183,14 @@ namespace chess
         std::vector<move> moveHistory;
         mutable std::optional<move> checkTest;
 
-        std::weak_ordering operator<=>(basic_position<mailbox_rep> const&) const = default;
+        auto operator<=>(basic_position<mailbox_rep> const& rhs) const
+        {
+            return std::forward_as_tuple(rep, turn, moveHistory) <=> std::forward_as_tuple(rhs.rep, rhs.turn, rhs.moveHistory);
+        }
+        bool operator==(basic_position<mailbox_rep> const& rhs) const
+        {
+            return std::forward_as_tuple(rep, turn, moveHistory) == std::forward_as_tuple(rhs.rep, rhs.turn, rhs.moveHistory);
+        }
     };
 
     template <>
@@ -188,34 +200,11 @@ namespace chess
         player turn;
         std::vector<move> moveHistory;
 
-        std::weak_ordering operator<=>(basic_position<bitboard_rep> const&) const = default;
+        auto operator<=>(basic_position<bitboard_rep> const&) const = default;
     };
 
     using mailbox_position = basic_position<mailbox_rep>;
     using bitboard_position = basic_position<bitboard_rep>;
-
-    template <typename Representation>
-    inline bool operator==(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
-    {
-        bool const samePosition = lhs.rep == rhs.rep;
-        bool const sameKings = lhs.kings == rhs.kings;
-        bool const sameTurn = lhs.turn == rhs.turn;
-        bool const sameHistory = lhs.moveHistory == rhs.moveHistory;
-        return samePosition && sameKings && sameTurn && sameHistory;
-    }
-
-    template <typename Representation>
-    inline bool operator!=(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
-    {
-        return !(lhs == rhs);
-    }
-
-    template <typename Representation>
-    inline bool operator<(basic_position<Representation> const& lhs, basic_position<Representation> const& rhs)
-    {
-        return std::forward_as_tuple(lhs.rep, lhs.kings, lhs.turn, lhs.moveHistory) <
-            std::forward_as_tuple(rhs.rep, rhs.kings, rhs.turn, rhs.moveHistory);
-    }
 
     using position = bitboard_position;
 
