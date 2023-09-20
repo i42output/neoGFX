@@ -444,25 +444,6 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::before() const
-    {
-        if (iLinkBefore != nullptr)
-            return *iLinkBefore;
-        if (has_parent())
-        {
-            auto me = parent().find(*this);
-            if (me != parent().children().begin())
-                return **(*(me - 1))->last();
-            else
-                return parent();
-        }
-        else if (has_children())
-            return **last();
-        else
-            return *this;
-    }
-
-    template <typename Interface>
     void widget<Interface>::bring_child_to_front(const i_widget& aChild)
     {
         auto existing = std::find_if(iChildren.begin(), iChildren.end(), [&](auto&& c) { return &*c == &aChild; });
@@ -500,6 +481,25 @@ namespace neogfx
             iLayer = aLayer;
             update(true);
         }
+    }
+
+    template <typename Interface>
+    const i_widget& widget<Interface>::before() const
+    {
+        if (iLinkBefore != nullptr)
+            return *iLinkBefore;
+        if (has_parent())
+        {
+            auto me = parent().find(*this);
+            if (me != parent().children().begin())
+                return **(*(me - 1))->last();
+            else
+                return parent();
+        }
+        else if (has_children())
+            return **last();
+        else
+            return *this;
     }
 
     template <typename Interface>
