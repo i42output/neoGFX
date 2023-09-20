@@ -675,20 +675,10 @@ namespace neogfx
         if (aScanCode == ScanCode_TAB && (start->focus_policy() & focus_policy::ConsumeTabKey) != focus_policy::ConsumeTabKey)
         {
             i_widget* w = start;
-            if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
-            {
-                for (w = &w->after(); 
-                    w != start && (w->effectively_hidden() || w->effectively_disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus); 
-                    w = &w->after())
-                    ;
-            }
-            else
-            {
-                for (w = &w->before();
-                    w != start && (w->effectively_hidden() || w->effectively_disabled() || (w->focus_policy() & focus_policy::TabFocus) != focus_policy::TabFocus);
-                    w = &w->before())
-                    ;
-            }
+            auto next = (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE ?
+                [](i_widget* current) { return &current->after(); } : [](i_widget* current) { return &current->before(); };
+            for (w = next(w); w != start && !w->can_set_focus(focus_reason::Tab); w = next(w))
+                ;
             if ((w->can_set_focus(focus_reason::Tab)))
                 w->set_focus(focus_reason::Tab);
         }

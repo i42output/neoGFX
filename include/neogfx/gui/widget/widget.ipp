@@ -1786,6 +1786,8 @@ namespace neogfx
     template <typename Interface>
     bool widget<Interface>::can_set_focus(focus_reason aFocusReason) const
     {
+        if (effectively_hidden() || effectively_disabled())
+            return false;
         switch (aFocusReason)
         {
         case focus_reason::ClickNonClient:
