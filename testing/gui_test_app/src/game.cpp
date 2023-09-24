@@ -162,7 +162,8 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     for (int i = 0; i < 75; ++i)
         make_asteroid();
 
-    auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
+    auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(
+        ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
     auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2d& target, const ng::vec3& velocity = {}, const ng::optional_color& color = {})
     {
