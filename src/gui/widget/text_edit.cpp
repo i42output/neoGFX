@@ -324,7 +324,7 @@ namespace neogfx
 
     text_format text_edit::character_style::as_text_format() const
     {
-        return text_format{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? paper_color() : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
+        return text_format{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? optional_text_color{ paper_color() } : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
     }
 
     text_edit::character_style& text_edit::character_style::set_font(optional_font const& aFont)

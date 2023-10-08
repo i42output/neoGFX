@@ -112,56 +112,17 @@ namespace neogfx
     class text_color : public color_or_gradient
     {
     public:
-        text_color() : color_or_gradient{}
-        {
-        }
-        text_color(const text_color& aOther) : color_or_gradient{ aOther }
-        {
-        }
-        text_color(text_color&& aOther) : color_or_gradient{ std::move(aOther) }
-        {
-        }
-        template <typename T>
-        text_color(T&& aOther) : color_or_gradient{ std::forward<T>(aOther) }
+        using color_or_gradient::color_or_gradient;
+        text_color(color_or_gradient const& aOther) :
+            color_or_gradient{ aOther }
         {
         }
     public:
-        text_color& operator=(const text_color& aOther)
+        using color_or_gradient::operator=;
+        text_color& operator=(color_or_gradient const& aOther)
         {
-            if (&aOther == this)
-                return *this;
             color_or_gradient::operator=(aOther);
             return *this;
-        }
-        text_color& operator=(text_color&& aOther)
-        {
-            if (&aOther == this)
-                return *this;
-            color_or_gradient::operator=(std::move(aOther));
-            return *this;
-        }
-        template <typename T>
-        text_color& operator=(T&& aOther)
-        {
-            color_or_gradient::operator=(std::forward<T>(aOther));
-            return *this;
-        }
-    public:
-        bool operator==(const color& aColor) const
-        {
-            return std::holds_alternative<color>(*this) && std::get<color>(*this) == aColor;
-        }
-        bool operator!=(const color& aColor) const
-        {
-            return !(*this == aColor);
-        }
-        bool operator==(const gradient& aGradient) const
-        {
-            return std::holds_alternative<gradient>(*this) && std::get<gradient>(*this) == aGradient;
-        }
-        bool operator!=(const gradient& aGradient) const
-        {
-            return !(*this == aGradient);
         }
     public:
         color::component alpha() const
@@ -181,6 +142,46 @@ namespace neogfx
                 return text_color{};
         }
     };
+
+    inline bool operator==(color_or_gradient const& lhs, color const& rhs) noexcept
+    {
+        return std::holds_alternative<color>(lhs) && std::get<color>(lhs) == rhs;
+    }
+
+    inline bool operator==(color const& lhs, color_or_gradient const& rhs) noexcept
+    {
+        return std::holds_alternative<color>(rhs) && std::get<color>(rhs) == lhs;
+    }
+
+    inline bool operator!=(color_or_gradient const& lhs, color const& rhs) noexcept
+    {
+        return !std::holds_alternative<color>(lhs) || std::get<color>(lhs) != rhs;
+    }
+
+    inline bool operator!=(color const& lhs, color_or_gradient const& rhs) noexcept
+    {
+        return !std::holds_alternative<color>(rhs) && std::get<color>(rhs) != lhs;
+    }
+
+    inline bool operator==(color_or_gradient const& lhs, gradient const& rhs) noexcept
+    {
+        return std::holds_alternative<gradient>(lhs) && std::get<gradient>(lhs) == rhs;
+    }
+
+    inline bool operator==(gradient const& lhs, color_or_gradient const& rhs) noexcept
+    {
+        return std::holds_alternative<gradient>(rhs) && std::get<gradient>(rhs) == lhs;
+    }
+
+    inline bool operator!=(color_or_gradient const& lhs, gradient const& rhs) noexcept
+    {
+        return !std::holds_alternative<gradient>(lhs) || std::get<gradient>(lhs) != rhs;
+    }
+
+    inline bool operator!=(gradient const& lhs, color_or_gradient const& rhs) noexcept
+    {
+        return !std::holds_alternative<gradient>(rhs) && std::get<gradient>(rhs) != lhs;
+    }
 
     typedef neolib::optional<text_color> optional_text_color;
 

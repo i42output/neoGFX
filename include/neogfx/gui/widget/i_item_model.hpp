@@ -167,12 +167,12 @@ namespace neogfx
         item_cell_data() 
         {
         }
-        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T const&>, sfinae>>
+        template <typename T, typename std::enable_if_t<is_alternative_v<T>, int> = 0>
         item_cell_data(T const& aValue) :
             item_cell_data_variant{ aValue }
         {
         }
-        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T&&>, sfinae>>
+        template <typename T, typename std::enable_if_t<is_alternative_v<T>, int> = 0>
         item_cell_data(T&& aValue) : 
             item_cell_data_variant{ std::forward<T>(aValue) }
         {
@@ -195,7 +195,7 @@ namespace neogfx
         {
         }
         item_cell_data(std::string&& aString) :
-            item_cell_data_variant{ string{ aString } }
+            item_cell_data_variant{ string{ std::move(aString) } }
         {
         }
     public:
@@ -209,13 +209,13 @@ namespace neogfx
             item_cell_data_variant::operator=(static_cast<item_cell_data_variant&&>(std::move(aOther)));
             return *this;
         }
-        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T const&>, sfinae>>
+        template <typename T, typename std::enable_if_t<is_alternative_v<T>, int> = 0>
         item_cell_data& operator=(T const& aArgument)
         {
             item_cell_data_variant::operator=(aArgument);
             return *this;
         }
-        template <typename T, typename SFINAE = std::enable_if_t<!std::is_same_v<std::decay_t<T>, item_cell_data> && std::is_constructible_v<item_cell_data_variant, T&&>, sfinae>>
+        template <typename T, typename std::enable_if_t<is_alternative_v<T>, int> = 0>
         item_cell_data& operator=(T&& aArgument)
         {
             item_cell_data_variant::operator=(std::forward<T>(aArgument));

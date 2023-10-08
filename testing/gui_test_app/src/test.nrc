@@ -1035,7 +1035,7 @@
                                                 label: {
                                                     text: "Size:"
                                                 }
-                                                slider: {
+                                                spin_box: {
                                                     id: sliderShapeSize
                                                     orientation: Horizontal
                                                     minimum: 1
@@ -1048,7 +1048,7 @@
                                                 label: {
                                                     text: "Count:"
                                                 }
-                                                slider: {
+                                                spin_box: {
                                                     id: sliderShapeCount
                                                     orientation: Horizontal
                                                     minimum: 0
