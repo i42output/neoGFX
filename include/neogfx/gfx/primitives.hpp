@@ -235,16 +235,13 @@ namespace neogfx
     public:
         bool operator==(const text_effect& that) const noexcept
         {
-            return iType == that.iType && iColor == that.iColor && iWidth == that.iWidth && iOffset == that.iOffset && iAux1 == that.iAux1 && iIgnoreEmoji == that.iIgnoreEmoji;
+            return std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) ==
+                std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iIgnoreEmoji);
         }
-        std::partial_ordering operator<=>(const text_effect& that) const noexcept
+        auto operator<=>(const text_effect& that) const noexcept
         {
-            if (*this == that)
-                return std::partial_ordering::equivalent;
-            else if (std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) < std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iIgnoreEmoji))
-                return std::partial_ordering::less;
-            else
-                return std::partial_ordering::greater;
+            return std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) <=>
+                std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iIgnoreEmoji);
         }
     public:
         text_effect_type type() const
@@ -485,23 +482,15 @@ namespace neogfx
         {
         }
     public:
-        bool operator==(text_format const& aRhs) const
+        bool operator==(text_format const& aRhs) const noexcept
         {
-            return iInk == aRhs.iInk && iPaper == aRhs.iPaper && iIgnoreEmoji == aRhs.iIgnoreEmoji && iEffect == aRhs.iEffect;
-        }
-        bool operator<(text_format const& aRhs) const
-        {
-            return std::forward_as_tuple(ink(), paper(), ignore_emoji(), effect()) <
+            return std::forward_as_tuple(ink(), paper(), ignore_emoji(), effect()) ==
                 std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.ignore_emoji(), aRhs.effect());
         }
-        std::strong_ordering operator<=>(const text_format& aRhs) const
+        auto operator<=>(text_format const& aRhs) const noexcept
         {
-            if (*this == aRhs)
-                return std::strong_ordering::equal;
-            else if (*this < aRhs)
-                return std::strong_ordering::less;
-            else
-                return std::strong_ordering::greater;
+            return std::forward_as_tuple(ink(), paper(), ignore_emoji(), effect()) <=>
+                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.ignore_emoji(), aRhs.effect());
         }
     public:
         text_color const& ink() const
