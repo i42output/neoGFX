@@ -79,7 +79,8 @@ namespace neogfx
 
         bool batchable(const text_effect& lhs, const text_effect& rhs)
         {
-            return batchable(lhs.color(), rhs.color()) && lhs.type() == rhs.type();
+            return batchable(lhs.color(), rhs.color()) && lhs.type() == rhs.type() && 
+                lhs.width() == rhs.width() && lhs.offset() == rhs.offset() && lhs.aux1() == rhs.aux1();
         }
 
         template <typename T>
