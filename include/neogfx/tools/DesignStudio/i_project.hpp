@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/core/i_event.hpp>
-#include <neogfx/gui/view/i_model.hpp>
+#include <neogfx/gui/mvc/i_model.hpp>
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
@@ -28,7 +28,7 @@ namespace neogfx::DesignStudio
 {
     class i_project_manager;
 
-    class i_project : public ng::i_model, public ng::i_reference_counted
+    class i_project : public ng::mvc::i_model, public ng::i_reference_counted
     {
     public:
         declare_event(element_added, i_element&);

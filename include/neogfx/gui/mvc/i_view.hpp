@@ -1,4 +1,4 @@
-// controller.hpp
+// i_view.hpp
 /*
 neogfx C++ App/Game Engine
 Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -21,31 +21,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/gui/view/i_controller.hpp>
+#include <neogfx/gui/widget/i_widget.hpp>
+#include <neogfx/gui/mvc/i_model.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
-    class controller : public i_controller
+    class i_view
     {
     public:
-        define_declared_event(ViewAdded, view_added, i_view&)
-        define_declared_event(ViewRemoved, view_removed, i_view&)
+        declare_event(activated)
+        declare_event(deactivated)
     public:
-        controller(i_model& aModel, i_view_container& aContainer);
+        virtual const i_widget& as_widget() const = 0;
+        virtual i_widget& as_widget() = 0;
     public:
-        virtual const i_model& model() const;
-        virtual i_model& model();
+        virtual const i_model& model() const = 0;
+        virtual i_model& model() = 0;
+        virtual void update() = 0;
     public:
-        virtual void add_view(i_view& aView);
-        virtual void add_view(std::shared_ptr<i_view> aView);
-        virtual void remove_view(i_view& aView);
-        virtual bool only_weak_views() const;
-    public:
-        virtual const i_view_container& container() const;
-        virtual i_view_container& container();
-    private:
-        i_model& iModel;
-        i_view_container& iContainer;
-        std::vector<std::shared_ptr<i_view>> iViews;
+        virtual bool is_strong() const = 0;
+        virtual bool is_weak() const = 0;
+        virtual bool is_active() const = 0;
+        virtual void activate() = 0;
+        virtual void deactivate() = 0;
     };
 }

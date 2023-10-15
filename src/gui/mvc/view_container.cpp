@@ -1,7 +1,7 @@
-// i_model.hpp
+// view_container.cpp
 /*
 neogfx C++ App/Game Engine
-Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
+Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
 
 This program is free software: you can redistribute it and / or modify
 it under the terms of the GNU General Public License as published by
@@ -17,28 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/i_event.hpp>
+#include <neogfx/gui/mvc/view_container.ipp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
-    class i_controller;
-
-    class i_model
-    {
-    public:
-        declare_event(modified)
-        declare_event(controller_added, i_controller&)
-        declare_event(controller_removed, i_controller&)
-    public:
-        virtual ~i_model() = default;
-    public:
-        virtual bool dirty() const = 0;
-        virtual void set_dirty() = 0;
-        virtual void set_clean() = 0;
-        virtual void add_controller(i_controller& aController) = 0;
-        virtual void remove_controller(i_controller& aController) = 0;
-    };
+    template class view_container<>;
+    template class view_container<scrollable_widget<>>;
 }

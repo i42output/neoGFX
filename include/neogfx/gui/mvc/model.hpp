@@ -21,9 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/core/event.hpp>
-#include <neogfx/gui/view/i_model.hpp>
+#include <neogfx/gui/mvc/i_model.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
     template <typename AbstractModel = i_model>
     class model : public AbstractModel

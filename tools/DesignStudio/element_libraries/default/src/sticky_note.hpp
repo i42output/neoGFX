@@ -27,6 +27,7 @@
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>
+#include <neogfx/gui/dialog/paragraph_dialog.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>
 
 namespace neogfx::DesignStudio
@@ -151,7 +152,19 @@ namespace neogfx::DesignStudio
                         iDefaultItem->apply_style(s);
                     }
                 });
-                paragraphFormat->disable(); // todo
+                paragraphFormat->Triggered([&]()
+                {
+                    paragraph_dialog paragraphFormatter{ *this };
+                    paragraphFormatter.SelectionChanged([&]()
+                    {
+                    });
+                    if (paragraphFormatter.exec() == dialog_result::Accepted)
+                    {
+                    }
+                    else
+                    {
+                    }
+                });
                 aMenu.add_action(fontFormat);
                 aMenu.add_action(paragraphFormat);
                 aMenu.add_separator();

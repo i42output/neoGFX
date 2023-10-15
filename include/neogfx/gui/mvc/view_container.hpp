@@ -28,10 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/tab_bar.hpp>
 #include <neogfx/gui/widget/tab_page_container.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
-#include "i_view.hpp"
-#include "i_view_container.hpp"
+#include <neogfx/gui/mvc/i_view.hpp>
+#include <neogfx/gui/mvc/i_view_container.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
     class view_stack : public drag_drop_target<framed_scrollable_widget>
     {
@@ -64,8 +64,8 @@ namespace neogfx
         i_widget& as_widget() override;
         const i_tab_container& tab_container() const override;
         i_tab_container& tab_container() override;
-        const neogfx::view_stack& view_stack() const override;
-        neogfx::view_stack& view_stack() override;
+        const mvc::view_stack& view_stack() const override;
+        mvc::view_stack& view_stack() override;
     public:
         i_layout& page_layout() override;
     public:
@@ -81,7 +81,7 @@ namespace neogfx
         view_container_style iStyle;
         vertical_layout iLayout0;
         horizontal_layout iLayout1;
-        neogfx::view_stack iViewStack;
+        mvc::view_stack iViewStack;
         std::vector<std::shared_ptr<i_controller>> iControllers;
     };
 

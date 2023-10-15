@@ -1,4 +1,4 @@
-// view.hpp
+// controller.hpp
 /*
 neogfx C++ App/Game Engine
 Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,33 +20,32 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/scrollable_widget.hpp>
-#include "i_view.hpp"
+#include <neogfx/core/event.hpp>
+#include <neogfx/gui/mvc/i_controller.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
-    class i_controller;
-
-    class view : public framed_scrollable_widget, public i_view
+    class controller : public i_controller
     {
-        meta_object(framed_scrollable_widget)
     public:
-        define_declared_event(Activated, activated)
-        define_declared_event(Deactivated, deactivated)
+        define_declared_event(ViewAdded, view_added, i_view&)
+        define_declared_event(ViewRemoved, view_removed, i_view&)
     public:
-        view(i_controller& aController, i_model& aModel);
+        controller(i_model& aModel, i_view_container& aContainer);
     public:
-        const i_widget& as_widget() const override;
-        i_widget& as_widget() override;
-        const i_model& model() const override;
-        i_model& model() override;
+        virtual const i_model& model() const;
+        virtual i_model& model();
     public:
-        bool is_active() const override;
-        void activate() override;
-        void deactivate() override;
+        virtual void add_view(i_view& aView);
+        virtual void add_view(std::shared_ptr<i_view> aView);
+        virtual void remove_view(i_view& aView);
+        virtual bool only_weak_views() const;
+    public:
+        virtual const i_view_container& container() const;
+        virtual i_view_container& container();
     private:
-        i_controller& iController;
         i_model& iModel;
-        bool iActive;
+        i_view_container& iContainer;
+        std::vector<std::shared_ptr<i_view>> iViews;
     };
 }

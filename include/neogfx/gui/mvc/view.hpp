@@ -1,4 +1,4 @@
-// i_view.hpp
+// view.hpp
 /*
 neogfx C++ App/Game Engine
 Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -20,29 +20,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/event.hpp>
-#include <neogfx/gui/widget/i_widget.hpp>
-#include "i_model.hpp"
+#include <neogfx/gui/widget/scrollable_widget.hpp>
+#include <neogfx/gui/mvc/i_view.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
-    class i_view
+    class i_controller;
+
+    class view : public framed_scrollable_widget, public i_view
     {
+        meta_object(framed_scrollable_widget)
     public:
-        declare_event(activated)
-        declare_event(deactivated)
+        define_declared_event(Activated, activated)
+        define_declared_event(Deactivated, deactivated)
     public:
-        virtual const i_widget& as_widget() const = 0;
-        virtual i_widget& as_widget() = 0;
+        view(i_controller& aController, i_model& aModel);
     public:
-        virtual const i_model& model() const = 0;
-        virtual i_model& model() = 0;
-        virtual void update() = 0;
+        const i_widget& as_widget() const override;
+        i_widget& as_widget() override;
+        const i_model& model() const override;
+        i_model& model() override;
     public:
-        virtual bool is_strong() const = 0;
-        virtual bool is_weak() const = 0;
-        virtual bool is_active() const = 0;
-        virtual void activate() = 0;
-        virtual void deactivate() = 0;
+        bool is_active() const override;
+        void activate() override;
+        void deactivate() override;
+    private:
+        i_controller& iController;
+        i_model& iModel;
+        bool iActive;
     };
 }

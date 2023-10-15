@@ -20,10 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/view/view_container.hpp>
-#include <neogfx/gui/view/i_controller.hpp>
+#include <neogfx/gui/mvc/view_container.hpp>
+#include <neogfx/gui/mvc/i_controller.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
     inline view_stack::view_stack(i_layout& aLayout, i_view_container& aParent) :
         drag_drop_target<framed_scrollable_widget>{ aLayout, frame_style::NoFrame }, iLayout{ *this }, iParent{ aParent }

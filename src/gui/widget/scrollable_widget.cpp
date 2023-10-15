@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <neogfx/gui/widget/scrollable_widget.ipp>
 #include <neogfx/gui/widget/framed_widget.hpp>
-#include <neogfx/gui/view/view_container.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 
 namespace neogfx
@@ -37,7 +36,7 @@ namespace neogfx
         void queue(i_scrollbar_container& aContainer) final
         {
             if (processing())
-                throw std::logic_error("neogfx::scrollbar_container_updater::queue: alreday processing");
+                throw std::logic_error("neogfx::scrollbar_container_updater::queue: already processing");
             iQueue.push_back(&aContainer);
         }
         void unqueue(i_scrollbar_container& aContainer) final

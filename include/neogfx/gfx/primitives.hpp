@@ -685,4 +685,16 @@ namespace neogfx
     private:
         spans iSpans;
     };
+
+    class paragraph_format
+    {
+    public:
+        using self_type = paragraph_format;
+        using abstract_type = self_type; ///< @todo
+    public:
+        paragraph_format() {}
+        paragraph_format(paragraph_format const& aOther) {}
+    public:
+        auto operator<=>(self_type const&) const = default;
+    };
 }

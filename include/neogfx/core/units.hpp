@@ -153,11 +153,11 @@ namespace neogfx
         typedef Units units;
         // construction
     public:
-        basic_scoped_units(units aNewUnits) : iSavedUnits{ current_units() }
+        basic_scoped_units(units aNewUnits = current_units()) : iSavedUnits{ current_units() }
         {
             set_units(aNewUnits);
         }
-        basic_scoped_units(i_units_context const& aNewContext, units aNewUnits) : iScopedContext{ aNewContext }, iSavedUnits { current_units() }
+        basic_scoped_units(i_units_context const& aNewContext, units aNewUnits = current_units()) : iScopedContext{ aNewContext }, iSavedUnits { current_units() }
         {
             set_units(aNewUnits);
         }

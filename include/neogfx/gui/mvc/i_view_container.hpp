@@ -24,12 +24,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+    class i_widget;
+    class i_tab_container;
+}
+
+namespace neogfx::mvc
+{
     class i_view;
     class i_controller;
-
-    class i_widget;
-
-    class i_tab_container;
 
     enum class view_container_style
     {
@@ -45,7 +47,7 @@ namespace neogfx
         declare_event(view_added, i_view&)
         declare_event(view_removed, i_view&)
     public:
-        struct controller_not_found : std::logic_error { controller_not_found() : std::logic_error("neogfx::i_container::controller_not_found") {} };
+        struct controller_not_found : std::logic_error { controller_not_found() : std::logic_error("neogfx::mvc::i_view_container::controller_not_found") {} };
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;

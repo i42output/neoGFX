@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>
-#include <neogfx/gui/view/view_container.hpp>
+#include <neogfx/gui/mvc/view_container.hpp>
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/dockable.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
@@ -94,7 +94,7 @@ namespace neogfx::DesignStudio
         ng::dockable iObjects;
         ng::dockable iProperties;
         ng::horizontal_layout iWorkspaceLayout;
-        ng::scrollable_view_container iWorkspace;
+        ng::mvc::scrollable_view_container iWorkspace;
         ng::texture iBackgroundTexture1;
         ng::texture iBackgroundTexture2;
         project_model iProjectModel;

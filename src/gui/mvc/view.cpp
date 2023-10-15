@@ -18,11 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/view/view.hpp>
-#include <neogfx/gui/view/i_controller.hpp>
-#include <neogfx/gui/view/i_view_container.hpp>
+#include <neogfx/gui/mvc/view.hpp>
+#include <neogfx/gui/mvc/i_controller.hpp>
+#include <neogfx/gui/mvc/i_view_container.hpp>
 
-namespace neogfx
+namespace neogfx::mvc
 {
     view::view(i_controller& aController, i_model& aModel) :
         framed_scrollable_widget{

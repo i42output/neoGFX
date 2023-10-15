@@ -46,6 +46,12 @@
     <Filter Include="Source Files\native\vulkan">
       <UniqueIdentifier>{fcc6c7c9-3006-4e91-bb23-586962955cb6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\mvc">
+      <UniqueIdentifier>{ab403c25-f024-4051-9fd0-2fc94e9fff0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mvc">
+      <UniqueIdentifier>{23e33264-b791-4b92-926b-a62fede59b47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\gfx\text\native\native_font_face.hpp">
@@ -379,27 +385,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\i_view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\controller.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\i_controller.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\i_model.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\i_view_container.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\view_container.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\group_box.hpp">
@@ -870,9 +855,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\normal_title_bar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\view\model.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1185,6 +1167,42 @@
     <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.frag.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.ipp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\dialog\paragraph_dialog.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\controller.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\i_controller.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\i_model.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\i_view.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\i_view_container.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\model.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\view.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\view_container.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\mvc\view_container.ipp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1385,15 +1403,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\view\view.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\view\controller.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\view\view_container.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\group_box.cpp">
@@ -1771,6 +1780,18 @@
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp">
       <Filter>Source Files\native\vulkan</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\dialog\paragraph_dialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mvc\controller.cpp">
+      <Filter>Source Files\mvc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mvc\view.cpp">
+      <Filter>Source Files\mvc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\mvc\view_container.cpp">
+      <Filter>Source Files\mvc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\gui\layout\flow_layout.ipp">
@@ -1807,9 +1828,6 @@
       <Filter>Header Files</Filter>
     </None>
     <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.ipp">
-      <Filter>Header Files</Filter>
-    </None>
-    <None Include="..\..\..\include\neogfx\gui\view\view_container.ipp">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
