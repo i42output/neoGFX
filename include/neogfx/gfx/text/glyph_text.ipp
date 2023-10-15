@@ -187,7 +187,7 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::begin()
     {
-        iExtents = std::nullopt;
+        iExtents = invalid;
         if constexpr (std::is_same_v<iterator, typename container_type::iterator>)
             return container_type::begin();
         else
@@ -202,7 +202,7 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::end()
     {
-        iExtents = std::nullopt;
+        iExtents = invalid;
         if constexpr (std::is_same_v<iterator, typename container_type::iterator>)
             return container_type::end();
         else
@@ -217,7 +217,7 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::reference basic_glyph_text_content<Container, ConstIterator, Iterator>::back()
     {
-        iExtents = std::nullopt;
+        iExtents = invalid;
         return container_type::back();
     }
 
@@ -225,7 +225,7 @@ namespace neogfx
     inline void basic_glyph_text_content<Container, ConstIterator, Iterator>::push_back(const_reference aGlyphChar)
     {
         container_type::push_back(aGlyphChar);
-        iExtents = std::nullopt;
+        iExtents = invalid;
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -233,7 +233,7 @@ namespace neogfx
     {
         container_type::clear();
         iCache.clear();
-        iExtents = std::nullopt;
+        iExtents = invalid;
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -257,7 +257,7 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     inline size basic_glyph_text_content<Container, ConstIterator, Iterator>::extents() const
     {
-        if (iExtents == std::nullopt)
+        if (!iExtents)
             iExtents = extents(begin(), end());
         return *iExtents;
     }

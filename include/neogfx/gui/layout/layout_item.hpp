@@ -205,7 +205,7 @@ namespace neogfx
     public:
         point origin() const final
         {
-            if (iOrigin == std::nullopt)
+            if (!iOrigin)
             {
                 auto& self = as_layout_item();
                 if (!self.is_widget())
@@ -232,7 +232,7 @@ namespace neogfx
         }
         void reset_origin() const final
         {
-            iOrigin = std::nullopt;
+            iOrigin = invalid;
         }
         point position() const final
         {
@@ -463,7 +463,7 @@ namespace neogfx
             }
             else
             {
-                if (iCombinedTransformation == std::nullopt)
+                if (!iCombinedTransformation)
                 {
                     iCombinedTransformation = has_parent_layout_item() ? parent_layout_item().transformation(true) * transformation() : transformation();
                 }
@@ -571,7 +571,7 @@ namespace neogfx
     public:
         void invalidate_combined_transformation() override
         {
-            iCombinedTransformation = std::nullopt;
+            iCombinedTransformation = invalid;
 
             auto& self = as_layout_item();
             if (self.is_layout())
@@ -678,7 +678,7 @@ namespace neogfx
         define_anchor(MaximumSize)
     private:
         string iId;
-        mutable optional_point iOrigin;
-        mutable optional_mat33 iCombinedTransformation;
+        mutable cache<point> iOrigin;
+        mutable cache<mat33> iCombinedTransformation;
     };
 }

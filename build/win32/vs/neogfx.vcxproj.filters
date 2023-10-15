@@ -1203,6 +1203,9 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\mvc\view_container.ipp">
       <Filter>Header Files\mvc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\view.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">

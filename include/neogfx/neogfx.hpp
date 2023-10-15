@@ -83,6 +83,10 @@ namespace neogfx
     using neolib::none;
     using neolib::none_t;
 
+    using neolib::cache;
+    using neolib::invalid;
+    using neolib::clear_cache;
+
     using neolib::any;
     using neolib::any_cast;
 

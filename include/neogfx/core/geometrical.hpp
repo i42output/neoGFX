@@ -102,6 +102,7 @@ namespace neogfx
 
     typedef neolib::optional<logical_coordinates> optional_logical_coordinates;
 
+    // Primarily for 2D use so 3D support limited
     template <typename CoordinateType>
     class basic_delta 
     { 
@@ -112,35 +113,35 @@ namespace neogfx
         typedef CoordinateType coordinate_type;
         // construction
     public:
-        constexpr basic_delta() : dx{}, dy{} {}
-        constexpr basic_delta(coordinate_type dx, coordinate_type dy) : dx{ dx }, dy{ dy } {}
-        constexpr explicit basic_delta(coordinate_type aSquareDelta) : dx{ aSquareDelta }, dy{ aSquareDelta } {}
+        constexpr basic_delta() : dx{}, dy{}, dz{} {}
+        constexpr basic_delta(coordinate_type dx, coordinate_type dy, coordinate_type dz = {}) : dx{ dx }, dy{ dy }, dz{ dz } {}
+        constexpr explicit basic_delta(coordinate_type aSquareDelta) : dx{ aSquareDelta }, dy{ aSquareDelta }, dz{} {}
         template <typename CoordinateType2>
         constexpr basic_delta(const basic_delta<CoordinateType2>& other) :
-            dx{ static_cast<CoordinateType>(other.dx) }, dy{ static_cast<CoordinateType>(other.dy) } {}
+            dx{ static_cast<CoordinateType>(other.dx) }, dy{ static_cast<CoordinateType>(other.dy) }, dz{ static_cast<CoordinateType>(other.dz) } {}
         // operations
     public:
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ dx, dy }; }
-        basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ dx, dy, 0.0 }; }
+        basic_vector<coordinate_type, 3> to_vec3() const { return basic_vector<coordinate_type, 3>{ dx, dy, dz }; }
         auto operator<=>(const basic_delta&) const = default;
         basic_delta& operator+=(coordinate_type s) { dx +=s; dy += s; return *this; }
         basic_delta& operator-=(coordinate_type s) { dx -=s; dy -= s; return *this; }
         basic_delta& operator*=(coordinate_type s) { dx *=s; dy *= s; return *this; }
         basic_delta& operator/=(coordinate_type s) { dx /=s; dy /= s; return *this; }
-        basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; return *this; }
-        basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; return *this; }
-        basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; return *this; }
-        basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; return *this; }
-        basic_delta operator-() const { return basic_delta{ -dx, -dy }; }
-        basic_delta abs() const { return basic_delta{ std::abs(dx), std::abs(dy) }; }
-        basic_delta ceil() const { return basic_delta{ std::ceil(dx), std::ceil(dy) }; }
-        basic_delta floor() const { return basic_delta{ std::floor(dx), std::floor(dy) }; }
-        basic_delta round() const { return basic_delta{ std::round(dx), std::round(dy) }; }
-        basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy) }; }
-        basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy) }; }
-        basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy }; }
-        basic_delta with_dy(coordinate_type dy) const { return basic_delta{ dx, dy }; }
-        coordinate_type magnitude() const { return std::sqrt(dx * dx + dy * dy); }
+        basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; dz += other.dz; return *this; }
+        basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; dz -= other.dz; return *this; }
+        basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; dz *= other.dz; return *this; }
+        basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; dz /= other.dz; return *this; }
+        basic_delta operator-() const { return basic_delta{ -dx, -dy, -dz }; }
+        basic_delta abs() const { return basic_delta{ std::abs(dx), std::abs(dy), std::abs(dz) }; }
+        basic_delta ceil() const { return basic_delta{ std::ceil(dx), std::ceil(dy), std::ceil(dz) }; }
+        basic_delta floor() const { return basic_delta{ std::floor(dx), std::floor(dy), std::floor(dz) }; }
+        basic_delta round() const { return basic_delta{ std::round(dx), std::round(dy), std::round(dz) }; }
+        basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy), std::min(dz, other.dz) }; }
+        basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy), std::max(dz, other.dz) }; }
+        basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy, dz }; }
+        basic_delta with_dy(coordinate_type dy) const { return basic_delta{ dx, dy, dz }; }
+        coordinate_type magnitude() const { return std::sqrt(dx * dx + dy * dy + dz * dz); }
     public:
         template <typename T>
         basic_delta<T> as() const
@@ -151,6 +152,7 @@ namespace neogfx
     public:
         coordinate_type dx;
         coordinate_type dy;
+        coordinate_type dz;
     };
 
     typedef basic_delta<coordinate> delta;
@@ -227,6 +229,7 @@ namespace neogfx
 
     struct bad_size : std::logic_error { bad_size() : std::logic_error{ "neogfx::bad_size" } {} };
 
+    // Primarily for 2D use so 3D support limited
     template <typename CoordinateType>
     class basic_size 
     { 
@@ -239,50 +242,51 @@ namespace neogfx
         typedef basic_delta<dimension_type> delta_type;
         // construction
     public:
-        constexpr basic_size() : cx{}, cy{} {}
+        constexpr basic_size() : cx{}, cy{}, cz{} {}
         template <typename Scalar>
-        constexpr basic_size(const basic_vector<Scalar, 2>& other) : cx{ static_cast<dimension_type>(other.x) }, cy{ static_cast<dimension_type>(other.y) } {}
+        constexpr basic_size(const basic_vector<Scalar, 2>& other) : cx{ static_cast<dimension_type>(other.x) }, cy{ static_cast<dimension_type>(other.y) }, cz{} {}
         template <typename Scalar>
-        constexpr basic_size(const basic_vector<Scalar, 3>& other) : cx{ static_cast<dimension_type>(other.x) }, cy{ static_cast<dimension_type>(other.y) } {}
-        constexpr basic_size(dimension_type cx, dimension_type cy) : cx{ cx }, cy{ cy } {}
-        constexpr explicit basic_size(dimension_type aSquareDimension) : cx{ aSquareDimension }, cy{ aSquareDimension } {}
+        constexpr basic_size(const basic_vector<Scalar, 3>& other) : cx{ static_cast<dimension_type>(other.x) }, cy{ static_cast<dimension_type>(other.y) }, cz{ static_cast<dimension_type>(other.z) } {}
+        constexpr basic_size(dimension_type cx, dimension_type cy, dimension_type cz = {}) : cx{ cx }, cy{ cy }, cz{ cz } {}
+        constexpr explicit basic_size(dimension_type aSquareDimension) : cx{ aSquareDimension }, cy{ aSquareDimension }, cz{} {}
         template <typename CoordinateType2>
         constexpr basic_size(const basic_size<CoordinateType2>& other) :
-            cx{ static_cast<CoordinateType>(other.cx) }, cy{ static_cast<CoordinateType>(other.cy) } {}
-        constexpr basic_size(const basic_delta<CoordinateType>& other) : cx{ other.dx }, cy{ other.dy } {}
+            cx{ static_cast<CoordinateType>(other.cx) }, cy{ static_cast<CoordinateType>(other.cy) }, cz{ static_cast<CoordinateType>(other.cz) } {}
+        constexpr basic_size(const basic_delta<CoordinateType>& other) : cx{ other.dx }, cy{ other.dy }, cz{ other.dz } {}
         // operations
     public:
         basic_vector<dimension_type, 2> to_vec2() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 2>{ cx, cy }; }
-        basic_vector<dimension_type, 3> to_vec3() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
+        basic_vector<dimension_type, 3> to_vec3() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 3>{ cx, cy, cz }; }
         basic_vector<dimension_type, 2> to_vec2_inf() const { return basic_vector<dimension_type, 2>{ cx, cy }; }
-        basic_vector<dimension_type, 3> to_vec3_inf() const { return basic_vector<dimension_type, 3>{ cx, cy, 0.0 }; }
-        delta_type to_delta() const { return delta_type(cx, cy); }
+        basic_vector<dimension_type, 3> to_vec3_inf() const { return basic_vector<dimension_type, 3>{ cx, cy, cz }; }
+        delta_type to_delta() const { return delta_type(cx, cy, cz); }
         bool empty() const { return cx == 0 || cy == 0; }
         auto operator<=>(const basic_size&) const = default;
-        basic_size operator-() const { throw_on_bad_size(*this); return basic_size{ -cx, -cy }; }
-        basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other); cx += other.cx; cy += other.cy; return *this; }
-        basic_size& operator+=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx += other.dx; cy += other.dy; return *this; }
+        basic_size operator-() const { throw_on_bad_size(*this); return basic_size{ -cx, -cy, -cz }; }
+        basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other); cx += other.cx; cy += other.cy; cz += other.cz; return *this; }
+        basic_size& operator+=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx += other.dx; cy += other.dy; cz += other.dz; return *this; }
         basic_size& operator+=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx += amount; cy += amount; return *this; }
-        basic_size& operator-=(const basic_size& other) { throw_on_bad_size(other); cx -= other.cx; cy -= other.cy; return *this; }
-        basic_size& operator-=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx -= other.dx; cy -= other.dy; return *this; }
+        basic_size& operator-=(const basic_size& other) { throw_on_bad_size(other); cx -= other.cx; cy -= other.cy; cz -= other.cz; return *this; }
+        basic_size& operator-=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx -= other.dx; cy -= other.dy; cz -= other.dz; return *this; }
         basic_size& operator-=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx -= amount; cy -= amount; return *this; }
-        basic_size& operator*=(const basic_size& other) { throw_on_bad_size(other); cx *= other.cx; cy *= other.cy; return *this; }
+        basic_size& operator*=(const basic_size& other) { throw_on_bad_size(other); cx *= other.cx; cy *= other.cy; cz *= other.cz; return *this; }
         basic_size& operator*=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx *= amount; cy *= amount; return *this; }
-        basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; return *this; }
+        basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; cz /= other.cz; return *this; }
         basic_size& operator/=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx /= amount; cy /= amount; return *this; }
-        basic_size ceil() const { return basic_size{ !cx_inf() ? std::ceil(cx) : cx, !cy_inf() ? std::ceil(cy) : cy }; }
-        basic_size floor() const { return basic_size{ !cx_inf() ? std::floor(cx) : cx, !cy_inf() ? std::floor(cy) : cy }; }
-        basic_size round() const { return basic_size{ !cx_inf() ? std::round(cx) : cx, !cy_inf() ? std::round(cy) : cy }; }
-        basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy) }; }
-        basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy) }; }
+        basic_size ceil() const { return basic_size{ !cx_inf() ? std::ceil(cx) : cx, !cy_inf() ? std::ceil(cy) : cy, !cz_inf() ? std::ceil(cz) : cz }; }
+        basic_size floor() const { return basic_size{ !cx_inf() ? std::floor(cx) : cx, !cy_inf() ? std::floor(cy) : cy, !cz_inf() ? std::floor(cz) : cz }; }
+        basic_size round() const { return basic_size{ !cx_inf() ? std::round(cx) : cx, !cy_inf() ? std::round(cy) : cy, !cz_inf() ? std::round(cz) : cz }; }
+        basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy), std::min(cz, other.cz) }; }
+        basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy), std::max(cz, other.cz) }; }
         bool less_than(const basic_size& other) const { return cx < other.cx && cy < other.cy; };
         bool less_than_or_equal(const basic_size& other) const { return cx <= other.cx && cy <= other.cy; };
         bool greater_than(const basic_size& other) const { return cy > other.cy && cy > other.cy; };
         bool greater_than_or_equal(const basic_size& other) const { return cy >= other.cy && cy >= other.cy; };
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
-        basic_size with_cx(dimension_type d) const { return basic_size{ d, cy }; }
-        basic_size with_cy(dimension_type d) const { return basic_size{ cx, d }; }
-        basic_size aspect_ratio() const { return cx >= cy ? basic_size{ 1.0, cy / cx } : basic_size{ cx / cy, 1.0 }; }
+        basic_size with_cx(dimension_type d) const { return basic_size{ d, cy, cz }; }
+        basic_size with_cy(dimension_type d) const { return basic_size{ cx, d, cz }; }
+        basic_size with_cz(dimension_type d) const { return basic_size{ cx, cy, d }; }
+        basic_size aspect_ratio() const { return cx >= cy ? basic_size{ 1.0, cy / cx, cz } : basic_size{ cx / cy, 1.0, cz }; }
         basic_size with_aspect_ratio_min(const basic_size& aspectRatio) const { return basic_size{ std::min(cx, cy) } * aspectRatio; };
         basic_size with_aspect_ratio_max(const basic_size& aspectRatio) const { return basic_size{ std::max(cx, cy) } * aspectRatio; };
     public:
@@ -294,8 +298,9 @@ namespace neogfx
     public:
         bool cx_inf() const { return cx == max_dimension(); }
         bool cy_inf() const { return cy == max_dimension(); }
+        bool cz_inf() const { return cz == max_dimension(); }
     private:
-        void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx_inf()) && (rhs.cy != 0.0 && cy_inf())) throw bad_size(); }
+        void throw_on_bad_size(const basic_size& rhs) const { if ((rhs.cx != 0.0 && cx_inf()) && (rhs.cy != 0.0 && cy_inf()) && (rhs.cz != 0.0 && cz_inf())) throw bad_size(); }
         // helpers
     public:
         static constexpr dimension_type max_dimension() { return std::numeric_limits<dimension_type>::infinity(); }
@@ -304,6 +309,7 @@ namespace neogfx
     public:
         dimension_type cx;
         dimension_type cy;
+        dimension_type cz;
     };
 
     typedef basic_size<coordinate> size;
@@ -378,6 +384,7 @@ namespace neogfx
         return nearly_equal(lhs.cx, rhs.cx, epsilon) && nearly_equal(lhs.cy, rhs.cy, epsilon);
     }
 
+    // Primarily for 2D use so 3D support limited
     template <typename CoordinateType>
     class basic_point
     {
@@ -419,18 +426,18 @@ namespace neogfx
         explicit operator basic_delta<coordinate_type>() const { return to_delta(); }
         explicit operator basic_size<coordinate_type>() const { return to_size(); }
         auto operator<=>(const basic_point&) const = default;
-        basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; return *this; }
-        basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; return *this; }
-        basic_point& operator*=(const basic_point& other) { x *= other.x; y *= other.y; return *this; }
-        basic_point& operator/=(const basic_point& other) { x /= other.x; y /= other.y; return *this; }
+        basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; z += other.z; return *this; }
+        basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
+        basic_point& operator*=(const basic_point& other) { x *= other.x; y *= other.y; z *= other.z; return *this; }
+        basic_point& operator/=(const basic_point& other) { x /= other.x; y /= other.y; z /= other.z; return *this; }
         basic_point& operator+=(coordinate_type amount) { x += amount; y += amount; return *this; }
         basic_point& operator-=(coordinate_type amount) { x -= amount; y -= amount; return *this; }
         basic_point& operator*=(coordinate_type amount) { x *= amount; y *= amount; return *this; }
         basic_point& operator/=(coordinate_type amount) { x /= amount; y /= amount; return *this; }
-        basic_point& operator+=(const basic_delta<coordinate_type>& other) { x += static_cast<coordinate_type>(other.dx); y += static_cast<coordinate_type>(other.dy); return *this; }
-        basic_point& operator-=(const basic_delta<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.dx); y -= static_cast<coordinate_type>(other.dy); return *this; }
-        basic_point& operator+=(const basic_size<coordinate_type>& other) { x += static_cast<coordinate_type>(other.cx); y += static_cast<coordinate_type>(other.cy); return *this; }
-        basic_point& operator-=(const basic_size<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.cx); y -= static_cast<coordinate_type>(other.cy); return *this; }
+        basic_point& operator+=(const basic_delta<coordinate_type>& other) { x += static_cast<coordinate_type>(other.dx); y += static_cast<coordinate_type>(other.dy); z += static_cast<coordinate_type>(other.dz); return *this; }
+        basic_point& operator-=(const basic_delta<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.dx); y -= static_cast<coordinate_type>(other.dy); z -= static_cast<coordinate_type>(other.dz); return *this; }
+        basic_point& operator+=(const basic_size<coordinate_type>& other) { x += static_cast<coordinate_type>(other.cx); y += static_cast<coordinate_type>(other.cy); z += static_cast<coordinate_type>(other.cz); return *this; }
+        basic_point& operator-=(const basic_size<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.cx); y -= static_cast<coordinate_type>(other.cy); z -= static_cast<coordinate_type>(other.cz); return *this; }
         basic_point operator-() const { return basic_point{ -x, -y, -z }; }
         basic_point abs() const { return basic_point{ std::abs(x), std::abs(y), std::abs(z) }; }
         basic_point ceil() const { return basic_point{ std::ceil(x), std::ceil(y), std::ceil(z) }; }
@@ -746,6 +753,7 @@ namespace neogfx
         return ret;
     }
 
+    // Primarily for 2D use so 3D support limited
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem = logical_coordinate_system::AutomaticGui>
     class basic_rect :
         public basic_point<CoordinateType>,
@@ -765,8 +773,10 @@ namespace neogfx
     public:
         using point_type::x;
         using point_type::y;
+        using point_type::z;
         using size_type::cx;
         using size_type::cy;
+        using size_type::cz;
         // constants
     public:
         static constexpr bool gui = is_gui<CoordinateSystem>::value;
@@ -811,10 +821,10 @@ namespace neogfx
         coordinate_type top() const { if constexpr (gui) return y; else return (y + cy) - epsilon.cy; }
         coordinate_type right() const { return (x + cx) - epsilon.cx; }
         coordinate_type bottom() const { if constexpr (gui) return (y + cy) - epsilon.cy; else return y; }
-        point_type top_left() const { return point_type(left(), top()); }
-        point_type top_right() const { return point_type(right(), top()); }
-        point_type bottom_left() const { return point_type(left(), bottom()); }
-        point_type bottom_right() const { return point_type(right(), bottom()); }
+        point_type top_left() const { return point_type(left(), top(), z); }
+        point_type top_right() const { return point_type(right(), top(), z); }
+        point_type bottom_left() const { return point_type(left(), bottom(), z); }
+        point_type bottom_right() const { return point_type(right(), bottom(), z); }
         dimension_type width() const { return cx; }
         dimension_type height() const { return cy; }
         bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
@@ -991,6 +1001,10 @@ namespace neogfx
         basic_vector<coordinate_type, 4> to_vec4() const
         {
             return basic_vector<coordinate_type, 4>{ top_left().x, top_left().y, bottom_right().x, bottom_right().y };
+        }
+        quad to_quad() const
+        {
+            return quad{ top_left().to_vec3(), top_right().to_vec3(), bottom_right().to_vec3(), bottom_left().to_vec3() };
         }
     public:
         template <typename T>

@@ -240,7 +240,7 @@ namespace neogfx
             SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
             iHash = result;
         }
-        return *iHash;
+        return iHash.value();
     }
 
     dimension image::dpi_scale_factor() const

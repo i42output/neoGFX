@@ -417,7 +417,7 @@ namespace neogfx
         void set_baseline(scalar aBaseline) override;
     private:
         font_cache iCache;
-        mutable std::optional<neogfx::size> iExtents;
+        mutable cache<neogfx::size> iExtents;
         vector<size_type> iLineBreaks;
         font_id iMajorFont;
         scalar iBaseline;

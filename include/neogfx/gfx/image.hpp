@@ -97,7 +97,7 @@ namespace neogfx
         neogfx::color_space iColorSpace;
         neogfx::color_format iColorFormat;
         data_type iData;
-        mutable std::optional<data_type> iHash;
+        mutable cache<data_type> iHash;
         texture_sampling iSampling;
         neogfx::size iSize;
     };

@@ -112,7 +112,7 @@ namespace neogfx
         void set_position(point_type aPosition) 
         { 
             iPosition = aPosition; 
-            iBoundingRect = std::nullopt;
+            iBoundingRect = invalid;
         }
         const sub_paths_type& sub_paths() const 
         { 
@@ -193,7 +193,7 @@ namespace neogfx
             }
             if (iSubPaths.back().empty() || iSubPaths.back().back() != aPoint)
                 iSubPaths.back().push_back(aPoint);
-            iBoundingRect = std::nullopt;
+            iBoundingRect = invalid;
         }
         void line_to(coordinate_type aX, coordinate_type aY)
         {
@@ -216,7 +216,7 @@ namespace neogfx
                     else
                         point.y += aDelta.dy;
                 }
-            iBoundingRect = std::nullopt;
+            iBoundingRect = invalid;
         }
         void inflate(coordinate_delta_type aDeltaX, coordinate_delta_type aDeltaY)
         {
@@ -239,7 +239,7 @@ namespace neogfx
         std::optional<point_type> iPointFrom;
         sub_paths_type iSubPaths;
         sub_paths_size_type iLineCountHint;
-        mutable std::optional<std::tuple<bool, size_type, mesh_type>> iBoundingRect;
+        mutable cache<std::tuple<bool, size_type, mesh_type>> iBoundingRect;
     };
 }
 

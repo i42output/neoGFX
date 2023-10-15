@@ -54,7 +54,7 @@ namespace neogfx
         public:
             const i_shader_uniform& uniform() const
             {
-                if (iId == std::nullopt)
+                if (!iId)
                 {
                     auto existing = iParent.find_uniform(iName);
                     if (existing != no_uniform)
@@ -78,7 +78,7 @@ namespace neogfx
             shader<Base>& iParent;
             string iName;
             bool iShared;
-            mutable std::optional<shader_uniform_id> iId;
+            mutable cache<shader_uniform_id> iId;
         };
     public:
         shader(shader_type aType, std::string const& aName, bool aEnabled = true) : 
@@ -91,7 +91,7 @@ namespace neogfx
         }
         ~shader()
         {
-            if (iHandle != std::nullopt)
+            if (iHandle)
                 service<i_rendering_engine>().destroy_shader_object(*iHandle);
         }
     public:
@@ -111,7 +111,7 @@ namespace neogfx
         {
             if (!aProgram.is_first_in_stage(*this))
                 return aProgram.first_in_stage(type()).handle(aProgram);
-            if (iHandle == std::nullopt)
+            if (!iHandle)
                 iHandle = service<i_rendering_engine>().create_shader_object(type());
             if (*iHandle == nullptr)
                 throw failed_to_create_shader_program("Failed to create shader object");
@@ -391,7 +391,7 @@ namespace neogfx
     private:
         shader_type iType;
         string iName;
-        mutable std::optional<void*> iHandle;
+        mutable cache<void*> iHandle;
         bool iEnabled;
         bool iDirty;
         uniform_list iUniforms;

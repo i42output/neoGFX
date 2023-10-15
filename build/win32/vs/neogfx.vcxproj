@@ -507,6 +507,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tree_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.ipp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp" />
