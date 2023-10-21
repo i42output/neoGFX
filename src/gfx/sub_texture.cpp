@@ -174,12 +174,42 @@ namespace neogfx
 
     color sub_texture::get_pixel(const point& aPosition) const
     {
+        if (is_empty())
+            throw texture_empty();
+        if (aPosition.x < 0.0 || aPosition.y < 0.0 || aPosition.x >= extents().cx || aPosition.y >= extents().cy)
+            return color{};
         return native_texture().get_pixel(aPosition + atlas_location().position());
     }
 
-    int32_t sub_texture::bind(const std::optional<uint32_t>& aTextureUnit) const
+    i_vector<texture_line_segment> const& sub_texture::intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize, scalar aTolerance) const
     {
+        auto existingResult = iIntersectionResultCache.find(std::make_tuple(aLine, aBoundingBox, aSampleSize, aTolerance));
+        if (existingResult != iIntersectionResultCache.end())
+            return existingResult->second;
+
+        auto& result = iIntersectionResultCache[std::make_tuple(aLine, aBoundingBox, aSampleSize, aTolerance)];
+        result = native_texture().intersection(texture_line_segment{ aLine.v1 + atlas_location().position().to_vec2(), aLine.v2 + atlas_location().position().to_vec2() }, 
+            aBoundingBox + atlas_location().position(), aSampleSize, aTolerance);
+        for (auto& segment : result)
+        {
+            segment.v1 -= atlas_location().position().to_vec2();
+            segment.v2 -= atlas_location().position().to_vec2();
+        }
+        return result;
+    }
+
+    void sub_texture::bind(std::uint32_t aTextureUnit) const
+    {
+        if (is_empty())
+            throw texture_empty();
         return native_texture().bind(aTextureUnit);
+    }
+
+    void sub_texture::unbind() const
+    {
+        if (is_empty())
+            throw texture_empty();
+        return native_texture().unbind();
     }
 
     intptr_t sub_texture::native_handle() const

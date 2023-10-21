@@ -31,6 +31,7 @@
 #include <neogfx/gui/layout/i_layout_item.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
+#include <neogfx/gui/widget/view.hpp>
 
 namespace neogfx
 {
@@ -166,6 +167,8 @@ namespace neogfx
         virtual widget_part part(const point& aPosition) const = 0;
         virtual widget_part hit_test(const point& aPosition) const = 0;
     public:
+        virtual neogfx::view const& view() const = 0;
+        virtual neogfx::view& view() = 0;
         virtual layer_t render_layer() const = 0;
         virtual void set_render_layer(const std::optional<layer_t>& aLayer) = 0;
         virtual bool can_update() const = 0;

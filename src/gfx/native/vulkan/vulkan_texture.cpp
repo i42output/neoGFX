@@ -485,7 +485,13 @@ namespace neogfx
     }
 
     template <typename T>
-    int32_t vulkan_texture<T>::bind(const std::optional<uint32_t>& aTextureUnit) const
+    void vulkan_texture<T>::bind(std::uint32_t aTextureUnit) const
+    {
+        TODO;
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::unbind() const
     {
         TODO;
     }

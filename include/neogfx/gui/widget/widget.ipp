@@ -1120,6 +1120,18 @@ namespace neogfx
     }
 
     template <typename Interface>
+    view const& widget<Interface>::view() const
+    {
+        return iView;
+    }
+
+    template <typename Interface>
+    view& widget<Interface>::view()
+    {
+        return iView;
+    }
+
+    template <typename Interface>
     layer_t widget<Interface>::render_layer() const
     {
         if (iRenderLayer != std::nullopt)

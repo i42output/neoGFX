@@ -44,33 +44,35 @@ namespace neogfx
         ~texture();
         // operations
     public:
-        texture_id id() const override;
-        i_string const& uri() const override;
-        rect const& part() const override;
-        texture_type type() const override;
-        bool is_render_target() const override;
-        const i_render_target& as_render_target() const override;
-        i_render_target& as_render_target() override;
-        const i_sub_texture& as_sub_texture() const override;
-        dimension dpi_scale_factor() const override;
-        neogfx::color_space color_space() const override;
-        texture_sampling sampling() const override;
-        uint32_t samples() const override;
-        texture_data_format data_format() const override;
-        texture_data_type data_type() const override;
-        bool is_empty() const override;
-        size extents() const override;
-        size storage_extents() const override;
-        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
-        void set_pixels(const i_image& aImage) override;
-        void set_pixels(const i_image& aImage, const rect& aImagePart) override;
-        void set_pixel(const point& aPosition, const color& aColor) override;
-        color get_pixel(const point& aPosition) const override;
+        texture_id id() const final;
+        i_string const& uri() const final;
+        rect const& part() const final;
+        texture_type type() const final;
+        bool is_render_target() const final;
+        const i_render_target& as_render_target() const final;
+        i_render_target& as_render_target() final;
+        const i_sub_texture& as_sub_texture() const final;
+        dimension dpi_scale_factor() const final;
+        neogfx::color_space color_space() const final;
+        texture_sampling sampling() const final;
+        uint32_t samples() const final;
+        texture_data_format data_format() const final;
+        texture_data_type data_type() const final;
+        bool is_empty() const final;
+        size extents() const final;
+        size storage_extents() const final;
+        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) final;
+        void set_pixels(const i_image& aImage) final;
+        void set_pixels(const i_image& aImage, const rect& aImagePart) final;
+        void set_pixel(const point& aPosition, const color& aColor) final;
+        color get_pixel(const point& aPosition) const final;
+        i_vector<texture_line_segment> const& intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize = { 1.0, 1.0 }, scalar aTolerance = 0.0) const final;
     public:
-        int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
+        void bind(std::uint32_t aTextureUnit) const final;
+        void unbind() const final;
     public:
-        intptr_t native_handle() const override;
-        i_texture& native_texture() const override;
+        intptr_t native_handle() const final;
+        i_texture& native_texture() const final;
         // attributes
     private:
         ref_ptr<i_texture> iNativeTexture;

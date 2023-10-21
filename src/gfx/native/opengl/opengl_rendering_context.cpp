@@ -1741,6 +1741,35 @@ namespace neogfx
             return result;
         };
 
+        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar)
+        {
+            static optional_mat44f const italicTransformGui = mat44f{
+                    { 1.0f, 0.0f, 0.0f, 0.0f },
+                    { -0.25f, 1.0f, 0.0f, 0.0f },
+                    { 0.0f, 0.0f, 1.0f, 0.0f },
+                    { 0.0f, 0.0f, 0.0f, 1.0f } };
+            static optional_mat44f const italicTransformGame = mat44f{
+                    { 1.0f, 0.0f, 0.0f, 0.0f },
+                    { 0.25f, 1.0f, 0.0f, 0.0f },
+                    { 0.0f, 0.0f, 1.0f, 0.0f },
+                    { 0.0f, 0.0f, 0.0f, 1.0f } };
+            auto const& italicTransform = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
+                optional_mat44f{} :
+                logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
+                italicTransformGui : italicTransformGame;
+
+            if (!italicTransform)
+                return glyphChar.shape;
+
+            thread_local quadf_2d transformedQuad;
+            vec2f centeringTranslation;
+            transformedQuad = center_quad(glyphChar.shape, centeringTranslation);
+            for (auto& v : transformedQuad)
+                v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
+
+            return transformedQuad;
+        };
+
         std::size_t normalGlyphCount = 0;
 
         optional_rect filterRegion;
@@ -1873,32 +1902,7 @@ namespace neogfx
                         auto const& glyphTexture = glyphText.glyph(glyphChar);
                         auto const& glyphFont = glyphText.glyph_font(glyphChar);
 
-                        static optional_mat44f const italicTransformGui = mat44f{
-                                { 1.0f, 0.0f, 0.0f, 0.0f },
-                                { -0.25f, 1.0f, 0.0f, 0.0f },
-                                { 0.0f, 0.0f, 1.0f, 0.0f },
-                                { 0.0f, 0.0f, 0.0f, 1.0f } };
-                        static optional_mat44f const italicTransformGame = mat44f{
-                                { 1.0f, 0.0f, 0.0f, 0.0f },
-                                { 0.25f, 1.0f, 0.0f, 0.0f },
-                                { 0.0f, 0.0f, 1.0f, 0.0f },
-                                { 0.0f, 0.0f, 0.0f, 1.0f } };
-                        auto const& italicTransform = ((glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic) ?
-                            optional_mat44f{} :
-                            logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ?
-                                italicTransformGui : italicTransformGame;
-    
-                        auto const& shapeQuad = [&]()
-                        {
-                            if (!italicTransform)
-                                return glyphChar.shape;
-                            thread_local quadf_2d transformedQuad;
-                            vec2f centeringTranslation;
-                            transformedQuad = center_quad(glyphChar.shape, centeringTranslation);
-                            for (auto& v : transformedQuad)
-                                v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
-                            return transformedQuad;
-                        }();
+                        auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
 
                         auto const& glyphQuad = quad{
                                 (glyphChar.cell[0] + shapeQuad[0]).round(),
@@ -1969,18 +1973,71 @@ namespace neogfx
                     {
                         auto& glyphText = *drawOp.glyphText;
                         auto& glyphChar = *drawOp.glyphChar;
-                        auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
-                            drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+
                         if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                         {
-                            // todo: intersection of underline with shape should be clipped?
+                            auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
+                                drawOp.appearance->ink() : drawOp.appearance->effect()->color();
+
+                            auto const& glyphFont = glyphText.glyph_font(glyphChar);
+                            auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
+
                             auto const& majorFont = glyphText.major_font();
                             auto const yUnderline = std::round(majorFont.native_font_face().underline_position());
                             auto const cyUnderline = std::ceil(majorFont.native_font_face().underline_thickness());
-                            draw_line(
-                                drawOp.point + vec3{ glyphChar.cell[0].x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
-                                drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
-                                pen{ ink, cyUnderline });
+
+                            if (drawOp.appearance->smart_underline() &&
+                                !is_whitespace(glyphChar) && !is_emoji(glyphChar) &&
+                                (glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic &&
+                                logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+                            {
+                                auto const& glyphTexture = glyphText.glyph(glyphChar);
+
+                                auto const& testLine = texture_line_segment{
+                                    { -shapeQuad[0].x, shapeQuad[0].y - (glyphText.baseline() - yUnderline) },
+                                    { -shapeQuad[0].x + glyphChar.cell[1].x - glyphChar.cell[0].x, shapeQuad[0].y - (glyphText.baseline() - yUnderline)}};
+
+                                thread_local vector<texture_line_segment> lineSegments;
+                                lineSegments = glyphTexture.texture().intersection(testLine, rect{ point{}, glyphTexture.texture().extents() },
+                                    vec2{ std::max<scalar>( 3.0_dip, drawOp.appearance->effect() ? drawOp.appearance->effect().value().width() : 0.0), 1.0});
+                                for (auto& segment : lineSegments)
+                                {
+                                    segment.v1.x += (shapeQuad[0].x + glyphChar.cell[0].x);
+                                    segment.v2.x += (shapeQuad[0].x + glyphChar.cell[0].x);
+                                    /// @todo apply any transformation to the line segment
+                                }
+                                if (lineSegments.empty())
+                                    draw_line(
+                                        drawOp.point + vec3{ glyphChar.cell[0].x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
+                                        drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                        pen{ ink, cyUnderline });
+                                else
+                                {
+                                    auto lineSegment = lineSegments.begin();
+                                    for (scalar x = glyphChar.cell[0].x; lineSegment != lineSegments.end() && x < glyphChar.cell[1].x;)
+                                    {
+                                        draw_line(
+                                            drawOp.point + vec3{ x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
+                                            drawOp.point + vec3{ lineSegment->v1.x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                            pen{ ink, cyUnderline });
+                                        x = lineSegment->v2.x;
+                                        if (++lineSegment == lineSegments.end())
+                                        {
+                                            draw_line(
+                                                drawOp.point + vec3{ x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
+                                                drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                                pen{ ink, cyUnderline });
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                draw_line(
+                                    drawOp.point + vec3{ glyphChar.cell[0].x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
+                                    drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                    pen{ ink, cyUnderline });
+                            }
                         }
                     }
                 }

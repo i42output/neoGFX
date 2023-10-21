@@ -412,6 +412,7 @@ namespace neogfx
         typedef text_format abstract_type; // todo
     public:
         text_format() :
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -420,6 +421,7 @@ namespace neogfx
         text_format(text_format const& aOther) :
             iInk{ aOther.iInk },
             iPaper{ aOther.iPaper },
+            iSmartUnderline{ aOther.iSmartUnderline },
             iIgnoreEmoji{ aOther.iIgnoreEmoji },
             iEffect{ aOther.iEffect },
             iOnlyCalculateEffect{ aOther.iOnlyCalculateEffect },
@@ -430,6 +432,7 @@ namespace neogfx
         text_format(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -440,6 +443,7 @@ namespace neogfx
         text_format(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -449,6 +453,7 @@ namespace neogfx
         template <typename InkType>
         text_format(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -458,6 +463,7 @@ namespace neogfx
         template <typename InkType>
         text_format(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -468,6 +474,7 @@ namespace neogfx
         text_format(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -476,6 +483,7 @@ namespace neogfx
         template <typename InkType>
         text_format(InkType const& aInk) :
             iInk{ aInk },
+            iSmartUnderline{ true },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -484,13 +492,13 @@ namespace neogfx
     public:
         bool operator==(text_format const& aRhs) const noexcept
         {
-            return std::forward_as_tuple(ink(), paper(), ignore_emoji(), effect()) ==
-                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.ignore_emoji(), aRhs.effect());
+            return std::forward_as_tuple(ink(), paper(), smart_underline(), ignore_emoji(), effect()) ==
+                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.smart_underline(), aRhs.ignore_emoji(), aRhs.effect());
         }
         auto operator<=>(text_format const& aRhs) const noexcept
         {
-            return std::forward_as_tuple(ink(), paper(), ignore_emoji(), effect()) <=>
-                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.ignore_emoji(), aRhs.effect());
+            return std::forward_as_tuple(ink(), paper(), smart_underline(), ignore_emoji(), effect()) <=>
+                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.smart_underline(), aRhs.ignore_emoji(), aRhs.effect());
         }
     public:
         text_color const& ink() const
@@ -508,6 +516,14 @@ namespace neogfx
         void set_paper(optional_text_color const& aPaper)
         {
             iPaper = aPaper;
+        }
+        bool smart_underline() const
+        {
+            return iSmartUnderline;
+        }
+        void set_smart_underline(bool aSmartUnderline)
+        {
+            iSmartUnderline = aSmartUnderline;
         }
         bool ignore_emoji() const
         {
@@ -540,11 +556,17 @@ namespace neogfx
     public:
         text_format with_ink(text_color const& aInk) const
         {
-            return text_format{ aInk, iPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+            return text_format{ aInk, iPaper, iEffect }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
         }
         text_format with_paper(optional_text_color const& aPaper) const
         {
-            return text_format{ iInk, aPaper, iEffect }.with_emoji_ignored(ignore_emoji());
+            return text_format{ iInk, aPaper, iEffect }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
+        }
+        text_format with_smart_underline(bool aSmartUnderline) const
+        {
+            auto result = *this;
+            result.set_smart_underline(aSmartUnderline);
+            return result;
         }
         text_format with_emoji_ignored(bool aIgnored) const
         {
@@ -554,7 +576,7 @@ namespace neogfx
         }
         text_format with_effect(optional_text_effect const& aEffect) const
         {
-            return text_format{ iInk, iPaper, aEffect }.with_emoji_ignored(ignore_emoji());
+            return text_format{ iInk, iPaper, aEffect }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
         }
         text_format with_alpha(color::component aAlpha) const
         {
@@ -565,7 +587,7 @@ namespace neogfx
                     optional_text_color{},
                 iEffect != std::nullopt ?
                     iEffect->with_alpha(aAlpha) :
-                    optional_text_effect{} }.with_emoji_ignored(ignore_emoji());
+                    optional_text_effect{} }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
         }
         text_format with_alpha(double aAlpha) const
         {
@@ -586,6 +608,7 @@ namespace neogfx
     private:
         text_color iInk;
         optional_text_color iPaper;
+        bool iSmartUnderline;
         bool iIgnoreEmoji;
         optional_text_effect iEffect;
         bool iOnlyCalculateEffect;
@@ -603,6 +626,8 @@ namespace neogfx
         aStream << aTextFormat.paper();
         aStream << ",";
         aStream << aTextFormat.effect();
+        aStream << ",";
+        aStream << aTextFormat.smart_underline();
         aStream << ",";
         aStream << aTextFormat.ignore_emoji();
         aStream << "]";
@@ -624,6 +649,9 @@ namespace neogfx
         optional_text_effect textEffect;
         aStream >> textEffect;
         aTextFormat.set_effect(textEffect);
+        bool smartUnderline;
+        aStream >> smartUnderline;
+        aTextFormat.set_smart_underline(smartUnderline);
         bool ignoreEmoji;
         aStream >> ignoreEmoji;
         aTextFormat.set_ignore_emoji(ignoreEmoji);

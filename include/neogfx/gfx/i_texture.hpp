@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neolib/core/i_vector.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/game/i_ecs.hpp>
@@ -69,6 +70,16 @@ namespace neogfx
     class i_sub_texture;
     class i_image;
 
+    struct texture_line_segment
+    {
+        vec2 v1;
+        vec2 v2;
+
+        auto operator<=>(texture_line_segment const&) const = default;
+
+        using abstract_type = texture_line_segment;
+    };
+
     class i_texture : public i_reference_counted
     {
     public:
@@ -101,8 +112,10 @@ namespace neogfx
         virtual void set_pixels(const i_image& aImage, const rect& aImagePart) = 0;
         virtual void set_pixel(const point& aPosition, const color& aColor) = 0;
         virtual color get_pixel(const point& aPosition) const = 0;
+        virtual i_vector<texture_line_segment> const& intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize = { 1.0, 1.0 }, scalar aTolerance = 0.0) const = 0;
     public:
-        virtual int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const = 0;
+        virtual void bind(std::uint32_t aTextureUnit) const = 0;
+        virtual void unbind() const = 0;
     public:
         virtual intptr_t native_handle() const = 0;
         virtual i_texture& native_texture() const = 0;

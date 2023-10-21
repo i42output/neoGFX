@@ -131,7 +131,7 @@ namespace neogfx
         basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; dz += other.dz; return *this; }
         basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; dz -= other.dz; return *this; }
         basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; dz *= other.dz; return *this; }
-        basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; dz /= other.dz; return *this; }
+        basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; if (other.dz != static_cast<coordinate_type>(0.0)) dz /= other.dz; return *this; }
         basic_delta operator-() const { return basic_delta{ -dx, -dy, -dz }; }
         basic_delta abs() const { return basic_delta{ std::abs(dx), std::abs(dy), std::abs(dz) }; }
         basic_delta ceil() const { return basic_delta{ std::ceil(dx), std::ceil(dy), std::ceil(dz) }; }
@@ -271,7 +271,7 @@ namespace neogfx
         basic_size& operator-=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx -= amount; cy -= amount; return *this; }
         basic_size& operator*=(const basic_size& other) { throw_on_bad_size(other); cx *= other.cx; cy *= other.cy; cz *= other.cz; return *this; }
         basic_size& operator*=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx *= amount; cy *= amount; return *this; }
-        basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; cz /= other.cz; return *this; }
+        basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; if (other.cz != static_cast<dimension_type>(0.0)) cz /= other.cz; return *this; }
         basic_size& operator/=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx /= amount; cy /= amount; return *this; }
         basic_size ceil() const { return basic_size{ !cx_inf() ? std::ceil(cx) : cx, !cy_inf() ? std::ceil(cy) : cy, !cz_inf() ? std::ceil(cz) : cz }; }
         basic_size floor() const { return basic_size{ !cx_inf() ? std::floor(cx) : cx, !cy_inf() ? std::floor(cy) : cy, !cz_inf() ? std::floor(cz) : cz }; }
@@ -429,7 +429,7 @@ namespace neogfx
         basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; z += other.z; return *this; }
         basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
         basic_point& operator*=(const basic_point& other) { x *= other.x; y *= other.y; z *= other.z; return *this; }
-        basic_point& operator/=(const basic_point& other) { x /= other.x; y /= other.y; z /= other.z; return *this; }
+        basic_point& operator/=(const basic_point& other) { x /= other.x; y /= other.y; if (other.z != static_cast<coordinate_type>(0.0)) z /= other.z; return *this; }
         basic_point& operator+=(coordinate_type amount) { x += amount; y += amount; return *this; }
         basic_point& operator-=(coordinate_type amount) { x -= amount; y -= amount; return *this; }
         basic_point& operator*=(coordinate_type amount) { x *= amount; y *= amount; return *this; }

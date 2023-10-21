@@ -55,13 +55,13 @@ namespace neogfx
                 {
                     if ((base_type::cell_meta(aIndex).selection & item_cell_selection_flags::Current) == item_cell_selection_flags::Current)
                     {
-                        auto backgroundColor = iDropList.view().palette_color(color_role::Void);
-                        if (backgroundColor == iDropList.view().background_color())
+                        auto backgroundColor = iDropList.list_view().palette_color(color_role::Void);
+                        if (backgroundColor == iDropList.list_view().background_color())
                             backgroundColor = backgroundColor.shaded(0x20);
                         return backgroundColor;
                     }
                     else
-                        return iDropList.view().palette_color(color_role::AlternateBase);
+                        return iDropList.list_view().palette_color(color_role::AlternateBase);
                 }
             }
             return {};
@@ -100,8 +100,8 @@ namespace neogfx
         drop_list_popup(drop_list& aDropList);
         ~drop_list_popup();
     public:
-        const drop_list_view& view() const;
-        drop_list_view& view();
+        const drop_list_view& list_view() const;
+        drop_list_view& list_view();
     protected:
         color frame_color() const override;
     protected:
@@ -220,7 +220,7 @@ namespace neogfx
         public:
             bool view_created() const;
             bool view_visible() const;
-            drop_list_view& view() const;
+            drop_list_view& list_view() const;
             dimension effective_frame_width() const;
         public:
             void show_view();
@@ -267,7 +267,7 @@ namespace neogfx
         void show_view();
         void hide_view();
         void close_view();
-        drop_list_view& view() const;
+        drop_list_view& list_view() const;
         void accept_selection();
         void cancel_selection(bool aClearInput = false);
         void cancel_and_restore_selection(bool aOnlyRestoreIfViewCreated = false);

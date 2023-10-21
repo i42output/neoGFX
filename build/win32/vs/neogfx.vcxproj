@@ -552,6 +552,7 @@
     <ClInclude Include="..\..\..\src\app\native\windows_drag_drop.hpp" />
     <ClInclude Include="..\..\..\src\audio\3rdparty\miniaudio\miniaudio.h" />
     <ClInclude Include="..\..\..\src\gfx\native\i_native_texture.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\native_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_error.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_helpers.hpp" />
@@ -646,6 +647,7 @@
     <ClCompile Include="..\..\..\src\gfx\hsl_color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\hsv_color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\image.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\native\native_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_helpers.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_renderer.cpp" />
@@ -694,7 +696,12 @@
     <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\vertical_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\mvc\controller.cpp" />
-    <ClCompile Include="..\..\..\src\gui\mvc\view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\mvc\view.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)mvc_view.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)mvc_view.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)mvc_view.obj</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)mvc_view.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\mvc\view_container.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
@@ -743,6 +750,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tool_title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_surface.cpp" />

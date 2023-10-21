@@ -133,16 +133,16 @@ namespace neogfx
 
     drop_list_popup::~drop_list_popup()
     {
-        if (service<i_mouse>().is_mouse_grabbed_by(view()))
-            service<i_mouse>().ungrab_mouse(view());
+        if (service<i_mouse>().is_mouse_grabbed_by(list_view()))
+            service<i_mouse>().ungrab_mouse(list_view());
     }
 
-    const drop_list_view& drop_list_popup::view() const
+    const drop_list_view& drop_list_popup::list_view() const
     {
         return iView;
     }
 
-    drop_list_view& drop_list_popup::view()
+    drop_list_view& drop_list_popup::list_view()
     {
         return iView;
     }
@@ -171,17 +171,17 @@ namespace neogfx
         if (aVisible && !visible())
         {
             update_placement();
-            if (!service<i_keyboard>().is_keyboard_grabbed_by(view()))
-                service<i_keyboard>().grab_keyboard(view());
-            if (!service<i_mouse>().is_mouse_grabbed_by(view()))
-                service<i_mouse>().grab_mouse(view());
+            if (!service<i_keyboard>().is_keyboard_grabbed_by(list_view()))
+                service<i_keyboard>().grab_keyboard(list_view());
+            if (!service<i_mouse>().is_mouse_grabbed_by(list_view()))
+                service<i_mouse>().grab_mouse(list_view());
         }
         else if (!aVisible)
         {
-            if (service<i_keyboard>().is_keyboard_grabbed_by(view()))
-                service<i_keyboard>().ungrab_keyboard(view());
-            if (service<i_mouse>().is_mouse_grabbed_by(view()))
-                service<i_mouse>().ungrab_mouse(view());
+            if (service<i_keyboard>().is_keyboard_grabbed_by(list_view()))
+                service<i_keyboard>().ungrab_keyboard(list_view());
+            if (service<i_mouse>().is_mouse_grabbed_by(list_view()))
+                service<i_mouse>().ungrab_mouse(list_view());
         }
         return window::show(aVisible);
     }
@@ -240,8 +240,8 @@ namespace neogfx
     {
         // dismissal may be for reasons other than explicit acceptance or cancellation (e.g. clicking outside of list popup)...
         auto* dropListForCancellation = iDropList.handling_text_change() || iDropList.accepting_selection() || iDropList.cancelling_selection() ? nullptr : &iDropList;
-        if (service<i_keyboard>().is_keyboard_grabbed_by(view()))
-            service<i_keyboard>().ungrab_keyboard(view());
+        if (service<i_keyboard>().is_keyboard_grabbed_by(list_view()))
+            service<i_keyboard>().ungrab_keyboard(list_view());
         close();
         // 'this' will be destroyed at this point...
         if (dropListForCancellation)
@@ -252,26 +252,26 @@ namespace neogfx
     {
         set_ready_to_render(false);
 
-        view().set_padding(iDropList.input_widget().as_widget().internal_spacing() - view().presentation_model().cell_padding(*this) - view().effective_frame_width());
+        list_view().set_padding(iDropList.input_widget().as_widget().internal_spacing() - list_view().presentation_model().cell_padding(*this) - list_view().effective_frame_width());
 
         // First stab at sizing ourselves...
         resize(minimum_size());
         
-        // Workout ideal position whereby text for current item in drop list popup view is at same position as text in drop button or line edit...
+        // Workout ideal position whereby text for current item in drop list popup list_view is at same position as text in drop button or line edit...
         point currentItemPos;
-        currentItemPos += view().presentation_model().cell_padding(*this).top_left();
-        currentItemPos += view().presentation_model().cell_spacing(*this) / 2.0;
+        currentItemPos += list_view().presentation_model().cell_padding(*this).top_left();
+        currentItemPos += list_view().presentation_model().cell_spacing(*this) / 2.0;
         currentItemPos -= point{ effective_frame_width(), effective_frame_width() };
-        if (view().presentation_model().rows() > 0 && view().presentation_model().columns() > 0)
+        if (list_view().presentation_model().rows() > 0 && list_view().presentation_model().columns() > 0)
         {
-            auto index = (view().selection_model().has_current_index() ?
-                view().selection_model().current_index() :
+            auto index = (list_view().selection_model().has_current_index() ?
+                list_view().selection_model().current_index() :
                 item_presentation_model_index{ 0, 0 });
-            view().make_visible(index);
-            currentItemPos += view().cell_rect(index).top_left();
-            auto const& maybeCellImageSize = view().presentation_model().cell_image_size(index);
+            list_view().make_visible(index);
+            currentItemPos += list_view().cell_rect(index).top_left();
+            auto const& maybeCellImageSize = list_view().presentation_model().cell_image_size(index);
             if (maybeCellImageSize != std::nullopt)
-                currentItemPos.x += (maybeCellImageSize->cx + view().presentation_model().cell_spacing(*this).cx);
+                currentItemPos.x += (maybeCellImageSize->cx + list_view().presentation_model().cell_spacing(*this).cx);
         }
         point inputWidgetPos{ iDropList.non_client_rect().top_left() + iDropList.root().window_position() };
         point textWidgetPos{ iDropList.input_widget().text_widget().non_client_rect().top_left() + iDropList.input_widget().text_widget().internal_spacing().top_left() + iDropList.root().window_position() };
@@ -345,10 +345,10 @@ namespace neogfx
         return (iPopup != std::nullopt && iPopup->visible()) || (iView != std::nullopt && iView->visible());
     }
 
-    drop_list_view& drop_list::list_proxy::view() const
+    drop_list_view& drop_list::list_proxy::list_view() const
     {
         if (iPopup != std::nullopt)
-            return iPopup->view();
+            return iPopup->list_view();
         else if (iView != std::nullopt)
             return *iView;
         throw no_view();
@@ -689,7 +689,7 @@ namespace neogfx
         }
         
         if (view_created())
-            view().set_model(aModel);
+            list_view().set_model(aModel);
 
         update_layout();
         update();
@@ -732,7 +732,7 @@ namespace neogfx
         if (has_presentation_model())
             presentation_model().attach(ref_ptr<i_widget>{ *this });
         if (view_created())
-            view().set_presentation_model(aPresentationModel);
+            list_view().set_presentation_model(aPresentationModel);
 
         iSelectionSink = selection_model().current_index_changed([this](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& /* aPreviousIndex */)
         {
@@ -789,7 +789,7 @@ namespace neogfx
         if (has_presentation_model() && has_selection_model())
             selection_model().set_presentation_model(presentation_model());
         if (view_created())
-            view().set_selection_model(aSelectionModel);
+            list_view().set_selection_model(aSelectionModel);
         update();
     }
 
@@ -857,9 +857,9 @@ namespace neogfx
             iListProxy.close_view();
     }
 
-    drop_list_view& drop_list::view() const
+    drop_list_view& drop_list::list_view() const
     {
-        return iListProxy.view();
+        return iListProxy.list_view();
     }
 
     void drop_list::accept_selection()
@@ -1040,7 +1040,7 @@ namespace neogfx
             graphics_context gc{ *this, graphics_context::type::Unattached };
             modelWidth = presentation_model().column_width(0, gc);
             if (list_always_visible())
-                modelWidth += view().vertical_scrollbar().width();
+                modelWidth += list_view().vertical_scrollbar().width();
         }
         minimumSize.cx += modelWidth;
         return minimumSize;
@@ -1102,9 +1102,9 @@ namespace neogfx
             {
                 if (view_created())
                 {
-                    if (view().capturing() && selection_model().has_current_index())
+                    if (list_view().capturing() && selection_model().has_current_index())
                     {
-                        view().release_capture();
+                        list_view().release_capture();
                         accept_selection();
                     }
                     else
@@ -1303,8 +1303,8 @@ namespace neogfx
         {
             auto delegate_to_proxy = [this](const neogfx::keyboard_event& aEvent)
             {
-                view().key_pressed(aEvent.scan_code(), aEvent.key_code(), KeyModifier_NONE);
-                if (view().selection_model().has_current_index())
+                list_view().key_pressed(aEvent.scan_code(), aEvent.key_code(), KeyModifier_NONE);
+                if (list_view().selection_model().has_current_index())
                     accept_selection();
             };
             switch (aEvent.scan_code())

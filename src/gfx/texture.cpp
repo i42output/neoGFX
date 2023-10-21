@@ -203,14 +203,30 @@ namespace neogfx
     {
         if (is_empty())
             throw texture_empty();
+        if (aPosition.x < 0.0 || aPosition.y < 0.0 || aPosition.x >= extents().cx || aPosition.y >= extents().cy)
+            return color{};
         return native_texture().get_pixel(aPosition);
     }
 
-    int32_t texture::bind(const std::optional<uint32_t>& aTextureUnit) const
+    i_vector<texture_line_segment> const& texture::intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize, scalar aTolerance) const
+    {
+        if (is_empty())
+            throw texture_empty();
+        return native_texture().intersection(aLine, aBoundingBox, aSampleSize, aTolerance);
+    }
+
+    void texture::bind(std::uint32_t aTextureUnit) const
     {
         if (is_empty())
             throw texture_empty();
         return native_texture().bind(aTextureUnit);
+    }
+
+    void texture::unbind() const
+    {
+        if (is_empty())
+            throw texture_empty();
+        return native_texture().unbind();
     }
 
     intptr_t texture::native_handle() const

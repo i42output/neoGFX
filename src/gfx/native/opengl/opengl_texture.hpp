@@ -24,14 +24,14 @@
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/shader_array.hpp>
 #include "opengl.hpp"
-#include "../i_native_texture.hpp"
+#include "../native_texture.hpp"
 
 namespace neogfx
 {
     class i_texture_manager;
 
     template <typename T>
-    class opengl_texture : public reference_counted<i_native_texture>
+    class opengl_texture : public native_texture
     {
         typedef opengl_texture<T> self_type;
     public:
@@ -42,7 +42,6 @@ namespace neogfx
     public:
         struct unsupported_color_format : std::runtime_error { unsupported_color_format() : std::runtime_error("neogfx::opengl_texture::unsupported_color_format") {} };
         struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::opengl_texture::multisample_texture_initialization_unsupported") {} };
-        struct unsupported_sampling_type_for_function : std::logic_error { unsupported_sampling_type_for_function() : std::logic_error("neogfx::opengl_texture::unsupported_sampling_type_for_function") {} };
     public:
         typedef T value_type;
         static constexpr texture_data_type kDataType = crack_shader_array_data_type<value_type>::DATA_TYPE;
@@ -51,66 +50,67 @@ namespace neogfx
         opengl_texture(i_texture_manager& aManager, texture_id aId, const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat = texture_data_format::RGBA);
         ~opengl_texture();
     public:
-        texture_id id() const override;
-        string const& uri() const override;
-        rect const& part() const override;
-        texture_type type() const override;
-        bool is_render_target() const override;
-        const i_render_target& as_render_target() const override;
-        i_render_target& as_render_target() override;
-        const i_sub_texture& as_sub_texture() const override;
-        dimension dpi_scale_factor() const override;
-        texture_sampling sampling() const override;
-        uint32_t samples() const override;
-        texture_data_format data_format() const override;
-        texture_data_type data_type() const override;
-        bool is_empty() const override;
-        size extents() const override;
-        size storage_extents() const override;
-        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) override;
-        void set_pixels(const i_image& aImage) override;
-        void set_pixels(const i_image& aImage, const rect& aImagePart) override;
-        void set_pixel(const point& aPosition, const color& aColor) override;
-        color get_pixel(const point& aPosition) const override;
+        texture_id id() const final;
+        string const& uri() const final;
+        rect const& part() const final;
+        texture_type type() const final;
+        bool is_render_target() const final;
+        const i_render_target& as_render_target() const final;
+        i_render_target& as_render_target() final;
+        const i_sub_texture& as_sub_texture() const final;
+        dimension dpi_scale_factor() const final;
+        texture_sampling sampling() const final;
+        uint32_t samples() const final;
+        texture_data_format data_format() const final;
+        texture_data_type data_type() const final;
+        bool is_empty() const final;
+        size extents() const final;
+        size storage_extents() const final;
+        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) final;
+        void set_pixels(const i_image& aImage) final;
+        void set_pixels(const i_image& aImage, const rect& aImagePart) final;
+        void set_pixel(const point& aPosition, const color& aColor) final;
+        color get_pixel(const point& aPosition) const final;
     public:
-        void* handle() const override;
-        bool is_resident() const override;
+        void* handle() const final;
+        bool is_resident() const final;
     public:
-        dimension horizontal_dpi() const override;
-        dimension vertical_dpi() const override;
-        dimension ppi() const override;
-        bool metrics_available() const override;
-        dimension em_size() const override;
+        dimension horizontal_dpi() const final;
+        dimension vertical_dpi() const final;
+        dimension ppi() const final;
+        bool metrics_available() const final;
+        dimension em_size() const final;
     public:
-        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const override;
+        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const final;
     public:
-        int32_t bind(const std::optional<uint32_t>& aTextureUnit = std::optional<uint32_t>{}) const override;
+        void bind(std::uint32_t aTextureUnit) const final;
+        void unbind() const final;
     public:
-        intptr_t native_handle() const override;
-        i_texture& native_texture() const override;
+        intptr_t native_handle() const final;
+        i_texture& native_texture() const final;
     public:
-        render_target_type target_type() const override;
-        void* target_handle() const override;
-        void* target_device_handle() const override;
-        pixel_format_t pixel_format() const override;
-        const i_texture& target_texture() const override;
-        point target_origin() const override;
-        size target_extents() const override;
+        render_target_type target_type() const final;
+        void* target_handle() const final;
+        void* target_device_handle() const final;
+        pixel_format_t pixel_format() const final;
+        const i_texture& target_texture() const final;
+        point target_origin() const final;
+        size target_extents() const final;
     public:
-        neogfx::logical_coordinate_system logical_coordinate_system() const override;
-        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) override;
-        neogfx::logical_coordinates logical_coordinates() const override;
-        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) override;
+        neogfx::logical_coordinate_system logical_coordinate_system() const final;
+        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) final;
+        neogfx::logical_coordinates logical_coordinates() const final;
+        void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) final;
     public:
-        rect_i32 viewport() const override;
-        rect_i32 set_viewport(const rect_i32& aViewport) const override;
+        rect_i32 viewport() const final;
+        rect_i32 set_viewport(const rect_i32& aViewport) const final;
     public:
-        bool target_active() const override;
-        void activate_target() const override;
-        void deactivate_target() const override;
+        bool target_active() const final;
+        void activate_target() const final;
+        void deactivate_target() const final;
     public:
-        neogfx::color_space color_space() const override;
-        color read_pixel(const point& aPosition) const override;
+        neogfx::color_space color_space() const final;
+        color read_pixel(const point& aPosition) const final;
     private:
         i_texture_manager& iManager;
         texture_id iId;
@@ -125,7 +125,10 @@ namespace neogfx
         GLuint iHandle;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        mutable std::optional<uint32_t> iBoundTextureUnit;
+        mutable std::optional<int32_t> iPreviouslyBoundTexture;
         mutable GLuint iFrameBuffer;
         mutable GLuint iDepthStencilBuffer;
+        mutable std::vector<T> iPixelData;
     };
 }

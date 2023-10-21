@@ -180,6 +180,8 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
     public:
+        neogfx::view const& view() const override;
+        neogfx::view& view() override;
         layer_t render_layer() const override;
         void set_render_layer(const std::optional<layer_t>& aLayer) override;
         bool can_update() const override;
@@ -325,6 +327,7 @@ namespace neogfx
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         optional_point iCapturePosition;
         int32_t iLayer;
+        neogfx::view iView;
         std::optional<int32_t> iRenderLayer;
         // properties / anchors
     public:

@@ -108,7 +108,7 @@ namespace neogfx
         try
         {
             glCheck(glGenTextures(1, &iHandle));
-            GLint previousTexture = bind(1);
+            bind(1);
             glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
             glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
             switch(sampling())
@@ -172,7 +172,7 @@ namespace neogfx
                     throw multisample_texture_initialization_unsupported();
                 glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
             }
-            glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
+            unbind();
         }
         catch (...)
         {
@@ -204,7 +204,7 @@ namespace neogfx
         {
             
             glCheck(glGenTextures(1, &iHandle));
-            GLint previousTexture = bind(1);
+            bind(1);
             switch(sampling())
             {
             case texture_sampling::Normal:
@@ -265,7 +265,7 @@ namespace neogfx
                 throw unsupported_color_format();
                 break;
             }
-            glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
+            unbind();
         }
         catch (...)
         {
@@ -409,7 +409,7 @@ namespace neogfx
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
         {
-            GLint previousTexture = bind(1);
+            bind(1);
             GLint previousPackAlignment;
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
@@ -423,7 +423,8 @@ namespace neogfx
                 glCheck(glGenerateMipmap(to_gl_enum(sampling())));
             }
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
-            glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(previousTexture)));
+            unbind();
+            iPixelData.clear();
         }
         else
             throw unsupported_sampling_type_for_function();
@@ -531,14 +532,27 @@ namespace neogfx
     }
 
     template <typename T>
-    int32_t opengl_texture<T>::bind(const std::optional<uint32_t>& aTextureUnit) const
+    void opengl_texture<T>::bind(std::uint32_t aTextureUnit) const
     {
-        if (aTextureUnit != std::nullopt)
-            glCheck(glActiveTexture(GL_TEXTURE0 + *aTextureUnit));
+        if (iBoundTextureUnit != std::nullopt)
+            unbind();
+        glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
         GLint previousTexture = 0;
         glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &previousTexture));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
-        return previousTexture;
+        iBoundTextureUnit = aTextureUnit;
+        iPreviouslyBoundTexture = previousTexture;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::unbind() const
+    {
+        if (iBoundTextureUnit == std::nullopt)
+            return;
+        glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
+        glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(iPreviouslyBoundTexture.value())));
+        iBoundTextureUnit = std::nullopt;
+        iPreviouslyBoundTexture = std::nullopt;
     }
 
     template <typename T>
@@ -747,12 +761,33 @@ namespace neogfx
     {
         if (sampling() != neogfx::texture_sampling::Multisample)
         {
-            scoped_render_target srt{ *this };
-            avec4u8 pixel;
+            if (aPosition.x < 0.0 || aPosition.y < 0.0 || aPosition.x >= extents().cx || aPosition.y >= extents().cy)
+                return color{};
+            value_type pixel;
             basic_point<GLint> pos{ aPosition };
+            pos += basic_point<GLint>{ 1, 1 };
             auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
-            glCheck(glReadPixels(pos.x + 1, pos.y + 1, 1, 1, format, type, &pixel));
-            return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
+            if (type != GL_UNSIGNED_BYTE)
+                throw std::logic_error("neogfx::opengl_texture::read_pixel: data type not yet implemented");
+            if (target_type() == render_target_type::Surface)
+            {
+                scoped_render_target srt{ *this };
+                glCheck(glReadPixels(pos.x, pos.y, 1, 1, format, type, &pixel));
+            }
+            else
+            {
+                if (iPixelData.empty())
+                {
+                    iPixelData.resize(static_cast<std::size_t>(storage_extents().cx) * static_cast<std::size_t>(storage_extents().cy));
+                    bind(1);
+                    glCheck(glGetTexImage(to_gl_enum(sampling()), 0, format, type, iPixelData.data()));
+                }
+                pixel = iPixelData[static_cast<std::size_t>(pos.y * storage_extents().cx + pos.x)];
+            }
+            if constexpr (std::is_same_v<value_type, avec4u8> || std::is_same_v<value_type, std::array<float, 4>>)
+                return color{ pixel[0], pixel[1], pixel[2], pixel[3] };
+            else
+                return color{ pixel, pixel, pixel, pixel };
         }
         else
             throw std::logic_error("neogfx::opengl_texture::read_pixel: not yet implemented for multisample render targets");
