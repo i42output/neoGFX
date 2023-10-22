@@ -158,6 +158,8 @@ namespace neogfx
         iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
         iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
         iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
+        iUnderlineBox{ iLayoutEffects, "Underline"_t },
+        iSmartUnderline{ iUnderlineBox.with_item_layout<vertical_layout>(), "Smart"_t },
         iTextFormatContainer{ iLayoutEffects },
         iLayoutTextFormat{ iTextFormatContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutTextFormat, "Ink"_t },
@@ -207,6 +209,8 @@ namespace neogfx
         iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
         iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
         iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
+        iUnderlineBox{ iLayoutEffects, "Underline"_t },
+        iSmartUnderline{ iUnderlineBox.with_item_layout<vertical_layout>(), "Smart"_t },
         iTextFormatContainer{ iLayoutEffects },
         iLayoutTextFormat{ iTextFormatContainer, neogfx::alignment::Top },
         iInkBox{ iLayoutTextFormat, "Ink"_t },
@@ -287,6 +291,7 @@ namespace neogfx
         iTextFormatContainer.set_padding(neogfx::padding{});
         iLayoutTextFormat.set_padding(neogfx::padding{});
         iTextFormatContainer.show(iSelectedTextFormat != std::nullopt);
+        iUnderlineBox.hide();
         iInkBox.set_checkable(true, true);
         iPaperBox.set_checkable(true, true);
         iAdvancedEffectsBox.set_checkable(true, true);
@@ -294,6 +299,7 @@ namespace neogfx
         iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); } update_selected_font(iSuperscript); });
         iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); } update_selected_font(iSubscript); });
         iSink += iBelowAscenderLine.Toggled([&]() { update_selected_font(iBelowAscenderLine); });
+        iSink += iSmartUnderline.Toggled([&]() { update_selected_format(iSmartUnderline); });
         iSink += iInkBox.check_box().Checked([&]() { update_selected_format(iInkBox); });
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_format(iInkBox); });
         iSink += iPaperBox.check_box().Checked([&]() { update_selected_format(iPaperBox); });
@@ -414,6 +420,7 @@ namespace neogfx
         if (&aUpdatingWidget == this)
         {
             iUnderline.set_checked(iSelectedFont.underline());
+            iUnderlineBox.show(iSelectedFont.underline());
             iSuperscript.set_checked((iSelectedFont.style() & font_style::Superscript) == font_style::Superscript);
             iSubscript.set_checked((iSelectedFont.style() & font_style::Subscript) == font_style::Subscript);
             iBelowAscenderLine.set_checked((iSelectedFont.style() & font_style::BelowAscenderLine) == font_style::BelowAscenderLine);
@@ -447,7 +454,11 @@ namespace neogfx
             iSizePicker.selection_model().set_current_index(*fontSizeIndex);
         else
             iSizePicker.selection_model().clear_current_index();
-        iSelectedFont.set_underline(iUnderline.is_checked());
+        if (&aUpdatingWidget == &iUnderline)
+        {
+            iUnderlineBox.show(iUnderline.is_checked());
+            iSelectedFont.set_underline(iUnderline.is_checked());
+        }
         auto desiredStyle = iSelectedFont.style();
         if (iSuperscript.is_checked())
         {
@@ -484,6 +495,7 @@ namespace neogfx
         {
             if (iSelectedTextFormat)
             {
+                iSmartUnderline.set_checked(iSelectedTextFormat->smart_underline());
                 if (iSelectedTextFormat->ink() != neolib::none)
                 {
                     iInkBox.check_box().check();
@@ -524,7 +536,6 @@ namespace neogfx
                 }
             }
         }
-        iSelectedFont.set_underline(iUnderline.is_checked());
         if (iInkBox.check_box().is_checked())
         {
             if (iInkColor.is_checked())
@@ -613,7 +624,8 @@ namespace neogfx
             iAdvancedEffectsInk = neolib::none;
             iAdvancedEffectsWidth = std::nullopt;
         }
-
+        if (&iSmartUnderline == &aUpdatingWidget)
+            iSelectedTextFormat->set_smart_underline(iSmartUnderline.is_checked());
         if (std::holds_alternative<color_widget>(iInk) && &std::get<color_widget>(iInk) == &aUpdatingWidget)
         {
             if (iSelectedTextFormat->ink() != std::get<color_widget>(iInk).color())
@@ -666,6 +678,7 @@ namespace neogfx
     {
         if (iSelectedTextFormat)
         {
+            iSmartUnderline.set_checked(iSelectedTextFormat->smart_underline());
             if (iSelectedTextFormat->ink() != neolib::none)
             {
                 iInkBox.check_box().check();

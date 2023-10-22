@@ -84,6 +84,8 @@ namespace neogfx
         check_box iSuperscript;
         check_box iSubscript;
         check_box iBelowAscenderLine;
+        group_box iUnderlineBox;
+        check_box iSmartUnderline;
         widget<> iTextFormatContainer;
         horizontal_layout iLayoutTextFormat;
         group_box iInkBox;

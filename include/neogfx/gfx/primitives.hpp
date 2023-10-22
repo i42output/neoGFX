@@ -412,7 +412,7 @@ namespace neogfx
         typedef text_format abstract_type; // todo
     public:
         text_format() :
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -432,7 +432,7 @@ namespace neogfx
         text_format(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -443,7 +443,7 @@ namespace neogfx
         text_format(InkType const& aInk, PaperType const& aPaper, text_effect const& aEffect) :
             iInk{ aInk },
             iPaper{ aPaper },
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -453,7 +453,7 @@ namespace neogfx
         template <typename InkType>
         text_format(InkType const& aInk, optional_text_effect const& aEffect) :
             iInk{ aInk },
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -463,7 +463,7 @@ namespace neogfx
         template <typename InkType>
         text_format(InkType const& aInk, text_effect const& aEffect) :
             iInk{ aInk },
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
             iOnlyCalculateEffect{ false },
@@ -474,7 +474,7 @@ namespace neogfx
         text_format(InkType const& aInk, PaperType const& aPaper) :
             iInk{ aInk },
             iPaper{ aPaper },
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
@@ -483,7 +483,7 @@ namespace neogfx
         template <typename InkType>
         text_format(InkType const& aInk) :
             iInk{ aInk },
-            iSmartUnderline{ true },
+            iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }

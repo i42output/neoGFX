@@ -127,6 +127,7 @@ namespace neogfx
             const color_or_gradient& glyph_color() const;
             const color_or_gradient& text_color() const;
             const color_or_gradient& paper_color() const;
+            bool smart_underline() const;
             bool ignore_emoji() const;
             const optional_text_effect& text_effect() const;
             text_format as_text_format() const;
@@ -148,6 +149,7 @@ namespace neogfx
             color_or_gradient iGlyphColor;
             color_or_gradient iTextColor;
             color_or_gradient iPaperColor;
+            bool iSmartUnderline;
             bool iIgnoreEmoji;
             optional_text_effect iTextEffect;
         };

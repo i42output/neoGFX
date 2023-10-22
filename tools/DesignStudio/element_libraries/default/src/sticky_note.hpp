@@ -121,8 +121,8 @@ namespace neogfx::DesignStudio
             iSink += iDefaultItem->ContextMenu([&](i_menu& aMenu)
             {
                 aElement.context_menu().trigger(aMenu);
-                auto fontFormat = make_ref<action>("Font...");
-                auto paragraphFormat = make_ref<action>("Paragraph...");
+                auto fontFormat = make_ref<action>("Font..."_t);
+                auto paragraphFormat = make_ref<action>("Paragraph..."_t);
                 fontFormat->Triggered([&]()
                 {
                     font_dialog fontPicker{ *this, *iDefaultItem->current_style().character().font(), iDefaultItem->current_style().character().as_text_format() };

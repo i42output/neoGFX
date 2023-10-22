@@ -265,6 +265,7 @@ namespace neogfx
     };
 
     text_edit::character_style::character_style() :
+        iSmartUnderline{ false },
         iIgnoreEmoji{ true }
     {
     }
@@ -274,7 +275,8 @@ namespace neogfx
         iGlyphColor{ aOther.iGlyphColor },
         iTextColor{ aOther.iTextColor },
         iPaperColor{ aOther.iPaperColor },
-        iIgnoreEmoji{ true },
+        iSmartUnderline{ aOther.iSmartUnderline },
+        iIgnoreEmoji{ aOther.iIgnoreEmoji },
         iTextEffect{ aOther.iTextEffect }
     {
     }
@@ -287,6 +289,7 @@ namespace neogfx
         iFont{ aFont },
         iTextColor{ aTextColor },
         iPaperColor{ aPaperColor },
+        iSmartUnderline{ false },
         iIgnoreEmoji{ true },
         iTextEffect{ aTextEffect }
     {
@@ -312,6 +315,11 @@ namespace neogfx
         return iPaperColor;
     }
 
+    bool text_edit::character_style::smart_underline() const
+    {
+        return iSmartUnderline;
+    }
+
     bool text_edit::character_style::ignore_emoji() const
     {
         return iIgnoreEmoji;
@@ -324,7 +332,10 @@ namespace neogfx
 
     text_format text_edit::character_style::as_text_format() const
     {
-        return text_format{ glyph_color() != neolib::none ? glyph_color() : text_color(), paper_color() != neolib::none ? optional_text_color{ paper_color() } : optional_text_color{}, text_effect() }.with_emoji_ignored(ignore_emoji());
+        return text_format{ 
+            glyph_color() != neolib::none ? glyph_color() : text_color(), 
+            paper_color() != neolib::none ? optional_text_color{ paper_color() } : optional_text_color{}, 
+            text_effect() }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
     }
 
     text_edit::character_style& text_edit::character_style::set_font(optional_font const& aFont)
@@ -369,6 +380,7 @@ namespace neogfx
         iGlyphColor = aTextFormat.ink();
         iTextColor = neolib::none; // todo
         iPaperColor = aTextFormat.paper() ? *aTextFormat.paper() : neolib::none;
+        iSmartUnderline = aTextFormat.smart_underline();
         iIgnoreEmoji = aTextFormat.ignore_emoji();
         iTextEffect = aTextFormat.effect();
         return *this;
@@ -384,6 +396,7 @@ namespace neogfx
             iTextColor = aRhs.text_color();
         if (aRhs.paper_color() != neolib::none)
             iPaperColor = aRhs.paper_color();
+        iSmartUnderline = aRhs.smart_underline();
         iIgnoreEmoji = aRhs.ignore_emoji();
         if (aRhs.text_effect() != std::nullopt)
             iTextEffect = aRhs.text_effect();
@@ -392,7 +405,8 @@ namespace neogfx
 
     bool text_edit::character_style::operator==(const character_style& aRhs) const
     {
-        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) == std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
+        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iSmartUnderline, iIgnoreEmoji, iTextEffect) == 
+            std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iSmartUnderline, aRhs.iIgnoreEmoji, aRhs.iTextEffect);
     }
 
     bool text_edit::character_style::operator!=(const character_style& aRhs) const
@@ -402,7 +416,8 @@ namespace neogfx
 
     bool text_edit::character_style::operator<(const character_style& aRhs) const
     {
-        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iTextEffect) < std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iTextEffect);
+        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iSmartUnderline, iIgnoreEmoji, iTextEffect) < 
+            std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iSmartUnderline, aRhs.iIgnoreEmoji, aRhs.iTextEffect);
     }
 
     text_edit::paragraph_style::paragraph_style()
@@ -2985,7 +3000,7 @@ namespace neogfx
                 text_format{
                     glyphColor,
                     style.character().paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.character().paper_color() } } : optional_text_color{},
-                    style.character().text_effect() }.with_emoji_ignored(style.character().ignore_emoji()) :
+                    style.character().text_effect() }.with_smart_underline(style.character().smart_underline()).with_emoji_ignored(style.character().ignore_emoji()) :
                 text_format{
                     has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
                     has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
