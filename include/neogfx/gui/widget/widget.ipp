@@ -1120,15 +1120,38 @@ namespace neogfx
     }
 
     template <typename Interface>
+    bool widget<Interface>::has_view() const
+    {
+        return iView != std::nullopt;
+    }
+
+    template <typename Interface>
     view const& widget<Interface>::view() const
     {
-        return iView;
+        if (!has_view())
+            throw no_view();
+        return iView.value();
     }
 
     template <typename Interface>
     view& widget<Interface>::view()
     {
-        return iView;
+        if (!has_view())
+            throw no_view();
+        return iView.value();
+    }
+
+    template <typename Interface>
+    view& widget<Interface>::create_view()
+    {
+        iView.emplace();
+        return iView.value();
+    }
+
+    template <typename Interface>
+    void widget<Interface>::reset_view()
+    {
+        iView = std::nullopt;
     }
 
     template <typename Interface>

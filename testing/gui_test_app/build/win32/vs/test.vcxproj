@@ -107,9 +107,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\..\src\game.cpp" />
     <ClCompile Include="..\..\..\src\main.cpp" />
     <ClCompile Include="x64\Debug\GeneratedFiles\test.res.cpp">

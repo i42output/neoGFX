@@ -54,6 +54,16 @@ namespace neogfx
     {
     }
 
+    view::view(i_view const& aOther) :
+        iViewPortGeometryPolicy{ aOther.view_port_geometry_policy() },
+        iViewGeometryPolicy{ aOther.view_geometry_policy() },
+        iViewPort{ aOther.view_port() },
+        iCenter{ aOther.center() },
+        iSize{ aOther.size() },
+        iRotation{ aOther.rotation() }
+    {
+    }
+
     view::geometry_policy view::view_port_geometry_policy() const
     {
         return iViewPortGeometryPolicy;
@@ -74,19 +84,14 @@ namespace neogfx
         iViewGeometryPolicy = aGeometryPolicy;
     }
 
-    optional_rect view::view_port() const
+    std::optional<quad> const& view::view_port() const
     {
-        if (iViewPort)
-            return rect{ point{ iViewPort.value()[0] }, neogfx::size{ iViewPort.value()[2] - iViewPort.value()[0] }};
-        return {};
+        return iViewPort;
     }
 
-    void view::set_view_port(optional_rect const& aViewPort)
+    void view::set_view_port(std::optional<quad> const& aViewPort)
     {
-        if (aViewPort)
-            iViewPort = aViewPort.value().to_quad();
-        else
-            iViewPort = std::nullopt;
+        iViewPort = aViewPort;
     }
 
     vec2 const& view::center() const

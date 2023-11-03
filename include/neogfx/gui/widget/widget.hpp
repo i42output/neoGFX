@@ -58,6 +58,7 @@ namespace neogfx
         using typename base_type::no_surface;
         using typename base_type::no_children;
         using typename base_type::not_child;
+        using typename base_type::no_view;
         using typename base_type::no_update_rect;
         using typename base_type::widget_not_entered;
         using typename base_type::widget_cannot_capture;
@@ -180,8 +181,11 @@ namespace neogfx
         void layout_as(const point& aPosition, const size& aSize) override;
         // i_widget
     public:
+        bool has_view() const override;
         neogfx::view const& view() const override;
         neogfx::view& view() override;
+        neogfx::view& create_view() override;
+        void reset_view() override;
         layer_t render_layer() const override;
         void set_render_layer(const std::optional<layer_t>& aLayer) override;
         bool can_update() const override;
@@ -327,7 +331,7 @@ namespace neogfx
         mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
         optional_point iCapturePosition;
         int32_t iLayer;
-        neogfx::view iView;
+        optional_view iView;
         std::optional<int32_t> iRenderLayer;
         // properties / anchors
     public:

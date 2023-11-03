@@ -20,38 +20,32 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/numerical.hpp>
-#include <neogfx/core/geometrical.hpp>
+#include <neogfx/gui/widget/i_view.hpp>
 
 namespace neogfx
 {
-    class view
+    class view : public i_view
     {
     public:
-        enum class geometry_policy : std::uint32_t
-        {
-            Automatic   = 0x00000001, ///< Parent widget moves/resizes the view port and/or view according to the widget's client rect.
-            Specified   = 0x00000002  ///< View port and/or view's position/size is specified (i.e. set explicitly).
-        };
-    public:
         view();
+        view(i_view const& aOther);
     public:
-        geometry_policy view_port_geometry_policy() const;
-        void set_view_port_geometry_policy(geometry_policy aGeometryPolicy);
-        geometry_policy view_geometry_policy() const;
-        void set_view_geometry_policy(geometry_policy aGeometryPolicy);
-        optional_rect view_port() const;
-        void set_view_port(optional_rect const& aViewPort);
-        vec2 const& center() const;
-        void set_center(vec2 const& aCenter);
-        void move(vec2 const& aOffset);
-        vec2 const& size() const;
-        void set_size(vec2 const& aSize);
-        void zoom(scalar aFactor);
-        scalar rotation() const;
-        void set_rotation(scalar aAngle);
-        void rotate(scalar aAngle);
-        mat33 const& transformation() const;
+        geometry_policy view_port_geometry_policy() const final;
+        void set_view_port_geometry_policy(geometry_policy aGeometryPolicy) final;
+        geometry_policy view_geometry_policy() const final;
+        void set_view_geometry_policy(geometry_policy aGeometryPolicy) final;
+        std::optional<quad> const& view_port() const final;
+        void set_view_port(std::optional<quad> const& aViewPort) final;
+        vec2 const& center() const final;
+        void set_center(vec2 const& aCenter) final;
+        void move(vec2 const& aOffset) final;
+        vec2 const& size() const final;
+        void set_size(vec2 const& aSize) final;
+        void zoom(scalar aFactor) final;
+        scalar rotation() const final;
+        void set_rotation(scalar aAngle) final;
+        void rotate(scalar aAngle) final;
+        mat33 const& transformation() const final;
     private:
         geometry_policy iViewPortGeometryPolicy = geometry_policy::Automatic;
         geometry_policy iViewGeometryPolicy = geometry_policy::Automatic;
@@ -61,4 +55,6 @@ namespace neogfx
         scalar iRotation = 0.0;
         mutable cache<mat33> iTransformation;
     };
+
+    using optional_view = optional<view>;
 }
