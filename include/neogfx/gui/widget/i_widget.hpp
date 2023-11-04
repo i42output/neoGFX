@@ -74,7 +74,6 @@ namespace neogfx
         struct no_surface : std::logic_error { no_surface() : std::logic_error("neogfx::i_widget::no_surface") {} };
         struct no_children : std::logic_error { no_children() : std::logic_error("neogfx::i_widget::no_children") {} };
         struct not_child : std::logic_error { not_child() : std::logic_error("neogfx::i_widget::not_child") {} };
-        struct no_view : std::logic_error { no_view() : std::logic_error("neogfx::i_widget::no_view") {} };
         struct no_update_rect : std::logic_error { no_update_rect() : std::logic_error("neogfx::i_widget::no_update_rect") {} };
         struct widget_not_entered : std::logic_error { widget_not_entered() : std::logic_error("neogfx::i_widget::widget_not_entered") {} };
         struct widget_cannot_capture : std::logic_error { widget_cannot_capture() : std::logic_error("neogfx::i_widget::widget_cannot_capture") {} };
@@ -169,10 +168,8 @@ namespace neogfx
         virtual widget_part hit_test(const point& aPosition) const = 0;
     public:
         virtual bool has_view() const = 0;
-        virtual neogfx::view const& view() const = 0;
-        virtual neogfx::view& view() = 0;
-        virtual neogfx::view& create_view() = 0;
-        virtual void reset_view() = 0;
+        virtual neogfx::view view(bool aExtendIntoPadding = true) const = 0;
+        virtual void set_view(optional_view const& aView) = 0;
         virtual layer_t render_layer() const = 0;
         virtual void set_render_layer(const std::optional<layer_t>& aLayer) = 0;
         virtual bool can_update() const = 0;

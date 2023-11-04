@@ -41,4 +41,3 @@ namespace neogfx
     template class widget<i_window>;
     template class widget<i_terminal>;
 }
-

@@ -435,7 +435,7 @@ namespace neogfx
                 return units_converter{ *this }.from_device_units(*FixedSize);
             return minimum_size(aAvailableSpace);
         }
-        void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true)
+        void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override
         {
             optional_size newFixedSize = (aFixedSize != std::nullopt ? units_converter{ *this }.to_device_units(*aFixedSize) : optional_size{});
             if (FixedSize != newFixedSize)

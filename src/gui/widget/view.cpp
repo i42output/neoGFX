@@ -55,33 +55,11 @@ namespace neogfx
     }
 
     view::view(i_view const& aOther) :
-        iViewPortGeometryPolicy{ aOther.view_port_geometry_policy() },
-        iViewGeometryPolicy{ aOther.view_geometry_policy() },
         iViewPort{ aOther.view_port() },
         iCenter{ aOther.center() },
         iSize{ aOther.size() },
         iRotation{ aOther.rotation() }
     {
-    }
-
-    view::geometry_policy view::view_port_geometry_policy() const
-    {
-        return iViewPortGeometryPolicy;
-    }
-
-    void view::set_view_port_geometry_policy(geometry_policy aGeometryPolicy)
-    {
-        iViewPortGeometryPolicy = aGeometryPolicy;
-    }
-
-    view::geometry_policy view::view_geometry_policy() const
-    {
-        return iViewGeometryPolicy;
-    }
-
-    void view::set_view_geometry_policy(geometry_policy aGeometryPolicy)
-    {
-        iViewGeometryPolicy = aGeometryPolicy;
     }
 
     std::optional<quad> const& view::view_port() const

@@ -30,16 +30,6 @@ namespace neogfx
     public:
         using abstract_type = i_view;
     public:
-        enum class geometry_policy : std::uint32_t
-        {
-            Automatic   = 0x00000001, ///< Parent widget moves/resizes the view port and/or view according to the widget's client rect.
-            Specified   = 0x00000002  ///< View port and/or view's position/size is specified (i.e. set explicitly).
-        };
-    public:
-        virtual geometry_policy view_port_geometry_policy() const = 0;
-        virtual void set_view_port_geometry_policy(geometry_policy aGeometryPolicy) = 0;
-        virtual geometry_policy view_geometry_policy() const = 0;
-        virtual void set_view_geometry_policy(geometry_policy aGeometryPolicy) = 0;
         virtual std::optional<quad> const& view_port() const = 0;
         virtual void set_view_port(std::optional<quad> const& aViewPort) = 0;
         virtual vec2 const& center() const = 0;

@@ -921,7 +921,7 @@ namespace neogfx
         SizeChanged.trigger();
         
         neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Resize };
-        
+
         layout_items();
         
         if ((widget_type() & neogfx::widget_type::Floating) == neogfx::widget_type::Floating)
@@ -1126,32 +1126,22 @@ namespace neogfx
     }
 
     template <typename Interface>
-    view const& widget<Interface>::view() const
+    view widget<Interface>::view(bool aExtendIntoPadding) const
     {
-        if (!has_view())
-            throw no_view();
-        return iView.value();
+        if (has_view())
+            return iView.value();
+        neogfx::view defaultView;
+        auto const& cr = client_rect(aExtendIntoPadding);
+        defaultView.set_center(cr.center().to_vec2());
+        defaultView.set_size(cr.extents().to_vec2());
+        defaultView.set_view_port(cr);
+        return defaultView;
     }
 
     template <typename Interface>
-    view& widget<Interface>::view()
+    void widget<Interface>::set_view(optional_view const& aView)
     {
-        if (!has_view())
-            throw no_view();
-        return iView.value();
-    }
-
-    template <typename Interface>
-    view& widget<Interface>::create_view()
-    {
-        iView.emplace();
-        return iView.value();
-    }
-
-    template <typename Interface>
-    void widget<Interface>::reset_view()
-    {
-        iView = std::nullopt;
+        iView = aView;
     }
 
     template <typename Interface>

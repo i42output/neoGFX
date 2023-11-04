@@ -30,11 +30,8 @@ namespace neogfx
         view();
         view(i_view const& aOther);
     public:
-        geometry_policy view_port_geometry_policy() const final;
-        void set_view_port_geometry_policy(geometry_policy aGeometryPolicy) final;
-        geometry_policy view_geometry_policy() const final;
-        void set_view_geometry_policy(geometry_policy aGeometryPolicy) final;
         std::optional<quad> const& view_port() const final;
+        using i_view::set_view_port;
         void set_view_port(std::optional<quad> const& aViewPort) final;
         vec2 const& center() const final;
         void set_center(vec2 const& aCenter) final;
@@ -47,8 +44,6 @@ namespace neogfx
         void rotate(scalar aAngle) final;
         mat33 const& transformation() const final;
     private:
-        geometry_policy iViewPortGeometryPolicy = geometry_policy::Automatic;
-        geometry_policy iViewGeometryPolicy = geometry_policy::Automatic;
         std::optional<quad> iViewPort;
         vec2 iCenter;
         vec2 iSize;
