@@ -1,4 +1,4 @@
-// spin_box.inl
+// spin_box.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -30,7 +30,7 @@
 namespace neogfx
 {
     template <typename T>
-    basic_spin_box<T>::basic_spin_box() :
+    inline basic_spin_box<T>::basic_spin_box() :
         base_type{ 2.0 },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
@@ -47,7 +47,7 @@ namespace neogfx
     }
 
     template <typename T>
-    basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
+    inline basic_spin_box<T>::basic_spin_box(i_widget& aParent) :
         base_type{ aParent, 2.0 },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
@@ -64,7 +64,7 @@ namespace neogfx
     }
 
     template <typename T>
-    basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
+    inline basic_spin_box<T>::basic_spin_box(i_layout& aLayout) :
         base_type{ aLayout, 2.0 },
         iPrimaryLayout{ *this },
         iTextBox{ iPrimaryLayout },
@@ -81,7 +81,7 @@ namespace neogfx
     }
 
     template <typename T>
-    neogfx::size_policy basic_spin_box<T>::size_policy() const
+    inline size_policy basic_spin_box<T>::size_policy() const
     {
         if (base_type::has_size_policy())
             return base_type::size_policy();
@@ -91,7 +91,7 @@ namespace neogfx
     }
 
     template <typename T>
-    color basic_spin_box<T>::palette_color(color_role aColorRole) const
+    inline color basic_spin_box<T>::palette_color(color_role aColorRole) const
     {
         if (has_palette_color(aColorRole))
             return base_type::palette_color(aColorRole);
@@ -101,13 +101,13 @@ namespace neogfx
     }
 
     template <typename T>
-    color basic_spin_box<T>::frame_color() const
+    inline color basic_spin_box<T>::frame_color() const
     {
         return iTextBox.frame_color();
     }
 
     template <typename T>
-    bool basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    inline bool basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         if (aWheel == mouse_wheel::Vertical)
         {
@@ -119,7 +119,7 @@ namespace neogfx
     }
 
     template <typename T>
-    bool basic_spin_box<T>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    inline bool basic_spin_box<T>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
         if (aScanCode == ScanCode_UP)
         {
@@ -136,37 +136,37 @@ namespace neogfx
     }
 
     template <typename T>
-    i_string const& basic_spin_box<T>::text()
+    inline i_string const& basic_spin_box<T>::text()
     {
         return iText;
     }
 
     template <typename T>
-    const line_edit& basic_spin_box<T>::text_box() const
+    inline const line_edit& basic_spin_box<T>::text_box() const
     {
         return iTextBox;
     }
 
     template <typename T>
-    line_edit& basic_spin_box<T>::text_box()
+    inline line_edit& basic_spin_box<T>::text_box()
     {
         return iTextBox;
     }
 
     template <typename T>
-    void basic_spin_box<T>::show_arrows()
+    inline void basic_spin_box<T>::show_arrows()
     {
         iSecondaryLayout.enable();
     }
 
     template <typename T>
-    void basic_spin_box<T>::hide_arrows()
+    inline void basic_spin_box<T>::hide_arrows()
     {
         iSecondaryLayout.disable();
     }
 
     template <typename T>
-    void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
+    inline void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
     {
         auto result = std::max(minimum(),
             std::min(maximum(),
@@ -195,7 +195,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_spin_box<T>::init()
+    inline void basic_spin_box<T>::init()
     {
         set_padding(neogfx::padding{});
 
@@ -305,7 +305,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_spin_box<T>::update_size_hint()
+    inline void basic_spin_box<T>::update_size_hint()
     {
         if (text_box_size_hint())
             text_box().set_size_hint(*text_box_size_hint());
@@ -336,7 +336,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_spin_box<T>::update_arrows()
+    inline void basic_spin_box<T>::update_arrows()
     {
         auto ink = service<i_app>().current_style().palette().color(color_role::Text);
         const char* sUpArrowImagePattern

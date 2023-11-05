@@ -1,4 +1,4 @@
-    // slider.inl
+// slider.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -25,31 +25,31 @@
 namespace neogfx
 {
     template <typename T>
-    basic_slider<T>::basic_slider(slider_orientation aOrientation) :
+    inline basic_slider<T>::basic_slider(slider_orientation aOrientation) :
         slider_impl(aOrientation), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
     {
     }
 
     template <typename T>
-    basic_slider<T>::basic_slider(i_widget& aParent, slider_orientation aOrientation) :
+    inline basic_slider<T>::basic_slider(i_widget& aParent, slider_orientation aOrientation) :
         slider_impl(aParent, aOrientation), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
     {
     }
 
     template <typename T>
-    basic_slider<T>::basic_slider(i_layout& aLayout, slider_orientation aOrientation) :
+    inline basic_slider<T>::basic_slider(i_layout& aLayout, slider_orientation aOrientation) :
         slider_impl(aLayout, aOrientation), iMinimum{}, iMaximum{}, iStep{}, iValue{}, iSettingNormalizedValue{ false }
     {
     }
 
     template <typename T>
-    typename basic_slider<T>::value_type basic_slider<T>::minimum() const
+    inline typename basic_slider<T>::value_type basic_slider<T>::minimum() const
     {
         return iMinimum;
     }
 
     template <typename T>
-    void basic_slider<T>::set_minimum(value_type aMinimum)
+    inline void basic_slider<T>::set_minimum(value_type aMinimum)
     {
         iMinimum = aMinimum;
         ConstraintsChanged.trigger();
@@ -64,7 +64,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_slider<T>::set_maximum(value_type aMaximum)
+    inline void basic_slider<T>::set_maximum(value_type aMaximum)
     {
         iMaximum = aMaximum;
         ConstraintsChanged.trigger();
@@ -73,26 +73,26 @@ namespace neogfx
     }
 
     template <typename T>
-    typename basic_slider<T>::value_type basic_slider<T>::step() const
+    inline typename basic_slider<T>::value_type basic_slider<T>::step() const
     {
         return iStep;
     }
 
     template <typename T>
-    void basic_slider<T>::set_step(value_type aStep)
+    inline void basic_slider<T>::set_step(value_type aStep)
     {
         iStep = aStep;
         ConstraintsChanged.trigger();
     }
 
     template <typename T>
-    typename basic_slider<T>::value_type basic_slider<T>::value() const
+    inline typename basic_slider<T>::value_type basic_slider<T>::value() const
     {
         return iValue;
     }
 
     template <typename T>
-    void basic_slider<T>::set_value(value_type aValue)
+    inline void basic_slider<T>::set_value(value_type aValue)
     {
         if (iValue != aValue)
         {
@@ -107,7 +107,7 @@ namespace neogfx
     }
 
     template <typename T>
-    double basic_slider<T>::normalized_step_value() const
+    inline double basic_slider<T>::normalized_step_value() const
     {
         auto range = maximum() - minimum();
         if (range == 0)
@@ -116,7 +116,7 @@ namespace neogfx
     }
 
     template <typename T>
-    double basic_slider<T>::normalized_value() const
+    inline double basic_slider<T>::normalized_value() const
     {
         auto range = maximum() - minimum();
         if (range == 0)
@@ -125,7 +125,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void basic_slider<T>::set_normalized_value(double aValue)
+    inline void basic_slider<T>::set_normalized_value(double aValue)
     {
         double const stepValue = normalized_step_value();
         double steps = 0.0;

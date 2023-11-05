@@ -525,6 +525,20 @@ namespace neogfx
                 *iEscapeSequence += static_cast<char>(ch);
                 switch(iEscapeSequence.value()[0])
                 {
+                case '7':
+                    if (active_buffer().saved.empty())
+                        active_buffer().saved.push_back(active_buffer());
+                    iEscapeSequence = std::nullopt;
+                    break;
+                case '8':
+                    if (!active_buffer().saved.empty())
+                    {
+                        static_cast<buffer_savable_state&>(active_buffer()) = active_buffer().saved.back();
+                        active_buffer().saved.pop_back();
+                        update_cursor();
+                    }
+                    iEscapeSequence = std::nullopt;
+                    break;
                 case 'M':
                     if ((!active_buffer().scrollingRegion && cursor_pos().y > 0) ||
                         (active_buffer().scrollingRegion && cursor_pos().y > active_buffer().scrollingRegion.value().top))
@@ -956,7 +970,9 @@ namespace neogfx
                             }
                             break;
                         case U'H':
+                        case U'f':
                             {
+                                // todo: handle any difference between 'H' and 'f'...
                                 std::int32_t row = 1;
                                 std::int32_t col = 1;
                                 if (active_buffer().originMode && active_buffer().scrollingRegion)

@@ -1,4 +1,4 @@
-// layout.inl
+// layout.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -148,7 +148,7 @@ namespace neogfx
     }
 
     template <typename AxisPolicy>
-    size layout::do_minimum_size(optional_size const& aAvailableSpace) const
+    inline size layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -193,7 +193,7 @@ namespace neogfx
     }
 
     template <typename AxisPolicy>
-    size layout::do_maximum_size(optional_size const& aAvailableSpace) const
+    inline size layout::do_maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -265,7 +265,7 @@ namespace neogfx
     }
 
     template <typename AxisPolicy>
-    void layout::do_layout_items(const point& aPosition, const size& aSize)
+    inline void layout::do_layout_items(const point& aPosition, const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)

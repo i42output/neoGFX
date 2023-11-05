@@ -62,11 +62,9 @@ namespace neogfx
             Application,
             Numeric
         };
-        struct buffer
+        struct buffer_savable_state
         {
-            point_type bufferOrigin;
             std::optional<point_type> cursorPos;
-            std::vector<buffer_line> lines;
             coordinate_type defaultTabStop = 8;
             std::optional<attribute> attribute;
             bool originMode = true;
@@ -76,7 +74,16 @@ namespace neogfx
             character_set characterSet = character_set::USASCII;
             keypad_mode keypadMode = keypad_mode::Numeric;
             bool cursorKeysMode = false;
+        };
+        struct buffer_state : buffer_savable_state
+        {
+            point_type bufferOrigin;
             std::optional<scrolling_region> scrollingRegion;
+        };
+        struct buffer : buffer_state
+        {
+            std::vector<buffer_line> lines;
+            std::vector<buffer_savable_state> saved;
             mutable neogfx::cursor cursor;
         };
     public:

@@ -1,4 +1,4 @@
-// unit_spin_box.inl
+// unit_spin_box.ipp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
@@ -24,19 +24,19 @@
 namespace neogfx
 {
     template <typename T, typename... Units>
-    basic_unit_spin_box<T, Units...>::basic_unit_spin_box() :
+    inline basic_unit_spin_box<T, Units...>::basic_unit_spin_box() :
         base_type{}
     {
     }
 
     template <typename T, typename... Units>
-    basic_unit_spin_box<T, Units...>::basic_unit_spin_box(i_widget& aParent) :
+    inline basic_unit_spin_box<T, Units...>::basic_unit_spin_box(i_widget& aParent) :
         base_type{ aParent }
     {
     }
 
     template <typename T, typename... Units>
-    basic_unit_spin_box<T, Units...>::basic_unit_spin_box(i_layout& aLayout) :
+    inline basic_unit_spin_box<T, Units...>::basic_unit_spin_box(i_layout& aLayout) :
         base_type{ aLayout }
     {
     }

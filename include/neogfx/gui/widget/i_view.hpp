@@ -53,7 +53,7 @@ namespace neogfx
         void set_view_port(optional_rect const& aViewPort)
         {
             if (aViewPort != std::nullopt)
-                set_view_port(quad{ aViewPort.value().top_left().to_vec3(), aViewPort.value().bottom_right().to_vec3() });
+                set_view_port(aViewPort.value().to_quad());
             else
                 set_view_port(std::optional<quad>{});
         }

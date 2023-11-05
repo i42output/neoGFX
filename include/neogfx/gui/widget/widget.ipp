@@ -34,7 +34,7 @@
 namespace neogfx
 {
     template <typename Interface>
-    widget<Interface>::widget() :
+    inline widget<Interface>::widget() :
         iSingular{ false },
         iParent{ nullptr },
         iAddingChild{ false },
@@ -52,7 +52,7 @@ namespace neogfx
     }
     
     template <typename Interface>
-    widget<Interface>::widget(i_widget& aParent) :
+    inline widget<Interface>::widget(i_widget& aParent) :
         iSingular{ false },
         iParent{ nullptr },
         iAddingChild{ false },
@@ -71,7 +71,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    widget<Interface>::widget(i_layout& aLayout) :
+    inline widget<Interface>::widget(i_layout& aLayout) :
         iSingular{ false },
         iParent{ nullptr },
         iAddingChild{ false },
@@ -90,7 +90,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    widget<Interface>::~widget()
+    inline widget<Interface>::~widget()
     {
         unlink();
         if (service<i_keyboard>().is_keyboard_grabbed_by(*this))
@@ -107,7 +107,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::property_changed(i_property& aProperty)
+    inline void widget<Interface>::property_changed(i_property& aProperty)
     {
         static auto invalidate_layout = [](i_widget& self) 
         { 
@@ -137,7 +137,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::device_metrics_available() const
+    inline bool widget<Interface>::device_metrics_available() const
     {
         if (iDeviceMetrics == std::nullopt)
         {
@@ -151,7 +151,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_device_metrics& widget<Interface>::device_metrics() const
+    inline const i_device_metrics& widget<Interface>::device_metrics() const
     {
         if (self_type::device_metrics_available())
             return **iDeviceMetrics;
@@ -159,13 +159,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::is_singular() const
+    inline bool widget<Interface>::is_singular() const
     {
         return iSingular;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_singular(bool aSingular)
+    inline void widget<Interface>::set_singular(bool aSingular)
     {
         if (iSingular != aSingular)
         {
@@ -178,7 +178,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::is_root() const
+    inline bool widget<Interface>::is_root() const
     {
         if constexpr (std::is_base_of_v<i_window, Interface>)
             return iRoot == this;
@@ -187,7 +187,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_root() const
+    inline bool widget<Interface>::has_root() const
     {
         if (iRoot == std::nullopt)
         {
@@ -201,7 +201,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_window& widget<Interface>::root() const
+    inline const i_window& widget<Interface>::root() const
     {
         if constexpr (std::is_base_of_v<i_window, Interface>)
             return *this;
@@ -214,61 +214,61 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_window& widget<Interface>::root()
+    inline i_window& widget<Interface>::root()
     {
         return const_cast<i_window&>(to_const(*this).self_type::root());
     }
 
     template <typename Interface>
-    void widget<Interface>::set_root(i_window& aRoot)
+    inline void widget<Interface>::set_root(i_window& aRoot)
     {
         iRoot = &aRoot;
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_surface() const
+    inline bool widget<Interface>::has_surface() const
     {
         return self_type::has_root() && self_type::root().has_surface();
     }
 
     template <typename Interface>
-    bool widget<Interface>::is_surface() const
+    inline bool widget<Interface>::is_surface() const
     {
         return self_type::is_root() && self_type::root().is_surface();
     }
 
     template <typename Interface>
-    const i_surface& widget<Interface>::surface() const
+    inline const i_surface& widget<Interface>::surface() const
     {
         return self_type::root().surface();
     }
 
     template <typename Interface>
-    i_surface& widget<Interface>::surface()
+    inline i_surface& widget<Interface>::surface()
     {
         return self_type::root().surface();
     }
 
     template <typename Interface>
-    const i_surface& widget<Interface>::real_surface() const
+    inline const i_surface& widget<Interface>::real_surface() const
     {
         return self_type::root().real_surface();
     }
 
     template <typename Interface>
-    i_surface& widget<Interface>::real_surface()
+    inline i_surface& widget<Interface>::real_surface()
     {
         return self_type::root().real_surface();
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_parent() const
+    inline bool widget<Interface>::has_parent() const
     {
         return iParent != nullptr;
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::parent() const
+    inline const i_widget& widget<Interface>::parent() const
     {
         if (!has_parent())
             throw no_parent();
@@ -276,13 +276,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::parent()
+    inline i_widget& widget<Interface>::parent()
     {
         return const_cast<i_widget&>(to_const(*this).parent());
     }
 
     template <typename Interface>
-    void widget<Interface>::set_parent(i_widget& aParent)
+    inline void widget<Interface>::set_parent(i_widget& aParent)
     {
         if (iParent != &aParent)
         {
@@ -304,7 +304,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::parent_changed()
+    inline void widget<Interface>::parent_changed()
     {
         auto& self = base_type::as_widget();
 
@@ -317,19 +317,19 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::adding_child() const
+    inline bool widget<Interface>::adding_child() const
     {
         return iAddingChild;
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::add(i_widget& aChild)
+    inline i_widget& widget<Interface>::add(i_widget& aChild)
     {
         return add(ref_ptr<i_widget>{ ref_ptr<i_widget>{}, &aChild });
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::add(const i_ref_ptr<i_widget>& aChild)
+    inline i_widget& widget<Interface>::add(const i_ref_ptr<i_widget>& aChild)
     {
         if (aChild->has_parent() && &aChild->parent() == this)
             return *aChild;
@@ -348,7 +348,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef)
+    inline void widget<Interface>::remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef)
     {
         auto existing = find(aChild, false);
         if (existing == iChildren.end())
@@ -373,26 +373,26 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::remove_all()
+    inline void widget<Interface>::remove_all()
     {
         while (!iChildren.empty())
             remove(*iChildren.back(), true);
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_children() const
+    inline bool widget<Interface>::has_children() const
     {
         return !iChildren.empty();
     }
 
     template <typename Interface>
-    const typename widget<Interface>::widget_list& widget<Interface>::children() const
+    inline const typename widget<Interface>::widget_list& widget<Interface>::children() const
     {
         return iChildren;
     }
 
     template <typename Interface>
-    typename widget<Interface>::widget_list::const_iterator widget<Interface>::last() const
+    inline typename widget<Interface>::widget_list::const_iterator widget<Interface>::last() const
     {
         if (!has_children())
         {
@@ -406,7 +406,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    typename widget<Interface>::widget_list::iterator widget<Interface>::last()
+    inline typename widget<Interface>::widget_list::iterator widget<Interface>::last()
     {
         if (!has_children())
         {
@@ -420,7 +420,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    typename widget<Interface>::widget_list::const_iterator widget<Interface>::find(const i_widget& aChild, bool aThrowIfNotFound) const
+    inline typename widget<Interface>::widget_list::const_iterator widget<Interface>::find(const i_widget& aChild, bool aThrowIfNotFound) const
     {
         for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
             if (&**i == &aChild)
@@ -432,7 +432,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    typename widget<Interface>::widget_list::iterator widget<Interface>::find(const i_widget& aChild, bool aThrowIfNotFound)
+    inline typename widget<Interface>::widget_list::iterator widget<Interface>::find(const i_widget& aChild, bool aThrowIfNotFound)
     {
         for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
             if (&**i == &aChild)
@@ -444,7 +444,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::bring_child_to_front(const i_widget& aChild)
+    inline void widget<Interface>::bring_child_to_front(const i_widget& aChild)
     {
         auto existing = std::find_if(iChildren.begin(), iChildren.end(), [&](auto&& c) { return &*c == &aChild; });
         if (existing != iChildren.end())
@@ -456,7 +456,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::send_child_to_back(const i_widget& aChild)
+    inline void widget<Interface>::send_child_to_back(const i_widget& aChild)
     {
         auto existing = std::find_if(iChildren.begin(), iChildren.end(), [&](auto&& c) { return &*c == &aChild; });
         if (existing != iChildren.end())
@@ -468,13 +468,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    layer_t widget<Interface>::layer() const
+    inline layer_t widget<Interface>::layer() const
     {
         return iLayer;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_layer(layer_t aLayer)
+    inline void widget<Interface>::set_layer(layer_t aLayer)
     {
         if (iLayer != aLayer)
         {
@@ -484,7 +484,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::before() const
+    inline const i_widget& widget<Interface>::before() const
     {
         if (iLinkBefore != nullptr)
             return *iLinkBefore;
@@ -503,13 +503,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::before()
+    inline i_widget& widget<Interface>::before()
     {
         return const_cast<i_widget&>(to_const(*this).before());
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::after() const
+    inline const i_widget& widget<Interface>::after() const
     {
         if (iLinkAfter != nullptr)
             return *iLinkAfter;
@@ -541,25 +541,25 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::after()
+    inline i_widget& widget<Interface>::after()
     {
         return const_cast<i_widget&>(to_const(*this).after());
     }
 
     template <typename Interface>
-    void widget<Interface>::link_before(i_widget* aPreviousWidget)
+    inline void widget<Interface>::link_before(i_widget* aPreviousWidget)
     {
         iLinkBefore = aPreviousWidget;
     }
 
     template <typename Interface>
-    void widget<Interface>::link_after(i_widget* aNextWidget)
+    inline void widget<Interface>::link_after(i_widget* aNextWidget)
     {
         iLinkAfter = aNextWidget;
     }
 
     template <typename Interface>
-    void widget<Interface>::unlink()
+    inline void widget<Interface>::unlink()
     {
         if (iLinkBefore != nullptr)
             iLinkBefore->link_after(iLinkAfter);
@@ -570,19 +570,19 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_layout() const
+    inline bool widget<Interface>::has_layout() const
     {
         return iLayout != nullptr;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_layout(i_layout& aLayout, bool aMoveExistingItems)
+    inline void widget<Interface>::set_layout(i_layout& aLayout, bool aMoveExistingItems)
     {
         set_layout(ref_ptr<i_layout>{ ref_ptr<i_layout>{}, &aLayout }, aMoveExistingItems);
     }
 
     template <typename Interface>
-    void widget<Interface>::set_layout(const i_ref_ptr<i_layout>& aLayout, bool aMoveExistingItems)
+    inline void widget<Interface>::set_layout(const i_ref_ptr<i_layout>& aLayout, bool aMoveExistingItems)
     {
         if (iLayout == aLayout)
             throw layout_already_set();
@@ -608,7 +608,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_layout& widget<Interface>::layout() const
+    inline const i_layout& widget<Interface>::layout() const
     {
         if (!iLayout)
             throw no_layout();
@@ -616,7 +616,7 @@ namespace neogfx
     }
     
     template <typename Interface>
-    i_layout& widget<Interface>::layout()
+    inline i_layout& widget<Interface>::layout()
     {
         if (!iLayout)
             throw no_layout();
@@ -624,31 +624,31 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::can_defer_layout() const
+    inline bool widget<Interface>::can_defer_layout() const
     {
         return is_managing_layout();
     }
 
     template <typename Interface>
-    bool widget<Interface>::is_managing_layout() const
+    inline bool widget<Interface>::is_managing_layout() const
     {
         return false;
     }
 
     template <typename Interface>
-    rect widget<Interface>::element_rect(skin_element) const
+    inline rect widget<Interface>::element_rect(skin_element) const
     {
         return client_rect();
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_parent_layout() const
+    inline bool widget<Interface>::has_parent_layout() const
     {
         return iParentLayout != nullptr;
     }
     
     template <typename Interface>
-    const i_layout& widget<Interface>::parent_layout() const
+    inline const i_layout& widget<Interface>::parent_layout() const
     {
         if (has_parent_layout())
             return *iParentLayout;
@@ -656,13 +656,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_layout& widget<Interface>::parent_layout()
+    inline i_layout& widget<Interface>::parent_layout()
     {
         return const_cast<i_layout&>(to_const(*this).parent_layout());
     }
 
     template <typename Interface>
-    void widget<Interface>::set_parent_layout(i_layout* aParentLayout)
+    inline void widget<Interface>::set_parent_layout(i_layout* aParentLayout)
     {
         if (has_layout() && layout().has_parent_layout() && &layout().parent_layout() == iParentLayout)
             layout().set_parent_layout(aParentLayout);
@@ -670,25 +670,25 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_parent_widget() const
+    inline bool widget<Interface>::has_parent_widget() const
     {
         return has_parent();
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::parent_widget() const
+    inline const i_widget& widget<Interface>::parent_widget() const
     {
         return parent();
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::parent_widget()
+    inline i_widget& widget<Interface>::parent_widget()
     {
         return parent();
     }
 
     template <typename Interface>
-    void widget<Interface>::set_parent_widget(i_widget* aParentWidget)
+    inline void widget<Interface>::set_parent_widget(i_widget* aParentWidget)
     {
         if (aParentWidget != nullptr)
             set_parent(*aParentWidget);
@@ -702,13 +702,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    optional<neogfx::layout_reason>& widget<Interface>::layout_reason()
+    inline optional<neogfx::layout_reason>& widget<Interface>::layout_reason()
     {
         return iLayoutReason;
     }
 
     template <typename Interface>
-    void widget<Interface>::layout_items(bool aDefer)
+    inline void widget<Interface>::layout_items(bool aDefer)
     {
         auto& self = base_type::as_widget();
 
@@ -787,7 +787,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::layout_items_started()
+    inline void widget<Interface>::layout_items_started()
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -797,13 +797,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::layout_items_in_progress() const
+    inline bool widget<Interface>::layout_items_in_progress() const
     {
         return iLayoutInProgress != 0;
     }
 
     template <typename Interface>
-    void widget<Interface>::layout_items_completed()
+    inline void widget<Interface>::layout_items_completed()
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -817,13 +817,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_logical_coordinate_system() const
+    inline bool widget<Interface>::has_logical_coordinate_system() const
     {
         return LogicalCoordinateSystem != std::nullopt;
     }
 
     template <typename Interface>
-    logical_coordinate_system widget<Interface>::logical_coordinate_system() const
+    inline logical_coordinate_system widget<Interface>::logical_coordinate_system() const
     {
         if (has_logical_coordinate_system())
             return *LogicalCoordinateSystem;
@@ -831,13 +831,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem)
+    inline void widget<Interface>::set_logical_coordinate_system(const optional_logical_coordinate_system& aLogicalCoordinateSystem)
     {
         LogicalCoordinateSystem = aLogicalCoordinateSystem;
     }
 
     template <typename Interface>
-    void widget<Interface>::move(const point& aPosition)
+    inline void widget<Interface>::move(const point& aPosition)
     {
         auto& self = base_type::as_widget();
 
@@ -849,7 +849,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::moved()
+    inline void widget<Interface>::moved()
     {
         auto& self = base_type::as_widget();
 
@@ -873,7 +873,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::parent_moved()
+    inline void widget<Interface>::parent_moved()
     {
         auto& self = base_type::as_widget();
 
@@ -884,13 +884,13 @@ namespace neogfx
     }
     
     template <typename Interface>
-    bool widget<Interface>::resizing() const
+    inline bool widget<Interface>::resizing() const
     {
         return iResizing;
     }
 
     template <typename Interface>
-    void widget<Interface>::resize(const size& aSize)
+    inline void widget<Interface>::resize(const size& aSize)
     {
         auto& self = base_type::as_widget();
 
@@ -909,7 +909,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::resized()
+    inline void widget<Interface>::resized()
     {
         auto& self = base_type::as_widget();
 
@@ -933,14 +933,14 @@ namespace neogfx
     }
 
     template <typename Interface>
-    rect widget<Interface>::non_client_rect() const
+    inline rect widget<Interface>::non_client_rect() const
     {
         auto& self = base_type::as_widget();
         return rect{self.origin(), self.extents()};
     }
 
     template <typename Interface>
-    rect widget<Interface>::client_rect(bool aExtendIntoPadding) const
+    inline rect widget<Interface>::client_rect(bool aExtendIntoPadding) const
     {
         auto& self = base_type::as_widget();
         auto const& internalSpacing = self.internal_spacing(!aExtendIntoPadding);
@@ -952,7 +952,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::get_widget_at(const point& aPosition) const
+    inline const i_widget& widget<Interface>::get_widget_at(const point& aPosition) const
     {
         scoped_units su{ *this, units::Pixels };
 
@@ -972,25 +972,25 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::get_widget_at(const point& aPosition)
+    inline i_widget& widget<Interface>::get_widget_at(const point& aPosition)
     {
         return const_cast<i_widget&>(to_const(*this).get_widget_at(aPosition));
     }
 
     template <typename Interface>
-    widget_type widget<Interface>::widget_type() const
+    inline widget_type widget<Interface>::widget_type() const
     {
         return neogfx::widget_type::Client;
     }
 
     template <typename Interface>
-    bool widget<Interface>::part_active(widget_part aPart) const
+    inline bool widget<Interface>::part_active(widget_part aPart) const
     {
         return true;
     }
 
     template <typename Interface>
-    widget_part widget<Interface>::part(const point& aPosition) const
+    inline widget_part widget<Interface>::part(const point& aPosition) const
     {
         if (client_rect().contains(aPosition))
             return widget_part{ *this, widget_part::Client };
@@ -1001,13 +1001,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    widget_part widget<Interface>::hit_test(const point& aPosition) const
+    inline widget_part widget<Interface>::hit_test(const point& aPosition) const
     {
         return part(aPosition);
     }
 
     template <typename Interface>
-    size_policy widget<Interface>::size_policy() const
+    inline size_policy widget<Interface>::size_policy() const
     {
         auto& self = base_type::as_widget();
 
@@ -1024,7 +1024,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    size widget<Interface>::minimum_size(optional_size const& aAvailableSpace) const
+    inline size widget<Interface>::minimum_size(optional_size const& aAvailableSpace) const
     {
         auto& self = base_type::as_widget();
 
@@ -1056,7 +1056,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    size widget<Interface>::maximum_size(optional_size const& aAvailableSpace) const
+    inline size widget<Interface>::maximum_size(optional_size const& aAvailableSpace) const
     {
         auto& self = base_type::as_widget();
 
@@ -1092,7 +1092,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    padding widget<Interface>::padding() const
+    inline padding widget<Interface>::padding() const
     {
         auto& self = base_type::as_widget();
         auto const& adjustedPadding = (self.has_padding() ? 
@@ -1101,7 +1101,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::layout_as(const point& aPosition, const size& aSize)
+    inline void widget<Interface>::layout_as(const point& aPosition, const size& aSize)
     {
         auto& self = base_type::as_widget();
 
@@ -1120,13 +1120,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_view() const
+    inline bool widget<Interface>::has_view() const
     {
         return iView != std::nullopt;
     }
 
     template <typename Interface>
-    view widget<Interface>::view(bool aExtendIntoPadding) const
+    inline view widget<Interface>::view(bool aExtendIntoPadding) const
     {
         if (has_view())
             return iView.value();
@@ -1139,13 +1139,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_view(optional_view const& aView)
+    inline void widget<Interface>::set_view(optional_view const& aView)
     {
         iView = aView;
     }
 
     template <typename Interface>
-    layer_t widget<Interface>::render_layer() const
+    inline layer_t widget<Interface>::render_layer() const
     {
         if (iRenderLayer != std::nullopt)
             return *iRenderLayer;
@@ -1153,7 +1153,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_render_layer(const std::optional<layer_t>& aLayer)
+    inline void widget<Interface>::set_render_layer(const std::optional<layer_t>& aLayer)
     {
         if (iRenderLayer != aLayer)
         {
@@ -1163,13 +1163,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::can_update() const
+    inline bool widget<Interface>::can_update() const
     {
         return self_type::has_root() && self_type::root().has_native_surface() && !effectively_hidden() && !layout_items_in_progress();
     }
 
     template <typename Interface>
-    bool widget<Interface>::update(bool aIncludeNonClient)
+    inline bool widget<Interface>::update(bool aIncludeNonClient)
     {
         if (!can_update())
             return false;
@@ -1177,7 +1177,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::update(const rect& aUpdateRect)
+    inline bool widget<Interface>::update(const rect& aUpdateRect)
     {
 #ifdef NEOGFX_DEBUG
         if (debug::renderItem == this)
@@ -1192,13 +1192,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::requires_update() const
+    inline bool widget<Interface>::requires_update() const
     {
         return surface().has_invalidated_area() && !surface().invalidated_area().intersection(non_client_rect()).empty();
     }
 
     template <typename Interface>
-    rect widget<Interface>::update_rect() const
+    inline rect widget<Interface>::update_rect() const
     {
         if (!requires_update())
             throw no_update_rect();
@@ -1206,27 +1206,27 @@ namespace neogfx
     }
 
     template <typename Interface>
-    rect widget<Interface>::default_clip_rect(bool aIncludeNonClient) const
+    inline rect widget<Interface>::default_clip_rect(bool aIncludeNonClient) const
     {
         auto& cachedRect = (aIncludeNonClient ? iDefaultClipRect.first : iDefaultClipRect.second);
         if (cachedRect != std::nullopt)
             return *cachedRect;
         rect clipRect = to_client_coordinates(non_client_rect());
         if (!aIncludeNonClient)
-            clipRect = clipRect.intersection(client_rect());
+            clipRect = clipRect.intersection(view().view_port_as_rect().value_or(client_rect()));
         if (!self_type::is_root())
             clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         return *(cachedRect = clipRect);
     }
 
     template <typename Interface>
-    bool widget<Interface>::ready_to_render() const
+    inline bool widget<Interface>::ready_to_render() const
     {
         return !iLayoutPending;
     }
 
     template <typename Interface>
-    void widget<Interface>::render(i_graphics_context& aGc) const
+    inline void widget<Interface>::render(i_graphics_context& aGc) const
     {
         auto& self = base_type::as_widget();
 
@@ -1344,7 +1344,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::paint_non_client(i_graphics_context& aGc) const
+    inline void widget<Interface>::paint_non_client(i_graphics_context& aGc) const
     {
         auto& self = base_type::as_widget();
 
@@ -1363,7 +1363,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::paint_non_client_after(i_graphics_context& aGc) const
+    inline void widget<Interface>::paint_non_client_after(i_graphics_context& aGc) const
     {
         auto& self = base_type::as_widget();
 
@@ -1444,19 +1444,19 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::paint(i_graphics_context& aGc) const
+    inline void widget<Interface>::paint(i_graphics_context& aGc) const
     {
         // do nothing
     }
 
     template <typename Interface>
-    double widget<Interface>::opacity() const
+    inline double widget<Interface>::opacity() const
     {
         return Opacity;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_opacity(double aOpacity)
+    inline void widget<Interface>::set_opacity(double aOpacity)
     {
         if (Opacity != aOpacity)
         {
@@ -1466,13 +1466,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_background_opacity() const
+    inline bool widget<Interface>::has_background_opacity() const
     {
         return BackgroundOpacity != std::nullopt;
     }
 
     template <typename Interface>
-    double widget<Interface>::background_opacity() const
+    inline double widget<Interface>::background_opacity() const
     {
         if (has_background_opacity())
             return *BackgroundOpacity.value();
@@ -1480,7 +1480,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_background_opacity(double aOpacity)
+    inline void widget<Interface>::set_background_opacity(double aOpacity)
     {
         if (BackgroundOpacity != aOpacity)
         {
@@ -1490,13 +1490,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_palette() const
+    inline bool widget<Interface>::has_palette() const
     {
         return Palette != std::nullopt;
     }
 
     template <typename Interface>
-    const i_palette& widget<Interface>::palette() const
+    inline const i_palette& widget<Interface>::palette() const
     {
         if (has_palette())
             return *Palette.value();
@@ -1504,7 +1504,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_palette(const i_palette& aPalette)
+    inline void widget<Interface>::set_palette(const i_palette& aPalette)
     {
         if (Palette != aPalette)
         {
@@ -1514,19 +1514,19 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_palette_color(color_role aColorRole) const
+    inline bool widget<Interface>::has_palette_color(color_role aColorRole) const
     {
         return has_palette() && palette().has_color(aColorRole);
     }
 
     template <typename Interface>
-    color widget<Interface>::palette_color(color_role aColorRole) const
+    inline color widget<Interface>::palette_color(color_role aColorRole) const
     {
         return palette().color(aColorRole);
     }
 
     template <typename Interface>
-    void widget<Interface>::set_palette_color(color_role aColorRole, const optional_color& aColor)
+    inline void widget<Interface>::set_palette_color(color_role aColorRole, const optional_color& aColor)
     {
         if (Palette == std::nullopt)
             Palette = neogfx::palette{ current_style_palette_proxy() };
@@ -1540,7 +1540,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    color widget<Interface>::container_background_color() const
+    inline color widget<Interface>::container_background_color() const
     {
         const i_widget* w = this;
         while (w->background_is_transparent() && w->has_parent())
@@ -1552,13 +1552,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_font_role() const
+    inline bool widget<Interface>::has_font_role() const
     {
         return FontRole != std::nullopt;
     }
 
     template <typename Interface>
-    font_role widget<Interface>::font_role() const
+    inline font_role widget<Interface>::font_role() const
     {
         if (has_font_role())
             return *FontRole.value();
@@ -1566,7 +1566,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_font_role(const optional_font_role& aFontRole)
+    inline void widget<Interface>::set_font_role(const optional_font_role& aFontRole)
     {
         if (FontRole != aFontRole)
         {
@@ -1576,13 +1576,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_font() const
+    inline bool widget<Interface>::has_font() const
     {
         return Font != std::nullopt;
     }
 
     template <typename Interface>
-    const font& widget<Interface>::font() const
+    inline const font& widget<Interface>::font() const
     {
         if (has_font())
             return *Font;
@@ -1591,7 +1591,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_font(optional_font const& aFont)
+    inline void widget<Interface>::set_font(optional_font const& aFont)
     {
         auto& self = base_type::as_widget();
 
@@ -1604,31 +1604,31 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::visible() const
+    inline bool widget<Interface>::visible() const
     {
         return Visible && (base_type::MaximumSize == std::nullopt || (base_type::MaximumSize->cx != 0.0 && base_type::MaximumSize->cy != 0.0));
     }
 
     template <typename Interface>
-    bool widget<Interface>::effectively_visible() const
+    inline bool widget<Interface>::effectively_visible() const
     {
         return visible() && (self_type::is_root() || !has_parent() || parent().effectively_visible());
     }
 
     template <typename Interface>
-    bool widget<Interface>::hidden() const
+    inline bool widget<Interface>::hidden() const
     {
         return !visible();
     }
 
     template <typename Interface>
-    bool widget<Interface>::effectively_hidden() const
+    inline bool widget<Interface>::effectively_hidden() const
     {
         return !effectively_visible();
     }
 
     template <typename Interface>
-    bool widget<Interface>::show(bool aVisible)
+    inline bool widget<Interface>::show(bool aVisible)
     {
         if (Visible != aVisible)
         {
@@ -1651,31 +1651,31 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::enabled() const
+    inline bool widget<Interface>::enabled() const
     {
         return Enabled;
     }
 
     template <typename Interface>
-    bool widget<Interface>::effectively_enabled() const
+    inline bool widget<Interface>::effectively_enabled() const
     {
         return enabled() && (self_type::is_root() || !has_parent() || parent().effectively_enabled());
     }
     
     template <typename Interface>
-    bool widget<Interface>::disabled() const
+    inline bool widget<Interface>::disabled() const
     {
         return !enabled();
     }
 
     template <typename Interface>
-    bool widget<Interface>::effectively_disabled() const
+    inline bool widget<Interface>::effectively_disabled() const
     {
         return !effectively_enabled();
     }
 
     template <typename Interface>
-    bool widget<Interface>::enable(bool aEnable)
+    inline bool widget<Interface>::enable(bool aEnable)
     {
         if (Enabled != aEnable)
         {
@@ -1695,31 +1695,31 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::entered(bool aChildEntered) const
+    inline bool widget<Interface>::entered(bool aChildEntered) const
     {
         return self_type::has_root() && self_type::root().has_entered_widget() && (&self_type::root().entered_widget() == this || (aChildEntered && self_type::root().entered_widget().is_descendent_of(*this)));
     }
 
     template <typename Interface>
-    bool widget<Interface>::can_capture() const
+    inline bool widget<Interface>::can_capture() const
     {
         return true;
     }
 
     template <typename Interface>
-    bool widget<Interface>::capturing() const
+    inline bool widget<Interface>::capturing() const
     {
         return surface().as_surface_window().has_capturing_widget() && &surface().as_surface_window().capturing_widget() == this;
     }
 
     template <typename Interface>
-    const optional_point& widget<Interface>::capture_position() const
+    inline const optional_point& widget<Interface>::capture_position() const
     {
         return iCapturePosition;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_capture(capture_reason aReason, const optional_point& aPosition)
+    inline void widget<Interface>::set_capture(capture_reason aReason, const optional_point& aPosition)
     {
         auto& self = base_type::as_widget();
 
@@ -1744,7 +1744,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::release_capture(capture_reason aReason)
+    inline void widget<Interface>::release_capture(capture_reason aReason)
     {
         auto& self = base_type::as_widget();
 
@@ -1764,7 +1764,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::non_client_set_capture()
+    inline void widget<Interface>::non_client_set_capture()
     {
         if (can_capture())
             surface().as_surface_window().non_client_set_capture(*this);
@@ -1773,29 +1773,29 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::non_client_release_capture()
+    inline void widget<Interface>::non_client_release_capture()
     {
         surface().as_surface_window().non_client_release_capture(*this);
     }
 
     template <typename Interface>
-    void widget<Interface>::captured()
+    inline void widget<Interface>::captured()
     {
     }
 
     template <typename Interface>
-    void widget<Interface>::capture_released()
+    inline void widget<Interface>::capture_released()
     {
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_focus_policy() const
+    inline bool widget<Interface>::has_focus_policy() const
     {
         return FocusPolicy != std::nullopt;
     }
 
     template <typename Interface>
-    focus_policy widget<Interface>::focus_policy() const
+    inline focus_policy widget<Interface>::focus_policy() const
     {
         if (has_focus_policy())
             return *FocusPolicy;
@@ -1803,13 +1803,13 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::set_focus_policy(optional_focus_policy const& aFocusPolicy)
+    inline void widget<Interface>::set_focus_policy(optional_focus_policy const& aFocusPolicy)
     {
         FocusPolicy = aFocusPolicy;
     }
 
     template <typename Interface>
-    bool widget<Interface>::can_set_focus(focus_reason aFocusReason) const
+    inline bool widget<Interface>::can_set_focus(focus_reason aFocusReason) const
     {
         if (effectively_hidden() || effectively_disabled())
             return false;
@@ -1833,19 +1833,19 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::has_focus() const
+    inline bool widget<Interface>::has_focus() const
     {
         return self_type::has_root() && self_type::root().is_active() && self_type::root().has_focused_widget() && &self_type::root().focused_widget() == this;
     }
 
     template <typename Interface>
-    bool widget<Interface>::child_has_focus() const
+    inline bool widget<Interface>::child_has_focus() const
     {
         return self_type::has_root() && self_type::root().is_active() && self_type::root().has_focused_widget() && self_type::root().focused_widget().is_descendent_of(*this);
     }
 
     template <typename Interface>
-    bool widget<Interface>::set_focus(focus_reason aFocusReason)
+    inline bool widget<Interface>::set_focus(focus_reason aFocusReason)
     {
         if (!has_focus())
         {
@@ -1856,7 +1856,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::release_focus()
+    inline bool widget<Interface>::release_focus()
     {
         if (has_focus() || child_has_focus())
         {
@@ -1867,59 +1867,59 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::focus_gained(focus_reason aReason)
+    inline void widget<Interface>::focus_gained(focus_reason aReason)
     {
         update(true);
         Focus.trigger(focus_event::FocusGained, aReason);
     }
 
     template <typename Interface>
-    void widget<Interface>::focus_lost(focus_reason aReason)
+    inline void widget<Interface>::focus_lost(focus_reason aReason)
     {
         update(true);
         Focus.trigger(focus_event::FocusLost, aReason);
     }
 
     template <typename Interface>
-    bool widget<Interface>::consider_ancestors_for_mouse_events() const
+    inline bool widget<Interface>::consider_ancestors_for_mouse_events() const
     {
         return ConsiderAncestorsForMouseEvents;
     }
 
     template <typename Interface>
-    void widget<Interface>::set_consider_ancestors_for_mouse_events(bool aConsiderAncestors)
+    inline void widget<Interface>::set_consider_ancestors_for_mouse_events(bool aConsiderAncestors)
     {
         ConsiderAncestorsForMouseEvents = aConsiderAncestors;
     }
 
     template <typename Interface>
-    bool widget<Interface>::ignore_mouse_events(bool aConsiderAncestors) const
+    inline bool widget<Interface>::ignore_mouse_events(bool aConsiderAncestors) const
     {
         return IgnoreMouseEvents || (aConsiderAncestors && consider_ancestors_for_mouse_events() && 
             has_parent() && parent().ignore_mouse_events());
     }
 
     template <typename Interface>
-    void widget<Interface>::set_ignore_mouse_events(bool aIgnoreMouseEvents)
+    inline void widget<Interface>::set_ignore_mouse_events(bool aIgnoreMouseEvents)
     {
         IgnoreMouseEvents = aIgnoreMouseEvents;
     }
 
     template <typename Interface>
-    bool widget<Interface>::ignore_non_client_mouse_events(bool aConsiderAncestors) const
+    inline bool widget<Interface>::ignore_non_client_mouse_events(bool aConsiderAncestors) const
     {
         return IgnoreNonClientMouseEvents || (aConsiderAncestors && consider_ancestors_for_mouse_events() &&
             has_parent() && parent().ignore_non_client_mouse_events());
     }
 
     template <typename Interface>
-    void widget<Interface>::set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents)
+    inline void widget<Interface>::set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents)
     {
         IgnoreNonClientMouseEvents = aIgnoreNonClientMouseEvents;
     }
 
     template <typename Interface>
-    mouse_event_location widget<Interface>::mouse_event_location() const
+    inline mouse_event_location widget<Interface>::mouse_event_location() const
     {
         if (self_type::has_root() && self_type::root().has_native_surface())
             return surface().as_surface_window().current_mouse_event_location();
@@ -1928,7 +1928,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    inline bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         auto& self = base_type::as_widget();
 
@@ -1939,7 +1939,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         auto& self = base_type::as_widget();
 
@@ -1950,7 +1950,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         auto& self = base_type::as_widget();
 
@@ -1961,7 +1961,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_button_released(mouse_button aButton, const point& aPosition)
+    inline void widget<Interface>::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         auto& self = base_type::as_widget();
 
@@ -1972,25 +1972,25 @@ namespace neogfx
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_moved(const point&, key_modifiers_e)
+    inline void widget<Interface>::mouse_moved(const point&, key_modifiers_e)
     {
         // do nothing
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_entered(const point&)
+    inline void widget<Interface>::mouse_entered(const point&)
     {
         // do nothing
     }
 
     template <typename Interface>
-    void widget<Interface>::mouse_left()
+    inline void widget<Interface>::mouse_left()
     {
         // do nothing
     }
 
     template <typename Interface>
-    point widget<Interface>::mouse_position() const
+    inline point widget<Interface>::mouse_position() const
     {
         auto& self = base_type::as_widget();
 
@@ -2002,7 +2002,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    neogfx::mouse_cursor widget<Interface>::mouse_cursor() const
+    inline mouse_cursor widget<Interface>::mouse_cursor() const
     {
         std::optional<neogfx::mouse_cursor> mouseCursor;
         auto const mousePosition = mouse_position();
@@ -2055,31 +2055,31 @@ namespace neogfx
     }
 
     template <typename Interface>
-    bool widget<Interface>::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
+    inline bool widget<Interface>::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
     {
         return false;
     }
 
     template <typename Interface>
-    bool widget<Interface>::key_released(scan_code_e, key_code_e, key_modifiers_e)
+    inline bool widget<Interface>::key_released(scan_code_e, key_code_e, key_modifiers_e)
     {
         return false;
     }
 
     template <typename Interface>
-    bool widget<Interface>::text_input(i_string const&)
+    inline bool widget<Interface>::text_input(i_string const&)
     {
         return false;
     }
 
     template <typename Interface>
-    bool widget<Interface>::sys_text_input(i_string const&)
+    inline bool widget<Interface>::sys_text_input(i_string const&)
     {
         return false;
     }
 
     template <typename Interface>
-    const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
+    inline const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
         auto& self = base_type::as_widget();
 
@@ -2133,7 +2133,7 @@ namespace neogfx
     }
 
     template <typename Interface>
-    i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
+    inline i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
     {
         return const_cast<i_widget&>(to_const(*this).widget_for_mouse_event(aPosition, aForHitTest));
     }
