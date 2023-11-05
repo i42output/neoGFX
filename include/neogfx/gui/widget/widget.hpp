@@ -30,7 +30,10 @@
 
 namespace neogfx
 {
-    template <typename Interface = i_widget>
+    template <typename T>
+    concept WidgetInterface = std::is_base_of_v<i_widget, T>;
+
+    template <WidgetInterface Interface = i_widget>
     class widget : public layout_item<object<Interface>>
     {
         meta_object(layout_item<object<Interface>>)
