@@ -85,6 +85,12 @@ namespace neogfx
             std::vector<buffer_line> lines;
             std::vector<buffer_savable_state> saved;
             mutable neogfx::cursor cursor;
+
+            buffer& operator=(buffer_savable_state const& aSavedState)
+            {
+                buffer_savable_state::operator=(aSavedState);
+                return *this;
+            }
         };
     public:
         terminal();

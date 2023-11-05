@@ -533,7 +533,7 @@ namespace neogfx
                 case '8':
                     if (!active_buffer().saved.empty())
                     {
-                        static_cast<buffer_savable_state&>(active_buffer()) = active_buffer().saved.back();
+                        active_buffer() = active_buffer().saved.back();
                         active_buffer().saved.pop_back();
                         update_cursor();
                     }
