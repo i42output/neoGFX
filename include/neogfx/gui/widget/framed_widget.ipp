@@ -24,13 +24,13 @@
 
 namespace neogfx
 {
-    template <typename Base>
+    template <Widget Base>
     inline neogfx::border framed_widget<Base>::border() const
     {
         return neogfx::border{ effective_frame_width(), effective_frame_width(), effective_frame_width(), effective_frame_width() };
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void framed_widget<Base>::paint_non_client(i_graphics_context& aGc) const
     {
 #ifdef NEOGFX_DEBUG
@@ -85,7 +85,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void framed_widget<Base>::set_frame_style(frame_style aStyle)
     {
         if (iStyle != aStyle)
@@ -95,13 +95,13 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline bool framed_widget<Base>::has_frame_color() const
     {
         return iFrameColor != std::nullopt;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline color framed_widget<Base>::frame_color() const
     {
         if (has_frame_color())
@@ -110,14 +110,14 @@ namespace neogfx
             return base_type::as_widget().background_color().shaded(0x20);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void framed_widget<Base>::set_frame_color(const optional_color& aFrameColor)
     {
         iFrameColor = aFrameColor;
         base_type::as_widget().update(true);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline color framed_widget<Base>::inner_frame_color() const
     {
         if (iStyle != frame_style::ContainerFrame)
@@ -126,13 +126,13 @@ namespace neogfx
             return (base_type::as_widget().has_base_color() ? base_type::as_widget().base_color() : base_type::as_widget().container_background_color()).lighter(0x40);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline bool framed_widget<Base>::has_frame_radius() const
     {
         return iFrameRadius != std::nullopt;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline vec4 framed_widget<Base>::frame_radius() const
     {
         if (has_frame_radius())
@@ -141,20 +141,20 @@ namespace neogfx
             return vec4{};
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void framed_widget<Base>::set_frame_radius(const optional_vec4& aFrameRadius)
     {
         iFrameRadius = aFrameRadius;
         base_type::as_widget().update(true);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline dimension framed_widget<Base>::line_width() const
     {
         return units_converter{ *this }.from_device_units(iLineWidth);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline dimension framed_widget<Base>::effective_frame_width() const
     {
         switch (iStyle)

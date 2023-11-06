@@ -24,38 +24,38 @@
 
 namespace neogfx
 {
-    template <typename Base>
+    template <Widget Base>
     inline scrollable_widget<Base>::~scrollable_widget()
     {
         service<i_scrollbar_container_updater>().unqueue(*this);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline scrollbar_style scrollable_widget<Base>::scrollbar_style() const
     {
         return iScrollbarStyle;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline point scrollable_widget<Base>::scroll_position() const
     {
         return units_converter{ *this }.from_device_units(point(static_cast<coordinate>(horizontal_scrollbar().position()), static_cast<coordinate>(vertical_scrollbar().position())));
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::scroll_to(i_widget& aChild)
     {
         (void)aChild;
         /* todo */
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::layout_items_started()
     {
         base_type::layout_items_started();
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::layout_items_completed()
     {
         base_type::layout_items_completed();
@@ -67,7 +67,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::resized()
     {
         base_type::resized();
@@ -79,7 +79,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline rect scrollable_widget<Base>::client_rect(bool aExtendIntoPadding) const
     {
         rect result = base_type::client_rect(aExtendIntoPadding);
@@ -110,7 +110,7 @@ namespace neogfx
         return result;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline widget_part scrollable_widget<Base>::part(const point& aPosition) const
     {
         if (vertical_scrollbar().visible() &&
@@ -125,7 +125,7 @@ namespace neogfx
             return base_type::part(aPosition);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::paint_non_client_after(i_graphics_context& aGc) const
     {
         base_type::paint_non_client_after(aGc);
@@ -144,7 +144,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline bool scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
         scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
@@ -174,7 +174,7 @@ namespace neogfx
             return true;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         if (aButton == mouse_button::Middle)
@@ -217,7 +217,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
@@ -239,7 +239,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
         base_type::mouse_button_released(aButton, aPosition);
@@ -263,7 +263,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         base_type::mouse_moved(aPosition, aKeyModifiers);
@@ -271,7 +271,7 @@ namespace neogfx
         horizontal_scrollbar().update(aPosition);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::mouse_entered(const point& aPosition)
     {
         base_type::mouse_entered(aPosition);
@@ -279,7 +279,7 @@ namespace neogfx
         horizontal_scrollbar().update();
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::mouse_left()
     {
         base_type::mouse_left();
@@ -287,7 +287,7 @@ namespace neogfx
         horizontal_scrollbar().update();
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline bool scrollable_widget<Base>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
         bool handled = true;
@@ -330,31 +330,31 @@ namespace neogfx
         return handled;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline const scrollbar& scrollable_widget<Base>::vertical_scrollbar() const
     {
         return iVerticalScrollbar;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline scrollbar& scrollable_widget<Base>::vertical_scrollbar()
     {
         return iVerticalScrollbar;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline const scrollbar& scrollable_widget<Base>::horizontal_scrollbar() const
     {
         return iHorizontalScrollbar;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline scrollbar& scrollable_widget<Base>::horizontal_scrollbar()
     {
         return iHorizontalScrollbar;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::init_scrollbars()
     {
         if (base_type::device_metrics_available())
@@ -364,7 +364,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::init()
     {
         auto async_update = [&]()
@@ -386,19 +386,19 @@ namespace neogfx
         init_scrollbars();
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline scrolling_disposition scrollable_widget<Base>::scrolling_disposition() const
     {
         return neogfx::scrolling_disposition::ScrollChildWidgetVertically | neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline scrolling_disposition scrollable_widget<Base>::scrolling_disposition(const i_widget&) const
     {
         return neogfx::scrolling_disposition::ScrollChildWidgetVertically | neogfx::scrolling_disposition::ScrollChildWidgetHorizontally;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline rect scrollable_widget<Base>::scroll_area() const
     {
         scoped_units su{ *this, units::Pixels };
@@ -476,13 +476,13 @@ namespace neogfx
 
         return to_units(*this, su.saved_units(), result);
     }
-    template <typename Base>
+    template <Widget Base>
     inline size scrollable_widget<Base>::scroll_page() const
     {
         return client_rect().extents();
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline rect scrollable_widget<Base>::scrollbar_geometry(const i_scrollbar& aScrollbar) const
     {
         auto const sbrect = client_rect();
@@ -509,7 +509,7 @@ namespace neogfx
         }
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e)
     {
         if (!iIgnoreScrollbarUpdates)
@@ -540,31 +540,31 @@ namespace neogfx
         base_type::as_widget().update(true);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline color scrollable_widget<Base>::scrollbar_color(const i_scrollbar&) const
     {
         return base_type::as_widget().palette_color(color_role::Foreground);
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline i_widget const& scrollable_widget<Base>::as_widget() const
     {
         return *this;
     }
 
-    template <typename Base>
+    template <Widget Base>
     i_widget& scrollable_widget<Base>::as_widget()
     {
         return *this;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline bool scrollable_widget<Base>::use_scrollbar_container_updater() const
     {
         return true;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::update_scrollbar_visibility()
     {
         if (!base_type::device_metrics_available())
@@ -634,7 +634,7 @@ namespace neogfx
 #endif
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline bool scrollable_widget<Base>::update_scrollbar_visibility(usv_stage_e aStage)
     {
         bool updatePage = false; 
@@ -699,7 +699,7 @@ namespace neogfx
         return updatePage;
     }
 
-    template <typename Base>
+    template <Widget Base>
     inline void scrollable_widget<Base>::scroll_page_updated()
     {
         base_type::as_widget().layout_items();

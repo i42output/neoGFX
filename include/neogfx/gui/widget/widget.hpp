@@ -33,9 +33,15 @@ namespace neogfx
     template <typename T>
     concept WidgetInterface = std::is_base_of_v<i_widget, T>;
 
+    template <typename T>
+    concept Widget = std::is_base_of_v<i_widget, T> && T::IsWidget;
+
     template <WidgetInterface Interface = i_widget>
     class widget : public layout_item<object<Interface>>
     {
+    public:
+        static bool constexpr IsWidget = true;
+    public:
         meta_object(layout_item<object<Interface>>)
         typedef widget<Interface> self_type;
     public:

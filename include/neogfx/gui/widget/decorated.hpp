@@ -110,7 +110,7 @@ namespace neogfx
         return aLhs = static_cast<decoration_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    template <typename WidgetType, typename... OtherBases>
+    template <Widget WidgetType, typename... OtherBases>
     class decorated : public WidgetType, public virtual i_standard_layout_container, public OtherBases...
     {
         meta_object(WidgetType)

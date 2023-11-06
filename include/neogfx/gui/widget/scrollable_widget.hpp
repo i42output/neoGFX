@@ -43,7 +43,7 @@ namespace neogfx
         return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
     }
 
-    template <typename Base = widget<>>
+    template <Widget Base = widget<>>
     class scrollable_widget : public Base, private i_scrollbar_container
     {
         meta_object(Base)
@@ -185,6 +185,5 @@ namespace neogfx
     };
 
     extern template class scrollable_widget<framed_widget<widget<>>>;
-    typedef scrollable_widget<framed_widget<widget<>>> framed_scrollable_widget;
-
+    using framed_scrollable_widget = scrollable_widget<framed_widget<widget<>>>;
 }

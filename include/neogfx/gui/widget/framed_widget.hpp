@@ -40,7 +40,7 @@ namespace neogfx
         WindowFrame
     };
 
-    template <typename Base = widget<>>
+    template <Widget Base = widget<>>
     class framed_widget : public Base
     {
         meta_object(Base)
