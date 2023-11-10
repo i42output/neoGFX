@@ -111,6 +111,17 @@ namespace neogfx
     }
 
     template <Widget Base>
+    inline view scrollable_widget<Base>::view(bool aExtendIntoPadding) const
+    {
+        if (base_type::has_view())
+            return base_type::view(aExtendIntoPadding);
+        neogfx::view result;
+        result.set_view_port(scroll_page());
+        result.set_view(scroll_area());
+        return result;
+    }
+
+    template <Widget Base>
     inline widget_part scrollable_widget<Base>::part(const point& aPosition) const
     {
         if (vertical_scrollbar().visible() &&
@@ -403,7 +414,7 @@ namespace neogfx
     {
         scoped_units su{ *this, units::Pixels };
         
-        auto const cr = client_rect();
+        auto const cr = client_rect(false);
         
         rect result = cr;
 

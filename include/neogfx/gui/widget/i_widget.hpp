@@ -170,6 +170,7 @@ namespace neogfx
         virtual bool has_view() const = 0;
         virtual neogfx::view view(bool aExtendIntoPadding = true) const = 0;
         virtual void set_view(optional_view const& aView) = 0;
+    public:
         virtual layer_t render_layer() const = 0;
         virtual void set_render_layer(const std::optional<layer_t>& aLayer) = 0;
         virtual bool can_update() const = 0;

@@ -134,6 +134,8 @@ namespace neogfx
         rect client_rect(bool aExtendIntoPadding = true) const override;
         widget_part part(point const& aPosition) const override;
     public:
+        neogfx::view view(bool aExtendIntoPadding = true) const override;
+    public:
         void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
         bool mouse_wheel_scrolled(mouse_wheel aWheel, point const& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;

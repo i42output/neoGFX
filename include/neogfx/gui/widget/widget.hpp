@@ -192,6 +192,8 @@ namespace neogfx
         bool has_view() const override;
         neogfx::view view(bool aExtendIntoPadding = true) const override;
         void set_view(optional_view const& aView) override;
+        // i_widget
+    public:
         layer_t render_layer() const override;
         void set_render_layer(const std::optional<layer_t>& aLayer) override;
         bool can_update() const override;

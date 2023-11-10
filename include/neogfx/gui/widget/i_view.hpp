@@ -57,5 +57,11 @@ namespace neogfx
             else
                 set_view_port(std::optional<quad>{});
         }
+        void set_view(rect const& aView, scalar aRotation = 0.0)
+        {
+            set_center(aView.center().to_vec2());
+            set_size(aView.extents().to_vec2());
+            set_rotation(aRotation);
+        }
     };
 }
