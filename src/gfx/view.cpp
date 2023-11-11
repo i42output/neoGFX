@@ -55,21 +55,40 @@ namespace neogfx
     }
 
     view::view(i_view const& aOther) :
-        iViewport{ aOther.viewport() },
+        iViewport{ aOther.viewport_set() ? aOther.viewport() : decltype(iViewport){} },
         iCenter{ aOther.center() },
         iSize{ aOther.size() },
         iRotation{ aOther.rotation() }
     {
     }
 
-    optional_rect const& view::viewport() const
+    view::view(rect const& aViewport) :
+        view{}
     {
-        return iViewport;
+        set_viewport(aViewport);
+        set_view(aViewport);
     }
 
-    void view::set_viewport(optional_rect const& aViewport)
+    bool view::viewport_set() const
+    {
+        return iViewport.has_value();
+    }
+
+    rect const& view::viewport() const
+    {
+        if (viewport_set())
+            return iViewport.value();
+        throw viewport_not_set();
+    }
+
+    void view::set_viewport(rect const& aViewport)
     {
         iViewport = aViewport;
+    }
+
+    void view::reset_viewport()
+    {
+        iViewport = std::nullopt;
     }
 
     vec2 const& view::center() const

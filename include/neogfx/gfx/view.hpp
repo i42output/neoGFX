@@ -29,10 +29,12 @@ namespace neogfx
     public:
         view();
         view(i_view const& aOther);
+        view(rect const& aViewport);
     public:
-        optional_rect const& viewport() const final;
-        using i_view::set_viewport;
-        void set_viewport(optional_rect const& aViewport) final;
+        bool viewport_set() const final;
+        rect const& viewport() const final;
+        void set_viewport(rect const& aViewport) final;
+        void reset_viewport() final;
         vec2 const& center() const final;
         void set_center(vec2 const& aCenter) final;
         void move(vec2 const& aOffset) final;

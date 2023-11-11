@@ -1130,11 +1130,7 @@ namespace neogfx
     {
         if (has_view())
             return iView.value();
-        neogfx::view defaultView;
-        auto const& cr = client_rect(aExtendIntoPadding);
-        defaultView.set_center(cr.center().to_vec2());
-        defaultView.set_size(cr.extents().to_vec2());
-        defaultView.set_viewport(cr);
+        neogfx::view const defaultView = client_rect(aExtendIntoPadding);
         return defaultView;
     }
 
@@ -1213,7 +1209,7 @@ namespace neogfx
             return *cachedRect;
         rect clipRect = to_client_coordinates(non_client_rect());
         if (!aIncludeNonClient)
-            clipRect = clipRect.intersection(view().viewport().value_or(client_rect()));
+            clipRect = clipRect.intersection(view().viewport());
         if (!self_type::is_root())
             clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         return *(cachedRect = clipRect);

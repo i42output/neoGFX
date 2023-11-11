@@ -201,8 +201,8 @@ namespace neogfx
         virtual void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) const = 0;
         virtual void clear_depth_buffer() const = 0;
         virtual void clear_stencil_buffer() const = 0;
-        virtual void blit(rect const& aDestinationRect, const i_graphics_context& aSource, rect const& aSourceRect) const = 0;
-        virtual void blur(rect const& aDestinationRect, const i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const = 0;
+        virtual void blit(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect) const = 0;
+        virtual void blur(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const = 0;
         // gradient
     public:
         virtual void clear_gradient() = 0;
@@ -376,7 +376,7 @@ namespace neogfx
     };
 
     template <typename Iter>
-    inline void draw_glyph_text(const i_graphics_context& aGc, vec3 const& aPoint, glyph_text const& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, text_format const& aTextFormat)
+    inline void draw_glyph_text(i_graphics_context const& aGc, vec3 const& aPoint, glyph_text const& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, text_format const& aTextFormat)
     {
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
@@ -389,7 +389,7 @@ namespace neogfx
     class scoped_mnemonics
     {
     public:
-        scoped_mnemonics(const i_graphics_context& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
+        scoped_mnemonics(i_graphics_context const& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
             iGc(aGc)
         {
             iGc.set_mnemonic(aShowMnemonics, aMnemonicPrefix);
@@ -399,33 +399,33 @@ namespace neogfx
             iGc.unset_mnemonic();
         }
     private:
-        const i_graphics_context& iGc;
+        i_graphics_context const& iGc;
     };
 
     class scoped_coordinate_system
     {
     public:
-        scoped_coordinate_system(const i_graphics_context& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+        scoped_coordinate_system(i_graphics_context const& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             apply_origin(aOrigin, aExtents);
         }
-        scoped_coordinate_system(const i_graphics_context& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
+        scoped_coordinate_system(i_graphics_context const& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             iGc.set_logical_coordinates(aCoordinates);
             apply_origin(aOrigin, aExtents);
         }
-        scoped_coordinate_system(const i_graphics_context& aGc, const i_graphics_context& aSource) :
+        scoped_coordinate_system(i_graphics_context const& aGc, i_graphics_context const& aSource) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
             iGc.set_logical_coordinates(aSource.logical_coordinates());
             iGc.set_origin(aSource.origin());
         }
-        scoped_coordinate_system(const i_graphics_context& aGc, i_rendering_context const& aSource) :
+        scoped_coordinate_system(i_graphics_context const& aGc, i_rendering_context const& aSource) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
@@ -450,7 +450,7 @@ namespace neogfx
                 iGc.set_origin(point{ aOrigin.x, iGc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
         }
     private:
-        const i_graphics_context& iGc;
+        i_graphics_context const& iGc;
         point iPreviousOrigin;
         logical_coordinate_system iPreviousCoordinateSystem;
         neogfx::logical_coordinates iPreviousCoordinates;
@@ -459,7 +459,7 @@ namespace neogfx
     class scoped_snap_to_pixel
     {
     public:
-        scoped_snap_to_pixel(const i_graphics_context& aGc, bool aSnapToPixel = true) :
+        scoped_snap_to_pixel(i_graphics_context const& aGc, bool aSnapToPixel = true) :
             iGc{ aGc }, iPreviousSnapped{ aGc.snap_to_pixel() }
         {
             iGc.set_snap_to_pixel(aSnapToPixel);
@@ -469,14 +469,14 @@ namespace neogfx
             iGc.set_snap_to_pixel(iPreviousSnapped);
         }
     private:
-        const i_graphics_context& iGc;
+        i_graphics_context const& iGc;
         bool iPreviousSnapped;
     };
 
     class scoped_opacity
     {
     public:
-        scoped_opacity(const i_graphics_context& aGc, double aOpacity) :
+        scoped_opacity(i_graphics_context const& aGc, double aOpacity) :
             iGc{ aGc }, iPreviousOpacity { aGc.opacity() }
         {
             iGc.set_opacity(iGc.opacity() * aOpacity);
@@ -486,14 +486,14 @@ namespace neogfx
             iGc.set_opacity(iPreviousOpacity);
         }
     private:
-        const i_graphics_context& iGc;
+        i_graphics_context const& iGc;
         double iPreviousOpacity;
     };
 
     class scoped_blending_mode
     {
     public:
-        scoped_blending_mode(const i_graphics_context& aGc, neogfx::blending_mode aBlendigMode) :
+        scoped_blending_mode(i_graphics_context const& aGc, neogfx::blending_mode aBlendigMode) :
             iGc{ aGc }, iPreviousBlendingMode{ aGc.blending_mode() }
         {
             iGc.set_blending_mode(aBlendigMode);
@@ -503,14 +503,14 @@ namespace neogfx
             iGc.set_blending_mode(iPreviousBlendingMode);
         }
     private:
-        const i_graphics_context& iGc;
+        i_graphics_context const& iGc;
         neogfx::blending_mode iPreviousBlendingMode;
     };
 
     class scoped_scissor
     {
     public:
-        scoped_scissor(const i_graphics_context& aGc, rect const& aScissorRect) :
+        scoped_scissor(i_graphics_context const& aGc, rect const& aScissorRect) :
             iGc{ aGc }
         {
             iGc.scissor_on(aScissorRect);
@@ -520,7 +520,7 @@ namespace neogfx
             iGc.scissor_off();
         }
     private:
-        const i_graphics_context& iGc;
+        i_graphics_context const& iGc;
     };
 
     inline void draw_alpha_background(i_graphics_context& aGc, rect const& aRect, dimension aAlphaPatternSize = 4.0_dip)
@@ -565,11 +565,11 @@ namespace neogfx
             iGc.draw_texture(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
         }
     public:
-        const i_graphics_context& front_buffer() const
+        i_graphics_context const& front_buffer() const
         {
             return *iBuffers.buffer1;
         }
-        const i_graphics_context& back_buffer() const
+        i_graphics_context const& back_buffer() const
         {
             return *iBuffers.buffer2;
         }

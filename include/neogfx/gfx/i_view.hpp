@@ -28,10 +28,14 @@ namespace neogfx
     class i_view
     {
     public:
+        struct viewport_not_set : std::logic_error { viewport_not_set() : std::logic_error{ "neogfx::i_view::viewport_not_set" } {} };
+    public:
         using abstract_type = i_view;
     public:
-        virtual optional_rect const& viewport() const = 0;
-        virtual void set_viewport(optional_rect const& aViewPort = {}) = 0;
+        virtual bool viewport_set() const = 0;
+        virtual rect const& viewport() const = 0;
+        virtual void set_viewport(rect const& aViewPort) = 0;
+        virtual void reset_viewport() = 0;
         virtual vec2 const& center() const = 0;
         virtual void set_center(vec2 const& aCenter) = 0;
         virtual void move(vec2 const& aOffset) = 0;
