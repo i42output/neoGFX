@@ -740,10 +740,10 @@ namespace neogfx
         return result;
     }
 
-    size item_view::scroll_page() const
+    rect item_view::scroll_page() const
     {
         scoped_units su{ *this, units::Pixels };
-        size const result{ item_display_rect() };
+        auto const result{ item_display_rect() };
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_page: " << result << endl;
         return result;

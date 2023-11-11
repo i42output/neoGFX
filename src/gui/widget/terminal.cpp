@@ -144,11 +144,6 @@ namespace neogfx
         return rect{ point{}, scrollAreaExtents * character_extents() };
     }
 
-    size terminal::scroll_page() const
-    {
-        return client_rect(false).extents();
-    }
-
     bool terminal::use_scrollbar_container_updater() const
     {
         return false;

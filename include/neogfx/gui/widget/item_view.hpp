@@ -141,7 +141,7 @@ namespace neogfx
         bool text_input(i_string const& aText) override;
     protected:
         rect scroll_area() const override;
-        size scroll_page() const override;
+        rect scroll_page() const override;
     protected:
         void update_scrollbar_visibility() override;
         bool update_scrollbar_visibility(usv_stage_e aStage) override;

@@ -1134,7 +1134,7 @@ namespace neogfx
         auto const& cr = client_rect(aExtendIntoPadding);
         defaultView.set_center(cr.center().to_vec2());
         defaultView.set_size(cr.extents().to_vec2());
-        defaultView.set_view_port(cr);
+        defaultView.set_viewport(cr);
         return defaultView;
     }
 
@@ -1208,12 +1208,12 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline rect widget<Interface>::default_clip_rect(bool aIncludeNonClient) const
     {
-        auto& cachedRect = (aIncludeNonClient ? iDefaultClipRect.first : iDefaultClipRect.second);
-        if (cachedRect != std::nullopt)
+        auto& cachedRect = (aIncludeNonClient ? iDefaultNonClientClipRect : iDefaultClientClipRect);
+        if (cachedRect != invalid)
             return *cachedRect;
         rect clipRect = to_client_coordinates(non_client_rect());
         if (!aIncludeNonClient)
-            clipRect = clipRect.intersection(view().view_port_as_rect().value_or(client_rect()));
+            clipRect = clipRect.intersection(view().viewport().value_or(client_rect()));
         if (!self_type::is_root())
             clipRect = clipRect.intersection(to_client_coordinates(parent().to_window_coordinates(parent().default_clip_rect((widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient))));
         return *(cachedRect = clipRect);
@@ -1237,7 +1237,8 @@ namespace neogfx
 
         scoped_units su{ *this, units::Pixels };
 
-        iDefaultClipRect = std::make_pair(std::nullopt, std::nullopt);
+        iDefaultNonClientClipRect = invalid;
+        iDefaultClientClipRect = invalid;
 
         const rect updateRect = update_rect();
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);

@@ -46,7 +46,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/view.hpp>
+#include <neogfx/gfx/view.hpp>
 
 namespace neogfx
 {
@@ -55,21 +55,21 @@ namespace neogfx
     }
 
     view::view(i_view const& aOther) :
-        iViewPort{ aOther.view_port() },
+        iViewport{ aOther.viewport() },
         iCenter{ aOther.center() },
         iSize{ aOther.size() },
         iRotation{ aOther.rotation() }
     {
     }
 
-    std::optional<quad> const& view::view_port() const
+    optional_rect const& view::viewport() const
     {
-        return iViewPort;
+        return iViewport;
     }
 
-    void view::set_view_port(std::optional<quad> const& aViewPort)
+    void view::set_viewport(optional_rect const& aViewport)
     {
-        iViewPort = aViewPort;
+        iViewport = aViewport;
     }
 
     vec2 const& view::center() const

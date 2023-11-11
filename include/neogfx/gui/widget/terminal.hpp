@@ -103,7 +103,6 @@ namespace neogfx
         void resized() override;
     public:
         rect scroll_area() const override;
-        size scroll_page() const override;
         bool use_scrollbar_container_updater() const override;
     public:
         void paint(i_graphics_context& aGc) const override;

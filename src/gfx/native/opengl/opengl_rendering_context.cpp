@@ -498,8 +498,8 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& setViewport = static_variant_cast<const graphics_operation::set_viewport&>(*op);
-                    if (setViewport.rect)
-                        render_target().set_viewport(setViewport.rect->as<int32_t>());
+                    if (setViewport.viewport)
+                        render_target().set_viewport(setViewport.viewport.value().as<int32_t>());
                     else
                         render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<int32_t>());
                 }

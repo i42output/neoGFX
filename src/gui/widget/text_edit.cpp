@@ -1276,11 +1276,6 @@ namespace neogfx
         return rect{ point{}, iTextExtents.value() };
     }
 
-    size text_edit::scroll_page() const
-    {
-        return client_rect(false).extents();
-    }
-
     bool text_edit::use_scrollbar_container_updater() const
     {
         return false;

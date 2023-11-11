@@ -156,7 +156,7 @@ namespace neogfx
         virtual neogfx::scrolling_disposition scrolling_disposition(i_widget const& aChildWidget) const;
     public:
         rect scroll_area() const override;
-        size scroll_page() const override;
+        rect scroll_page() const override;
     protected:
         rect scrollbar_geometry(i_scrollbar const& aScrollbar) const override;
         void scrollbar_updated(i_scrollbar const& aScrollbar, i_scrollbar::update_reason_e aReason) override;

@@ -27,11 +27,11 @@
 #include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/app/i_style.hpp>
 #include <neogfx/app/palette.hpp>
+#include <neogfx/gfx/view.hpp>
 #include <neogfx/gui/window/window_events.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 #include <neogfx/gui/widget/widget_bits.hpp>
-#include <neogfx/gui/widget/view.hpp>
 
 namespace neogfx
 {

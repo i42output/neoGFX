@@ -173,7 +173,7 @@ namespace neogfx
         friend class scrollbar_container_updater;
     public:
         virtual rect scroll_area() const = 0;
-        virtual size scroll_page() const = 0;
+        virtual rect scroll_page() const = 0;
     public:
         virtual rect scrollbar_geometry(const i_scrollbar& aScrollbar) const = 0;
         virtual void scrollbar_updated(const i_scrollbar& aScrollbar, i_scrollbar::update_reason_e aReason) = 0;

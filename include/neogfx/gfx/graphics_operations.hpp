@@ -53,7 +53,12 @@ namespace neogfx
 
         struct set_viewport
         {
-            std::optional<rect> rect;
+            std::optional<rect> viewport;
+        };
+
+        struct set_view_transformation
+        {
+            std::optional<mat33> viewTransformation;
         };
 
         struct scissor_on
@@ -281,6 +286,7 @@ namespace neogfx
             set_logical_coordinates,
             set_origin,
             set_viewport,
+            set_view_transformation,
             scissor_on,
             scissor_off,
             snap_to_pixel_on,
@@ -325,6 +331,7 @@ namespace neogfx
             SetLogicalCoordinates,
             SetOrigin,
             SetViewport,
+            SetViewTransformation,
             ScissorOn,
             ScissorOff,
             SnapToPixelOn,

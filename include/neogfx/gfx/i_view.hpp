@@ -30,8 +30,8 @@ namespace neogfx
     public:
         using abstract_type = i_view;
     public:
-        virtual std::optional<quad> const& view_port() const = 0;
-        virtual void set_view_port(std::optional<quad> const& aViewPort) = 0;
+        virtual optional_rect const& viewport() const = 0;
+        virtual void set_viewport(optional_rect const& aViewPort = {}) = 0;
         virtual vec2 const& center() const = 0;
         virtual void set_center(vec2 const& aCenter) = 0;
         virtual void move(vec2 const& aOffset) = 0;
@@ -43,20 +43,6 @@ namespace neogfx
         virtual void rotate(scalar aAngle) = 0;
         virtual mat33 const& transformation() const = 0;
     public:
-        optional_rect view_port_as_rect() const
-        {
-            auto const& viewPort = view_port();
-            if (viewPort != std::nullopt)
-                return rect{ point{ viewPort.value()[0] }, neogfx::size{ viewPort.value()[2] - viewPort.value()[0] } };
-            return {};
-        }
-        void set_view_port(optional_rect const& aViewPort)
-        {
-            if (aViewPort != std::nullopt)
-                set_view_port(aViewPort.value().to_quad());
-            else
-                set_view_port(std::optional<quad>{});
-        }
         void set_view(rect const& aView, scalar aRotation = 0.0)
         {
             set_center(aView.center().to_vec2());

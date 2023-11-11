@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/i_view.hpp>
+#include <neogfx/gfx/i_view.hpp>
 
 namespace neogfx
 {
@@ -30,9 +30,9 @@ namespace neogfx
         view();
         view(i_view const& aOther);
     public:
-        std::optional<quad> const& view_port() const final;
-        using i_view::set_view_port;
-        void set_view_port(std::optional<quad> const& aViewPort) final;
+        optional_rect const& viewport() const final;
+        using i_view::set_viewport;
+        void set_viewport(optional_rect const& aViewport) final;
         vec2 const& center() const final;
         void set_center(vec2 const& aCenter) final;
         void move(vec2 const& aOffset) final;
@@ -44,7 +44,7 @@ namespace neogfx
         void rotate(scalar aAngle) final;
         mat33 const& transformation() const final;
     private:
-        std::optional<quad> iViewPort;
+        optional_rect iViewport;
         vec2 iCenter;
         vec2 iSize;
         scalar iRotation = 0.0;

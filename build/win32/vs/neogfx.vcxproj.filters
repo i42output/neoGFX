@@ -1203,13 +1203,13 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\mvc\view_container.ipp">
       <Filter>Header Files\mvc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gfx\native\native_texture.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_view.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_view.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\view.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1801,10 +1801,10 @@
     <ClCompile Include="..\..\..\src\gui\mvc\view_container.cpp">
       <Filter>Source Files\mvc</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\widget\view.cpp">
+    <ClCompile Include="..\..\..\src\gfx\native\native_texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\native\native_texture.cpp">
+    <ClCompile Include="..\..\..\src\gfx\view.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

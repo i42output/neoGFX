@@ -336,7 +336,8 @@ namespace neogfx
         uint32_t iLayoutInProgress;
         optional<neogfx::layout_reason> iLayoutReason;
         ref_ptr<i_layout> iLayout;
-        mutable std::pair<optional_rect, optional_rect> iDefaultClipRect;
+        mutable cache<rect> iDefaultNonClientClipRect;
+        mutable cache<rect> iDefaultClientClipRect;
         optional_point iCapturePosition;
         int32_t iLayer;
         optional_view iView;

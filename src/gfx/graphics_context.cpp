@@ -36,7 +36,7 @@
 
 namespace neogfx
 {
-    ping_pong_buffers create_ping_pong_buffers(const i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling, const optional_color& aClearColor)
+    ping_pong_buffers create_ping_pong_buffers(i_rendering_context const& aContext, size const& aExtents, texture_sampling aSampling, optional_color const& aClearColor)
     {
         size previousExtents;
         auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
@@ -68,7 +68,7 @@ namespace neogfx
         return ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
     }
 
-    graphics_context::graphics_context(const i_surface& aSurface, type aType) :
+    graphics_context::graphics_context(i_surface const& aSurface, type aType) :
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
         iNativeGraphicsContext{ nullptr },
@@ -83,7 +83,7 @@ namespace neogfx
     {
     }
 
-    graphics_context::graphics_context(const i_surface& aSurface, const font& aDefaultFont, type aType) :
+    graphics_context::graphics_context(i_surface const& aSurface, font const& aDefaultFont, type aType) :
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
         iNativeGraphicsContext{ nullptr },
@@ -98,7 +98,7 @@ namespace neogfx
     {
     }
 
-    graphics_context::graphics_context(const i_widget& aWidget, type aType) :
+    graphics_context::graphics_context(i_widget const& aWidget, type aType) :
         iType{ aType },
         iRenderTarget{ aWidget.surface().native_surface() },
         iNativeGraphicsContext{ nullptr },
@@ -115,7 +115,7 @@ namespace neogfx
         set_logical_coordinate_system(aWidget.logical_coordinate_system());
     }
 
-    graphics_context::graphics_context(const i_texture& aTexture, type aType) :
+    graphics_context::graphics_context(i_texture const& aTexture, type aType) :
         iType{ aType },
         iRenderTarget{ static_cast<i_native_texture&>(aTexture.native_texture()) },
         iNativeGraphicsContext{ nullptr },
@@ -130,7 +130,7 @@ namespace neogfx
     {
     }
 
-    graphics_context::graphics_context(const graphics_context& aOther) :
+    graphics_context::graphics_context(graphics_context const& aOther) :
         iType{ aOther.iType },
         iRenderTarget{ aOther.iRenderTarget },
         iSrt{ aOther.iRenderTarget },
@@ -184,7 +184,7 @@ namespace neogfx
         return native_context().queue();
     }
 
-    void graphics_context::enqueue(const graphics_operation::operation& aOperation)
+    void graphics_context::enqueue(graphics_operation::operation const& aOperation)
     {
         native_context().enqueue(aOperation);
     }
@@ -195,32 +195,32 @@ namespace neogfx
             native_context().flush();
     }
 
-    delta graphics_context::to_device_units(const delta& aValue) const
+    delta graphics_context::to_device_units(delta const& aValue) const
     {
         return units_converter{ *this }.to_device_units(aValue);
     }
 
-    size graphics_context::to_device_units(const size& aValue) const
+    size graphics_context::to_device_units(size const& aValue) const
     {
         return units_converter{ *this }.to_device_units(aValue);
     }
 
-    point graphics_context::to_device_units(const point& aValue) const
+    point graphics_context::to_device_units(point const& aValue) const
     {
         return units_converter{ *this }.to_device_units(aValue);
     }
 
-    vec2 graphics_context::to_device_units(const vec2& aValue) const
+    vec2 graphics_context::to_device_units(vec2 const& aValue) const
     {
         return units_converter{ *this }.to_device_units(aValue);
     }
 
-    rect graphics_context::to_device_units(const rect& aValue) const
+    rect graphics_context::to_device_units(rect const& aValue) const
     {
         return units_converter{ *this }.to_device_units(aValue);
     }
 
-    path graphics_context::to_device_units(const path& aValue) const
+    path graphics_context::to_device_units(path const& aValue) const
     {
         path result = aValue;
         result.set_position(to_device_units(result.position()));
@@ -230,27 +230,27 @@ namespace neogfx
         return result;
     }
 
-    delta graphics_context::from_device_units(const delta& aValue) const
+    delta graphics_context::from_device_units(delta const& aValue) const
     {
         return units_converter{ *this }.from_device_units(aValue);
     }
 
-    size graphics_context::from_device_units(const size& aValue) const
+    size graphics_context::from_device_units(size const& aValue) const
     {
         return units_converter{ *this }.from_device_units(aValue);
     }
 
-    point graphics_context::from_device_units(const point& aValue) const
+    point graphics_context::from_device_units(point const& aValue) const
     {
         return units_converter{ *this }.from_device_units(aValue);
     }
 
-    rect graphics_context::from_device_units(const rect& aValue) const
+    rect graphics_context::from_device_units(rect const& aValue) const
     {
         return units_converter{ *this }.from_device_units(aValue);
     }
 
-    path graphics_context::from_device_units(const path& aValue) const
+    path graphics_context::from_device_units(path const& aValue) const
     {
         path result = aValue;
         result.set_position(from_device_units(result.position()));
@@ -300,7 +300,7 @@ namespace neogfx
         return render_target().logical_coordinates();
     }
 
-    void graphics_context::set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates) const
+    void graphics_context::set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) const
     {
         if (iLogicalCoordinates != aCoordinates)
         {
@@ -315,7 +315,7 @@ namespace neogfx
         throw not_implemented();
     }
 
-    void graphics_context::set_offset(const optional_vec2& aOffset)
+    void graphics_context::set_offset(optional_vec2 const& aOffset)
     {
         throw not_implemented();
     }
@@ -335,17 +335,17 @@ namespace neogfx
         return iDefaultFont;
     }
 
-    void graphics_context::set_default_font(const font& aDefaultFont) const
+    void graphics_context::set_default_font(font const& aDefaultFont) const
     {
         iDefaultFont = aDefaultFont;
     }
 
-    void graphics_context::set_extents(const size& aExtents) const
+    void graphics_context::set_extents(size const& aExtents) const
     {
         iExtents = aExtents;
     }
 
-    void graphics_context::set_origin(const point& aOrigin) const
+    void graphics_context::set_origin(point const& aOrigin) const
     {
         if (iOrigin != to_device_units(aOrigin))
         {
@@ -364,79 +364,79 @@ namespace neogfx
         native_context().enqueue(graphics_operation::clear_gradient{});
     }
 
-    void graphics_context::set_gradient(const gradient& aGradient, const rect& aBoundingBox)
+    void graphics_context::set_gradient(gradient const& aGradient, rect const& aBoundingBox)
     {
         native_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox) + iOrigin) });
     }
 
-    void graphics_context::set_pixel(const point& aPoint, const color& aColor) const
+    void graphics_context::set_pixel(point const& aPoint, color const& aColor) const
     {
         native_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColor });
     }
 
-    void graphics_context::draw_pixel(const point& aPoint, const color& aColor) const
+    void graphics_context::draw_pixel(point const& aPoint, color const& aColor) const
     {
         native_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint) + iOrigin, aColor });
     }
 
-    void graphics_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen) const
+    void graphics_context::draw_line(point const& aFrom, point const& aTo, pen const& aPen) const
     {
         native_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen });
     }
 
-    void graphics_context::draw_triangle(const point& aP0, const point& aP1, const point& aP2, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen, aFill });
     }
 
-    void graphics_context::draw_rect(const rect& aRect, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_rect(rect const& aRect, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen, aFill });
     }
 
-    void graphics_context::draw_rounded_rect(const rect& aRect, const vec4& aRadius, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
     }
 
-    void graphics_context::draw_checker_rect(const rect& aRect, const size& aSquareSize, const pen& aPen, const brush& aFill1, const brush& aFill2) const
+    void graphics_context::draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const
     {
         native_context().enqueue(graphics_operation::draw_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
     }
 
-    void graphics_context::draw_circle(const point& aCenter, dimension aRadius, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aFill });
     }
 
-    void graphics_context::draw_ellipse(const point& aCenter, dimension aRadiusA, dimension aRadiusB, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen, aFill });
     }
 
-    void graphics_context::draw_pie(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
-    void graphics_context::draw_arc(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill) const
     {
         native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
-    void graphics_context::draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen) const
+    void graphics_context::draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const
     {
         native_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, to_device_units(aP3) + iOrigin, aPen });
     }
 
-    void graphics_context::draw_path(const path& aPath, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_path(path const& aPath, pen const& aPen, brush const& aFill) const
     {
         path path = to_device_units(aPath);
         path.set_position(path.position() + iOrigin);
         native_context().enqueue(graphics_operation::draw_path{ path, aPen, aFill });
     }
 
-    void graphics_context::draw_shape(const game::mesh& aShape, const vec3& aPosition, const pen& aPen, const brush& aFill) const
+    void graphics_context::draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill) const
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
@@ -467,7 +467,7 @@ namespace neogfx
                 });
     }
 
-    void graphics_context::draw_focus_rect(const rect& aRect) const
+    void graphics_context::draw_focus_rect(rect const& aRect) const
     {
         scoped_snap_to_pixel sntp{ *this, true };
 
@@ -505,7 +505,7 @@ namespace neogfx
         return text_extent(aText, default_font());
     }
 
-    size graphics_context::text_extent(std::string const& aText, const font& aFont) const
+    size graphics_context::text_extent(std::string const& aText, font const& aFont) const
     {
         return text_extent(aText.begin(), aText.end(), [&aFont](std::size_t) { return aFont; });
     }
@@ -520,7 +520,7 @@ namespace neogfx
         return text_extent(aTextBegin, aTextEnd, default_font());
     }
 
-    size graphics_context::text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const
+    size graphics_context::text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const
     {
         return text_extent(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
     }
@@ -535,7 +535,7 @@ namespace neogfx
         return multiline_text_extent(aText, default_font());
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText, const font& aFont) const
+    size graphics_context::multiline_text_extent(std::string const& aText, font const& aFont) const
     {
         return multiline_text_extent(aText, [&aFont](std::size_t) { return aFont; }, 0);
     }
@@ -550,7 +550,7 @@ namespace neogfx
         return multiline_text_extent(aText, default_font(), aMaxWidth);
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText, const font& aFont, dimension aMaxWidth) const
+    size graphics_context::multiline_text_extent(std::string const& aText, font const& aFont, dimension aMaxWidth) const
     {
         return multiline_text_extent(aText, [&aFont](std::size_t) { return aFont; }, aMaxWidth);
     }
@@ -560,17 +560,17 @@ namespace neogfx
         return multiline_glyph_text_extent(to_glyph_text(aText.begin(), aText.end(), aFontSelector), aMaxWidth);
     }
 
-    size graphics_context::glyph_text_extent(const glyph_text& aText) const
+    size graphics_context::glyph_text_extent(glyph_text const& aText) const
     {
         return from_device_units(aText.extents());
     }
 
-    size graphics_context::glyph_text_extent(const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const
+    size graphics_context::glyph_text_extent(glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const
     {
         return from_device_units(aText.extents(aTextBegin, aTextEnd));
     }
 
-    size graphics_context::multiline_glyph_text_extent(const glyph_text& aText, dimension aMaxWidth) const
+    size graphics_context::multiline_glyph_text_extent(glyph_text const& aText, dimension aMaxWidth) const
     {
         return quad_extents(to_multiline_glyph_text(aText, aMaxWidth).bbox);
     }
@@ -580,7 +580,7 @@ namespace neogfx
         return is_text_left_to_right(aText, default_font());
     }
 
-    bool graphics_context::is_text_left_to_right(std::string const& aText, const font& aFont) const
+    bool graphics_context::is_text_left_to_right(std::string const& aText, font const& aFont) const
     {
         auto const& glyphText = to_glyph_text(aText.begin(), aText.end(), aFont);
         return glyph_text_direction(glyphText.cbegin(), glyphText.cend()) == text_direction::LTR;
@@ -591,107 +591,107 @@ namespace neogfx
         return is_text_right_to_left(aText, default_font());
     }
 
-    bool graphics_context::is_text_right_to_left(std::string const& aText, const font& aFont) const
+    bool graphics_context::is_text_right_to_left(std::string const& aText, font const& aFont) const
     {
         return !is_text_left_to_right(aText, aFont);
     }
 
-    void graphics_context::draw_text(const point& aPoint, std::string const& aText, const text_format& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aText, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(const point& aPoint, std::string const& aText, const font& aFont, const text_format& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat) const
     {
         draw_text(aPoint.to_vec3(), aText, aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const text_format& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aTextBegin, aTextEnd, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(const point& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_format& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const
     {
         draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(const vec3& aPoint, std::string const& aText, const text_format& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, std::string const& aText, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aText, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_format& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aText.begin(), aText.end(), aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const text_format& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aTextBegin, aTextEnd, default_font() , aTextFormat);
     }
 
-    void graphics_context::draw_text(const vec3& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, const text_format& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const
     {
         draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aFont), aTextFormat);
     }
 
-    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint.to_vec3(), aText, aFont, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aMaxWidth, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const point& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aTextFormat, aAlignment);
     }
         
-    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, aFont, 0, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aMaxWidth, aTextFormat, aAlignment);
     }
     
-    void graphics_context::draw_multiline_text(const vec3& aPoint, std::string const& aText, const font& aFont, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aFont, aMaxWidth, aAlignment), aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const
     {
         draw_glyph_text(aPoint.to_vec3(), aText, aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(const point& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const
     {
         draw_glyph_text(aPoint.to_vec3(), aText, aTextBegin, aTextEnd, aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const
     {
         draw_glyph_text(aPoint, aText, aText.cbegin(), aText.cend(), aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(const vec3& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const
     {
         if (aTextBegin == aTextEnd)
             return;
@@ -699,22 +699,22 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, text_format_span{ 0, aTextEnd - aTextBegin, aTextFormat }, mnemonics_shown() });
     }
 
-    void graphics_context::draw_multiline_glyph_text(const point& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_glyph_text(point const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_glyph_text(aPoint.to_vec3(), aText, aMaxWidth, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_glyph_text(const vec3& aPoint, const glyph_text& aText, dimension aMaxWidth, const text_format& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_glyph_text(vec3 const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aMaxWidth, aAlignment), aTextFormat);
     }
 
-    void graphics_context::draw_multiline_glyph_text(const point& aPoint, const multiline_glyph_text& aText, const text_format& aTextFormat) const
+    void graphics_context::draw_multiline_glyph_text(point const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) const
     {
         draw_multiline_glyph_text(aPoint.to_vec3(), aText, aTextFormat);
     }
 
-    void graphics_context::draw_multiline_glyph_text(const vec3& aPoint, const multiline_glyph_text& aText, const text_format& aTextFormat) const
+    void graphics_context::draw_multiline_glyph_text(vec3 const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) const
     {
         for (auto& line : aText.lines)
         {
@@ -801,17 +801,23 @@ namespace neogfx
         native_context().flush();
     }
 
-    void graphics_context::set_default_viewport() const
+    void graphics_context::set_viewport(optional_rect const& aViewport) const
     {
-        native_context().enqueue(graphics_operation::set_viewport{});
+        if (aViewport)
+            native_context().enqueue(graphics_operation::set_viewport{ to_device_units(aViewport.value() )});
+        else
+            native_context().enqueue(graphics_operation::set_viewport{});
     }
 
-    void graphics_context::set_viewport(const rect& aViewportRect) const
+    void graphics_context::set_view_transforamtion(optional_mat33 const& aViewTransforamtion) const
     {
-        native_context().enqueue(graphics_operation::set_viewport{ to_device_units(aViewportRect) });
-        }
+        if (aViewTransforamtion)
+            native_context().enqueue(graphics_operation::set_view_transformation{ aViewTransforamtion.value() });
+        else
+            native_context().enqueue(graphics_operation::set_view_transformation{});
+    }
 
-    void graphics_context::scissor_on(const rect& aRect) const
+    void graphics_context::scissor_on(rect const& aRect) const
     {
         native_context().enqueue(graphics_operation::scissor_on{ to_device_units(aRect) + iOrigin });
     }
@@ -923,7 +929,7 @@ namespace neogfx
         }
     }
 
-    void graphics_context::clear(const color& aColor, const std::optional<scalar>& aZpos) const
+    void graphics_context::clear(color const& aColor, std::optional<scalar> const& aZpos) const
     {
         if (aZpos == std::nullopt)
             native_context().enqueue(graphics_operation::clear{ aColor });
@@ -942,13 +948,13 @@ namespace neogfx
         native_context().enqueue(graphics_operation::clear_stencil_buffer{});
     }
 
-    void graphics_context::blit(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect) const
+    void graphics_context::blit(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect) const
     {
         scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
         draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
     }
 
-    void blur(const i_graphics_context& aDestination, const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
+    void blur(i_graphics_context const& aDestination, rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt{ aDestination };
         auto mesh = aDestination.logical_coordinate_system() == logical_coordinate_system::AutomaticGui ?
@@ -970,7 +976,7 @@ namespace neogfx
             to_ecs_component(aAlgorithm, aParameter1, aParameter2));
     }
 
-    void graphics_context::blur(const rect& aDestinationRect, const i_graphics_context& aSource, const rect& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2) const
+    void graphics_context::blur(rect const& aDestinationRect, const i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2) const
     {
         scoped_render_target srt1{ *this };
         scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Blit };
@@ -995,7 +1001,7 @@ namespace neogfx
         return to_glyph_text(aText, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string const& aText, const font& aFont) const
+    glyph_text graphics_context::to_glyph_text(std::string const& aText, font const& aFont) const
     {
         return to_glyph_text(aText.begin(), aText.end(), aFont);
     }
@@ -1010,7 +1016,7 @@ namespace neogfx
         return to_glyph_text(aTextBegin, aTextEnd, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont) const
+    glyph_text graphics_context::to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
     }
@@ -1020,17 +1026,17 @@ namespace neogfx
         return service<i_font_manager>().glyph_text_factory().to_glyph_text(*this, std::string_view{ aTextBegin, aTextEnd }, aFontSelector);
     }
 
-    glyph_text graphics_context::to_glyph_text(const std::u32string& aText) const
+    glyph_text graphics_context::to_glyph_text(std::u32string const& aText) const
     {
         return to_glyph_text(aText, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(const std::u32string& aText, const font& aFont) const
+    glyph_text graphics_context::to_glyph_text(std::u32string const& aText, font const& aFont) const
     {
         return to_glyph_text(aText.begin(), aText.end(), aFont);
     }
 
-    glyph_text graphics_context::to_glyph_text(const std::u32string& aText, std::function<font(std::size_t)> aFontSelector) const
+    glyph_text graphics_context::to_glyph_text(std::u32string const& aText, std::function<font(std::size_t)> aFontSelector) const
     {
         return to_glyph_text(aText.begin(), aText.end(), aFontSelector);
     }
@@ -1040,7 +1046,7 @@ namespace neogfx
         return to_glyph_text(aTextBegin, aTextEnd, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont) const
+    glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
     }
@@ -1055,7 +1061,7 @@ namespace neogfx
         return to_multiline_glyph_text(aText, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string const& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aText.begin(), aText.end(), aFont, aMaxWidth, aAlignment);
     }
@@ -1065,7 +1071,7 @@ namespace neogfx
         return to_multiline_glyph_text(aTextBegin, aTextEnd, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aTextBegin, aTextEnd, [aFont](std::size_t) { return aFont; }, aMaxWidth, aAlignment);
     }
@@ -1075,12 +1081,12 @@ namespace neogfx
         return to_multiline_glyph_text(to_glyph_text(aTextBegin, aTextEnd, aFontSelector), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(const std::u32string& aText, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string const& aText, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aText, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(const std::u32string& aText, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aText.begin(), aText.end(), aFont, aMaxWidth, aAlignment);
     }
@@ -1090,7 +1096,7 @@ namespace neogfx
         return to_multiline_glyph_text(aTextBegin, aTextEnd, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, const font& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; }, aMaxWidth, aAlignment);
     }
@@ -1100,7 +1106,7 @@ namespace neogfx
         return to_multiline_glyph_text(to_glyph_text(aTextBegin, aTextEnd, aFontSelector), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(const glyph_text& aText, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(glyph_text const& aText, dimension aMaxWidth, alignment aAlignment) const
     {
         multiline_glyph_text result{ aText.clone() };
         typedef std::pair<glyph_text::iterator, glyph_text::iterator> line_t;
@@ -1222,23 +1228,23 @@ namespace neogfx
         return result;
     }
 
-    void graphics_context::draw_glyph(const point& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph(point const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) const
     {
         draw_glyph(aPoint.to_vec3(), aText, aGlyphChar, aTextFormat);
     }
 
-    void graphics_context::draw_glyph(const vec3& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, const text_format& aTextFormat) const
+    void graphics_context::draw_glyph(vec3 const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) const
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
         native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyphChar, std::next(&aGlyphChar), text_format_span{ 0, 1, aTextFormat }, mnemonics_shown() });
     }
 
-    void graphics_context::draw_glyphs(const point& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const
+    void graphics_context::draw_glyphs(point const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const
     {
         draw_glyphs(aPoint.to_vec3(), aText, aSpans);
     }
 
-    void graphics_context::draw_glyphs(const vec3& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const
+    void graphics_context::draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
         native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aText.begin(), aText.end(), aSpans, mnemonics_shown()});
@@ -1295,12 +1301,12 @@ namespace neogfx
             iPassword = std::nullopt;
     }
 
-    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect) const
     {
         draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, with_bounding_box(aColor, rect{ aPoint, aTexture.extents() }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect) const
     {
         if (logical_coordinates().is_gui_orientation())
             draw_texture(to_ecs_component(aRect), aTexture, with_bounding_box(aColor, aRect), aShaderEffect);
@@ -1308,12 +1314,12 @@ namespace neogfx
             draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, with_bounding_box(aColor, game_rect{ aRect }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const point& aPoint, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect) const
     {
         draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, with_bounding_box(aColor, rect{ aPoint, aTextureRect.extents() }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect) const
     {
         if (logical_coordinates().is_gui_orientation())
             draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, with_bounding_box(aColor, aRect), aShaderEffect);
@@ -1321,7 +1327,7 @@ namespace neogfx
             draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, with_bounding_box(aColor, game_rect{ aRect }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect) const
     {
         draw_mesh(
             aMesh, 
@@ -1336,7 +1342,7 @@ namespace neogfx
             optional_mat44{});
     }
 
-    void graphics_context::draw_texture(const game::mesh& aMesh, const i_texture& aTexture, const rect& aTextureRect, const color_or_gradient& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect) const
     {
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)
@@ -1344,7 +1350,7 @@ namespace neogfx
         draw_texture(adjustedMesh, aTexture, aColor, aShaderEffect);
     }
 
-    void graphics_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const optional_mat44& aTransformation, const std::optional<game::filter>& aFilter) const
+    void graphics_context::draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation, std::optional<game::filter> const& aFilter) const
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(

@@ -356,6 +356,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_buffer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_provider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_shader.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\primitives.hpp" />
@@ -381,6 +382,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\utility.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_buffer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\vertex_shader.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\color_dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\dialog_button_box.hpp" />
@@ -470,7 +472,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_text_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tool.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp" />
@@ -508,7 +509,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\tree_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.ipp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\widget\view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp" />
@@ -677,6 +677,7 @@
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\gfx\vertex_shader.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\view.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\color_dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
     <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />
@@ -751,7 +752,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tool_title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\view.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_surface.cpp" />

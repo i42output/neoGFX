@@ -113,10 +113,8 @@ namespace neogfx
     template <Widget Base>
     inline view scrollable_widget<Base>::view(bool aExtendIntoPadding) const
     {
-        if (base_type::has_view())
-            return base_type::view(aExtendIntoPadding);
-        neogfx::view result;
-        result.set_view_port(scroll_page());
+        neogfx::view result = base_type::view(aExtendIntoPadding);
+        result.set_viewport(aExtendIntoPadding ? client_rect() : scroll_page());
         result.set_view(scroll_area());
         return result;
     }
@@ -488,9 +486,9 @@ namespace neogfx
         return to_units(*this, su.saved_units(), result);
     }
     template <Widget Base>
-    inline size scrollable_widget<Base>::scroll_page() const
+    inline rect scrollable_widget<Base>::scroll_page() const
     {
-        return client_rect().extents();
+        return client_rect(false);
     }
 
     template <Widget Base>
