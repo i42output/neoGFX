@@ -165,6 +165,8 @@ namespace neogfx
         virtual void set_underline(bool aUnderline);
         virtual font_weight weight() const;
         virtual point_size size() const;
+        virtual scalar outline_thickness() const;
+        virtual void set_outline_thickness(scalar aOutlineThickness);
         virtual bool kerning() const;
         virtual void enable_kerning();
         virtual void disable_kerning();
@@ -173,6 +175,7 @@ namespace neogfx
         font_info with_style_xor(font_style aStyle) const;
         font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
+        font_info with_outline(scalar aOutlineThickness) const;
     public:
         bool operator==(const font_info& aRhs) const;
         bool operator<(const font_info& aRhs) const;

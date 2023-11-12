@@ -45,8 +45,9 @@ namespace neogfx
         virtual i_string const& style_name(uint32_t aStyleIndex) const = 0;
         virtual void remove_style(font_style aStyle) = 0;
         virtual void remove_style(uint32_t aStyleIndex) = 0;
-        virtual void create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
-        virtual void create_face(i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
+        virtual void create_face(font_style aStyle, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
+        virtual void create_face(i_string const& aStyleName, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
+        virtual void create_face(font_info const& aFontInfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         // helpers
     public:
         font_style min_style() const
@@ -63,16 +64,22 @@ namespace neogfx
                 minWeight = std::min(minWeight, font::weight_from_style_name(style_name(si)));
             return minWeight;
         }
-        ref_ptr<i_native_font_face> create_face(font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+        ref_ptr<i_native_font_face> create_face(font_style aStyle, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice)
         {
             ref_ptr<i_native_font_face> result;
-            create_face(aStyle, aSize, aDevice, result);
+            create_face(aStyle, aSize, aOutlineThickness, aDevice, result);
             return result;
         }
-        ref_ptr<i_native_font_face> create_face(std::string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+        ref_ptr<i_native_font_face> create_face(std::string const& aStyleName, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice)
         {
             ref_ptr<i_native_font_face> result;
-            create_face(string{ aStyleName }, aSize, aDevice, result);
+            create_face(string{ aStyleName }, aSize, aOutlineThickness, aDevice, result);
+            return result;
+        }
+        ref_ptr<i_native_font_face> create_face(font_info const& aFontInfo, i_device_resolution const& aDevice)
+        {
+            ref_ptr<i_native_font_face> result;
+            create_face(aFontInfo, aDevice, result);
             return result;
         }
     };

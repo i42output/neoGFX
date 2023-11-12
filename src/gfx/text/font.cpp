@@ -119,13 +119,15 @@ namespace neogfx
         bool iUnderline;
         font_weight iWeight;
         point_size iSize;
+        scalar iOutlineThickness;
         bool iKerning;
     };
 
     font_info::instance::instance() :
         iSize{}, 
         iUnderline{ false }, 
-        iWeight{ font_weight::Normal }, 
+        iWeight{ font_weight::Normal },
+        iOutlineThickness{ 0.0 },
         iKerning{ true }
     {
     }
@@ -136,6 +138,7 @@ namespace neogfx
         iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, 
         iWeight{ weight_from_style(aStyle) }, 
         iSize{ aSize }, 
+        iOutlineThickness{ 0.0 },
         iKerning{ true }
     {
     }
@@ -146,6 +149,7 @@ namespace neogfx
         iUnderline{ false }, 
         iWeight{ weight_from_style_name(aStyleName) }, 
         iSize{ aSize }, 
+        iOutlineThickness{ 0.0 },
         iKerning{ true }
     {
     }
@@ -157,6 +161,7 @@ namespace neogfx
         iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, 
         iWeight{ weight_from_style_name(aStyleName) }, 
         iSize{ aSize }, 
+        iOutlineThickness{ 0.0 },
         iKerning{ true }
     {
     }
@@ -168,6 +173,7 @@ namespace neogfx
         iUnderline{ false },
         iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) : font_weight::Normal },
         iSize{ aSize },
+        iOutlineThickness{ 0.0 },
         iKerning{ true }
     {
     }
@@ -179,6 +185,7 @@ namespace neogfx
         iUnderline{ aOther.iUnderline }, 
         iWeight{ aOther.iWeight }, 
         iSize{ aOther.iSize }, 
+        iOutlineThickness{ 0.0 },
         iKerning{ aOther.iKerning }
     {
     }
@@ -195,6 +202,7 @@ namespace neogfx
         iUnderline = aOther.iUnderline;
         iWeight = aOther.iWeight;
         iSize = aOther.iSize;
+        iOutlineThickness = aOther.iOutlineThickness;
         iKerning = aOther.iKerning;
         return *this;
     }
@@ -296,6 +304,20 @@ namespace neogfx
         return iInstance->iSize;
     }
 
+    scalar font_info::outline_thickness() const
+    {
+        return iInstance->iOutlineThickness;
+    }
+
+    void font_info::set_outline_thickness(scalar aOutlineThickness)
+    {
+        if (iInstance->iOutlineThickness != aOutlineThickness)
+        {
+            iInstance = std::make_shared<instance>(*iInstance);
+            iInstance->iOutlineThickness = aOutlineThickness;
+        }
+    }
+
     bool font_info::kerning() const
     {
         return iInstance->iKerning;
@@ -344,6 +366,13 @@ namespace neogfx
     font_info font_info::with_size(point_size aSize) const
     {
         return font_info(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, aSize);
+    }
+
+    font_info font_info::with_outline(scalar aOutlineThickness) const
+    {
+        font_info result = *this;
+        result.set_outline_thickness(aOutlineThickness);
+        return result;
     }
 
     bool font_info::operator==(const font_info& aRhs) const

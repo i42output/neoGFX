@@ -938,32 +938,34 @@ namespace neogfx
     {
         if (aStyle == neogfx::font_style::Emulated)
             aStyle = neogfx::font_style::Normal;
-        return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, aDevice));
+        return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, 0.0, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, aDevice));
+        return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, 0.0, aDevice));
     }
 
-    i_native_font_face& font_manager::create_font(const font_info& aInfo, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::create_font(const font_info& aFontInfo, const i_device_resolution& aDevice)
     {
-        if (aInfo.style_name_available())
-            return create_font(aInfo.family_name(), aInfo.style_name(), aInfo.size(), aDevice);
-        else
-            return create_font(aInfo.family_name(), aInfo.style(), aInfo.size(), aDevice);
+        return add_font(find_font(aFontInfo).create_face(aFontInfo, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_native_font& aFont, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
     {
         if (aStyle == neogfx::font_style::Emulated)
             aStyle = neogfx::font_style::Normal;
-        return add_font(aFont.create_face(aStyle, aSize, aDevice));
+        return add_font(aFont.create_face(aStyle, aSize, 0.0, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_native_font& aFont, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        return add_font(aFont.create_face(aStyleName, aSize, aDevice));
+        return add_font(aFont.create_face(aStyleName, aSize, 0.0, aDevice));
+    }
+
+    i_native_font_face& font_manager::create_font(i_native_font& aFont, const font_info& aFontInfo, const i_device_resolution& aDevice)
+    {
+        return add_font(aFont.create_face(aFontInfo, aDevice));
     }
 
     bool font_manager::is_font_file(i_string const& aFileName) const
@@ -1001,6 +1003,14 @@ namespace neogfx
         (void)aDevice;
     }
 
+    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, font_info const& aFontInfo, const i_device_resolution& aDevice)
+    {
+        throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
+        (void)aFileName;
+        (void)aFontInfo;
+        (void)aDevice;
+    }
+
     i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
@@ -1026,6 +1036,15 @@ namespace neogfx
         (void)aSizeInBytes;
         (void)aStyleName;
         (void)aSize;
+        (void)aDevice;
+    }
+
+    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font_info const& aFontInfo, const i_device_resolution& aDevice)
+    {
+        throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
+        (void)aData;
+        (void)aSizeInBytes;
+        (void)aFontInfo;
         (void)aDevice;
     }
 
@@ -1146,6 +1165,14 @@ namespace neogfx
                     return *f;
         }
         return find_best_font(aFamilyName, font_style::Normal, aSize);
+    }
+
+    i_native_font& font_manager::find_font(font_info const& aFontInfo)
+    {
+        if (aFontInfo.style_name_available())
+            return find_font(aFontInfo.family_name(), aFontInfo.style_name(), aFontInfo.size());
+        else
+            return find_best_font(aFontInfo.family_name(), aFontInfo.style(), aFontInfo.size());
     }
 
     namespace

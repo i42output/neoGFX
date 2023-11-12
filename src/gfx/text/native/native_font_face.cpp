@@ -64,8 +64,12 @@ namespace neogfx
         return static_cast<hb_position_t>(static_cast<font_face_handle*>(user_data)->owner.kerning(first_glyph, second_glyph));
     }
 
-    native_font_face::native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
-        iFontLib{ aFontLib }, iId { aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, iPixelDensityDpi{ aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace }, iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
+    native_font_face::native_font_face(
+        FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, scalar aOutlineThickness, 
+        neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
+        iFontLib{ aFontLib }, iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, 
+        iOutlineThickness{ aOutlineThickness }, iPixelDensityDpi {aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace }, 
+        iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         switch (aStyle)
         {
@@ -123,6 +127,11 @@ namespace neogfx
             return iSize;
         else
             return 72.0 / iPixelDensityDpi.cy * -iSize;
+    }
+
+    scalar native_font_face::outline_thickness() const
+    {
+        return iOutlineThickness;
     }
 
     dimension native_font_face::horizontal_dpi() const
