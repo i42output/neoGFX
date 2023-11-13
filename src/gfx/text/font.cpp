@@ -112,6 +112,8 @@ namespace neogfx
         ~instance();
     public:
         instance& operator=(const instance& aOther);
+    public:
+        auto operator<=>(instance const&) const noexcept = default;
     private:
         string iFamilyName;
         optional_style iStyle;
@@ -119,7 +121,7 @@ namespace neogfx
         bool iUnderline;
         font_weight iWeight;
         point_size iSize;
-        scalar iOutlineThickness;
+        stroke iOutline;
         bool iKerning;
     };
 
@@ -127,7 +129,7 @@ namespace neogfx
         iSize{}, 
         iUnderline{ false }, 
         iWeight{ font_weight::Normal },
-        iOutlineThickness{ 0.0 },
+        iOutline{ 0.0 },
         iKerning{ true }
     {
     }
@@ -138,7 +140,7 @@ namespace neogfx
         iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, 
         iWeight{ weight_from_style(aStyle) }, 
         iSize{ aSize }, 
-        iOutlineThickness{ 0.0 },
+        iOutline{ 0.0 },
         iKerning{ true }
     {
     }
@@ -149,7 +151,7 @@ namespace neogfx
         iUnderline{ false }, 
         iWeight{ weight_from_style_name(aStyleName) }, 
         iSize{ aSize }, 
-        iOutlineThickness{ 0.0 },
+        iOutline{ 0.0 },
         iKerning{ true }
     {
     }
@@ -161,7 +163,7 @@ namespace neogfx
         iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, 
         iWeight{ weight_from_style_name(aStyleName) }, 
         iSize{ aSize }, 
-        iOutlineThickness{ 0.0 },
+        iOutline{ 0.0 },
         iKerning{ true }
     {
     }
@@ -173,7 +175,7 @@ namespace neogfx
         iUnderline{ false },
         iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) : font_weight::Normal },
         iSize{ aSize },
-        iOutlineThickness{ 0.0 },
+        iOutline{ 0.0 },
         iKerning{ true }
     {
     }
@@ -185,7 +187,7 @@ namespace neogfx
         iUnderline{ aOther.iUnderline }, 
         iWeight{ aOther.iWeight }, 
         iSize{ aOther.iSize }, 
-        iOutlineThickness{ 0.0 },
+        iOutline{ 0.0 },
         iKerning{ aOther.iKerning }
     {
     }
@@ -202,7 +204,7 @@ namespace neogfx
         iUnderline = aOther.iUnderline;
         iWeight = aOther.iWeight;
         iSize = aOther.iSize;
-        iOutlineThickness = aOther.iOutlineThickness;
+        iOutline = aOther.iOutline;
         iKerning = aOther.iKerning;
         return *this;
     }
@@ -304,17 +306,17 @@ namespace neogfx
         return iInstance->iSize;
     }
 
-    scalar font_info::outline_thickness() const
+    stroke font_info::outline() const
     {
-        return iInstance->iOutlineThickness;
+        return iInstance->iOutline;
     }
 
-    void font_info::set_outline_thickness(scalar aOutlineThickness)
+    void font_info::set_outline(stroke aOutline)
     {
-        if (iInstance->iOutlineThickness != aOutlineThickness)
+        if (iInstance->iOutline != aOutline)
         {
             iInstance = std::make_shared<instance>(*iInstance);
-            iInstance->iOutlineThickness = aOutlineThickness;
+            iInstance->iOutline = aOutline;
         }
     }
 
@@ -368,28 +370,21 @@ namespace neogfx
         return font_info(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, aSize);
     }
 
-    font_info font_info::with_outline(scalar aOutlineThickness) const
+    font_info font_info::with_outline(stroke aOutline) const
     {
         font_info result = *this;
-        result.set_outline_thickness(aOutlineThickness);
+        result.set_outline(aOutline);
         return result;
     }
 
     bool font_info::operator==(const font_info& aRhs) const
     {
-        return iInstance == aRhs.iInstance ||
-            (iInstance->iFamilyName == aRhs.iInstance->iFamilyName &&
-                iInstance->iStyle == aRhs.iInstance->iStyle &&
-                iInstance->iStyleName == aRhs.iInstance->iStyleName &&
-                iInstance->iUnderline == aRhs.iInstance->iUnderline &&
-                iInstance->iSize == aRhs.iInstance->iSize &&
-                iInstance->iKerning == aRhs.iInstance->iKerning);
+        return iInstance == aRhs.iInstance || *iInstance == *aRhs.iInstance;
     }
 
     bool font_info::operator<(const font_info& aRhs) const
     {
-        return std::forward_as_tuple(iInstance->iFamilyName, iInstance->iStyle, iInstance->iStyleName, iInstance->iUnderline, iInstance->iSize, iInstance->iKerning) <
-            std::forward_as_tuple(aRhs.iInstance->iFamilyName, aRhs.iInstance->iStyle, aRhs.iInstance->iStyleName, aRhs.iInstance->iUnderline, aRhs.iInstance->iSize, aRhs.iInstance->iKerning);
+        return *iInstance < *aRhs.iInstance;
     }
 
     std::strong_ordering font_info::operator<=>(const font_info& aRhs) const

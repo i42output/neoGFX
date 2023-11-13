@@ -938,12 +938,12 @@ namespace neogfx
     {
         if (aStyle == neogfx::font_style::Emulated)
             aStyle = neogfx::font_style::Normal;
-        return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, 0.0, aDevice));
+        return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, {}, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, 0.0, aDevice));
+        return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, {}, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(const font_info& aFontInfo, const i_device_resolution& aDevice)
@@ -955,12 +955,12 @@ namespace neogfx
     {
         if (aStyle == neogfx::font_style::Emulated)
             aStyle = neogfx::font_style::Normal;
-        return add_font(aFont.create_face(aStyle, aSize, 0.0, aDevice));
+        return add_font(aFont.create_face(aStyle, aSize, {}, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_native_font& aFont, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        return add_font(aFont.create_face(aStyleName, aSize, 0.0, aDevice));
+        return add_font(aFont.create_face(aStyleName, aSize, {}, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_native_font& aFont, const font_info& aFontInfo, const i_device_resolution& aDevice)

@@ -111,23 +111,49 @@ end_declare_enum(neogfx::font_style)
 
 namespace neogfx 
 {
-    enum class font_weight : uint32_t
+    enum class font_weight : std::uint32_t
     {
-        Unknown = 0,
-        Thin = 100,
-        Extralight = 200,
-        Ultralight = 200,
-        Light = 300,
-        Normal = 400,
-        Regular = 400,
-        Medium = 500,
-        Semibold = 600,
-        Demibold = 600,
-        Bold = 700,
-        Extrabold = 800,
-        Ultrabold = 800,
-        Heavy = 900,
-        Black = 900
+        Unknown     = 0,
+        Thin        = 100,
+        Extralight  = 200,
+        Ultralight  = 200,
+        Light       = 300,
+        Normal      = 400,
+        Regular     = 400,
+        Medium      = 500,
+        Semibold    = 600,
+        Demibold    = 600,
+        Bold        = 700,
+        Extrabold   = 800,
+        Ultrabold   = 800,
+        Heavy       = 900,
+        Black       = 900
+    };
+
+    enum class stroke_line_cap : std::uint32_t
+    {
+        Butt    = 0,
+        Round   = 1,
+        Square  = 2
+    };
+
+    enum class stroke_line_join : std::uint32_t
+    {
+        Round           = 0,
+        Bevel           = 1,
+        MiterVariable   = 2,
+        Miter           = MiterVariable,
+        MiterFixed      = 3
+    };
+
+    struct stroke
+    {
+        scalar radius = 0.0;
+        stroke_line_cap lineCap = stroke_line_cap::Round;
+        stroke_line_join lineJoin = stroke_line_join::Round;
+        scalar miterLimit = 0.0;
+
+        auto operator<=>(stroke const&) const = default;
     };
 
     class font_info
@@ -165,8 +191,8 @@ namespace neogfx
         virtual void set_underline(bool aUnderline);
         virtual font_weight weight() const;
         virtual point_size size() const;
-        virtual scalar outline_thickness() const;
-        virtual void set_outline_thickness(scalar aOutlineThickness);
+        virtual stroke outline() const;
+        virtual void set_outline(stroke aOutline);
         virtual bool kerning() const;
         virtual void enable_kerning();
         virtual void disable_kerning();
@@ -175,7 +201,7 @@ namespace neogfx
         font_info with_style_xor(font_style aStyle) const;
         font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
-        font_info with_outline(scalar aOutlineThickness) const;
+        font_info with_outline(stroke aOutline) const;
     public:
         bool operator==(const font_info& aRhs) const;
         bool operator<(const font_info& aRhs) const;

@@ -39,7 +39,7 @@ namespace neogfx
     private:
         typedef std::variant<std::monostate, filename_type, memory_block_type> source_type;
         typedef std::map<std::pair<font_style, string>, FT_Long> style_map;
-        typedef std::map<std::tuple<FT_Long, font_style, font::point_size, scalar, size>, ref_ptr<i_native_font_face>> face_map;
+        typedef std::map<std::tuple<FT_Long, font_style, font::point_size, stroke, size>, ref_ptr<i_native_font_face>> face_map;
     public:
         struct failed_to_load_font : std::runtime_error { failed_to_load_font() : std::runtime_error("neogfx::native_font::failed_to_load_font") {} };
         struct no_matching_style_found : std::runtime_error { no_matching_style_found() : std::runtime_error("neogfx::native_font::no_matching_style_found") {} };
@@ -55,8 +55,8 @@ namespace neogfx
         i_string const& style_name(uint32_t aStyleIndex) const final;
         void remove_style(font_style aStyleIndex) final;
         void remove_style(uint32_t aStyleIndex) final;
-        void create_face(font_style aStyle, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
-        void create_face(i_string const& aStyleName, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
+        void create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
+        void create_face(i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
         void create_face(font_info const& aFontIinfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
     private:
         style_map::const_iterator find_style(font_style aStyle) const;
@@ -64,7 +64,7 @@ namespace neogfx
         void register_face(FT_Long aFaceIndex);
         std::pair<FT_Face, hb_face_t*> open_face(FT_Long aFaceIndex);
         void close_face(FT_Face aFace);
-        ref_ptr<i_native_font_face> create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, scalar aOutlineThickness, i_device_resolution const& aDevice);
+        ref_ptr<i_native_font_face> create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice);
     private:
         FT_Library iFontLib;
         source_type iSource;

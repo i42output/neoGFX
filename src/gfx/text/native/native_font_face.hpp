@@ -112,7 +112,7 @@ namespace neogfx
         struct freetype_load_glyph_error : freetype_error { freetype_load_glyph_error(std::string const& aError) : freetype_error(aError) {} };
         struct freetype_render_glyph_error : freetype_error { freetype_render_glyph_error(std::string const& aError) : freetype_error(aError) {} };
     public:
-        native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, scalar aOutlineThickness, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace);
+        native_font_face(FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, stroke aOutline, neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace);
         ~native_font_face();
     public:
         font_id id() const final;
@@ -120,7 +120,7 @@ namespace neogfx
         i_string const& family_name() const final;
         font_style style() const final;
         font::point_size size() const final;
-        scalar outline_thickness() const final;
+        stroke outline() const final;
         i_string const& style_name() const final;
         dimension horizontal_dpi() const final;
         dimension vertical_dpi() const final;
@@ -154,7 +154,7 @@ namespace neogfx
         font_style iStyle;
         string iStyleName;
         font::point_size iSize;
-        scalar iOutlineThickness;
+        stroke iOutline;
         neogfx::size iPixelDensityDpi;
         mutable font_face_handle iHandle;
         std::optional<FT_Size_Metrics> iMetrics;

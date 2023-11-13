@@ -65,10 +65,10 @@ namespace neogfx
     }
 
     native_font_face::native_font_face(
-        FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, scalar aOutlineThickness, 
+        FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, stroke aOutline, 
         neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
         iFontLib{ aFontLib }, iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, 
-        iOutlineThickness{ aOutlineThickness }, iPixelDensityDpi {aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace }, 
+        iOutline{ aOutline }, iPixelDensityDpi {aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace }, 
         iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         switch (aStyle)
@@ -129,9 +129,9 @@ namespace neogfx
             return 72.0 / iPixelDensityDpi.cy * -iSize;
     }
 
-    scalar native_font_face::outline_thickness() const
+    stroke native_font_face::outline() const
     {
-        return iOutlineThickness;
+        return iOutline;
     }
 
     dimension native_font_face::horizontal_dpi() const
