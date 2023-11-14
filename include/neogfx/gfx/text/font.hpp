@@ -99,6 +99,7 @@ declare_enum_string(neogfx::font_style, Superscript)
 declare_enum_string(neogfx::font_style, Subscript)
 declare_enum_string(neogfx::font_style, BelowAscenderLine)
 declare_enum_string(neogfx::font_style, AboveBaseline)
+declare_enum_string(neogfx::font_style, Strike)
 declare_enum_string(neogfx::font_style, Emulated)
 declare_enum_string(neogfx::font_style, BoldItalic)
 declare_enum_string(neogfx::font_style, BoldItalicUnderline)
@@ -182,20 +183,20 @@ namespace neogfx
     private:
         font_info(std::string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
     public:
-        virtual i_string const& family_name() const;
-        virtual bool style_available() const;
-        virtual font_style style() const;
-        virtual bool style_name_available() const;
-        virtual i_string const& style_name() const;
-        virtual bool underline() const;
-        virtual void set_underline(bool aUnderline);
-        virtual font_weight weight() const;
-        virtual point_size size() const;
-        virtual stroke outline() const;
-        virtual void set_outline(stroke aOutline);
-        virtual bool kerning() const;
-        virtual void enable_kerning();
-        virtual void disable_kerning();
+        i_string const& family_name() const;
+        bool style_available() const;
+        font_style style() const;
+        bool style_name_available() const;
+        i_string const& style_name() const;
+        bool underline() const;
+        void set_underline(bool aUnderline);
+        font_weight weight() const;
+        point_size size() const;
+        stroke outline() const;
+        void set_outline(stroke aOutline);
+        bool kerning() const;
+        void enable_kerning();
+        void disable_kerning();
     public:
         font_info with_style(font_style aStyle) const;
         font_info with_style_xor(font_style aStyle) const;
@@ -203,14 +204,19 @@ namespace neogfx
         font_info with_size(point_size aSize) const;
         font_info with_outline(stroke aOutline) const;
     public:
-        bool operator==(const font_info& aRhs) const;
-        bool operator<(const font_info& aRhs) const;
-        std::strong_ordering operator<=>(const font_info& aRhs) const;
+        auto operator<=>(const font_info& aRhs) const = default;
     public:
         static font_weight weight_from_style(font_style aStyle);
         static font_weight weight_from_style_name(std::string aStyleName, bool aUnknownAsRegular = true);
     private:
-        mutable std::shared_ptr<instance> iInstance;
+        string iFamilyName;
+        optional_style iStyle;
+        optional_style_name iStyleName;
+        bool iUnderline;
+        font_weight iWeight;
+        point_size iSize;
+        stroke iOutline;
+        bool iKerning;
     };
 
     typedef optional<font_info> optional_font_info;
@@ -218,7 +224,7 @@ namespace neogfx
     typedef neolib::small_cookie font_id;
 
     // todo: abstract font
-    class font : public font_info
+    class font
     {
         friend class font_manager;
         friend class graphics_context;
@@ -228,6 +234,7 @@ namespace neogfx
         // types
     public:
         typedef font abstract_type; // todo
+        using point_size = font_info::point_size;
     private:
         class instance;
         // construction
@@ -251,23 +258,31 @@ namespace neogfx
         font(i_native_font_face& aNativeFontFace);
         font(i_native_font_face& aNativeFontFace, font_style aStyle);
     public:
+        font with_style(font_style aStyle) const;
+        font with_style_xor(font_style aStyle) const;
+        font with_underline(bool aUnderline) const;
+        font with_size(point_size aSize) const;
+        font with_outline(stroke aOutline) const;
+    public:
         font_id id() const;
+        font_info const& info() const;
     public:
         bool has_fallback() const;
         font fallback() const;
         // operations
     public:
-        i_string const& family_name() const override;
-        font_style style() const override;
-        i_string const& style_name() const override;
-        point_size size() const override;
+        i_string const& family_name() const;
+        font_style style() const;
+        i_string const& style_name() const;
+        bool underline() const;
+        point_size size() const;
         neogfx::size em_size() const;
         dimension height() const;
         dimension max_advance() const;
         dimension ascender() const;
         dimension descender() const;
         dimension line_spacing() const;
-        using font_info::kerning;
+        bool kerning() const;
         dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
         bool is_bitmap_font() const;
         uint32_t num_fixed_sizes() const;
@@ -276,7 +291,6 @@ namespace neogfx
         const i_glyph& glyph(const glyph_char& aGlyphChar) const;
     public:
         bool operator==(const font& aRhs) const;
-        bool operator<(const font& aRhs) const;
         std::strong_ordering operator<=>(const font& aRhs) const;
     public:
         i_native_font_face& native_font_face() const;
@@ -288,27 +302,27 @@ namespace neogfx
     typedef optional<font> optional_font;
 
     template <typename Elem, typename Traits>
-    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const font_info& aFont)
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const font_info& aFontInfo)
     {
         aStream << "[";
-        aStream << aFont.family_name();
+        aStream << aFontInfo.family_name();
         aStream << ",";
-        if (aFont.style_available())
-            aStream << aFont.style();
+        if (aFontInfo.style_available())
+            aStream << aFontInfo.style();
         else
-            aStream << aFont.style_name();
+            aStream << aFontInfo.style_name();
         aStream << ", ";
-        aStream << aFont.size();
+        aStream << aFontInfo.size();
         aStream << ", ";
-        aStream << aFont.underline();
+        aStream << aFontInfo.underline();
         aStream << ", ";
-        aStream << aFont.kerning();
+        aStream << aFontInfo.kerning();
         aStream << "]";
         return aStream;
     }
 
     template <typename Elem, typename Traits>
-    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, font_info& aFont)
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, font_info& aFontInfo)
     {
         std::string familyName;
         std::variant<font_style, std::string> style;
@@ -340,14 +354,14 @@ namespace neogfx
         aStream.imbue(previousImbued);
 
         if (std::holds_alternative<font_style>(style))
-            aFont = font_info{ familyName, std::get<font_style>(style), size };
+            aFontInfo = font_info{ familyName, std::get<font_style>(style), size };
         else
-            aFont = font_info{ familyName, std::get<std::string>(style), size };
-        aFont.set_underline(underline);
+            aFontInfo = font_info{ familyName, std::get<std::string>(style), size };
+        aFontInfo.set_underline(underline);
         if (kerning)
-            aFont.enable_kerning();
+            aFontInfo.enable_kerning();
         else
-            aFont.disable_kerning();
+            aFontInfo.disable_kerning();
 
         return aStream;
     }

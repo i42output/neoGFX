@@ -65,7 +65,8 @@ namespace neogfx
                     iFonts[modelRow] = font{ 
                         fm.font_family(modelRow), 
                         font_style::Normal, 
-                        -font{ service<i_app>().current_style().font().with_size(pointSize) }.height() };
+                        -service<i_app>().current_style().font().with_size(pointSize).height() 
+                    };
                 }
                 return iFonts[modelRow];
             }
@@ -121,7 +122,8 @@ namespace neogfx
                     iFonts[modelRow] = font{
                         fm.font_family(familyModelRow), 
                         static_variant_cast<string const&>(item_model().cell_data(to_item_model_index(aIndex))), 
-                        -font{ service<i_app>().current_style().font().with_size(pointSize) }.height() };
+                        -service<i_app>().current_style().font().with_size(pointSize).height() 
+                    };
                 }
                 return iFonts[modelRow];
             }
@@ -304,14 +306,14 @@ namespace neogfx
         iSink += iInkBox.check_box().Unchecked([&]() { update_selected_format(iInkBox); });
         iSink += iPaperBox.check_box().Checked([&]() { update_selected_format(iPaperBox); });
         iSink += iPaperBox.check_box().Unchecked([&]() { update_selected_format(iPaperBox); });
-        iSink += iAdvancedEffectsBox.check_box().Checked([&]() { update_selected_format(iAdvancedEffectsBox); });
-        iSink += iAdvancedEffectsBox.check_box().Unchecked([&]() { update_selected_format(iAdvancedEffectsBox); });
+        iSink += iAdvancedEffectsBox.check_box().Checked([&]() { update_selected_format(iAdvancedEffectsBox); update_selected_font(iAdvancedEffectsBox); });
+        iSink += iAdvancedEffectsBox.check_box().Unchecked([&]() { update_selected_format(iAdvancedEffectsBox); update_selected_font(iAdvancedEffectsBox); });
         iSink += iInkColor.Checked([&]() { update_selected_format(iInkColor); });
         iSink += iInkGradient.Checked([&]() { update_selected_format(iInkGradient); });
         iSink += iInkEmoji.Toggled([&]() { update_selected_format(iInkEmoji); });
         iSink += iPaperColor.Checked([&]() { update_selected_format(iPaperColor); });
         iSink += iPaperGradient.Checked([&]() { update_selected_format(iPaperGradient); });
-        iSink += iAdvancedEffectsOutline.Checked([&]() { update_selected_format(iAdvancedEffectsOutline); });
+        iSink += iAdvancedEffectsOutline.Checked([&]() { update_selected_format(iAdvancedEffectsOutline); update_selected_font(iAdvancedEffectsOutline); });
         iSink += iAdvancedEffectsShadow.Checked([&]() { update_selected_format(iAdvancedEffectsShadow); });
         iSink += iAdvancedEffectsGlow.Checked([&]() { update_selected_format(iAdvancedEffectsGlow); });
         iSink += iAdvancedEffectsColor.Checked([&]() { update_selected_format(iAdvancedEffectsColor); });
@@ -457,7 +459,7 @@ namespace neogfx
         if (&aUpdatingWidget == &iUnderline)
         {
             iUnderlineBox.show(iUnderline.is_checked());
-            iSelectedFont.set_underline(iUnderline.is_checked());
+            iSelectedFont = iSelectedFont.with_underline(iUnderline.is_checked());
         }
         auto desiredStyle = iSelectedFont.style();
         if (iSuperscript.is_checked())
@@ -478,8 +480,14 @@ namespace neogfx
         }
         else
             desiredStyle &= ~(font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline);
-        if (iSelectedFont.style() != desiredStyle)
-            iSelectedFont = neogfx::font{ iSelectedFont, desiredStyle, iSelectedFont.size() };
+        font_info outlineFontInfo = iSelectedFont.info();
+        if (iSelectedTextFormat.has_value() && iSelectedTextFormat.value().effect().has_value() && 
+            iSelectedTextFormat.value().effect().value().type() == text_effect_type::Outline)
+            outlineFontInfo.set_outline(stroke{ iSelectedTextFormat.value().effect().value().width() });
+        else
+            outlineFontInfo.set_outline(stroke{ 0.0 });
+        if (iSelectedFont.info() != outlineFontInfo)
+            iSelectedFont = neogfx::font{ outlineFontInfo };
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
             SelectionChanged.trigger();
@@ -779,6 +787,7 @@ namespace neogfx
                     iSink += iAdvancedEffectsWidth->slider.ValueChanged([&]()
                     {
                         update_selected_format(iAdvancedEffectsWidth->slider);
+                        update_selected_font(iAdvancedEffectsWidth->slider);
                     });
                     iAdvancedEffectsWidth->slider.set_minimum(1);
                     iAdvancedEffectsWidth->slider.set_maximum(16);

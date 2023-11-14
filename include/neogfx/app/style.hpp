@@ -59,9 +59,12 @@ namespace neogfx
         void set_palette(const i_palette& aPalette) final;
         void set_palette_color(color_role aRole, const optional_color& aColor) final;
         bool font_available(font_role aRole) const final;
+        using i_style::font_info;
         const neogfx::font_info& font_info(font_role aRole) const final;
         const i_optional<neogfx::font_info>& maybe_font_info(font_role aRole) const final;
+        using i_style::set_font_info;
         void set_font_info(font_role aRole, const neogfx::font_info& aFontInfo) final;
+        using i_style::font;
         const neogfx::font& font(font_role aRole) const final;
     private:
         void handle_change(style_aspect aAspect);

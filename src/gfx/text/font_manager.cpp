@@ -1218,7 +1218,7 @@ namespace neogfx
             {
                 auto const matchingBits = matching_bits(static_cast<std::uint32_t>(f->style(s)), static_cast<std::uint32_t>(aStyle));
                 auto const& styleName = f->style_name(s);
-                auto const weight = font::weight_from_style_name(styleName);
+                auto const weight = font_info::weight_from_style_name(styleName);
                 if (weight <= font_weight::Normal && (
                     bestNormalFont == std::nullopt ||
                     bestNormalFont->matchingBits < matchingBits ||

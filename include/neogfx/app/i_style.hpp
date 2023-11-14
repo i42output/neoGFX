@@ -120,5 +120,13 @@ namespace neogfx
         {
             return font(font_role::Widget);
         }
+        void set_font(font_role aRole, const neogfx::font& aFont)
+        {
+            set_font_info(aRole, aFont.info());
+        }
+        void set_font(const neogfx::font& aFont)
+        {
+            set_font_info(font_role::Widget, aFont.info());
+        }
     };
 }

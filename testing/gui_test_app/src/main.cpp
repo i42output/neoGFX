@@ -348,14 +348,14 @@ int main(int argc, char* argv[])
             if (window.checkKerning.is_checked())
             {
                 fi.enable_kerning();
-                auto newTextEditFont = window.textEdit.font();
+                auto newTextEditFont = window.textEdit.font().info();
                 newTextEditFont.enable_kerning();
                 window.textEdit.set_font(newTextEditFont);
             }
             else
             {
                 fi.disable_kerning();
-                auto newTextEditFont = window.textEdit.font();
+                auto newTextEditFont = window.textEdit.font().info();
                 newTextEditFont.disable_kerning();
                 window.textEdit.set_font(newTextEditFont);
             }
@@ -492,7 +492,7 @@ int main(int argc, char* argv[])
                     window.textEditEditor.set_font(fontPicker.selected_font());
                 }
                 else
-                    ng::service<ng::i_app>().current_style().set_font_info(fontPicker.selected_font());
+                    ng::service<ng::i_app>().current_style().set_font(fontPicker.selected_font());
             }
         });
 

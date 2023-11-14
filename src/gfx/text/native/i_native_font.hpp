@@ -59,9 +59,9 @@ namespace neogfx
         }
         font_weight min_weight() const
         {
-            auto minWeight = font::weight_from_style_name(style_name(0));
+            auto minWeight = font_info::weight_from_style_name(style_name(0));
             for (auto si = 1u; si < style_count(); ++si)
-                minWeight = std::min(minWeight, font::weight_from_style_name(style_name(si)));
+                minWeight = std::min(minWeight, font_info::weight_from_style_name(style_name(si)));
             return minWeight;
         }
         ref_ptr<i_native_font_face> create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice)

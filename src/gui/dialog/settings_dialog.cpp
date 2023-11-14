@@ -269,7 +269,7 @@ namespace neogfx
                         aSink += settingWidget->SelectionChanged([&, settingWidget]()
                         {
                             if (!settingWidget->updating)
-                                aSetting.set_value(static_cast<const font_info&>(settingWidget->selected_font()));
+                                aSetting.set_value(settingWidget->selected_font().info());
                         });
                         aSink += aSetting.changing([&, settingWidget]()
                         {
@@ -291,7 +291,7 @@ namespace neogfx
                         aSink += settingWidget->SelectionChanged([&, settingWidget]()
                             {
                                 if (!settingWidget->updating)
-                                    aSetting.set_value(extended_font{ settingWidget->selected_font(), settingWidget->selected_format() });
+                                    aSetting.set_value(extended_font{ settingWidget->selected_font().info(), settingWidget->selected_format()});
                             });
                         aSink += aSetting.changing([&, settingWidget]()
                             {
@@ -399,7 +399,8 @@ namespace neogfx
             iLayout.set_padding({});
             auto reset_font = [&]()
             {
-                iTitle.text_widget().set_font(service<i_app>().current_style().font().with_size(service<i_app>().current_style().font().size() * 1.25).with_underline(true));
+                iTitle.text_widget().set_font(
+                    service<i_app>().current_style().font().with_size(service<i_app>().current_style().font().size() * 1.25).with_underline(true));
             };
             iSink += service<i_app>().current_style_changed([this, reset_font](style_aspect aAspect)
             {
