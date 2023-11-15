@@ -68,8 +68,7 @@ namespace neogfx
         character_type(text_category aCategory) :
             category(aCategory), direction(text_direction::LTR) {}
     public:
-        bool operator==(const character_type& aRhs) const { return category == aRhs.category && direction == aRhs.direction; }
-        bool operator!=(const character_type& aRhs) const { return !(*this == aRhs); }
+        auto operator<=>(character_type const&) const = default;
     };
 
     struct glyph_char
@@ -77,7 +76,7 @@ namespace neogfx
         using value_type = std::uint32_t;
         using cluster_index = std::uint32_t;
         using cluster_range = std::pair<cluster_index, cluster_index>;
-        enum flags_e : uint8_t
+        enum flags_e : std::uint8_t
         {
             Default             = 0x00,
             Underline           = 0x01,
@@ -365,11 +364,11 @@ namespace neogfx
         container_type const& container() const;
         container_type& container();
     public:
-        void clone(i_ref_ptr<abstract_type>& aClone) const override;
+        void clone(i_ref_ptr<abstract_type>& aClone) const final;
     public:
-        bool empty() const override;
-        size_type size() const override;
-        void clear() override;
+        bool empty() const final;
+        size_type size() const final;
+        void clear() final;
     public:
         template< class... Args >
         reference emplace_back(Args&&... args)
@@ -378,43 +377,43 @@ namespace neogfx
             iExtents = std::nullopt;
             return result;
         }
-        void push_back(const_reference aGlyphChar) override;
+        void push_back(const_reference aGlyphChar) final;
     public:
         using container_type::back;
         reference back();
     public:
-        const_iterator cbegin() const override;
-        const_iterator cend() const override;
+        const_iterator cbegin() const final;
+        const_iterator cend() const final;
         using abstract_type::begin;
         using abstract_type::end;
-        iterator begin() override;
-        iterator end() override;
+        iterator begin() final;
+        iterator end() final;
     public:
         bool operator==(const self_type& aOther) const;
     public:
-        neogfx::size extents() const override;
-        neogfx::size extents(const_reference aGlyphChar) const override;
-        neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const override;
+        neogfx::size extents() const final;
+        neogfx::size extents(const_reference aGlyphChar) const final;
+        neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const final;
     public:
-        void set_extents(const neogfx::size& aExtents) override;
-        self_type& align_baselines() override;
-        align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) override;
-        std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const override;
-        std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) override;
+        void set_extents(const neogfx::size& aExtents) final;
+        self_type& align_baselines() final;
+        align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) final;
+        std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const final;
+        std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) final;
     public:
-        vector<size_type> const& line_breaks() const override;
-        vector<size_type>& line_breaks() override;
+        vector<size_type> const& line_breaks() const final;
+        vector<size_type>& line_breaks() final;
     public:
-        const font& glyph_font() const override;
-        const font& glyph_font(const_reference aGlyphChar) const override;
-        void cache_glyph_font(font_id aFontId) const override;
-        void cache_glyph_font(const font& aFont) const override;
-        const i_glyph& glyph(const_reference aGlyphChar) const override;
+        const font& glyph_font() const final;
+        const font& glyph_font(const_reference aGlyphChar) const final;
+        void cache_glyph_font(font_id aFontId) const final;
+        void cache_glyph_font(const font& aFont) const final;
+        const i_glyph& glyph(const_reference aGlyphChar) const final;
     public:
-        const font& major_font() const override;
-        void set_major_font(const font& aFont) override;
-        scalar baseline() const override;
-        void set_baseline(scalar aBaseline) override;
+        const font& major_font() const final;
+        void set_major_font(const font& aFont) final;
+        scalar baseline() const final;
+        void set_baseline(scalar aBaseline) final;
     private:
         font_cache iCache;
         mutable cache<neogfx::size> iExtents;
@@ -543,7 +542,7 @@ namespace neogfx
         {
         }
     public:
-        font select_font(std::size_t CharacterPos) const override
+        font select_font(std::size_t CharacterPos) const final
         {
             return iSelectorFunction(CharacterPos);
         }

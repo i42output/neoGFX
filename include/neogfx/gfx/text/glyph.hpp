@@ -30,10 +30,10 @@ namespace neogfx
         glyph(const i_sub_texture& aTexture, bool aSubpixel, const glyph_metrics& aMetrics, glyph_pixel_mode aPixelMode);
         ~glyph();
     public:
-        const i_sub_texture& texture() const override;
-        bool subpixel() const override;
-        const glyph_metrics& metrics() const override;
-        glyph_pixel_mode pixel_mode() const override;
+        const i_sub_texture& texture() const final;
+        bool subpixel() const final;
+        const glyph_metrics& metrics() const final;
+        glyph_pixel_mode pixel_mode() const final;
     private:
         const i_sub_texture& iTexture;
         bool iSubpixel;
