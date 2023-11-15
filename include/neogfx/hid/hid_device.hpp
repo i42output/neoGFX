@@ -26,14 +26,17 @@
 
 namespace neogfx
 {
-    template <typename HidInterface>
-    class hid_device : public reference_counted<HidInterface>
+    template <typename T>
+    concept HidDeviceInterface = std::is_base_of_v<i_hid_device, T>;
+
+    template <HidDeviceInterface Interface>
+    class hid_device : public reference_counted<Interface>
     {
     public:
         define_declared_event(Enabled, enabled)
         define_declared_event(Disabled, disabled)
     public:
-        typedef HidInterface abstract_type;
+        typedef Interface abstract_type;
     public:
         hid_device(hid_device_type aType, hid_device_class aClass, hid_device_subclass aSubclass, const hid_device_uuid& aProductId = {}, const hid_device_uuid& aInstanceId = {}) :
             iType{ aType },
