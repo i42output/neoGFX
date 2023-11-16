@@ -56,7 +56,7 @@ namespace neogfx
         void remove_style(font_style aStyleIndex) final;
         void remove_style(uint32_t aStyleIndex) final;
         void create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
-        void create_face(i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
+        void create_face(font_style aStyle, i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
         void create_face(font_info const& aFontIinfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
     private:
         style_map::const_iterator find_style(font_style aStyle) const;

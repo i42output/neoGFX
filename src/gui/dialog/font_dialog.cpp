@@ -480,14 +480,14 @@ namespace neogfx
         }
         else
             desiredStyle &= ~(font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline);
-        font_info outlineFontInfo = iSelectedFont.info();
+        font_info desiredFontInfo = iSelectedFont.info().with_style(desiredStyle);
         if (iSelectedTextFormat.has_value() && iSelectedTextFormat.value().effect().has_value() && 
             iSelectedTextFormat.value().effect().value().type() == text_effect_type::Outline)
-            outlineFontInfo.set_outline(stroke{ iSelectedTextFormat.value().effect().value().width() });
+            desiredFontInfo.set_outline(stroke{ iSelectedTextFormat.value().effect().value().width() });
         else
-            outlineFontInfo.set_outline(stroke{ 0.0 });
-        if (iSelectedFont.info() != outlineFontInfo)
-            iSelectedFont = neogfx::font{ outlineFontInfo };
+            desiredFontInfo.set_outline(stroke{ 0.0 });
+        if (iSelectedFont.info() != desiredFontInfo)
+            iSelectedFont = neogfx::font{ desiredFontInfo };
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
             SelectionChanged.trigger();

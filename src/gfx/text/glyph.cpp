@@ -23,7 +23,7 @@
 namespace neogfx
 {
     glyph::glyph(const i_sub_texture& aTexture, bool aSubpixel, const glyph_metrics& aMetrics, glyph_pixel_mode aPixelMode) :
-        iTexture(aTexture), iSubpixel{ aSubpixel }, iMetrics{ aMetrics }, iPixelMode{ aPixelMode }
+        iTexture(aTexture), iOutlineTexture{ nullptr }, iSubpixel{ aSubpixel }, iMetrics{ aMetrics }, iPixelMode{ aPixelMode }
     {
     }
 
@@ -34,6 +34,23 @@ namespace neogfx
     const i_sub_texture& glyph::texture() const
     {
         return iTexture;
+    }
+
+    bool glyph::has_outline_texture() const
+    {
+        return iOutlineTexture != nullptr;
+    }
+
+    const i_sub_texture& glyph::outline_texture() const
+    {
+        if (has_outline_texture())
+            return *iOutlineTexture;
+        throw no_outline_texture();
+    }
+
+    void glyph::set_outline_texture(const i_sub_texture& aOutlineTexture)
+    {
+        iOutlineTexture = &aOutlineTexture;
     }
 
     bool glyph::subpixel() const

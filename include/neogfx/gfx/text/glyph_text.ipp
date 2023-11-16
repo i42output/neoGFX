@@ -333,7 +333,7 @@ namespace neogfx
         {
             auto const& gf = glyph_font(g);
             auto const existingExtents = quad_extents(g.cell);
-            g.shape += vec2f{ 0.0f, cyMax - (existingExtents.y + static_cast<float>(gf.descender())) };
+            auto shapeOffset = vec2f{ 0.0f, cyMax - (existingExtents.y + static_cast<float>(gf.descender())) };
             g.cell[2].y = g.cell[1].y + yMax;
             g.cell[3].y = g.cell[0].y + yMax;
             if ((g.flags & (glyph_char::Superscript | glyph_char::Subscript)) != glyph_char::Default)
@@ -348,20 +348,23 @@ namespace neogfx
                     auto const belowAscenderDelta = static_cast<float>(dySmall);
                     auto const aboveAscenderDelta = static_cast<float>(dyLarge);
                     if ((g.flags & glyph_char::BelowAscenderLine) == glyph_char::BelowAscenderLine)
-                        g.shape -= vec2f{ 0.0f, std::ceil(belowAscenderDelta) };
+                        shapeOffset -= vec2f{ 0.0f, std::ceil(belowAscenderDelta) };
                     else
-                        g.shape -= vec2f{ 0.0f, std::ceil(aboveAscenderDelta) };
+                        shapeOffset -= vec2f{ 0.0f, std::ceil(aboveAscenderDelta) };
                 }
                 else if ((g.flags & glyph_char::Subscript) == glyph_char::Subscript)
                 {
                     auto const aboveBaselineDelta = 0.0f;
                     auto const belowBaselineDelta = static_cast<float>(dyLarge + descender / 0.58);
                     if ((g.flags & glyph_char::AboveBaseline) == glyph_char::AboveBaseline)
-                        g.shape += vec2f{ 0.0f, aboveBaselineDelta };
+                        shapeOffset += vec2f{ 0.0f, aboveBaselineDelta };
                     else
-                        g.shape += vec2f{ 0.0f, belowBaselineDelta };
+                        shapeOffset += vec2f{ 0.0f, belowBaselineDelta };
                 }
             }
+            g.shape += shapeOffset;
+            if (g.outlineShape)
+                g.outlineShape.value() += shapeOffset;
         }
         return result;
     }

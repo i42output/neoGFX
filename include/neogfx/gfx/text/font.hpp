@@ -186,6 +186,7 @@ namespace neogfx
         i_string const& family_name() const;
         bool style_available() const;
         font_style style() const;
+        font_style style_maybe() const;
         bool style_name_available() const;
         i_string const& style_name() const;
         bool underline() const;

@@ -1741,7 +1741,7 @@ namespace neogfx
             return result;
         };
 
-        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar)
+        auto shape_quad = [&](font const& glyphFont, glyph_char const& glyphChar, bool outline = false)
         {
             static optional_mat44f const italicTransformGui = mat44f{
                     { 1.0f, 0.0f, 0.0f, 0.0f },
@@ -1759,11 +1759,11 @@ namespace neogfx
                 italicTransformGui : italicTransformGame;
 
             if (!italicTransform)
-                return glyphChar.shape;
+                return !outline ? glyphChar.shape : glyphChar.outlineShape.value();
 
             thread_local quadf_2d transformedQuad;
             vec2f centeringTranslation;
-            transformedQuad = center_quad(glyphChar.shape, centeringTranslation);
+            transformedQuad = center_quad(!outline ? glyphChar.shape : glyphChar.outlineShape.value(), centeringTranslation);
             for (auto& v : transformedQuad)
                 v = (*italicTransform * vec3f{ v } + -vec3f{ centeringTranslation }).xy;
 
@@ -1856,10 +1856,10 @@ namespace neogfx
                         continue;
 
                     auto const& glyphQuad = quad{
-                            (glyphChar.cell[0] + glyphChar.shape[0]).round(),
-                            (glyphChar.cell[0] + glyphChar.shape[1]).round(),
-                            (glyphChar.cell[0] + glyphChar.shape[2]).round(),
-                            (glyphChar.cell[0] + glyphChar.shape[3]).round() } + drawOp.point;
+                        (glyphChar.cell[0] + glyphChar.shape[0]).round(),
+                        (glyphChar.cell[0] + glyphChar.shape[1]).round(),
+                        (glyphChar.cell[0] + glyphChar.shape[2]).round(),
+                        (glyphChar.cell[0] + glyphChar.shape[3]).round() } + drawOp.point;
 
                     auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
 
@@ -1899,16 +1899,8 @@ namespace neogfx
                         if (is_whitespace(glyphChar) || is_emoji(glyphChar))
                             continue;
 
-                        auto const& glyphTexture = glyphText.glyph(glyphChar);
+                        auto const& theGlyph = glyphText.glyph(glyphChar);
                         auto const& glyphFont = glyphText.glyph_font(glyphChar);
-
-                        auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
-
-                        auto const& glyphQuad = quad{
-                                (glyphChar.cell[0] + shapeQuad[0]).round(),
-                                (glyphChar.cell[0] + shapeQuad[1]).round(),
-                                (glyphChar.cell[0] + shapeQuad[2]).round(),
-                                (glyphChar.cell[0] + shapeQuad[3]).round() } + drawOp.point;
 
                         if (updateGlyphShader)
                         {
@@ -1916,37 +1908,46 @@ namespace neogfx
                             rendering_engine().default_shader_program().glyph_shader().set_first_glyph(*this, glyphText, glyphChar);
                         }
 
-                        bool const subpixelRender = subpixel(glyphChar) && glyphTexture.subpixel();
+                        bool const subpixelRender = subpixel(glyphChar) && theGlyph.subpixel();
 
                         if (stage == draw_glyphs_stage::GlyphOutline)
                         {
-                            if (drawOp.appearance->effect() && drawOp.appearance->effect()->type() == text_effect_type::Outline)
+                            if (theGlyph.has_outline_texture() && drawOp.appearance->effect() && drawOp.appearance->effect()->type() == text_effect_type::Outline)
                             {
-                                auto const scanlineOffsets = static_cast<uint32_t>(drawOp.appearance->effect()->width()) * 2u + 1u;
-                                auto const offsets = scanlineOffsets * scanlineOffsets;
-                                auto const offsetOrigin = drawOp.appearance->effect()->offset();
-                                for (uint32_t offset = 0; offset < offsets; ++offset)
-                                {
-                                    auto const effectQuad = glyphQuad + offsetOrigin + vec3{ static_cast<coordinate>(offset % scanlineOffsets), static_cast<coordinate>(offset / scanlineOffsets) };
-                                    auto const& mesh = to_ecs_component(effectQuad, mesh_type::Triangles);
-                                    meshFilters.push_back(game::mesh_filter{ {}, mesh });
-                                    auto const& ink = drawOp.appearance->effect()->color();
-                                    meshRenderers.push_back(
-                                        game::mesh_renderer{
-                                            game::material{
-                                                std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(effectQuad.begin(), effectQuad.end()))) : std::optional<game::gradient>{},
-                                                {},
-                                                to_ecs_component(glyphTexture.texture()),
-                                                shader_effect::Ignore
-                                            },
+                                auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
+
+                                auto const& glyphQuad = quad{
+                                    (glyphChar.cell[0] + shapeQuad[0]).round(),
+                                    (glyphChar.cell[0] + shapeQuad[1]).round(),
+                                    (glyphChar.cell[0] + shapeQuad[2]).round(),
+                                    (glyphChar.cell[0] + shapeQuad[3]).round() } + drawOp.point;
+
+                                auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
+                                meshFilters.push_back(game::mesh_filter{ {}, mesh });
+                                auto const& ink = drawOp.appearance->effect()->color();
+                                meshRenderers.push_back(
+                                    game::mesh_renderer{
+                                        game::material{
+                                            std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
+                                            std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                             {},
-                                            0,
-                                            {}, subpixelRender });
-                                }
+                                            to_ecs_component(theGlyph.outline_texture()),
+                                            shader_effect::Ignore
+                                        },
+                                        {},
+                                        0,
+                                        {}, subpixelRender });
                             }
                             continue;
                         }
+
+                        auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
+
+                        auto const& glyphQuad = quad{
+                            (glyphChar.cell[0] + shapeQuad[0]).round(),
+                            (glyphChar.cell[0] + shapeQuad[1]).round(),
+                            (glyphChar.cell[0] + shapeQuad[2]).round(),
+                            (glyphChar.cell[0] + shapeQuad[3]).round() } + drawOp.point;
 
                         auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
@@ -1958,7 +1959,7 @@ namespace neogfx
                                     std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
                                     std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                     {},
-                                    to_ecs_component(glyphTexture.texture()),
+                                    to_ecs_component(theGlyph.texture()),
                                     shader_effect::Ignore
                                 },
                                 {},
@@ -1991,14 +1992,14 @@ namespace neogfx
                                 (glyphFont.style() & font_style::EmulatedItalic) != font_style::EmulatedItalic &&
                                 logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
                             {
-                                auto const& glyphTexture = glyphText.glyph(glyphChar);
+                                auto const& theGlyph = glyphText.glyph(glyphChar);
 
                                 auto const& testLine = texture_line_segment{
                                     { -shapeQuad[0].x, shapeQuad[0].y - (glyphText.baseline() - yUnderline) },
                                     { -shapeQuad[0].x + glyphChar.cell[1].x - glyphChar.cell[0].x, shapeQuad[0].y - (glyphText.baseline() - yUnderline)}};
 
                                 thread_local vector<texture_line_segment> lineSegments;
-                                lineSegments = glyphTexture.texture().intersection(testLine, rect{ point{}, glyphTexture.texture().extents() },
+                                lineSegments = theGlyph.texture().intersection(testLine, rect{ point{}, theGlyph.texture().extents() },
                                     vec2{ std::max<scalar>( 3.0_dip, drawOp.appearance->effect() ? drawOp.appearance->effect().value().width() : 0.0), 1.0});
                                 for (auto& segment : lineSegments)
                                 {

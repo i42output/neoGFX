@@ -118,7 +118,7 @@ namespace neogfx
         aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aDevice);
     }
 
-    void native_font::create_face(i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
+    void native_font::create_face(font_style aStyle, i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
         style_map::value_type* foundStyle = 0;
         for (auto& s : iStyleMap)
@@ -133,14 +133,14 @@ namespace neogfx
             return;
         }
         FT_Long faceIndex = foundStyle->second;
-        font_style faceStyle = foundStyle->first.first;
+        font_style faceStyle = foundStyle->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline));
         aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aDevice);
     }
 
     void native_font::create_face(font_info const& aFontInfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
         if (aFontInfo.style_name_available())
-            return create_face(aFontInfo.style_name(), aFontInfo.size(), aFontInfo.outline(), aDevice, aResult);
+            return create_face(aFontInfo.style_maybe(), aFontInfo.style_name(), aFontInfo.size(), aFontInfo.outline(), aDevice, aResult);
         else
             return create_face(aFontInfo.style(), aFontInfo.size(), aFontInfo.outline(), aDevice, aResult);
     }

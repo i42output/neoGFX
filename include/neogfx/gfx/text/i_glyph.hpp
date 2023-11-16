@@ -47,9 +47,14 @@ namespace neogfx
     class i_glyph
     {
     public:
+        struct no_outline_texture : std::logic_error { no_outline_texture() : std::logic_error{ "neogfx::i_glyph::no_outline_texture" } {} };
+    public:
         virtual ~i_glyph() = default;
     public:
         virtual const i_sub_texture& texture() const = 0;
+        virtual bool has_outline_texture() const = 0;
+        virtual const i_sub_texture& outline_texture() const = 0;
+        virtual void set_outline_texture(const i_sub_texture& aOutlineTexture) = 0;
         virtual bool subpixel() const = 0;
         virtual const glyph_metrics& metrics() const = 0;
         virtual glyph_pixel_mode pixel_mode() const = 0;

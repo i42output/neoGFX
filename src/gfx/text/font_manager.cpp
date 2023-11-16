@@ -667,10 +667,10 @@ namespace neogfx
 
                 if (category(newGlyph) != text_category::Emoji)
                 {
-                    auto const& glyphTexture = font.glyph(newGlyph);
-                    auto const& glyphTextureExtents = glyphTexture.texture().extents().as<float>();
-                    float const cellWidth = (category(newGlyph) != text_category::Whitespace ? std::max(advance.x, glyphTextureExtents.cx) : advance.x);
-                    auto const& glyphMetrics = glyphTexture.metrics();
+                    auto const& fontGlyph = font.glyph(newGlyph);
+                    auto const& fontGlyphExtents = fontGlyph.texture().extents().as<float>();
+                    float const cellWidth = (category(newGlyph) != text_category::Whitespace ? std::max(advance.x, fontGlyphExtents.cx) : advance.x);
+                    auto const& glyphMetrics = fontGlyph.metrics();
 
                     newGlyph.cell = quadf_2d{
                         previousCell[0] + previousAdvance,
@@ -681,15 +681,31 @@ namespace neogfx
                     newGlyph.shape = category(newGlyph) != text_category::Whitespace ? 
                         quadf_2d{
                             offset,
-                            offset + vec2f{ glyphTextureExtents.cx, 0.0f },
-                            offset + vec2f{ glyphTextureExtents.cx, glyphTextureExtents.cy },
-                            offset + vec2f{ 0.0f, glyphTextureExtents.cy } } : 
+                            offset + vec2f{ fontGlyphExtents.cx, 0.0f },
+                            offset + vec2f{ fontGlyphExtents.cx, fontGlyphExtents.cy },
+                            offset + vec2f{ 0.0f, fontGlyphExtents.cy } } : 
                         quadf_2d{};
+
+                    if (fontGlyph.has_outline_texture())
+                    {
+                        auto const& fontOutlineGlyphExtents = fontGlyph.outline_texture().extents().as<float>();
+                        auto const adjustedOffset = offset - vec2f{ 
+                            static_cast<float>(font.info().outline().radius), static_cast<float>(font.info().outline().radius) };
+                        newGlyph.outlineShape = category(newGlyph) != text_category::Whitespace ?
+                            quadf_2d{
+                                adjustedOffset,
+                                adjustedOffset + vec2f{ fontOutlineGlyphExtents.cx, 0.0f },
+                                adjustedOffset + vec2f{ fontOutlineGlyphExtents.cx, fontOutlineGlyphExtents.cy },
+                                adjustedOffset + vec2f{ 0.0f, fontOutlineGlyphExtents.cy } } :
+                            quadf_2d{};
+                    }
 
                     vec2f const shapeAdjust = vec2{
                         glyphMetrics.bearing.x,
                         glyphMetrics.bearing.y - glyphMetrics.extents.y + -font.descender() }.as<float>();
                     newGlyph.shape += shapeAdjust;
+                    if (newGlyph.outlineShape)
+                        newGlyph.outlineShape.value() += shapeAdjust;
                 }
                 else
                 {
@@ -709,8 +725,13 @@ namespace neogfx
                 }
 
                 if (aGc.logical_coordinate_system() == logical_coordinate_system::AutomaticGui)
+                {
                     for (auto& v : newGlyph.shape)
                         v.y = -v.y + cellHeight;
+                    if (newGlyph.outlineShape)
+                        for (auto& v : newGlyph.outlineShape.value())
+                            v.y = -v.y + cellHeight;
+                }
 
                 previousAdvance = advance;
                 previousCell = newGlyph.cell;
@@ -941,9 +962,9 @@ namespace neogfx
         return add_font(find_best_font(aFamilyName, aStyle, aSize).create_face(aStyle, aSize, {}, aDevice));
     }
 
-    i_native_font_face& font_manager::create_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::create_font(i_string const& aFamilyName, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyleName, aSize, {}, aDevice));
+        return add_font(find_font(aFamilyName, aStyleName, aSize).create_face(aStyle, aStyleName, aSize, {}, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(const font_info& aFontInfo, const i_device_resolution& aDevice)
@@ -958,9 +979,9 @@ namespace neogfx
         return add_font(aFont.create_face(aStyle, aSize, {}, aDevice));
     }
 
-    i_native_font_face& font_manager::create_font(i_native_font& aFont, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::create_font(i_native_font& aFont, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
-        return add_font(aFont.create_face(aStyleName, aSize, {}, aDevice));
+        return add_font(aFont.create_face(aStyle, aStyleName, aSize, {}, aDevice));
     }
 
     i_native_font_face& font_manager::create_font(i_native_font& aFont, const font_info& aFontInfo, const i_device_resolution& aDevice)
@@ -994,7 +1015,7 @@ namespace neogfx
         (void)aDevice;
     }
 
-    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
         (void)aFileName;
@@ -1029,7 +1050,7 @@ namespace neogfx
         (void)aDevice;
     }
 
-    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
+    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
     {
         throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
         (void)aData;

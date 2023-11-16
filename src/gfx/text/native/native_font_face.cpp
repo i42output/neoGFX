@@ -27,6 +27,7 @@
 #include FT_BITMAP_H
 #include FT_LCD_FILTER_H
 #include FT_ADVANCES_H
+#include FT_STROKER_H
 #include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
 #include <neogfx/gfx/text/i_font_manager.hpp>
@@ -280,27 +281,60 @@ namespace neogfx
         return FT_Get_Char_Index(iHandle.freetypeFace, aCodePoint);
     }
 
-    inline glyph_pixel_mode to_glyph_pixel_mode(unsigned char aFreeTypePixelMode)
+    namespace
     {
-        switch (aFreeTypePixelMode)
+        inline glyph_pixel_mode to_glyph_pixel_mode(unsigned char aFreeTypePixelMode)
         {
-        default:
-        case FT_PIXEL_MODE_NONE:
-            return glyph_pixel_mode::None;
-        case FT_PIXEL_MODE_MONO:
-            return glyph_pixel_mode::Mono;
-        case FT_PIXEL_MODE_GRAY:
-            return glyph_pixel_mode::Gray;
-        case FT_PIXEL_MODE_GRAY2:
-            return glyph_pixel_mode::Gray2Bit;
-        case FT_PIXEL_MODE_GRAY4:
-            return glyph_pixel_mode::Gray4Bit;
-        case FT_PIXEL_MODE_LCD:
-            return glyph_pixel_mode::LCD;
-        case FT_PIXEL_MODE_LCD_V:
-            return glyph_pixel_mode::LCD_V;
-        case FT_PIXEL_MODE_BGRA:
-            return glyph_pixel_mode::BGRA;
+            switch (aFreeTypePixelMode)
+            {
+            default:
+            case FT_PIXEL_MODE_NONE:
+                return glyph_pixel_mode::None;
+            case FT_PIXEL_MODE_MONO:
+                return glyph_pixel_mode::Mono;
+            case FT_PIXEL_MODE_GRAY:
+                return glyph_pixel_mode::Gray;
+            case FT_PIXEL_MODE_GRAY2:
+                return glyph_pixel_mode::Gray2Bit;
+            case FT_PIXEL_MODE_GRAY4:
+                return glyph_pixel_mode::Gray4Bit;
+            case FT_PIXEL_MODE_LCD:
+                return glyph_pixel_mode::LCD;
+            case FT_PIXEL_MODE_LCD_V:
+                return glyph_pixel_mode::LCD_V;
+            case FT_PIXEL_MODE_BGRA:
+                return glyph_pixel_mode::BGRA;
+            }
+        }
+
+        inline FT_Stroker_LineCap from_stroke_line_cap(stroke_line_cap aLineCap)
+        {
+            switch (aLineCap)
+            {
+            case stroke_line_cap::Butt:
+                return FT_STROKER_LINECAP_BUTT;
+            case stroke_line_cap::Round:
+            default:
+                return FT_STROKER_LINECAP_ROUND;
+            case stroke_line_cap::Square:
+                return FT_STROKER_LINECAP_SQUARE;
+            }
+        }
+
+        inline FT_Stroker_LineJoin from_stroke_line_join(stroke_line_join aLineJoin)
+        {
+            switch (aLineJoin)
+            {
+            case stroke_line_join::Bevel:
+                return FT_STROKER_LINEJOIN_BEVEL;
+            case stroke_line_join::Miter:
+                return FT_STROKER_LINEJOIN_MITER;
+            case stroke_line_join::MiterFixed:
+                return FT_STROKER_LINEJOIN_MITER_FIXED;
+            case stroke_line_join::Round:
+            default:
+                return FT_STROKER_LINEJOIN_ROUND;
+            }
         }
     }
          
@@ -309,9 +343,22 @@ namespace neogfx
         // todo: investigate why turning off sub-pixel doesn't produce same grayscale bitmap as Windows with ClearType disabled
         bool useSubpixelFiltering = true;
 
+        thread_local bool tRenderOutlineGlyph = false;
+
         auto existingGlyph = iGlyphs.find(aGlyphChar.value);
         if (existingGlyph != iGlyphs.end())
-            return existingGlyph->second;
+        {
+            if (!tRenderOutlineGlyph)
+                return existingGlyph->second;
+        }
+        else
+        {
+            if (tRenderOutlineGlyph)
+                throw std::logic_error( "neogfx::native_font_face::glyph" );
+        }
+
+        FT_Bitmap* bitmap = nullptr;
+
         try
         {
             try
@@ -330,21 +377,54 @@ namespace neogfx
                 service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot load font glyph" << endl;
                 throw freetype_load_glyph_error(fe.what());
             }
-            try
+            if (!tRenderOutlineGlyph)
             {
-                if (useSubpixelFiltering)
+                try
                 {
-                    freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_LCD));
+                    if (useSubpixelFiltering)
+                    {
+                        freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_LCD));
+                    }
+                    else
+                    {
+                        freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_NORMAL));
+                    }
+                    bitmap = &iHandle.freetypeFace->glyph->bitmap;
                 }
-                else
+                catch (freetype_error fe)
                 {
-                    freetypeCheck(FT_Render_Glyph(iHandle.freetypeFace->glyph, FT_RENDER_MODE_NORMAL));
+                    service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font glyph" << endl;
+                    throw freetype_render_glyph_error(fe.what());
                 }
             }
-            catch (freetype_error fe)
+            else
             {
-                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font glyph" << endl;
-                throw freetype_render_glyph_error(fe.what());
+                try
+                {
+                    FT_Glyph glyphDescStroke;
+                    FT_Get_Glyph(iHandle.freetypeFace->glyph, &glyphDescStroke);
+                    FT_Stroker stroker;
+                    freetypeCheck(FT_Stroker_New(iFontLib, &stroker));
+                    FT_Stroker_Set(stroker,
+                        static_cast<FT_Fixed>(outline().radius * static_cast<float>(1 << 6)),
+                        from_stroke_line_cap(outline().lineCap), from_stroke_line_join(outline().lineJoin), 0);
+                    freetypeCheck(FT_Glyph_Stroke(&glyphDescStroke, stroker, true));
+                    FT_Stroker_Done(stroker);
+                    if (useSubpixelFiltering)
+                    {
+                        freetypeCheck(FT_Glyph_To_Bitmap(&glyphDescStroke, FT_RENDER_MODE_LCD, 0, 1));
+                    }
+                    else
+                    {
+                        freetypeCheck(FT_Glyph_To_Bitmap(&glyphDescStroke, FT_RENDER_MODE_NORMAL, 0, 1));
+                    }
+                    bitmap = &reinterpret_cast<FT_BitmapGlyph>(glyphDescStroke)->bitmap;
+                }
+                catch (freetype_error fe)
+                {
+                    service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font outline glyph" << endl;
+                    throw freetype_render_glyph_error(fe.what());
+                }
             }
         }
         catch (...)
@@ -364,31 +444,34 @@ namespace neogfx
             return invalid_glyph();
         }
 
-        FT_Bitmap& bitmap = iHandle.freetypeFace->glyph->bitmap;
-
         if ((style() & (font_style::EmulatedBold)) == font_style::EmulatedBold)
-            FT_Bitmap_Embolden(iFontLib, &bitmap, static_cast<FT_F26Dot6>(xn_dpi_scale_factor(iPixelDensityDpi.cx) * 64), 0);
+            FT_Bitmap_Embolden(iFontLib, bitmap, static_cast<FT_F26Dot6>(xn_dpi_scale_factor(iPixelDensityDpi.cx) * 64), 0);
 
-        auto pixelMode = to_glyph_pixel_mode(bitmap.pixel_mode);
+        auto pixelMode = to_glyph_pixel_mode(bitmap->pixel_mode);
 
         if (pixelMode != glyph_pixel_mode::LCD)
             useSubpixelFiltering = false;
 
-        auto subTextureWidth = bitmap.width / (useSubpixelFiltering ? 3 : 1);
+        auto subTextureWidth = bitmap->width / (useSubpixelFiltering ? 3 : 1);
 
         auto& subTexture = service<i_font_manager>().glyph_atlas().create_sub_texture(
-            neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap.rows) }.ceil(),
+            neogfx::size{ static_cast<dimension>(subTextureWidth), static_cast<dimension>(bitmap->rows) }.ceil(),
             1.0, texture_sampling::Normal, pixelMode == glyph_pixel_mode::LCD ? texture_data_format::SubPixel : texture_data_format::Red);
 
         rect glyphRect{ subTexture.atlas_location() };
-        i_glyph& glyphTexture = iGlyphs.insert(std::make_pair(aGlyphChar.value,
-            neogfx::glyph{
-                subTexture,
-                useSubpixelFiltering,
-                glyph_metrics{
-                    vec2{ iHandle.freetypeFace->glyph->metrics.width / 64.0, iHandle.freetypeFace->glyph->metrics.height / 64.0 }.round(),
-                    vec2{ iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0, iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0 }.round() },
-                pixelMode })).first->second;
+        i_glyph& theGlyph = (!tRenderOutlineGlyph ?
+            iGlyphs.insert(std::make_pair(aGlyphChar.value,
+                neogfx::glyph{
+                    subTexture,
+                    useSubpixelFiltering,
+                    glyph_metrics{
+                        vec2{ iHandle.freetypeFace->glyph->metrics.width / 64.0, iHandle.freetypeFace->glyph->metrics.height / 64.0 }.round(),
+                        vec2{ iHandle.freetypeFace->glyph->metrics.horiBearingX / 64.0, iHandle.freetypeFace->glyph->metrics.horiBearingY / 64.0 }.round() },
+                    pixelMode })).first->second :
+            existingGlyph->second);
+
+        if (tRenderOutlineGlyph)
+            theGlyph.set_outline_texture(subTexture);
 
         thread_local std::vector<std::uint8_t> glyphTextureData;
         thread_local std::vector<std::array<std::uint8_t, 4>> subpixelGlyphData;
@@ -404,18 +487,18 @@ namespace neogfx
                 subpixelGlyphData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
                 // sub-pixel FIR filter.
                 static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
-                for (uint32_t y = 0; y < bitmap.rows; y++)
+                for (uint32_t y = 0; y < bitmap->rows; y++)
                 {
-                    for (uint32_t x = 0; x < bitmap.width; x++)
+                    for (uint32_t x = 0; x < bitmap->width; x++)
                     {
                         uint8_t alpha = 0;
                         for (int32_t z = -2; z <= 2; ++z)
                         {
                             int32_t const s = x + z;
-                            if (s >= 0 && s <= static_cast<int32_t>(bitmap.width) - 1)
-                                alpha += static_cast<uint8_t>(bitmap.buffer[s + bitmap.pitch * y] * coefficients[z + 2]);
+                            if (s >= 0 && s <= static_cast<int32_t>(bitmap->width) - 1)
+                                alpha += static_cast<uint8_t>(bitmap->buffer[s + bitmap->pitch * y] * coefficients[z + 2]);
                         }
-                        subpixelGlyphData[(x / 3) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
+                        subpixelGlyphData[(x / 3) + (bitmap->rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
                     }
                 }
                 textureData = &subpixelGlyphData[0][0];
@@ -423,28 +506,35 @@ namespace neogfx
             else
             {
                 glyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
-                for (uint32_t y = 0; y < bitmap.rows; y++)
-                    switch (bitmap.pixel_mode)
+                for (uint32_t y = 0; y < bitmap->rows; y++)
+                    switch (bitmap->pixel_mode)
                     {
                     case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
-                        for (uint32_t x = 0; x < bitmap.width; x += 8)
-                            for (uint32_t b = 0; b < std::min(bitmap.width - x, 8u); ++b)
-                                glyphTextureData[(x + b) + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
-                                    (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : ((bitmap.buffer[x / 8 + bitmap.pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
+                        for (uint32_t x = 0; x < bitmap->width; x += 8)
+                            for (uint32_t b = 0; b < std::min(bitmap->width - x, 8u); ++b)
+                                glyphTextureData[(x + b) + (bitmap->rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
+                                    (x >= bitmap->width || y >= bitmap->rows) ? 0x00 : ((bitmap->buffer[x / 8 + bitmap->pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
                         break;
                     case FT_PIXEL_MODE_GRAY:
                     default:
-                        for (uint32_t x = 0; x < bitmap.width; x++)
-                            glyphTextureData[x + (bitmap.rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
-                                (x >= bitmap.width || y >= bitmap.rows) ? 0x00 : bitmap.buffer[x + bitmap.pitch * y];
+                        for (uint32_t x = 0; x < bitmap->width; x++)
+                            glyphTextureData[x + (bitmap->rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
+                                (x >= bitmap->width || y >= bitmap->rows) ? 0x00 : bitmap->buffer[x + bitmap->pitch * y];
                         break;
                     }
                 textureData = &glyphTextureData[0];
             }
-            static_cast<i_native_texture&>(glyphTexture.texture().native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
+            static_cast<i_native_texture&>((!tRenderOutlineGlyph ? 
+                theGlyph.texture() : theGlyph.outline_texture()).native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
         }
 
-        return glyphTexture;
+        if (outline().radius != 0.0 && !tRenderOutlineGlyph)
+        {
+            neolib::scoped_flag sf{ tRenderOutlineGlyph };
+            (void) glyph(aGlyphChar);
+        }
+
+        return theGlyph;
     }
 
     i_glyph& native_font_face::invalid_glyph() const

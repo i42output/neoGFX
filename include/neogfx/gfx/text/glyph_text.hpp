@@ -95,6 +95,7 @@ namespace neogfx
         font_id font;
         quadf_2d cell;
         quadf_2d shape;
+        std::optional<quadf_2d> outlineShape;
     };
 
     inline bool operator==(const glyph_char& lhs, const glyph_char& rhs)

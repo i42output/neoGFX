@@ -31,11 +31,15 @@ namespace neogfx
         ~glyph();
     public:
         const i_sub_texture& texture() const final;
+        bool has_outline_texture() const final;
+        const i_sub_texture& outline_texture() const final;
+        void set_outline_texture(const i_sub_texture& aOutlineTexture) final;
         bool subpixel() const final;
         const glyph_metrics& metrics() const final;
         glyph_pixel_mode pixel_mode() const final;
     private:
         const i_sub_texture& iTexture;
+        const i_sub_texture* iOutlineTexture;
         bool iSubpixel;
         glyph_metrics iMetrics;
         glyph_pixel_mode iPixelMode;
