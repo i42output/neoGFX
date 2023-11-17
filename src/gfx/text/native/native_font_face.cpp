@@ -402,12 +402,13 @@ namespace neogfx
                 try
                 {
                     FT_Glyph glyphDescStroke;
-                    FT_Get_Glyph(iHandle.freetypeFace->glyph, &glyphDescStroke);
+                    freetypeCheck(FT_Get_Glyph(iHandle.freetypeFace->glyph, &glyphDescStroke));
                     FT_Stroker stroker;
                     freetypeCheck(FT_Stroker_New(iFontLib, &stroker));
                     FT_Stroker_Set(stroker,
                         static_cast<FT_Fixed>(outline().radius * static_cast<float>(1 << 6)),
-                        from_stroke_line_cap(outline().lineCap), from_stroke_line_join(outline().lineJoin), 0);
+                        from_stroke_line_cap(outline().lineCap), from_stroke_line_join(outline().lineJoin), 
+                        static_cast<FT_Fixed>(outline().miterLimit * static_cast<float>(1 << 6)));
                     freetypeCheck(FT_Glyph_Stroke(&glyphDescStroke, stroker, true));
                     FT_Stroker_Done(stroker);
                     if (useSubpixelFiltering)

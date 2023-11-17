@@ -62,7 +62,7 @@ namespace video_poker
                 aCanvas.ecs(),
                 ng::graphics_context{ aCanvas },
                 aOutcome,
-                ng::font{ "Exo 2", "Black", 48.0 },
+                ng::font{ "Exo 2", "Black", 48.0 }.with_outline({ 1.0_dp }),
                 ng::text_format{aColor, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } },
                 ng::alignment::Center}
         {
@@ -118,7 +118,7 @@ namespace video_poker
                 ng::gradient{ { ng::color::Black, aColor, ng::color::Black } },
                 ng::text_effect{ng::text_effect_type::Outline, ng::color::White } };
         };
-        iLabelTitle.text_widget().set_font(ng::font{ "Exo 2", "Black", 48.0 });
+        iLabelTitle.text_widget().set_font(ng::font{ "Exo 2", "Black", 48.0 }.with_outline({ 1.0_dp }));
         iLabelTitle.text_widget().set_text_format(shiny_text(ng::color::Green));
         iSpacer1.set_weight(ng::size{ 0.1 });
         iSpacer2.set_weight(ng::size{ 0.25 });
@@ -135,20 +135,20 @@ namespace video_poker
             aButton.set_base_color(ng::color::White);
             aButton.text_widget().set_size_hint(ng::size_hint{ "MAX\nBET" });
             aButton.text_widget().set_text_color(ng::color::Black);
-            aButton.text_widget().set_font(ng::font{ "Exo 2", "Black", 24.0 });
+            aButton.text_widget().set_font(ng::font{ "Exo 2", "Black", 24.0 }.with_outline({ 1.0_dp }));
         };
         set_bet_button_appearance(iBetMinus);
         set_bet_button_appearance(iBetPlus);
         set_bet_button_appearance(iBetMax);
         set_bet_button_appearance(iDeal);
         ng::layout_as_same_size(iAddCredit, iBetMinus);
-        iLabelCredits.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelCredits.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 }.with_outline({ 1.0_dp }));
         iLabelCredits.text_widget().set_text_format(shiny_text(ng::color::Yellow));
-        iLabelCreditsValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelCreditsValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 }.with_outline({ 1.0_dp }));
         iLabelCreditsValue.text_widget().set_text_format(shiny_text(ng::color::White));
-        iLabelStake.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelStake.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 }.with_outline({ 1.0_dp }));
         iLabelStake.text_widget().set_text_format(shiny_text(ng::color::Yellow));
-        iLabelStakeValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 });
+        iLabelStakeValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 }.with_outline({ 1.0_dp }));
         iLabelStakeValue.text_widget().set_text_format(shiny_text(ng::color::White));
 
         iAddCredit.clicked([this]() { add_credit(STARTING_CREDIT); });
