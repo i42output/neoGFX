@@ -1810,7 +1810,7 @@ namespace neogfx
                                     std::holds_alternative<color>(*drawOp.appearance->paper()) ?
                                         to_ecs_component(std::get<color>(*drawOp.appearance->paper())) : std::optional<game::color>{},
                                     std::holds_alternative<gradient>(*drawOp.appearance->paper()) ?
-                                        to_ecs_component(std::get<gradient>(*drawOp.appearance->paper())) : std::optional<game::gradient>{} } });
+                                        to_ecs_component(std::get<gradient>(*drawOp.appearance->paper()).with_bounding_box_if_none(bounding_rect())) : std::optional<game::gradient>{} } });
                     }
                 }
                 break;
