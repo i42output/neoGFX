@@ -246,6 +246,10 @@ namespace neogfx
     {
         if (items_visible() == 0)
             return size{};
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::minimum_size(" << aAvailableSpace << ") --> ";
+#endif // NEOGFX_DEBUG
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
@@ -266,12 +270,16 @@ namespace neogfx
         }
         result.cx += internal_spacing().size().cx;
         result.cy += internal_spacing().size().cy;
-        if (result.cx != size::max_dimension() && visibleColumns> 0)
+        if (result.cx != size::max_dimension() && visibleColumns > 0)
             result.cx += (spacing().cx * (visibleColumns - 1));
         if (result.cy != size::max_dimension() && visibleRows > 0)
             result.cy += (spacing().cy * (visibleRows - 1));
         result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
         result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << result << endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
@@ -279,6 +287,10 @@ namespace neogfx
     {
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
             return size{};
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::maximum_size(" << aAvailableSpace << ") --> ";
+#endif // NEOGFX_DEBUG
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
@@ -311,6 +323,10 @@ namespace neogfx
             result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
         if (result.cy != size::max_dimension())
             result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << result << endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
@@ -443,6 +459,8 @@ namespace neogfx
                             point rowPos2 = availablePos;
                             for (cell_coordinate row2 = 0; !foundSpan && row2 <= s.second.y; ++row2)
                             {
+                                if (maxRowHeight[row2] == 0.0)
+                                    continue;
                                 point colPos2 = rowPos2;
                                 for (cell_coordinate col2 = 0; !foundSpan && col2 <= s.second.x; ++col2)
                                 {
