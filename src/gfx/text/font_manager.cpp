@@ -786,6 +786,9 @@ namespace neogfx
                         g.clusters = glyph_char::cluster_range{ g.clusters.first, g.clusters.first + static_cast<std::uint32_t>(sequence.size()) };
                         g.cell += advanceAdjust;
                         emojiResult.push_back(g);
+                        for (auto& lineBreak : emojiResult.line_breaks())
+                            if (lineBreak >= emojiResult.size())
+                                lineBreak -= sequence.size() - 1;
                         std::advance(i, sequence.size());
                         if (i != result.end())
                             advanceAdjust = -vec2f{ i->cell[0].x - g.cell[1].x, 0.0f };
