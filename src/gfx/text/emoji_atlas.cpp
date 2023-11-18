@@ -86,14 +86,27 @@ namespace neogfx
 
     bool emoji_atlas::is_emoji(char32_t aCodePoint) const
     {
-        std::u32string str;
-        str += aCodePoint;
+        thread_local std::u32string str;
+        str = aCodePoint;
         return is_emoji(str);
     }
 
     bool emoji_atlas::is_emoji(const std::u32string& aCodePoints) const
     {
         return iEmojiMap.find(aCodePoints) != iEmojiMap.end();
+    }
+
+    bool emoji_atlas::is_emoji(const std::u32string& aCodePoints, std::u32string& aPartial) const
+    {
+        aPartial.clear();
+        auto existing = iEmojiMap.lower_bound(aCodePoints);
+        if (existing == iEmojiMap.end())
+            return false;
+        if (existing->first == aCodePoints)
+            return true;
+        if (existing->first.find(aCodePoints) == 0)
+            aPartial = existing->first;
+        return false;
     }
 
     emoji_atlas::emoji_id emoji_atlas::emoji(char32_t aCodePoint, dimension aDesiredSize) const

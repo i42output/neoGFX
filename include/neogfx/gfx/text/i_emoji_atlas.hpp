@@ -33,6 +33,7 @@ namespace neogfx
     public:
         virtual bool is_emoji(char32_t aCodePoint) const = 0;
         virtual bool is_emoji(const std::u32string& aCodePoints) const = 0;
+        virtual bool is_emoji(const std::u32string& aCodePoints, std::u32string& aPartial) const = 0;
         virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const = 0;
         virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize) const = 0;
         virtual const i_texture& emoji_texture(emoji_id aId) const = 0;

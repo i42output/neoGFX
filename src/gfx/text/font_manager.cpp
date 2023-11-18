@@ -765,19 +765,23 @@ namespace neogfx
                     thread_local std::u32string sequence;
                     sequence.clear();
                     sequence += chStart;
-                    auto j = i + 1;
-                    for (; j != result.end(); ++j)
+                    thread_local std::u32string partial;
+                    for (auto j = i + 1; j != result.end(); ++j)
                     {
                         auto ch = aUtf32Begin[cluster + (j - i)];
-                        if (emojiAtlas.is_emoji(sequence + ch))
+                        thread_local std::u32string nextPartial;
+                        if (emojiAtlas.is_emoji(sequence + ch, nextPartial) || !nextPartial.empty())
+                        {
+                            partial = nextPartial;
                             sequence += ch;
+                        }
                         else
                             break;
                     }
                     if (sequence.size() > 1)
                     {
                         auto g = *i;
-                        g.value = emojiAtlas.emoji(sequence, aFontSelector.select_font(cluster).height());
+                        g.value = emojiAtlas.emoji(partial.empty() ? sequence : partial, aFontSelector.select_font(cluster).height());
                         g.clusters = glyph_char::cluster_range{ g.clusters.first, g.clusters.first + static_cast<std::uint32_t>(sequence.size()) };
                         g.cell += advanceAdjust;
                         emojiResult.push_back(g);

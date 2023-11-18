@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <unordered_map>
+#include <map>
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_texture_atlas.hpp>
 #include "i_emoji_atlas.hpp"
@@ -35,15 +35,16 @@ namespace neogfx
     public:
         emoji_atlas();
     public:
-        virtual bool is_emoji(char32_t aCodePoint) const;
-        virtual bool is_emoji(const std::u32string& aCodePoints) const;
-        virtual emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const;
-        virtual emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64) const;
-        virtual const i_texture& emoji_texture(emoji_id aId) const;
+        bool is_emoji(char32_t aCodePoint) const final;
+        bool is_emoji(const std::u32string& aCodePoints) const final;
+        bool is_emoji(const std::u32string& aCodePoints, std::u32string& aPartial) const final;
+        emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const final;
+        emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64) const final;
+        const i_texture& emoji_texture(emoji_id aId) const final;
     private:
         const std::string kFilePath;
         std::unique_ptr<i_texture_atlas> iTextureAtlas;
         emojis iEmojis;
-        mutable std::unordered_map<std::u32string, std::optional<emoji_id>> iEmojiMap;
+        mutable std::map<std::u32string, std::optional<emoji_id>> iEmojiMap;
     };
 }
