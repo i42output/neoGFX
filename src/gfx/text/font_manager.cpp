@@ -743,7 +743,7 @@ namespace neogfx
             auto& emojiResult = *refEmojiResult;
             emojiResult.line_breaks() = result.line_breaks();
             vec2f advanceAdjust = {};
-            for (auto i = result.begin(); i != result.end(); ++i)
+            for (auto i = result.begin(); i != result.end();)
             {
                 auto cluster = i->clusters.first;
                 auto chStart = aUtf32Begin[cluster];
@@ -766,6 +766,7 @@ namespace neogfx
                     sequence.clear();
                     sequence += chStart;
                     thread_local std::u32string partial;
+                    partial.clear();
                     for (auto j = i + 1; j != result.end(); ++j)
                     {
                         auto ch = aUtf32Begin[cluster + (j - i)];
@@ -785,23 +786,20 @@ namespace neogfx
                         g.clusters = glyph_char::cluster_range{ g.clusters.first, g.clusters.first + static_cast<std::uint32_t>(sequence.size()) };
                         g.cell += advanceAdjust;
                         emojiResult.push_back(g);
-                        auto toCombine = sequence.size() - 1;
-                        while (toCombine--)
-                        {
-                            advanceAdjust -= vec2f{ i->cell[1].x - i->cell[0].x, 0.0f };
-                            ++i;
-                        }
+                        std::advance(i, sequence.size());
+                        if (i != result.end())
+                            advanceAdjust = -vec2f{ i->cell[0].x - g.cell[1].x, 0.0f };
                     }
                     else
                     {
-                        auto g = *i;
+                        auto g = *i++;
                         g.cell += advanceAdjust;
                         emojiResult.push_back(g);
                     }
                 }
                 else
                 {
-                    auto g = *i;
+                    auto g = *i++;
                     g.cell += advanceAdjust;
                     emojiResult.push_back(g);
                 }
