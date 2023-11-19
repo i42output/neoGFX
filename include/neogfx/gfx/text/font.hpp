@@ -201,6 +201,7 @@ namespace neogfx
     public:
         font_info with_style(font_style aStyle) const;
         font_info with_style_xor(font_style aStyle) const;
+        font_info with_style_name(std::string const& aStyleName) const;
         font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
         font_info with_outline(stroke aOutline) const;
@@ -208,7 +209,7 @@ namespace neogfx
         auto operator<=>(const font_info& aRhs) const = default;
     public:
         static font_weight weight_from_style(font_style aStyle);
-        static font_weight weight_from_style_name(std::string aStyleName, bool aUnknownAsRegular = true);
+        static font_weight weight_from_style_name(std::string const& aStyleName, bool aUnknownAsRegular = true);
     private:
         string iFamilyName;
         optional_style iStyle;

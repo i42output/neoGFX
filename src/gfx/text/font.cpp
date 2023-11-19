@@ -37,7 +37,7 @@ namespace neogfx
             return font_weight::Normal;
     }
 
-    font_weight font_info::weight_from_style_name(std::string aStyleName, bool aUnknownAsRegular)
+    font_weight font_info::weight_from_style_name(std::string const& aStyleName, bool aUnknownAsRegular)
     {
         static std::unordered_map<std::string, font_weight> sWeightMap =
         {
@@ -80,16 +80,16 @@ namespace neogfx
             { "h", font_weight::Heavy },
             { "bl", font_weight::Black },
         };
-        boost::algorithm::to_lower(aStyleName);
-        auto w = sWeightMap.find(aStyleName);
+        auto const key = boost::algorithm::to_lower_copy(aStyleName);
+        auto w = sWeightMap.find(key);
         if (w != sWeightMap.end())
             return w->second;
-        auto aw = sAbbreviatedWeightMap.find(aStyleName);
+        auto aw = sAbbreviatedWeightMap.find(key);
         if (aw != sAbbreviatedWeightMap.end())
             return aw->second;
         std::optional<decltype(sWeightMap)::value_type*> match;
         for (auto& wme : sWeightMap)
-            if (aStyleName.find(wme.first) != std::string::npos)
+            if (key.find(wme.first) != std::string::npos)
             {
                 if (match == std::nullopt || (**match).first.size() < wme.first.size())
                     match = &wme;
@@ -283,6 +283,13 @@ namespace neogfx
             s &= ~font_style::Normal;
         font_info result{ *this };
         result.iStyle = s;
+        return result;
+    }
+
+    font_info font_info::with_style_name(std::string const& aStyleName) const
+    {
+        font_info result{ *this };
+        result.iStyleName = aStyleName;
         return result;
     }
 

@@ -110,11 +110,11 @@ namespace neogfx
     {
         std::multimap<matching_bits_t, style_map::value_type*> matches;
         for (auto& s : iStyleMap)
-            matches.insert(std::make_pair(matching_bits(static_cast<uint32_t>(s.first.first), static_cast<uint32_t>(aStyle)), &s));
+            matches.insert(std::make_pair(matching_bits(static_cast<std::uint32_t>(s.first.first), static_cast<std::uint32_t>(aStyle)), &s));
         if (matches.empty())
             throw no_matching_style_found();
-        FT_Long faceIndex = matches.rbegin()->second->second;
-        font_style faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript|font_style::Subscript|font_style::BelowAscenderLine|font_style::AboveBaseline|font_style::Emulated)));
+        font_style const faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline | font_style::Emulated)));
+        FT_Long const faceIndex = matches.rbegin()->second->second;
         aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aDevice);
     }
 
@@ -129,11 +129,16 @@ namespace neogfx
             }
         if (foundStyle == nullptr)
         {
-            create_face(font_style::Normal, aSize, aOutline, aDevice, aResult);
+            create_face(aStyle, aSize, aOutline, aDevice, aResult);
             return;
         }
-        FT_Long faceIndex = foundStyle->second;
-        font_style faceStyle = foundStyle->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline));
+        font_style const faceStyle = foundStyle->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline));
+        if ((aStyle & font_style::BoldItalic) != font_style::Invalid && (aStyle & font_style::BoldItalic) != (faceStyle & font_style::BoldItalic))
+        {
+            create_face(aStyle, aSize, aOutline, aDevice, aResult);
+            return;
+        }
+        FT_Long const faceIndex = foundStyle->second;
         aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aDevice);
     }
 

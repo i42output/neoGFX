@@ -1195,7 +1195,7 @@ namespace neogfx
 
     i_native_font& font_manager::find_font(font_info const& aFontInfo)
     {
-        if (aFontInfo.style_name_available())
+        if (aFontInfo.style_name_available() && (aFontInfo.style_maybe() & font_style::BoldItalic) == font_style::Invalid)
             return find_font(aFontInfo.family_name(), aFontInfo.style_name(), aFontInfo.size());
         else
             return find_best_font(aFontInfo.family_name(), aFontInfo.style(), aFontInfo.size());
