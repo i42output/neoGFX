@@ -1195,10 +1195,14 @@ namespace neogfx
 
     i_native_font& font_manager::find_font(font_info const& aFontInfo)
     {
-        if (aFontInfo.style_name_available() && (aFontInfo.style_maybe() & font_style::BoldItalic) == font_style::Invalid)
-            return find_font(aFontInfo.family_name(), aFontInfo.style_name(), aFontInfo.size());
-        else
-            return find_best_font(aFontInfo.family_name(), aFontInfo.style(), aFontInfo.size());
+        if (aFontInfo.style_name_available())
+        {
+            auto& candidateFont = find_font(aFontInfo.family_name(), aFontInfo.style_name(), aFontInfo.size());
+            auto const styleOverride = (aFontInfo.style_maybe() & font_style::BoldItalic);
+            if (styleOverride == font_style::Invalid || candidateFont.has_style(styleOverride))
+                return candidateFont;
+        }
+        return find_best_font(aFontInfo.family_name(), aFontInfo.style(), aFontInfo.size());
     }
 
     namespace
