@@ -50,21 +50,21 @@ namespace neogfx
     {
     public:
         declare_event(device_metrics_updated, const i_widget&)
-        declare_event(child_added, i_widget&)
-        declare_event(child_removed, i_widget&)
-        declare_event(visibility_changed)
-        declare_event(position_changed)
-        declare_event(parent_position_changed)
-        declare_event(size_changed)
-        declare_event(layout_completed)
-        declare_event(painting, i_graphics_context&)
-        declare_event(painting_children, i_graphics_context&)
-        declare_event(painted, i_graphics_context&)
-        declare_event(mouse_event, const neogfx::mouse_event&)
-        declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
-        declare_event(query_mouse_cursor, neogfx::mouse_cursor&)
-        declare_event(keyboard_event, const neogfx::keyboard_event&)
-        declare_event(focus_event, neogfx::focus_event, focus_reason)
+            declare_event(child_added, i_widget&)
+            declare_event(child_removed, i_widget&)
+            declare_event(visibility_changed)
+            declare_event(position_changed)
+            declare_event(parent_position_changed)
+            declare_event(size_changed)
+            declare_event(layout_completed)
+            declare_event(painting, i_graphics_context&)
+            declare_event(painting_children, i_graphics_context&)
+            declare_event(painted, i_graphics_context&)
+            declare_event(mouse_event, const neogfx::mouse_event&)
+            declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
+            declare_event(query_mouse_cursor, neogfx::mouse_cursor&)
+            declare_event(keyboard_event, const neogfx::keyboard_event&)
+            declare_event(focus_event, neogfx::focus_event, focus_reason)
     public:
         typedef i_widget abstract_type;
         typedef neolib::i_vector<i_ref_ptr<i_widget>> widget_list;
@@ -331,6 +331,13 @@ namespace neogfx
         rect to_client_coordinates(const rect& aWindowCoordinates) const
         {
             return aWindowCoordinates - non_client_rect().top_left();
+        }
+        rect to_client_rect(const size& aExtents, bool aExtendIntoPadding = true) const
+        {
+            auto const& internalSpacing = internal_spacing(!aExtendIntoPadding);
+            auto const& topLeft = internalSpacing.top_left();
+            auto const& adjustedExtents = (aExtents - internalSpacing.size()).max(size{});
+            return rect{ topLeft, adjustedExtents };
         }
     public:
         bool show()

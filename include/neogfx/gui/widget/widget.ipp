@@ -943,12 +943,7 @@ namespace neogfx
     inline rect widget<Interface>::client_rect(bool aExtendIntoPadding) const
     {
         auto& self = base_type::as_widget();
-        auto const& internalSpacing = self.internal_spacing(!aExtendIntoPadding);
-        auto const& topLeft = internalSpacing.top_left();
-        auto const& extents = self.extents();
-        auto const& adjustedExtents = (extents - internalSpacing.size()).max(size{});
-        rect const result{ topLeft, adjustedExtents };
-        return result;
+        return base_type::to_client_rect(self.extents(), aExtendIntoPadding);
     }
 
     template <WidgetInterface Interface>

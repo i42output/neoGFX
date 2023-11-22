@@ -309,10 +309,10 @@ namespace neogfx
         aStream << "[";
         aStream << aFontInfo.family_name();
         aStream << ",";
-        if (aFontInfo.style_available())
-            aStream << aFontInfo.style();
-        else
+        if (aFontInfo.style_name_available())
             aStream << aFontInfo.style_name();
+        else
+            aStream << aFontInfo.style();
         aStream << ", ";
         aStream << aFontInfo.size();
         aStream << ", ";
@@ -338,16 +338,13 @@ namespace neogfx
         char ignore;
         aStream >> ignore;
         aStream >> familyName;
-        std::string string;
-        aStream >> string;
-        try
-        {
-            style = neolib::string_to_enum<font_style>(string);
-        }
-        catch (...)
-        {
-            style = string;
-        }
+        std::string styleString;
+        aStream >> styleString;
+        auto tryStyle = neolib::try_string_to_enum<font_style>(styleString);
+        if (tryStyle.has_value())
+            style = tryStyle.value();
+        else
+            style = styleString;
         aStream.imbue(std::locale{ previousImbued, new neolib::comma_as_whitespace{} });
         aStream >> size;
         aStream >> underline;

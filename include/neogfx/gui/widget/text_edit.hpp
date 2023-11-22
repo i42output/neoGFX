@@ -201,6 +201,12 @@ namespace neogfx
             character_style& character();
             paragraph_style const& paragraph() const;
             paragraph_style& paragraph();
+        public:
+            style with_font(optional_font const& aFont = optional_font{}) const;
+            style with_glyph_color(const color_or_gradient& aColor = color_or_gradient{}) const;
+            style with_text_color(const color_or_gradient& aColor = color_or_gradient{}) const;
+            style with_paper_color(const color_or_gradient& aColor = color_or_gradient{}) const;
+            style with_text_effect(const optional_text_effect& aEffect = optional_text_effect{}) const;
         private:
 			text_edit* iParent;
             mutable uint32_t iUseCount;
@@ -485,6 +491,9 @@ namespace neogfx
         const style& column_style(std::size_t aColumnIndex) const;
         const style& column_style(const column_info& aColumn) const;
     public:
+        bool has_page_rect() const;
+        rect page_rect() const;
+        void set_page_rect(optional_rect const& aPageRect);
         const neogfx::size_hint& size_hint() const;
         void set_size_hint(const neogfx::size_hint& aSizeHint);
         void set_tab_stop_hint(i_string const& aTabStopHint = string{ "0000" });
@@ -547,6 +556,7 @@ namespace neogfx
         bool iUpdatingDocument;
         document_text iPreviousText;
         document_text iText;
+        optional_rect iPageRect;
         mutable std::optional<string> iUtf8TextCache;
         mutable std::optional<document_glyphs> iGlyphs;
         glyph_paragraphs iGlyphParagraphs;

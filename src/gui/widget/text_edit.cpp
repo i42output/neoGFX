@@ -586,6 +586,41 @@ namespace neogfx
         return iParagraph;
     }
 
+    text_edit::style text_edit::style::with_font(optional_font const& aFont) const
+    {
+        style newStyle = *this;
+        newStyle.character().set_font(aFont);
+        return newStyle;
+    }
+
+    text_edit::style text_edit::style::with_glyph_color(const color_or_gradient& aColor) const
+    {
+        style newStyle = *this;
+        newStyle.character().set_glyph_color(aColor);
+        return newStyle;
+    }
+
+    text_edit::style text_edit::style::with_text_color(const color_or_gradient& aColor) const
+    {
+        style newStyle = *this;
+        newStyle.character().set_text_color(aColor);
+        return newStyle;
+    }
+
+    text_edit::style text_edit::style::with_paper_color(const color_or_gradient& aColor) const
+    {
+        style newStyle = *this;
+        newStyle.character().set_paper_color(aColor);
+        return newStyle;
+    }
+
+    text_edit::style text_edit::style::with_text_effect(const optional_text_effect& aEffect) const
+    {
+        style newStyle = *this;
+        newStyle.character().set_text_effect(aEffect);
+        return newStyle;
+    }
+
     text_edit::column_info::column_info() :
         iDelimiter{ U'\t' }
     {
@@ -1827,7 +1862,7 @@ namespace neogfx
 
     rect text_edit::column_rect(std::size_t aColumnIndex, bool aExtendIntoPadding) const
     {
-        auto result = client_rect(false);
+        auto result = page_rect();
         for (std::size_t ci = 0; ci < aColumnIndex; ++ci)
             result.x += static_cast<const glyph_column&>(column(ci)).width();
         if (!aExtendIntoPadding)
@@ -2277,6 +2312,24 @@ namespace neogfx
         return default_style();
     }
 
+    bool text_edit::has_page_rect() const
+    {
+        return iPageRect != std::nullopt;
+    }
+
+    rect text_edit::page_rect() const
+    {
+        if (has_page_rect())
+            return iPageRect.value();
+        return client_rect(false);
+    }
+
+    void text_edit::set_page_rect(optional_rect const& aPageRect)
+    {
+        iPageRect = aPageRect;
+        refresh_columns();
+    }
+
     const neogfx::size_hint& text_edit::size_hint() const
     {       
         return iSizeHint;
@@ -2711,8 +2764,18 @@ namespace neogfx
                             {
                                 glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f } }, {} };
                                 auto split = std::lower_bound(next, paragraphLineEnd, key, [](auto const& lhs, auto const& rhs) { return lhs.cell[0].x < rhs.cell[0].x; });
-                                if (split != next && (split != paragraphLineEnd || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((split - 1)->cell).x) >= offset + availableWidth))
-                                    --split;
+                                if (split != next)
+                                {
+                                    if (split != paragraphLineEnd) 
+                                        --split;
+                                    else
+                                    {
+                                        auto const xPrevious = static_cast<coordinate>((split - 1)->cell[0].x);
+                                        auto const cxPrevious = static_cast<coordinate>(quad_extents((split - 1)->cell).x);
+                                        if (xPrevious + cxPrevious >= offset + availableWidth)
+                                            --split;
+                                    }
+                                }
                                 if (split == next)
                                     ++split;
                                 if (split != paragraphLineEnd)
