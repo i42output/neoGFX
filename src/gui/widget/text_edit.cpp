@@ -1308,7 +1308,14 @@ namespace neogfx
 
     rect text_edit::scroll_area() const
     {
-        return rect{ point{}, iTextExtents.value() };
+        auto paddingAdjust = internal_spacing().size();
+        paddingAdjust += column_rect(0, true).extents() - column_rect(0, false).extents();
+        return rect{ point{}, iTextExtents.value() + paddingAdjust };
+    }
+
+    rect text_edit::scroll_page() const
+    {
+        return framed_scrollable_widget::scroll_page();
     }
 
     bool text_edit::use_scrollbar_container_updater() const
@@ -2762,7 +2769,7 @@ namespace neogfx
                             coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x : 0.0);
                             while (next != paragraphLineEnd)
                             {
-                                glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f } }, {} };
+                                glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f }, vec2{ offset + availableWidth, 0.0f } }, {} };
                                 auto split = std::lower_bound(next, paragraphLineEnd, key, [](auto const& lhs, auto const& rhs) { return lhs.cell[0].x < rhs.cell[0].x; });
                                 if (split != next)
                                 {
@@ -2770,8 +2777,9 @@ namespace neogfx
                                         --split;
                                     else
                                     {
-                                        auto const xPrevious = static_cast<coordinate>((split - 1)->cell[0].x);
-                                        auto const cxPrevious = static_cast<coordinate>(quad_extents((split - 1)->cell).x);
+                                        auto const& previousChar = *(split - 1);
+                                        auto const xPrevious = static_cast<coordinate>(previousChar.cell[0].x);
+                                        auto const cxPrevious = static_cast<coordinate>(quad_extents(previousChar.cell).x);
                                         if (xPrevious + cxPrevious >= offset + availableWidth)
                                             --split;
                                     }
