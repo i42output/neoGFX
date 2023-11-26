@@ -1308,9 +1308,10 @@ namespace neogfx
 
     rect text_edit::scroll_area() const
     {
-        auto paddingAdjust = internal_spacing().size();
-        paddingAdjust += column_rect(0, true).extents() - column_rect(0, false).extents();
-        return rect{ point{}, iTextExtents.value() + paddingAdjust };
+        auto const& internalPadding = padding();
+        auto const& colulmnPadding = column(0).padding(); ///< todo: other columns?
+        auto const& totalPadding = internalPadding + colulmnPadding;
+        return rect{ point{}, iTextExtents.value() + totalPadding.size()};
     }
 
     rect text_edit::scroll_page() const
@@ -3006,18 +3007,22 @@ namespace neogfx
     void text_edit::make_visible(position_info const& aGlyphPosition, point const& aPreview)
     {
         scoped_units su{ *this, units::Pixels };
-        auto e = (aGlyphPosition.line != aGlyphPosition.column->lines().end() ?
+        auto extents = (aGlyphPosition.line != aGlyphPosition.column->lines().end() ?
             size{ aGlyphPosition.glyph != aGlyphPosition.lineEnd ? quad_extents(aGlyphPosition.glyph->cell).x : 0.0, aGlyphPosition.line->extents.cy } :
             size{ 0.0, font().height() });
-        e.cy = std::min(e.cy, vertical_scrollbar().page());
-        if (aGlyphPosition.pos.y < vertical_scrollbar().position())
-            vertical_scrollbar().set_position(aGlyphPosition.pos.y);
-        else if (aGlyphPosition.pos.y + e.cy > vertical_scrollbar().position() + vertical_scrollbar().page())
-            vertical_scrollbar().set_position(aGlyphPosition.pos.y + e.cy - vertical_scrollbar().page());
-        if (aGlyphPosition.pos.x < horizontal_scrollbar().position() + aPreview.x)
-            horizontal_scrollbar().set_position(aGlyphPosition.pos.x - aPreview.x);
-        else if (aGlyphPosition.pos.x + e.cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - aPreview.x)
-            horizontal_scrollbar().set_position(aGlyphPosition.pos.x + e.cx + aPreview.x - horizontal_scrollbar().page());
+        auto position = aGlyphPosition.pos;
+        auto const& internalPadding = padding();
+        auto const& colulmnPadding = column(0).padding(); ///< todo: other columns?
+        auto const& totalPadding = internalPadding + colulmnPadding;
+        extents.cy = std::min(extents.cy, vertical_scrollbar().page());
+        if (position.y < vertical_scrollbar().position())
+            vertical_scrollbar().set_position(position.y);
+        else if (position.y + extents.cy + totalPadding.size().cy > vertical_scrollbar().position() + vertical_scrollbar().page())
+            vertical_scrollbar().set_position(position.y + extents.cy - vertical_scrollbar().page() + totalPadding.size().cy );
+        if (position.x < horizontal_scrollbar().position() + aPreview.x)
+            horizontal_scrollbar().set_position(position.x - aPreview.x);
+        else if (position.x + extents.cx + totalPadding.size().cx > horizontal_scrollbar().position() + horizontal_scrollbar().page() - aPreview.x)
+            horizontal_scrollbar().set_position(position.x + extents.cx + aPreview.x - horizontal_scrollbar().page() + totalPadding.size().cx);
     }
 
     text_edit::style text_edit::glyph_style(document_glyphs::const_iterator aGlyph, const glyph_column& aColumn) const

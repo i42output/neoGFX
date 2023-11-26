@@ -106,7 +106,6 @@ namespace neogfx
         iSample.set_default_style(iSample.default_style().with_text_color(color::Black));
         iSample.set_page_rect(iSample.to_client_rect(iSample.minimum_size() * 2.0, false));
         //auto v = iSample.view();
-        //v.zoom(1.0);
         //iSample.set_view(v);
         center_on_parent();
         update_selected_format(*this);
