@@ -34,8 +34,6 @@ namespace neogfx
         typedef ref_ptr<i_texture> texture_pointer;
         typedef neolib::pair<texture_pointer, uint32_t> texture_list_entry;
         typedef neolib::jar<texture_list_entry> texture_list;
-    private:
-        friend neolib::cookie item_cookie(texture_list_entry const&);
     protected:
         texture_id allocate_texture_id() override;
     public:

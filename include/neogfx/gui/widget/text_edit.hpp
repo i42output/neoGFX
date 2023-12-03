@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 #include <functional>
 #include <boost/pool/pool_alloc.hpp>
+#include <neolib/core/gap_vector.hpp>
 #include <neolib/core/tag_array.hpp>
 #include <neolib/core/segmented_array.hpp>
 #include <neolib/core/indexitor.hpp>
@@ -328,24 +329,23 @@ namespace neogfx
             tag_data iContents;
         };
 
-        typedef neolib::tag_array<tag<>, char32_t, 16, 256> document_text;
+        using document_text = neolib::tag_array<tag<>, char32_t, 16, 256>;
 
-        typedef neolib::segmented_array<glyph_char, 256> glyph_container_type;
-
-        typedef basic_glyph_text_content<glyph_container_type> document_glyphs;
+        using glyph_container_type = neolib::gap_vector<glyph_char>;
+        using document_glyphs = basic_glyph_text_content<glyph_container_type>;
 
         class glyph_paragraph;
         class glyph_paragraph_index;
-        typedef neolib::indexitor<
+        using glyph_paragraphs = neolib::indexitor<
             glyph_paragraph, 
             glyph_paragraph_index, 
-            boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> glyph_paragraphs;
+            boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>>;
 
         struct glyph_line;
-        typedef std::vector<glyph_line> glyph_lines;
+        using glyph_lines = neolib::gap_vector<glyph_line>;
 
         class glyph_column;
-        typedef std::vector<glyph_column> glyph_columns;
+        using glyph_columns = std::vector<glyph_column>;
 
         struct position_info;
 
@@ -353,7 +353,7 @@ namespace neogfx
         class dragger;
 
     public:
-        typedef document_text::size_type position_type;
+        using position_type = document_text::size_type;
 
         // exceptions
     public:

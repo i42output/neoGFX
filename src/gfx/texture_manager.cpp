@@ -31,11 +31,6 @@ neogfx::i_texture_manager& services::start_service<neogfx::i_texture_manager>()
 
 namespace neogfx
 {
-    neolib::cookie item_cookie(const texture_manager::texture_list_entry& aEntry)
-    {
-        return aEntry.first()->id();
-    }
-
     texture_id texture_manager::allocate_texture_id()
     {
         return textures().next_cookie();

@@ -562,11 +562,6 @@ namespace neogfx
         std::function<void()> iFixer = [&]() { fix(); };
     };
 
-    neolib::cookie item_cookie(gradient_manager::gradient_list_entry const& aEntry)
-    {
-        return aEntry.first()->id();
-    }
-
     gradient_manager::gradient_manager()
     {
     }

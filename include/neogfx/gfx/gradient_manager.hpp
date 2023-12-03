@@ -119,7 +119,6 @@ namespace neogfx
         i_gradient_filter const& filter(i_gradient const& aGradient) override;
         // implementation
     protected:
-        friend neolib::cookie item_cookie(gradient_list_entry const&);
         void add_ref(gradient_id aId) override;
         void release(gradient_id aId) override;
         long use_count(gradient_id aId) const override;

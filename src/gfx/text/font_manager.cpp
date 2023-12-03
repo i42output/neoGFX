@@ -58,11 +58,6 @@ neogfx::i_font_manager& services::start_service<neogfx::i_font_manager>()
 
 namespace neogfx
 {
-    neolib::small_cookie item_cookie(const font_manager::id_cache_entry& aEntry)
-    {
-        return aEntry.id();
-    }
-
     namespace detail
     {
         namespace platform_specific
