@@ -61,7 +61,7 @@ namespace neogfx
         auto existing = find_texture(aImage, aImagePart);
         if (existing != textures().end())
         {
-            aResult = existing->first();
+            aResult = *existing;
             return;
         }
         switch (aDataFormat)

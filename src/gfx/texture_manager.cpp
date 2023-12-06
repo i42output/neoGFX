@@ -38,7 +38,7 @@ namespace neogfx
 
     void texture_manager::find_texture(texture_id aId, i_ref_ptr<i_texture>& aResult) const
     {
-        aResult = textures()[aId].first();
+        aResult = textures()[aId];
     }
 
     void texture_manager::clear_textures()
@@ -48,23 +48,23 @@ namespace neogfx
 
     void texture_manager::add_ref(texture_id aId)
     {
-        ++textures()[aId].second();
+        auto const& texture = *textures()[aId];
+        texture.add_ref();
     }
 
     void texture_manager::release(texture_id aId)
     {
-        if (textures()[aId].second() == 0u)
-            throw invalid_release();
-        if (--textures()[aId].second() == 0u)
-        {
-            if (textures()[aId].first().use_count() == 1)
-                textures().remove(aId);
-        }
+        auto const& texturePtr = textures()[aId];
+        auto const& texture = *texturePtr;
+        texture.release();
+        if (texturePtr.unique())
+            textures().remove(aId);
     }
 
     long texture_manager::use_count(texture_id aId) const
     {
-        return textures()[aId].second();
+        auto const& texture = *textures()[aId];
+        return texture.use_count();
     }
 
     std::unique_ptr<i_texture_atlas> texture_manager::create_texture_atlas(size const& aSize)
@@ -74,12 +74,7 @@ namespace neogfx
 
     void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
     {
-        textures().add(aSubTexture.id(), texture_list_entry{ texture_pointer{ texture_pointer{}, &aSubTexture }, 0u });
-    }
-
-    void texture_manager::remove_sub_texture(i_sub_texture& aSubTexture)
-    {
-        textures().remove(aSubTexture.id());
+        textures().add(aSubTexture.id(), &aSubTexture);
     }
 
     const texture_manager::texture_list& texture_manager::textures() const
@@ -98,11 +93,11 @@ namespace neogfx
             return textures().end();
         for (auto i = textures().begin(); i != textures().end(); ++i)
         {
-            auto& texture = *i;
-            if (texture.first()->type() != texture_type::Texture)   
+            auto& texture = **i;
+            if (texture.type() != texture_type::Texture)   
                 continue;
-            auto const& textureUri = texture.first()->native_texture().uri();
-            if (aImage.uri() == textureUri && aImagePart == texture.first()->part() && aImage.sampling() == texture.first()->sampling())
+            auto const& textureUri = texture.native_texture().uri();
+            if (aImage.uri() == textureUri && aImagePart == texture.part() && aImage.sampling() == texture.sampling())
                 return i;
         }
         return textures().end();
@@ -114,11 +109,11 @@ namespace neogfx
             return textures().end();
         for (auto i = textures().begin(); i != textures().end(); ++i)
         {
-            auto& texture = *i;
-            if (texture.first()->type() != texture_type::Texture)
+            auto& texture = **i;
+            if (texture.type() != texture_type::Texture)
                 continue;
-            auto const& textureUri = texture.first()->native_texture().uri();
-            if (aImage.uri() == textureUri && aImagePart == texture.first()->part() && aImage.sampling() == texture.first()->sampling())
+            auto const& textureUri = texture.native_texture().uri();
+            if (aImage.uri() == textureUri && aImagePart == texture.part() && aImage.sampling() == texture.sampling())
                 return i;
         }
         return textures().end();
@@ -128,15 +123,16 @@ namespace neogfx
     {
         // cleanup opportunity
         cleanup();
-        return textures().add(aTexture->id(), texture_list_entry{ aTexture, 0u })->first();
+        return *textures().add(aTexture->id(), texture_pointer{ aTexture });
     }
 
     void texture_manager::cleanup()
     {
         for (auto i = textures().begin(); i != textures().end();)
         {
-            auto& texture = *i;
-            if (texture.first()->type() == texture_type::Texture && texture.first().use_count() == 1 && texture.second() == 0u)
+            auto& texturePtr = *i;
+            auto& texture = *texturePtr;
+            if (texture.type() == texture_type::Texture && texturePtr.unique())
                 i = textures().erase(i);
             else
                 ++i;

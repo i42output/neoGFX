@@ -33,6 +33,7 @@ namespace neogfx
     class i_texture_manager : public neolib::i_cookie_consumer, public i_service
     {
         friend class texture_atlas;
+        friend class sub_texture;
     public:
         struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogfx::i_texture_manager::texture_not_found") {} };
     private:
@@ -68,7 +69,6 @@ namespace neogfx
         virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;
     private:
         virtual void add_sub_texture(i_sub_texture& aSubTexture) = 0;
-        virtual void remove_sub_texture(i_sub_texture& aSubTexture) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0xbc995572, 0x980e, 0x40cd, 0xa13e,{ 0x83, 0x66, 0xc1, 0x73, 0x50, 0xf4 } }; return sIid; }
     };

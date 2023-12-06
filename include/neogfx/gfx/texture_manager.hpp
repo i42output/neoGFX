@@ -32,8 +32,7 @@ namespace neogfx
         friend class texture_wrapper;
     protected:
         typedef ref_ptr<i_texture> texture_pointer;
-        typedef neolib::pair<texture_pointer, uint32_t> texture_list_entry;
-        typedef neolib::jar<texture_list_entry> texture_list;
+        typedef neolib::jar<texture_pointer> texture_list;
     protected:
         texture_id allocate_texture_id() override;
     public:
@@ -47,7 +46,6 @@ namespace neogfx
         std::unique_ptr<i_texture_atlas> create_texture_atlas(size const& aSize = size{ 1024.0, 1024.0 }) override;
     private:
         void add_sub_texture(i_sub_texture& aSubTexture) override;
-        void remove_sub_texture(i_sub_texture& aSubTexture) override;
     protected:
         const texture_list& textures() const;
         texture_list& textures();

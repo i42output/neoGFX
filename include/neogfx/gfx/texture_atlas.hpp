@@ -62,7 +62,15 @@ namespace neogfx
         };
         typedef std::pair<texture, fragments> page;
         typedef std::list<page> pages;
-        typedef std::pair<pages::iterator, neogfx::sub_texture> entry;
+        struct entry
+        {
+            pages::iterator page;
+            ref_ptr<i_sub_texture> texture;
+
+            template <typename... Args>
+            entry(pages::iterator page, Args&&... args) :
+                page{ page }, texture{ make_ref<neogfx::sub_texture>(std::forward<Args>(args)...) } {}
+        };
         typedef std::unordered_map<texture_id, entry> entries;
     public:
         texture_atlas(const size& aPageSize);

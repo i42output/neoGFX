@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/gfx/texture_manager.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
 #include "native/i_native_texture.hpp"
 
@@ -26,20 +27,29 @@ namespace neogfx
     sub_texture::sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents) :
         iAtlasId{ aAtlasId }, iAtlasTexture{ &aAtlasTexture }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aAtlasTexture.storage_extents() }, iExtents{ aExtents }
     {
+        service<i_texture_manager>().add_ref(atlas_texture().id());
+        service<i_texture_manager>().add_sub_texture(*this);
+        service<i_texture_manager>().add_ref(id());
     }
 
     sub_texture::sub_texture(const i_sub_texture& aSubTexture) :
         iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aSubTexture.atlas_location() }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aSubTexture.extents() }
     {
+        service<i_texture_manager>().add_ref(atlas_texture().id());
+        service<i_texture_manager>().add_ref(id());
     }
 
     sub_texture::sub_texture(const i_sub_texture& aSubTexture, const rect& aAtlasLocation) :
         iAtlasId{ aSubTexture.atlas_id() }, iAtlasTexture{ &aSubTexture.atlas_texture() }, iAtlasLocation{ aAtlasLocation }, iStorageExtents{ aSubTexture.storage_extents() }, iExtents{ aAtlasLocation.extents() }
     {
+        service<i_texture_manager>().add_ref(atlas_texture().id());
+        service<i_texture_manager>().add_ref(id());
     }
 
     sub_texture::~sub_texture()
     {
+        service<i_texture_manager>().release(id());
+        service<i_texture_manager>().release(atlas_texture().id());
     }
 
     texture_id sub_texture::id() const

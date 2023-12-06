@@ -35,7 +35,7 @@ namespace neogfx
         auto iterEntry = iEntries.find(aSubTextureId);
         if (iterEntry == iEntries.end())
             throw sub_texture_not_found();
-        return iterEntry->second.second;
+        return *iterEntry->second.texture;
     }
 
     i_sub_texture& texture_atlas::sub_texture(texture_id aSubTextureId)
@@ -43,49 +43,45 @@ namespace neogfx
         auto iterEntry = iEntries.find(aSubTextureId);
         if (iterEntry == iEntries.end())
             throw sub_texture_not_found();
-        return iterEntry->second.second;
+        return *iterEntry->second.texture;
     }
 
     i_sub_texture& texture_atlas::create_sub_texture(const size& aSize, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat)
     {
         auto newSpace = allocate_space(aSize, aDpiScaleFactor, aSampling, aDataFormat);
         auto nextId = iTextureManager.allocate_texture_id();
-        auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aSize })));
-        iTextureManager.add_sub_texture(entry.first->second.second);
-        return entry.first->second.second;
+        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, nextId, newSpace.first->first, newSpace.second, aSize));
+        return *entry.first->second.texture;
     }
 
     i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage)
     {
         auto newSpace = allocate_space(aImage.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
         auto nextId = iTextureManager.allocate_texture_id();
-        auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aImage.extents() })));
-        entry.first->second.second.set_pixels(aImage);
-        iTextureManager.add_sub_texture(entry.first->second.second);
-        return entry.first->second.second;
+        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, nextId, newSpace.first->first, newSpace.second, aImage.extents()));
+        entry.first->second.texture->set_pixels(aImage);
+        return *entry.first->second.texture;
     }
 
     i_sub_texture& texture_atlas::create_sub_texture(const i_image& aImage, const rect& aImagePart)
     {
         auto newSpace = allocate_space(aImagePart.extents(), aImage.dpi_scale_factor(), aImage.sampling(), aImage.data_format());
         auto nextId = iTextureManager.allocate_texture_id();
-        auto entry = iEntries.insert(std::make_pair(nextId, std::make_pair(newSpace.first, neogfx::sub_texture{ nextId, newSpace.first->first, newSpace.second, aImagePart.extents() })));
-        entry.first->second.second.set_pixels(aImage, aImagePart);
-        iTextureManager.add_sub_texture(entry.first->second.second);
-        return entry.first->second.second;
+        auto entry = iEntries.emplace(std::piecewise_construct, std::forward_as_tuple(nextId), std::forward_as_tuple(newSpace.first, nextId, newSpace.first->first, newSpace.second, aImagePart.extents()));
+        entry.first->second.texture->set_pixels(aImage, aImagePart);
+        return *entry.first->second.texture;
     }
 
     void texture_atlas::destroy_sub_texture(i_sub_texture& aSubTexture)
     {
         auto iterEntry = iEntries.find(aSubTexture.atlas_id());
-        if (iterEntry == iEntries.end() || &aSubTexture != &iterEntry->second.second)
+        if (iterEntry == iEntries.end() || &aSubTexture != &*iterEntry->second.texture)
             throw sub_texture_not_found();
-        auto rectEntry = iterEntry->second.second.atlas_location();
-        auto space = iterEntry->second.first->second.used.find(rectEntry);
-        if (space != iterEntry->second.first->second.used.end())
-            iterEntry->second.first->second.used.erase(space);
-        iterEntry->second.first->second.freed.insert(rectEntry);
-        iTextureManager.remove_sub_texture(aSubTexture);
+        auto rectEntry = iterEntry->second.texture->atlas_location();
+        auto space = iterEntry->second.page->second.used.find(rectEntry);
+        if (space != iterEntry->second.page->second.used.end())
+            iterEntry->second.page->second.used.erase(space);
+        iterEntry->second.page->second.freed.insert(rectEntry);
         iEntries.erase(iterEntry);
     }
 

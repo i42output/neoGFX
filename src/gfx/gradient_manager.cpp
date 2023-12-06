@@ -646,8 +646,10 @@ namespace neogfx
             throw invalid_release();
         if (--gradients()[aId].second() == 0u)
         {
-            if (gradients()[aId].first().use_count() <= 1)
+            if (gradients()[aId].first().unique())
                 gradients().remove(aId);
+            else
+                throw invalid_release();
         }
     }
 
@@ -772,7 +774,7 @@ namespace neogfx
         for (auto i = gradients().begin(); i != gradients().end();)
         {
             auto& gradient = *i;
-            if (gradient.first().use_count() <= 1 && gradient.second() == 0u)
+            if (gradient.first().unique() && gradient.second() == 0u)
                 i = gradients().erase(i);
             else
                 ++i;
