@@ -31,8 +31,8 @@ namespace neogfx
     {
         friend class texture_wrapper;
     protected:
-        typedef ref_ptr<i_texture> texture_pointer;
-        typedef neolib::jar<texture_pointer> texture_list;
+        using texture_pointer = ref_ptr<i_texture>;
+        using texture_list = neolib::jar<texture_pointer>;
     protected:
         texture_id allocate_texture_id() override;
     public:

@@ -637,25 +637,23 @@ namespace neogfx
 
     void gradient_manager::add_ref(gradient_id aId)
     {
-        ++gradients()[aId].second();
+        auto const& gradient = *gradients()[aId];
+        gradient.add_ref();
     }
 
     void gradient_manager::release(gradient_id aId)
     {
-        if (gradients()[aId].second() == 0u)
-            throw invalid_release();
-        if (--gradients()[aId].second() == 0u)
-        {
-            if (gradients()[aId].first().unique())
-                gradients().remove(aId);
-            else
-                throw invalid_release();
-        }
+        auto const& gradientPtr = gradients()[aId];
+        auto const& gradient = *gradientPtr;
+        gradient.release();
+        if (gradientPtr.unique())
+            gradients().remove(aId);
     }
 
     long gradient_manager::use_count(gradient_id aId) const
     {
-        return gradients()[aId].second();
+        auto const& gradient = *gradients()[aId];
+        return gradient.use_count();
     }
 
     gradient_id gradient_manager::allocate_gradient_id()
@@ -677,12 +675,12 @@ namespace neogfx
     {
         // cleanup opportunity
         cleanup();
-        return gradients().add(aGradient->id(), gradient_list_entry{ aGradient, 0u })->first();
+        return *gradients().add(aGradient->id(), gradient_pointer{ aGradient });
     }
 
     void gradient_manager::do_find_gradient(gradient_id aId, neolib::i_ref_ptr<i_gradient>& aResult) const
     {
-        aResult = gradients()[aId].first();
+        aResult = gradients()[aId];
     }
 
     void gradient_manager::do_create_gradient(neolib::i_ref_ptr<i_gradient>& aResult)
@@ -773,8 +771,7 @@ namespace neogfx
     {
         for (auto i = gradients().begin(); i != gradients().end();)
         {
-            auto& gradient = *i;
-            if (gradient.first().unique() && gradient.second() == 0u)
+            if (i->unique())
                 i = gradients().erase(i);
             else
                 ++i;

@@ -99,12 +99,11 @@ namespace neogfx
         friend class gradient_object;
         // types
     protected:
-        typedef ref_ptr<i_gradient> gradient_pointer;
-        typedef neolib::pair<gradient_pointer, uint32_t> gradient_list_entry;
-        typedef neolib::jar<gradient_list_entry> gradient_list;
-        typedef std::pair<gradient::color_stop_list, gradient::alpha_stop_list> sampler_key_t;
-        typedef std::map<sampler_key_t, gradient_sampler> sampler_map_t;
-        typedef std::map<scalar, gradient_filter> filter_map_t;
+        using gradient_pointer = ref_ptr<i_gradient>;
+        using gradient_list = neolib::jar<gradient_pointer>;
+        using sampler_key_t = std::pair<gradient::color_stop_list, gradient::alpha_stop_list>;
+        using sampler_map_t = std::map<sampler_key_t, gradient_sampler> ;
+        using filter_map_t = std::map<scalar, gradient_filter>;
         // constants
     public:
         static constexpr uint32_t MaxSamplers = 1024;
