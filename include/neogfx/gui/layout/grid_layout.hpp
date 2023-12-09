@@ -85,7 +85,7 @@ namespace neogfx
         grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
         void set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout = true) override;
     public:
-        void layout_items(const point& aPosition, const size& aSize) override;
+        void layout_items(const point& aPosition, const size& aSize) final;
     public:
         const cell_coordinates& cursor() const;
     protected:

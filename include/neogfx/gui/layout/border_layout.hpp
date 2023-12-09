@@ -57,8 +57,8 @@ namespace neogfx
     public:
         void invalidate(bool aDeferLayout = true) override;
     public:
-        void layout_items(const point& aPosition, const size& aSize) override;
-        void fix_weightings(bool aRecalculate = true) override;
+        void layout_items(const point& aPosition, const size& aSize) final;
+        void fix_weightings(bool aRecalculate = true) final;
     public:
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;

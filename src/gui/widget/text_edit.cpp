@@ -2645,15 +2645,15 @@ namespace neogfx
                 auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
                 if (gt.cbegin() != gt.cend())
                 {
-                    auto paragraphGlyphs = glyphs().container().insert(glyphs().container().end(), gt.cbegin(), gt.cend());
+                    auto paragraphGlyphs = glyphs().insert(glyphs().end(), gt.cbegin(), gt.cend());
                     for (auto& newGlyph : gt)
-                        glyphs().cache_glyph_font(newGlyph.font);
+                        glyphs().glyph_font(newGlyph);
                     auto paragraph = iGlyphParagraphs.insert(iGlyphParagraphs.end(),
                         std::make_pair(
                             glyph_paragraph{ *this },
                             glyph_paragraph_index{
                                 static_cast<std::size_t>((iterChar + 1) - iText.begin()) - static_cast<std::size_t>(nextParagraph - iText.begin()),
-                                glyphs().size() - static_cast<std::size_t>(paragraphGlyphs - glyphs().container().begin()) }),
+                                glyphs().size() - static_cast<std::size_t>(paragraphGlyphs - glyphs().begin()) }),
                                 glyph_paragraphs::skip_type{ glyph_paragraph_index{}, glyph_paragraph_index{} });
                     paragraph->first.set_self(paragraph);
                     paragraph->first.set_line_breaks(gt.content().line_breaks());

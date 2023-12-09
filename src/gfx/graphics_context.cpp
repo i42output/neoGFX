@@ -1183,7 +1183,7 @@ namespace neogfx
                 }
             }
             else
-                pos.y += aText.glyph_font().height();
+                pos.y += aText.major_font().height();
         }
 
         std::optional<vec3> min;

@@ -23,10 +23,12 @@
 #include <optional>
 #include <neolib/core/allocator.hpp>
 #include <neolib/core/vecarray.hpp>
+#include <neolib/core/jar.hpp>
 #include <neolib/core/string_ci.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/font.hpp>
+#include <neogfx/gfx/text/i_font_manager.hpp>
 
 namespace neogfx
 {
@@ -233,19 +235,21 @@ namespace neogfx
     template <typename GlyphT, typename ConstIterator = GlyphT const*, typename Iterator = GlyphT*>
     class i_basic_glyph_text : public i_reference_counted
     {
-        typedef i_basic_glyph_text<GlyphT, ConstIterator, Iterator> self_type;
+        using self_type = i_basic_glyph_text<GlyphT, ConstIterator, Iterator>;
     public:
-        typedef self_type abstract_type;
+        using abstract_type = self_type;
     public:
-        typedef GlyphT value_type;
-        typedef value_type const* const_pointer;
-        typedef value_type* pointer;
-        typedef value_type const& const_reference;
-        typedef value_type& reference;
-        typedef ConstIterator const_iterator;
-        typedef Iterator iterator;
-        typedef std::size_t size_type;
-        typedef std::ptrdiff_t difference_type;
+        using value_type = GlyphT;
+        using const_pointer = value_type const*;
+        using pointer = value_type*;
+        using const_reference = value_type const&;
+        using reference = value_type&;
+        using const_iterator = ConstIterator;
+        using iterator = Iterator;
+        using const_reverse_iterator = typename std::reverse_iterator<const_iterator>;
+        using reverse_iterator = typename std::reverse_iterator<iterator>;
+        using size_type = std::size_t ;
+        using difference_type = std::ptrdiff_t;
         struct align_baselines_result
         {
             float yExtent;
@@ -261,10 +265,9 @@ namespace neogfx
             return result;
         }
     public:
-        virtual const font& glyph_font() const = 0;
+        virtual const font& cached_font(font_id aId) const = 0;
+    public:
         virtual const font& glyph_font(const_reference aGlyphChar) const = 0;
-        virtual void cache_glyph_font(font_id aFontId) const = 0;
-        virtual void cache_glyph_font(const font& aFont) const = 0;
         virtual const i_glyph& glyph(const_reference aGlyphChar) const = 0;
     public:
         virtual const font& major_font() const = 0;
@@ -276,7 +279,10 @@ namespace neogfx
         virtual size_type size() const = 0;
         virtual void clear() = 0;
     public:
+        virtual const_reference operator[](size_type aIndex) const = 0;
+    public:
         virtual void push_back(const_reference aGlyphChar) = 0;
+        virtual iterator insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast) = 0;
     public:
         virtual neogfx::size extents() const = 0;
         virtual neogfx::size extents(const_reference aGlyphChar) const = 0;
@@ -308,12 +314,11 @@ namespace neogfx
     using i_glyph_text = i_basic_glyph_text<glyph_char>;
 
     template <typename Container, typename ConstIterator = typename Container::const_iterator, typename Iterator = typename Container::iterator>
-    class basic_glyph_text_content : public reference_counted<i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>>, public Container
+    class basic_glyph_text_content : public reference_counted<i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>>
     {
-        typedef basic_glyph_text_content<Container, ConstIterator, Iterator> self_type;
-        typedef Container base_type;
+        using self_type = basic_glyph_text_content<Container, ConstIterator, Iterator>;
     public:
-        typedef i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator> abstract_type;
+        using abstract_type = i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>;
     public:
         using typename abstract_type::value_type;
         using typename abstract_type::const_pointer;
@@ -322,36 +327,21 @@ namespace neogfx
         using typename abstract_type::reference;
         using typename abstract_type::const_iterator;
         using typename abstract_type::iterator;
+        using typename abstract_type::const_reverse_iterator;
+        using typename abstract_type::reverse_iterator;
         using typename abstract_type::size_type;
         using typename abstract_type::difference_type;
         using typename i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>::align_baselines_result;
     private:
         static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
-        typedef Container container_type;
-        class font_cache
-        {
-        private:
-            typedef std::pair<neolib::small_cookie_ref_ptr, font> cache_entry;
-            typedef std::unordered_map<font_id, cache_entry, std::hash<font_id>, std::equal_to<font_id>, neolib::fast_pool_allocator<std::pair<const font_id, cache_entry>>> cache;
-        public:
-            struct cached_font_not_found : std::logic_error { cached_font_not_found() : std::logic_error("neogfx::glyph_text_content::font_cache::cached_font_not_found") {} };
-        public:
-            const font& glyph_font() const;
-            const font& glyph_font(font_id aFontId) const;
-            const font& glyph_font(const_reference aGlyphChar) const;
-            void cache_glyph_font(font_id aFontId) const;
-            void cache_glyph_font(const font& aFont) const;
-        public:
-            void clear();
-        private:
-            mutable cache iCache;
-        };
+        using container_type = Container;
+        using font_cache = neolib::small_std_vector_jar<indirect_font_ref>;
     public:
         basic_glyph_text_content();
         basic_glyph_text_content(font const& aFont);
         template <typename Iter>
         basic_glyph_text_content(Iter aBegin, Iter aEnd) :
-            container_type{ aBegin, aEnd },
+            iGlyphs{ aBegin, aEnd },
             iMajorFont{},
             iBaseline{}
         {
@@ -362,8 +352,7 @@ namespace neogfx
         self_type& operator=(const self_type& aOther);
         self_type& operator=(self_type&& aOther);
     public:
-        container_type const& container() const;
-        container_type& container();
+        container_type const& glyphs() const;
     public:
         void clone(i_ref_ptr<abstract_type>& aClone) const final;
     public:
@@ -371,16 +360,25 @@ namespace neogfx
         size_type size() const final;
         void clear() final;
     public:
+        const_reference operator[](size_type aIndex) const final;
+    public:
         template< class... Args >
         reference emplace_back(Args&&... args)
         {
-            auto& result = container_type::emplace_back(std::forward<Args>(args)...);
-            iExtents = std::nullopt;
+            auto& result = iGlyphs.emplace_back(std::forward<Args>(args)...);
+            iExtents = invalid;
             return result;
         }
         void push_back(const_reference aGlyphChar) final;
+        iterator insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast) final;
+        template <typename Iter>
+        iterator insert(const_iterator aPos, Iter aFirst, Iter aLast)
+        {
+            auto result = iGlyphs.insert(aPos, aFirst, aLast);
+            iExtents = invalid;
+            return result;
+        }
     public:
-        using container_type::back;
         reference back();
     public:
         const_iterator cbegin() const final;
@@ -405,10 +403,9 @@ namespace neogfx
         vector<size_type> const& line_breaks() const final;
         vector<size_type>& line_breaks() final;
     public:
-        const font& glyph_font() const final;
+        const font& cached_font(font_id aId) const final;
+    public:
         const font& glyph_font(const_reference aGlyphChar) const final;
-        void cache_glyph_font(font_id aFontId) const final;
-        void cache_glyph_font(const font& aFont) const final;
         const i_glyph& glyph(const_reference aGlyphChar) const final;
     public:
         const font& major_font() const final;
@@ -416,43 +413,46 @@ namespace neogfx
         scalar baseline() const final;
         void set_baseline(scalar aBaseline) final;
     private:
-        font_cache iCache;
+        container_type iGlyphs;
         mutable cache<neogfx::size> iExtents;
+        mutable font_cache iFontCache;
         vector<size_type> iLineBreaks;
-        font_id iMajorFont;
+        indirect_font_ref iMajorFont;
         scalar iBaseline;
     };
 
-    constexpr std::size_t SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT = 16;
-    extern template class basic_glyph_text_content<neolib::vecarray<glyph_char, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph_char const*, glyph_char*>;
-    
-    using glyph_text_content = basic_glyph_text_content<neolib::vecarray<glyph_char, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph_char const*, glyph_char*>;
+    constexpr std::size_t GLYPH_TEXT_SMALL_BUFFER_SIZE = 16;
+    using glyph_text_container = neolib::vecarray<glyph_char, GLYPH_TEXT_SMALL_BUFFER_SIZE, -1>;
+    extern template class basic_glyph_text_content<glyph_text_container, const glyph_char*, glyph_char*>;
+    using glyph_text_content = basic_glyph_text_content<glyph_text_container, const glyph_char*, glyph_char*>;
 
     class glyph_text
     {
     public:
-        typedef i_glyph_text::const_pointer const_pointer;
-        typedef i_glyph_text::pointer pointer;
-        typedef i_glyph_text::const_reference const_reference;
-        typedef i_glyph_text::reference reference;
-        typedef i_glyph_text::const_iterator const_iterator;
-        typedef i_glyph_text::iterator iterator;
-        typedef i_glyph_text::size_type size_type;
-        typedef i_glyph_text::difference_type difference_type;
+        using value_type = i_glyph_text::value_type;
+        using const_pointer = i_glyph_text::const_pointer;
+        using pointer = i_glyph_text::pointer;
+        using const_reference = i_glyph_text::const_reference;
+        using reference = i_glyph_text::reference;
+        using const_iterator = i_glyph_text::const_iterator;
+        using iterator = i_glyph_text::iterator;
+        using const_reverse_iterator = i_glyph_text::const_reverse_iterator;
+        using reverse_iterator = i_glyph_text::reverse_iterator;
+        using size_type = i_glyph_text::size_type;
+        using difference_type = i_glyph_text::difference_type;
+    public:
+        using align_baselines_result = i_glyph_text::align_baselines_result;
     public:
         glyph_text() = delete;
         glyph_text(font const& aFont);
         glyph_text(i_glyph_text& aContents);
         glyph_text(glyph_text const& aOther);
         template <typename GlyphIter>
-        glyph_text(font const& aFont, GlyphIter aGlyphsBegin, GlyphIter aGlyphsEnd) :
+        glyph_text(font const& aFont, GlyphIter aFirst, GlyphIter aLast) :
             glyph_text{ aFont }
         {
-            for (auto const& glyph : std::ranges::subrange(aGlyphsBegin, aGlyphsEnd))
-            {
+            for (auto const& glyph : std::ranges::subrange(aFirst, aLast))
                 content().push_back(glyph);
-                content().cache_glyph_font(glyph.font);
-            }
         }
     public:
         glyph_text operator=(const glyph_text& aOther);
@@ -460,24 +460,42 @@ namespace neogfx
     public:
         i_glyph_text& content() const;
     public:
-        const font& glyph_font() const;
+        const font& cached_font(font_id aId) const;
+    public:
         const font& glyph_font(const_reference aGlyphChar) const;
         const i_glyph& glyph(const_reference aGlyphChar) const;
+    public:
+        const font& major_font() const;
+        void set_major_font(const font& aFont);
+        scalar baseline() const;
+        void set_baseline(scalar aBaseline);
     public:
         bool empty() const;
         size_type size() const;
         void clear();
+    public:
+        const_reference operator[](size_type aIndex) const;
+    public:
+        void push_back(const_reference aGlyphChar);
+        iterator insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast);
+        template <typename GlyphIter>
+        iterator insert(const_iterator aPos, GlyphIter aFirst, GlyphIter aLast)
+        {
+            return content().insert(aPos, aFirst, aLast);
+        }
     public:
         neogfx::size extents() const;
         neogfx::size extents(const_reference aGlyphChar) const;
         neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const;
     public:
         void set_extents(const neogfx::size& aExtents);
+        glyph_text& align_baselines();
+        align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false);
         std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const;
         std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom);
     public:
-        const_reference back() const;
-        reference back();
+        i_vector<size_type> const& line_breaks() const;
+        i_vector<size_type>& line_breaks();
     public:
         const_iterator cbegin() const;
         const_iterator cend() const;

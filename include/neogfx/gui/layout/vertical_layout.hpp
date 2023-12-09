@@ -32,7 +32,7 @@ namespace neogfx
         vertical_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
         vertical_layout(vertical_layout& aParent);
     public:
-        layout_direction direction() const override;
+        layout_direction direction() const final;
     public:
         i_spacer& add_spacer() override;
         i_spacer& add_spacer_at(layout_item_index aPosition) override;
@@ -40,7 +40,7 @@ namespace neogfx
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        void layout_items(const point& aPosition, const size& aSize) override;
+        void layout_items(const point& aPosition, const size& aSize) final;
     protected:
         using layout::items_visible;
     };

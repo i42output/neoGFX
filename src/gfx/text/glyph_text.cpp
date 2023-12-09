@@ -21,11 +21,12 @@
 
 #include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>
+#include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gfx/text/glyph_text.ipp>
 
 namespace neogfx
 {
-    template class basic_glyph_text_content<neolib::vecarray<glyph_char, SMALL_OPTIMIZATION_GLYPH_TEXT_GLYPH_COUNT, -1>, glyph_char const*, glyph_char*>;
+    template class basic_glyph_text_content<glyph_text_container, const glyph_char*, glyph_char*>;
 
     glyph_text::glyph_text(font const& aFont) :
         iContent{ service<i_font_manager>().glyph_text_factory().create_glyph_text(aFont).content() }
@@ -50,7 +51,7 @@ namespace neogfx
 
     glyph_text glyph_text::clone() const
     {
-        return glyph_text{ *iContent->clone() };
+        return glyph_text{ *content().clone() };
     }
 
     i_glyph_text& glyph_text::content() const
@@ -58,9 +59,9 @@ namespace neogfx
         return *iContent;
     }
 
-    const font& glyph_text::glyph_font() const
+    const font& glyph_text::cached_font(font_id aFontId) const
     {
-        return content().glyph_font();
+        return content().cached_font(aFontId);
     }
 
     const font& glyph_text::glyph_font(const_reference aGlyphChar) const
@@ -71,6 +72,26 @@ namespace neogfx
     const i_glyph& glyph_text::glyph(const_reference aGlyphChar) const
     {
         return content().glyph(aGlyphChar);
+    }
+
+    const font& glyph_text::major_font() const
+    {
+        return content().major_font();
+    }
+
+    void glyph_text::set_major_font(const font& aFont)
+    {
+        content().set_major_font(aFont);
+    }
+
+    scalar glyph_text::baseline() const
+    {
+        return content().baseline();
+    }
+
+    void glyph_text::set_baseline(scalar aBaseline)
+    {
+        content().set_baseline(aBaseline);
     }
 
     bool glyph_text::empty() const
@@ -86,6 +107,21 @@ namespace neogfx
     void glyph_text::clear()
     {
         content().clear();
+    }
+        
+    glyph_text::const_reference glyph_text::operator[](size_type aIndex) const
+    {
+        return content()[aIndex];
+    }
+
+    void glyph_text::push_back(const_reference aGlyphChar)
+    {
+        content().push_back(aGlyphChar);
+    }
+
+    glyph_text::iterator glyph_text::insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast)
+    {
+        return content().insert(aPos, aFirst, aLast);
     }
 
     size glyph_text::extents() const
@@ -108,6 +144,17 @@ namespace neogfx
         content().set_extents(aExtents);
     }
 
+    glyph_text& glyph_text::align_baselines()
+    {
+        content().align_baselines();
+        return *this;
+    }
+
+    glyph_text::align_baselines_result glyph_text::align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate)
+    {
+        return content().align_baselines(aBegin, aEnd, aJustCalculate);
+    }
+
     std::pair<glyph_text::const_iterator, glyph_text::const_iterator> glyph_text::word_break(const_iterator aBegin, const_iterator aFrom) const
     {
         return content().word_break(aBegin, aFrom);
@@ -118,14 +165,14 @@ namespace neogfx
         return content().word_break(aBegin, aFrom);
     }
 
-    glyph_text::const_reference glyph_text::back() const
+    i_vector<glyph_text::size_type> const& glyph_text::line_breaks() const
     {
-        return *std::prev(content().cend());
+        return content().line_breaks();
     }
 
-    glyph_text::reference glyph_text::back()
+    i_vector<glyph_text::size_type>& glyph_text::line_breaks()
     {
-        return *std::prev(content().end());
+        return content().line_breaks();
     }
 
     glyph_text::const_iterator glyph_text::cbegin() const
@@ -140,12 +187,12 @@ namespace neogfx
 
     glyph_text::const_iterator glyph_text::begin() const
     {
-        return cbegin();
+        return content().begin();
     }
 
     glyph_text::const_iterator glyph_text::end() const
     {
-        return cend();
+        return content().end();
     }
 
     glyph_text::iterator glyph_text::begin()

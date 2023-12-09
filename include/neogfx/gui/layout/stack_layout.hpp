@@ -38,6 +38,6 @@ namespace neogfx
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
-        void layout_items(const point& aPosition, const size& aSize) override;
+        void layout_items(const point& aPosition, const size& aSize) final;
     };
 }

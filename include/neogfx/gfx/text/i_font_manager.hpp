@@ -24,7 +24,6 @@
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/text/font.hpp>
-#include <neogfx/gfx/text/glyph_text.hpp>
 
 namespace neogfx
 {
@@ -33,6 +32,8 @@ namespace neogfx
 
     class i_texture_atlas;
     class i_emoji_atlas;
+
+    class i_glyph_text_factory;
 
     enum class system_font_role : uint32_t
     {
@@ -115,5 +116,74 @@ namespace neogfx
         }
     public:
         static uuid const& iid() { static uuid const sIid{ 0x83bbaf78, 0x66a8, 0x4862, 0x9221, { 0x4c, 0xfd, 0x93, 0xfb, 0xf3, 0xe7 } }; return sIid; }
+    };
+
+    class indirect_font_ref
+    {
+    public:
+        indirect_font_ref()
+        {
+        }
+        indirect_font_ref(font_id aId) : iFont{ service<i_font_manager>().font_from_id(aId) }
+        {
+            service<i_font_manager>().add_ref(iFont->id());
+        }
+        indirect_font_ref(indirect_font_ref const& aOther) : iFont{ aOther.iFont }
+        {
+            if (iFont)
+                service<i_font_manager>().add_ref(iFont->id());
+        }
+        indirect_font_ref(indirect_font_ref&& aOther) : iFont{ aOther.iFont }, iIndirectRefCount{ aOther.iIndirectRefCount }
+        {
+            aOther.iFont = std::nullopt;
+            aOther.iIndirectRefCount = 0;
+        }
+        ~indirect_font_ref()
+        {
+            if (iFont)
+                service<i_font_manager>().release(iFont->id());
+        }
+    public:
+        indirect_font_ref& operator=(indirect_font_ref const& aOther)
+        {
+            if (iFont)
+                service<i_font_manager>().release(iFont->id());
+            iFont = aOther.iFont;
+            iIndirectRefCount = 0;
+            if (iFont)
+                service<i_font_manager>().add_ref(iFont->id());
+            return *this;
+        }
+        indirect_font_ref& operator=(indirect_font_ref&& aOther)
+        {
+            iFont = aOther.iFont;
+            iIndirectRefCount = aOther.iIndirectRefCount;
+            aOther.iFont = std::nullopt;
+            aOther.iIndirectRefCount = 0;
+            return *this;
+        }
+    public:
+        neogfx::font const& font() const
+        {
+            if (iFont)
+                return *iFont;
+            throw std::logic_error("neogfx::indirect_font_ref::font");
+        }
+    public:
+        void add_ref() const noexcept
+        {
+            ++iIndirectRefCount;
+        }
+        void release() const noexcept
+        {
+            --iIndirectRefCount;
+        }
+        bool use_count() const noexcept
+        {
+            return iIndirectRefCount;
+        }
+    private:
+        optional_font iFont;
+        mutable long iIndirectRefCount = 0;
     };
 }

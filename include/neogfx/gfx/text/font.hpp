@@ -221,10 +221,10 @@ namespace neogfx
         bool iKerning;
     };
 
-    typedef optional<font_info> optional_font_info;
+    using optional_font_info = optional<font_info>;
 
-    typedef neolib::small_cookie font_id;
-
+    using font_id = neolib::small_cookie;
+    
     // todo: abstract font
     class font
     {

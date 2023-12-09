@@ -65,7 +65,7 @@ namespace neogfx
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:
-        void layout_as(const point& aPosition, const size& aSize) override;
+        void layout_as(const point& aPosition, const size& aSize) final;
     public:
         bool visible() const override;
     private:

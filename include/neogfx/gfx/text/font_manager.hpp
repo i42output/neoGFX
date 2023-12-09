@@ -49,10 +49,10 @@ namespace neogfx
     {
         friend class native_font_face;
     private:
-        typedef std::list<native_font> native_font_list;
-        typedef std::map<string, std::vector<native_font_list::iterator>, neolib::ci_less> font_family_list;
-        typedef font id_cache_entry;
-        typedef neolib::small_jar<id_cache_entry> id_cache;
+        using native_font_list = std::list<native_font>;
+        using font_family_list = std::map<string, std::vector<native_font_list::iterator>, neolib::ci_less>;
+        using id_cache_entry = font ;
+        using id_cache = neolib::small_jar<id_cache_entry>;
     public:
         struct error_initializing_font_library : std::runtime_error { error_initializing_font_library() : std::runtime_error("neogfx::font_manager::error_initializing_font_library") {} };
         struct no_matching_font_found : std::runtime_error { no_matching_font_found() : std::runtime_error("neogfx::font_manager::no_matching_font_found") {} };

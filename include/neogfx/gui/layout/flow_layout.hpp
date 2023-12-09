@@ -42,13 +42,13 @@ namespace neogfx
         i_spacer& add_spacer() override;
         i_spacer& add_spacer_at(layout_item_index aPosition) override;
     public:
-        neogfx::size_policy size_policy() const override;
+        neogfx::size_policy size_policy() const final;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
     public:
         neogfx::alignment alignment() const override;
     public:
-        void layout_items(const point& aPosition, const size& aSize) override;
+        void layout_items(const point& aPosition, const size& aSize) final;
     protected:
         template <typename AxisPolicy>
         size do_minimum_size(optional_size const& aAvailableSpace) const;
