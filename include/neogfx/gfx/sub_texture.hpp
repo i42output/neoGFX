@@ -28,11 +28,15 @@ namespace neogfx
 {
     class sub_texture : public reference_counted<i_sub_texture>
     {
+        // types
+    private:
+        using base_type = reference_counted<i_sub_texture>;
         // construction
     public:
-        sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, const rect& aAtlasLocation, const size& aExtents);
-        sub_texture(const i_sub_texture& aSubTexture);
-        sub_texture(const i_sub_texture& aSubTexture, const rect& aAtlasLocation);
+        sub_texture(texture_id aAtlasId, i_texture& aAtlasTexture, rect const& aAtlasLocation, size const& aExtents);
+        sub_texture(sub_texture const& aSubTexture);
+        sub_texture(i_sub_texture const& aSubTexture);
+        sub_texture(i_sub_texture const& aSubTexture, const rect& aAtlasLocation);
         ~sub_texture();
         // operations
     public:
@@ -53,11 +57,11 @@ namespace neogfx
         bool is_empty() const final;
         size extents() const final;
         size storage_extents() const final;
-        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) final;
-        void set_pixels(const i_image& aImage) final;
-        void set_pixels(const i_image& aImage, const rect& aImagePart) final;
-        void set_pixel(const point& aPosition, const color& aColor) final;
-        color get_pixel(const point& aPosition) const final;
+        void set_pixels(rect const& aRect, void const* aPixelData, uint32_t aPackAlignment = 4u) final;
+        void set_pixels(i_image const& aImage) final;
+        void set_pixels(i_image const& aImage, rect const& aImagePart) final;
+        void set_pixel(point const& aPosition, color const& aColor) final;
+        color get_pixel(point const& aPosition) const final;
         i_vector<texture_line_segment> const& intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize = { 1.0, 1.0 }, scalar aTolerance = 0.0) const final;
     public:
         void bind(std::uint32_t aTextureUnit) const final;
@@ -69,8 +73,13 @@ namespace neogfx
         texture_id atlas_id() const final;
         i_texture& atlas_texture() const final;
         const rect& atlas_location() const final;
+    public:
+        void add_ref() const noexcept final;
+        void release() const final;
+        long use_count() const noexcept final;
         // attributes
     private:
+        bool iChild = false;
         texture_id iAtlasId;
         i_texture* iAtlasTexture;
         rect iAtlasLocation;

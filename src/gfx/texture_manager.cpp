@@ -63,6 +63,8 @@ namespace neogfx
 
     long texture_manager::use_count(texture_id aId) const
     {
+        if (!textures().contains(aId))
+            return 0;
         auto const& texture = *textures()[aId];
         return texture.use_count();
     }
@@ -74,6 +76,7 @@ namespace neogfx
 
     void texture_manager::add_sub_texture(i_sub_texture& aSubTexture)
     {
+        add_ref(aSubTexture.atlas_texture().id());
         textures().add(aSubTexture.id(), &aSubTexture);
     }
 

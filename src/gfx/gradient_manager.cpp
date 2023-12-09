@@ -652,6 +652,8 @@ namespace neogfx
 
     long gradient_manager::use_count(gradient_id aId) const
     {
+        if (!gradients().contains(aId))
+            return 0;
         auto const& gradient = *gradients()[aId];
         return gradient.use_count();
     }
