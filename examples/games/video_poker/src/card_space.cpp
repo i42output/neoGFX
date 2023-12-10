@@ -143,7 +143,7 @@ namespace video_poker
         iHoldButton.set_size_policy(ng::size_constraint::Minimum);
         iHoldButton.set_base_color(ng::color::Black);
         iHoldButton.text_widget().set_font(ng::font{ "Exo 2", "Black", 16.0 });
-        iHoldButton.text_widget().set_text_format(ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black.with_alpha(0.5) } });
+        iHoldButton.text_widget().set_text_format(ng::text_format{ ng::color::Black, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White.with_alpha(0.5) } });
         iHoldButton.set_checkable();
         auto update_hold = [this]() 
         { 
