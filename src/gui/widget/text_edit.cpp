@@ -1243,7 +1243,7 @@ namespace neogfx
                     move_cursor(cursor::EndOfDocument, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
                 else
                 {
-                    auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } };
+                    auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().Position.effective_value(), vertical_scrollbar().Position.effective_value()}};
                     framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
                     set_cursor_position(pos + client_rect(false).top_left(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
                 }

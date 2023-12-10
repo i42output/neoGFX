@@ -304,22 +304,22 @@ namespace neogfx
         switch (aScanCode)
         {
         case ScanCode_LEFT:
-            horizontal_scrollbar().set_position(horizontal_scrollbar().position() - horizontal_scrollbar().step());
+            horizontal_scrollbar().set_position(horizontal_scrollbar().Position.effective_value() - horizontal_scrollbar().step());
             break;
         case ScanCode_RIGHT:
-            horizontal_scrollbar().set_position(horizontal_scrollbar().position() + horizontal_scrollbar().step());
+            horizontal_scrollbar().set_position(horizontal_scrollbar().Position.effective_value() + horizontal_scrollbar().step());
             break;
         case ScanCode_UP:
-            vertical_scrollbar().set_position(vertical_scrollbar().position() - vertical_scrollbar().step());
+            vertical_scrollbar().set_position(vertical_scrollbar().Position.effective_value() - vertical_scrollbar().step());
             break;
         case ScanCode_DOWN:
-            vertical_scrollbar().set_position(vertical_scrollbar().position() + vertical_scrollbar().step());
+            vertical_scrollbar().set_position(vertical_scrollbar().Position.effective_value() + vertical_scrollbar().step());
             break;
         case ScanCode_PAGEUP:
-            vertical_scrollbar().set_position(vertical_scrollbar().position() - vertical_scrollbar().page());
+            vertical_scrollbar().set_position(vertical_scrollbar().Position.effective_value() - vertical_scrollbar().page());
             break;
         case ScanCode_PAGEDOWN:
-            vertical_scrollbar().set_position(vertical_scrollbar().position() + vertical_scrollbar().page());
+            vertical_scrollbar().set_position(vertical_scrollbar().Position.effective_value() + vertical_scrollbar().page());
             break;
         case ScanCode_HOME:
             if (horizontal_scrollbar().visible() && !(aKeyModifiers & KeyModifier_CTRL))
