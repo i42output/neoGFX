@@ -118,8 +118,8 @@ namespace neogfx
         i_gradient_filter const& filter(i_gradient const& aGradient) override;
         // implementation
     protected:
-        void add_ref(gradient_id aId) override;
-        void release(gradient_id aId) override;
+        void add_ref(gradient_id aId, long aCount = 1) override;
+        void release(gradient_id aId, long aCount = 1) override;
         long use_count(gradient_id aId) const override;
     protected:
         gradient_id allocate_gradient_id();

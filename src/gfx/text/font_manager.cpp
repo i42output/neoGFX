@@ -1156,14 +1156,14 @@ namespace neogfx
         return iEmojiAtlas;
     }
 
-    void font_manager::add_ref(font_id aId)
+    void font_manager::add_ref(font_id aId, long aCount)
     {
-        font_from_id(aId).native_font_face().add_ref();
+        font_from_id(aId).native_font_face().add_ref(aCount);
     }
 
-    void font_manager::release(font_id aId)
+    void font_manager::release(font_id aId, long aCount)
     {
-        font_from_id(aId).native_font_face().release();
+        font_from_id(aId).native_font_face().release(aCount);
     }
 
     long font_manager::use_count(font_id aId) const

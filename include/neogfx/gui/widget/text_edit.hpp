@@ -26,6 +26,7 @@
 #include <neolib/core/tag_array.hpp>
 #include <neolib/core/segmented_array.hpp>
 #include <neolib/core/indexitor.hpp>
+#include <neolib/core/jar.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gui/window/context_menu.hpp>

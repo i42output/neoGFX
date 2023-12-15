@@ -635,13 +635,13 @@ namespace neogfx
         return allocated->second;
     }
 
-    void gradient_manager::add_ref(gradient_id aId)
+    void gradient_manager::add_ref(gradient_id aId, long aCount)
     {
         auto const& gradient = *gradients()[aId];
         gradient.add_ref();
     }
 
-    void gradient_manager::release(gradient_id aId)
+    void gradient_manager::release(gradient_id aId, long aCount)
     {
         auto const& gradientPtr = gradients()[aId];
         auto const& gradient = *gradientPtr;

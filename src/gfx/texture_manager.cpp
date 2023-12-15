@@ -46,17 +46,19 @@ namespace neogfx
         textures().clear();
     }
 
-    void texture_manager::add_ref(texture_id aId)
+    void texture_manager::add_ref(texture_id aId, long aCount)
     {
         auto const& texture = *textures()[aId];
-        texture.add_ref();
+        while(aCount--)
+            texture.add_ref();
     }
 
-    void texture_manager::release(texture_id aId)
+    void texture_manager::release(texture_id aId, long aCount)
     {
         auto const& texturePtr = textures()[aId];
         auto const& texture = *texturePtr;
-        texture.release();
+        while(aCount--)
+            texture.release();
         if (texturePtr.unique())
             textures().remove(aId);
     }

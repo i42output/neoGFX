@@ -39,8 +39,8 @@ namespace neogfx
         void find_texture(texture_id aId, i_ref_ptr<i_texture>& aResult) const override;
         void clear_textures() override;
     public:
-        void add_ref(texture_id aId) override;
-        void release(texture_id aId) override;
+        void add_ref(texture_id aId, long aCount = 1) override;
+        void release(texture_id aId, long aCount = 1) override;
         long use_count(texture_id aId) const override;
     public:
         std::unique_ptr<i_texture_atlas> create_texture_atlas(size const& aSize = size{ 1024.0, 1024.0 }) override;

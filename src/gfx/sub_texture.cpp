@@ -54,26 +54,26 @@ namespace neogfx
             release();
     }
 
-    void sub_texture::add_ref() const noexcept
+    void sub_texture::add_ref(long aCount) const noexcept
     {
         if (iChild)
         {
-            service<i_texture_manager>().add_ref(atlas_texture().id());
-            service<i_texture_manager>().add_ref(id());
+            service<i_texture_manager>().add_ref(atlas_texture().id(), aCount);
+            service<i_texture_manager>().add_ref(id(), aCount);
         }
         else
-            base_type::add_ref();
+            base_type::add_ref(aCount);
     }
 
-    void sub_texture::release() const
+    void sub_texture::release(long aCount) const
     {
         if (iChild)
         {
-            service<i_texture_manager>().release(id());
-            service<i_texture_manager>().release(atlas_texture().id());
+            service<i_texture_manager>().release(id(), aCount);
+            service<i_texture_manager>().release(atlas_texture().id(), aCount);
         }
         else
-            base_type::release();
+            base_type::release(aCount);
     }
 
     long sub_texture::use_count() const noexcept

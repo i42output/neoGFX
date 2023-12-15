@@ -74,8 +74,8 @@ namespace neogfx
         i_texture& atlas_texture() const final;
         const rect& atlas_location() const final;
     public:
-        void add_ref() const noexcept final;
-        void release() const final;
+        void add_ref(long aCount = 1) const noexcept final;
+        void release(long aCount = 1) const final;
         long use_count() const noexcept final;
         // attributes
     private:

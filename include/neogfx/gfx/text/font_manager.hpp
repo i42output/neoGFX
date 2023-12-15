@@ -100,8 +100,8 @@ namespace neogfx
         const i_emoji_atlas& emoji_atlas() const final;
         i_emoji_atlas& emoji_atlas() final;
     protected:
-        void add_ref(font_id aId) final;
-        void release(font_id aId) final;
+        void add_ref(font_id aId, long aCount = 1) final;
+        void release(font_id aId, long aCount = 1) final;
         long use_count(font_id aId) const final;
     private:
         i_native_font& find_font(i_string const& aFamilyName, i_string const& aStyleName, font::point_size aSize);
