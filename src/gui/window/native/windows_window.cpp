@@ -1152,22 +1152,22 @@ namespace neogfx
                                 PostMessage(hwnd, WM_SYSCOMMAND, cmd, lparam);
                             self.iSystemMenuOpen = false;
                         }
-                        else if (self.iClickedWidgetPart == widget_part::Nowhere)
+                        else if (msg == WM_NCLBUTTONUP && self.iClickedWidgetPart == widget_part::Nowhere)
                             PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, lparam);
                         result = 0;
                         break;
                     case HTMINBUTTON:
-                        if (self.iClickedWidgetPart == widget_part::MinimizeButton)
+                        if (msg == WM_NCLBUTTONUP && self.iClickedWidgetPart == widget_part::MinimizeButton)
                             PostMessage(hwnd, WM_SYSCOMMAND, SC_MINIMIZE, lparam);
                         result = 0;
                         break;
                     case HTMAXBUTTON:
-                        if (self.iClickedWidgetPart == widget_part::MaximizeButton)
+                        if (msg == WM_NCLBUTTONUP && self.iClickedWidgetPart == widget_part::MaximizeButton)
                             PostMessage(hwnd, WM_SYSCOMMAND, IsMaximized(hwnd) ? SC_RESTORE : SC_MAXIMIZE, lparam);
                         result = 0;
                         break;
                     case HTCLOSE:
-                        if (self.iClickedWidgetPart == widget_part::CloseButton)
+                        if (msg == WM_NCLBUTTONUP && self.iClickedWidgetPart == widget_part::CloseButton)
                             PostMessage(hwnd, WM_SYSCOMMAND, SC_CLOSE, lparam);
                         result = 0;
                         break;
