@@ -23,9 +23,6 @@
 #include <functional>
 #include <boost/pool/pool_alloc.hpp>
 #include <neolib/core/gap_vector.hpp>
-#include <neolib/core/tag_array.hpp>
-#include <neolib/core/segmented_array.hpp>
-#include <neolib/core/indexitor.hpp>
 #include <neolib/core/jar.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
@@ -254,93 +251,21 @@ namespace neogfx
     private:
         class multiple_text_changes;
 
-        struct unknown_node {};
-
-        template <typename Node = unknown_node>
-        class tag
+        struct document_char
         {
-        private:
-            static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
-        private:
-            typedef std::variant<std::monostate, style_list::const_iterator, nullptr_t> tag_style;
-        public:
-            struct tag_data
-            {
-                tag_style style;
-                bool operator==(const tag_data& rhs) const
-                {
-                    return style == rhs.style;
-                }
-            };
-        public:
-            template <typename Node2>
-            struct rebind { typedef tag<Node2> type; };
-        private:
-            typedef Node node_type;
-        public:
-            tag(const tag_data& aContents) :
-                iNode(nullptr), iContents(aContents)
-            {
-                if (std::holds_alternative<style_list::const_iterator>(style()))
-                    static_variant_cast<style_list::const_iterator>(style())->add_ref();
-            }
-            template <typename Node2>
-            tag(node_type& aNode, const tag<Node2>& aTag) :
-                iNode(&aNode), iContents(aTag.iContents)
-            {
-                if (std::holds_alternative<style_list::const_iterator>(style()))
-                    static_variant_cast<style_list::const_iterator>(style())->add_ref();
-            }
-            tag(const tag& aOther) :
-                iNode(aOther.iNode), iContents(aOther.iContents)
-            {
-                if (std::holds_alternative<style_list::const_iterator>(style()))
-                    static_variant_cast<style_list::const_iterator>(style())->add_ref();
-            }
-            ~tag()
-            {
-                if (std::holds_alternative<style_list::const_iterator>(style()))
-                    static_variant_cast<style_list::const_iterator>(style())->release();
-            }
-        public:
-            bool operator==(const tag& aOther) const
-            {
-                return contents() == aOther.contents();
-            }
-            bool operator!=(const tag& aOther) const
-            {
-                return !(*this == aOther);
-            }
-        public:
-            const tag_style& style() const
-            {
-                return contents().style;
-            }
-        private:
-            const tag_data& contents() const
-            {
-                return iContents;
-            }
-            tag_data& contents()
-            {
-                return iContents;
-            }
-        private:
-            node_type* iNode;
-            tag_data iContents;
-        };
+            char32_t character;
+            neolib::cookie style;
 
-        using document_text = neolib::tag_array<tag<>, char32_t, 16, 256>;
+            document_char(char32_t aCharacter) : character{ aCharacter }, style{ neolib::invalid_cookie<neolib::cookie> } {}
+            document_char(char32_t aCharacter, neolib::cookie aStyle) : character{ aCharacter }, style{ aStyle } {}
+        };
+        using document_text = neolib::gap_vector<document_char>;
 
         using glyph_container_type = neolib::gap_vector<glyph_char>;
         using document_glyphs = basic_glyph_text_content<glyph_container_type>;
 
-        class glyph_paragraph;
-        class glyph_paragraph_index;
-        using glyph_paragraphs = neolib::indexitor<
-            glyph_paragraph, 
-            glyph_paragraph_index, 
-            boost::fast_pool_allocator<std::pair<glyph_paragraph, const glyph_paragraph_index>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>>;
+        struct glyph_paragraph;
+        using glyph_paragraphs = neolib::gap_vector<glyph_paragraph>;
 
         struct glyph_line;
         using glyph_lines = neolib::gap_vector<glyph_line>;
@@ -565,16 +490,6 @@ namespace neogfx
         glyph_columns iGlyphColumns;
         optional_size iTextExtents;
         uint64_t iCursorAnimationStartTime;
-        typedef std::pair<position_type, position_type> find_span;
-        typedef std::map<
-            find_span,
-            glyph_paragraphs::const_iterator,
-            std::less<find_span>,
-            boost::fast_pool_allocator<std::pair<const find_span, glyph_paragraphs::const_iterator>, boost::default_user_allocator_new_delete, boost::details::pool::null_mutex>> find_in_paragraph_cache;
-        mutable find_in_paragraph_cache iCharacterToParagraphCache;
-        mutable std::optional<find_in_paragraph_cache::iterator> iCharacterToParagraphCacheLastAccess;
-        mutable find_in_paragraph_cache iGlyphToParagraphCache;
-        mutable std::optional<find_in_paragraph_cache::iterator> iGlyphToParagraphCacheLastAccess;
         neogfx::size_hint iSizeHint;
         mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
         std::optional<neogfx::tab_stops> iTabStops;
@@ -585,7 +500,7 @@ namespace neogfx
         std::unique_ptr<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
         uint32_t iSuppressTextChangedNotification;
-        uint32_t iWantedToNotfiyTextChanged;
+        uint32_t iWantedToNotifyTextChanged;
         std::optional<std::pair<text_edit::position_type, text_edit::position_type>> iSelectedUri;
         std::optional<password_bits> iPasswordBits;
         bool iOutOfMemory;
