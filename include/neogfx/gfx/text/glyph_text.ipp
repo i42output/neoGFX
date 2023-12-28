@@ -198,7 +198,7 @@ namespace neogfx
     typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast)
     {
         iExtents = invalid;
-        auto result = iGlyphs.insert(aPos, aFirst, aLast);
+        auto result = iGlyphs.insert(std::next(iGlyphs.begin(), aPos - cbegin()), aFirst, aLast);
         for (auto i = std::next(result, std::distance(aFirst, aLast)); i != result; --i)
             (void)glyph_font(*std::prev(i));
         if constexpr (std::is_pointer_v<iterator>)
@@ -225,6 +225,20 @@ namespace neogfx
     inline Container const& basic_glyph_text_content<Container, ConstIterator, Iterator>::glyphs() const
     {
         return iGlyphs;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::from_cluster(glyph_char::cluster_index aWhere) const
+    {
+        auto const result = std::lower_bound(begin(), end(), aWhere, 
+            [](auto const& g, glyph_char::cluster_index c) { return g.clusters.first < c; });
+        return result;
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::from_cluster(glyph_char::cluster_index aWhere)
+    {
+        return std::next(begin(), std::distance(cbegin(), const_cast<self_type const&>(*this).from_cluster(aWhere)));
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>

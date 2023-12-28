@@ -105,6 +105,12 @@ namespace neogfx
         return lhs.type.category == rhs.type.category && lhs.value == rhs.value;
     }
 
+    template <typename T>
+    inline glyph_char::cluster_index to_cluster(T const& index)
+    {
+        return static_cast<glyph_char::cluster_index>(index);
+    }
+
     inline bool has_font(glyph_char const& g)
     {
         return g.font != font_id{};
@@ -284,6 +290,9 @@ namespace neogfx
         virtual void push_back(const_reference aGlyphChar) = 0;
         virtual iterator insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast) = 0;
     public:
+        virtual const_iterator from_cluster(glyph_char::cluster_index aWhere) const = 0;
+        virtual iterator from_cluster(glyph_char::cluster_index aWhere) = 0;
+    public:
         virtual neogfx::size extents() const = 0;
         virtual neogfx::size extents(const_reference aGlyphChar) const = 0;
         virtual neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const = 0;
@@ -333,7 +342,6 @@ namespace neogfx
         using typename abstract_type::difference_type;
         using typename i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>::align_baselines_result;
     private:
-        static constexpr std::size_t SMALL_OPTIMIZATION_FONT_COUNT = 4;
         using container_type = Container;
         using font_cache = neolib::small_std_vector_jar<indirect_font_ref>;
     public:
@@ -389,6 +397,9 @@ namespace neogfx
         iterator end() final;
     public:
         bool operator==(const self_type& aOther) const;
+    public:
+        const_iterator from_cluster(glyph_char::cluster_index aWhere) const final;
+        iterator from_cluster(glyph_char::cluster_index aWhere) final;
     public:
         neogfx::size extents() const final;
         neogfx::size extents(const_reference aGlyphChar) const final;

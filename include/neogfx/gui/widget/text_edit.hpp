@@ -178,6 +178,8 @@ namespace neogfx
             optional<double> iLineSpacing;
         };
 
+        using style_cookie = neolib::cookie;
+
         class style
         {
         public:
@@ -186,6 +188,10 @@ namespace neogfx
             style(character_style const& aCharacter, paragraph_style const& aParagraph);
             style(paragraph_style const& aParagraph);
             style(text_edit& aParent, const style& aOther);
+        public:
+            bool has_cookie() const;
+            style_cookie cookie() const;
+            void set_cookie(style_cookie aCookie);
         public:
             void add_ref() const;
             void release() const;
@@ -208,12 +214,11 @@ namespace neogfx
             style with_text_effect(const optional_text_effect& aEffect = optional_text_effect{}) const;
         private:
 			text_edit* iParent;
+            style_cookie iCookie = neolib::invalid_cookie<style_cookie>;
             mutable uint32_t iUseCount;
             character_style iCharacter;
             paragraph_style iParagraph;
         };
-
-        using style_list = std::set<style>;
 
         using style_callback = std::function<std::tuple<const style&, std::ptrdiff_t> (std::ptrdiff_t)>;
         struct ansi {};
@@ -226,6 +231,8 @@ namespace neogfx
             optional_dimension maxWidth;
             neogfx::padding padding;
             std::optional<text_edit::style> style;
+
+            auto operator<=>(column_info const&) const = default;
         };
 
         struct document_column
@@ -237,12 +244,23 @@ namespace neogfx
         using document_columns = neolib::vecarray<document_column, 4, -1>;
 
     private:
+        using style_ptr = std::shared_ptr<style>;
+        struct style_list_comparator
+        {
+            bool operator()(const style_ptr& lhs, const style_ptr& rhs) const
+            {
+                return *lhs < *rhs;
+            }
+        };
+        using style_list = std::set<style_ptr, style_list_comparator>;
+        using style_map = neolib::std_vector_jar<style_ptr>;
+
         class multiple_text_changes;
 
         struct document_char
         {
             char32_t character;
-            neolib::cookie style;
+            style_cookie style;
 
             operator char32_t() const { return character; }
 
@@ -536,6 +554,7 @@ namespace neogfx
         std::size_t do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
+        std::size_t column_index(glyph_column const& aColumn) const;
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
         bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
         glyph_paragraphs::const_iterator character_to_paragraph(position_type aCharacterPos) const;
@@ -566,6 +585,7 @@ namespace neogfx
         font_info iDefaultFont;
         mutable neogfx::cursor iCursor;
         style_list iStyles;
+        style_map iStyleMap;
         bool iUpdatingDocument;
         document_text iPreviousText;
         document_text iText;

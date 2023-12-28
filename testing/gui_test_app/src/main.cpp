@@ -332,7 +332,9 @@ int main(int argc, char* argv[])
             *sink1 += window.gradientWidget.GradientChanged([&]()
             {
                 auto cs = window.textEdit.column(2);
-                cs.set_style(ng::text_edit::character_style{ ng::optional_font{}, ng::color_or_gradient{}, ng::color_or_gradient{}, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
+                cs.style.emplace(
+                    ng::text_edit::character_style{ ng::optional_font{}, ng::color_or_gradient{}, ng::color_or_gradient{},
+                        ng::text_effect{ ng::text_effect_type::Outline, ng::color::White } });
                 window.textEdit.set_column(2, cs);
             });
         });

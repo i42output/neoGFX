@@ -43,7 +43,7 @@ namespace neogfx
         typedef T value_type;
         typedef std::allocator<value_type> allocator_type;
         typedef CellType cell_type;
-        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
+        typedef neolib::vecarray<cell_type, Columns, Columns, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
         struct row
         {
             value_type value;
@@ -58,7 +58,7 @@ namespace neogfx
         typedef T value_type;
         typedef std::allocator<value_type> allocator_type;
         typedef CellType cell_type;
-        typedef neolib::vecarray<cell_type, Columns, Columns, neolib::check<neolib::vecarray_overflow>, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
+        typedef neolib::vecarray<cell_type, Columns, Columns, typename std::allocator_traits<allocator_type>::template rebind_alloc<cell_type>> row_cell_array;
         struct row
         {
             value_type value;
