@@ -2448,7 +2448,7 @@ namespace neogfx
                             std::distance(glyphs().begin(), paragraphGlyphs),
                             std::distance(glyphs().begin(), std::next(paragraphGlyphs, gt.size())) });
                     paragraph->lineBreaks.assign(gt.content().line_breaks().begin(), gt.content().line_breaks().end());
-                    columnDelimiters.push_back(paragraph->span.textLast);
+                    columnDelimiters.push_back(paragraph->span.textLast - paragraph->span.textFirst);
                     position_type nextColumnStart = 0;
                     for (auto cd : columnDelimiters)
                     {
@@ -2526,7 +2526,7 @@ namespace neogfx
                         paragraphLines.emplace_back(lastBreak - column.span.glyphsFirst, lineBreak - column.span.glyphsFirst);
                         lastBreak = lineBreak + 1;
                     }
-                    paragraphLines.emplace_back(lastBreak - column.span.glyphsFirst, column.span.textLast - column.span.glyphsFirst);
+                    paragraphLines.emplace_back(lastBreak - column.span.glyphsFirst, column.span.glyphsLast - column.span.glyphsFirst);
                     if (paragraphLines.back().first != paragraphLines.back().second &&
                         is_line_breaking_whitespace(glyphs().back()) && std::next(iterParagraph) == iGlyphParagraphs.end())
                         paragraphLines.emplace_back(
@@ -2840,15 +2840,21 @@ namespace neogfx
     void text_edit::make_cursor_visible(bool aForcePreviewScroll)
     {
         scoped_units su{ *this, units::Pixels };
-        make_visible(glyph_position(cursor_glyph_position(), true), aForcePreviewScroll ? point{ std::ceil(std::min(client_rect(false).width() / 3.0, 200.0)), 0.0 } : point{});
+        auto const cgp = cursor_glyph_position();
+        auto const gp = glyph_position(cgp, true);
+        make_visible(gp, aForcePreviewScroll ? 
+            point{ std::ceil(std::min(client_rect(false).width() / 3.0, 200.0)), 0.0 } : 
+            point{});
     }
 
     void text_edit::make_visible(position_info const& aGlyphPosition, point const& aPreview)
     {
         scoped_units su{ *this, units::Pixels };
-        auto extents = (aGlyphPosition.line != aGlyphPosition.column->lines.end() ?
-            size{ aGlyphPosition.glyph != aGlyphPosition.lineEnd ? quad_extents(aGlyphPosition.glyph->cell).x : 0.0, aGlyphPosition.line->extents.cy } :
-            size{ 0.0, font().height() });
+        auto extents = (aGlyphPosition.paragraph != iGlyphParagraphs.end() && 
+            aGlyphPosition.column != aGlyphPosition.paragraph->columns.end() && 
+            aGlyphPosition.line != aGlyphPosition.column->lines.end() ?
+                size{ aGlyphPosition.glyph != aGlyphPosition.lineEnd ? quad_extents(aGlyphPosition.glyph->cell).x : 0.0, aGlyphPosition.line->extents.cy } :
+                size{ 0.0, font().height() });
         auto position = aGlyphPosition.pos;
         auto const& internalPadding = padding();
         auto const& colulmnPadding = column(0).padding; ///< todo: other columns?
@@ -2869,7 +2875,10 @@ namespace neogfx
         style result = iDefaultStyle;
         result.merge(column_style(aColumn.info));
         result.character().set_paper_color();
-        result.merge(*iStyleMap[iText[from_glyph(aGlyph).first].style]);
+        auto const existingCharacterStyleCookie = iText[from_glyph(aGlyph).first].style;
+        auto const existingCharacterStyle = iStyleMap.find(existingCharacterStyleCookie);
+        if (existingCharacterStyle != iStyleMap.end())
+            result.merge(**existingCharacterStyle);
         return result;
     }
 
