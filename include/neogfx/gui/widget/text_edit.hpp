@@ -293,11 +293,11 @@ namespace neogfx
 
             document_glyphs::difference_type glyph_begin_index() const
             {
-                return span.glyphsFirst + parent->span.glyphsFirst + parent->parent->span.glyphsFirst;
+                return span.glyphsFirst + parent->glyph_begin_index();
             }
             document_glyphs::difference_type glyph_end_index() const
             {
-                return span.glyphsLast + parent->span.glyphsLast + parent->parent->span.glyphsLast;
+                return span.glyphsLast + parent->glyph_begin_index();
             }
             document_glyphs::const_iterator glyph_begin() const
             {
@@ -325,11 +325,11 @@ namespace neogfx
 
             document_glyphs::difference_type glyph_begin_index() const
             {
-                return span.glyphsFirst + parent->span.glyphsFirst;
+                return span.glyphsFirst + parent->glyph_begin_index();
             }
             document_glyphs::difference_type glyph_end_index() const
             {
-                return span.glyphsLast + parent->span.glyphsLast;
+                return span.glyphsLast + parent->glyph_begin_index();
             }
             document_glyphs::const_iterator glyph_begin() const
             {

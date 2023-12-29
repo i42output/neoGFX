@@ -100,7 +100,7 @@
       <AdditionalIncludeDirectories>$(IntDir)/GeneratedFiles;$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
@@ -125,7 +125,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include;$(IntDir)/GeneratedFiles</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
@@ -152,7 +152,7 @@
       <AdditionalIncludeDirectories>\code\neogfx\tools\DesignStudio\build\win32\vs\x64\Tools\GeneratedFiles;$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
@@ -179,7 +179,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include;$(DevDirNeogfx)\include;$(DevDirFreetype)\include;/usr/local/include;$(IntDir)\GeneratedFiles</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ConformanceMode>true</ConformanceMode>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
