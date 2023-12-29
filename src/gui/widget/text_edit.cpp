@@ -2014,7 +2014,11 @@ namespace neogfx
         iUtf8TextCache = std::nullopt;
 
         for (auto& ch : std::ranges::subrange(eraseBegin, eraseEnd))
-            iStyleMap[ch.style]->release();
+        {
+            auto existingStyle = iStyleMap.find(ch.style);
+            if (existingStyle != iStyleMap.end())
+                (**existingStyle).release();
+        }
         refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 
         update();
@@ -2562,10 +2566,10 @@ namespace neogfx
                                 paragraph.index(),
                                 column.index(),
                                 document_span{
-                                    static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
-                                    static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
-                                    paragraphLine.first,
-                                    paragraphLine.second
+                                    static_cast<position_type>(from_glyph(lineStart).first) - column.span.textFirst - paragraph.span.textFirst,
+                                    static_cast<position_type>(from_glyph(lineEnd).second) - column.span.textFirst - paragraph.span.textFirst,
+                                    lineStart - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst,
+                                    lineEnd - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst
                                 },
                                 yLine,
                                 size{ 
@@ -2636,10 +2640,10 @@ namespace neogfx
                                         paragraph.index(),
                                         column.index(),
                                         document_span{
-                                            static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
-                                            static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
-                                            paragraphLine.first,
-                                            paragraphLine.second
+                                            static_cast<position_type>(from_glyph(lineStart).first) - column.span.textFirst - paragraph.span.textFirst,
+                                            static_cast<position_type>(from_glyph(lineEnd).second) - column.span.textFirst - paragraph.span.textFirst,
+                                            lineStart - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst,
+                                            lineEnd - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst
                                         },
                                         yLine,
                                         size{
@@ -2703,10 +2707,10 @@ namespace neogfx
                                         paragraph.index(),
                                         column.index(),
                                         document_span{
-                                            static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
-                                            static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
-                                            paragraphLine.first,
-                                            paragraphLine.second
+                                            static_cast<position_type>(from_glyph(lineStart.base()).first) - column.span.textFirst - paragraph.span.textFirst,
+                                            static_cast<position_type>(from_glyph(lineEnd.base()).second) - column.span.textFirst - paragraph.span.textFirst,
+                                            lineStart.base() - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst,
+                                            lineEnd.base() - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst
                                         },
                                         yLine,
                                         size{
@@ -2735,10 +2739,10 @@ namespace neogfx
                                 paragraph.index(),
                                 column.index(),
                                 document_span{
-                                    static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
-                                    static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
-                                    paragraphLine.first,
-                                    paragraphLine.second
+                                    static_cast<position_type>(from_glyph(lineStart).first) - column.span.textFirst - paragraph.span.textFirst,
+                                    static_cast<position_type>(from_glyph(lineEnd).second) - column.span.textFirst - paragraph.span.textFirst,
+                                    lineStart - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst,
+                                    lineEnd - glyphs().begin() - column.span.glyphsFirst - paragraph.span.glyphsFirst
                                 },
                                 yLine,
                                 size{
