@@ -323,6 +323,10 @@ namespace neogfx
             glyph_lines lines;
             dimension width = 0.0;
 
+            std::size_t index() const
+            {
+                return std::distance(&*parent->columns.cbegin(), this);
+            }
             document_glyphs::difference_type glyph_begin_index() const
             {
                 return span.glyphsFirst + parent->glyph_begin_index();
@@ -554,7 +558,6 @@ namespace neogfx
         std::size_t do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
-        std::size_t column_index(glyph_column const& aColumn) const;
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
         bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
         glyph_paragraphs::const_iterator character_to_paragraph(position_type aCharacterPos) const;
