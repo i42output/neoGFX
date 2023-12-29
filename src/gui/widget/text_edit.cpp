@@ -495,11 +495,11 @@ namespace neogfx
         if (heightMap.empty())
         {
             dimension previousHeight = 0.0;
-            auto iterGlyph = std::next(parent->glyphs().begin(), span.glyphsFirst);
+            auto iterGlyph = std::next(owner->glyphs().begin(), span.glyphsFirst);
             for (auto i = span.glyphsFirst; i != span.glyphsLast; ++i)
             {
                 auto const& glyph = *(iterGlyph++);
-                dimension cy = parent->glyphs().extents(glyph).cy;
+                dimension cy = owner->glyphs().extents(glyph).cy;
                 if (i == span.glyphsFirst || cy != previousHeight)
                 {
                     heightMap.emplace_back(i, cy);
@@ -509,11 +509,11 @@ namespace neogfx
             heightMap.emplace_back(span.glyphsLast, 0.0);
         }
         dimension result = 0.0;
-        auto start = std::lower_bound(heightMap.begin(), heightMap.end(), height_map_entry{ aStart - parent->glyphs().begin() },
+        auto start = std::lower_bound(heightMap.begin(), heightMap.end(), height_map_entry{ aStart - owner->glyphs().begin() },
             [](auto const& lhs, auto const& rhs) { return lhs.glyphIndex < rhs.glyphIndex; });
-        if (start != heightMap.begin() && aStart < parent->glyphs().begin() + start->glyphIndex)
+        if (start != heightMap.begin() && aStart < owner->glyphs().begin() + start->glyphIndex)
             --start;
-        auto stop = std::lower_bound(heightMap.begin(), heightMap.end(), height_map_entry{ aEnd - parent->glyphs().begin() },
+        auto stop = std::lower_bound(heightMap.begin(), heightMap.end(), height_map_entry{ aEnd - owner->glyphs().begin() },
             [](auto const& lhs, auto const& rhs) { return lhs.glyphIndex < rhs.glyphIndex; });
         if (start == stop && stop != heightMap.end())
             ++stop;
@@ -2450,7 +2450,8 @@ namespace neogfx
                     for (auto cd : columnDelimiters)
                     {
                         paragraph->columns.emplace_back(
-                            &*paragraph,
+                            this,
+                            paragraph->index(),
                             document_span{
                                 nextColumnStart,
                                 cd,
@@ -2557,7 +2558,9 @@ namespace neogfx
                             auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
 
                             lines.emplace_back(
-                                &column,
+                                this,
+                                paragraph.index(),
+                                column.index(),
                                 document_span{
                                     static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
                                     static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
@@ -2629,7 +2632,9 @@ namespace neogfx
                                         --lineEnd;
                                     auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
                                     insertionPoint = lines.emplace(lines.end(),
-                                        &column,
+                                        this,
+                                        paragraph.index(),
+                                        column.index(),
                                         document_span{
                                             static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
                                             static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
@@ -2694,7 +2699,9 @@ namespace neogfx
                                         --lineEnd;
                                     auto const alignBaselinesResult = glyphs().align_baselines(lineEnd.base(), lineStart.base(), true);
                                     insertionPoint = lines.emplace(lines.end(),
-                                        &column,
+                                        this,
+                                        paragraph.index(),
+                                        column.index(),
                                         document_span{
                                             static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
                                             static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
@@ -2724,7 +2731,9 @@ namespace neogfx
                                 --lineEnd;
                             auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
                             lines.emplace_back(
-                                &column,
+                                this,
+                                paragraph.index(),
+                                column.index(),
                                 document_span{
                                     static_cast<position_type>(from_glyph(paragraphLineStart).first) - column.span.textFirst,
                                     static_cast<position_type>(from_glyph(paragraphLineEnd).second) - column.span.textFirst,
