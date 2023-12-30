@@ -1711,30 +1711,34 @@ namespace neogfx
 
     text_edit::position_info text_edit::glyph_position(position_type aGlyphPosition, bool aForCursor) const
     {
-        auto const paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), document_span{ 0, 0, aGlyphPosition, aGlyphPosition },
+        auto paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), document_span{ 0, 0, aGlyphPosition, aGlyphPosition },
             [](auto const& p, auto const& s) { return p.glyph_begin_index() < s.glyphsFirst; });
+        if (paragraph != iGlyphParagraphs.begin())
+        {
+            if (paragraph == iGlyphParagraphs.end() || aGlyphPosition < std::prev(paragraph)->glyph_end_index())
+                paragraph = std::prev(paragraph);
+        }
         if (paragraph == iGlyphParagraphs.end())
             return { paragraph };
-        auto const column = std::lower_bound(paragraph->columns.begin(), paragraph->columns.end(), document_span{ 0, 0, aGlyphPosition, aGlyphPosition },
-            [](auto const& p, auto const& s) { return p.glyph_begin_index() < s.glyphsFirst; });
+        auto column = std::lower_bound(paragraph->columns.begin(), paragraph->columns.end(), document_span{ 0, 0, aGlyphPosition, aGlyphPosition },
+            [](auto const& c, auto const& s) { return c.glyph_begin_index() < s.glyphsFirst; });
+        if (column != paragraph->columns.begin())
+        {
+            if (column == paragraph->columns.end() || aGlyphPosition < std::prev(column)->glyph_end_index())
+                column = std::prev(column);
+        }
         if (column == paragraph->columns.end())
             return { paragraph, column };
         auto const columnIndex = std::distance(paragraph->columns.begin(), column);
         auto line = std::lower_bound(column->lines.begin(), column->lines.end(), document_span{ 0, 0, aGlyphPosition, aGlyphPosition },
-            [](auto const& p, auto const& s) { return p.glyph_begin_index() < s.glyphsFirst; });
+            [](auto const& l, auto const& s) { return l.glyph_begin_index() < s.glyphsFirst; });
+        if (line != column->lines.begin())
+        {
+            if (line == column->lines.end() || aGlyphPosition < std::prev(line)->glyph_end_index())
+                line = std::prev(line);
+        }
         auto const& columnRectSansPadding = column_rect(columnIndex);
         auto const& lines = column->lines;
-        if (line != lines.begin())
-        {
-            if (line == lines.end())
-            {
-                auto const& lastLine = lines.back();
-                if (aGlyphPosition <= lastLine.glyph_end_index())
-                    --line;
-            }
-            else if (aGlyphPosition < line->glyph_begin_index())
-                --line;
-        }
         if (line != lines.end())
         {
             position_type lineStart = line->glyph_begin_index();
@@ -2044,8 +2048,13 @@ namespace neogfx
 
     text_edit::glyph_paragraphs::const_iterator text_edit::character_to_paragraph(position_type aCharacterPos) const
     {
-        auto const paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), aCharacterPos,
-            [](glyph_paragraph const& p, position_type cp) { return p.span.textFirst < cp; });
+        auto paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), aCharacterPos,
+            [](glyph_paragraph const& p, position_type cp) 
+        { 
+            return p.span.textFirst < cp; 
+        });
+        if (paragraph != iGlyphParagraphs.begin() && aCharacterPos < std::prev(paragraph)->span.textLast)
+            paragraph = std::prev(paragraph);
         return paragraph;
     }
 
@@ -2276,7 +2285,7 @@ namespace neogfx
                     style.add_ref();
             }
             auto const insertionPoint = std::distance(iText.cbegin(), aWhere);
-            std::transform(begin, end, std::back_inserter(iText), [&style](auto const& ch) { return document_char{ ch, style.cookie() }; });
+            std::transform(begin, end, std::inserter(iText, std::next(iText.begin(), insertionPoint)), [&style](auto const& ch) { return document_char{ ch, style.cookie() }; });
             return std::next(iText.begin(), insertionPoint);
         };
 
@@ -2362,8 +2371,11 @@ namespace neogfx
         auto const paragraph = character_to_paragraph(textIndex);
         if (paragraph == iGlyphParagraphs.end())
             return glyphs().end();
-        auto const result = std::lower_bound(paragraph->glyph_begin(), paragraph->glyph_end(), textIndex,
-            [](auto const& g, position_type c) { return g.clusters.first < c; });
+        auto const result = std::lower_bound(paragraph->glyph_begin(), paragraph->glyph_end(), textIndex - paragraph->span.textFirst,
+            [](auto const& g, position_type c) 
+        { 
+            return g.clusters.first < c; 
+        });
         return result;
     }
 
