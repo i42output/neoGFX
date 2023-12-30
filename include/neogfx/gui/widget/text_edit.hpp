@@ -586,6 +586,8 @@ namespace neogfx
         glyph_paragraphs::const_iterator glyph_to_paragraph(position_type aGlyphPos) const;
         document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;
         std::pair<document_text::size_type, document_text::size_type> from_glyph(document_glyphs::const_iterator aWhere) const;
+        std::optional<glyph_lines::const_iterator> next_line(std::optional<glyph_lines::const_iterator> const& aFrom) const;
+        std::optional<glyph_lines::const_iterator> previous_line(std::optional<glyph_lines::const_iterator> const& aFrom) const;
         void refresh_paragraph(document_text::const_iterator aWhere, ptrdiff_t aDelta);
         void refresh_columns();
         void refresh_lines();
