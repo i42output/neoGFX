@@ -2545,6 +2545,9 @@ namespace neogfx
 
                     thread_local std::vector<std::pair<document_glyphs::difference_type, document_glyphs::difference_type>> paragraphLines;
                     paragraphLines.clear();
+
+                    // todo: line segments to correct column
+
                     glyph_text::size_type lastBreak = 0;
                     for (auto lineBreak : paragraph.lineBreaks)
                     {
