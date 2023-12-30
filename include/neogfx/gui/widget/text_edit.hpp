@@ -344,6 +344,7 @@ namespace neogfx
 
         struct glyph_paragraph
         {
+            using column_breaks = neolib::vecarray<document_glyphs::difference_type, 4, -1>;
             using line_breaks = neolib::vecarray<document_glyphs::difference_type, 8, -1>;
             struct height_map_entry
             {
@@ -356,6 +357,7 @@ namespace neogfx
             document_span span;
             coordinate ypos;
             mutable height_map heightMap;
+            column_breaks columnBreaks;
             line_breaks lineBreaks;
 
             std::size_t index() const

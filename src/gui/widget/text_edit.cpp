@@ -2449,11 +2449,13 @@ namespace neogfx
         };
         
         columnDelimiters.clear();
+        std::size_t columnCount = 0;
+
         for (auto iterChar = iText.begin(); iterChar != iText.end(); ++iterChar)
         {
             auto ch = iterChar->character;
 
-            auto& column = iColumns[columnDelimiters.size()];
+            auto& column = iColumns[std::min(columnDelimiters.size(), iColumns.size() - 1)];
 
             if (ch == column.info.delimiter && columnDelimiters.size() + 1 < iColumns.size())
                 columnDelimiters.push_back(std::distance(nextParagraph, iterChar));
@@ -2478,23 +2480,18 @@ namespace neogfx
                             std::distance(iText.begin(), std::next(iterChar)),
                             std::distance(glyphs().begin(), paragraphGlyphs),
                             std::distance(glyphs().begin(), std::next(paragraphGlyphs, gt.size())) });
+                    paragraph->columnBreaks.assign(columnDelimiters.begin(), columnDelimiters.end());
                     paragraph->lineBreaks.assign(gt.content().line_breaks().begin(), gt.content().line_breaks().end());
-                    columnDelimiters.push_back(paragraph->span.textLast - paragraph->span.textFirst);
-                    position_type nextColumnStart = 0;
-                    for (auto i = 0; i < columnDelimiters.size(); ++i)
-                    {
-                        auto cd = columnDelimiters[i];
-                        if (iGlyphColumns.size() <= i)
-                            iGlyphColumns.emplace_back(this);
-                        else
-                            iGlyphColumns[i].lines.clear();
-                        nextColumnStart = cd;
-                    }
                 }
                 nextParagraph = std::next(iterChar);
+                columnCount = std::max(columnCount, columnDelimiters.size() + 1);
                 columnDelimiters.clear();
             }
         }
+
+        iGlyphColumns.resize(std::max(columnCount, iGlyphColumns.size()), { this });
+        for (auto& column : iGlyphColumns)
+            column.lines.clear();
 
         if (iPasswordBits)
             iPasswordBits.value().showPassword.show(!iText.empty());
