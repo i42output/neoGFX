@@ -300,7 +300,7 @@ namespace neogfx
             }
             glyph_column& column() const
             {
-                return paragraph().columns[columnIndex];
+                return owner->iGlyphColumns[columnIndex];
             }
             std::size_t index() const
             {
@@ -308,11 +308,11 @@ namespace neogfx
             }
             document_glyphs::difference_type glyph_begin_index() const
             {
-                return span.glyphsFirst + column().glyph_begin_index();
+                return span.glyphsFirst + paragraph().glyph_begin_index();
             }
             document_glyphs::difference_type glyph_end_index() const
             {
-                return span.glyphsLast + column().glyph_begin_index();
+                return span.glyphsLast + paragraph().glyph_begin_index();
             }
             document_glyphs::const_iterator glyph_begin() const
             {
@@ -332,34 +332,12 @@ namespace neogfx
         struct glyph_column
         {
             text_edit* owner;
-            std::size_t paragraphIndex;
-            document_span span;
             glyph_lines lines;
             dimension width = 0.0;
 
-            glyph_paragraph& paragraph() const
-            {
-                return owner->iGlyphParagraphs[paragraphIndex];
-            }
             std::size_t index() const
             {
-                return std::distance(&*paragraph().columns.cbegin(), this);
-            }
-            document_glyphs::difference_type glyph_begin_index() const
-            {
-                return span.glyphsFirst + paragraph().glyph_begin_index();
-            }
-            document_glyphs::difference_type glyph_end_index() const
-            {
-                return span.glyphsLast + paragraph().glyph_begin_index();
-            }
-            document_glyphs::const_iterator glyph_begin() const
-            {
-                return std::next(owner->glyphs().begin(), glyph_begin_index());
-            }
-            document_glyphs::const_iterator glyph_end() const
-            {
-                return std::next(owner->glyphs().begin(), glyph_end_index());
+                return std::distance(&*owner->iGlyphColumns.cbegin(), this);
             }
         };
         using glyph_columns = neolib::vecarray<glyph_column, 4, -1>;
@@ -379,7 +357,6 @@ namespace neogfx
             coordinate ypos;
             mutable height_map heightMap;
             line_breaks lineBreaks;
-            glyph_columns columns;
 
             std::size_t index() const
             {
@@ -621,6 +598,7 @@ namespace neogfx
         mutable std::optional<string> iUtf8TextCache;
         mutable std::optional<document_glyphs> iGlyphs;
         glyph_paragraphs iGlyphParagraphs;
+        glyph_columns iGlyphColumns;
         optional_size iTextExtents;
         uint64_t iCursorAnimationStartTime;
         neogfx::size_hint iSizeHint;
