@@ -668,15 +668,19 @@ namespace neogfx
         scoped_scissor scissor{ aGc, clipRect };
         if (default_style().character().paper_color() != neolib::none)
             aGc.fill_rect(client_rect(), to_brush(default_style().character().paper_color()));
-        for (auto paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), vertical_scrollbar().position(),
-            [](const glyph_paragraph& left, coordinate right) { return left.ypos < right; }); paragraph != iGlyphParagraphs.end(); ++paragraph)
+        auto const top = vertical_scrollbar().position();
+        auto paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), top,
+            [](const glyph_paragraph& left, coordinate right) { return left.ypos < right; });
+        if (paragraph != iGlyphParagraphs.begin() && top < paragraph->ypos)
+            paragraph = std::prev(paragraph);
+        for (; paragraph != iGlyphParagraphs.end(); ++paragraph)
         {
             bool intersectsUpdateRect = false;
             coordinate x = 0.0;
             for (auto columnIndex = 0u; columnIndex < paragraph->columns.size(); ++columnIndex)
             {
                 auto const& columnRectSansPadding = column_rect(columnIndex);
-                point const paragraphPos = columnRectSansPadding.top_left() + point{ -horizontal_scrollbar().position(), paragraph->ypos - vertical_scrollbar().position() };
+                point const paragraphPos = columnRectSansPadding.top_left() + point{ -horizontal_scrollbar().position(), paragraph->ypos - top };
                 
                 if (paragraphPos.y > columnRectSansPadding.bottom() || paragraphPos.y > update_rect().bottom())
                     continue;
@@ -691,15 +695,15 @@ namespace neogfx
                 scoped_scissor scissor2{ aGc, columnClipRect };
 
                 auto const& lines = glyphColumn.lines;
-                auto line = std::lower_bound(lines.begin(), lines.end(), vertical_scrollbar().position(),
+                auto line = std::lower_bound(lines.begin(), lines.end(), top,
                     [](const glyph_line& left, coordinate const& right) { return left.ypos() < right; });
-                if (line != lines.begin() && (line == lines.end() || line->ypos() > vertical_scrollbar().position()))
+                if (line != lines.begin() && (line == lines.end() || top < line->ypos()))
                     --line;
                 if (line == lines.end())
                     continue;
                 for (auto paintLine = line; paintLine != lines.end(); paintLine++)
                 {
-                    point linePos = columnRectSansPadding.top_left() + point{ -horizontal_scrollbar().position(), paintLine->ypos() - vertical_scrollbar().position()};
+                    point linePos = columnRectSansPadding.top_left() + point{ -horizontal_scrollbar().position(), paintLine->ypos() - top};
                     if (linePos.y + paintLine->extents.cy < columnRectSansPadding.top() || linePos.y + paintLine->extents.cy < update_rect().top())
                         continue;
                     if (linePos.y > columnRectSansPadding.bottom() || linePos.y > update_rect().bottom())
