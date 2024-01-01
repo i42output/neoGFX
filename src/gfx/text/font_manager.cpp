@@ -113,17 +113,23 @@ namespace neogfx
 #endif
             }
 
-            std::string get_local_font_directory()
+            std::vector<std::string> get_local_font_directories()
             {
+                // Trademarks acknowledged (Microsoft® and Adobe®).
+                std::vector<std::string> result;
 #ifdef WIN32
                 char szPath[MAX_PATH];
                 if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, szPath)))
-                    return neolib::tidy_path(szPath) + "/Microsoft/Windows/Fonts";
+                    result.push_back(neolib::tidy_path(szPath) + "/Microsoft/Windows/Fonts");
                 else
                     throw std::logic_error("neogfx::detail::platform_specific::get_local_font_directory: Error");
+                std::string const adobeFonts = neolib::user_settings_directory() + "/Adobe/CoreSync/plugins/livetype/r";
+                if (std::filesystem::exists(adobeFonts))
+                    result.push_back(adobeFonts);
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::get_local_font_directory: Unknown system");
 #endif
+                return result;
             }
 
             fallback_font_info default_fallback_font_info()
@@ -849,7 +855,8 @@ namespace neogfx
                 }
         };
         enumerate(detail::platform_specific::get_system_font_directory());
-        enumerate(detail::platform_specific::get_local_font_directory());
+        for (auto const& path : detail::platform_specific::get_local_font_directories())
+            enumerate(path);
         for (auto& family : iFontFamilies)
         {
             std::optional<native_font_list::iterator> bold;
