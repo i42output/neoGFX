@@ -32,7 +32,9 @@ namespace neogfx
     {
         using namespace neolib::ecs; // todo: deprecated scope
 
-        typedef vec3u32 face;
-        typedef std::vector<face> faces;
+        using face = vec3u32;
+        using faces = std::vector<face>;
+
+        using scene_layer = std::int32_t;
    }
 }

@@ -259,7 +259,7 @@ namespace neogfx
         struct draw_entities
         {
             game::i_ecs& ecs;
-            int32_t layer;
+            game::scene_layer layer;
             mat44 transformation;
         };
 

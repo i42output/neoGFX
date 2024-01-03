@@ -452,7 +452,7 @@ namespace neogfx
             });
     }
 
-    void graphics_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer) const
+    void graphics_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer) const
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(

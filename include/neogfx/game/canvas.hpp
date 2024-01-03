@@ -27,8 +27,8 @@ namespace neogfx::game
     class canvas : public widget<>
     {
     public:
-        define_event(RenderingEntities, rendering_entities, i_graphics_context&, int32_t)
-        define_event(EntitiesRendered, entities_rendered, i_graphics_context&, int32_t)
+        define_event(RenderingEntities, rendering_entities, i_graphics_context&, std::int32_t)
+        define_event(EntitiesRendered, entities_rendered, i_graphics_context&, std::int32_t)
         define_event(EntityClicked, entity_clicked, entity_id)
         define_event(EntityDoubleClicked, entity_double_clicked, entity_id)
     public:
@@ -50,11 +50,11 @@ namespace neogfx::game
         game::i_ecs& ecs() const;
         void set_ecs(game::i_ecs& aEcs);
         void set_ecs(const std::shared_ptr<game::i_ecs>& aEcs);
-        int32_t layers();
-        void set_layers(int32_t aLayers);
-        bool layer_visible(int32_t aLayer) const;
-        void show_layer(int32_t aLayer);
-        void hide_layer(int32_t aLayer);
+        scene_layer layers();
+        void set_layers(scene_layer aLayers);
+        bool layer_visible(scene_layer aLayer) const;
+        void show_layer(scene_layer aLayer);
+        void hide_layer(scene_layer aLayer);
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const override;
     public:

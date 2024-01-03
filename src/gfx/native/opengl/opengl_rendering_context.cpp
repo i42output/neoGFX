@@ -1481,14 +1481,14 @@ namespace neogfx
                 function });
     }
 
-    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation)
+    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         thread_local std::vector<std::vector<mesh_drawable>> drawables;
-        thread_local int32_t maxLayer = 0;
+        thread_local game::scene_layer maxLayer = 0;
         thread_local optional_ecs_render_lock lock;
 
         if (drawables.size() <= aLayer)
