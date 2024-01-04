@@ -36,7 +36,7 @@ namespace neogfx
         TabOrientationHorizontal    = 0x0000,
         TabOrientationVertical      = 0x0004, // todo
         TabOrientationMask          = 0x0004,
-        ResizeToTabs                = 0x1000
+        ResizeToPages               = 0x1000
     };
     inline tab_container_style operator|(tab_container_style aLhs, tab_container_style aRhs)
     {

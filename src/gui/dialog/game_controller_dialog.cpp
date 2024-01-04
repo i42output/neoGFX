@@ -29,7 +29,7 @@ namespace neogfx
         dialog{ "Game Controller Settings"_t, window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iControllerSelectorGroupBox{ client_layout(), "Installed Game Controllers"_t },
         iControllerSelector{ iControllerSelectorGroupBox.item_layout() },
-        iTabs{ client_layout(), false, tab_container_style::TabAlignmentTop | tab_container_style::ResizeToTabs },
+        iTabs{ client_layout(), false, tab_container_style::TabAlignmentTop | tab_container_style::ResizeToPages },
         iCalibrateTab{ iTabs, "Calibrate"_t },
         iTestTab{ iTabs, "Test"_t },
         iLayout1{ iCalibrateTab },
@@ -45,7 +45,7 @@ namespace neogfx
         dialog{ aParent, "Game Controller Settings", window_style::Dialog | window_style::Modal | window_style::TitleBar | window_style::Close },
         iControllerSelectorGroupBox{ client_layout(), "Installed Game Controllers"_t },
         iControllerSelector{ iControllerSelectorGroupBox.item_layout() },
-        iTabs{ client_layout(), false, tab_container_style::TabAlignmentTop | tab_container_style::ResizeToTabs },
+        iTabs{ client_layout(), false, tab_container_style::TabAlignmentTop | tab_container_style::ResizeToPages },
         iCalibrateTab{ iTabs, "Calibrate"_t },
         iTestTab{ iTabs, "Test"_t },
         iLayout1{ iCalibrateTab },
@@ -70,7 +70,8 @@ namespace neogfx
                 iControllerSelector.selection_model().set_current_index(iControllerSelector.presentation_model().rows() - 1);
         }
         iControllerSelector.accept_selection();
-        iTabs.layout().set_ignore_child_visibility(true);
+
+        iTabs.page_layout().set_ignore_child_visibility(true);
 
         center_on_parent();
         set_ready_to_render(true);
