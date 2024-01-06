@@ -28,6 +28,7 @@
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
+#include <neogfx/gui/widget/text_edit.hpp>
 
 namespace neogfx
 {
@@ -52,5 +53,6 @@ namespace neogfx
         image_widget iSchematic;
         vertical_layout iLayout2;
         group_box iTestGroupBox;
+        text_edit iTestOutput;
     };
 }

@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    enum class game_player : uint32_t
+    enum class game_player : std::uint32_t
     {
         One     = 0x00000001,
         Two     = 0x00000002,
@@ -34,9 +34,9 @@ namespace neogfx
         Four    = 0x00000004
     };
 
-    typedef uint32_t game_controller_port;
+    typedef std::uint32_t game_controller_port;
 
-    enum class game_controller_button : uint64_t
+    enum class game_controller_button : std::uint64_t
     {
         None                = 0x0000000000000000,
         A                   = 0x0000000000000001,
@@ -115,13 +115,17 @@ namespace neogfx
         Function32          = 0x8000000000000000
     };
 
-    typedef uint32_t game_controller_button_ordinal;
+    typedef std::uint32_t game_controller_button_ordinal;
+
+    typedef std::uint32_t game_controller_pov_ordinal ;
 
     class i_game_controller : public i_hid_device
     {
     public:
         typedef i_game_controller abstract_type;
     public:
+        declare_event(raw_button_pressed, game_controller_button_ordinal, key_modifiers_e)
+        declare_event(raw_button_released, game_controller_button_ordinal, key_modifiers_e)
         declare_event(button_pressed, game_controller_button, key_modifiers_e)
         declare_event(button_released, game_controller_button, key_modifiers_e)
         declare_event(button_repeat, game_controller_button, key_modifiers_e)
@@ -129,6 +133,7 @@ namespace neogfx
         declare_event(right_trigger_moved, double, key_modifiers_e)
         declare_event(left_thumb_moved, const vec2&, key_modifiers_e)
         declare_event(right_thumb_moved, const vec2&, key_modifiers_e)
+        declare_event(pov_moved, game_controller_pov_ordinal , const vec2&, key_modifiers_e)
         declare_event(stick_moved, const vec3&, key_modifiers_e)
         declare_event(stick_rotated, const vec3&, key_modifiers_e)
         declare_event(slider_moved, const vec2&, key_modifiers_e)
@@ -160,6 +165,7 @@ namespace neogfx
     public:
         virtual uint32_t button_count() const = 0;
         virtual bool button_mapped(game_controller_button aButton) const = 0;
+        virtual bool button_mapped(game_controller_button_ordinal aButtonOrdinal) const = 0;
         virtual game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const = 0;
         virtual game_controller_button button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const = 0;
     };

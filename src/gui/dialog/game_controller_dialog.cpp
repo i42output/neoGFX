@@ -36,7 +36,8 @@ namespace neogfx
         iSchematicGroupBox{ iLayout1, "Button Mappings"_t },
         iSchematic{ iSchematicGroupBox.item_layout(), image{ ":/neogfx/resources/images/game_controller.png" } },
         iLayout2{ iTestTab },
-        iTestGroupBox{ iLayout2, "" }
+        iTestGroupBox{ iLayout2, "" },
+        iTestOutput{ iTestGroupBox.item_layout() }
     {
         init();
     }
@@ -52,7 +53,8 @@ namespace neogfx
         iSchematicGroupBox{ iLayout1, "Button Mappings"_t },
         iSchematic{ iSchematicGroupBox.item_layout(), image{ ":/neogfx/resources/images/game_controller.png" } },
         iLayout2{ iTestTab },
-        iTestGroupBox{ iLayout2, "" }
+        iTestGroupBox{ iLayout2, "" },
+        iTestOutput{ iTestGroupBox.item_layout() }
     {
         init();
     }
@@ -63,13 +65,52 @@ namespace neogfx
 
     void game_controller_dialog::init()
     {
+        auto gameControllerModel = make_ref<basic_item_model<ref_ptr<i_game_controller>>>();
+        iControllerSelector.set_model(gameControllerModel);
+        iControllerSelector.SelectionChanged([&, gameControllerModel](optional_item_model_index aIndex)
+        {
+            iSink.clear();
+            if (aIndex)
+            {
+                auto& controller = *gameControllerModel->item(*aIndex);
+                iSink += controller.raw_button_pressed([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
+                {
+                    if (!controller.button_mapped(aButtonOrdinal))
+                    {
+                        std::ostringstream oss;
+                        oss << "Button #" << aButtonOrdinal << " pressed\n";
+                        iTestOutput.append_text(oss.str(), true);
+                    }
+                });
+                iSink += controller.raw_button_released([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
+                {
+                    if (!controller.button_mapped(aButtonOrdinal))
+                    {
+                        std::ostringstream oss;
+                        oss << "Button #" << aButtonOrdinal << " released\n";
+                        iTestOutput.append_text(oss.str(), true);
+                    }
+                });
+                iSink += controller.pov_moved([&](game_controller_pov_ordinal aPovOrdinal, vec2 const& aPosition, key_modifiers_e aKeyboardState)
+                {
+                    std::ostringstream oss;
+                    oss << "POV #" << aPovOrdinal << " moved to " << aPosition << "\n";
+                    iTestOutput.append_text(oss.str(), true);
+                });
+            }
+        });
+
         for (auto const& controller : service<i_game_controllers>().controllers())
         {
-            iControllerSelector.model().insert_item(iControllerSelector.model().rows(), controller->product_name());
+            gameControllerModel->insert_item(iControllerSelector.model().rows(), controller, controller->product_name());
             if (controller->player_assigned() && controller->player() == game_player::One)
                 iControllerSelector.selection_model().set_current_index(iControllerSelector.presentation_model().rows() - 1);
         }
+
         iControllerSelector.accept_selection();
+
+        iTestGroupBox.set_size_policy(size_constraint::Expanding);
+        iTestOutput.set_read_only(true);
 
         iTabs.page_layout().set_ignore_child_visibility(true);
 

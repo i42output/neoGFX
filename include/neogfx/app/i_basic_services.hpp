@@ -47,6 +47,7 @@ namespace neogfx
     public:
         virtual neogfx::platform platform() const = 0;
         virtual i_async_task& app_task() = 0;
+        virtual void* helper_window_handle() const = 0;
         virtual void system_beep() = 0;
         virtual void display_error_dialog(std::string const& aTitle, std::string const& aMessage, void* aParentWindowHandle = 0) const = 0;
         virtual uint32_t display_count() const = 0;

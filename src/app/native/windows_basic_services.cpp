@@ -63,10 +63,32 @@ namespace neogfx
             ::OleInitialize(NULL);
 
             ::SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+
+            WNDCLASS wc = {};
+            wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
+            wc.lpfnWndProc = ::DefWindowProc;
+            wc.hInstance = ::GetModuleHandle(NULL);
+            wc.lpszClassName = L"neoGFX::HelperWindow";
+            ::RegisterClass(&wc);
+
+            iHelperWindowHandle = ::CreateWindowEx(
+                0, 
+                L"neoGFX::HelperWindow",
+                L"neoGFX::HelperWindow",
+                WS_OVERLAPPED, CW_USEDEFAULT,
+                CW_USEDEFAULT, CW_USEDEFAULT,
+                CW_USEDEFAULT, HWND_MESSAGE, NULL,
+                ::GetModuleHandle(NULL), NULL);
+
+            if (iHelperWindowHandle == NULL)
+                throw std::runtime_error("neoGFX: Failed to create helper window");
         }
 
         basic_services::~basic_services()
         {
+            ::DestroyWindow(iHelperWindowHandle);
+            ::UnregisterClass(L"neoGFX::HelperWindow", ::GetModuleHandle(NULL));
+
             ::OleUninitialize();
         }
 
@@ -78,6 +100,11 @@ namespace neogfx
         i_async_task& basic_services::app_task()
         {
             return iAppTask;
+        }
+
+        void* basic_services::helper_window_handle() const
+        {
+            return iHelperWindowHandle;
         }
 
         void basic_services::system_beep()

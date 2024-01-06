@@ -30,6 +30,8 @@ namespace neogfx
     class game_controller : public hid_device<i_game_controller>
     {
     public:
+        define_declared_event(RawButtonPressed, raw_button_pressed, game_controller_button_ordinal, key_modifiers_e)
+        define_declared_event(RawButtonReleased, raw_button_released, game_controller_button_ordinal, key_modifiers_e)
         define_declared_event(ButtonPressed, button_pressed, game_controller_button, key_modifiers_e)
         define_declared_event(ButtonReleased, button_released, game_controller_button, key_modifiers_e)
         define_declared_event(ButtonRepeat, button_repeat, game_controller_button, key_modifiers_e)
@@ -37,13 +39,15 @@ namespace neogfx
         define_declared_event(RightTriggerMoved, right_trigger_moved, double, key_modifiers_e)
         define_declared_event(LeftThumbMoved, left_thumb_moved, const vec2&, key_modifiers_e)
         define_declared_event(RightThumbMoved, right_thumb_moved, const vec2&, key_modifiers_e)
+        define_declared_event(PovMoved, pov_moved, game_controller_pov_ordinal , const vec2&, key_modifiers_e)
         define_declared_event(StickMoved, stick_moved, const vec3&, key_modifiers_e)
         define_declared_event(StickRotated, stick_rotated, const vec3&, key_modifiers_e)
         define_declared_event(SliderMoved, slider_moved, const vec2&, key_modifiers_e)
     public:
         struct button_not_found : std::logic_error { button_not_found() : std::logic_error{ "neogfx::game_controller::button_not_found" } {} };
     public:
-        static constexpr game_controller_button_ordinal MAX_BUTTONS = 64u;
+        static constexpr game_controller_button_ordinal MAX_BUTTONS = 128u;
+        static constexpr game_controller_pov_ordinal MAX_POVS = 4u;
     public:
         typedef boost::bimap<game_controller_button_ordinal, game_controller_button> button_map_type;
     public:
@@ -73,6 +77,7 @@ namespace neogfx
     public:
         uint32_t button_count() const override;
         bool button_mapped(game_controller_button aButton) const override;
+        bool button_mapped(game_controller_button_ordinal aButtonOrdinal) const override;
         game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const override;
         game_controller_button button_ordinal_to_button(game_controller_button_ordinal aButtonOrdinal) const override;
     protected:
@@ -85,6 +90,7 @@ namespace neogfx
         void set_right_trigger_position(double aPosition);
         void set_left_thumb_position(const vec2& aPosition);
         void set_right_thumb_position(const vec2& aPosition);
+        void set_pov_position(game_controller_pov_ordinal aPov, const vec2& aPosition);
         void set_stick_position(const vec3& aPosition);
         void set_stick_rotation(const vec3& aRotation);
         void set_slider_position(const vec2& aPosition);
@@ -98,6 +104,7 @@ namespace neogfx
         double iRightTriggerPosition = 0.0;
         vec2 iLeftThumbPosition;
         vec2 iRightThumbPosition;
+        std::array<vec2, MAX_POVS> iPovPosition = {};
         vec3 iStickPosition;
         vec3 iStickRotation;
         vec2 iSliderPosition;

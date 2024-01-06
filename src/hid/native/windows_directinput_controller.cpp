@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include "windows_directinput_controller.hpp"
 
@@ -30,20 +31,38 @@ namespace neogfx
         directinput_controller::directinput_controller(IDirectInputDevice8* aDevice,  hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId) :
             game_controller{ aSubclass, aProductId, aInstanceId, directinput_button_map(aProductId) }, iDevice{ aDevice }
         {
-            iDevice->SetDataFormat(&c_dfDIJoystick2);
+            if (FAILED(iDevice->SetCooperativeLevel(static_cast<HWND>(service<i_basic_services>().helper_window_handle()), DISCL_EXCLUSIVE | DISCL_BACKGROUND)))
+                throw failed_to_initialise();
+            if (FAILED(iDevice->SetDataFormat(&c_dfDIJoystick2)))
+                throw failed_to_initialise();
+            if (FAILED(iDevice->Acquire()))
+                throw failed_to_initialise();
         }
 
         directinput_controller::~directinput_controller()
         {
+            iDevice->Unacquire();
             iDevice->Release();
         }
 
         void directinput_controller::update_state()
         {
             DIJOYSTATE2 djs = {};
-            if (FAILED(iDevice->GetDeviceState(sizeof(djs), &djs)))
+            auto const result = iDevice->GetDeviceState(sizeof(djs), &djs);
+            if (FAILED(result))
                 return;
-            // todo
+            for (game_controller_button_ordinal button = 1u; button <= std::min<game_controller_button_ordinal>(MAX_BUTTONS, sizeof(djs.rgbButtons) / sizeof(djs.rgbButtons[0])); ++button)
+                set_button_state(button, djs.rgbButtons[button - 1u]);
+            auto round_to = [](double n, double precision = 1.0)
+            {
+                return std::round(n / precision) * precision;
+            };
+            for (game_controller_pov_ordinal  pov = 1u; pov <= std::min<game_controller_pov_ordinal>(MAX_POVS, sizeof(djs.rgdwPOV) / sizeof(djs.rgdwPOV[0])); ++pov)
+                set_pov_position(pov, djs.rgdwPOV[pov - 1u] == -1 ?
+                    vec2{} :
+                    vec2{ 
+                        round_to(std::sin(djs.rgdwPOV[pov - 1u] / 100.0 * math::pi<double>() / 180.0), 0.00001),
+                        round_to(std::cos(djs.rgdwPOV[pov - 1u] / 100.0 * math::pi<double>() / 180.0), 0.00001) });
         }
 
         const directinput_controller::button_map_type& directinput_controller::directinput_button_map(const hid_device_uuid& aProductId)
