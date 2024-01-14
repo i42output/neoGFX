@@ -42,7 +42,8 @@ namespace neogfx
     private:
         void init();
     private:
-        sink iSink;
+        sink iSink1;
+        sink iSink2;
         group_box iControllerSelectorGroupBox;
         drop_list iControllerSelector;
         tab_page_container<> iTabs;

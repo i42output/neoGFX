@@ -69,11 +69,11 @@ namespace neogfx
         iControllerSelector.set_model(gameControllerModel);
         iControllerSelector.SelectionChanged([&, gameControllerModel](optional_item_model_index aIndex)
         {
-            iSink.clear();
+            iSink1.clear();
             if (aIndex)
             {
                 auto& controller = *gameControllerModel->item(*aIndex);
-                iSink += controller.raw_button_pressed([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
+                iSink1 += controller.raw_button_pressed([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
                 {
                     if (!controller.button_mapped(aButtonOrdinal))
                     {
@@ -82,7 +82,7 @@ namespace neogfx
                         iTestOutput.append_text(oss.str(), true);
                     }
                 });
-                iSink += controller.raw_button_released([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
+                iSink1 += controller.raw_button_released([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
                 {
                     if (!controller.button_mapped(aButtonOrdinal))
                     {
@@ -91,7 +91,7 @@ namespace neogfx
                         iTestOutput.append_text(oss.str(), true);
                     }
                 });
-                iSink += controller.pov_moved([&](game_controller_pov_ordinal aPovOrdinal, vec2 const& aPosition, key_modifiers_e aKeyboardState)
+                iSink1 += controller.pov_moved([&](game_controller_pov_ordinal aPovOrdinal, vec2 const& aPosition, key_modifiers_e aKeyboardState)
                 {
                     std::ostringstream oss;
                     oss << "POV #" << aPovOrdinal << " moved to " << aPosition << "\n";
@@ -99,6 +99,14 @@ namespace neogfx
                 });
             }
         });
+
+        auto update_schematic_color = [this](style_aspect aAspect)
+        {
+            if ((aAspect & (style_aspect::Color)) == style_aspect::Color)
+                iSchematic.set_image_color(service<i_app>().current_style().palette().color(color_role::Text));
+        };
+        iSink2 += service<i_app>().current_style_changed(update_schematic_color);
+        update_schematic_color(style_aspect::Color);
 
         for (auto const& controller : service<i_game_controllers>().controllers())
         {

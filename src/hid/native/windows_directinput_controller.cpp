@@ -57,7 +57,7 @@ namespace neogfx
             {
                 return std::round(n / precision) * precision;
             };
-            for (game_controller_pov_ordinal  pov = 1u; pov <= std::min<game_controller_pov_ordinal>(MAX_POVS, sizeof(djs.rgdwPOV) / sizeof(djs.rgdwPOV[0])); ++pov)
+            for (game_controller_pov_ordinal pov = 1u; pov <= std::min<game_controller_pov_ordinal>(MAX_POVS, sizeof(djs.rgdwPOV) / sizeof(djs.rgdwPOV[0])); ++pov)
                 set_pov_position(pov, djs.rgdwPOV[pov - 1u] == -1 ?
                     vec2{} :
                     vec2{ 

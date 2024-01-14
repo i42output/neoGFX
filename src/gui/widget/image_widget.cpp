@@ -129,7 +129,11 @@ namespace neogfx
 
     void image_widget::set_image_color(const color_or_gradient& aImageColor)
     {
-        iColor = aImageColor;
+        if (iColor != aImageColor)
+        {
+            iColor = aImageColor;
+            update();
+        }
     }
 
     void image_widget::set_aspect_ratio(aspect_ratio aAspectRatio)
