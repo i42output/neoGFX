@@ -26,14 +26,15 @@ namespace neogfx
 {
     bool dialog_button_box::button_sorter::operator()(const button_key& aLhs, const button_key& aRhs) const
     {
-        static const std::map<platform, std::vector<button_role>> sRoleOrder
+        static const std::map<std::pair<platform, environment>, std::vector<button_role>> sRoleOrder
         {
-            { platform::Windows, { button_role::Reset, button_role::Yes, button_role::Accept, button_role::Destructive, button_role::No, button_role::Action, button_role::Reject, button_role::Apply, button_role::Help } },
-            { platform::Mac, { button_role::Help, button_role::Reset, button_role::Apply, button_role::Action, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } },
-            { platform::Kde, { button_role::Help, button_role::Reset, button_role::Yes, button_role::No, button_role::Action, button_role::Accept, button_role::Apply, button_role::Destructive, button_role::Reject } },
-            { platform::Gnome, { button_role::Help, button_role::Reset, button_role::Action, button_role::Apply, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } }
+            { { platform::Windows, environment::Native }, { button_role::Reset, button_role::Yes, button_role::Accept, button_role::Destructive, button_role::No, button_role::Action, button_role::Reject, button_role::Apply, button_role::Help } },
+            { { platform::macOS, environment::Native }, { button_role::Help, button_role::Reset, button_role::Apply, button_role::Action, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } },
+            { { platform::Linux, environment::Gnome }, { button_role::Help, button_role::Reset, button_role::Action, button_role::Apply, button_role::Destructive, button_role::Reject, button_role::Accept, button_role::No, button_role::Yes } },
+            { { platform::Linux, environment::Kde }, { button_role::Help, button_role::Reset, button_role::Yes, button_role::No, button_role::Action, button_role::Accept, button_role::Apply, button_role::Destructive, button_role::Reject } },
         };
-        static auto const& sPlatformSpecific = sRoleOrder.find(service<i_basic_services>().platform())->second;
+        static auto const& sPlatformSpecific = sRoleOrder.find(
+            std::make_pair(service<i_basic_services>().platform(), service<i_basic_services>().environment()))->second;
         auto left = std::find(sPlatformSpecific.begin(), sPlatformSpecific.end(), aLhs.second);
         auto right = std::find(sPlatformSpecific.begin(), sPlatformSpecific.end(), aRhs.second);
         return left < right;

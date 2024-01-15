@@ -35,6 +35,8 @@ namespace neogfx
             ~basic_services();
         public:
             neogfx::platform platform() const final;
+            neogfx::windowing_system windowing_system() const final;
+            neogfx::environment environment() const final;
             i_async_task& app_task() final;
             void* helper_window_handle() const final;
             void system_beep() final;

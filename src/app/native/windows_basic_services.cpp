@@ -92,9 +92,19 @@ namespace neogfx
             ::OleUninitialize();
         }
 
-        neogfx::platform basic_services::platform() const
+        platform basic_services::platform() const
         {
             return neogfx::platform::Windows;
+        }
+
+        windowing_system basic_services::windowing_system() const
+        {
+            return neogfx::windowing_system::Native;
+        }
+
+        environment basic_services::environment() const
+        {
+            return neogfx::environment::Native;
         }
 
         i_async_task& basic_services::app_task()
