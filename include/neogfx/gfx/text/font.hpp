@@ -293,7 +293,7 @@ namespace neogfx
         const i_glyph& glyph(const glyph_char& aGlyphChar) const;
     public:
         bool operator==(const font& aRhs) const;
-        std::strong_ordering operator<=>(const font& aRhs) const;
+        std::partial_ordering operator<=>(const font& aRhs) const;
     public:
         i_native_font_face& native_font_face() const;
         // attributes

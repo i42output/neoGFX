@@ -614,12 +614,16 @@ namespace neogfx
 
     bool font::operator==(const font& aRhs) const
     {
-        return iInstance == aRhs.iInstance;
+        if (iInstance == aRhs.iInstance)
+            return true;
+        return info() == aRhs.info();
     }
 
-    std::strong_ordering font::operator<=>(const font& aRhs) const
+    std::partial_ordering font::operator<=>(const font& aRhs) const
     {
-        return iInstance <=> aRhs.iInstance;
+        if (iInstance == aRhs.iInstance)
+            return iInstance <=> aRhs.iInstance;
+        return info() <=> aRhs.info();
     }
 
     i_native_font_face& font::native_font_face() const

@@ -50,6 +50,8 @@ namespace neogfx
         abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator add_device(i_game_controller& aController) override;
         abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator remove_device(i_game_controller& aController) override;
     private:
+        void load_database();
+    private:
         controller_list iControllers;
         mutable std::map<hid_device_uuid, button_map_type> iButtonMaps;
     };
