@@ -45,6 +45,11 @@ namespace neogfx
 
     drop_list_view::~drop_list_view()
     {
+        if (presentation_model().attached_to(*this))
+        {
+            presentation_model().detach();
+            presentation_model().attach(ref_ptr<i_widget>{ iDropList });
+        }
     }
 
     void drop_list_view::items_filtered()
@@ -364,6 +369,8 @@ namespace neogfx
 
     void drop_list::list_proxy::show_view()
     {
+        if (iDropList.model().empty() && !iDropList.editable())
+            return;
         if (!view_created())
         {
             if (iDropList.list_always_visible())
@@ -683,8 +690,15 @@ namespace neogfx
 
             iSink += model().item_removed([&](item_model_index const& aItem)
             {
+                if (iSavedSelection == aItem)
+                    iSavedSelection = std::nullopt;
                 if (has_selection() && selection() == aItem)
                     cancel_and_restore_selection(true);
+                if (model().empty())
+                {
+                    model().item_removed().accept();
+                    close_view();
+                }
             });
         }
         
@@ -1260,23 +1274,20 @@ namespace neogfx
 
         presentation_model().reset_filter();
 
-        if (aRestoreSavedSelection)
+        auto const previousSelection = iSelection;
+        if (aRestoreSavedSelection && iSavedSelection != std::nullopt)
         {
-            if (iSavedSelection != std::nullopt)
-                selection_model().set_current_index(presentation_model().from_item_model_index(*iSavedSelection));
-            else
-                selection_model().clear_current_index();
+            iSelection = iSavedSelection;
+            iSavedSelection = std::nullopt;
+            selection_model().set_current_index(presentation_model().from_item_model_index(*iSelection));
         }
         else
         {
+            iSelection = std::nullopt;
             selection_model().clear_current_index();
-            if (iSelection != std::nullopt)
-            {
-                iSelection = std::nullopt;
-                SelectionChanged.async_trigger(iSelection);
-            }
         }
-        iSavedSelection = std::nullopt;
+        if (iSelection != previousSelection)
+            SelectionChanged.async_trigger(iSelection);
 
         if (!editable() && aUpdateEditor)
         {

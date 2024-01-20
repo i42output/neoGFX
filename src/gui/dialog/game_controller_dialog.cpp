@@ -108,12 +108,24 @@ namespace neogfx
         iSink2 += service<i_app>().current_style_changed(update_schematic_color);
         update_schematic_color(style_aspect::Color);
 
-        for (auto const& controller : service<i_game_controllers>().controllers())
+        auto add_controller = [gameControllerModel, this](i_game_controller& aController)
         {
-            gameControllerModel->insert_item(iControllerSelector.model().rows(), controller, controller->product_name());
-            if (controller->player_assigned() && controller->player() == game_player::One)
+            gameControllerModel->insert_item(gameControllerModel->rows(), aController, aController.product_name());
+            if (!iControllerSelector.has_selection())
+            {
                 iControllerSelector.selection_model().set_current_index(iControllerSelector.presentation_model().rows() - 1);
-        }
+                iControllerSelector.accept_selection();
+            }
+        };
+
+        for (auto const& controller : service<i_game_controllers>().controllers())
+            add_controller(*controller);
+
+        iSink2 += service<i_game_controllers>().controller_connected(add_controller);
+        iSink2 += service<i_game_controllers>().controller_disconnected([gameControllerModel](i_game_controller& aController)
+        {
+            gameControllerModel->erase(gameControllerModel->find_item(aController));
+        });
 
         iControllerSelector.accept_selection();
 

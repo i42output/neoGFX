@@ -149,6 +149,10 @@ namespace neogfx
         {
             return iAttachment != nullptr;
         }
+        bool attached_to(i_widget& aWidget) const final
+        {
+            return attached() && &attachment() == &aWidget;
+        }
         i_widget& attachment() const final
         {
             if (iAttachment == nullptr)
