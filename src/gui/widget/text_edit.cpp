@@ -2605,6 +2605,31 @@ namespace neogfx
                         }
                         else if (WordWrap && static_cast<coordinate>((paragraphLineEnd - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((paragraphLineEnd - 1)->cell).x) > availableWidth)
                         {
+                            auto add_line = [&](auto first, auto last)
+                            {
+                                if (last != first && is_line_breaking_whitespace(*(last - 1)))
+                                    --last;
+                                auto const alignBaselinesResult = glyphs().align_baselines(first, last, true);
+                                lines.emplace_back(
+                                    this,
+                                    paragraph.index(),
+                                    column.index(),
+                                    document_span{
+                                        static_cast<position_type>(from_glyph(first).first) - paragraph.span.textFirst,
+                                        static_cast<position_type>(from_glyph(last).second) - paragraph.span.textFirst,
+                                        first - glyphs().begin() - paragraph.span.glyphsFirst,
+                                        last - glyphs().begin() - paragraph.span.glyphsFirst
+                                    },
+                                    yLine,
+                                    size{
+                                        last != first ? (last - 1)->cell[1].x - (first)->cell[0].x : 0.0f,
+                                        alignBaselinesResult.yExtent },
+                                        alignBaselinesResult.majorFont,
+                                        alignBaselinesResult.baseline);
+                                yLine += lines.back().extents.cy;
+                                iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
+                            };
+
                             if (glyph_text_direction(paragraphLineStart, paragraphLineEnd) == text_direction::LTR)
                             {
                                 auto next = paragraphLineStart;
@@ -2654,27 +2679,7 @@ namespace neogfx
                                     }
                                     else
                                         next = paragraphLineEnd;
-                                    if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
-                                        --lineEnd;
-                                    auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
-                                    lines.emplace_back(
-                                        this,
-                                        paragraph.index(),
-                                        column.index(),
-                                        document_span{
-                                            static_cast<position_type>(from_glyph(lineStart).first) - paragraph.span.textFirst,
-                                            static_cast<position_type>(from_glyph(lineEnd).second) - paragraph.span.textFirst,
-                                            lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
-                                            lineEnd - glyphs().begin() - paragraph.span.glyphsFirst
-                                        },
-                                        yLine,
-                                        size{
-                                            lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
-                                            alignBaselinesResult.yExtent },
-                                            alignBaselinesResult.majorFont,
-                                            alignBaselinesResult.baseline);
-                                    yLine += lines.back().extents.cy;
-                                    iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
+                                    add_line(lineStart, lineEnd);
                                     lineStart = next;
                                     if (lineStart != paragraphLineEnd)
                                         offset = lineStart->cell[0].x;
@@ -2720,27 +2725,7 @@ namespace neogfx
                                     }
                                     else
                                         next = std::reverse_iterator{ paragraphLineStart };
-                                    if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
-                                        --lineEnd;
-                                    auto const alignBaselinesResult = glyphs().align_baselines(lineEnd.base(), lineStart.base(), true);
-                                    lines.emplace_back(
-                                        this,
-                                        paragraph.index(),
-                                        column.index(),
-                                        document_span{
-                                            static_cast<position_type>(from_glyph(lineStart.base()).first) - paragraph.span.textFirst,
-                                            static_cast<position_type>(from_glyph(lineEnd.base()).second) - paragraph.span.textFirst,
-                                            lineStart.base() - glyphs().begin() - paragraph.span.glyphsFirst,
-                                            lineEnd.base() - glyphs().begin() - paragraph.span.glyphsFirst
-                                        },
-                                        yLine,
-                                        size{
-                                            lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
-                                            alignBaselinesResult.yExtent },
-                                            alignBaselinesResult.majorFont,
-                                            alignBaselinesResult.baseline);
-                                    yLine += lines.back().extents.cy;
-                                    iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
+                                    add_line(lineEnd.base(), lineStart.base());
                                     lineStart = next;
                                     if (lineStart != std::reverse_iterator{ paragraphLineStart })
                                         offset = lineStart->cell[1].x;
