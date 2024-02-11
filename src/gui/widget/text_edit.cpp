@@ -2371,12 +2371,26 @@ namespace neogfx
         auto const paragraph = character_to_paragraph(textIndex);
         if (paragraph == iGlyphParagraphs.end())
             return glyphs().end();
-        auto const result = std::lower_bound(paragraph->glyph_begin(), paragraph->glyph_end(), textIndex - paragraph->span.textFirst,
-            [](auto const& g, position_type c) 
-        { 
-            return g.clusters.first < c; 
-        });
-        return result;
+        if (glyph_text_direction(paragraph->glyph_begin(), paragraph->glyph_end()) == text_direction::LTR)
+        {
+            auto const result = std::lower_bound(paragraph->glyph_begin(), paragraph->glyph_end(), textIndex - paragraph->span.textFirst,
+                [](auto const& g, position_type c)
+                {
+                    return g.clusters.first < c;
+                });
+            return result;
+        }
+        else
+        {
+            auto result = std::lower_bound(paragraph->glyph_begin(), paragraph->glyph_end(), textIndex - paragraph->span.textFirst,
+                [](auto const& g, position_type c)
+                {
+                    return g.clusters.second - 1 > c;
+                });
+            if (result == paragraph->glyph_begin() && result->clusters.second == textIndex)
+                result = paragraph->glyph_end();
+            return result;
+        }
     }
 
     std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::from_glyph(document_glyphs::const_iterator aWhere) const
