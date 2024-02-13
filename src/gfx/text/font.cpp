@@ -87,15 +87,15 @@ namespace neogfx
         auto aw = sAbbreviatedWeightMap.find(key);
         if (aw != sAbbreviatedWeightMap.end())
             return aw->second;
-        std::optional<decltype(sWeightMap)::value_type*> match;
-        for (auto& wme : sWeightMap)
+        decltype(sWeightMap)::value_type const* match = nullptr;
+        for (auto const& wme : sWeightMap)
             if (key.find(wme.first) != std::string::npos)
             {
-                if (match == std::nullopt || (**match).first.size() < wme.first.size())
+                if (match == nullptr || match->first.size() < wme.first.size())
                     match = &wme;
             }
-        if (match != std::nullopt)
-            return (**match).second;
+        if (match != nullptr)
+            return match->second;
         return aUnknownAsRegular ? font_weight::Regular : font_weight::Unknown;
     }
 
