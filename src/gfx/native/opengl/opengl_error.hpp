@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <GL/glew.h>
 #include <GL/GL.h>
 

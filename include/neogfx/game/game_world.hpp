@@ -19,7 +19,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/ecs/chrono.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
 

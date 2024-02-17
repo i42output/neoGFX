@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/framed_widget.ipp>
 #include <neogfx/gui/widget/i_terminal.hpp>
 

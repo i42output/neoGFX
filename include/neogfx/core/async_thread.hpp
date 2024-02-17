@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/task/async_thread.hpp>
+
 #include <neogfx/core/async_task.hpp>
 
 namespace neogfx

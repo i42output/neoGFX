@@ -18,10 +18,12 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <string>
 #include <atomic>
 #include <filesystem>
 #include <boost/locale.hpp> 
+
 #include <neolib/file/file.hpp>
 #include <neolib/file/xml.hpp>
 #include <neolib/core/scoped.hpp>

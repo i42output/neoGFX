@@ -18,9 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/task/thread.hpp>
-#include <neogfx/app/i_basic_services.hpp>
 #include <neolib/app/i_power.hpp>
+
+#include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/scrollable_widget.ipp>
 #include <neogfx/gui/widget/terminal.hpp>

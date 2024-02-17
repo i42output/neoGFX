@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_vector.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/game/i_ecs.hpp>

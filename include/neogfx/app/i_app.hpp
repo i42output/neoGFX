@@ -20,8 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/program_options.hpp>
+
 #include <neolib/app/i_application.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_texture.hpp>

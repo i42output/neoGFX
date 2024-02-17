@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/widget.ipp>
 #include <neogfx/gui/widget/i_button.hpp>
 #include <neogfx/gui/widget/i_push_button.hpp>

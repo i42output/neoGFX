@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/i_skin.hpp>
 
 namespace neogfx

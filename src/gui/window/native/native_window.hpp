@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/variant.hpp>
+
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>

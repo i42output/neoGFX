@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <Shellapi.h>
 #include <ShellScalingApi.h>
 #include <D2d1.h>

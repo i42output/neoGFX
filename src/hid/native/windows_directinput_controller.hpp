@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <d3d11_1.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #pragma comment(lib, "dinput8.lib")
+
 #include <neogfx/hid/game_controller.hpp>
 
 namespace neogfx

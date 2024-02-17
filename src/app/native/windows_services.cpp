@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/clipboard.hpp>
 #include "windows_basic_services.hpp"

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/ecs/entity_info.hpp>
 
 namespace neogfx

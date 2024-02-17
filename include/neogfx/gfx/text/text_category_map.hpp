@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include "i_emoji_atlas.hpp"
 

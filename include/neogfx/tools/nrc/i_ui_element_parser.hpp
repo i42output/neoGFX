@@ -20,7 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/format.hpp>
+
 #include <neolib/core/i_reference_counted.hpp>
 #include <neolib/core/optional.hpp>
 #include <neolib/core/string.hpp>

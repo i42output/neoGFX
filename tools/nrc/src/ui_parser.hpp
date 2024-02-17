@@ -20,7 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
+#include <filesystem>
+
 #include <neolib/core/vector.hpp>
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/file/json.hpp>
@@ -40,7 +43,7 @@ namespace neogfx::nrc
         typedef neolib::simple_variant data_t;
         typedef neolib::vector<neolib::simple_variant> array_data_t;
     public:
-        ui_parser(const boost::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
+        ui_parser(const std::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput);
     public:
         const neolib::i_string& element_namespace() const override;
         const neolib::i_string& current_fragment() const override;
@@ -73,7 +76,7 @@ namespace neogfx::nrc
         void parse(const neolib::fjson_value& aNode);
         void parse(const neolib::fjson_value& aNode, i_ui_element& aElement);
     private:
-        const boost::filesystem::path& iInputFilename;
+        const std::filesystem::path& iInputFilename;
         const neolib::fjson_object& iRoot;
         std::ofstream& iOutput;
         std::vector<neolib::ref_ptr<i_ui_element_library>> iLibraries;

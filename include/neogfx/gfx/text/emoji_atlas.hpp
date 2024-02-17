@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
+
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_texture_atlas.hpp>
 #include "i_emoji_atlas.hpp"

@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <set>
 #include <map>
+
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>

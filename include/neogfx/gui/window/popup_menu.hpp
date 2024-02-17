@@ -20,9 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include "window.hpp"
+
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
+#include "window.hpp"
 
 namespace neogfx
 {

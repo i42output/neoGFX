@@ -18,9 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gui/widget/timer.hpp>
+
 #include <neolib/core/lifetime.hpp>
 #include <neolib/task/thread.hpp>
+
+#include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/app/event_processing_context.hpp>

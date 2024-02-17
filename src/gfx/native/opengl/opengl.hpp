@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <type_traits>
 #include <GL/glew.h>
 #include <GL/GL.h>
+
 #include "opengl_error.hpp"
 
 template <typename T>

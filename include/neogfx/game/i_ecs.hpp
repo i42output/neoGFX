@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
+
 #include <neolib/core/numerical.hpp>
 #include <neolib/ecs/i_ecs.hpp>
 

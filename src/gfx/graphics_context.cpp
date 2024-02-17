@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/string_utils.hpp>
+
 #include "native/i_native_texture.hpp"
 #include "text/native/native_font_face.hpp"
 #include <neogfx/hid/i_native_surface.hpp>

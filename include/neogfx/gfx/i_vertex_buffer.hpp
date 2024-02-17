@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_vertex_provider.hpp>
 
 namespace neogfx

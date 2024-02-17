@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/text/font.hpp>

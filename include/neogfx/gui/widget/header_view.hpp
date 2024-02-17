@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/window/context_menu.hpp>
 #include "splitter.hpp"
 #include "i_item_model.hpp"

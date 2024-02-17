@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/ecs_helpers.hpp>

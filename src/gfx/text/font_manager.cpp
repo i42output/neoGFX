@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <filesystem>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/core/string_utf.hpp>
@@ -40,7 +41,9 @@
 #ifdef _WIN32
 #include <Shlobj.h>
 #endif
+
 #include <neolib/file/file.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>

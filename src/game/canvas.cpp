@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh_renderer.hpp>

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/game_controller.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 

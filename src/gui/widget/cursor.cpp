@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/cursor.hpp>
 #include <neogfx/gui/widget/i_document.hpp>
 

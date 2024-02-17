@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/variant.hpp>
 #include <neolib/core/vecarray.hpp>
+
 #include <neogfx/core/primitives.hpp>
 
 namespace neogfx

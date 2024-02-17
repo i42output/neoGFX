@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <optional>
+
 #include <neolib/ecs/component.hpp>
 
 namespace neogfx

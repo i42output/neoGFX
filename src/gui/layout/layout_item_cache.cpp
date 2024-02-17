@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>

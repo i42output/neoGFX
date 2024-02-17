@@ -20,11 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <array>
 #include <type_traits>
 #include <ostream>
 #include <optional>
+
 #include <neolib/app/i_setting_value.hpp>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/alignment.hpp>
 

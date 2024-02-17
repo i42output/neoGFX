@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include "opengl_error.hpp"

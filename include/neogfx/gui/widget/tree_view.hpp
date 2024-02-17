@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/layout/vertical_layout.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/list_view.hpp>

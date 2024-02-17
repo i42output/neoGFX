@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/window_manager.hpp>
 
 namespace neogfx

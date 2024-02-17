@@ -20,6 +20,7 @@
 #pragma comment(lib, "opengl32.lib")
 
 #include <neogfx/neogfx.hpp>
+#include <boost/lexical_cast.hpp>
 #include <strsafe.h>
 #include <GL/glew.h>
 #include <GL/wglew.h>

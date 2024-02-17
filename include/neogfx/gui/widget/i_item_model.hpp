@@ -20,12 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/format.hpp>
+
 #include <neolib/core/vector.hpp>
 #include <neolib/core/pair.hpp>
 #include <neolib/core/optional.hpp>
 #include <neolib/core/variant.hpp>
 #include <neolib/core/generic_iterator.hpp>
+
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gui/widget/item_index.hpp>
 

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include "text_edit.hpp"
 
 namespace neogfx

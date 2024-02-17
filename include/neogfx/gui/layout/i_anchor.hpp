@@ -20,8 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <functional>
+
 #include <neolib/core/i_enum.hpp>
+
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>
 

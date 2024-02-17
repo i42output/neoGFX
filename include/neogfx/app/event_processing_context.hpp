@@ -20,8 +20,8 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/core/async_task.hpp>
 
+#include <neogfx/core/async_task.hpp>
 #include <neogfx/app/i_event_processing_context.hpp>
 
 namespace neogfx

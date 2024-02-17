@@ -18,9 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <boost/format.hpp>
+
 #include <neolib/core/string_utils.hpp>
 #include <neolib/core/scoped.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/drag_drop.hpp>

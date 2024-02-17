@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/scoped.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/dialog/paragraph_dialog.hpp>
 #include <neogfx/gui/dialog/message_box.hpp>

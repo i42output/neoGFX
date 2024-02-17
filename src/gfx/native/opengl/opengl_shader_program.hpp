@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/shader_program.hpp>
 #include <neogfx/gfx/standard_shader_program.hpp>
 #include "opengl.hpp"

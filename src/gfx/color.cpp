@@ -18,10 +18,12 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <algorithm>
 #include <tuple>
 #include <iomanip>
 #include <boost/lexical_cast.hpp>
+
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/string_ci.hpp>
 #include <neogfx/core/numerical.hpp>

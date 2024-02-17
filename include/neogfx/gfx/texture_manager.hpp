@@ -20,8 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <variant>
+
 #include <neolib/core/jar.hpp>
+
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_texture_manager.hpp>
 

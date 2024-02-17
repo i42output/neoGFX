@@ -18,8 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <boost/algorithm/string.hpp> 
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
 #include <initguid.h>
 #include <wbemidl.h>
@@ -29,7 +30,9 @@
 #include <dinput.h>
 #include <xinput.h>
 #pragma comment(lib, "Xinput.lib")
+
 #include <neolib/core/map.hpp>
+
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/hid/game_controllers.hpp>
 

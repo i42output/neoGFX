@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <string>
+
 #include <neolib/file/lexer.hpp>
 #include <neogfx/core/css.hpp>
 

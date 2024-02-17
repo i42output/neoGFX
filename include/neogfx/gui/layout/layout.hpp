@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <list>
-#include <boost/pool/pool_alloc.hpp>
+
 #include <neolib/core/allocator.hpp>
 #include <neolib/core/variant.hpp>
+
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>

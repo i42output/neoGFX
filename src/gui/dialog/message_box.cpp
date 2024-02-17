@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/dialog/message_box.hpp>
 
 namespace neogfx

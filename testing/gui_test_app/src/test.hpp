@@ -1,11 +1,13 @@
-﻿#include <neolib/neolib.hpp>
+﻿#include <neogfx/neogfx.hpp>
+
+#include <neolib/neolib.hpp>
 #include <csignal>
-#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+
 #include <neolib/core/random.hpp>
 #include <neolib/task/thread_pool.hpp>
 #include <neolib/app/i_power.hpp>
-#include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/easing.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/hid/i_surface.hpp>

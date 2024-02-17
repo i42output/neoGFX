@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/slider.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
 

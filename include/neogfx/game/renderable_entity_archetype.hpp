@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/game/entity_archetype.hpp>
 
 namespace neogfx::game

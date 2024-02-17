@@ -68,8 +68,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <thread>
+
 #include <neolib/core/string_utf.hpp>
+
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_window_manager.hpp>

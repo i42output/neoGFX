@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_texture_manager.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/i_shader_array.hpp>

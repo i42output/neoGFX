@@ -18,8 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <boost/filesystem.hpp>
+
+#include <filesystem>
+
 #include <neolib/core/string_ci.hpp>
+
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include "native_font.hpp"
 #include "native_font_face.hpp"
@@ -219,7 +222,7 @@ namespace neogfx
         {
             if (iCache.empty())
             {
-                std::size_t fileSize = static_cast<std::size_t>(boost::filesystem::file_size(static_variant_cast<const filename_type&>(iSource)));
+                std::size_t fileSize = static_cast<std::size_t>(std::filesystem::file_size(static_variant_cast<const filename_type&>(iSource)));
                 iCache.resize(fileSize);
                 std::ifstream file{ std::get<filename_type>(iSource).c_str(), std::ios::in | std::ios::binary };
                 file.read(reinterpret_cast<char*>(&iCache[0]), fileSize);

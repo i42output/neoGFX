@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/scoped.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/graphics_context.hpp>

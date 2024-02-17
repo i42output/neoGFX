@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/app/i_action.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>

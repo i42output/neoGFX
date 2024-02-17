@@ -18,6 +18,8 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
+#include <boost/lexical_cast.hpp>
 #include <ShellScalingApi.h>
 #include <D2d1.h>
 #pragma comment(lib, "Shcore.lib")

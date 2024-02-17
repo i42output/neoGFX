@@ -20,12 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
 #include <deque>
 #include <boost/algorithm/string.hpp>
+
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/segmented_array.hpp>
 #include <neolib/core/scoped.hpp>
+
 #include <neogfx/core/object.hpp>
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/app/i_app.hpp>

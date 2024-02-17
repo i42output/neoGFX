@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/window/window.hpp>
 #include "dialog_button_box.hpp"
 

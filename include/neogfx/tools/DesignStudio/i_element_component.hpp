@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/neolib.hpp>
 #include <neolib/core/i_reference_counted.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/core/i_vector.hpp>
+
 #include <neogfx/core/i_property.hpp>
 
 namespace neogfx::DesignStudio

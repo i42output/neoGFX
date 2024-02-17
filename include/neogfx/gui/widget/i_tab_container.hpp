@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/gui/widget/i_tab.hpp>
 #include <neogfx/gui/widget/i_tab_page.hpp>

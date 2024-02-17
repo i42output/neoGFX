@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/app/i_resource.hpp>

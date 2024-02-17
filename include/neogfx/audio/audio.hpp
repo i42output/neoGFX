@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/i_audio.hpp>
 #include <neogfx/audio/audio_device.hpp>
 #include <neogfx/audio/audio_instrument_atlas.hpp>

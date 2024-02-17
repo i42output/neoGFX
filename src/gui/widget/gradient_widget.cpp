@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gui/dialog/gradient_dialog.hpp>

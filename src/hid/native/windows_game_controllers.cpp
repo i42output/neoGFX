@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include "windows_game_controllers.hpp"
 #include "windows_xinput_controller.hpp"
 #include "windows_directinput_controller.hpp"

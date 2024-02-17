@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/simple_physics.hpp>

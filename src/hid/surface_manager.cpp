@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/string_utils.hpp>
 
 #include <neogfx/app/i_app.hpp>

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #ifdef _WIN32
 #include <D2d1.h>
 #endif

@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <boost/type_index.hpp>
 #include <neolib/neolib.hpp>
 #include <neolib/core/lifetime.hpp>
 #include <neolib/core/map.hpp>

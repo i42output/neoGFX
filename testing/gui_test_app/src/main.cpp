@@ -1,4 +1,6 @@
-﻿#include "test.hpp"
+﻿#include <boost/lexical_cast.hpp>
+
+#include "test.hpp"
 
 void signal_handler(int signal)
 {

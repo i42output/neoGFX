@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/bimap.hpp>
+
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/hid/hid_device.hpp>
 #include <neogfx/hid/i_game_controller.hpp>

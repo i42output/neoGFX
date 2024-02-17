@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/i_audio_oscillator.hpp>
 
 #pragma once

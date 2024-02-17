@@ -20,11 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/dll.hpp>
+
 #include <neolib/core/string.hpp>
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/app/version.hpp>
 #include <neolib/app/i_application.hpp>
+
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 
 namespace neogfx::DesignStudio

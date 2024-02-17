@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/vector.hpp>
 #include <neolib/core/set.hpp>
@@ -27,6 +28,7 @@
 #include <neolib/core/string.hpp>
 #include <neolib/app/i_application.hpp>
 #include <neolib/app/version.hpp>
+
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/widget/menu.hpp>

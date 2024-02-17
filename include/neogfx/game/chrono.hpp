@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/ecs/chrono.hpp>
 
 namespace neogfx

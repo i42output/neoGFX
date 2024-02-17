@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/action.hpp>
 

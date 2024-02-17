@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <optional>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/app/i_resource.hpp>
 #include <neogfx/app/i_resource_manager.hpp>

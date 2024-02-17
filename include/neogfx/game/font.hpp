@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
+
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/i_component_data.hpp>

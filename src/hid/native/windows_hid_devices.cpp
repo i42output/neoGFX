@@ -17,13 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <Dbt.h>
 #include <initguid.h>
 #include <Usbiodef.h>
 #include <hidclass.h>
+
 #include <neogfx/app/i_clipboard.hpp>
 #include "windows_hid_devices.hpp"
 

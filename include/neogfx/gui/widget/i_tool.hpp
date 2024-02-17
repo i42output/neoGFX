@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_string.hpp>
+
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 

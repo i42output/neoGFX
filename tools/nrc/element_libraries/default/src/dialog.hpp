@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/tools/nrc/ui_element.hpp>
 #include <neogfx/gui/dialog/dialog_button_box.hpp>
 #include "window.hpp"

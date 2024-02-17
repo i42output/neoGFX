@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <tuple>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/i_shader_array.hpp>

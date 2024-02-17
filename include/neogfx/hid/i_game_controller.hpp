@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/hid/i_hid_device.hpp>
 #include <neogfx/hid/i_keyboard.hpp>

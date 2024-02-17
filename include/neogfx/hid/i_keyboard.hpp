@@ -41,9 +41,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <optional>
+
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/string_ci.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_hid_device.hpp>

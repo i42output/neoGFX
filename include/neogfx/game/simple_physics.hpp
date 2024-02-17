@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
 #include <neogfx/game/box_collider.hpp>

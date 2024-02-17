@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
+#include <filesystem>
+
 #include <neolib/file/json.hpp>
 
 namespace neogfx::nrc
@@ -27,7 +30,7 @@ namespace neogfx::nrc
     class resource_parser
     {
     public:
-        resource_parser(const boost::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, std::ofstream& aOutput);
+        resource_parser(const std::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, std::ofstream& aOutput);
     public:
         void parse(const neolib::fjson_value& aItem);
     private:

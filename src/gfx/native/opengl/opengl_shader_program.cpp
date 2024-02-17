@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/set.hpp>
+
 #include "opengl_shader_program.hpp"
 
 namespace neogfx

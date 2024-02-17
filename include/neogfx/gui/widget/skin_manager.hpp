@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_set>
+
 #include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/default_skin.hpp>
 

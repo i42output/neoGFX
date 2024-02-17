@@ -18,6 +18,10 @@
 */
 
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
+
+#include <filesystem>
+#include <boost/lexical_cast.hpp>
+
 #include <neolib/file/json.hpp>
 #include <neogfx/tools/DesignStudio/project.hpp>
 #include <neogfx/tools/DesignStudio/i_project_manager.hpp>
@@ -42,7 +46,7 @@ namespace neogfx::DesignStudio
 
     void project::open(const i_string& aPath)
     {
-        boost::filesystem::path const inputFileName{ aPath.to_std_string() };
+        std::filesystem::path const inputFileName{ aPath.to_std_string() };
         neolib::fjson const input{ inputFileName.string() };
         if (!input.has_root())
             throw invalid_project_file("bad root node");

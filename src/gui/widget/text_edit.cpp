@@ -18,10 +18,13 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/algorithm/string/find.hpp>
+
 #include <neolib/core/scoped.hpp>
 #include <neolib/task/thread.hpp>
 #include <neolib/app/i_power.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/graphics_context.hpp>

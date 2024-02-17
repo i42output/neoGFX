@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <random>
+
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>

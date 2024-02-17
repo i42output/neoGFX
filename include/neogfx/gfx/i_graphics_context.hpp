@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <memory>
 #ifdef _WIN32
 #pragma warning( push )
@@ -30,6 +31,7 @@
 #pragma warning( pop )
 #endif
 #include <optional>
+
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>

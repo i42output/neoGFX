@@ -20,7 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <boost/format.hpp>
+
 #include <neogfx/app/settings.hpp>
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/terminal.hpp>

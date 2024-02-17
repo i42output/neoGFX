@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <functional>
-#include <boost/pool/pool_alloc.hpp>
+
 #include <neolib/core/gap_vector.hpp>
 #include <neolib/core/jar.hpp>
+
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gui/window/context_menu.hpp>

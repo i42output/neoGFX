@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
 #include <neogfx/gui/layout/horizontal_layout.hpp>

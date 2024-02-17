@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/layout/i_anchor.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>

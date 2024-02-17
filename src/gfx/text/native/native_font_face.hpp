@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
 #include <boost/pool/pool_alloc.hpp>
@@ -35,7 +36,9 @@
 #include <harfbuzz\hb.h>
 #include <harfbuzz\hb-ot.h>
 #endif
+
 #include <neolib/core/reference_counted.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gfx/text/font.hpp>

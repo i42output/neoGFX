@@ -34,6 +34,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/rect_pack.hpp>
 
 namespace neogfx

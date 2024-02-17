@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/hid_devices.hpp>
 
 namespace neogfx

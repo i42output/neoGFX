@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/fragment_shader.hpp>
 #include "standard-gradient.frag.hpp"
 #include "standard-texture.frag.hpp"

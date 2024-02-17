@@ -22,7 +22,6 @@
 #include <neogfx/neogfx.hpp>
 
 #include <unordered_set>
-#include <boost/lexical_cast.hpp>
 
 #include <neolib/core/string_utils.hpp>
 

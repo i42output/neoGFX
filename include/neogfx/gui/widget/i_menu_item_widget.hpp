@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_mnemonic.hpp>
 #include <neogfx/app/i_help.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>

@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <optional>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/keyboard.hpp>
 #include <neogfx/gfx/texture.hpp>

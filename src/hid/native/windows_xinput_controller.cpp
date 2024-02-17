@@ -17,9 +17,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
+#include <boost/bimap.hpp>
+
 #include "windows_xinput_controller.hpp"
 
 namespace neogfx

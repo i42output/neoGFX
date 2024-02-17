@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/audio_primitives.hpp>
 
 #pragma once

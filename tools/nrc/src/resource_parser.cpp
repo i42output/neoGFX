@@ -17,9 +17,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
+#include <filesystem>
 #include <boost/algorithm/string.hpp>
 
 #include "resource_parser.hpp"
@@ -31,7 +31,7 @@ namespace neogfx::nrc
         failed_to_read_resource_file(std::string const& aPath) : std::runtime_error("Failed to read resource file '" + aPath + "'!") {}
     };
 
-    resource_parser::resource_parser(const boost::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, std::ofstream& aOutput) :
+    resource_parser::resource_parser(const std::filesystem::path& aInputFilename, const neolib::fjson_string& aNamespace, std::ofstream& aOutput) :
         iInputFilename{ aInputFilename }, iNamespace{ aNamespace }, iOutput{ aOutput }, iResourceIndex{ 0u }
     {
     }

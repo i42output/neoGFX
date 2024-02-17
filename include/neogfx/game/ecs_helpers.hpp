@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_gradient_manager.hpp>
 #include <neogfx/gfx/shapes.hpp>

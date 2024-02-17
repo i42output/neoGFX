@@ -18,8 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <array>
 #include <bit>
+#include <boost/lexical_cast.hpp>
 
 #pragma once
 

@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <bit>
+
 #include <neogfx/audio/audio_waveform.hpp>
 #include <neogfx/audio/audio_oscillator.hpp>
 

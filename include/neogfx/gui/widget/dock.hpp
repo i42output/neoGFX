@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/vector.hpp>
+
 #include <neogfx/gui/widget/splitter.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 #include <neogfx/gui/widget/i_dockable.hpp>

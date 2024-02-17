@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <boost/functional/hash.hpp>
 #include <ft2build.h>
@@ -28,6 +29,7 @@
 #include FT_LCD_FILTER_H
 #include FT_ADVANCES_H
 #include FT_STROKER_H
+
 #include "../../native/i_native_texture.hpp"
 #include "native_font_face.hpp"
 #include <neogfx/gfx/text/i_font_manager.hpp>

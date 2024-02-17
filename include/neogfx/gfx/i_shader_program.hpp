@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_vector.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/core/i_reference_counted.hpp>
+
 #include <neogfx/gfx/i_vertex_buffer.hpp>
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_vertex_shader.hpp>

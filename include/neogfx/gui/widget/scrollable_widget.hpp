@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/widget/scrollbar.hpp>
 

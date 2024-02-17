@@ -20,11 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <type_traits>
+
 #include <neolib/core/any.hpp>
 #include <neolib/plugin/plugin_variant.hpp>
 #include <neolib/core/variant.hpp>
 #include <neolib/core/i_enum.hpp>
+
 #include <neogfx/core/i_object.hpp>
 #include <neogfx/core/i_properties.hpp>
 #include <neogfx/core/event.hpp>

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/game/ecs.hpp>
 

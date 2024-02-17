@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_display.hpp>
 #include <neogfx/hid/i_nest.hpp>

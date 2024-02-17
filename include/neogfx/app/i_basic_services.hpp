@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/async_task.hpp>
 #include <neogfx/core/primitives.hpp>
 

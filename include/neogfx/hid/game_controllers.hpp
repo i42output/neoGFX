@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/vector.hpp>
 #include <neolib/core/map.hpp>
+
 #include <neogfx/hid/i_game_controllers.hpp>
 
 namespace neogfx

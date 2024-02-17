@@ -18,7 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
+#include <boost/lexical_cast.hpp>
+
 #include <neolib/core/scoped.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/font_dialog.hpp>

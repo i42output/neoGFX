@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/text/i_font_manager.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gfx/text/glyph_text.ipp>

@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/variant.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/core/geometrical.hpp>

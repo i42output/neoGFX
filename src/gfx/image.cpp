@@ -18,10 +18,13 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <libpng/png.h>
 #include <openssl/sha.h>
+
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/string_utils.hpp>
+
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/app/resource_manager.hpp>
 

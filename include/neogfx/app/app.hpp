@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
 #include <optional>
-#include <boost/pool/pool_alloc.hpp>
+
 #include <neolib/core/map.hpp>
+
 #include <neogfx/gui/widget/timer.hpp>
 #include <neolib/app/application.hpp>
 #include <neogfx/core/async_thread.hpp>

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gui/window/window_bits.hpp>

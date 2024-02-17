@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/format.hpp>
+
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/text/font.hpp>

@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/graphics_operations.hpp>
 #include "native/i_native_texture.hpp"
 

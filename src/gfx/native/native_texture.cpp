@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
+
 #include "native_texture.hpp"
 
 namespace neogfx

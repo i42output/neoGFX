@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include "vulkan_texture_manager.hpp"
 #include "vulkan_texture.hpp"
 

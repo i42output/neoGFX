@@ -20,9 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <type_traits>
-#include <neogfx/core/geometrical.hpp>
+
 #include <neolib/app/i_setting_value.hpp>
+
+#include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gfx/hsl_color.hpp>
 #include <neogfx/gfx/hsv_color.hpp>

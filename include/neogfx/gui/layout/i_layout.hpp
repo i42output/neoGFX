@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/gui/widget/i_dock.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>

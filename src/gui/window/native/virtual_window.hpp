@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include "native_window.hpp"
 #include "native_surface.hpp"
 

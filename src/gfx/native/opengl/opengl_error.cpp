@@ -18,8 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <iostream>
+
 #include <neolib/core/string_utils.hpp>
+
 #include "opengl_error.hpp"
 
 namespace neogfx

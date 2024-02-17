@@ -18,9 +18,12 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <filesystem>
+
 #include <neolib/file/file.hpp>
 #include <neolib/core/uuid.hpp>
+
 #include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/hid_devices.hpp>

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/audio_primitives.hpp>
 #include <neogfx/audio/i_audio_instrument_atlas.hpp>
 

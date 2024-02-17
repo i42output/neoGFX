@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_enum.hpp>
+
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gfx/color.hpp>

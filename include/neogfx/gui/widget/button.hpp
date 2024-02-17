@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/app/i_mnemonic.hpp>
 #include <neogfx/gui/widget/i_button.hpp>

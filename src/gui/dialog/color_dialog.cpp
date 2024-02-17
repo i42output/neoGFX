@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/task/thread.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/image.hpp>

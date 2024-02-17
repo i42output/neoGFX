@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/layout/flow_layout.hpp>
 #include <neogfx/gui/layout/vertical_layout.hpp>

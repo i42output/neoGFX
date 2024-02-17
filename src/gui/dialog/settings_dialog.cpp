@@ -18,8 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/scoped.hpp>
 #include <neolib/core/i_enum.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>

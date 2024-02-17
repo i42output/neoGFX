@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/i_ecs.hpp>

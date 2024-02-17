@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/layout/i_layout_item.hpp>
 

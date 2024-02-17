@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/mouse.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/i_property.hpp>

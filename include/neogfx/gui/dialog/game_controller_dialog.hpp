@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gui/widget/tab_page_container.hpp>

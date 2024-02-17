@@ -1,10 +1,11 @@
 ﻿#include <neogfx/neogfx.hpp>
-#include <neogfx/neogfx.hpp>
+
 #include <iomanip>
-#include <boost/format.hpp>
+
 #include <neolib/core/random.hpp>
 #include <neolib/core/singleton.hpp>
 #include <neolib/app/i_power.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>

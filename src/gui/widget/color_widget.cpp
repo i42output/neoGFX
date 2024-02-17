@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/dialog/color_dialog.hpp>
 #include <neogfx/gui/widget/color_widget.hpp>
 

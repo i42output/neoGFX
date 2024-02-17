@@ -20,8 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
-#include <boost/pool/pool_alloc.hpp>
+
 #include "layout.hpp"
 #include "vertical_layout.hpp"
 #include "horizontal_layout.hpp"

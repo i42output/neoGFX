@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/jar.hpp>
+
 #include <neogfx/gfx/i_gradient.hpp>
 
 namespace neogfx

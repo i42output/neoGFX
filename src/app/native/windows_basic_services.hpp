@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/hid/i_display.hpp>

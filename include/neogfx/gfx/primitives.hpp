@@ -20,17 +20,19 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <memory>
 #ifdef _WIN32
 #pragma warning( push )
 #pragma warning( disable: 4459 ) // declaration of 'name' hides global declaration
 #endif
-#include <boost/multi_array.hpp>
 #ifdef _WIN32
 #pragma warning( pop )
 #endif
 #include <optional>
+
 #include <neolib/core/vecarray.hpp>
+
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>

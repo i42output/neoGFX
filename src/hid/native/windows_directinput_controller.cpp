@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include "windows_directinput_controller.hpp"

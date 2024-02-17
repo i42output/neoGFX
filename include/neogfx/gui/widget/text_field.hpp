@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include "label.hpp"
 #include "line_edit.hpp"
 
