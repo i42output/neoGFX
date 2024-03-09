@@ -501,6 +501,8 @@ namespace neogfx
         update_texture();
         iCanvas.Painted([this](i_graphics_context& aGc)
         {
+            if (iImage)
+                return;
             point center = dip(current_cursor_position());
             auto const radius = dip(CURSOR_RADIUS);
             auto const circumference = 2.0 * math::pi<double>() * radius;
@@ -521,10 +523,12 @@ namespace neogfx
 
     void color_dialog::yz_picker::clear_image()
     {
+        auto const selection = iOwner.selected_color();
         iImage.reset();
         iCanvas.set_image(iTexture);
         iCursorPosition.reset();
         iOwner.iXPicker.show();
+        iOwner.select_color(selection);
         update();
     }
 
@@ -571,7 +575,10 @@ namespace neogfx
     {
         point pos{ std::max(std::min(aCursorPos.x, 255.0), 0.0), std::max(std::min(aCursorPos.y, 255.0), 0.0) };
         if (iImage)
-            return iImage->get_pixel(((pos + scroll_position()) * dpi_scale_factor() / iCanvas.extents() * iImage->extents()).floor());
+        {
+            auto const imagePos = ((pos + scroll_position()) * dpi_scale_factor() / iCanvas.extents() * (iImage->extents() - size{ 1.0, 1.0 })).floor();
+            return iImage->get_pixel(imagePos);
+        }
         switch (iOwner.current_channel())
         {
         case ChannelHue:
