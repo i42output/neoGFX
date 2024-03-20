@@ -1179,7 +1179,7 @@ namespace neogfx
                     make_cursor_visible();
                     break;
                 case scrollbar_zone::Middle:
-                    make_visible(glyph_position(document_hit_test(column_rect(0).top_left()), true));
+                    make_visible(glyph_position(glyph_hit_test(column_rect(0).top_left()), true));
                     break;
                 case scrollbar_zone::Bottom:
                     vertical_scrollbar().set_position(vertical_scrollbar().maximum());
@@ -1445,8 +1445,8 @@ namespace neogfx
                 {
                     auto const columnRectSansPadding = column_rect(currentPosition.column_index());
                     auto const cursorPos = point{ *iCursorHint.x, previousLine.value()->ypos()} + columnRectSansPadding.top_left();
-                    auto const glyphIndex = document_hit_test(cursorPos, false);
-                    cursor().set_position(from_glyph(glyphs().begin() + glyphIndex).first, aMoveAnchor);
+                    auto const documentPos = document_hit_test(cursorPos, false);
+                    cursor().set_position(documentPos, aMoveAnchor);
                 }
             }
             break;
@@ -1458,8 +1458,8 @@ namespace neogfx
                 {
                     auto const columnRectSansPadding = column_rect(currentPosition.column_index());
                     auto const cursorPos = point{ *iCursorHint.x, nextLine.value()->ypos() } + columnRectSansPadding.top_left();
-                    auto const glyphIndex = document_hit_test(cursorPos, false);
-                    cursor().set_position(from_glyph(glyphs().begin() + glyphIndex).first, aMoveAnchor);
+                    auto const documentPos = document_hit_test(cursorPos, false);
+                    cursor().set_position(documentPos, aMoveAnchor);
                 }
                 else if (currentPosition.lineEnd.value() == glyphs().end() || is_line_breaking_whitespace(*currentPosition.lineEnd.value()))
                     cursor().set_position(iText.size(), aMoveAnchor);
@@ -1675,7 +1675,8 @@ namespace neogfx
 
     void text_edit::set_cursor_position(const point& aPosition, bool aMoveAnchor, bool aEnableDragger)
     {
-        set_cursor_glyph_position(document_hit_test(aPosition), aMoveAnchor);
+        auto const documentPosition = document_hit_test(aPosition);
+        cursor().set_position(documentPosition, aMoveAnchor);
         neolib::service<neolib::i_power>().register_activity();
         if (aEnableDragger)
         {
@@ -1822,7 +1823,7 @@ namespace neogfx
         cursor().set_position(from_glyph(glyphs().begin() + aGlyphPosition).first, aMoveAnchor);
     }
 
-    text_edit::position_type text_edit::document_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
+    text_edit::document_glyphs::difference_type text_edit::glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
         if (iGlyphParagraphs.empty())
             return 0;
@@ -1832,10 +1833,10 @@ namespace neogfx
         point adjustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansPadding.top_left();
         adjustedPosition = adjustedPosition.max(point{});
         auto paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), adjustedPosition.y,
-            [](glyph_paragraph const& p, coordinate y) 
-        { 
-            return p.ypos < y;
-        });
+            [](glyph_paragraph const& p, coordinate y)
+            {
+                return p.ypos < y;
+            });
         if (paragraph == iGlyphParagraphs.end())
             paragraph = std::prev(paragraph);
         if (paragraph != iGlyphParagraphs.begin() && adjustedPosition.y < paragraph->ypos)
@@ -1877,10 +1878,11 @@ namespace neogfx
                 auto const glyphAdvance = quad_extents(glyph.cell).x;
                 if (adjustedPosition.x >= glyph.cell[0].x - lineStartX && adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance)
                 {
-                    if (direction(glyph) != text_direction::RTL)
-                        return adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0 ? gi : gi + 1;
+                    bool const inLeftHalf = adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0;
+                    if (direction(glyph) == text_direction::LTR)
+                        return inLeftHalf ? gi : gi + 1;
                     else
-                        return gi + 1;
+                        return inLeftHalf && gi != lineStart ? gi - 1 : (inLeftHalf ? lineEnd : gi);
                 }
             }
             if (lineEnd > lineStart && line != std::prev(lines.end()) && !is_whitespace(glyphs()[lineEnd]))
@@ -1893,6 +1895,18 @@ namespace neogfx
         {
             return glyphs().size();
         }
+    }
+
+    text_edit::position_type text_edit::document_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
+    {
+        auto const glyphPosition = glyph_hit_test(aPosition, aAdjustForScrollPosition);
+        if (glyphPosition < glyphs().size())
+        {
+            auto const glyphParagraph = glyph_to_paragraph(glyphPosition);
+            if (glyphParagraph != iGlyphParagraphs.end())
+                return glyphParagraph->text_begin_index() + glyphs()[glyphPosition].clusters.first;
+        }
+        return iText.size();
     }
 
     bool text_edit::same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const
