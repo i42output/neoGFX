@@ -341,9 +341,11 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         else if (keyboard.is_key_pressed(ng::ScanCode_X))
             spaceshipPhysics.spin.z = ng::to_rad(-30.0);
 
+        bool fireButtonPressed = false;
         if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
         {
             auto const& controller = ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One);
+            fireButtonPressed = controller.is_button_pressed(ng::game_controller_button::A);
             spaceshipPhysics.acceleration += ng::vec3{ 16.0, 16.0, 0.0 }.hadamard_product(ng::vec3{ controller.left_thumb_position() });
             spaceshipPhysics.acceleration += ng::vec3{ 0.0,
                 controller.is_button_pressed(ng::game_controller_button::DirectionalPadUp) ? 16.0 :
@@ -355,9 +357,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         }
 
         static bool sExtraFire = false;
-        bool const fireMissile = sExtraFire || gameState->autoFire || keyboard.is_key_pressed(ng::ScanCode_SPACE) ||
-            (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One) &&
-                ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).is_button_pressed(ng::game_controller_button::A));
+        bool const fireMissile = sExtraFire || gameState->autoFire || keyboard.is_key_pressed(ng::ScanCode_SPACE) || fireButtonPressed;
         if (fireMissile)
         {
             auto stepTime_ms = static_cast<decltype(aPhysicsStepTime)>(ng::game::chrono::to_milliseconds(ng::game::chrono::flicks{ aPhysicsStepTime }));
