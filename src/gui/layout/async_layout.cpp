@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/layout/async_layout.hpp>
 
 template <> neogfx::i_async_layout& services::start_service<neogfx::i_async_layout>()

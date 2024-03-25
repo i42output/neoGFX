@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/dialog/dialog.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 #include <neogfx/gui/widget/tab_page_container.hpp>
@@ -28,6 +29,7 @@
 #include <neogfx/gui/widget/drop_list.hpp>
 #include <neogfx/gui/widget/group_box.hpp>
 #include <neogfx/gui/widget/image_widget.hpp>
+#include <neogfx/gui/widget/text_edit.hpp>
 
 namespace neogfx
 {
@@ -41,7 +43,8 @@ namespace neogfx
     private:
         void init();
     private:
-        sink iSink;
+        sink iSink1;
+        sink iSink2;
         group_box iControllerSelectorGroupBox;
         drop_list iControllerSelector;
         tab_page_container<> iTabs;
@@ -52,5 +55,6 @@ namespace neogfx
         image_widget iSchematic;
         vertical_layout iLayout2;
         group_box iTestGroupBox;
+        text_edit iTestOutput;
     };
 }

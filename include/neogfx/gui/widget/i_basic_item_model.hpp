@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include "i_item_model.hpp"
 
 namespace neogfx

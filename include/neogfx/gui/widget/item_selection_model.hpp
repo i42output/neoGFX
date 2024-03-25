@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/scoped.hpp>
 #include <neolib/core/map.hpp>
+
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/widget/i_item_presentation_model.hpp>
 #include <neogfx/gui/widget/i_item_selection_model.hpp>

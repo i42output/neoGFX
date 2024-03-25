@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_enum.hpp>
+
 #include <neogfx/gui/layout/i_layout_item.hpp>
 
 namespace neogfx

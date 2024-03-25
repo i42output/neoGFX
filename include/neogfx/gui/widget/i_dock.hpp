@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_vector.hpp>
+
 #include <neogfx/gui/widget/i_skinnable_item.hpp>
 
 namespace neogfx

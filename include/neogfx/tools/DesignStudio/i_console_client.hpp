@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/i_terminal.hpp>
 
 namespace neogfx::DesignStudio

@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/scoped.hpp>
+
 #include <neogfx/gui/widget/menu_item.hpp>
 #include <neogfx/gui/widget/i_menu.hpp>
 

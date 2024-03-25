@@ -18,10 +18,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <fstream>
 #include <iostream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/format.hpp>
+
 #include <neolib/file/json.hpp>
 #include <neolib/app/application.hpp>
 
@@ -38,7 +40,7 @@ namespace neogfx::nrc
     };
     struct bad_usage : std::runtime_error { bad_usage() : std::runtime_error("Bad usage") {} };
 
-    void parse_ui(const boost::filesystem::path& aInputFilename, neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
+    void parse_ui(const std::filesystem::path& aInputFilename, neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_value& aItem, std::ofstream& aOutput)
     {
         auto const& ui = aItem.as<neolib::fjson_object>();
         auto ns = aNamespace + (ui.has("namespace") ? "_" + ui.at("namespace").text() : "");
@@ -86,7 +88,7 @@ int main(int argc, char* argv[])
             throw bad_usage();
         }
 
-        boost::filesystem::path const inputFileName{ files[0] };
+        std::filesystem::path const inputFileName{ files[0] };
         std::cout << "Resource meta file: " << inputFileName << std::endl;
         neolib::fjson const input{ inputFileName.string() };
         if (!input.has_root())

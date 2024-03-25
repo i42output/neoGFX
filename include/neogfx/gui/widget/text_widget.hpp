@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/i_text_widget.hpp>
 

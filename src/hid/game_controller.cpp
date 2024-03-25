@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/game_controller.hpp>
 #include <neogfx/hid/i_game_controllers.hpp>
 
@@ -90,7 +91,7 @@ namespace neogfx
 
     bool game_controller::is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const
     {
-        return iButtonState[aButtonOrdinal - 1u];
+        return iButtonState[aButtonOrdinal];
     }
 
     bool game_controller::is_button_pressed(game_controller_button aButton) const
@@ -143,6 +144,11 @@ namespace neogfx
         return iButtonMap.right.find(aButton) != iButtonMap.right.end();
     }
 
+    bool game_controller::button_mapped(game_controller_button_ordinal aButtonOrdinal) const
+    {
+        return iButtonMap.left.find(aButtonOrdinal) != iButtonMap.left.end();
+    }
+
     game_controller_button_ordinal game_controller::button_to_button_ordinal(game_controller_button aButton) const
     {
         auto existing = iButtonMap.right.find(aButton);
@@ -169,10 +175,19 @@ namespace neogfx
         if (iButtonState[aButtonOrdinal - 1u] != aIsPressed)
         {
             iButtonState[aButtonOrdinal - 1u] = aIsPressed;
+            auto const keyboardState = service<i_keyboard>().modifiers();
             if (aIsPressed)
-                ButtonPressed.trigger(button_ordinal_to_button(aButtonOrdinal), service<i_keyboard>().modifiers());
+            {
+                RawButtonPressed.trigger(aButtonOrdinal, keyboardState);
+                if (button_mapped(aButtonOrdinal))
+                    ButtonPressed.trigger(button_ordinal_to_button(aButtonOrdinal), keyboardState);
+            }
             else
-                ButtonReleased.trigger(button_ordinal_to_button(aButtonOrdinal), service<i_keyboard>().modifiers());
+            {
+                RawButtonReleased.trigger(aButtonOrdinal, keyboardState);
+                if (button_mapped(aButtonOrdinal))
+                    ButtonReleased.trigger(button_ordinal_to_button(aButtonOrdinal), keyboardState);
+            }
         }
     }
 
@@ -214,6 +229,15 @@ namespace neogfx
         {
             iRightThumbPosition = aPosition;
             RightThumbMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+        }
+    }
+
+    void game_controller::set_pov_position(game_controller_pov_ordinal aPov, const vec2& aPosition)
+    {
+        if (iPovPosition[aPov - 1u] != aPosition)
+        {
+            iPovPosition[aPov - 1u] = aPosition;
+            PovMoved.trigger(aPov, aPosition, service<i_keyboard>().modifiers());
         }
     }
 

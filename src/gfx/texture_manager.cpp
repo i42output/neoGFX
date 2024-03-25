@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/texture_manager.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>

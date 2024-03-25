@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx

@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <functional>
-#include <boost/pool/pool_alloc.hpp>
+
 #include <neolib/core/gap_vector.hpp>
 #include <neolib/core/jar.hpp>
+
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gui/window/context_menu.hpp>
@@ -278,10 +280,81 @@ namespace neogfx
             document_text::difference_type textLast;
             document_glyphs::difference_type glyphsFirst;
             document_glyphs::difference_type glyphsLast;
+
+            document_span operator+(document_span const& rhs) const
+            {
+                return { 
+                    textFirst + rhs.textFirst, textFirst + rhs.textFirst + (textLast - textFirst), 
+                    glyphsFirst + rhs.glyphsFirst, glyphsFirst + rhs.glyphsFirst + (glyphsLast - glyphsFirst) };
+            }
         };
 
-        struct glyph_paragraph;
+        struct glyph_paragraph
+        {
+            using column_breaks = neolib::vecarray<document_glyphs::difference_type, 4, -1>;
+            using line_breaks = neolib::vecarray<document_glyphs::difference_type, 8, -1>;
+            struct height_map_entry
+            {
+                document_glyphs::difference_type glyphIndex;
+                dimension height;
+            };
+            using height_map = neolib::vecarray<height_map_entry, 8, -1>;
+
+            text_edit* owner;
+            document_span span;
+            coordinate ypos;
+            mutable height_map heightMap;
+            column_breaks columnBreaks;
+            line_breaks lineBreaks;
+
+            std::size_t index() const
+            {
+                return std::distance(&*owner->iGlyphParagraphs.cbegin(), this);
+            }
+            document_text::difference_type text_begin_index() const
+            {
+                return span.textFirst;
+            }
+            document_text::difference_type text_end_index() const
+            {
+                return span.textLast;
+            }
+            document_text::const_iterator text_begin() const
+            {
+                return std::next(owner->iText.begin(), text_begin_index());
+            }
+            document_text::const_iterator text_end() const
+            {
+                return std::next(owner->iText.begin(), text_end_index());
+            }
+            document_glyphs::difference_type glyph_begin_index() const
+            {
+                return span.glyphsFirst;
+            }
+            document_glyphs::difference_type glyph_end_index() const
+            {
+                return span.glyphsLast;
+            }
+            document_glyphs::const_iterator glyph_begin() const
+            {
+                return std::next(owner->glyphs().begin(), glyph_begin_index());
+            }
+            document_glyphs::const_iterator glyph_end() const
+            {
+                return std::next(owner->glyphs().begin(), glyph_end_index());
+            }
+            dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const;
+        };
+
+        using glyph_paragraphs = neolib::gap_vector<glyph_paragraph, 16>;
+
         struct glyph_column;
+
+        struct paragraph_line_span
+        {
+            document_span paragraphSpan;
+            document_span lineSpan;
+        };
 
         struct glyph_line
         {
@@ -306,6 +379,22 @@ namespace neogfx
             {
                 return std::distance(&*column().lines.cbegin(), this);
             }
+            document_text::difference_type text_begin_index() const
+            {
+                return span.textFirst + paragraph().text_begin_index();
+            }
+            document_text::difference_type text_end_index() const
+            {
+                return span.textLast + paragraph().text_begin_index();
+            }
+            document_text::const_iterator text_begin() const
+            {
+                return std::next(owner->iText.begin(), text_begin_index());
+            }
+            document_text::const_iterator text_end() const
+            {
+                return std::next(owner->iText.begin(), text_end_index());
+            }
             document_glyphs::difference_type glyph_begin_index() const
             {
                 return span.glyphsFirst + paragraph().glyph_begin_index();
@@ -321,6 +410,13 @@ namespace neogfx
             document_glyphs::const_iterator glyph_end() const
             {
                 return std::next(owner->glyphs().begin(), glyph_end_index());
+            }
+            paragraph_line_span paragraph_span() const
+            {
+                paragraph_line_span result = { paragraph().span, span };
+                if (glyph_end() != owner->glyphs().end() && is_line_breaking_whitespace(*glyph_end()))
+                    ++result.lineSpan.glyphsLast;
+                return result;
             }
             coordinate ypos() const
             {
@@ -341,48 +437,6 @@ namespace neogfx
             }
         };
         using glyph_columns = neolib::vecarray<glyph_column, 4, -1>;
-
-        struct glyph_paragraph
-        {
-            using column_breaks = neolib::vecarray<document_glyphs::difference_type, 4, -1>;
-            using line_breaks = neolib::vecarray<document_glyphs::difference_type, 8, -1>;
-            struct height_map_entry
-            {
-                document_glyphs::difference_type glyphIndex;
-                dimension height;
-            };
-            using height_map = neolib::vecarray<height_map_entry, 8, -1>;
-
-            text_edit* owner;
-            document_span span;
-            coordinate ypos;
-            mutable height_map heightMap;
-            column_breaks columnBreaks;
-            line_breaks lineBreaks;
-
-            std::size_t index() const
-            {
-                return std::distance(&*owner->iGlyphParagraphs.cbegin(), this);
-            }
-            document_glyphs::difference_type glyph_begin_index() const
-            {
-                return span.glyphsFirst;
-            }
-            document_glyphs::difference_type glyph_end_index() const
-            {
-                return span.glyphsLast;
-            }
-            document_glyphs::const_iterator glyph_begin() const
-            {
-                return std::next(owner->glyphs().begin(), glyph_begin_index());
-            }
-            document_glyphs::const_iterator glyph_end() const
-            {
-                return std::next(owner->glyphs().begin(), glyph_end_index());
-            }
-            dimension height(document_glyphs::iterator aStart, document_glyphs::iterator aEnd) const;
-        };
-        using glyph_paragraphs = neolib::gap_vector<glyph_paragraph, 16>;
 
         struct position_info;
 
@@ -561,7 +615,7 @@ namespace neogfx
         void notify_text_changed();
         std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
         bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
-        glyph_paragraphs::const_iterator character_to_paragraph(position_type aCharacterPos) const;
+        paragraph_line_span character_to_line(position_type aCharacterPos) const;
         glyph_paragraphs::const_iterator glyph_to_paragraph(position_type aGlyphPos) const;
         document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;
         std::pair<document_text::size_type, document_text::size_type> from_glyph(document_glyphs::const_iterator aWhere) const;
@@ -573,6 +627,7 @@ namespace neogfx
         void animate();
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
+        document_glyphs::difference_type glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         void make_visible(position_info const& aGlyphPosition, point const& aPreview = {});
         style glyph_style(document_glyphs::const_iterator aGlyphChar, const document_column& aColumn) const;
         void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;

@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
 #include <unordered_map>
 #include <optional>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_image.hpp>
 

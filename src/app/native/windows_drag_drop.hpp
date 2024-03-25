@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
+#include <Ole2.h>
+
 #include <neogfx/app/drag_drop.hpp>
 #include "windows_com.hpp"
-#include <Ole2.h>
 
 namespace neogfx
 {

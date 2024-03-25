@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/skin_manager.hpp>
 
 template<> neogfx::i_skin_manager& services::start_service<neogfx::i_skin_manager>() { return neogfx::skin_manager::instance(); }

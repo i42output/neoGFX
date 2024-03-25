@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/gradient_manager.hpp>
 

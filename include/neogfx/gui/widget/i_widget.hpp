@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_vector.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/hid/mouse.hpp>

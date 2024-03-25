@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/i_event.hpp>
 #include <neogfx/gui/widget/i_skin.hpp>
 

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/button.hpp>
 #include <neogfx/gui/widget/i_push_button.hpp>
 

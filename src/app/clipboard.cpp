@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/clipboard.hpp>
 #include "native/i_native_clipboard.hpp"
 

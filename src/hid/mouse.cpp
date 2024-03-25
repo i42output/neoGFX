@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/mouse.hpp>
 
 namespace neogfx

@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-#include <neogfx/gfx/i_vertex_provider.hpp>
+
 #include <neolib/ecs/ecs.hpp>
+
+#include <neogfx/gfx/i_vertex_provider.hpp>
 
 namespace neogfx
 {

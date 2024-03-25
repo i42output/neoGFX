@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include "opengl_texture_manager.hpp"
 #include "opengl_texture.hpp"
 

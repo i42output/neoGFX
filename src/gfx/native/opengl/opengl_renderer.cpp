@@ -19,7 +19,6 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <boost/filesystem.hpp>
 #ifdef _WIN32
 #include <ShellScalingApi.h>
 #include <D2d1.h>

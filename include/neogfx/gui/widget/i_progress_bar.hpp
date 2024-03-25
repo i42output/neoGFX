@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/widget/i_text_widget.hpp>
 

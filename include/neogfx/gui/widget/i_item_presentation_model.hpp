@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/format.hpp>
+
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/text/font.hpp>
@@ -251,6 +253,7 @@ namespace neogfx
         virtual ~i_item_presentation_model() = default;
     public:
         virtual bool attached() const = 0;
+        virtual bool attached_to(i_widget& aWidget) const = 0;
         virtual i_widget& attachment() const = 0;
         virtual void attach(i_ref_ptr<i_widget> const& aWidget) = 0;
         virtual void detach() = 0;

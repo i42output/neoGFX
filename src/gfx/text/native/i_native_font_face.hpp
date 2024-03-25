@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_reference_counted.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/font.hpp>
 

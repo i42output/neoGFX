@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <boost/lexical_cast.hpp>
+
 #include <video_poker/video_poker.hpp>
 
 #include <neogfx/gui/dialog/message_box.hpp>

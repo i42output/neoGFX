@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/core/async_task.hpp>
 

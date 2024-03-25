@@ -18,13 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
+
+#include <filesystem>
 #include <boost/format.hpp>
 
 #include "ui_parser.hpp"
 
 namespace neogfx::nrc
 {
-    ui_parser::ui_parser(const boost::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput) :
+    ui_parser::ui_parser(const std::filesystem::path& aInputFilename, const neolib::i_plugin_manager& aPluginManager, const neolib::fjson_string& aNamespace, const neolib::fjson_object& aRoot, std::ofstream& aOutput) :
         iInputFilename{ aInputFilename }, iRoot{ aRoot }, iOutput{ aOutput }, iNamespace{ aNamespace }, iCurrentNode{ nullptr }, iCurrentFragment{ nullptr }, iAnonymousIdCounter{ 0u }
     {
         for (auto const& plugin : aPluginManager.plugins())
@@ -133,7 +135,7 @@ namespace neogfx::nrc
 
     void ui_parser::do_source_location(neolib::i_string& aLocation) const
     {
-        auto const& absolutePath = boost::filesystem::absolute(iInputFilename).string();
+        auto const& absolutePath = std::filesystem::absolute(iInputFilename).string();
         if (iCurrentNode != nullptr)
         {
             auto const& location = iCurrentNode->document_source_location();

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/tab_page_container.ipp>
 #include <neogfx/gui/widget/scrollable_widget.ipp>
 #include <neogfx/gui/mvc/view_container.hpp>

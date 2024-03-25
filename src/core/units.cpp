@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
+
 #include <neogfx/core/units.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 

@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/vertex_shader.hpp>
 #include "standard.vert.hpp"
 #include "standard-texture.vert.hpp"

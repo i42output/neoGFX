@@ -20,9 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
 #include <ranges>
+
 #include <neolib/core/variant.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/path.hpp>
@@ -259,7 +262,7 @@ namespace neogfx
         struct draw_entities
         {
             game::i_ecs& ecs;
-            int32_t layer;
+            game::scene_layer layer;
             mat44 transformation;
         };
 

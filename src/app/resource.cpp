@@ -18,9 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <sstream>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <openssl/sha.h>
+
 #include <neolib/io/uri.hpp>
 #include <neolib/file/zip.hpp>
 #include <neogfx/app/resource.hpp>
@@ -35,7 +37,7 @@ namespace neogfx
         {
             if (uri.fragment().empty()) // individual asset file
             { 
-                iData.resize(static_cast<std::size_t>(boost::filesystem::file_size(uri.path())));
+                iData.resize(static_cast<std::size_t>(std::filesystem::file_size(uri.path())));
                 std::ifstream input(uri.path(), std::ios::binary | std::ios::in);
                 input.read(reinterpret_cast<char*>(data()), iData.size());
                 iSize = iData.size();

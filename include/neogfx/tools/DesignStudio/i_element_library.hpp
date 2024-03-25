@@ -20,12 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/i_vector.hpp>
 #include <neolib/core/i_set.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/plugin/i_plugin.hpp>
 #include <neolib/app/i_application.hpp>
+
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/tools/DesignStudio/i_ide.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <memory>
 #ifdef _WIN32
 #pragma warning( push )
@@ -30,6 +31,7 @@
 #pragma warning( pop )
 #endif
 #include <optional>
+
 #include <neogfx/core/primitives.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
@@ -51,7 +53,7 @@ namespace neogfx
 
     class i_graphics_context;
 
-    typedef int32_t layer_t;
+    using layer_t = std::int32_t;
     layer_t constexpr LayerWidget       = 0x00000000u;
     layer_t constexpr LayerNestedWindow = 0x10000000u;
 
@@ -223,7 +225,7 @@ namespace neogfx
         virtual void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const = 0;
         virtual void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_entities(game::i_ecs& aEcs, int32_t aLayer = 0) const = 0;
+        virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) const = 0;
         virtual void draw_focus_rect(rect const& aRect) const = 0;
         // text
     public:

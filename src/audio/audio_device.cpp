@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/audio_device.hpp>
 
 #ifdef _WIN32

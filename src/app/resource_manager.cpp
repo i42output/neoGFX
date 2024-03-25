@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/io/uri.hpp>
 #include <neogfx/app/resource_manager.hpp>
 #include <neogfx/app/module_resource.hpp>

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/layout/i_anchorable.hpp>
 
 namespace neogfx

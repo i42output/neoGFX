@@ -20,10 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/i_set.hpp>
 #include <neolib/core/i_string.hpp>
 #include <neolib/plugin/i_plugin.hpp>
+
 #include <neogfx/tools/nrc/i_ui_element.hpp>
 
 namespace neogfx::nrc

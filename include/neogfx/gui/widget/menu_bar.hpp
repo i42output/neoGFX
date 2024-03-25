@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/layout/flow_layout.hpp>
 #include "widget.hpp"
 #include "menu.hpp"

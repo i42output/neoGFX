@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_optional.hpp>
 #include <neolib/core/i_vector.hpp>
 #include <neolib/plugin/i_plugin_variant.hpp>
+
 #include <neogfx/core/numerical.hpp>
 
 namespace neogfx

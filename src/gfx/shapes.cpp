@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/vecarray.hpp>
+
 #include <neogfx/gfx/shapes.hpp>
 
 namespace neogfx

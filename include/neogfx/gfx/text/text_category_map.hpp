@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include "i_emoji_atlas.hpp"
 
@@ -2005,7 +2006,10 @@ namespace neogfx
         if (aCodePoint != aCodePointEnd)
         {
             if (*aCodePoint != U'\r' && *aCodePoint != U'\n' && aLineDirection && aLineDirection.value() == text_direction::RTL)
-                return text_direction::RTL;
+            {
+                if (get_text_category(aEmojiAtlas, aCodePoint, aCodePointEnd) != text_category::LTR)
+                    return text_direction::RTL;
+            }
             auto nextCodePoint = aCodePoint;
             while (nextCodePoint != aCodePointEnd)
             {
@@ -2015,8 +2019,12 @@ namespace neogfx
                     return text_direction::LTR;
                 case text_category::RTL:
                     return text_direction::RTL;
-                case text_category::Whitespace:
                 case text_category::Mark:
+                    if (aCurrentDirection)
+                        return aCurrentDirection.value();
+                    break;
+                case text_category::Whitespace:
+                case text_category::None:
                     if (aCurrentDirection && aCurrentDirection.value() == text_direction::LTR)
                         return text_direction::LTR;
                     break;
@@ -2026,7 +2034,7 @@ namespace neogfx
                 ++nextCodePoint;
             }
         }
-        return aCurrentDirection ? aCurrentDirection.value() : text_direction::LTR;
+        return aCurrentDirection ? aCurrentDirection.value() : aLineDirection ? aLineDirection.value() : text_direction::LTR;
     }
 
     inline text_direction get_text_direction(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint, std::optional<text_direction> aLineDirection = std::nullopt, std::optional<text_direction> aCurrentDirection = std::nullopt)

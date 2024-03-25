@@ -20,10 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <set>
+
 #include <neolib/core/jar.hpp>
 #include <neolib/core/string_ci.hpp>
+
 #include <neogfx/gfx/texture_atlas.hpp>
 #include <neogfx/gfx/text/emoji_atlas.hpp>
 #include <neogfx/gfx/text/i_font_manager.hpp>

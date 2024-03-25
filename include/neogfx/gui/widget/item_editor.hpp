@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include "text_edit.hpp"
 #include "line_edit.hpp"
 #include "spin_box.hpp"

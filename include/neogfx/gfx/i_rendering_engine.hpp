@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gui/window/window_bits.hpp>

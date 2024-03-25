@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_image.hpp>
 #include <neogfx/gfx/i_sub_texture.hpp>
 

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/object.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include <neogfx/hid/i_surface_window.hpp>

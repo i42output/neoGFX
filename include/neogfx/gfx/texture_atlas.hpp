@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <set>
 #include <tuple>
+
 #include "i_texture_atlas.hpp"
 #include "i_texture_manager.hpp"
 #include "texture.hpp"

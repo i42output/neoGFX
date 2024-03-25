@@ -18,8 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <boost/algorithm/string.hpp> 
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
@@ -87,15 +89,15 @@ namespace neogfx
         auto aw = sAbbreviatedWeightMap.find(key);
         if (aw != sAbbreviatedWeightMap.end())
             return aw->second;
-        std::optional<decltype(sWeightMap)::value_type*> match;
-        for (auto& wme : sWeightMap)
+        decltype(sWeightMap)::value_type const* match = nullptr;
+        for (auto const& wme : sWeightMap)
             if (key.find(wme.first) != std::string::npos)
             {
-                if (match == std::nullopt || (**match).first.size() < wme.first.size())
+                if (match == nullptr || match->first.size() < wme.first.size())
                     match = &wme;
             }
-        if (match != std::nullopt)
-            return (**match).second;
+        if (match != nullptr)
+            return match->second;
         return aUnknownAsRegular ? font_weight::Regular : font_weight::Unknown;
     }
 
@@ -614,12 +616,16 @@ namespace neogfx
 
     bool font::operator==(const font& aRhs) const
     {
-        return iInstance == aRhs.iInstance;
+        if (iInstance == aRhs.iInstance)
+            return true;
+        return info() == aRhs.info();
     }
 
-    std::strong_ordering font::operator<=>(const font& aRhs) const
+    std::partial_ordering font::operator<=>(const font& aRhs) const
     {
-        return iInstance <=> aRhs.iInstance;
+        if (iInstance == aRhs.iInstance)
+            return iInstance <=> aRhs.iInstance;
+        return info() <=> aRhs.info();
     }
 
     i_native_font_face& font::native_font_face() const

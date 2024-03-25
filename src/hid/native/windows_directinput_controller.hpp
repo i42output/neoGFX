@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <d3d11_1.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #pragma comment(lib, "dinput8.lib")
+
 #include <neogfx/hid/game_controller.hpp>
 
 namespace neogfx
@@ -32,6 +34,8 @@ namespace neogfx
     {
         class directinput_controller : public game_controller
         {
+        public:
+            struct failed_to_initialise : std::runtime_error { failed_to_initialise() : std::runtime_error("neogfx::native::windows::directinput_controller::failed_to_initialise") {} };
         public:
             directinput_controller(IDirectInputDevice8* aDevice, hid_device_subclass aSubclass, const hid_device_uuid& aProductId, const hid_device_uuid& aInstanceId);
             ~directinput_controller();

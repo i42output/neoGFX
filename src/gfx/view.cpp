@@ -43,9 +43,8 @@
 //
 ////////////////////////////////////////////////////////////
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/view.hpp>
 
 namespace neogfx

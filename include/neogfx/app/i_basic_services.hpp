@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/async_task.hpp>
 #include <neogfx/core/primitives.hpp>
 
@@ -29,12 +30,28 @@ namespace neogfx
     class i_native_clipboard;
     class i_shared_menu_bar;
 
-    enum class platform
+    enum class platform : std::uint32_t
     {
+        Unknown,
         Windows,
-        Mac,
-        Kde,
-        Gnome
+        macOS,
+        Linux,
+        Android,
+        iOS
+    };
+
+    enum class windowing_system : std::uint32_t
+    {
+        Native,
+        Wayland,
+        X11
+    };
+
+    enum class environment : std::uint32_t
+    {
+        Native,
+        Gnome,
+        Kde
     };
 
     class i_basic_services : public i_service
@@ -46,7 +63,10 @@ namespace neogfx
         virtual ~i_basic_services() = default;
     public:
         virtual neogfx::platform platform() const = 0;
+        virtual neogfx::windowing_system windowing_system() const = 0;
+        virtual neogfx::environment environment() const = 0;
         virtual i_async_task& app_task() = 0;
+        virtual void* helper_window_handle() const = 0;
         virtual void system_beep() = 0;
         virtual void display_error_dialog(std::string const& aTitle, std::string const& aMessage, void* aParentWindowHandle = 0) const = 0;
         virtual uint32_t display_count() const = 0;

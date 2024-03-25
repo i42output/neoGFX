@@ -20,8 +20,10 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/pair.hpp>
 #include <neolib/app/settings.hpp>
+
 #include <neogfx/gfx/i_texture.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/text/font.hpp>

@@ -20,12 +20,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <algorithm>
-#include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
+
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/optional.hpp>
 #include <neolib/core/vector.hpp>
 #include <neolib/core/string.hpp>
+
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>

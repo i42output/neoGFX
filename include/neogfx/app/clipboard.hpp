@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include "i_clipboard.hpp"
 
 namespace neogfx

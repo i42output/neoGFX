@@ -20,12 +20,15 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
 #include <tuple>
-#include <neolib/core/variant.hpp>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include <harfbuzz/hb.h>
+
+#include <neolib/core/variant.hpp>
+
 #include "i_native_font.hpp"
 #include "i_native_font_face.hpp"
 

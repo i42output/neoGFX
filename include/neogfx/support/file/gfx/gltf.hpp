@@ -20,10 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
 #include <variant>
 #include <optional>
 #include <string>
+
 #include <neogfx/core/numerical.hpp>
 
 namespace neogfx::file

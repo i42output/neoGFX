@@ -20,9 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/jar.hpp>
 #include <neolib/core/variant.hpp>
 #include <neolib/app/i_settings.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 
 namespace neogfx
@@ -293,7 +295,7 @@ namespace neogfx
         const i_glyph& glyph(const glyph_char& aGlyphChar) const;
     public:
         bool operator==(const font& aRhs) const;
-        std::strong_ordering operator<=>(const font& aRhs) const;
+        std::partial_ordering operator<=>(const font& aRhs) const;
     public:
         i_native_font_face& native_font_face() const;
         // attributes

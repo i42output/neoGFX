@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/tools/DesignStudio/i_console_client.hpp>
 
 namespace neogfx::DesignStudio

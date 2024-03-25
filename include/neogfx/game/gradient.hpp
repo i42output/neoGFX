@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
 

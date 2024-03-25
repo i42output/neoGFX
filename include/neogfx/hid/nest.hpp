@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <set>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_nest.hpp>
 

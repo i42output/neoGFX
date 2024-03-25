@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/format.hpp>
+
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/tools/DesignStudio/i_element.hpp>

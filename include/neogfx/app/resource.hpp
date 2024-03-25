@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <optional>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/app/i_resource.hpp>
 #include <neogfx/app/i_resource_manager.hpp>
@@ -33,7 +35,7 @@ namespace neogfx
         define_declared_event(Downloaded, downloaded)
         define_declared_event(FailedToDownload, failed_to_download)
     public:
-        typedef neolib::vector<uint8_t> data_type;
+        typedef neolib::vector<std::uint8_t> data_type;
         typedef data_type hash_digest_type;
     public:
         resource() = delete;

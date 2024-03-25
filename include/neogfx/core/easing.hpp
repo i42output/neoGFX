@@ -35,6 +35,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/numerical.hpp>
 
 namespace neogfx

@@ -20,8 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_set>
-#include <boost/pool/pool_alloc.hpp>
+
 #include <neogfx/gui/widget/i_skin.hpp>
 
 namespace neogfx

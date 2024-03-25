@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <sstream>
 #include <filesystem>
 #include <boost/property_tree/ptree.hpp>

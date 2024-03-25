@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_vector.hpp>
+
 #include <neogfx/hid/i_hid_device.hpp>
 
 namespace neogfx

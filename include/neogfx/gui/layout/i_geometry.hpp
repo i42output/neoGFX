@@ -20,8 +20,11 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <iostream>
+
 #include <neolib/core/i_enum.hpp>
+
 #include <neogfx/core/units.hpp>
 
 namespace neogfx

@@ -413,7 +413,7 @@ namespace neogfx
     {
         base_type::set_padding(neogfx::padding{});
         iContainerLayout.set_padding(neogfx::padding{});
-        if ((tab_container_style() & neogfx::tab_container_style::ResizeToTabs) == neogfx::tab_container_style::ResizeToTabs)
+        if ((tab_container_style() & neogfx::tab_container_style::ResizeToPages) == neogfx::tab_container_style::ResizeToPages)
             page_layout().parent_layout().set_minimum_size({});
         update_tab_bar_placement();
 

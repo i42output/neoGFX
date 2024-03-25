@@ -18,8 +18,11 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <vulkan/vk_enum_string_helper.h>
+
 #include <neolib/core/string_utils.hpp>
+
 #include "vulkan_error.hpp"
 
 namespace neogfx

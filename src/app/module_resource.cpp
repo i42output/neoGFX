@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <openssl/sha.h>
+
 #include <neogfx/app/module_resource.hpp>
 
 namespace neogfx

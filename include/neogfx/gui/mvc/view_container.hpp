@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>

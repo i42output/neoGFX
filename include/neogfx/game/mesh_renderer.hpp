@@ -20,8 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/uuid.hpp>
 #include <neolib/core/string.hpp>
+
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/game/ecs_ids.hpp>
 #include <neogfx/game/material.hpp>

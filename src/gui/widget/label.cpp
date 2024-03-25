@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/text_widget.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>

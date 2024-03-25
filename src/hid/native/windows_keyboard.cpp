@@ -38,9 +38,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>

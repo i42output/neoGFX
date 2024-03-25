@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/map.hpp>
 #include <neolib/core/i_string.hpp>
 

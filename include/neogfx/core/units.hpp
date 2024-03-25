@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/app/i_shared_thread_local.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/core/device_metrics.hpp>
 

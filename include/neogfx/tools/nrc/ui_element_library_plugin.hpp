@@ -20,11 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/dll.hpp>
+
 #include <neolib/core/string.hpp>
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/app/version.hpp>
 #include <neolib/app/i_application.hpp>
+
 #include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/tools/nrc/i_ui_element_library.hpp>
 

@@ -17,9 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/game/renderable_entity_archetype.hpp>
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/mesh_renderer.hpp>

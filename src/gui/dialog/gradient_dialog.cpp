@@ -17,6 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <boost/lexical_cast.hpp>
+
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/task/thread.hpp>

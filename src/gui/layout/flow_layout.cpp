@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/layout/flow_layout.hpp>

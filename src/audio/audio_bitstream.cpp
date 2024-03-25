@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/audio_bitstream.ipp>
 #include <neogfx/audio/i_audio_waveform.hpp>
 #include <neogfx/audio/i_audio_instrument.hpp>

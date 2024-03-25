@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/game/i_ecs.hpp>
@@ -321,7 +322,7 @@ namespace neogfx
         void draw_path(const path& aPath, const pen& aPen);
         void draw_shapes(const graphics_operation::batch& aDrawShapeOps);
         void draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen);
-        void draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation);
+        void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation);
         void fill_path(const path& aPath, const brush& aFill);
         void fill_shape(const game::mesh& aMesh, const vec3& aPosition, const brush& aFill);
         void draw_glyphs(const graphics_operation::batch& aDrawGlyphOps);

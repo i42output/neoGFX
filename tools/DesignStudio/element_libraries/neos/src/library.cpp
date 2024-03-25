@@ -18,8 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <boost/range/iterator_range.hpp>
+
+#include <boost/lexical_cast.hpp>
+
 #include <neolib/core/string_ci.hpp>
+
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/utility.hpp>
 #include <neogfx/tools/DesignStudio/i_project.hpp>

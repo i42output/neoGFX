@@ -18,6 +18,7 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/mesh_renderer.hpp>
@@ -144,31 +145,31 @@ namespace neogfx::game
         }
     }
 
-    int32_t canvas::layers()
+    scene_layer canvas::layers()
     {
-        return static_cast<int32_t>(iLayers.size());
+        return static_cast<scene_layer>(iLayers.size());
     }
 
-    void canvas::set_layers(int32_t aLayers)
+    void canvas::set_layers(scene_layer aLayers)
     {
         iLayers.resize(aLayers, true);
     }
 
-    bool canvas::layer_visible(int32_t aLayer) const
+    bool canvas::layer_visible(scene_layer aLayer) const
     {
         if (aLayer >= iLayers.size())
             throw invalid_layer();
         return iLayers[aLayer];
     }
 
-    void canvas::show_layer(int32_t aLayer)
+    void canvas::show_layer(scene_layer aLayer)
     {
         if (aLayer >= iLayers.size())
             throw invalid_layer();
         iLayers[aLayer] = true;
     }
 
-    void canvas::hide_layer(int32_t aLayer)
+    void canvas::hide_layer(scene_layer aLayer)
     {
         if (aLayer >= iLayers.size())
             throw invalid_layer();
@@ -247,7 +248,7 @@ namespace neogfx::game
             if (have_ecs() && ecs().component_registered<mesh_renderer>())
             {
                 scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
-                for (int32_t layer = 1; layer < layers(); ++layer)
+                for (scene_layer layer = 1; layer < layers(); ++layer)
                 {
                     if (!layer_visible(layer))
                         continue;

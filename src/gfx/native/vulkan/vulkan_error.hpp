@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vulkan/vulkan.hpp>
 
 namespace neogfx

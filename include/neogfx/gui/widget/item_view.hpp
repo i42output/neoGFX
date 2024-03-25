@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/easing.hpp>
 #include <neogfx/app/drag_drop.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>

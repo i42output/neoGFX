@@ -18,13 +18,16 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <sstream>
 #include <filesystem>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+
 #include <neolib/core/string_utils.hpp>
 #include <neolib/file/file.hpp>
 #include <neolib/file/zip.hpp>
+
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/text/emoji_atlas.hpp>
 
@@ -55,7 +58,7 @@ namespace neogfx
                         {
                             std::u32string codePoints;
                             std::vector<std::string> hexCodePoints;
-                            auto filename = boost::filesystem::path(filePath).stem().string();
+                            auto filename = std::filesystem::path(filePath).stem().string();
                             if (filename.size() <= prefix.size() || (!prefix.empty() && filename.find(prefix) != 0))
                                 continue;
                             neolib::tokens(filename.substr(prefix.size()), separator, hexCodePoints);

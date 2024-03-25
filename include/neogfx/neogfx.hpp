@@ -41,6 +41,7 @@ using namespace boost::multiprecision;
 #include <neolib/task/i_async_task.hpp>
 #include <neolib/app/services.hpp>
 #include <neolib/app/logger.hpp>
+
 #include <neogfx/app/i18n.hpp>
 
 namespace services = neolib::services;

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/core/i_event.hpp>
 
 namespace neogfx
@@ -32,7 +33,7 @@ namespace neogfx
     public:
         typedef i_resource abstract_type;
     public:
-        typedef neolib::i_vector<uint8_t> data_type;
+        typedef neolib::i_vector<std::uint8_t> data_type;
         typedef data_type hash_digest_type;
     public:
         struct not_available : std::logic_error { not_available() : std::logic_error("neogfx::i_resource::not_available") {} };

@@ -18,7 +18,9 @@
 */
 
 #include <neogfx/neogfx.hpp>
+
 #include <chrono>
+
 #include <neogfx/audio/audio_primitives.hpp>
 
 #pragma once

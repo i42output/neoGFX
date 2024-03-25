@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gui/window/window.hpp>
 #include <neogfx/gui/widget/list_view.hpp>
 #include <neogfx/gui/widget/item_presentation_model.hpp>

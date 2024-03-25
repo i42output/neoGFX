@@ -20,11 +20,14 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <optional>
+
 #include <neolib/core/allocator.hpp>
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/jar.hpp>
 #include <neolib/core/string_ci.hpp>
+
 #include <neogfx/core/geometrical.hpp>
 #include <neogfx/gfx/text/glyph.hpp>
 #include <neogfx/gfx/text/font.hpp>

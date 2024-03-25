@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <map>
+
 #include "i_native_texture.hpp"
 
 namespace neogfx

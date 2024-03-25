@@ -18,9 +18,10 @@
 */
 
 #include <neogfx/neogfx.hpp>
-#include <boost/math/constants/constants.hpp>
+
 #include <neolib/core/thread_local.hpp>
 #include <neolib/app/i_power.hpp>
+
 #include <neogfx/app/i_basic_services.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
@@ -1481,14 +1482,14 @@ namespace neogfx
                 function });
     }
 
-    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, int32_t aLayer, const mat44& aTransformation)
+    void opengl_rendering_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
         thread_local std::vector<std::vector<mesh_drawable>> drawables;
-        thread_local int32_t maxLayer = 0;
+        thread_local game::scene_layer maxLayer = 0;
         thread_local optional_ecs_render_lock lock;
 
         if (drawables.size() <= aLayer)

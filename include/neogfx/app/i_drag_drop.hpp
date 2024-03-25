@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neolib/core/i_vector.hpp>
+
 #include <neogfx/core/event.hpp>
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>

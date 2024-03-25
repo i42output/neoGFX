@@ -20,11 +20,13 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <vector>
 #include <memory>
 #include <variant>
 #include <optional>
 #include <string>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/core/units.hpp>
 

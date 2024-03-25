@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/i_shader_program.hpp>
 #include <neogfx/gfx/i_vertex_shader.hpp>
 #include <neogfx/gfx/i_fragment_shader.hpp>

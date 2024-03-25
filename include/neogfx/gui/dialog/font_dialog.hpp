@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/text/glyph_text.hpp>
 #include <neogfx/gui/dialog/dialog.hpp>

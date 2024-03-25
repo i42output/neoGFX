@@ -17,8 +17,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#pragma once
-
 #include <neogfx/tools/DesignStudio/DesignStudio.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/tools/DesignStudio/Settings.hpp>

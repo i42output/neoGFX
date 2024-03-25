@@ -20,9 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <boost/pool/pool_alloc.hpp>
+
 #include <neolib/core/vecarray.hpp>
 #include <neolib/core/lifetime.hpp>
+
 #include <neogfx/core/numerical.hpp>
 #include <neogfx/game/i_ecs.hpp>
 #include <neogfx/game/entity_info.hpp>

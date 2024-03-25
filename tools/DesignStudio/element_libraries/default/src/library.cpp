@@ -18,8 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <neogfx/neogfx.hpp>
-#include <boost/range/iterator_range.hpp>
+
 #include <neolib/core/string_ci.hpp>
+
 #include <neogfx/app/app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/gui/window/window.hpp>

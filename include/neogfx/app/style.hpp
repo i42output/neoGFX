@@ -20,7 +20,9 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <unordered_map>
+
 #include "i_style.hpp"
 #include "palette.hpp"
 
