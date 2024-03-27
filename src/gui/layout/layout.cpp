@@ -532,7 +532,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << std::endl;
 #endif
         if (!iEnabled)
             return;
@@ -545,7 +545,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::validate()" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::validate()" << std::endl;
 #endif
         if (!iInvalidated)
             return;
@@ -563,7 +563,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << std::endl;
 #endif
         if (has_size_policy())
             return base_type::size_policy();
@@ -694,7 +694,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         {
             auto& item = **aItem;

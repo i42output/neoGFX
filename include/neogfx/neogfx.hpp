@@ -124,9 +124,6 @@ namespace neogfx
     using neolib::operator<<;
     using neolib::operator>>;
 
-    using neolib::logger::endl;
-    using neolib::logger::flush;
-
     // convert strings with different traits and/or character types to neolib::string
     template <typename CharT, typename Traits, typename Allocator>
     inline const string to_string(const std::basic_string<CharT, Traits, Allocator>& aString)

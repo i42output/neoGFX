@@ -50,7 +50,7 @@ namespace neogfx
             std::string errorMessage = "An internal Vulkan call failed in " +
                 fileString.substr(fileString.find_last_of("\\/") + 1) + " (" + neolib::uint32_to_string<char>(line) + ") : " +
                 error;
-            service<neogfx::debug::logger>() << "neogfx (Vulkan): " << errorMessage << neogfx::endl;
+            service<neogfx::debug::logger>() << "neogfx (Vulkan): " << errorMessage << std::endl;
             throw vk_error(errorMessage);
         }
 

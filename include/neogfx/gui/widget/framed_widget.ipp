@@ -37,7 +37,7 @@ namespace neogfx
         if (debug::renderItem == this)
         {
             aGc.flush();
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << std::endl;
         }
 #endif // NEOGFX_DEBUG
 

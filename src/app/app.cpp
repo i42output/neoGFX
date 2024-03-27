@@ -325,13 +325,13 @@ namespace neogfx
     }
     catch (std::exception& e)
     {
-        service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with exception: " << e.what() << endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
         service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), std::string("main: terminating with exception: ") + e.what());
         throw;
     }
     catch (...)
     {
-        service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with unknown exception" << endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with unknown exception" << std::endl;
         service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), "main: terminating with unknown exception");
         throw;
     }
@@ -395,14 +395,14 @@ namespace neogfx
         catch (std::exception& e)
         {
             thread().halt();
-            service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with exception: " << e.what() << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
             std::exit(EXIT_FAILURE);
         }
         catch (...)
         {
             thread().halt();
-            service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with unknown exception" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with unknown exception" << std::endl;
             service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
             std::exit(EXIT_FAILURE);
         }
@@ -806,7 +806,7 @@ namespace neogfx
             if (!thread().halted())
             {
                 thread().halt();
-                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with exception: " << e.what() << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with exception: " << e.what() << std::endl;
                 service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
                 std::exit(EXIT_FAILURE);
             }
@@ -816,7 +816,7 @@ namespace neogfx
             if (!thread().halted())
             {
                 thread().halt();
-                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with unknown exception" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with unknown exception" << std::endl;
                 service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
                 std::exit(EXIT_FAILURE);
             }

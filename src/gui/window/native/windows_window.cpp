@@ -788,7 +788,7 @@ namespace neogfx
             scoped_units su{ self.surface_window().as_widget(), units::Pixels};
 #ifdef NEOGFX_DEBUG
             if (debug::item == &self)
-                service<debug::logger>() << neolib::logger::severity::Debug << typeid(self).name() << ": Windows message (0x" << std::hex << msg << ")" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(self).name() << ": Windows message (0x" << std::hex << msg << ")" << std::endl;
 #endif
             LRESULT result = 0;
             bool const CUSTOM_DECORATION = (self.surface_window().style() & window_style::TitleBar) == window_style::TitleBar;

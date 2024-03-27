@@ -101,10 +101,10 @@ namespace neogfx
 
     void opengl_renderer::initialize()
     {
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL vendor: " << reinterpret_cast<const char*>(glGetString(GL_VENDOR)) << endl;
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << endl;
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << endl;
-        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL vendor: " << reinterpret_cast<const char*>(glGetString(GL_VENDOR)) << std::endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << std::endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
+        service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
 
         iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_shader_program>().as<i_shader_program>()).as<i_standard_shader_program>();
     }

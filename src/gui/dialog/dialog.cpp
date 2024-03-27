@@ -181,7 +181,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::item == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::exec()" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::exec()" << std::endl;
 #endif
 
         if (!iButtonBox)

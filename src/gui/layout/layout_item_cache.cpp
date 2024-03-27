@@ -323,7 +323,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::size_policy()" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::size_policy()" << std::endl;
 #endif // NEOGFX_DEBUG
         auto& cachedSizePolicy = iSizePolicy.second;
         if (iSizePolicy.first != global_layout_id())
@@ -333,7 +333,7 @@ namespace neogfx
         }
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::size_policy() -> " << cachedSizePolicy << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::size_policy() -> " << cachedSizePolicy << std::endl;
 #endif // NEOGFX_DEBUG
         return cachedSizePolicy;
     }
@@ -352,7 +352,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::weight()" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::weight()" << std::endl;
 #endif // NEOGFX_DEBUG
         auto& cachedWeight = iWeight.second;
         if (iWeight.first != global_layout_id())
@@ -362,7 +362,7 @@ namespace neogfx
         }
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::weight() -> " << cachedWeight << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::weight() -> " << cachedWeight << std::endl;
 #endif // NEOGFX_DEBUG
         return cachedWeight;
     }
@@ -386,7 +386,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size{};
@@ -396,7 +396,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
-                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ") (cache invalid)" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ") (cache invalid)" << std::endl;
 #endif // NEOGFX_DEBUG
             cachedIdealSize = subject().ideal_size(aAvailableSpace);
             auto const ourSizePolicy = effective_size_policy();
@@ -425,7 +425,7 @@ namespace neogfx
         auto const result = transformation() * cachedIdealSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ") -> " << cachedIdealSize << " -> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::ideal_size(" << aAvailableSpace << ") -> " << cachedIdealSize << " -> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return to_units(subject(), su.saved_units(), result);
     }
@@ -451,7 +451,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size{};
@@ -461,7 +461,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
-                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ") (cache invalid)" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ") (cache invalid)" << std::endl;
 #endif // NEOGFX_DEBUG
             cachedMinSize = subject().minimum_size(aAvailableSpace);
             auto const ourSizePolicy = effective_size_policy();
@@ -490,7 +490,7 @@ namespace neogfx
         auto const result = transformation() * cachedMinSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << " -> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::minimum_size(" << aAvailableSpace << ") -> " << cachedMinSize << " -> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return to_units(subject(), su.saved_units(), result);
     }
@@ -516,7 +516,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (!visible())
             return size::max_size();
@@ -526,7 +526,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
-                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ") (cache invalid)" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ") (cache invalid)" << std::endl;
 #endif // NEOGFX_DEBUG
             cachedMaxSize = subject().apply_fixed_size(subject().maximum_size(aAvailableSpace));
             iMaximumSize.first = global_layout_id();
@@ -535,7 +535,7 @@ namespace neogfx
         auto const result = transformation() * cachedMaxSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << " ->  " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::maximum_size(" << aAvailableSpace << ") -> " << cachedMaxSize << " ->  " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return to_units(subject(), su.saved_units(), result);
     }
@@ -556,7 +556,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         scoped_units su{ subject(), units::Pixels };
         auto& cachedFixedSize = iFixedSize.second.second;
@@ -564,7 +564,7 @@ namespace neogfx
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
-                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ") (cache invalid)" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ") (cache invalid)" << std::endl;
 #endif // NEOGFX_DEBUG
             cachedFixedSize = subject().fixed_size(aAvailableSpace);
             iFixedSize.first = global_layout_id();
@@ -573,7 +573,7 @@ namespace neogfx
         auto const result = transformation() * cachedFixedSize;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ") -> " << cachedFixedSize << " -> " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::fixed_size(" << aAvailableSpace << ") -> " << cachedFixedSize << " -> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return to_units(subject(), su.saved_units(), result);
     }
@@ -595,21 +595,21 @@ namespace neogfx
         auto& attribute = !aCombineAncestorTransformations ? iTransformation : iCombinedTransformation;
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::transformation(" << aCombineAncestorTransformations << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::transformation(" << aCombineAncestorTransformations << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         auto& cachedTransformation = attribute.second;
         if (attribute.first != global_layout_id())
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
-                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::transformation(" << aCombineAncestorTransformations << ") (cache invalid)" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::transformation(" << aCombineAncestorTransformations << ") (cache invalid)" << std::endl;
 #endif // NEOGFX_DEBUG
             cachedTransformation = subject().transformation(aCombineAncestorTransformations);
             attribute.first = global_layout_id();
         }
 #ifdef NEOGFX_DEBUG
         if (&subject() == debug::layoutItem)
-            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::transformation(" << aCombineAncestorTransformations << ") -> " << cachedTransformation << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "layout_item_cache::transformation(" << aCombineAncestorTransformations << ") -> " << cachedTransformation << std::endl;
 #endif // transformation
         return cachedTransformation;
     }

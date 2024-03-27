@@ -877,21 +877,24 @@ namespace neogfx
             }
             iMenu->menu().add_separator();
             iMenu->menu().add_action(service<i_app>().action_select_all());
-            iMenu->menu().add_separator();
-            if (!neolib::service<i_keyboard>().layout().ime_open())
+            if (!read_only())
             {
-                iMenu->menu().add_action(make_ref<action>("Open IME"_t)).triggered([&]()
+                iMenu->menu().add_separator();
+                if (!neolib::service<i_keyboard>().layout().ime_open())
                 {
-                    neolib::service<i_keyboard>().layout().open_ime();
-                    neolib::service<i_keyboard>().layout().activate_ime(*this, cursor_rect().bottom_left());
-                });
-            }
-            else
-            {
-                iMenu->menu().add_action(make_ref<action>("Close IME"_t)).triggered([&]()
+                    iMenu->menu().add_action(make_ref<action>("Open IME"_t)).triggered([&]()
+                    {
+                        neolib::service<i_keyboard>().layout().open_ime();
+                        neolib::service<i_keyboard>().layout().activate_ime(*this, cursor_rect().bottom_left());
+                    });
+                }
+                else
                 {
-                    neolib::service<i_keyboard>().layout().close_ime();
-                });
+                    iMenu->menu().add_action(make_ref<action>("Close IME"_t)).triggered([&]()
+                    {
+                        neolib::service<i_keyboard>().layout().close_ime();
+                    });
+                }
             }
             bool selectAll = false;
             tempSink += service<i_app>().action_select_all().triggered([&]() { selectAll = true; });
@@ -1900,7 +1903,7 @@ namespace neogfx
     text_edit::position_type text_edit::document_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
         auto const glyphPosition = glyph_hit_test(aPosition, aAdjustForScrollPosition);
-        if (glyphPosition < glyphs().size())
+        if (glyphPosition < static_cast<document_glyphs::difference_type>(glyphs().size()))
         {
             auto const glyphParagraph = glyph_to_paragraph(glyphPosition);
             if (glyphParagraph != iGlyphParagraphs.end())

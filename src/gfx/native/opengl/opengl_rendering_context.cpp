@@ -1510,7 +1510,7 @@ namespace neogfx
             {
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (infos.entity_record(entity).debug)
-                    service<debug::logger>() << neolib::logger::severity::Debug << "Rendering debug::layoutItem entity..." << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "Rendering debug::layoutItem entity..." << std::endl;
 #endif // NEOGFX_DEBUG
                 auto const& info = infos.entity_record_no_lock(entity);
                 if (info.destroyed)
@@ -2196,7 +2196,7 @@ namespace neogfx
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
             if (meshDrawable.entity != game::null_entity &&
                 dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
-                service<debug::logger>() << neolib::logger::severity::Debug << "Adding debug::layoutItem entity drawable..." << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "Adding debug::layoutItem entity drawable..." << std::endl;
 #endif // NEOGFX_DEBUG
             if (!faces.empty())
                 add_item(meshRenderCache.meshVertexArrayIndices, mesh, material, faces);
@@ -2316,7 +2316,7 @@ namespace neogfx
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
                     dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                    service<debug::logger>() << neolib::logger::severity::Debug << "Drawing debug::layoutItem entity (texture)..." << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "Drawing debug::layoutItem entity (texture)..." << std::endl;
 
 #endif // NEOGFX_DEBUG
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);
@@ -2331,7 +2331,7 @@ namespace neogfx
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
                     dynamic_cast<game::i_ecs&>(*aPatch.provider).component<game::entity_info>().entity_record(item->meshDrawable->entity).debug)
-                    service<debug::logger>() << neolib::logger::severity::Debug << "Drawing debug::layoutItem entity (non-texture)..." << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "Drawing debug::layoutItem entity (non-texture)..." << std::endl;
 
 #endif // NEOGFX_DEBUG
                 vertexArrayUsage->draw(item->vertexArrayIndexStart, faceCount * 3);

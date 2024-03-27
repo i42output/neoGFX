@@ -119,7 +119,7 @@ namespace neogfx
             auto& next = *e.widget;
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == &next)
-                service<debug::logger>() << neolib::logger::severity::Debug << typeid(next).name() << ": async_layout::process()" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(next).name() << ": async_layout::process()" << std::endl;
 #endif
             if (next.root().has_native_window())
             {

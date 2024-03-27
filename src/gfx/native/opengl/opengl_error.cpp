@@ -72,7 +72,7 @@ namespace neogfx
             std::string errorMessage = "An internal OpenGL call failed in " +
                 fileString.substr(fileString.find_last_of("\\/") + 1) + " (" + neolib::uint32_to_string<char>(line) + ") : " +
                 error;            
-            service<neogfx::debug::logger>() << "neogfx (OpenGL): " << errorMessage << neogfx::endl;
+            service<neogfx::debug::logger>() << "neogfx (OpenGL): " << errorMessage << std::endl;
             throw opengl_error(errorMessage);
         }
 

@@ -6,11 +6,11 @@ void signal_handler(int signal)
 {
     if (signal == SIGABRT) 
     {
-        ng::service<ng::debug::logger>() << "SIGABRT received" << ng::endl;
+        ng::service<ng::debug::logger>() << "SIGABRT received" << std::endl;
     }
     else 
     {
-        ng::service<ng::debug::logger>() << "Unexpected signal " << signal << " received" << ng::endl;
+        ng::service<ng::debug::logger>() << "Unexpected signal " << signal << " received" << std::endl;
     }
     std::_Exit(EXIT_FAILURE);
 }
@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     auto previous_handler = std::signal(SIGABRT, signal_handler);
     if (previous_handler == SIG_ERR) 
     {
-        ng::service<ng::debug::logger>() << "SIGABRT handler setup failed" << ng::endl;
+        ng::service<ng::debug::logger>() << "SIGABRT handler setup failed" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -1212,14 +1212,14 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         app.thread().halt();
-        ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with exception: " << e.what() << ng::endl;
+        ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
         std::exit(EXIT_FAILURE);
     }
     catch (...)
     {
         app.thread().halt();
-        ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with unknown exception" << ng::endl;
+        ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with unknown exception" << std::endl;
         ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
         std::exit(EXIT_FAILURE);
     }

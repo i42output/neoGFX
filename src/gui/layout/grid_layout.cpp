@@ -281,7 +281,7 @@ namespace neogfx
         result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << result << endl;
+            service<debug::logger>() << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -328,7 +328,7 @@ namespace neogfx
             result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << result << endl;
+            service<debug::logger>() << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
     }
@@ -378,7 +378,7 @@ namespace neogfx
             return;
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (has_parent_widget())
             parent_widget().layout_items_started();

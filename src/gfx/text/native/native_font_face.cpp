@@ -376,7 +376,7 @@ namespace neogfx
             }
             catch (freetype_error fe)
             {
-                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot load font glyph" << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot load font glyph" << std::endl;
                 throw freetype_load_glyph_error(fe.what());
             }
             if (!tRenderOutlineGlyph)
@@ -395,7 +395,7 @@ namespace neogfx
                 }
                 catch (freetype_error fe)
                 {
-                    service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font glyph" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font glyph" << std::endl;
                     throw freetype_render_glyph_error(fe.what());
                 }
             }
@@ -425,7 +425,7 @@ namespace neogfx
                 }
                 catch (freetype_error fe)
                 {
-                    service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font outline glyph" << endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "neogfx: warning: Cannot render font outline glyph" << std::endl;
                     throw freetype_render_glyph_error(fe.what());
                 }
             }

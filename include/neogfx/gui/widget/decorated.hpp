@@ -362,7 +362,7 @@ namespace neogfx
             }
 #ifdef NEOGFX_DEBUG
             if (debug::layoutItem == this)
-                service<debug::logger>() << neolib::logger::severity::Debug << result.part << endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << result.part << std::endl;
 #endif // NEOGFX_DEBUG
             return result;
         }
@@ -624,7 +624,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::layoutItem == this)
-                        service<debug::logger>() << neolib::logger::severity::Debug << "update_tracking(" << aPosition << "): " << currentPosition << " -> " << newPosition << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << "update_tracking(" << aPosition << "): " << currentPosition << " -> " << newPosition << std::endl;
 #endif // NEOGFX_DEBUG
                     if ((decoration_style() & neogfx::decoration_style::Nested) != neogfx::decoration_style::Nested)
                     {
@@ -637,7 +637,7 @@ namespace neogfx
                 {                
 #ifdef NEOGFX_DEBUG
                     if (debug::layoutItem == this)
-                        service<debug::logger>() << neolib::logger::severity::Debug << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << "update_tracking(" << aPosition << "): " << currentSize << " -> " << newSize << std::endl;
 #endif // NEOGFX_DEBUG
                     if ((decoration_style() & neogfx::decoration_style::Nested) != neogfx::decoration_style::Nested)
                     {

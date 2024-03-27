@@ -738,7 +738,7 @@ namespace neogfx
         scoped_units su{ *this, units::Pixels };
         rect const result{ point{}, total_item_area(*this) };
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_area: " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_area: " << result << std::endl;
         return result;
     }
 
@@ -747,7 +747,7 @@ namespace neogfx
         scoped_units su{ *this, units::Pixels };
         auto const result{ item_display_rect() };
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_page: " << result << endl;
+            service<debug::logger>() << neolib::logger::severity::Error << typeid(*this).name() << ": scroll_page: " << result << std::endl;
         return result;
     }
 
@@ -1148,7 +1148,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
-                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging object." << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging object." << std::endl;
 #endif
                     presentation_model().dragging_item().trigger(*iDragDropItem);
                 });
@@ -1156,7 +1156,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
-                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging cancelled." << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging cancelled." << std::endl;
 #endif
                     presentation_model().dragging_item_cancelled().trigger(*iDragDropItem);
                     iDragDropItem = std::nullopt;
@@ -1165,7 +1165,7 @@ namespace neogfx
                 {
 #ifdef NEOGFX_DEBUG
                     if (debug::item == this)
-                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": object dropped." << endl;
+                        service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": object dropped." << std::endl;
 #endif
                     presentation_model().item_dropped().trigger(*iDragDropItem, aTarget);
                     iDragDropItem = std::nullopt;

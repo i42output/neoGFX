@@ -168,7 +168,7 @@ namespace neogfx
     {
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << "spacer::layout_as(..., " << aSize << ")" << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "spacer::layout_as(..., " << aSize << ")" << std::endl;
 #endif
         set_extents(aSize);
     }

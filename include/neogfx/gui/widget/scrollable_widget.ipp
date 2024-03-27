@@ -585,7 +585,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility..."  << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility..."  << std::endl;
 #endif
 
         neolib::scoped_flag sf{ iUpdatingScrollbarVisibility };
@@ -639,7 +639,7 @@ namespace neogfx
         {
             auto const scrollArea = scroll_area();
             auto const scrollPage = scroll_page();
-            service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scrollArea << ", scroll_page: " << scrollPage << endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility: scroll_area: " << scrollArea << ", scroll_page: " << scrollPage << std::endl;
         }
 #endif
     }
