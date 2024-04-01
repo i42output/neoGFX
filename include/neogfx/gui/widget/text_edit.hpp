@@ -352,6 +352,7 @@ namespace neogfx
 
         struct paragraph_line_span
         {
+            std::size_t paragraphIndex;
             document_span paragraphSpan;
             document_span lineSpan;
         };
@@ -413,7 +414,7 @@ namespace neogfx
             }
             paragraph_line_span paragraph_span() const
             {
-                paragraph_line_span result = { paragraph().span, span };
+                paragraph_line_span result = { paragraphIndex, paragraph().span, span };
                 if (glyph_end() != owner->glyphs().end() && is_line_breaking_whitespace(*glyph_end()))
                     ++result.lineSpan.glyphsLast;
                 return result;

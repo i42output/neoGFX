@@ -216,6 +216,23 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::erase(const_iterator aFirst, const_iterator aLast)
+    {
+        iFontCache.clear();
+        iExtents = invalid;
+        if constexpr (std::is_pointer_v<const_iterator>)
+        {
+            auto const first = std::next(iGlyphs.cbegin(), std::distance<decltype(aFirst)>(iGlyphs.data(), aFirst));
+            auto const last = std::next(iGlyphs.cbegin(), std::distance<decltype(aLast)>(iGlyphs.data(), aLast));
+            return std::next(iGlyphs.data(), std::distance(iGlyphs.begin(), iGlyphs.erase(first, last)));
+        }
+        else
+        {
+            return iGlyphs.erase(aFirst, aLast);
+        }
+    }
+
+    template <typename Container, typename ConstIterator, typename Iterator>
     inline bool basic_glyph_text_content<Container, ConstIterator, Iterator>::operator==(const self_type& aOther) const
     {
         return static_cast<const container_type&>(iGlyphs) == static_cast<const container_type&>(aOther.iGlyphs);

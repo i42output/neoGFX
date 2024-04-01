@@ -2084,7 +2084,8 @@ namespace neogfx
                 });
             if (line != column.lines.begin() && (line == column.lines.end() || aCharacterPos < line->text_begin_index()))
                 line = std::prev(line);
-            if (line != column.lines.end() && aCharacterPos >= line->text_begin_index() && aCharacterPos < line->text_end_index())
+            if (line != column.lines.end() && aCharacterPos >= line->text_begin_index() && 
+                (aCharacterPos < line->text_end_index() || (&column == &*std::prev(iGlyphColumns.end()) && std::next(line) == column.lines.end())))
                 return line->paragraph_span();
         }
         return paragraph_line_span{};
@@ -2460,17 +2461,54 @@ namespace neogfx
         if (iUpdatingDocument)
             return;
 
-        /* simple (naive) implementation just to get things moving (so just refresh everything) ... */
-        (void)aWhere;
-        glyphs().clear();
-        iGlyphParagraphs.clear();
+        document_text::const_iterator first;
+        document_text::const_iterator last;
+        document_glyphs::const_iterator glyphsInsertPos;
+        glyph_paragraphs::const_iterator glyphParagraphsInsertPos;
+
+        std::ptrdiff_t charsInserted = 0;
+        std::ptrdiff_t glyphsInserted = 0;
+
+        if (aDelta == 0 || iGlyphParagraphs.empty())
+        {
+            (void)aWhere;
+            glyphs().clear();
+            iGlyphParagraphs.clear();
+            first = iText.begin();
+            last = iText.end();
+            glyphsInsertPos = glyphs().end();
+            glyphParagraphsInsertPos = iGlyphParagraphs.end();
+        }
+        else if (aDelta > 0)
+        {
+            auto const fromParagraph = character_to_line(std::distance(iText.cbegin(), aWhere));
+            first = std::next(iText.begin(), fromParagraph.paragraphSpan.textFirst);
+            last = std::next(iText.begin(), fromParagraph.paragraphSpan.textLast + aDelta);
+            glyphsInsertPos = glyphs().erase(
+                std::next(glyphs().begin(), fromParagraph.paragraphSpan.glyphsFirst), 
+                std::next(glyphs().begin(), fromParagraph.paragraphSpan.glyphsLast));
+            glyphParagraphsInsertPos = iGlyphParagraphs.erase(std::next(iGlyphParagraphs.begin(), fromParagraph.paragraphIndex));
+            charsInserted -= (fromParagraph.paragraphSpan.textLast - fromParagraph.paragraphSpan.textFirst);
+            glyphsInserted -= (fromParagraph.paragraphSpan.glyphsLast - fromParagraph.paragraphSpan.glyphsFirst);
+        }
+        else // aDelta < 0
+        {
+            // todo: non-naive version
+            (void)aWhere;
+            glyphs().clear();
+            iGlyphParagraphs.clear();
+            first = iText.begin();
+            last = iText.end();
+            glyphsInsertPos = glyphs().end();
+            glyphParagraphsInsertPos = iGlyphParagraphs.end();
+        }
 
         graphics_context gc{ *this, graphics_context::type::Unattached };
 
         if (password() && (!iPasswordBits || !iPasswordBits.value().showPassword.is_pressed()))
             gc.set_password(true, PasswordMask.value().empty() ? "\xE2\x97\x8F"_s : PasswordMask);
 
-        auto nextParagraph = iText.begin();
+        auto nextParagraph = first;
         thread_local std::vector<std::u32string::difference_type> cachedColumnDelimiters;
         auto& columnDelimiters = cachedColumnDelimiters;
  
@@ -2491,7 +2529,7 @@ namespace neogfx
         columnDelimiters.clear();
         std::size_t columnCount = 0;
 
-        for (auto iterChar = iText.begin(); iterChar != iText.end(); ++iterChar)
+        for (auto iterChar = first; iterChar != last; ++iterChar)
         {
             auto ch = iterChar->character;
 
@@ -2502,7 +2540,7 @@ namespace neogfx
             
             bool newParagraph = (ch == U'\n');
             
-            if (newParagraph || iterChar == std::prev(iText.end()))
+            if (newParagraph || iterChar == std::prev(last))
             {
                 thread_local std::u32string paragraphBuffer;
                 paragraphBuffer.assign(nextParagraph, std::next(iterChar));
@@ -2510,23 +2548,36 @@ namespace neogfx
                 auto gt = service<i_font_manager>().glyph_text_factory().to_glyph_text(gc, std::u32string_view{ paragraphBuffer.begin(), paragraphBuffer.end() }, fs, false);
                 if (gt.cbegin() != gt.cend())
                 {
-                    auto const paragraphGlyphs = glyphs().insert(glyphs().end(), gt.cbegin(), gt.cend());
+                    auto const paragraphGlyphs = glyphs().insert(glyphsInsertPos, gt.cbegin(), gt.cend());
+                    glyphsInsertPos = std::next(paragraphGlyphs, gt.size());
                     for (auto& newGlyph : gt)
                         glyphs().glyph_font(newGlyph);
-                    auto const paragraph = iGlyphParagraphs.emplace(iGlyphParagraphs.end(),
+                    auto const paragraph = iGlyphParagraphs.emplace(glyphParagraphsInsertPos,
                         this,
                         document_span{
-                            std::distance(iText.begin(), nextParagraph),
-                            std::distance(iText.begin(), std::next(iterChar)),
+                            std::distance(iText.cbegin(), nextParagraph),
+                            std::distance(iText.cbegin(), std::next(iterChar)),
                             std::distance(glyphs().begin(), paragraphGlyphs),
                             std::distance(glyphs().begin(), std::next(paragraphGlyphs, gt.size())) });
                     paragraph->columnBreaks.assign(columnDelimiters.begin(), columnDelimiters.end());
                     paragraph->lineBreaks.assign(gt.content().line_breaks().begin(), gt.content().line_breaks().end());
+                    glyphParagraphsInsertPos = std::next(paragraph);
+                    charsInserted += (paragraph->span.textLast - paragraph->span.textFirst);
+                    glyphsInserted += (paragraph->span.glyphsLast - paragraph->span.glyphsFirst);
                 }
                 nextParagraph = std::next(iterChar);
                 columnCount = std::max(columnCount, columnDelimiters.size() + 1);
                 columnDelimiters.clear();
             }
+        }
+
+        for (auto paragraphToAdjust = std::next(iGlyphParagraphs.begin(), std::distance(iGlyphParagraphs.cbegin(), glyphParagraphsInsertPos)); 
+            paragraphToAdjust != iGlyphParagraphs.end(); ++paragraphToAdjust)
+        {
+            paragraphToAdjust->span.textFirst += charsInserted;
+            paragraphToAdjust->span.textLast += charsInserted;
+            paragraphToAdjust->span.glyphsFirst += glyphsInserted;
+            paragraphToAdjust->span.glyphsLast += glyphsInserted;
         }
 
         iGlyphColumns.resize(std::max(columnCount, iGlyphColumns.size()), { this });

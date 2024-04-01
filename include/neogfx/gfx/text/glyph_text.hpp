@@ -287,6 +287,7 @@ namespace neogfx
         virtual bool empty() const = 0;
         virtual size_type size() const = 0;
         virtual void clear() = 0;
+        virtual iterator erase(const_iterator aFirst, const_iterator aLast) = 0;
     public:
         virtual const_reference operator[](size_type aIndex) const = 0;
     public:
@@ -370,6 +371,7 @@ namespace neogfx
         bool empty() const final;
         size_type size() const final;
         void clear() final;
+        iterator erase(const_iterator aFirst, const_iterator aLast) final;
     public:
         const_reference operator[](size_type aIndex) const final;
     public:
