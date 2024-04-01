@@ -101,6 +101,15 @@ namespace neogfx
         quadf_2d cell;
         quadf_2d shape;
         std::optional<quadf_2d> outlineShape;
+        
+        mutable std::optional<vec2f> cellExtents;
+
+        vec2f const& cell_extents() const
+        {
+            if (cellExtents == std::nullopt)
+                cellExtents = quad_extents(cell);
+            return cellExtents.value();
+        }
     };
 
     inline bool operator==(const glyph_char& lhs, const glyph_char& rhs)

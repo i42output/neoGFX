@@ -1787,7 +1787,7 @@ namespace neogfx
                             *(glyphs().begin() + lineStart));
                     point linePos{ glyphForPos.cell[0].x - line->glyph_begin()->cell[0].x, line->ypos()};
                     if (placeCursorToRight)
-                        linePos.x += quad_extents(glyphForPos.cell).x;
+                        linePos.x += glyphForPos.cell_extents().x;
                     return position_info{ paragraph, column, line, iterGlyph, line->glyph_begin(), line->glyph_end(), linePos + alignmentAdjust};
                 }
                 else
@@ -1878,7 +1878,7 @@ namespace neogfx
             for (auto gi = lineStart; gi != lineEnd; ++gi)
             {
                 auto const& glyph = glyphs()[gi];
-                auto const glyphAdvance = quad_extents(glyph.cell).x;
+                auto const glyphAdvance = glyph.cell_extents().x;
                 if (adjustedPosition.x >= glyph.cell[0].x - lineStartX && adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance)
                 {
                     bool const inLeftHalf = adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0;
@@ -2695,7 +2695,7 @@ namespace neogfx
                             yLine += lines.back().extents.cy;
                             iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                         }
-                        else if (WordWrap && static_cast<coordinate>((paragraphLineEnd - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((paragraphLineEnd - 1)->cell).x) > availableWidth)
+                        else if (WordWrap && static_cast<coordinate>((paragraphLineEnd - 1)->cell[0].x) + static_cast<coordinate>((paragraphLineEnd - 1)->cell_extents().x) > availableWidth)
                         {
                             auto add_line = [&](auto first, auto last)
                             {
@@ -2744,7 +2744,7 @@ namespace neogfx
                                         {
                                             auto const& previousChar = *(split - 1);
                                             auto const xPrevious = static_cast<coordinate>(previousChar.cell[0].x);
-                                            auto const cxPrevious = static_cast<coordinate>(quad_extents(previousChar.cell).x);
+                                            auto const cxPrevious = static_cast<coordinate>(previousChar.cell_extents().x);
                                             if (xPrevious + cxPrevious >= offset + availableWidth)
                                                 --split;
                                         }
@@ -2793,7 +2793,7 @@ namespace neogfx
                                 {
                                     glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset - availableWidth, 0.0f } }, {} };
                                     auto split = std::lower_bound(next, std::reverse_iterator{ paragraphLineStart }, key, [=](auto const& lhs, auto const& rhs) { return offset - lhs.cell[0].x < offset - rhs.cell[0].x; });
-                                    if (split != next && (split != std::reverse_iterator{ paragraphLineStart } || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>(quad_extents((split - 1)->cell).x) >= rightmost - offset + availableWidth))
+                                    if (split != next && (split != std::reverse_iterator{ paragraphLineStart } || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>((split - 1)->cell_extents().x) >= rightmost - offset + availableWidth))
                                         --split;
                                     if (split == next)
                                         ++split;
@@ -2969,7 +2969,7 @@ namespace neogfx
         auto extents = (aGlyphPosition.paragraph != iGlyphParagraphs.end() && 
             aGlyphPosition.column != iGlyphColumns.end() && 
             aGlyphPosition.line != aGlyphPosition.column.value()->lines.end() ?
-                size{ aGlyphPosition.glyph != aGlyphPosition.lineEnd.value() ? quad_extents(aGlyphPosition.glyph.value()->cell).x : 0.0, aGlyphPosition.line.value()->extents.cy } :
+                size{ aGlyphPosition.glyph != aGlyphPosition.lineEnd.value() ? aGlyphPosition.glyph.value()->cell_extents().x : 0.0, aGlyphPosition.line.value()->extents.cy } :
                 size{ 0.0, font().height() });
         auto position = aGlyphPosition.pos;
         auto const& internalPadding = padding();

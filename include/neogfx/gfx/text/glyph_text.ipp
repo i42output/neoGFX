@@ -314,7 +314,7 @@ namespace neogfx
             for (auto const& g : std::ranges::subrange(aBegin, aEnd))
             {
                 auto const& gf = glyph_font(g);
-                auto const existingExtents = quad_extents(g.cell);
+                auto const& existingExtents = g.cell_extents();
                 result.yExtent = std::max(result.yExtent, existingExtents.y);
                 float cy = existingExtents.y + static_cast<float>(gf.descender());
                 if (cy > cyMax)
@@ -336,10 +336,11 @@ namespace neogfx
         for (auto& g : std::ranges::subrange(aBegin, aEnd))
         {
             auto const& gf = glyph_font(g);
-            auto const existingExtents = quad_extents(g.cell);
+            auto const& existingExtents = g.cell_extents();
             auto shapeOffset = vec2f{ 0.0f, cyMax - (existingExtents.y + static_cast<float>(gf.descender())) };
             g.cell[2].y = g.cell[1].y + yMax;
             g.cell[3].y = g.cell[0].y + yMax;
+            g.cellExtents = std::nullopt;
             if ((g.flags & (glyph_char::Superscript | glyph_char::Subscript)) != glyph_char::Default)
             {
                 scalar const ascender = gf.ascender();
