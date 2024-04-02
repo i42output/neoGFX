@@ -614,7 +614,6 @@ namespace neogfx
         std::size_t do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst);
         void delete_any_selection();
         void notify_text_changed();
-        std::pair<position_type, position_type> related_glyphs(position_type aGlyphPosition) const;
         bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
         paragraph_line_span character_to_line(position_type aCharacterPos) const;
         glyph_paragraphs::const_iterator glyph_to_paragraph(position_type aGlyphPos) const;

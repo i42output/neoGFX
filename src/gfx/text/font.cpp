@@ -474,6 +474,12 @@ namespace neogfx
             return *this;
         auto old = iInstance;
         iInstance = aOther.iInstance;
+        iSize = std::nullopt;
+        iEmSize = std::nullopt;
+        iHeight = std::nullopt;
+        iMaxAdvance = std::nullopt;
+        iAscender = std::nullopt;
+        iDescender = std::nullopt;
         return *this;
     }
 
@@ -544,32 +550,44 @@ namespace neogfx
 
     font::point_size font::size() const
     {
-        return native_font_face().size();
+        if (iSize == std::nullopt)
+            iSize = native_font_face().size();
+        return iSize.value();
     }
     
     size font::em_size() const
     {
-        return native_font_face().em_size();
+        if (iEmSize == std::nullopt)
+            iEmSize = native_font_face().em_size();
+        return iEmSize.value();
     }
 
     dimension font::height() const
     {
-        return native_font_face().height();
+        if (iHeight == std::nullopt)
+            iHeight = native_font_face().height();
+        return iHeight.value();
     }
 
     dimension font::max_advance() const
     {
-        return native_font_face().max_advance();
+        if (iMaxAdvance == std::nullopt)
+            iMaxAdvance = native_font_face().max_advance();
+        return iMaxAdvance.value();
     }
 
     dimension font::ascender() const
     {
-        return native_font_face().ascender();
+        if (iAscender == std::nullopt)
+            iAscender = native_font_face().ascender();
+        return iAscender.value();
     }
 
     dimension font::descender() const
     {
-        return native_font_face().descender();
+        if (iDescender == std::nullopt)
+            iDescender = native_font_face().descender();
+        return iDescender.value();
     }
 
     dimension font::line_spacing() const

@@ -301,6 +301,12 @@ namespace neogfx
         // attributes
     private:
         mutable std::shared_ptr<instance> iInstance;
+        mutable std::optional<point_size> iSize;
+        mutable std::optional<neogfx::size> iEmSize;
+        mutable std::optional<dimension> iHeight;
+        mutable std::optional<dimension> iMaxAdvance;
+        mutable std::optional<dimension> iAscender;
+        mutable std::optional<dimension> iDescender;
     };
 
     typedef optional<font> optional_font;

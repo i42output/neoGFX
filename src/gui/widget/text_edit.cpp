@@ -2058,16 +2058,6 @@ namespace neogfx
             notify_text_changed();
     }
 
-    std::pair<text_edit::position_type, text_edit::position_type> text_edit::related_glyphs(position_type aGlyphPosition) const
-    {
-        std::pair<position_type, position_type> result{ aGlyphPosition, aGlyphPosition + 1 };
-        while (result.first > 0 && same_paragraph(aGlyphPosition, result.first - 1) && glyphs()[result.first-1].clusters == glyphs()[aGlyphPosition].clusters)
-            --result.first;
-        while (result.second < static_cast<position_type>(glyphs().size()) && same_paragraph(aGlyphPosition, result.second) && glyphs()[result.second].clusters == glyphs()[aGlyphPosition].clusters)
-            ++result.second;
-        return result;
-    }
-
     bool text_edit::same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const
     {
         return glyph_to_paragraph(aFirstGlyphPos) == glyph_to_paragraph(aSecondGlyphPos);
@@ -2369,8 +2359,11 @@ namespace neogfx
         }
 
         insertionPoint = iText.begin() + aPosition;
-        refresh_paragraph(insertionPoint, insertionSize);
-        
+        if (!aClearFirst)
+            refresh_paragraph(insertionPoint, insertionSize);
+        else
+            refresh_paragraph(iText.begin(), 0);
+
         update();
         
         if (aMoveCursor)
@@ -2431,9 +2424,8 @@ namespace neogfx
         {
             if (paragraph->glyph_begin() > aWhere)
                 --paragraph;
-            auto textStart = paragraph->span.textFirst;
-            auto rg = related_glyphs(aWhere - glyphs().begin());
-            return std::make_pair(textStart + glyphs()[rg.first].clusters.first, textStart + glyphs()[rg.second - 1].clusters.second);
+            auto const textStart = paragraph->span.textFirst;
+            return std::make_pair(textStart + aWhere->clusters.first, textStart + aWhere->clusters.second);
         }
         return std::make_pair(iText.size(), iText.size());
     }
