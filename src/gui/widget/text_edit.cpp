@@ -528,6 +528,7 @@ namespace neogfx
     text_edit::text_edit(text_edit_caps aCaps, frame_style aFrameStyle) :
         framed_scrollable_widget{ (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
         iCaps{ aCaps },
+        iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
         iUpdatingDocument{ false },
@@ -549,6 +550,7 @@ namespace neogfx
     text_edit::text_edit(i_widget& aParent, text_edit_caps aCaps, frame_style aFrameStyle) :
         framed_scrollable_widget{ aParent, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
         iCaps{ aCaps },
+        iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
         iUpdatingDocument{ false },
@@ -570,6 +572,7 @@ namespace neogfx
     text_edit::text_edit(i_layout& aLayout, text_edit_caps aCaps, frame_style aFrameStyle) :
         framed_scrollable_widget{ aLayout, (aCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine ? scrollbar_style::Normal : scrollbar_style::None, aFrameStyle, 2.0 },
         iCaps{ aCaps },
+        iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
         iUpdatingDocument{ false },
@@ -1526,6 +1529,16 @@ namespace neogfx
         update();
     }
 
+    text_edit_line_ending text_edit::line_ending() const
+    {
+        return iLineEnding;
+    }
+
+    void text_edit::set_line_ending(text_edit_line_ending aLineEnding)
+    {
+        iLineEnding = aLineEnding;
+    }
+
     bool text_edit::read_only() const
     {
         return ReadOnly;
@@ -2310,10 +2323,46 @@ namespace neogfx
                 for (auto i = std::distance(begin, end); i > 0; --i)
                     style.add_ref();
             }
-            auto const insertionPoint = std::distance(iText.cbegin(), aWhere);
-            std::transform(begin, end, std::inserter(iText, std::next(iText.begin(), insertionPoint)), 
-                [&style](auto const& ch) { return document_char{ ch, style.cookie() }; });
-            return std::next(iText.begin(), insertionPoint);
+
+            auto const pos = std::distance(iText.cbegin(), aWhere);
+            auto next = std::next(iText.begin(), pos);
+            char32_t previousChar = (aWhere != iText.begin() ? std::prev(aWhere)->character : 0);
+            for (auto const ch : std::ranges::subrange(begin, end))
+            {
+                bool discard = false;
+                switch (ch)
+                {
+                case '\n':
+                    if (previousChar == '\r')
+                    {
+                        std::prev(next)->character = '\n';
+                        if (is_automatic(iLineEnding))
+                            iLineEnding = text_edit_line_ending::AutomaticLfCr;
+                        discard = true;
+                    }
+                    else
+                    {
+                        if (is_automatic(iLineEnding))
+                            iLineEnding = text_edit_line_ending::AutomaticLf;
+                    }
+                    break;
+                case '\r':
+                    if (previousChar == '\n')
+                    {
+                        if (is_automatic(iLineEnding))
+                            iLineEnding = text_edit_line_ending::AutomaticCrLf;
+                        discard = true;
+                    }
+                    break;
+                default:
+                    /* do nothing */
+                    break;
+                }
+                if (!discard)
+                    next = std::next(iText.insert(next, document_char{ ch, style.cookie() }));
+                previousChar = ch;
+            }
+            return std::next(iText.begin(), pos);
         };
 
         if (std::holds_alternative<std::monostate>(aFormat) || std::holds_alternative<style>(aFormat))
@@ -2473,6 +2522,15 @@ namespace neogfx
         }
         else if (aDelta > 0)
         {
+            // todo: non-naive version
+            (void)aWhere;
+            glyphs().clear();
+            iGlyphParagraphs.clear();
+            first = iText.begin();
+            last = iText.end();
+            glyphsInsertPos = glyphs().end();
+            glyphParagraphsInsertPos = iGlyphParagraphs.end();
+            #if 0 // disabled as bug currently manifests
             auto const fromParagraph = character_to_line(std::distance(iText.cbegin(), aWhere));
             first = std::next(iText.begin(), fromParagraph.paragraphSpan.textFirst);
             last = std::next(iText.begin(), fromParagraph.paragraphSpan.textLast + aDelta);
@@ -2482,6 +2540,7 @@ namespace neogfx
             glyphParagraphsInsertPos = iGlyphParagraphs.erase(std::next(iGlyphParagraphs.begin(), fromParagraph.paragraphIndex));
             charsInserted -= (fromParagraph.paragraphSpan.textLast - fromParagraph.paragraphSpan.textFirst);
             glyphsInserted -= (fromParagraph.paragraphSpan.glyphsLast - fromParagraph.paragraphSpan.glyphsFirst);
+            #endif 
         }
         else // aDelta < 0
         {
@@ -2676,8 +2735,7 @@ namespace neogfx
                                     static_cast<position_type>(from_glyph(lineStart).first) - paragraph.span.textFirst,
                                     static_cast<position_type>(from_glyph(lineEnd).second) - paragraph.span.textFirst,
                                     lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
-                                    lineEnd - glyphs().begin() - paragraph.span.glyphsFirst
-                                },
+                                    lineEnd - glyphs().begin() - paragraph.span.glyphsFirst },
                                 yLine,
                                 size{ 
                                     lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, 
@@ -2706,14 +2764,13 @@ namespace neogfx
                                         textLineStart,
                                         textLineEnd,
                                         first - glyphs().begin() - paragraph.span.glyphsFirst,
-                                        last - glyphs().begin() - paragraph.span.glyphsFirst
-                                    },
+                                        last - glyphs().begin() - paragraph.span.glyphsFirst },
                                     yLine,
                                     size{
                                         last != first ? (last - 1)->cell[1].x - (first)->cell[0].x : 0.0f,
                                         alignBaselinesResult.yExtent },
-                                        alignBaselinesResult.majorFont,
-                                        alignBaselinesResult.baseline);
+                                    alignBaselinesResult.majorFont,
+                                    alignBaselinesResult.baseline);
                                 yLine += lines.back().extents.cy;
                                 iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                             };
@@ -2840,14 +2897,13 @@ namespace neogfx
                                     textLineStart,
                                     textLineEnd,
                                     lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
-                                    lineEnd - glyphs().begin() - paragraph.span.glyphsFirst
-                                },
+                                    lineEnd - glyphs().begin() - paragraph.span.glyphsFirst },
                                 yLine,
                                 size{
                                     lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
                                     alignBaselinesResult.yExtent },
-                                    alignBaselinesResult.majorFont,
-                                    alignBaselinesResult.baseline);
+                                alignBaselinesResult.majorFont,
+                                alignBaselinesResult.baseline);
                             yLine += lines.back().extents.cy;
                             iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                         }

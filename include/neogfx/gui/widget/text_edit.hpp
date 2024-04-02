@@ -38,7 +38,7 @@
 
 namespace neogfx
 {
-    enum class text_edit_caps : uint32_t
+    enum class text_edit_caps : std::uint32_t
     {
         None            = 0x00000000,
 
@@ -55,6 +55,32 @@ namespace neogfx
 
         LINES_MASK      = SingleLine | MultiLine
     };
+
+    enum class text_edit_line_ending : std::uint32_t
+    {
+        Lf              = 0,
+        CrLf            = 1,
+        LfCr            = 2,
+        AutomaticLf     = 3,
+        AutomaticCrLf   = 4,
+        AutomaticLfCr   = 5
+    };
+
+    inline bool is_automatic(text_edit_line_ending aLineEnding)
+    {
+        switch (aLineEnding)
+        {
+        case text_edit_line_ending::Lf:
+        case text_edit_line_ending::CrLf:
+        case text_edit_line_ending::LfCr:
+        default:
+            return false;
+        case text_edit_line_ending::AutomaticLf:
+        case text_edit_line_ending::AutomaticCrLf:
+        case text_edit_line_ending::AutomaticLfCr:
+            return true;
+        }
+    }
 }
 
 begin_declare_enum(neogfx::text_edit_caps)
@@ -535,6 +561,8 @@ namespace neogfx
         void end_update() override;
         // text_edit
     public:
+        text_edit_line_ending line_ending() const;
+        void set_line_ending(text_edit_line_ending aLineEnding);
         bool read_only() const;
         void set_read_only(bool aReadOnly = true);
         bool word_wrap() const;
@@ -640,6 +668,7 @@ namespace neogfx
     private:
         sink iSink;
         text_edit_caps iCaps;
+        text_edit_line_ending iLineEnding;
         style iDefaultStyle;
         mutable std::optional<style> iNextStyle;
         bool iPersistDefaultStyle;
