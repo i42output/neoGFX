@@ -663,6 +663,11 @@ namespace neogfx
 
     void text_edit::paint(i_graphics_context& aGc) const
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "text_edit::paint(...)" << std::endl;
+#endif // NEOGFX_DEBUG
+
         framed_scrollable_widget::paint(aGc);
         rect clipRect = default_clip_rect().intersection(client_rect(false));
         clipRect.inflate(size{ padding_adjust() });
@@ -2359,7 +2364,10 @@ namespace neogfx
                     break;
                 }
                 if (!discard)
+                {
                     next = std::next(iText.insert(next, document_char{ ch, style.cookie() }));
+                    ++insertionSize;
+                }
                 previousChar = ch;
             }
             return std::next(iText.begin(), pos);
@@ -2377,7 +2385,6 @@ namespace neogfx
             }
             auto const& formatStyle = std::holds_alternative<std::monostate>(aFormat) ? default_style() : std::get<style>(aFormat);
             insert(insertionPoint, formatStyle, text.begin(), text.end());
-            insertionSize = text.size();
         }
         else if (std::holds_alternative<style_callback>(aFormat))
         {
@@ -2398,7 +2405,6 @@ namespace neogfx
                     }
                 }
                 insertionPoint = std::next(insert(insertionPoint, s, text.begin(), text.end()), text.size());
-                insertionSize += text.size();
                 next = nextEnd;
             }
         }
@@ -2522,15 +2528,6 @@ namespace neogfx
         }
         else if (aDelta > 0)
         {
-            // todo: non-naive version
-            (void)aWhere;
-            glyphs().clear();
-            iGlyphParagraphs.clear();
-            first = iText.begin();
-            last = iText.end();
-            glyphsInsertPos = glyphs().end();
-            glyphParagraphsInsertPos = iGlyphParagraphs.end();
-            #if 0 // disabled as bug currently manifests
             auto const fromParagraph = character_to_line(std::distance(iText.cbegin(), aWhere));
             first = std::next(iText.begin(), fromParagraph.paragraphSpan.textFirst);
             last = std::next(iText.begin(), fromParagraph.paragraphSpan.textLast + aDelta);
@@ -2540,7 +2537,6 @@ namespace neogfx
             glyphParagraphsInsertPos = iGlyphParagraphs.erase(std::next(iGlyphParagraphs.begin(), fromParagraph.paragraphIndex));
             charsInserted -= (fromParagraph.paragraphSpan.textLast - fromParagraph.paragraphSpan.textFirst);
             glyphsInserted -= (fromParagraph.paragraphSpan.glyphsLast - fromParagraph.paragraphSpan.glyphsFirst);
-            #endif 
         }
         else // aDelta < 0
         {
@@ -2629,6 +2625,8 @@ namespace neogfx
             paragraphToAdjust->span.textLast += charsInserted;
             paragraphToAdjust->span.glyphsFirst += glyphsInserted;
             paragraphToAdjust->span.glyphsLast += glyphsInserted;
+            paragraphToAdjust->heightMap.clear();
+            paragraphToAdjust->ypos = 0.0;
         }
 
         iGlyphColumns.resize(std::max(columnCount, iGlyphColumns.size()), { this });
@@ -2652,6 +2650,11 @@ namespace neogfx
 
     void text_edit::refresh_lines()
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "text_edit::refresh_lines()" << std::endl;
+#endif // NEOGFX_DEBUG
+
         try
         {
             iOutOfMemory = false;
@@ -2729,7 +2732,7 @@ namespace neogfx
 
                             lines.emplace_back(
                                 this,
-                                paragraph.index(),
+                                std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                 column.index(),
                                 document_span{
                                     static_cast<position_type>(from_glyph(lineStart).first) - paragraph.span.textFirst,
@@ -2758,7 +2761,7 @@ namespace neogfx
                                     textLineStart = std::prev(last)->clusters.first;
                                 lines.emplace_back(
                                     this,
-                                    paragraph.index(),
+                                    std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                     column.index(),
                                     document_span{
                                         textLineStart,
@@ -2891,7 +2894,7 @@ namespace neogfx
                             auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
                             lines.emplace_back(
                                 this,
-                                paragraph.index(),
+                                std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                 column.index(),
                                 document_span{
                                     textLineStart,

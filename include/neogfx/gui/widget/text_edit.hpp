@@ -333,10 +333,6 @@ namespace neogfx
             column_breaks columnBreaks;
             line_breaks lineBreaks;
 
-            std::size_t index() const
-            {
-                return std::distance(&*owner->iGlyphParagraphs.cbegin(), this);
-            }
             document_text::difference_type text_begin_index() const
             {
                 return span.textFirst;
