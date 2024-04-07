@@ -477,15 +477,10 @@ namespace neogfx
             
             previousNewLine = newLine;
             newLine = (codePoints[codePointIndex] == U'\r' || codePoints[codePointIndex] == U'\n');
-            bool consumeNext = false;
             if (newLine || previousNewLine)
             {
                 if (newLine)
-                {
                     currentLineDirection = text_direction::LTR;
-                    if (codePointIndex < lastCodePointIndex && codePoints[codePointIndex] == U'\r' && codePoints[codePointIndex + 1] == U'\n')
-                        consumeNext = true;
-                }
                 else
                     currentLineDirection = get_text_direction(emojiAtlas, codePoints + codePointIndex, codePoints + codePointCount, currentLineDirection);
             }
@@ -525,8 +520,6 @@ namespace neogfx
                 currentDirection = currentLineDirection;
             
             textDirections.push_back(character_type{ currentCategory, currentDirection });
-            if (consumeNext)
-                textDirections.push_back(character_type{ currentCategory, currentDirection });
 
             hb_script_t currentScript = hb_unicode_script(unicodeFuncs, codePoints[codePointIndex]);
             if (currentScript == HB_SCRIPT_COMMON || currentScript == HB_SCRIPT_INHERITED)
@@ -553,9 +546,6 @@ namespace neogfx
             previousCategory = currentCategory;
             previousScript = currentScript;
             previousFont = currentFont;
-
-            if (consumeNext)
-                ++codePointIndex;
         }
 
         runs.emplace_back(runStart, &codePoints[lastCodePointIndex + 1], previousLineDirection, previousDirection, previousCategory == text_category::Mnemonic, previousScript);
@@ -608,10 +598,7 @@ namespace neogfx
                 endCluster += (runs[i].start - &codePoints[0]);
 
                 if (textDirections[startCluster].category == text_category::Whitespace && aUtf32Begin[startCluster] == U'\r')
-                {
-                    if (aUtf32Begin + startCluster + 1 == aUtf32End || aUtf32Begin[startCluster + 1] != U'\n')
-                        result.line_breaks().push_back(result.size());
-                }
+                    result.line_breaks().push_back(result.size());
 
                 neogfx::font selectedFont = aFontSelector.select_font(startCluster);
                 neogfx::font font = selectedFont;

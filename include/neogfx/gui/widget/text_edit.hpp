@@ -673,6 +673,7 @@ namespace neogfx
         style_list iStyles;
         style_map iStyleMap;
         bool iUpdatingDocument;
+        bool iHandlingKeyPress;
         document_text iPreviousText;
         document_text iText;
         optional_rect iPageRect;

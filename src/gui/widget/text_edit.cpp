@@ -532,6 +532,7 @@ namespace neogfx
         iPersistDefaultStyle{ false },
         iCursor{ *this },
         iUpdatingDocument{ false },
+        iHandlingKeyPress{ false },
         iColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -554,6 +555,7 @@ namespace neogfx
         iPersistDefaultStyle{ false },
         iCursor{ *this },
         iUpdatingDocument{ false },
+        iHandlingKeyPress{ false },
         iColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -576,6 +578,7 @@ namespace neogfx
         iPersistDefaultStyle{ false },
         iCursor{ *this },
         iUpdatingDocument{ false },
+        iHandlingKeyPress{ false },
         iColumns{ 1 },
         iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
         iTabStopHint{ "0000" },
@@ -957,6 +960,8 @@ namespace neogfx
     bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
     {
         neolib::service<neolib::i_power>().register_activity();
+
+        neolib::scoped_flag sf{ iHandlingKeyPress };
 
         bool handled = true;
         switch (aScanCode)
@@ -2335,33 +2340,36 @@ namespace neogfx
             for (auto const ch : std::ranges::subrange(begin, end))
             {
                 bool discard = false;
-                switch (ch)
+                if (!iHandlingKeyPress)
                 {
-                case '\n':
-                    if (previousChar == '\r')
+                    switch (ch)
                     {
-                        std::prev(next)->character = '\n';
-                        if (is_automatic(iLineEnding))
-                            iLineEnding = text_edit_line_ending::AutomaticLfCr;
-                        discard = true;
+                    case '\n':
+                        if (previousChar == '\r')
+                        {
+                            std::prev(next)->character = '\n';
+                            if (is_automatic(iLineEnding))
+                                iLineEnding = text_edit_line_ending::AutomaticLfCr;
+                            discard = true;
+                        }
+                        else
+                        {
+                            if (is_automatic(iLineEnding))
+                                iLineEnding = text_edit_line_ending::AutomaticLf;
+                        }
+                        break;
+                    case '\r':
+                        if (previousChar == '\n')
+                        {
+                            if (is_automatic(iLineEnding))
+                                iLineEnding = text_edit_line_ending::AutomaticCrLf;
+                            discard = true;
+                        }
+                        break;
+                    default:
+                        /* do nothing */
+                        break;
                     }
-                    else
-                    {
-                        if (is_automatic(iLineEnding))
-                            iLineEnding = text_edit_line_ending::AutomaticLf;
-                    }
-                    break;
-                case '\r':
-                    if (previousChar == '\n')
-                    {
-                        if (is_automatic(iLineEnding))
-                            iLineEnding = text_edit_line_ending::AutomaticCrLf;
-                        discard = true;
-                    }
-                    break;
-                default:
-                    /* do nothing */
-                    break;
                 }
                 if (!discard)
                 {
@@ -2540,14 +2548,18 @@ namespace neogfx
         }
         else // aDelta < 0
         {
-            // todo: non-naive version
-            (void)aWhere;
-            glyphs().clear();
-            iGlyphParagraphs.clear();
-            first = iText.begin();
-            last = iText.end();
-            glyphsInsertPos = glyphs().end();
-            glyphParagraphsInsertPos = iGlyphParagraphs.end();
+            auto const fromParagraph = character_to_line(std::distance(iText.cbegin(), aWhere));
+            auto const toParagraph = character_to_line(std::distance(iText.cbegin(), aWhere + -aDelta));
+            first = std::next(iText.begin(), fromParagraph.paragraphSpan.textFirst);
+            last = std::next(iText.begin(), toParagraph.paragraphSpan.textLast + aDelta);
+            glyphsInsertPos = glyphs().erase(
+                std::next(glyphs().begin(), fromParagraph.paragraphSpan.glyphsFirst),
+                std::next(glyphs().begin(), toParagraph.paragraphSpan.glyphsLast));
+            glyphParagraphsInsertPos = iGlyphParagraphs.erase(
+                std::next(iGlyphParagraphs.begin(), fromParagraph.paragraphIndex),
+                std::next(iGlyphParagraphs.begin(), toParagraph.paragraphIndex + 1));
+            charsInserted -= (toParagraph.paragraphSpan.textLast - fromParagraph.paragraphSpan.textFirst);
+            glyphsInserted -= (toParagraph.paragraphSpan.glyphsLast - fromParagraph.paragraphSpan.glyphsFirst);
         }
 
         graphics_context gc{ *this, graphics_context::type::Unattached };
