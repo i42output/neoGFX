@@ -253,9 +253,8 @@ namespace neogfx
     template <typename GlyphT, typename ConstIterator = GlyphT const*, typename Iterator = GlyphT*>
     class i_basic_glyph_text : public i_reference_counted
     {
-        using self_type = i_basic_glyph_text<GlyphT, ConstIterator, Iterator>;
     public:
-        using abstract_type = self_type;
+        using abstract_type = i_basic_glyph_text;
     public:
         using value_type = GlyphT;
         using const_pointer = value_type const*;
@@ -275,10 +274,10 @@ namespace neogfx
             float baseline;
         };
     public:
-        virtual void clone(i_ref_ptr<self_type>& aClone) const = 0;
-        ref_ptr<self_type> clone() const
+        virtual void clone(i_ref_ptr<i_basic_glyph_text>& aClone) const = 0;
+        ref_ptr<i_basic_glyph_text> clone() const
         {
-            ref_ptr<self_type> result;
+            ref_ptr<i_basic_glyph_text> result;
             clone(result);
             return result;
         }
@@ -311,7 +310,7 @@ namespace neogfx
         virtual neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const = 0;
     public:
         virtual void set_extents(const neogfx::size& aExtents) = 0;
-        virtual self_type& align_baselines() = 0;
+        virtual i_basic_glyph_text& align_baselines() = 0;
         virtual align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) = 0;
         virtual std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const = 0;
         virtual std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) = 0;
@@ -338,7 +337,6 @@ namespace neogfx
     template <typename Container, typename ConstIterator = typename Container::const_iterator, typename Iterator = typename Container::iterator>
     class basic_glyph_text_content : public reference_counted<i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>>
     {
-        using self_type = basic_glyph_text_content<Container, ConstIterator, Iterator>;
     public:
         using abstract_type = i_basic_glyph_text<typename Container::value_type, ConstIterator, Iterator>;
     public:
@@ -367,11 +365,11 @@ namespace neogfx
             iBaseline{}
         {
         }
-        basic_glyph_text_content(const self_type& aOther);
-        basic_glyph_text_content(self_type&& aOther);
+        basic_glyph_text_content(const basic_glyph_text_content& aOther);
+        basic_glyph_text_content(basic_glyph_text_content&& aOther);
     public:
-        self_type& operator=(const self_type& aOther);
-        self_type& operator=(self_type&& aOther);
+        basic_glyph_text_content& operator=(const basic_glyph_text_content& aOther);
+        basic_glyph_text_content& operator=(basic_glyph_text_content&& aOther);
     public:
         container_type const& glyphs() const;
     public:
@@ -410,7 +408,7 @@ namespace neogfx
         iterator begin() final;
         iterator end() final;
     public:
-        bool operator==(const self_type& aOther) const;
+        bool operator==(const basic_glyph_text_content& aOther) const;
     public:
         const_iterator from_cluster(glyph_char::cluster_index aWhere) const final;
         iterator from_cluster(glyph_char::cluster_index aWhere) final;
@@ -420,7 +418,7 @@ namespace neogfx
         neogfx::size extents(const_iterator aBegin, const_iterator aEnd) const final;
     public:
         void set_extents(const neogfx::size& aExtents) final;
-        self_type& align_baselines() final;
+        basic_glyph_text_content& align_baselines() final;
         align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) final;
         std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const final;
         std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) final;

@@ -42,7 +42,7 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline basic_glyph_text_content<Container, ConstIterator, Iterator>::basic_glyph_text_content(const self_type& aOther) :
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>::basic_glyph_text_content(const basic_glyph_text_content& aOther) :
         iGlyphs{ aOther.iGlyphs },
         iFontCache{ aOther.iFontCache },
         iExtents{ aOther.iExtents },
@@ -52,7 +52,7 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline basic_glyph_text_content<Container, ConstIterator, Iterator>::basic_glyph_text_content(self_type&& aOther) :
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>::basic_glyph_text_content(basic_glyph_text_content&& aOther) :
         iGlyphs{ std::move(aOther.iGlyphs) },
         iFontCache{ std::move(aOther.iFontCache) },
         iExtents{ std::move(aOther.iExtents) },
@@ -62,7 +62,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline basic_glyph_text_content<Container, ConstIterator, Iterator>& basic_glyph_text_content<Container, ConstIterator, Iterator>::operator=(const self_type& aOther)
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>&
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::operator=(const basic_glyph_text_content& aOther)
     {
         if (&aOther == this)
             return *this;
@@ -80,7 +81,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline basic_glyph_text_content<Container, ConstIterator, Iterator>& basic_glyph_text_content<Container, ConstIterator, Iterator>::operator=(self_type&& aOther)
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>&
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::operator=(basic_glyph_text_content&& aOther)
     {
         if (&aOther == this)
             return *this;
@@ -100,7 +102,7 @@ namespace neogfx
     template <typename Container, typename ConstIterator, typename Iterator>
     inline void basic_glyph_text_content<Container, ConstIterator, Iterator>::clone(i_ref_ptr<abstract_type>& aClone) const
     {
-        aClone = make_ref<self_type>(*this);
+        aClone = make_ref<basic_glyph_text_content>(*this);
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -110,13 +112,15 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type basic_glyph_text_content<Container, ConstIterator, Iterator>::size() const
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::size() const
     {
         return iGlyphs.size();
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::cbegin() const
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator 
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::cbegin() const
     {
         if constexpr (std::is_same_v<const_iterator, decltype(iGlyphs.cbegin())>)
             return iGlyphs.cbegin();
@@ -130,7 +134,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::cend() const
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::cend() const
     {
         if constexpr (std::is_same_v<const_iterator, decltype(iGlyphs.cend())>)
             return iGlyphs.cend();
@@ -144,7 +149,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::begin()
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::begin()
     {
         iExtents = invalid;
         if constexpr (std::is_same_v<iterator, decltype(iGlyphs.begin())>)
@@ -159,7 +165,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::end()
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::end()
     {
         iExtents = invalid;
         if constexpr (std::is_same_v<iterator, decltype(iGlyphs.end())>)
@@ -174,14 +181,16 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::reference basic_glyph_text_content<Container, ConstIterator, Iterator>::back()
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::reference
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::back()
     {
         iExtents = invalid;
         return iGlyphs.back();
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    basic_glyph_text_content<Container, ConstIterator, Iterator>::const_reference basic_glyph_text_content<Container, ConstIterator, Iterator>::operator[](size_type aIndex) const
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::const_reference
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::operator[](size_type aIndex) const
     {
         return iGlyphs[aIndex];
     }
@@ -195,7 +204,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast)
+    typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::insert(const_iterator aPos, const_iterator aFirst, const_iterator aLast)
     {
         iExtents = invalid;
         auto result = iGlyphs.insert(std::next(iGlyphs.begin(), aPos - cbegin()), aFirst, aLast);
@@ -216,7 +226,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::erase(const_iterator aFirst, const_iterator aLast)
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::erase(const_iterator aFirst, const_iterator aLast)
     {
         iFontCache.clear();
         iExtents = invalid;
@@ -233,7 +244,7 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline bool basic_glyph_text_content<Container, ConstIterator, Iterator>::operator==(const self_type& aOther) const
+    inline bool basic_glyph_text_content<Container, ConstIterator, Iterator>::operator==(const basic_glyph_text_content& aOther) const
     {
         return static_cast<const container_type&>(iGlyphs) == static_cast<const container_type&>(aOther.iGlyphs);
     }
@@ -245,7 +256,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::from_cluster(glyph_char::cluster_index aWhere) const
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::from_cluster(glyph_char::cluster_index aWhere) const
     {
         auto const result = std::lower_bound(begin(), end(), aWhere, 
             [](auto const& g, glyph_char::cluster_index c) { return g.clusters.first < c; });
@@ -253,9 +265,11 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator basic_glyph_text_content<Container, ConstIterator, Iterator>::from_cluster(glyph_char::cluster_index aWhere)
+    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::from_cluster(glyph_char::cluster_index aWhere)
     {
-        return std::next(begin(), std::distance(cbegin(), const_cast<self_type const&>(*this).from_cluster(aWhere)));
+        return std::next(begin(), std::distance(cbegin(), 
+            const_cast<basic_glyph_text_content const&>(*this).from_cluster(aWhere)));
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
@@ -295,7 +309,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline typename basic_glyph_text_content<Container, ConstIterator, Iterator>::self_type& basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines()
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>&
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines()
     {
         auto result = align_baselines(begin(), end());
         iMajorFont = result.majorFont;
@@ -304,7 +319,8 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines_result basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate)
+    inline basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines_result
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate)
     {
         align_baselines_result result = {};
         float cyMax = 0.0f;
@@ -375,7 +391,10 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline std::pair<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator, typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator> basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom) const
+    inline std::pair<
+        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator, 
+        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator>
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom) const
     {
         std::pair<const_iterator, const_iterator> result(aFrom, aFrom);
         if (!is_whitespace(*aFrom))
@@ -400,20 +419,27 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline std::pair<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator, typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator> basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom)
+    inline std::pair<
+        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator, 
+        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator>
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom)
     {
-        auto result = const_cast<const self_type&>(*this).word_break(aBegin, aFrom);
-        return std::make_pair(std::next(begin(), std::distance(cbegin(), result.first)), std::next(begin(), std::distance(cbegin(), result.second)));
+        auto result = const_cast<const basic_glyph_text_content&>(*this).word_break(aBegin, aFrom);
+        return std::make_pair(
+            std::next(begin(), std::distance(cbegin(), result.first)), 
+            std::next(begin(), std::distance(cbegin(), result.second)));
     }
         
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type> const& basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks() const
+    inline vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type> const& 
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks() const
     {
         return iLineBreaks;
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type>& basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks()
+    inline vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type>& 
+    basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks()
     {
         return iLineBreaks;
     }
