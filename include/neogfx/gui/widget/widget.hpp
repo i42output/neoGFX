@@ -44,7 +44,6 @@ namespace neogfx
         static bool constexpr IsWidget = true;
     public:
         meta_object(layout_item<object<Interface>>)
-        typedef widget<Interface> self_type;
     public:
         define_declared_event(DeviceMetricsUpdated, device_metrics_updated, const i_widget&)
         define_declared_event(ChildAdded, child_added, i_widget&)

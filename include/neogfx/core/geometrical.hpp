@@ -33,21 +33,21 @@
 
 namespace neogfx
 { 
-    typedef scalar default_geometry_value_type;
-    typedef default_geometry_value_type coordinate;
-    typedef default_geometry_value_type dimension;
-    typedef default_geometry_value_type coordinate_delta;
+    using default_geometry_value_type = scalar;
+    using coordinate                  = default_geometry_value_type;
+    using dimension                   = default_geometry_value_type;
+    using coordinate_delta            = default_geometry_value_type;
 
-    typedef int32_t coordinate_i32;
-    typedef int32_t dimension_i32;
-    typedef int32_t coordinate_delta_i32;
+    using coordinate_i32              = std::int32_t;
+    using dimension_i32               = std::int32_t;
+    using coordinate_delta_i32        = std::int32_t;
 
-    typedef uint32_t coordinate_u32;
-    typedef uint32_t dimension_u32;
-    typedef uint32_t coordinate_delta_u32;
+    using coordinate_u32              = std::uint32_t;
+    using dimension_u32               = std::uint32_t;
+    using coordinate_delta_u32        = std::uint32_t;
 
-    typedef vec2 xy;
-    typedef vec3 xyz;
+    using xy    = vec2;
+    using xyz   = vec3;
 
     enum class logical_coordinate_system
     {
@@ -77,11 +77,11 @@ namespace neogfx
         static constexpr bool value = true;
     };
 
-    typedef optional<logical_coordinate_system> optional_logical_coordinate_system;
+    using optional_logical_coordinate_system = optional<logical_coordinate_system> ;
 
     struct logical_coordinates
     {
-        typedef logical_coordinates abstract_type; // todo
+        using abstract_type = logical_coordinates; // todo
 
         vec2 bottomLeft;
         vec2 topRight;
@@ -109,11 +109,10 @@ namespace neogfx
     template <typename CoordinateType>
     class basic_delta 
     { 
-        typedef basic_delta<CoordinateType> self_type;
         // types
     public:
-        typedef self_type abstract_type; // todo: abstract type
-        typedef CoordinateType coordinate_type;
+        using abstract_type   = basic_delta; // todo: abstract type
+        using coordinate_type = CoordinateType;
         // construction
     public:
         constexpr basic_delta() : dx{}, dy{}, dz{} {}
@@ -158,7 +157,7 @@ namespace neogfx
         coordinate_type dz;
     };
 
-    typedef basic_delta<coordinate> delta;
+    using delta = basic_delta<coordinate>;
 
     template <typename CoordinateType>
     inline basic_delta<CoordinateType> operator+(const basic_delta<CoordinateType>& left, CoordinateType s)
@@ -236,13 +235,12 @@ namespace neogfx
     template <typename CoordinateType>
     class basic_size 
     { 
-        typedef basic_size<CoordinateType> self_type;
         // types
     public:
-        typedef self_type abstract_type; // todo: abstract type
-        typedef CoordinateType coordinate_type;
-        typedef CoordinateType dimension_type;
-        typedef basic_delta<dimension_type> delta_type;
+        using abstract_type   = basic_size; // todo: abstract type
+        using coordinate_type = CoordinateType;
+        using dimension_type  = CoordinateType;
+        using delta_type      = basic_delta<dimension_type>;
         // construction
     public:
         constexpr basic_size() : cx{}, cy{}, cz{} {}
@@ -315,7 +313,7 @@ namespace neogfx
         dimension_type cz;
     };
 
-    typedef basic_size<coordinate> size;
+    using size = basic_size<coordinate>;
 
     template <typename CoordinateType>
     inline basic_size<CoordinateType> operator+(const basic_size<CoordinateType>& left, const basic_size<CoordinateType>& right)
@@ -391,11 +389,10 @@ namespace neogfx
     template <typename CoordinateType>
     class basic_point
     {
-        typedef basic_point<CoordinateType> self_type;
         // types
     public:
-        typedef self_type abstract_type; // todo: abstract type
-        typedef CoordinateType coordinate_type;
+        using abstract_type   = basic_point; // todo: abstract type
+        using coordinate_type = CoordinateType;
         // construction
     public:
         constexpr basic_point() : x{}, y{}, z{} {}
@@ -467,7 +464,7 @@ namespace neogfx
         coordinate_type z;
     };
 
-    typedef basic_point<coordinate> point;
+    using point = basic_point<coordinate>;
 
     template <typename CoordinateType>
     inline basic_point<CoordinateType> operator+(const basic_point<CoordinateType>& left, const basic_point<CoordinateType>& right)
@@ -638,14 +635,13 @@ namespace neogfx
     template <typename DimensionType>
     class basic_box_areas
     {
-        typedef basic_box_areas<DimensionType> self_type;
         // types
     public:
-        typedef self_type abstract_type; // todo: abstract type
-        typedef DimensionType dimension_type;
-        typedef dimension_type coordinate_type;
-        typedef basic_point<coordinate_type> point_type;
-        typedef basic_size<dimension_type> size_type;
+        using abstract_type   = basic_box_areas; // todo: abstract type
+        using dimension_type  = DimensionType;
+        using coordinate_type = dimension_type;
+        using point_type      = basic_point<coordinate_type>;
+        using size_type       = basic_size<dimension_type>;
         // construction
     public:
         basic_box_areas() : left{}, top{}, right{}, bottom{} {}
@@ -659,29 +655,29 @@ namespace neogfx
             left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
         // operations
     public:
-        auto operator<=>(const self_type&) const = default;
-        self_type operator-() const { return self_type{ -left, -top, -right, -bottom }; }
-        self_type& operator+=(const self_type& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
-        self_type& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
-        self_type& operator-=(const self_type& other) { left -= other.left; top -= other.top; right -= other.right; bottom -= other.bottom; return *this; }
-        self_type& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
-        self_type& operator*=(const self_type& other) { left *= other.left; top *= other.top; right *= other.right; bottom *= other.bottom; return *this; }
-        self_type& operator*=(dimension_type amount) { left *= amount; top *= amount; right *= amount; bottom *= amount; return *this; }
-        self_type& operator/=(const self_type& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
-        self_type& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
+        auto operator<=>(const basic_box_areas&) const = default;
+        basic_box_areas operator-() const { return basic_box_areas{ -left, -top, -right, -bottom }; }
+        basic_box_areas& operator+=(const basic_box_areas& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
+        basic_box_areas& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
+        basic_box_areas& operator-=(const basic_box_areas& other) { left -= other.left; top -= other.top; right -= other.right; bottom -= other.bottom; return *this; }
+        basic_box_areas& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
+        basic_box_areas& operator*=(const basic_box_areas& other) { left *= other.left; top *= other.top; right *= other.right; bottom *= other.bottom; return *this; }
+        basic_box_areas& operator*=(dimension_type amount) { left *= amount; top *= amount; right *= amount; bottom *= amount; return *this; }
+        basic_box_areas& operator/=(const basic_box_areas& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
+        basic_box_areas& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
     public:
-        self_type with_left(dimension_type d) const { return self_type{ d, top, right, bottom }; }
-        self_type with_top(dimension_type d) const { return self_type{ left, d, right, bottom }; }
-        self_type with_right(dimension_type d) const { return self_type{ left, top, d, bottom }; }
-        self_type with_bottom(dimension_type d) const { return self_type{ left, top, right, d }; }
+        basic_box_areas with_left(dimension_type d) const { return basic_box_areas{ d, top, right, bottom }; }
+        basic_box_areas with_top(dimension_type d) const { return basic_box_areas{ left, d, right, bottom }; }
+        basic_box_areas with_right(dimension_type d) const { return basic_box_areas{ left, top, d, bottom }; }
+        basic_box_areas with_bottom(dimension_type d) const { return basic_box_areas{ left, top, right, d }; }
     public:
         point_type top_left() const { return point_type{ left, top }; }
         point_type bottom_right() const { return point_type{ right, bottom }; }
         size_type size() const { return size_type{ left + right, top + bottom }; }
     public:
-        self_type ceil() const { return self_type{ std::ceil(left), std::ceil(top), std::ceil(right), std::ceil(bottom) }; }
-        self_type floor() const { return self_type{ std::floor(left), std::floor(top), std::floor(right), std::floor(bottom) }; }
-        self_type round() const { return self_type{ std::round(left), std::round(top), std::round(right), std::round(bottom) }; }
+        basic_box_areas ceil() const { return basic_box_areas{ std::ceil(left), std::ceil(top), std::ceil(right), std::ceil(bottom) }; }
+        basic_box_areas floor() const { return basic_box_areas{ std::floor(left), std::floor(top), std::floor(right), std::floor(bottom) }; }
+        basic_box_areas round() const { return basic_box_areas{ std::round(left), std::round(top), std::round(right), std::round(bottom) }; }
         // attributes
     public:
         dimension_type left;
@@ -690,7 +686,7 @@ namespace neogfx
         dimension_type bottom;
     };
 
-    typedef basic_box_areas<double> box_areas;
+    using box_areas = basic_box_areas<double>;
 
     template <typename DimensionType>
     inline basic_box_areas<DimensionType> operator+(const basic_box_areas<DimensionType>& left, const basic_box_areas<DimensionType>& right)
@@ -762,17 +758,16 @@ namespace neogfx
         public basic_point<CoordinateType>,
         public basic_size<CoordinateType>
     {
-        typedef basic_rect<CoordinateType, CoordinateSystem> self_type;
         // types
     public:
-        typedef self_type abstract_type; // todo: abstract type
-        typedef CoordinateType coordinate_type;
-        typedef coordinate_type dimension_type;
+        using abstract_type   = basic_rect; // todo: abstract type
+        using coordinate_type = CoordinateType;
+        using dimension_type  = coordinate_type;
     private:
-        typedef basic_delta<coordinate_type> delta_type;
-        typedef basic_size<dimension_type> size_type;
-        typedef basic_point<coordinate_type> point_type;
-        typedef basic_box_areas<dimension_type> padding_type;
+        using delta_type      = basic_delta<coordinate_type>;
+        using size_type       = basic_size<dimension_type>;
+        using point_type      = basic_point<coordinate_type>;
+        using padding_type    = basic_box_areas<dimension_type>;
     public:
         using point_type::x;
         using point_type::y;
@@ -804,9 +799,9 @@ namespace neogfx
         // assignment
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
-        self_type& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other; epsilon = other.epsilon; return *this; }
-        self_type& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
-        self_type& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
+        basic_rect& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other; epsilon = other.epsilon; return *this; }
+        basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
+        basic_rect& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
         // operations
     public:
         basic_vector<basic_vector<coordinate_type, 2>, 4> to_vector() const 
@@ -832,16 +827,16 @@ namespace neogfx
         dimension_type height() const { return cy; }
         bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
         bool operator!=(const basic_rect& other) const { return !operator==(other); }
-        self_type& operator*=(const self_type& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
-        self_type& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
-        self_type& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
-        self_type& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
-        self_type& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
-        self_type& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
+        basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
+        basic_rect& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
+        basic_rect& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
+        basic_rect& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
+        basic_rect& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
+        basic_rect& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
         bool contains_x(const point_type& point) const { return point.x >= left() && point.x < right(); }
         bool contains_y(const point_type& point) const { if constexpr (gui) return point.y >= top() && point.y < bottom(); else return point.y >= bottom() && point.y < top(); }
         bool contains(const point_type& point) const { return contains_x(point) && contains_y(point); }
-        bool contains(const self_type& other) const
+        bool contains(const basic_rect& other) const
         { 
             if constexpr (gui) 
                 return other.left() >= left() && other.right() <= right() && other.top() >= top() && other.bottom() <= bottom(); 
@@ -855,52 +850,52 @@ namespace neogfx
             else
                 return point_type{ left() + static_cast<coordinate_type>(width()) / two, bottom() + static_cast<coordinate_type>(height()) / two };
         }
-        self_type& translate(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
-        self_type translated(const point_type& aOffset) const { self_type result = *this; result.x += aOffset.x; result.y += aOffset.y; return result; }
-        self_type& indent(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; cx -= aOffset.x; cy -= aOffset.y; return *this; }
-        self_type& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * two; cy += delta.dy * two; return *this; }
-        self_type& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
-        self_type& inflate(const padding_type& padding) { return inflate(padding.left, padding.top, padding.right, padding.bottom); }
-        self_type& inflate(coordinate_type dx, coordinate_type dy) { return inflate(delta_type(dx, dy)); }
-        self_type& inflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
+        basic_rect& translate(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; return *this; }
+        basic_rect translated(const point_type& aOffset) const { basic_rect result = *this; result.x += aOffset.x; result.y += aOffset.y; return result; }
+        basic_rect& indent(const point_type& aOffset) { x += aOffset.x; y += aOffset.y; cx -= aOffset.x; cy -= aOffset.y; return *this; }
+        basic_rect& inflate(const delta_type& delta) { x -= delta.dx; y -= delta.dy; cx += delta.dx * two; cy += delta.dy * two; return *this; }
+        basic_rect& inflate(const size_type& size) { return inflate(delta_type(size.cx, size.cy)); }
+        basic_rect& inflate(const padding_type& padding) { return inflate(padding.left, padding.top, padding.right, padding.bottom); }
+        basic_rect& inflate(coordinate_type dx, coordinate_type dy) { return inflate(delta_type(dx, dy)); }
+        basic_rect& inflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { x -= left; y -= top; cx += (left + right); cy += (top + bottom); return *this; }
         template <typename... Args>
-        self_type inflated(Args&&... aArgs) const
+        basic_rect inflated(Args&&... aArgs) const
         {
             auto result = *this;
             result.inflate(std::forward<Args>(aArgs)...);
             return result;
         }
-        self_type& deflate(const delta_type& delta) { return inflate(-delta); }
-        self_type& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
-        self_type& deflate(const padding_type& padding) { return deflate(padding.left, padding.top, padding.right, padding.bottom); }
-        self_type& deflate(coordinate_type dx, coordinate_type dy) { return inflate(-dx, -dy); }
-        self_type& deflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { return inflate(-left, -top, -right, -bottom); }
+        basic_rect& deflate(const delta_type& delta) { return inflate(-delta); }
+        basic_rect& deflate(const size_type& size) { return inflate(-size.cx, -size.cy); }
+        basic_rect& deflate(const padding_type& padding) { return deflate(padding.left, padding.top, padding.right, padding.bottom); }
+        basic_rect& deflate(coordinate_type dx, coordinate_type dy) { return inflate(-dx, -dy); }
+        basic_rect& deflate(coordinate_type left, coordinate_type top, coordinate_type right, coordinate_type bottom) { return inflate(-left, -top, -right, -bottom); }
         template <typename... Args>
-        self_type deflated(Args&&... aArgs) const
+        basic_rect deflated(Args&&... aArgs) const
         {
             auto result = *this;
             result.deflate(std::forward<Args>(aArgs)...);
             return result;
         }
         template <typename... T>
-        friend self_type inflate_rect(const self_type& aRect, T&&... aAmount)
+        friend basic_rect inflate_rect(const basic_rect& aRect, T&&... aAmount)
         {
             auto result = aRect;
             result.inflate(std::forward<T>(aAmount)...);
             return result;
         }
         template <typename... T>
-        friend self_type deflate_rect(const self_type& aRect, T&&... aAmount)
+        friend basic_rect deflate_rect(const basic_rect& aRect, T&&... aAmount)
         {
             auto result = aRect;
             result.deflate(std::forward<T>(aAmount)...);
             return result;
         }
-        self_type intersection(const self_type& other) const
+        basic_rect intersection(const basic_rect& other) const
         {
             if constexpr (gui)
             {
-                self_type candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
+                basic_rect candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
                 if (contains(candidate.center()) && other.contains(candidate.center()))
                     return candidate;
                 else
@@ -908,89 +903,89 @@ namespace neogfx
             }
             else
             {
-                self_type candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
+                basic_rect candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
                 if (contains(candidate.center()) && other.contains(candidate.center()))
                     return candidate;
                 else
                     return basic_rect{};
             }
         }
-        bool intersects(const self_type& aOther) const
+        bool intersects(const basic_rect& aOther) const
         {
             auto const& test = intersection(aOther);
             return test != basic_rect{};
         }
-        self_type& center_on(const self_type& other)
+        basic_rect& center_on(const basic_rect& other)
         {
             *this = centered_on(other);
             return *this;
         }
-        self_type centered_on(const self_type other) const
+        basic_rect centered_on(const basic_rect other) const
         {
             auto result = *this;
             result.position() += (other.center() - center());
             return result;
         }
-        self_type& combine(const self_type& other)
+        basic_rect& combine(const basic_rect& other)
         {
             *this = combined(other);
             return *this;
         }
-        self_type combined(const self_type& other) const
+        basic_rect combined(const basic_rect& other) const
         {
             if constexpr (gui)
-                return self_type{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
+                return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
             else
-                return self_type{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
+                return basic_rect{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
         }
-        self_type with_position(const point_type& p) const
+        basic_rect with_position(const point_type& p) const
         {
             auto result = *this;
             result.position().x = p.x;
             result.position().y = p.y;
             return result;
         }
-        self_type with_x(coordinate_type c) const
+        basic_rect with_x(coordinate_type c) const
         {
             auto result = *this;
             result.position().x = c;
             return result;
         }
-        self_type with_y(coordinate_type c) const
+        basic_rect with_y(coordinate_type c) const
         {
             auto result = *this;
             result.position().y = c;
             return result;
         }
-        self_type with_extents(const size_type& e) const
+        basic_rect with_extents(const size_type& e) const
         {
             auto result = *this;
             result.extents().cx = e.cx;
             result.extents().cy = e.cy;
             return result;
         }
-        self_type with_cx(dimension_type d) const
+        basic_rect with_cx(dimension_type d) const
         { 
             auto result = *this;
             result.extents().cx = d;
             return result;
         }
-        self_type with_cy(dimension_type d) const 
+        basic_rect with_cy(dimension_type d) const
         { 
             auto result = *this;
             result.extents().cy = d;
             return result;
         }
-        self_type with_centered_origin() const
+        basic_rect with_centered_origin() const
         {
-            return self_type{ point_type{ -extents() / two }, extents() };
+            return basic_rect{ point_type{ -extents() / two }, extents() };
         }
-        self_type ceil() const { return self_type{ point_type::ceil(), size_type::ceil() }; }
-        self_type floor() const { return self_type{ point_type::floor(), size_type::floor() }; }
-        self_type round() const { return self_type{ point_type::round(), size_type::round() }; }
-        self_type with_epsilon(const size_type& aEpsilon = default_epsilon) const
+        basic_rect ceil() const { return basic_rect{ point_type::ceil(), size_type::ceil() }; }
+        basic_rect floor() const { return basic_rect{ point_type::floor(), size_type::floor() }; }
+        basic_rect round() const { return basic_rect{ point_type::round(), size_type::round() }; }
+        basic_rect with_epsilon(const size_type& aEpsilon = default_epsilon) const
         {
-            self_type result = *this;
+            basic_rect result = *this;
             result.epsilon = aEpsilon;
             return result;
         }
@@ -1016,7 +1011,7 @@ namespace neogfx
             return basic_rect<T, CoordinateSystem>{ *this };
         }
         template <typename T>
-        std::enable_if_t<std::is_same_v<T, coordinate_type>, self_type const&> as() const
+        std::enable_if_t<std::is_same_v<T, coordinate_type>, basic_rect const&> as() const
         {
             return *this;
         }
@@ -1024,9 +1019,9 @@ namespace neogfx
         size_type epsilon = size_type{ zero };
     };
 
-    typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGui> gui_rect;
-    typedef basic_rect<coordinate, logical_coordinate_system::AutomaticGame> game_rect;
-    typedef gui_rect rect; 
+    using gui_rect  = basic_rect<coordinate, logical_coordinate_system::AutomaticGui>;
+    using game_rect = basic_rect<coordinate, logical_coordinate_system::AutomaticGame>;
+    using rect      = gui_rect;
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
     inline basic_rect<CoordinateType, CoordinateSystem> operator*(const basic_rect<CoordinateType, CoordinateSystem>& left, const basic_rect<CoordinateType, CoordinateSystem>& right)
@@ -1165,10 +1160,10 @@ namespace neogfx
     {
         // types
     private:
-        typedef CoordinateType coordinate_type;
-        typedef basic_delta<coordinate_type> delta_type;
-        typedef basic_point<coordinate_type> point_type;
-        typedef basic_line<coordinate_type> line;
+        using coordinate_type = CoordinateType;
+        using delta_type      = basic_delta<coordinate_type>;
+        using point_type      = basic_point<coordinate_type> ;
+        using line            = basic_line<coordinate_type> ;
         // construction
     public:
         basic_line(const point_type& a, const point_type& b) : a(a), b(b), d(b - a), m(d.dx != 0 ? d.dy / d.dx : 0), c(a.y - m * a.x) {}
@@ -1245,17 +1240,17 @@ namespace neogfx
         coordinate_type c;
     };
 
-    typedef basic_line<coordinate> line;
+    using line      = basic_line<coordinate>;
 
-    typedef basic_size<int32_t> size_i32;
-    typedef basic_delta<int32_t> delta_i32;
-    typedef basic_point<int32_t> point_i32;
-    typedef basic_rect<int32_t> rect_i32;
+    using size_i32  = basic_size<std::int32_t>;
+    using delta_i32 = basic_delta<std::int32_t>;
+    using point_i32 = basic_point<std::int32_t>;
+    using rect_i32  = basic_rect<std::int32_t>;
 
-    typedef basic_size<uint32_t> size_u32;
-    typedef basic_delta<uint32_t> delta_u32;
-    typedef basic_point<uint32_t> point_u32;
-    typedef basic_rect<uint32_t> rect_u32;
+    using size_u32  = basic_size<std::uint32_t>;
+    using delta_u32 = basic_delta<std::uint32_t>;
+    using point_u32 = basic_point<std::uint32_t>;
+    using rect_u32  = basic_rect<std::uint32_t>;
 
     template <typename DimensionType>
     using basic_margin = basic_box_areas<DimensionType>;
@@ -1266,27 +1261,27 @@ namespace neogfx
     template <typename DimensionType>
     using basic_padding = basic_box_areas<DimensionType>;
 
-    typedef basic_margin<dimension> margin;
-    typedef basic_border<dimension> border;
-    typedef basic_padding<dimension> padding;
+    using margin  = basic_margin<dimension> ;
+    using border  = basic_border<dimension> ;
+    using padding = basic_padding<dimension> ;
 
-    typedef optional<dimension> optional_dimension;
-    typedef optional<angle> optional_angle;
-    typedef optional<delta> optional_delta;
-    typedef optional<point> optional_point;
-    typedef optional<size> optional_size;
-    typedef optional<rect> optional_rect;
-    typedef optional<delta_u32> optional_delta_u32;
-    typedef optional<point_u32> optional_point_u32;
-    typedef optional<size_u32> optional_size_u32;
-    typedef optional<rect_u32> optional_rect_u32;
-    typedef optional<margin> optional_margin;
-    typedef optional<border> optional_border;
-    typedef optional<padding> optional_padding;
-    typedef optional<vector1> optional_vector1;
-    typedef optional<vector2> optional_vector2;
-    typedef optional<vector3> optional_vector3;
-    typedef optional<vector4> optional_vector4;
+    using optional_dimension = optional<dimension>;
+    using optional_angle     = optional<angle>;
+    using optional_delta     = optional<delta>;
+    using optional_point     = optional<point>;
+    using optional_size      = optional<size>;
+    using optional_rect      = optional<rect>;
+    using optional_delta_u32 = optional<delta_u32>;
+    using optional_point_u32 = optional<point_u32>;
+    using optional_size_u32  = optional<size_u32>;
+    using optional_rect_u32  = optional<rect_u32>;
+    using optional_margin    = optional<margin>;
+    using optional_border    = optional<border>;
+    using optional_padding   = optional<padding>;
+    using optional_vector1   = optional<vector1>;
+    using optional_vector2   = optional<vector2>;
+    using optional_vector3   = optional<vector3>;
+    using optional_vector4   = optional<vector4>;
 
     template <typename T>
     inline basic_point<T> operator*(basic_matrix<T, 3, 3> const& aTransformation, basic_point<T> const& aPoint)

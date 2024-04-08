@@ -31,7 +31,6 @@ namespace neogfx
     template <typename DragDropObjectInterface>
     class drag_drop_object : public DragDropObjectInterface
     {
-        typedef drag_drop_object<DragDropObjectInterface> self_type;
     public:
         typedef DragDropObjectInterface object_interface;
     public:
