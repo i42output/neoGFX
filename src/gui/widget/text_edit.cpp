@@ -2818,24 +2818,10 @@ namespace neogfx
                                     if (split != paragraphLineEnd)
                                     {
                                         auto wordBreak = word_break(lineStart, split, paragraphLineEnd);
-                                        if (wordBreak.first == wordBreak.second)
-                                        {
-                                            auto previousLineEnd = wordBreak.first;
-                                            while (previousLineEnd != lineStart && (previousLineEnd - 1)->clusters == wordBreak.first->clusters)
-                                                --previousLineEnd;
-                                            if (previousLineEnd != lineStart)
-                                            {
-                                                lineEnd = wordBreak.first;
-                                                next = previousLineEnd;
-                                            }
-                                            else
-                                                next = lineEnd = split;
-                                        }
+                                        if (wordBreak.first != lineStart)
+                                            next = lineEnd = wordBreak.first;
                                         else
-                                        {
-                                            lineEnd = wordBreak.first;
-                                            next = wordBreak.second;
-                                        }
+                                            next = lineEnd = split;
                                     }
                                     else
                                         next = paragraphLineEnd;
@@ -2864,24 +2850,10 @@ namespace neogfx
                                     if (split != std::reverse_iterator{ paragraphLineStart })
                                     {
                                         auto wordBreak = word_break(lineStart, split, std::reverse_iterator{ paragraphLineStart });
-                                        if (wordBreak.first == wordBreak.second)
-                                        {
-                                            auto previousLineEnd = wordBreak.first;
-                                            while (previousLineEnd != lineStart && (previousLineEnd - 1)->clusters == wordBreak.first->clusters)
-                                                --previousLineEnd;
-                                            if (previousLineEnd != lineStart)
-                                            {
-                                                lineEnd = wordBreak.first;
-                                                next = previousLineEnd;
-                                            }
-                                            else
-                                                next = lineEnd = split;
-                                        }
+                                        if (wordBreak.first != lineStart)
+                                            next = lineEnd = wordBreak.first;
                                         else
-                                        {
-                                            lineEnd = wordBreak.first;
-                                            next = wordBreak.second;
-                                        }
+                                            next = lineEnd = split;
                                     }
                                     else
                                         next = std::reverse_iterator{ paragraphLineStart };
@@ -3200,43 +3172,5 @@ namespace neogfx
         for (auto const& s : iStyles)
             paddingAdjust = std::max(paddingAdjust, calc_padding_adjust(*s));
         return paddingAdjust;
-    }
-
-    namespace
-    {
-        template <typename Iter>
-        std::pair<Iter, Iter> word_break(Iter aBegin, Iter aFrom, Iter aEnd)
-        {
-            std::pair<Iter, Iter> result{ aFrom, aFrom };
-            if (!is_whitespace(*aFrom))
-            {
-                while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
-                    --result.first;
-                result.second = result.first;
-            }
-            else
-            {
-                while (result.first != aBegin && is_whitespace(*(result.first - 1)))
-                    --result.first;
-                while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
-                    --result.first;
-                result.second = result.first;
-            }
-            if (result.second != aEnd && is_line_breaking_whitespace(*result.second))
-                ++result.second;
-            if (result.first == result.second && result.first == aBegin)
-                result = { aFrom, aFrom };
-            return result;
-        }
-    }
-
-    std::pair<text_edit::document_glyphs::iterator, text_edit::document_glyphs::iterator> text_edit::word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd)
-    {
-        return neogfx::word_break(aBegin, aFrom, aEnd);
-    }
-
-    std::pair<text_edit::document_glyphs::reverse_iterator, text_edit::document_glyphs::reverse_iterator> text_edit::word_break(document_glyphs::reverse_iterator aBegin, document_glyphs::reverse_iterator aFrom, document_glyphs::reverse_iterator aEnd)
-    {
-        return neogfx::word_break(aBegin, aFrom, aEnd);
     }
 }

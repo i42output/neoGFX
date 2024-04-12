@@ -1150,15 +1150,8 @@ namespace neogfx
                         {
                             if (next != lineStart)
                             {
-                                std::pair<glyph_text::iterator, glyph_text::iterator> wordBreak = result.glyphText.word_break(lineStart, next);
-                                lineEnd = wordBreak.first;
-                                next = wordBreak.second;
-                                if (lineEnd == next)
-                                {
-                                    while (lineEnd != line.second && (lineEnd + 1)->clusters == wordBreak.first->clusters)
-                                        ++lineEnd;
-                                    next = lineEnd;
-                                }
+                                std::pair<glyph_text::iterator, glyph_text::iterator> wordBreak = word_break(lineStart, next, result.glyphText.end());
+                                next = lineEnd = wordBreak.first;
                             }
                             else
                                 ++next;

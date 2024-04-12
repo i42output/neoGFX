@@ -391,46 +391,6 @@ namespace neogfx
     }
 
     template <typename Container, typename ConstIterator, typename Iterator>
-    inline std::pair<
-        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator, 
-        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::const_iterator>
-    basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom) const
-    {
-        std::pair<const_iterator, const_iterator> result(aFrom, aFrom);
-        if (!is_whitespace(*aFrom))
-        {
-            while (result.first != aBegin && !is_whitespace(*result.first))
-                --result.first;
-            if (!is_whitespace(*result.first))
-            {
-                result.first = aFrom;
-                while (result.first != aBegin && (result.first - 1)->clusters == aFrom->clusters)
-                    --result.first;
-                result.second = result.first;
-                return result;
-            }
-            result.second = result.first;
-        }
-        while (result.first != aBegin && is_whitespace(*(result.first - 1)))
-            --result.first;
-        while (is_whitespace(*result.second) && result.second != end())
-            ++result.second;
-        return result;
-    }
-
-    template <typename Container, typename ConstIterator, typename Iterator>
-    inline std::pair<
-        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator, 
-        typename basic_glyph_text_content<Container, ConstIterator, Iterator>::iterator>
-    basic_glyph_text_content<Container, ConstIterator, Iterator>::word_break(const_iterator aBegin, const_iterator aFrom)
-    {
-        auto result = const_cast<const basic_glyph_text_content&>(*this).word_break(aBegin, aFrom);
-        return std::make_pair(
-            std::next(begin(), std::distance(cbegin(), result.first)), 
-            std::next(begin(), std::distance(cbegin(), result.second)));
-    }
-        
-    template <typename Container, typename ConstIterator, typename Iterator>
     inline vector<typename basic_glyph_text_content<Container, ConstIterator, Iterator>::size_type> const& 
     basic_glyph_text_content<Container, ConstIterator, Iterator>::line_breaks() const
     {

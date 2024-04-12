@@ -250,23 +250,46 @@ namespace neogfx
         g.flags = static_cast<glyph_char::flags_e>(aMnemonic ? g.flags | glyph_char::Mnemonic : g.flags & ~glyph_char::Mnemonic);
     }
 
+    template <typename Iterator>
+    inline std::pair<Iterator, Iterator> word_break(Iterator aBegin, Iterator aFrom, Iterator aEnd, bool aConsumeWhitespace = false)
+    {
+        std::pair<Iterator, Iterator> result{ aFrom, aFrom };
+        if (!is_whitespace(*result.first))
+        {
+            while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
+                --result.first;
+            while (result.first != aBegin && (result.first - 1)->clusters == aFrom->clusters)
+                --result.first;
+            result.second = result.first;
+            return result;
+        }
+        if (aConsumeWhitespace)
+        {
+            while (result.first != aBegin && is_whitespace(*(result.first - 1)))
+                --result.first;
+            while (result.second != aEnd && is_whitespace(*result.second))
+                ++result.second;
+        }
+        return result;
+    }
+
     template <typename GlyphT, typename ConstIterator = GlyphT const*, typename Iterator = GlyphT*>
     class i_basic_glyph_text : public i_reference_counted
     {
     public:
-        using abstract_type = i_basic_glyph_text;
+        using abstract_type          = i_basic_glyph_text;
     public:
-        using value_type = GlyphT;
-        using const_pointer = value_type const*;
-        using pointer = value_type*;
-        using const_reference = value_type const&;
-        using reference = value_type&;
-        using const_iterator = ConstIterator;
-        using iterator = Iterator;
+        using value_type             = GlyphT;
+        using const_pointer          = value_type const*;
+        using pointer                = value_type*;
+        using const_reference        = value_type const&;
+        using reference              = value_type&;
+        using const_iterator         = ConstIterator;
+        using iterator               = Iterator;
         using const_reverse_iterator = typename std::reverse_iterator<const_iterator>;
-        using reverse_iterator = typename std::reverse_iterator<iterator>;
-        using size_type = std::size_t ;
-        using difference_type = std::ptrdiff_t;
+        using reverse_iterator       = typename std::reverse_iterator<iterator>;
+        using size_type              = std::size_t ;
+        using difference_type        = std::ptrdiff_t;
         struct align_baselines_result
         {
             float yExtent;
@@ -312,8 +335,6 @@ namespace neogfx
         virtual void set_extents(const neogfx::size& aExtents) = 0;
         virtual i_basic_glyph_text& align_baselines() = 0;
         virtual align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) = 0;
-        virtual std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const = 0;
-        virtual std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) = 0;
     public:
         virtual i_vector<size_type> const& line_breaks() const = 0;
         virtual i_vector<size_type>& line_breaks() = 0;
@@ -420,8 +441,6 @@ namespace neogfx
         void set_extents(const neogfx::size& aExtents) final;
         basic_glyph_text_content& align_baselines() final;
         align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false) final;
-        std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const final;
-        std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom) final;
     public:
         vector<size_type> const& line_breaks() const final;
         vector<size_type>& line_breaks() final;
@@ -514,8 +533,6 @@ namespace neogfx
         void set_extents(const neogfx::size& aExtents);
         glyph_text& align_baselines();
         align_baselines_result align_baselines(iterator aBegin, iterator aEnd, bool aJustCalculate = false);
-        std::pair<const_iterator, const_iterator> word_break(const_iterator aBegin, const_iterator aFrom) const;
-        std::pair<iterator, iterator> word_break(const_iterator aBegin, const_iterator aFrom);
     public:
         i_vector<size_type> const& line_breaks() const;
         i_vector<size_type>& line_breaks();

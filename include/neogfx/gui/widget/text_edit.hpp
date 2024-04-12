@@ -659,8 +659,6 @@ namespace neogfx
         rect cursor_rect() const;
         double calc_padding_adjust(style const& aStyle) const;
         double padding_adjust() const;
-        static std::pair<document_glyphs::iterator, document_glyphs::iterator> word_break(document_glyphs::iterator aBegin, document_glyphs::iterator aFrom, document_glyphs::iterator aEnd);
-        static std::pair<document_glyphs::reverse_iterator, document_glyphs::reverse_iterator> word_break(document_glyphs::reverse_iterator aBegin, document_glyphs::reverse_iterator aFrom, document_glyphs::reverse_iterator aEnd);
     private:
         sink iSink;
         text_edit_caps iCaps;

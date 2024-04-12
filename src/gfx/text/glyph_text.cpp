@@ -154,16 +154,6 @@ namespace neogfx
         return content().align_baselines(aBegin, aEnd, aJustCalculate);
     }
 
-    std::pair<glyph_text::const_iterator, glyph_text::const_iterator> glyph_text::word_break(const_iterator aBegin, const_iterator aFrom) const
-    {
-        return content().word_break(aBegin, aFrom);
-    }
-
-    std::pair<glyph_text::iterator, glyph_text::iterator> glyph_text::word_break(const_iterator aBegin, const_iterator aFrom)
-    {
-        return content().word_break(aBegin, aFrom);
-    }
-
     i_vector<glyph_text::size_type> const& glyph_text::line_breaks() const
     {
         return content().line_breaks();
