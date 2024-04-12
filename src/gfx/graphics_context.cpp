@@ -1150,8 +1150,9 @@ namespace neogfx
                         {
                             if (next != lineStart)
                             {
-                                std::pair<glyph_text::iterator, glyph_text::iterator> wordBreak = word_break(lineStart, next, result.glyphText.end());
-                                next = lineEnd = wordBreak.first;
+                                auto wordBreak = word_break(lineStart, next, result.glyphText.end());
+                                lineEnd = wordBreak.first;
+                                next = wordBreak.second;
                             }
                             else
                                 ++next;

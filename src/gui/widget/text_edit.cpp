@@ -2467,13 +2467,11 @@ namespace neogfx
         auto const documentSpan = paragraphLineSpan.lineSpan + paragraphLineSpan.paragraphSpan;
         auto const lineStart = std::next(glyphs().begin(), documentSpan.glyphsFirst);
         auto const lineEnd = std::next(glyphs().begin(), documentSpan.glyphsLast);
+        auto const paragraphTextIndex = textIndex - paragraphLineSpan.paragraphSpan.textFirst;
         for (auto g = lineStart; g != lineEnd; ++g)
-        {
-            if (textIndex - paragraphLineSpan.paragraphSpan.textFirst >= g->clusters.first && 
-                textIndex - paragraphLineSpan.paragraphSpan.textFirst < g->clusters.second)
+            if (g->clusters.first <= paragraphTextIndex && g->clusters.second > paragraphTextIndex)
                 return g;
-        }
-        return glyphs().end();
+        return lineEnd;
     }
 
     std::pair<text_edit::document_text::size_type, text_edit::document_text::size_type> text_edit::from_glyph(document_glyphs::const_iterator aWhere) const
@@ -2819,7 +2817,10 @@ namespace neogfx
                                     {
                                         auto wordBreak = word_break(lineStart, split, paragraphLineEnd);
                                         if (wordBreak.first != lineStart)
-                                            next = lineEnd = wordBreak.first;
+                                        {
+                                            lineEnd = wordBreak.first;
+                                            next = wordBreak.second;
+                                        }
                                         else
                                             next = lineEnd = split;
                                     }
@@ -2851,7 +2852,10 @@ namespace neogfx
                                     {
                                         auto wordBreak = word_break(lineStart, split, std::reverse_iterator{ paragraphLineStart });
                                         if (wordBreak.first != lineStart)
-                                            next = lineEnd = wordBreak.first;
+                                        {
+                                            lineEnd = wordBreak.first;
+                                            next = wordBreak.second;
+                                        }
                                         else
                                             next = lineEnd = split;
                                     }

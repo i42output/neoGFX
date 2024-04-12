@@ -256,16 +256,17 @@ namespace neogfx
         std::pair<Iterator, Iterator> result{ aFrom, aFrom };
         if (!is_whitespace(*result.first))
         {
-            while (result.first != aBegin && !is_whitespace(*(result.first - 1)))
+            while (result.first != aBegin && !is_whitespace(*std::prev(result.first)))
                 --result.first;
-            while (result.first != aBegin && (result.first - 1)->clusters == aFrom->clusters)
+            while (result.first != aBegin && std::prev(result.first)->clusters == aFrom->clusters)
                 --result.first;
             result.second = result.first;
-            return result;
         }
+        else if (std::next(result.first) == aEnd || !is_whitespace(*std::next(result.first)))
+            ++result.second;
         if (aConsumeWhitespace)
         {
-            while (result.first != aBegin && is_whitespace(*(result.first - 1)))
+            while (result.first != aBegin && is_whitespace(*std::prev(result.first)))
                 --result.first;
             while (result.second != aEnd && is_whitespace(*result.second))
                 ++result.second;
