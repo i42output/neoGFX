@@ -2677,15 +2677,17 @@ namespace neogfx
             dimension availableHeight = column_rect(0).height();
             bool showVerticalScrollbar = false;
             bool showHorizontalScrollbar = false;
-            
+
             iTextExtents = size{};
             
             uint32_t pass = 1;
+            dimension yposParagraph = 0.0;
 
             for (auto iterParagraph = iGlyphParagraphs.begin(); iterParagraph != iGlyphParagraphs.end();)
             {
                 auto& paragraph = *iterParagraph;
 
+                paragraph.ypos = yposParagraph;
                 dimension yColumn = 0.0;
 
                 for (auto& column : iGlyphColumns)
@@ -2906,21 +2908,16 @@ namespace neogfx
                     yColumn = std::max(yColumn, yLine);
                 }
 
-                if (std::next(iterParagraph) != iGlyphParagraphs.end())
-                    std::next(iterParagraph)->ypos = iterParagraph->ypos + yColumn;
-                else
-                    iTextExtents->cy = std::max(iTextExtents->cy, iterParagraph->ypos + yColumn);
+                yposParagraph += yColumn;
+                iTextExtents->cy = std::max(iTextExtents->cy, yposParagraph);
 
                 auto next_pass = [&]()
                     {
                         if (pass <= 3)
                         {
-                            for (auto& p : iGlyphParagraphs)
-                            {
-                                p.ypos = 0.0;
-                                for (auto& c : iGlyphColumns)
-                                    c.lines.clear();
-                            }
+                            for (auto& c : iGlyphColumns)
+                                c.lines.clear();
+                            yposParagraph = 0.0;
                             iTextExtents = size{};
                             iterParagraph = iGlyphParagraphs.begin();
                             ++pass;
