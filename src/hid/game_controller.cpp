@@ -91,7 +91,7 @@ namespace neogfx
 
     bool game_controller::is_button_pressed(game_controller_button_ordinal aButtonOrdinal) const
     {
-        return iButtonState[aButtonOrdinal];
+        return iButtonState[aButtonOrdinal - 1u];
     }
 
     bool game_controller::is_button_pressed(game_controller_button aButton) const
