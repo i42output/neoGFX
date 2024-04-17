@@ -139,7 +139,7 @@ namespace neogfx
             {
 #ifdef WIN32
                 // TODO: Use fallback font info from registry
-                return fallback_font_info{ { "Segoe UI Symbol", "Noto Sans CJK JP", "Arial Unicode MS" } };
+                return fallback_font_info{ { "Segoe UI Symbol", "Noto Sans CJK JP", "Nirmala UI", "Arial Unicode MS" } };
 #else
                 throw std::logic_error("neogfx::detail::platform_specific::default_fallback_font_info: Unknown system");
 #endif
