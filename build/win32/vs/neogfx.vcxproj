@@ -456,6 +456,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_native_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_progress_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_scrollbar.hpp" />
@@ -480,6 +481,8 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\menu_item_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\native_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\native_widget.ipp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\progress_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\push_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\radio_button.hpp" />
@@ -727,6 +730,7 @@
     <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\native_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\progress_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />

@@ -190,7 +190,7 @@ namespace neogfx
             iMinimizeButton.enable(!isIconic && isEnabled);
             iMaximizeButton.enable(!isMaximized && isEnabled);
             iRestoreButton.enable(!isRestored && isEnabled);
-            iCloseButton.enable(root().can_close());
+            iCloseButton.enable(root().can_close() && isEnabled);
             iMinimizeButton.show(!isIconic && (root().style() & window_style::MinimizeBox) == window_style::MinimizeBox);
             iMaximizeButton.show(!isMaximized && (root().style() & window_style::MaximizeBox) == window_style::MaximizeBox);
             iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid);
