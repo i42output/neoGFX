@@ -1221,6 +1221,9 @@
     <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-texture.vert.hpp">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\web_view.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1818,6 +1821,9 @@
     </ClCompile>
     <ClCompile Include="neoGFX\x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\gui\widget\web_view.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

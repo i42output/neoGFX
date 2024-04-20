@@ -31,6 +31,14 @@ namespace neogfx
     {
         init();
     }
+
+    template <typename Interface>
+    inline native_widget<Interface>::native_widget(i_layout& aLayout) :
+        base_type{ aLayout }
+    {
+        init();
+    }
+
     template <typename Interface>
     inline native_widget<Interface>::~native_widget()
     {

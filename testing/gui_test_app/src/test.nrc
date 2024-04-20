@@ -983,6 +983,19 @@
                         }
                     }
                     tab_page: {
+                        id: pageWebBrowser
+                        tab_text: "Web Browser"
+                        vertical_layout: {
+                            id: layoutWebView
+                            line_edit: {
+                                id: webViewUrl
+                            }
+                            web_view: {
+                                id: webView
+                            }
+                        }
+                    }
+                    tab_page: {
                         id: pageInstancing
                         tab_text: "Instancing"
                         vertical_layout: {

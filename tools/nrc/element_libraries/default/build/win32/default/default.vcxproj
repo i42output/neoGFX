@@ -232,6 +232,7 @@
     <ClInclude Include="..\..\..\src\text_widget.hpp" />
     <ClInclude Include="..\..\..\src\toolbar.hpp" />
     <ClInclude Include="..\..\..\src\tree_view.hpp" />
+    <ClInclude Include="..\..\..\src\web_view.hpp" />
     <ClInclude Include="..\..\..\src\widget.hpp" />
     <ClInclude Include="..\..\..\src\window.hpp" />
   </ItemGroup>

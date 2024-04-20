@@ -35,9 +35,11 @@ namespace neogfx
     public:
         // types
     public:
+        using base_type = widget<Interface>;
         // native_widget
     public:
         native_widget(i_widget& aParent);
+        native_widget(i_layout& aLayout);
         ~native_widget();
         // widget
     public:

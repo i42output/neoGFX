@@ -90,6 +90,7 @@ namespace neogfx
         SliderBox                       = 0x0000000000000144 | Widget,
         DoubleSliderBox                 = 0x0000000000000145 | Widget,
         GradientWidget                  = 0x0000000000000800 | Widget,
+        WebView                         = 0x0000000000000801 | Widget,
         VerticalLayout                  = 0x0000000000000900 | Layout,
         HorizontalLayout                = 0x0000000000000901 | Layout,
         GridLayout                      = 0x0000000000000902 | Layout,
