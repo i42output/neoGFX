@@ -1574,12 +1574,12 @@ namespace neogfx
         }
     }
 
-    uint32_t text_edit::grow_lines() const
+    std::uint32_t text_edit::grow_lines() const
     {
         return GrowLines;
     }
 
-    void text_edit::set_grow_lines(uint32_t aGrowLines)
+    void text_edit::set_grow_lines(std::uint32_t aGrowLines)
     {
         if (GrowLines != aGrowLines)
         {
@@ -2680,7 +2680,7 @@ namespace neogfx
 
             iTextExtents = size{};
             
-            uint32_t pass = 1;
+            std::uint32_t pass = 1;
             dimension yposParagraph = 0.0;
 
             for (auto iterParagraph = iGlyphParagraphs.begin(); iterParagraph != iGlyphParagraphs.end();)

@@ -29,12 +29,12 @@ namespace neogfx
     class video_mode
     {
     public:
-        video_mode(uint32_t aWidth, uint32_t aHeight, uint32_t aBitsPerPixel = 32) :
+        video_mode(std::uint32_t aWidth, std::uint32_t aHeight, std::uint32_t aBitsPerPixel = 32) :
             iResolution{ aWidth, aHeight }, iBitsPerPixel{ aBitsPerPixel }
         {
         };
         template <typename T>
-        explicit video_mode(const basic_size<T>& aExtents, uint32_t aBitsPerPixel = 32) :
+        explicit video_mode(const basic_size<T>& aExtents, std::uint32_t aBitsPerPixel = 32) :
             iResolution{ aExtents }, iBitsPerPixel{ aBitsPerPixel }
         {
         };
@@ -43,13 +43,13 @@ namespace neogfx
         {
             return iResolution;
         }
-        uint32_t bits_per_pixel() const
+        std::uint32_t bits_per_pixel() const
         {
             return iBitsPerPixel;
         }
     private:
         video_mode_resolution iResolution;
-        uint32_t iBitsPerPixel;
+        std::uint32_t iBitsPerPixel;
     };
 
     typedef std::optional<video_mode> optional_video_mode;

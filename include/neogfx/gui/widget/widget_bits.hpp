@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    enum class widget_type : uint32_t
+    enum class widget_type : std::uint32_t
     {
         Client      = 0x00000001,
         NonClient   = 0x00000002,
@@ -32,22 +32,22 @@ namespace neogfx
 
     inline constexpr widget_type operator|(widget_type aLhs, widget_type aRhs)
     {
-        return static_cast<widget_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<widget_type>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr widget_type operator&(widget_type aLhs, widget_type aRhs)
     {
-        return static_cast<widget_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<widget_type>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr widget_type& operator|=(widget_type& aLhs, widget_type aRhs)
     {
-        return aLhs = static_cast<widget_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<widget_type>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr widget_type& operator&=(widget_type& aLhs, widget_type aRhs)
     {
-        return aLhs = static_cast<widget_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<widget_type>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     class i_widget; 
@@ -118,7 +118,7 @@ namespace neogfx
         }
     }
 
-    enum class focus_policy : uint32_t
+    enum class focus_policy : std::uint32_t
     {
         NoFocus           = 0x00000000,
         ClickFocus        = 0x00000001,
@@ -207,28 +207,28 @@ namespace neogfx
 
     inline focus_policy operator|(focus_policy aLhs, focus_policy aRhs)
     {
-        return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<focus_policy>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline focus_policy& operator|=(focus_policy& aLhs, focus_policy aRhs)
     {
-        aLhs = static_cast<focus_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        aLhs = static_cast<focus_policy>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
         return aLhs;
     }
 
     inline focus_policy operator&(focus_policy aLhs, focus_policy aRhs)
     {
-        return static_cast<focus_policy>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<focus_policy>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline focus_policy& operator&=(focus_policy& aLhs, focus_policy aRhs)
     {
-        aLhs = static_cast<focus_policy>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        aLhs = static_cast<focus_policy>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
         return aLhs;
     }
 
     inline focus_policy operator~(focus_policy aLhs)
     {
-        return static_cast<focus_policy>(~static_cast<uint32_t>(aLhs));
+        return static_cast<focus_policy>(~static_cast<std::uint32_t>(aLhs));
     }
 }

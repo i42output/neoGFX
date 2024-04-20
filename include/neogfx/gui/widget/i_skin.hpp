@@ -54,7 +54,7 @@ namespace neogfx
         virtual void draw_separators(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_layout& aLayout) const = 0;
     };
 
-    typedef std::pair<uint32_t, uint32_t> separator_index;
+    typedef std::pair<std::uint32_t, std::uint32_t> separator_index;
 
     inline rect separator_rect(const i_layout& aLayout, separator_index aSeparator)
     {

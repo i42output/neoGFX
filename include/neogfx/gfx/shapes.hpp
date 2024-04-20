@@ -80,7 +80,7 @@ namespace neogfx
         calc_rect_vertices(result, aRect, aType, aTransformation);
         return result;
     };
-    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments = 0);
-    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments = 0);
-    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments = 0);
+    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, std::uint32_t aArcSegments = 0);
+    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, std::uint32_t aArcSegments = 0);
+    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, std::uint32_t aArcSegments = 0);
 }

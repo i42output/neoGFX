@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    extern std::atomic<uint64_t> sNodeCounter;
+    extern std::atomic<std::uint64_t> sNodeCounter;
 
     namespace
     {
@@ -67,7 +67,7 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    ai<Representation, Player>::ai(int32_t aPly) :
+    ai<Representation, Player>::ai(std::int32_t aPly) :
         async_thread{ "chess::ai" },
         iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },
@@ -262,7 +262,7 @@ namespace chess
                 auto similarEnd = std::remove_if(bestMoves.begin(), bestMoves.end(),
                     [bestMoveEval, decimator](auto const& m)
                     {
-                        return static_cast<int64_t>(*m.eval * decimator) != static_cast<int64_t>(bestMoveEval * decimator);
+                        return static_cast<std::int64_t>(*m.eval * decimator) != static_cast<std::int64_t>(bestMoveEval * decimator);
                     });
                 thread_local std::random_device tEntropy;
                 thread_local std::mt19937 tGenerator{ tEntropy() };
@@ -302,13 +302,13 @@ namespace chess
     }
 
     template <typename Representation, player Player>
-    uint64_t ai<Representation, Player>::nodes_per_second() const
+    std::uint64_t ai<Representation, Player>::nodes_per_second() const
     {
         std::unique_lock lk{ iMutex };
         if (iNodesPerSecond)
             return *iNodesPerSecond;
         else if (iStartTime)
-            return static_cast<uint64_t>(sNodeCounter / std::chrono::duration<double>(std::chrono::steady_clock::now() - *iStartTime).count());
+            return static_cast<std::uint64_t>(sNodeCounter / std::chrono::duration<double>(std::chrono::steady_clock::now() - *iStartTime).count());
         else
             return 0;
     }

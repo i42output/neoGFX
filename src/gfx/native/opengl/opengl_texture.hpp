@@ -61,13 +61,13 @@ namespace neogfx
         const i_sub_texture& as_sub_texture() const final;
         dimension dpi_scale_factor() const final;
         texture_sampling sampling() const final;
-        uint32_t samples() const final;
+        std::uint32_t samples() const final;
         texture_data_format data_format() const final;
         texture_data_type data_type() const final;
         bool is_empty() const final;
         size extents() const final;
         size storage_extents() const final;
-        void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) final;
+        void set_pixels(const rect& aRect, const void* aPixelData, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(const i_image& aImage) final;
         void set_pixels(const i_image& aImage, const rect& aImagePart) final;
         void set_pixel(const point& aPosition, const color& aColor) final;
@@ -126,8 +126,8 @@ namespace neogfx
         GLuint iHandle;
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
-        mutable std::optional<uint32_t> iBoundTextureUnit;
-        mutable std::optional<int32_t> iPreviouslyBoundTexture;
+        mutable std::optional<std::uint32_t> iBoundTextureUnit;
+        mutable std::optional<std::int32_t> iPreviouslyBoundTexture;
         mutable GLuint iFrameBuffer;
         mutable GLuint iDepthStencilBuffer;
         mutable std::vector<T> iPixelData;

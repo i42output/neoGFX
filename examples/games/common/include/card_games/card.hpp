@@ -36,7 +36,7 @@ namespace neogames
         public:
             typedef GameTraits game_traits;
         public:
-            enum class value : uint32_t
+            enum class value : std::uint32_t
             {
                 Joker   = 0,
                 LowAce  = 1,
@@ -54,7 +54,7 @@ namespace neogames
                 King    = 13,
                 Ace     = game_traits::ace_high ? King + 1 : Two - 1
             };
-            enum class suit : uint32_t
+            enum class suit : std::uint32_t
             {
                 Joker   = 0,
                 Club    = 1,

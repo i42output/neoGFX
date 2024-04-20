@@ -157,8 +157,8 @@ namespace neogfx
         const item_list& items() const;
         item_list& items();
         virtual void remove(item_list::iterator aItem);
-        uint32_t spacer_count() const;
-        uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
+        std::uint32_t spacer_count() const;
+        std::uint32_t items_visible(item_type_e aItemType = static_cast<item_type_e>(ItemTypeWidget|ItemTypeLayout)) const;
         template <typename AxisPolicy>
         size do_minimum_size(optional_size const& aAvailableSpace) const;
         template <typename AxisPolicy>

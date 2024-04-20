@@ -44,7 +44,7 @@ namespace video_poker
 {
     using namespace neogames::card_games;
 
-    typedef int32_t credit_t;
+    typedef std::int32_t credit_t;
 
     class outcome;
 

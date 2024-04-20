@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    enum class splitter_style : uint32_t
+    enum class splitter_style : std::uint32_t
     {
         None                = 0x00000000,
         Horizontal          = 0x00000001,
@@ -36,19 +36,19 @@ namespace neogfx
 
     inline constexpr splitter_style operator|(splitter_style aLhs, splitter_style aRhs)
     {
-        return static_cast<splitter_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<splitter_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr splitter_style operator&(splitter_style aLhs, splitter_style aRhs)
     {
-        return static_cast<splitter_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<splitter_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     class splitter : public widget<>
     {
         meta_object(widget<>)
     private:
-        typedef std::pair<uint32_t, uint32_t> separator_type;
+        typedef std::pair<std::uint32_t, std::uint32_t> separator_type;
     public:
         splitter(splitter_style aStyle = splitter_style::Horizontal | splitter_style::DrawGrip);
         splitter(i_widget& aParent, splitter_style aStyle = splitter_style::Horizontal | splitter_style::DrawGrip);
@@ -68,7 +68,7 @@ namespace neogfx
         void capture_released() override;
     public:
         virtual void panes_resized();
-        virtual void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = {});
+        virtual void reset_pane_sizes_requested(const std::optional<std::uint32_t>& aPane = {});
     protected:
         void paint(i_graphics_context& aGc) const override;
     private:

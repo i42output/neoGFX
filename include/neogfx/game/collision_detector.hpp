@@ -28,7 +28,7 @@
 
 namespace neogfx::game
 {
-    enum class collision_detection_cycle : uint32_t
+    enum class collision_detection_cycle : std::uint32_t
     {
         None                = 0x00000000,
 
@@ -43,12 +43,12 @@ namespace neogfx::game
 
     inline constexpr collision_detection_cycle operator|(collision_detection_cycle aLhs, collision_detection_cycle aRhs)
     {
-        return static_cast<collision_detection_cycle>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<collision_detection_cycle>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr collision_detection_cycle operator&(collision_detection_cycle aLhs, collision_detection_cycle aRhs)
     {
-        return static_cast<collision_detection_cycle>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<collision_detection_cycle>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     class collision_detector : public game::system<entity_info, box_collider, box_collider_2d>

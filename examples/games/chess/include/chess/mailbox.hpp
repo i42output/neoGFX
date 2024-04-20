@@ -53,7 +53,7 @@ namespace chess
     {
         if (aFrom == aTo)
             return false;
-        auto const delta = (aTo.as<int32_t>() - aFrom.as<int32_t>()).abs();
+        auto const delta = (aTo.as<std::int32_t>() - aFrom.as<std::int32_t>()).abs();
         if (delta.x != 0 && delta.y != 0 && delta.x != delta.y)
         {
             if ((delta.x == 1 && delta.y == 2) || (delta.x == 2 && delta.y == 1))
@@ -101,11 +101,11 @@ namespace chess
                     auto const pieceLastMoved = piece_at(aPosition, aPosition.moveHistory.back().to);
                     if (piece_type(pieceLastMoved) == piece::Pawn && piece_color(pieceLastMoved) != static_cast<piece>(aTurn))
                     {
-                        auto const delta = aPosition.moveHistory.back().to.as<int32_t>() - aPosition.moveHistory.back().from.as<int32_t>();
+                        auto const delta = aPosition.moveHistory.back().to.as<std::int32_t>() - aPosition.moveHistory.back().from.as<std::int32_t>();
                         if (std::abs(delta.y) == 2)
                         {
                             auto const& deltaUnity = neogfx::delta_i32{ delta.x != 0 ? delta.x / std::abs(delta.x) : 0, delta.y != 0 ? delta.y / std::abs(delta.y) : 0 };
-                            if (aPosition.moveHistory.back().to.as<int32_t>() - deltaUnity == aMove.to.as<int32_t>())
+                            if (aPosition.moveHistory.back().to.as<std::int32_t>() - deltaUnity == aMove.to.as<std::int32_t>())
                                 enPassant = true;
                         }
                     }

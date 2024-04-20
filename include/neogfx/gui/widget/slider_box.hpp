@@ -180,6 +180,6 @@ namespace neogfx
         bool iSettingParameter;
     };
 
-    typedef basic_slider_box<int32_t> slider_box;
+    typedef basic_slider_box<std::int32_t> slider_box;
     typedef basic_slider_box<double> double_slider_box;
 }

@@ -193,7 +193,7 @@ namespace neogfx
         iLogicalCoordinates = aCoordinates;
     }
 
-    uint64_t native_surface::frame_counter() const
+    std::uint64_t native_surface::frame_counter() const
     {
         return iFrameCounter;
     }

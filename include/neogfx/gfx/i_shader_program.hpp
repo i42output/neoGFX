@@ -43,7 +43,7 @@ namespace neogfx
     struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(std::string const& aReason) : std::runtime_error("neogfx::failed_to_create_shader_program: " + aReason) {} };
     struct shader_program_error : std::runtime_error { shader_program_error(std::string const& aError) : std::runtime_error("neogfx::shader_program_error: " + aError) {} };
 
-    enum class shader_program_type : uint32_t
+    enum class shader_program_type : std::uint32_t
     {
         Standard,
         User

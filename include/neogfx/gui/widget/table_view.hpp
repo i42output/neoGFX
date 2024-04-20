@@ -48,7 +48,7 @@ namespace neogfx
     protected:
         rect item_display_rect(bool aIntersectItemArea = false) const override;
         size total_item_area(i_units_context const& aUnitsContext) const override;
-        dimension column_width(uint32_t aColumn) const override;
+        dimension column_width(std::uint32_t aColumn) const override;
     protected:
         neogfx::scrolling_disposition scrolling_disposition(const i_widget& aChildWidget) const override;
     private:

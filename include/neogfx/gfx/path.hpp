@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    enum class path_shape : uint32_t
+    enum class path_shape : std::uint32_t
     {
         Vertices,
         Quads,

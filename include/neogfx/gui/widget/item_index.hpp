@@ -34,7 +34,7 @@ namespace neogfx
     public:
         typedef self_type abstract_type; // todo: create abstract interface
     public:
-        typedef uint32_t value_type;
+        typedef std::uint32_t value_type;
         typedef value_type row_type;
         typedef value_type column_type;
         typedef std::optional<row_type> optional_row_type;

@@ -38,7 +38,7 @@ namespace neogfx
     // case insensitive text
     typedef std::basic_string<char, neolib::ci_char_traits<std::char_traits<char> > > ci_string;
 
-    enum class text_category : uint8_t
+    enum class text_category : std::uint8_t
     {
         Unknown     = 0x00,
         None        = 0x01,
@@ -53,7 +53,7 @@ namespace neogfx
         Control     = 0x0A
     };
 
-    enum class text_direction : uint8_t
+    enum class text_direction : std::uint8_t
     {
         Invalid     = 0x00,
         LTR         = 0x01,

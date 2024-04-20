@@ -84,7 +84,7 @@ namespace neogfx
     }
 
     resource::resource(i_resource_manager& aManager, std::string const& aUri, const void* aData, std::size_t aSize) : 
-        iManager{aManager}, iUri{aUri}, iSize{aSize}, iData{reinterpret_cast<const uint8_t*>(aData), reinterpret_cast<const uint8_t*>(aData) + aSize}
+        iManager{aManager}, iUri{aUri}, iSize{aSize}, iData{reinterpret_cast<const std::uint8_t*>(aData), reinterpret_cast<const std::uint8_t*>(aData) + aSize}
     {
     }
 
@@ -168,7 +168,7 @@ namespace neogfx
         if (!iHash)
         {
             hash_digest_type::std_type result{ SHA256_DIGEST_LENGTH };
-            SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+            SHA256(static_cast<const std::uint8_t*>(cdata()), size(), &result[0]);
             iHash = result;
         }
         return *iHash;

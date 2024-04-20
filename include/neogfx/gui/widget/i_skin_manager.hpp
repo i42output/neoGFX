@@ -37,9 +37,9 @@ namespace neogfx
     public:
         virtual ~i_skin_manager() = default;
     public:
-        virtual uint32_t skin_count() const = 0;
-        virtual const i_skin& skin(uint32_t aIndex) const = 0;
-        virtual i_skin& skin(uint32_t aIndex) = 0;
+        virtual std::uint32_t skin_count() const = 0;
+        virtual const i_skin& skin(std::uint32_t aIndex) const = 0;
+        virtual i_skin& skin(std::uint32_t aIndex) = 0;
         virtual void register_skin(i_skin& aSkin) = 0;
         virtual void unregister_skin(i_skin& aSkin) = 0;
     public:

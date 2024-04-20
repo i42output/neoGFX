@@ -46,7 +46,7 @@ namespace chess
         std::optional<bool> isCapture;
         std::optional<piece> promoteTo;
         piece capture = piece::None;
-        enum class castling_piece_index : uint32_t
+        enum class castling_piece_index : std::uint32_t
         {
             QueensRook  = 0x0,
             King        = 0x1,
@@ -85,8 +85,8 @@ namespace chess
 
     typedef std::array<std::array<piece, 8>, 8> mailbox_rep;
     
-    typedef uint64_t bitboard;
-    typedef uint64_t bit_position;
+    typedef std::uint64_t bitboard;
+    typedef std::uint64_t bit_position;
 
     inline constexpr bitboard bit_from_bit_position(bit_position aBitPosition)
     {
@@ -100,7 +100,7 @@ namespace chess
 
     inline constexpr coordinates coordinates_from_bit_position(bit_position aBitPosition)
     {
-        return coordinates{ static_cast<uint32_t>(aBitPosition % 8ull), static_cast<uint32_t>(aBitPosition / 8ull) };
+        return coordinates{ static_cast<std::uint32_t>(aBitPosition % 8ull), static_cast<std::uint32_t>(aBitPosition / 8ull) };
     }
 
     inline constexpr bit_position bit_position_from_coordinates(coordinates const& aPosition)
@@ -378,7 +378,7 @@ namespace chess
             {
                 if (!aPosition.moveHistory.empty() && aCoordinates == aPosition.moveHistory.back().to)
                 {
-                    if (std::abs(static_cast<int32_t>(aPosition.moveHistory.back().from.y) - static_cast<int32_t>(aPosition.moveHistory.back().to.y)) == 2)
+                    if (std::abs(static_cast<std::int32_t>(aPosition.moveHistory.back().from.y) - static_cast<std::int32_t>(aPosition.moveHistory.back().to.y)) == 2)
                     {
                         if (aPosition.checkTest->to == coordinates{ aPosition.moveHistory.back().to.x, piece_color(movingPiece) == piece::White ? aPosition.moveHistory.back().to.y + 1 : aPosition.moveHistory.back().to.y - 1 })
                         {

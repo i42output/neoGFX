@@ -39,7 +39,7 @@ namespace neogfx
     {
         BOOL CALLBACK count_display_monitors_proc(HMONITOR, HDC, LPRECT, LPARAM aDisplayCount)
         {
-            ++*reinterpret_cast<uint32_t*>(aDisplayCount);
+            ++*reinterpret_cast<std::uint32_t*>(aDisplayCount);
             return true;
         }
 
@@ -52,7 +52,7 @@ namespace neogfx
             basic_rect<LONG> monitorRect{ basic_point<LONG>{ mi.rcMonitor.left, mi.rcMonitor.top }, basic_size<LONG>{ mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top } };
             basic_rect<LONG> workAreaRect{ basic_point<LONG>{ mi.rcWork.left, mi.rcWork.top }, basic_size<LONG>{ mi.rcWork.right - mi.rcWork.left, mi.rcWork.bottom - mi.rcWork.top } };
             auto& displayList = *reinterpret_cast<std::vector<std::unique_ptr<i_display>>*>(aDisplayList);
-            displayList.push_back(std::make_unique<native::windows::display>(static_cast<uint32_t>(displayList.size()), monitorRect, workAreaRect, reinterpret_cast<void*>(aMonitor), reinterpret_cast<void*>(GetDC(NULL))));
+            displayList.push_back(std::make_unique<native::windows::display>(static_cast<std::uint32_t>(displayList.size()), monitorRect, workAreaRect, reinterpret_cast<void*>(aMonitor), reinterpret_cast<void*>(GetDC(NULL))));
             return true;
         }
 
@@ -137,7 +137,7 @@ namespace neogfx
             tinyfd_messageBox(aParentWindowHandle, aTitle.c_str(), aMessage.c_str(), "ok", "error", 1);
         }
 
-        uint32_t basic_services::display_count() const
+        std::uint32_t basic_services::display_count() const
         {
             // todo: invalidate diplay count if monitor connected/disconnected
             if (iDisplayCount == std::nullopt)
@@ -148,7 +148,7 @@ namespace neogfx
             return *iDisplayCount;
         }
 
-        i_display& basic_services::display(uint32_t aDisplayIndex) const
+        i_display& basic_services::display(std::uint32_t aDisplayIndex) const
         {
             // todo: invalidate diplays if monitor connected/disconnected
             if (iDisplays.size() != display_count())
@@ -239,15 +239,15 @@ namespace neogfx
                             // todo: this is a naive implementation not yet supporting all DIB formats...
                             auto const& bitmapInfo = *reinterpret_cast<BITMAPINFO const*>(::GlobalLock(hMem));
                             result.resize(basic_size<LONG>{ bitmapInfo.bmiHeader.biWidth, std::abs(bitmapInfo.bmiHeader.biHeight) });
-                            int32_t const cx = static_cast<int32_t>(result.extents().cx);
-                            int32_t const cy = static_cast<int32_t>(result.extents().cy);
+                            std::int32_t const cx = static_cast<std::int32_t>(result.extents().cx);
+                            std::int32_t const cy = static_cast<std::int32_t>(result.extents().cy);
                             auto const memStart = reinterpret_cast<RGBQUAD const*>(reinterpret_cast<std::byte const*>(&bitmapInfo) + 
                                 bitmapInfo.bmiHeader.biSize) + 3;
-                            for (int32_t y = 0; y < cy; ++y)
+                            for (std::int32_t y = 0; y < cy; ++y)
                             {
                                 auto src = memStart + (bitmapInfo.bmiHeader.biHeight >= 0 ? (cy - y - 1) * cx : y * cx);
                                 auto dst = static_cast<avec4u8*>(result.data()) + y * cx;
-                                for (int32_t x = 0; x < cx; ++x)
+                                for (std::int32_t x = 0; x < cx; ++x)
                                 {
                                     *dst++ = { src->rgbRed, src->rgbGreen, src->rgbBlue, 0xFF };
                                     ++src;

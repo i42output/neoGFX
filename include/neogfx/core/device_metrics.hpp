@@ -31,12 +31,12 @@ namespace neogfx
 
     inline dimension x2_dpi_scale_factor(dimension aPpi)
     {
-        return static_cast<dimension>(static_cast<int32_t>(aPpi / HIGH_DPI_PPI) + 1.0);
+        return static_cast<dimension>(static_cast<std::int32_t>(aPpi / HIGH_DPI_PPI) + 1.0);
     }
 
     inline dimension xn_dpi_scale_factor(dimension aPpi)
     {
-        return static_cast<dimension>(static_cast<int32_t>(aPpi / (DPI_DIVISOR + 1.0)) + 1) * (DPI_DIVISOR / STANDARD_DPI_PPI);
+        return static_cast<dimension>(static_cast<std::int32_t>(aPpi / (DPI_DIVISOR + 1.0)) + 1) * (DPI_DIVISOR / STANDARD_DPI_PPI);
     }
 
     enum class dpi_scale_type

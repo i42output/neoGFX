@@ -176,8 +176,8 @@ namespace video_poker
             cursor.y += valueDimensions.cy;
         }
         iValueTextures.emplace(card::value::Joker, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position(), valueDimensions } });
-        for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<uint32_t>(v) + 1))
-            iValueTextures.emplace(v, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position() + ng::point{0.0, (static_cast<uint32_t>(card::value::Ace) - static_cast<uint32_t>(v)) * valueDimensions.cy}, valueDimensions } });
+        for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<std::uint32_t>(v) + 1))
+            iValueTextures.emplace(v, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position() + ng::point{0.0, (static_cast<std::uint32_t>(card::value::Ace) - static_cast<std::uint32_t>(v)) * valueDimensions.cy}, valueDimensions } });
         iSuitTextures.emplace(card::suit::Club, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/club.png" }));
         iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/diamond.png" }));
         iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/spade.png" }));

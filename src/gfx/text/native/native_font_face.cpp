@@ -240,12 +240,12 @@ namespace neogfx
         return !FT_IS_SCALABLE(iHandle.freetypeFace);
     }
 
-    uint32_t native_font_face::num_fixed_sizes() const
+    std::uint32_t native_font_face::num_fixed_sizes() const
     {
         return iHandle.freetypeFace->num_fixed_sizes;
     }
 
-    font::point_size native_font_face::fixed_size(uint32_t aFixedSizeIndex) const
+    font::point_size native_font_face::fixed_size(std::uint32_t aFixedSizeIndex) const
     {
         if (aFixedSizeIndex < num_fixed_sizes())
             return iHandle.freetypeFace->available_sizes[aFixedSizeIndex].size / 64.0;
@@ -490,16 +490,16 @@ namespace neogfx
                 subpixelGlyphData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
                 // sub-pixel FIR filter.
                 static double coefficients[] = { 1.5 / 16.0, 3.5 / 16.0, 6.0 / 16.0, 3.5 / 16.0, 1.5 / 16.0 };
-                for (uint32_t y = 0; y < bitmap->rows; y++)
+                for (std::uint32_t y = 0; y < bitmap->rows; y++)
                 {
-                    for (uint32_t x = 0; x < bitmap->width; x++)
+                    for (std::uint32_t x = 0; x < bitmap->width; x++)
                     {
-                        uint8_t alpha = 0;
-                        for (int32_t z = -2; z <= 2; ++z)
+                        std::uint8_t alpha = 0;
+                        for (std::int32_t z = -2; z <= 2; ++z)
                         {
-                            int32_t const s = x + z;
-                            if (s >= 0 && s <= static_cast<int32_t>(bitmap->width) - 1)
-                                alpha += static_cast<uint8_t>(bitmap->buffer[s + bitmap->pitch * y] * coefficients[z + 2]);
+                            std::int32_t const s = x + z;
+                            if (s >= 0 && s <= static_cast<std::int32_t>(bitmap->width) - 1)
+                                alpha += static_cast<std::uint8_t>(bitmap->buffer[s + bitmap->pitch * y] * coefficients[z + 2]);
                         }
                         subpixelGlyphData[(x / 3) + (bitmap->rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)][x % 3] = alpha;
                     }
@@ -509,18 +509,18 @@ namespace neogfx
             else
             {
                 glyphTextureData.resize(static_cast<std::size_t>(glyphRect.cx * glyphRect.cy));
-                for (uint32_t y = 0; y < bitmap->rows; y++)
+                for (std::uint32_t y = 0; y < bitmap->rows; y++)
                     switch (bitmap->pixel_mode)
                     {
                     case FT_PIXEL_MODE_MONO: // 1 bit per pixel monochrome
-                        for (uint32_t x = 0; x < bitmap->width; x += 8)
-                            for (uint32_t b = 0; b < std::min(bitmap->width - x, 8u); ++b)
+                        for (std::uint32_t x = 0; x < bitmap->width; x += 8)
+                            for (std::uint32_t b = 0; b < std::min(bitmap->width - x, 8u); ++b)
                                 glyphTextureData[(x + b) + (bitmap->rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
                                     (x >= bitmap->width || y >= bitmap->rows) ? 0x00 : ((bitmap->buffer[x / 8 + bitmap->pitch * y] & (1 << (7 - b))) != 0 ? 0xFF : 0x00);
                         break;
                     case FT_PIXEL_MODE_GRAY:
                     default:
-                        for (uint32_t x = 0; x < bitmap->width; x++)
+                        for (std::uint32_t x = 0; x < bitmap->width; x++)
                             glyphTextureData[x + (bitmap->rows - 1 - y) * static_cast<std::size_t>(glyphRect.cx)] =
                                 (x >= bitmap->width || y >= bitmap->rows) ? 0x00 : bitmap->buffer[x + bitmap->pitch * y];
                         break;

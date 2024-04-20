@@ -28,7 +28,7 @@ namespace neogfx
     {
     public:
         typedef i_status_bar abstract_type;
-        typedef uint32_t widget_index;
+        typedef std::uint32_t widget_index;
     public:
         virtual ~i_status_bar() = default;
     public:

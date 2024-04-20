@@ -71,7 +71,7 @@ namespace chess
     {
     }
 
-    uint64_t human::nodes_per_second() const
+    std::uint64_t human::nodes_per_second() const
     {
         return 0;
     }

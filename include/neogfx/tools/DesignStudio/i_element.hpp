@@ -45,7 +45,7 @@ namespace neogfx::DesignStudio
         virtual void end_drag() = 0;
     };
 
-    enum class element_group : uint32_t
+    enum class element_group : std::uint32_t
     {
         Unknown,
         Perspective,

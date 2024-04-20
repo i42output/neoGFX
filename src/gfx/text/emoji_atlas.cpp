@@ -66,7 +66,7 @@ namespace neogfx
                             {
                                 std::stringstream ss;
                                 ss << std::hex << hexCodePoint;
-                                uint32_t x;
+                                std::uint32_t x;
                                 ss >> x;
                                 if (x < 256)
                                     break;

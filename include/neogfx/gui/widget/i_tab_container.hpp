@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    enum class tab_container_style : uint32_t
+    enum class tab_container_style : std::uint32_t
     {
         TabAlignmentTop             = 0x0000,
         TabAlignmentBottom          = 0x0001,
@@ -41,15 +41,15 @@ namespace neogfx
     };
     inline tab_container_style operator|(tab_container_style aLhs, tab_container_style aRhs)
     {
-        return static_cast<tab_container_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<tab_container_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
     inline tab_container_style operator&(tab_container_style aLhs, tab_container_style aRhs)
     {
-        return static_cast<tab_container_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<tab_container_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
     inline tab_container_style operator~(tab_container_style aLhs)
     {
-        return static_cast<tab_container_style>(~static_cast<uint32_t>(aLhs));
+        return static_cast<tab_container_style>(~static_cast<std::uint32_t>(aLhs));
     }
 
     class i_tab_container
@@ -57,7 +57,7 @@ namespace neogfx
     public:
         declare_event(style_changed)
     public:
-        typedef uint32_t tab_index;
+        typedef std::uint32_t tab_index;
         typedef std::optional<tab_index> optional_tab_index;
     public:
         struct tab_not_found : std::logic_error { tab_not_found() : std::logic_error("neogfx::i_tab_container::tab_not_found") {} };
@@ -71,7 +71,7 @@ namespace neogfx
         virtual void set_tab_icon_size(const size& aIconSize) = 0;
     public:
         virtual bool has_tabs() const noexcept = 0;
-        virtual uint32_t tab_count() const noexcept = 0;
+        virtual std::uint32_t tab_count() const noexcept = 0;
         virtual tab_index index_of(const i_tab& aTab) const = 0;
         virtual const i_tab& tab(tab_index aTabIndex) const = 0;
         virtual i_tab& tab(tab_index aTabIndex) = 0;

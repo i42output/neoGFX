@@ -107,7 +107,7 @@ namespace chess
                                 auto calc_validity = [&](move_tables<mailbox_rep>::unit_moves const& aUnitMoves, bool& aResult) 
                                 {
                                     aResult = false;
-                                    auto const delta = move_coordinates{ static_cast<int32_t>(xTo), static_cast<int32_t>(yTo) } - move_coordinates{ static_cast<int32_t>(xFrom), static_cast<int32_t>(yFrom) };
+                                    auto const delta = move_coordinates{ static_cast<std::int32_t>(xTo), static_cast<std::int32_t>(yTo) } - move_coordinates{ static_cast<std::int32_t>(xFrom), static_cast<std::int32_t>(yFrom) };
                                     auto const& unitMoves = aUnitMoves[pieceColorIndex][pieceTypeIndex];
                                     if (std::find(unitMoves.begin(), unitMoves.end(), delta) != unitMoves.end())
                                         aResult = true;

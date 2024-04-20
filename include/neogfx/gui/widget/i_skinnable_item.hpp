@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_widget;
 
-    enum class skin_element : uint32_t
+    enum class skin_element : std::uint32_t
     {
         ClickableArea,
         Scrollbar,

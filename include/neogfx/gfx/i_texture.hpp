@@ -34,13 +34,13 @@ namespace neogfx
     class i_render_target;
     class i_native_texture;
 
-    enum class texture_type : uint32_t
+    enum class texture_type : std::uint32_t
     {
         Texture,
         SubTexture
     };
 
-    enum class texture_sampling : uint32_t
+    enum class texture_sampling : std::uint32_t
     {
         Normal,
         NormalMipmap,
@@ -54,7 +54,7 @@ namespace neogfx
         Multisample32x
     };
 
-    enum class texture_data_format : uint32_t
+    enum class texture_data_format : std::uint32_t
     {
         // todo: add remaining GL texture data formats
         RGBA        = 0x01,
@@ -62,7 +62,7 @@ namespace neogfx
         SubPixel    = 0x03
     };
 
-    enum class texture_data_type : uint32_t
+    enum class texture_data_type : std::uint32_t
     {
         // todo: add remaining GL texture data types
         UnsignedByte,
@@ -103,13 +103,13 @@ namespace neogfx
         virtual dimension dpi_scale_factor() const = 0;
         virtual neogfx::color_space color_space() const = 0;
         virtual texture_sampling sampling() const = 0;
-        virtual uint32_t samples() const = 0;
+        virtual std::uint32_t samples() const = 0;
         virtual texture_data_format data_format() const = 0;
         virtual texture_data_type data_type() const = 0;
         virtual bool is_empty() const = 0;
         virtual size extents() const = 0;
         virtual size storage_extents() const = 0;
-        virtual void set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment = 4u) = 0;
+        virtual void set_pixels(const rect& aRect, const void* aPixelData, std::uint32_t aPackAlignment = 4u) = 0;
         virtual void set_pixels(const i_image& aImage) = 0;
         virtual void set_pixels(const i_image& aImage, const rect& aImagePart) = 0;
         virtual void set_pixel(const point& aPosition, const color& aColor) = 0;

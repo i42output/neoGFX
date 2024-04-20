@@ -117,7 +117,7 @@ namespace neogfx
             size{};
     }
 
-    dimension list_view::column_width(uint32_t) const
+    dimension list_view::column_width(std::uint32_t) const
     {
         return has_presentation_model() ? 
             presentation_model().column_width(0, graphics_context{ *this, graphics_context::type::Unattached }) : 0.0;

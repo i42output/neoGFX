@@ -86,7 +86,7 @@ namespace neogfx::nrc
                         emit("   %1%.model().insert_item(%1%.model().end(), %2%);\n", id(), item.get<bool>());
                         break;
                     case neolib::simple_variant_type::Integer:
-                        emit("   %1%.model().insert_item(%1%.model().end(), %2%);\n", id(), item.get<int64_t>());
+                        emit("   %1%.model().insert_item(%1%.model().end(), %2%);\n", id(), item.get<std::int64_t>());
                         break;
                     case neolib::simple_variant_type::Real:
                         emit("   %1%.model().insert_item(%1%.model().end(), %2%);\n", id(), item.get<double>());

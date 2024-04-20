@@ -30,7 +30,7 @@
 
 namespace neogfx
 {
-    enum class anchor_constraint_function : uint32_t
+    enum class anchor_constraint_function : std::uint32_t
     {
         Invalid         = 0x00000000,
 
@@ -80,17 +80,17 @@ namespace neogfx
 
     inline constexpr anchor_constraint_function operator~(anchor_constraint_function lhs)
     {
-        return static_cast<anchor_constraint_function>(~static_cast<uint32_t>(lhs));
+        return static_cast<anchor_constraint_function>(~static_cast<std::uint32_t>(lhs));
     }
 
     inline constexpr anchor_constraint_function operator&(anchor_constraint_function lhs, anchor_constraint_function rhs)
     {
-        return static_cast<anchor_constraint_function>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+        return static_cast<anchor_constraint_function>(static_cast<std::uint32_t>(lhs) & static_cast<std::uint32_t>(rhs));
     }
 
     inline constexpr anchor_constraint_function operator|(anchor_constraint_function lhs, anchor_constraint_function rhs)
     {
-        return static_cast<anchor_constraint_function>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+        return static_cast<anchor_constraint_function>(static_cast<std::uint32_t>(lhs) | static_cast<std::uint32_t>(rhs));
     }
 }
 

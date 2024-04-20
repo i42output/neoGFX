@@ -28,7 +28,7 @@ namespace neogfx
 {
     namespace detail
     {
-        typedef std::pair<uint32_t, text_category> text_category_MAP_VALUE_TYPE;
+        typedef std::pair<std::uint32_t, text_category> text_category_MAP_VALUE_TYPE;
         const text_category_MAP_VALUE_TYPE text_category_MAP[] =
         {
 			{ 0x00000, text_category::Whitespace },

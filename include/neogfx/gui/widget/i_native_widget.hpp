@@ -23,9 +23,29 @@
 
 namespace neogfx
 {
+    enum native_widget_style : std::uint32_t
+    {
+        Default         = 0x00000000,
+        Transparent     = 0x00000001,
+        ClickThrough    = 0x00000002,
+    };
+
+    inline constexpr native_widget_style operator|(native_widget_style aLhs, native_widget_style aRhs)
+    {
+        return static_cast<native_widget_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr native_widget_style operator&(native_widget_style aLhs, native_widget_style aRhs)
+    {
+        return static_cast<native_widget_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
     class i_native_widget
     {
     public:
         virtual ~i_native_widget() = default;
+    public:
+        virtual native_widget_style style() const = 0;
+        virtual void set_style(native_widget_style aStyle) = 0;
     };
 }

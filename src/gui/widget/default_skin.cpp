@@ -281,7 +281,7 @@ namespace neogfx
         auto ink1 = (aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Base));
         ink1 = ink1.shaded(0x60);
         auto ink2 = ink1.darker(0x30);
-        for (uint32_t i = 1u; i < aLayout.count(); ++i) 
+        for (std::uint32_t i = 1u; i < aLayout.count(); ++i) 
         {
             if (aLayout.item_at(i - 1u).is_layout() && (!aLayout.item_at(i - 1u).as_layout().enabled() || aLayout.item_at(i - 1u).as_layout().count() == 0))
                 continue;

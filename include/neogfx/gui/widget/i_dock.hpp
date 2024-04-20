@@ -29,7 +29,7 @@ namespace neogfx
 {
     class i_dockable;
 
-    enum class dock_area : uint32_t
+    enum class dock_area : std::uint32_t
     {
         None        = 0x00000000,
         Top         = 0x00000001,
@@ -47,12 +47,12 @@ namespace neogfx
 
     inline constexpr dock_area operator|(dock_area aLhs, dock_area aRhs)
     {
-        return static_cast<dock_area>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<dock_area>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr dock_area operator&(dock_area aLhs, dock_area aRhs)
     {
-        return static_cast<dock_area>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<dock_area>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 }
 

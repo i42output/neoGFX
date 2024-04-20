@@ -37,7 +37,7 @@ namespace neogfx
 
     class i_glyph_text_factory;
 
-    enum class system_font_role : uint32_t
+    enum class system_font_role : std::uint32_t
     {
         Caption,
         Menu,
@@ -87,11 +87,11 @@ namespace neogfx
         virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const font_info& aInfo, const i_device_resolution& aDevice) = 0;
     public:
-        virtual uint32_t font_family_count() const = 0;
-        virtual i_string const& font_family(uint32_t aFamilyIndex) const = 0;
-        virtual uint32_t font_style_count(uint32_t aFamilyIndex) const = 0;
-        virtual neogfx::font_style font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const = 0;
-        virtual i_string const& font_style_name(uint32_t aFamilyIndex, uint32_t aStyleIndex) const = 0;
+        virtual std::uint32_t font_family_count() const = 0;
+        virtual i_string const& font_family(std::uint32_t aFamilyIndex) const = 0;
+        virtual std::uint32_t font_style_count(std::uint32_t aFamilyIndex) const = 0;
+        virtual neogfx::font_style font_style(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const = 0;
+        virtual i_string const& font_style_name(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const = 0;
     private:
         virtual font_id allocate_font_id() = 0;
     public:
@@ -106,10 +106,10 @@ namespace neogfx
     public:
         bool has_font(std::string const& aFamily, std::string const& aStyle) const
         {
-            for (uint32_t familyIndex = 0; familyIndex < font_family_count(); ++familyIndex)
+            for (std::uint32_t familyIndex = 0; familyIndex < font_family_count(); ++familyIndex)
                 if (font_family(familyIndex).to_std_string_view() == aFamily)
                 {
-                    for (uint32_t styleIndex = 0; styleIndex < font_style_count(familyIndex); ++styleIndex)
+                    for (std::uint32_t styleIndex = 0; styleIndex < font_style_count(familyIndex); ++styleIndex)
                         if (font_style_name(familyIndex, styleIndex).to_std_string_view() == aStyle)
                             return true;
                     return false;

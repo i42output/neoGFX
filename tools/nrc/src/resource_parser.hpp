@@ -37,6 +37,6 @@ namespace neogfx::nrc
         const boost::filesystem::path iInputFilename;
         const neolib::fjson_string iNamespace;
         std::ofstream& iOutput;
-        uint32_t iResourceIndex;
+        std::uint32_t iResourceIndex;
     };
 }

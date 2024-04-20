@@ -130,8 +130,8 @@ namespace neogfx
 
     void dialog_button_box::add_buttons(standard_button aStandardButtons)
     {
-        uint32_t buttons = static_cast<uint32_t>(aStandardButtons);
-        uint32_t bit = 0;
+        std::uint32_t buttons = static_cast<std::uint32_t>(aStandardButtons);
+        std::uint32_t bit = 0;
         while (bit < 32)
         {
             auto button = buttons & (1 << bit++);
@@ -159,8 +159,8 @@ namespace neogfx
 
     bool dialog_button_box::has_reject_role(standard_button aStandardButtons)
     {
-        uint32_t buttons = static_cast<uint32_t>(aStandardButtons);
-        uint32_t bit = 0;
+        std::uint32_t buttons = static_cast<std::uint32_t>(aStandardButtons);
+        std::uint32_t bit = 0;
         while (bit < 32)
         {
             auto button = buttons & (1 << bit++);

@@ -85,7 +85,7 @@ namespace neogfx
             }
             glCheck(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, static_cast<GLuint>(target_texture().native_texture().native_handle())));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
-            set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<int32_t>() });
+            set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<std::int32_t>() });
             GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
             glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         }
@@ -155,7 +155,7 @@ namespace neogfx
         if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
         
-        set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<int32_t>() });
+        set_viewport(rect_i32{ point_i32{ 0, 0 }, extents().as<std::int32_t>() });
         
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));

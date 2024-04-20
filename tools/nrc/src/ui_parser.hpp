@@ -54,7 +54,7 @@ namespace neogfx::nrc
         using base_type::generate_anonymous_id;
         void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const override;
         using i_ui_element_parser::indent;
-        void indent(int32_t aLevel, neolib::i_string& aResult) const override;
+        void indent(std::int32_t aLevel, neolib::i_string& aResult) const override;
         using base_type::emit;
         void emit(const neolib::i_string& aText) const override;
     private:
@@ -86,7 +86,7 @@ namespace neogfx::nrc
         mutable const neolib::fjson_value* iCurrentFragment;
         mutable std::map<std::pair<const neolib::fjson_object*, std::string>, data_t> iDataCache;
         mutable std::map<std::pair<const neolib::fjson_object*, std::string>, array_data_t> iArrayDataCache;
-        mutable uint32_t iAnonymousIdCounter;
+        mutable std::uint32_t iAnonymousIdCounter;
         mutable index_t iIndex;
     };
 }

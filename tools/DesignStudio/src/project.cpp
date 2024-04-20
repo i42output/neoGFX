@@ -62,7 +62,7 @@ namespace neogfx::DesignStudio
             }
             else if (item.name() == "ui")
             {
-                std::map<std::string, uint32_t> counters;
+                std::map<std::string, std::uint32_t> counters;
                 std::function<void(i_element&, neolib::fjson_value const&)> add_node = [&](i_element& aParent, neolib::fjson_value const& aNode)
                 {
                     if (aParent.has_parent() && aParent.parent().has_parent())

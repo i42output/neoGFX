@@ -45,7 +45,7 @@ namespace chess
     public:
         typedef Representation representation_type;
     public:
-        ai(int32_t aPly = 4);
+        ai(std::int32_t aPly = 4);
         ~ai();
     public:
         player_type type() const override;
@@ -60,13 +60,13 @@ namespace chess
         void undo() override;
         void setup(mailbox_position const& aSetup) override;
     public:
-        uint64_t nodes_per_second() const override;
+        std::uint64_t nodes_per_second() const override;
     private:
         bool do_work(neolib::yield_type aYieldType = neolib::yield_type::NoYield) override;
     private:
         game_tree_node const* execute();
     private:
-        int32_t iPly;
+        std::int32_t iPly;
         move_tables<representation_type> const iMoveTables;
         mutable std::recursive_mutex iMutex;
         basic_position<representation_type> iPosition;
@@ -79,7 +79,7 @@ namespace chess
         std::optional<game_tree_node> iRootNode;
         ng::sink iSink;
         std::optional<std::chrono::steady_clock::time_point> iStartTime;
-        std::optional<uint64_t> iNodesPerSecond;
+        std::optional<std::uint64_t> iNodesPerSecond;
         bool iUseDecimator = false;
     };
 

@@ -33,7 +33,7 @@ namespace neogfx
     {
         meta_object(button<i_push_button>)
     public:
-        static const uint32_t kMaxAnimationFrame = 10;
+        static const std::uint32_t kMaxAnimationFrame = 10;
     public:
         push_button(push_button_style aStyle = push_button_style::Normal);
         push_button(std::string const& aText, push_button_style aStyle = push_button_style::Normal);
@@ -85,12 +85,12 @@ namespace neogfx
         virtual bool finished_animation() const;
         virtual color effective_face_color() const;
         virtual color effective_hover_color() const;
-        virtual color animation_color(uint32_t aAnimationFrame) const;
+        virtual color animation_color(std::uint32_t aAnimationFrame) const;
     private:
         void init();
     private:
         widget_timer iAnimator;
-        uint32_t iAnimationFrame;
+        std::uint32_t iAnimationFrame;
         push_button_style iStyle;
         optional_color iFaceColor;
         optional_color iHoverColor;

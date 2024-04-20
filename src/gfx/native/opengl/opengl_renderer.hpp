@@ -37,15 +37,15 @@ namespace neogfx
     class frame_counter
     {
     public:
-        frame_counter(uint32_t aDuration);
+        frame_counter(std::uint32_t aDuration);
     public:
-        uint32_t counter() const;
+        std::uint32_t counter() const;
     public:
         void add(i_widget& aWidget);
         void remove(i_widget& aWidget);
     private:
         neolib::callback_timer iTimer;
-        uint32_t iCounter;
+        std::uint32_t iCounter;
         std::vector<i_widget*> iWidgets;
     };
 
@@ -113,14 +113,14 @@ namespace neogfx
         void subpixel_rendering_off() override;
         bool frame_rate_limited() const override;
         void enable_frame_rate_limiter(bool aEnable) override;
-        uint32_t frame_rate_limit() const override;
-        void set_frame_rate_limit(uint32_t aFps) override;
+        std::uint32_t frame_rate_limit() const override;
+        void set_frame_rate_limit(std::uint32_t aFps) override;
     public:
         bool process_events() override;
     public:
-        void register_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
-        void unregister_frame_counter(i_widget& aWidget, uint32_t aDuration) override;
-        uint32_t frame_counter(uint32_t aDuration) const override;
+        void register_frame_counter(i_widget& aWidget, std::uint32_t aDuration) override;
+        void unregister_frame_counter(i_widget& aWidget, std::uint32_t aDuration) override;
+        std::uint32_t frame_counter(std::uint32_t aDuration) const override;
         i_texture& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling);
     private:
         neogfx::renderer iRenderer;
@@ -128,12 +128,12 @@ namespace neogfx
         mutable std::optional<neogfx::font_manager> iFontManager;
         mutable shader_program_list iShaderPrograms;
         bool iLimitFrameRate;
-        uint32_t iFrameRateLimit;
+        std::uint32_t iFrameRateLimit;
         bool iSubpixelRendering;
         typedef std::unordered_map<i_vertex_provider*, opengl_vertex_buffer<>> vertex_buffers_map;
         mutable vertex_buffers_map iVertexBuffers;
         mutable std::optional<vertex_buffers_map::iterator> iLastVertexBufferUsed;
-        std::map<uint32_t, neogfx::frame_counter> iFrameCounters;
+        std::map<std::uint32_t, neogfx::frame_counter> iFrameCounters;
         mutable std::optional<ping_pong_buffers_t> iPingPongBuffer1s;
         mutable std::optional<ping_pong_buffers_t> iPingPongBuffer2s;
         ref_ptr<i_standard_shader_program> iDefaultShaderProgram;

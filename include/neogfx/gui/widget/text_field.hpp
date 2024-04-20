@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    enum class text_field_placement : uint32_t
+    enum class text_field_placement : std::uint32_t
     {
         NoLabel     = 0x00000000,
         LabelLeft   = 0x00000001,

@@ -31,7 +31,7 @@ namespace neogfx
 {
     class i_spacer;
 
-    enum class label_placement : uint32_t
+    enum class label_placement : std::uint32_t
     {
         Text                        = 0x00000001,
         Image                       = 0x00000002,
@@ -56,12 +56,12 @@ namespace neogfx
 
     inline constexpr label_placement operator|(label_placement aLhs, label_placement aRhs)
     {
-        return static_cast<label_placement>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<label_placement>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr label_placement operator&(label_placement aLhs, label_placement aRhs)
     {
-        return static_cast<label_placement>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<label_placement>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 }
 

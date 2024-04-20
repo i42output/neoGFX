@@ -62,7 +62,7 @@ namespace neogfx
         i_layout& page_layout() override;
     public:
         bool has_tabs() const noexcept override;
-        uint32_t tab_count() const noexcept override;
+        std::uint32_t tab_count() const noexcept override;
         tab_index index_of(const i_tab& aTab) const override;
         const i_tab& tab(tab_index aTabIndex) const override;
         i_tab& tab(tab_index aTabIndex) override;

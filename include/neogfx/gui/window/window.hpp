@@ -219,7 +219,7 @@ namespace neogfx
         bool iReadyToRender;
         string iTitleText;
         window_style iStyle;
-        int32_t iCountedEnable;
+        std::int32_t iCountedEnable;
         i_widget* iEnteredWidget;
         i_widget* iFocusedWidget;
         bool iDismissingChildren;

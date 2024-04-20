@@ -131,7 +131,7 @@ public:
     {
         if (base_type::column_image_size(aIndex.column()))
         {
-            auto const idx = (std::hash<uint32_t>{}(base_type::to_item_model_index(aIndex).row()) + std::hash<uint32_t>{}(base_type::to_item_model_index(aIndex).column())) % 5;
+            auto const idx = (std::hash<std::uint32_t>{}(base_type::to_item_model_index(aIndex).row()) + std::hash<std::uint32_t>{}(base_type::to_item_model_index(aIndex).column())) % 5;
             return iCellImages[idx];
         }
         return ng::optional_texture{};
@@ -193,7 +193,7 @@ private:
 class keypad_button : public ng::push_button
 {
 public:
-    keypad_button(ng::text_edit& aTextEdit, uint32_t aNumber) :
+    keypad_button(ng::text_edit& aTextEdit, std::uint32_t aNumber) :
         ng::push_button{ boost::lexical_cast<std::string>(aNumber) }, iTextEdit{ aTextEdit }
     {
         clicked([this, aNumber]()

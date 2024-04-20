@@ -187,7 +187,7 @@ namespace neogfx
 
     typedef neolib::optional<text_color> optional_text_color;
 
-    enum class text_effect_type : uint32_t
+    enum class text_effect_type : std::uint32_t
     {
         None,
         Outline,

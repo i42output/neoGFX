@@ -57,7 +57,7 @@ namespace neogfx
             }
         }
         using base_type::add_attribute;
-        i_shader_variable& add_attribute(const i_string& aName, uint32_t aLocation, bool aFlat, shader_data_type aType) final
+        i_shader_variable& add_attribute(const i_string& aName, std::uint32_t aLocation, bool aFlat, shader_data_type aType) final
         {
             auto& in = base_type::add_variable(
                 shader_variable

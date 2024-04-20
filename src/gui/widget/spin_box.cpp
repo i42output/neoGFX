@@ -23,14 +23,14 @@
 
 namespace neogfx
 {
-    template class basic_spin_box<int8_t>;
-    template class basic_spin_box<uint8_t>;
+    template class basic_spin_box<std::int8_t>;
+    template class basic_spin_box<std::uint8_t>;
     template class basic_spin_box<int16_t>;
     template class basic_spin_box<uint16_t>;
-    template class basic_spin_box<int32_t>;
-    template class basic_spin_box<uint32_t>;
-    template class basic_spin_box<int64_t>;
-    template class basic_spin_box<uint64_t>;
+    template class basic_spin_box<std::int32_t>;
+    template class basic_spin_box<std::uint32_t>;
+    template class basic_spin_box<std::int64_t>;
+    template class basic_spin_box<std::uint64_t>;
     template class basic_spin_box<float>;
     template class basic_spin_box<double>;
 }

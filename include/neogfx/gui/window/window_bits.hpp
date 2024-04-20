@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    enum class window_style : uint32_t
+    enum class window_style : std::uint32_t
     {
         Invalid                     = 0x00000000,
         NoDecoration                = 0x00000001,    // No decoration at all (useful for splash screens, for example); this style cannot be combined with others
@@ -66,30 +66,30 @@ namespace neogfx
 
     inline constexpr window_style operator~(window_style aStyle)
     {
-        return static_cast<window_style>(~static_cast<uint32_t>(aStyle));
+        return static_cast<window_style>(~static_cast<std::uint32_t>(aStyle));
     }
 
     inline constexpr window_style operator|(window_style aLhs, window_style aRhs)
     {
-        return static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<window_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr window_style operator&(window_style aLhs, window_style aRhs)
     {
-        return static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<window_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr window_style& operator|=(window_style& aLhs, window_style aRhs)
     {
-        return aLhs = static_cast<window_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<window_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr window_style& operator&=(window_style& aLhs, window_style aRhs)
     {
-        return aLhs = static_cast<window_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<window_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
-    enum class window_state : uint32_t
+    enum class window_state : std::uint32_t
     {
         Normal      = 0x00000000,
         Iconized    = 0x00000001,

@@ -358,7 +358,7 @@ namespace neogfx
         mutable optional_rect iScissorRect;
         GLint iPreviousTexture;
         font iLastDrawGlyphFallbackFont;
-        std::optional<uint8_t> iLastDrawGlyphFallbackFontIndex;
+        std::optional<std::uint8_t> iLastDrawGlyphFallbackFontIndex;
         sink iSink;
         optional_vec2 iOffset;
         bool iSnapToPixel;

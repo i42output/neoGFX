@@ -48,11 +48,11 @@ namespace neogfx::game
                 static const string sName = "Mesh";
                 return sName;
             }
-            static uint32_t field_count()
+            static std::uint32_t field_count()
             {
                 return 3;
             }
-            static component_data_field_type field_type(uint32_t aFieldIndex)
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
                 switch (aFieldIndex)
                 {
@@ -66,7 +66,7 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(std::uint32_t aFieldIndex)
             {
                 static const string sFieldNames[] =
                 {
@@ -125,13 +125,13 @@ namespace neogfx::game
     {
         if (aVertices.empty())
             return rect{};
-        point topLeft{ aTransformation * aVertices[static_cast<vertices::size_type>(aFaces[0][static_cast<uint32_t>(0)]) + aOffset] };
+        point topLeft{ aTransformation * aVertices[static_cast<vertices::size_type>(aFaces[0][static_cast<std::uint32_t>(0)]) + aOffset] };
         point bottomRight = topLeft;
         for (auto const& f : aFaces)
         {
             for (faces::size_type fv = 0; fv < 3; ++fv)
             {
-                auto const& v = aTransformation * aVertices[static_cast<vertices::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset];
+                auto const& v = aTransformation * aVertices[static_cast<vertices::size_type>(f[static_cast<std::uint32_t>(fv)]) + aOffset];
                 topLeft.x = std::min<coordinate>(topLeft.x, v.x);
                 topLeft.y = std::min<coordinate>(topLeft.y, v.y);
                 bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);
@@ -146,13 +146,13 @@ namespace neogfx::game
     {
         if (aVertices.empty())
             return rect{};
-        point topLeft{ aTransformation * aVertices[static_cast<typename Container::size_type>(aFaces[0][static_cast<uint32_t>(0)]) + aOffset].xyz };
+        point topLeft{ aTransformation * aVertices[static_cast<typename Container::size_type>(aFaces[0][static_cast<std::uint32_t>(0)]) + aOffset].xyz };
         point bottomRight = topLeft;
         for (auto const& f : aFaces)
         {
             for (faces::size_type fv = 0; fv < 3; ++fv)
             {
-                auto const& v = aTransformation * aVertices[static_cast<typename Container::size_type>(f[static_cast<uint32_t>(fv)]) + aOffset].xyz;
+                auto const& v = aTransformation * aVertices[static_cast<typename Container::size_type>(f[static_cast<std::uint32_t>(fv)]) + aOffset].xyz;
                 topLeft.x = std::min<coordinate>(topLeft.x, v.x);
                 topLeft.y = std::min<coordinate>(topLeft.y, v.y);
                 bottomRight.x = std::max<coordinate>(bottomRight.x, v.x);
@@ -167,16 +167,16 @@ namespace neogfx::game
         return bounding_rect(aMesh.vertices);
     }
 
-    inline faces default_faces(uint32_t aVertexCount, uint32_t aOffset = 0u)
+    inline faces default_faces(std::uint32_t aVertexCount, std::uint32_t aOffset = 0u)
     {
         faces faces;
-        for (uint32_t i = aOffset; i < aVertexCount + aOffset; i += 3u)
+        for (std::uint32_t i = aOffset; i < aVertexCount + aOffset; i += 3u)
             faces.push_back(face{ i, i + 1u, i + 2u });
         return faces;
     }
 
-    inline faces default_faces(const vertices& aVertices, uint32_t aOffset = 0u)
+    inline faces default_faces(const vertices& aVertices, std::uint32_t aOffset = 0u)
     {
-        return default_faces(static_cast<uint32_t>(aVertices.size()), aOffset);
+        return default_faces(static_cast<std::uint32_t>(aVertices.size()), aOffset);
     }
 }

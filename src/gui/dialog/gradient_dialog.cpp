@@ -17,6 +17,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include <neogfx/gui/dialog/gradient_dialog.hpp>
@@ -315,7 +317,7 @@ namespace neogfx
         iHueSlider.set_step(1.0);
         iHueSlider.disable();
         neogfx::gradient::color_stop_list hues;
-        for (uint32_t s = 0; s < neogfx::gradient::MaxStops; ++s)
+        for (std::uint32_t s = 0; s < neogfx::gradient::MaxStops; ++s)
         {
             double const pos = s / static_cast<double>((neogfx::gradient::MaxStops - 1));
             hues.emplace_back(pos, color::from_hsv(pos * 360.0, 1.0, 1.0));
@@ -604,8 +606,8 @@ namespace neogfx
         iTile.check_box().set_checked(gradient().tile() != std::nullopt);
         if (gradient().tile() != std::nullopt)
         {
-            iTileWidth.set_value(static_cast<uint32_t>(gradient().tile()->extents.cx));
-            iTileHeight.set_value(static_cast<uint32_t>(gradient().tile()->extents.cy));
+            iTileWidth.set_value(static_cast<std::uint32_t>(gradient().tile()->extents.cx));
+            iTileHeight.set_value(static_cast<std::uint32_t>(gradient().tile()->extents.cy));
         }
         else
         {

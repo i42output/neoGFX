@@ -17,6 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <neolib/core/string_utils.hpp>

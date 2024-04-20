@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    enum class object_type : uint64_t
+    enum class object_type : std::uint64_t
     {
         Invalid                         = 0x0000000000000000,
         None                            = 0x0000000000000000,
@@ -106,12 +106,12 @@ namespace neogfx
 
     inline constexpr object_type operator|(object_type aLhs, object_type aRhs)
     {
-        return static_cast<object_type>(static_cast<uint64_t>(aLhs) | static_cast<uint64_t>(aRhs));
+        return static_cast<object_type>(static_cast<std::uint64_t>(aLhs) | static_cast<std::uint64_t>(aRhs));
     }
 
     inline constexpr object_type operator&(object_type aLhs, object_type aRhs)
     {
-        return static_cast<object_type>(static_cast<uint64_t>(aLhs)& static_cast<uint64_t>(aRhs));
+        return static_cast<object_type>(static_cast<std::uint64_t>(aLhs)& static_cast<std::uint64_t>(aRhs));
     }
 
     inline constexpr object_type category(object_type aType)

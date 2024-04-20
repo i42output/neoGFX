@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-    enum class mouse_button : uint32_t
+    enum class mouse_button : std::uint32_t
     {
         None    = 0x00,
         Left    = 0x01,
@@ -40,7 +40,7 @@ namespace neogfx
         Other   = 0x20
     };
 
-    enum class mouse_wheel : uint32_t
+    enum class mouse_wheel : std::uint32_t
     {
         None        = 0x00,
         Vertical    = 0x01,
@@ -91,17 +91,17 @@ namespace neogfx
 
     inline mouse_button operator|(mouse_button aLhs, mouse_button aRhs)
     {
-        return static_cast<mouse_button>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<mouse_button>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline mouse_button operator&(mouse_button aLhs, mouse_button aRhs)
     {
-        return static_cast<mouse_button>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+        return static_cast<mouse_button>(static_cast<std::uint32_t>(aLhs)& static_cast<std::uint32_t>(aRhs));
     }
 
     inline mouse_button operator~(mouse_button aLhs)
     {
-        return static_cast<mouse_button>(~static_cast<uint32_t>(aLhs));
+        return static_cast<mouse_button>(~static_cast<std::uint32_t>(aLhs));
     }
 
     inline mouse_button& operator|=(mouse_button& aLhs, mouse_button aRhs)
@@ -118,22 +118,22 @@ namespace neogfx
 
     inline mouse_wheel operator|(mouse_wheel aLhs, mouse_wheel aRhs)
     {
-        return static_cast<mouse_wheel>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<mouse_wheel>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline mouse_wheel operator&(mouse_wheel aLhs, mouse_wheel aRhs)
     {
-        return static_cast<mouse_wheel>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+        return static_cast<mouse_wheel>(static_cast<std::uint32_t>(aLhs)& static_cast<std::uint32_t>(aRhs));
     }
 
     inline mouse_wheel operator~(mouse_wheel aLhs)
     {
-        return static_cast<mouse_wheel>(~static_cast<uint32_t>(aLhs));
+        return static_cast<mouse_wheel>(~static_cast<std::uint32_t>(aLhs));
     }
 
     class i_surface;
 
-    enum class mouse_capture_type : uint32_t
+    enum class mouse_capture_type : std::uint32_t
     {
         None,
         Normal,

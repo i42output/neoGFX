@@ -584,7 +584,7 @@ namespace neogfx::nrc
         data_names_t iDataNames;
         neolib::optional<neolib::string> iId;
         mutable neolib::optional<neolib::string> iAnonymousId;
-        mutable uint32_t iAnonymousIdCounter;
+        mutable std::uint32_t iAnonymousIdCounter;
         ui_element_type iType;
         children_t iChildren;
         neolib::set<neolib::string> iRefs;

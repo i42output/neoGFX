@@ -100,8 +100,8 @@ namespace neogfx::nrc
     public:
         grid_layout(const i_ui_element_parser& aParser, i_ui_element& aParent) :
             base_type{ aParser, aParent },
-            iRows{ aParser.get_optional<uint32_t>("rows") },
-            iColumns{ aParser.get_optional<uint32_t>("columns") }
+            iRows{ aParser.get_optional<std::uint32_t>("rows") },
+            iColumns{ aParser.get_optional<std::uint32_t>("columns") }
         {
             add_data_names({ "rows", "columns" });
         }
@@ -122,8 +122,8 @@ namespace neogfx::nrc
             base_type::emit_body();
         }
     public:
-        neolib::optional<uint32_t> iRows;
-        neolib::optional<uint32_t> iColumns;
+        neolib::optional<std::uint32_t> iRows;
+        neolib::optional<std::uint32_t> iColumns;
     };
 
     typedef basic_layout<ui_element_type::VerticalLayout> vertical_layout;

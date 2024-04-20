@@ -69,7 +69,7 @@ namespace neogfx::nrc
         virtual const i_ui_element* find(const neolib::i_string& aId) const = 0;
         virtual const i_ui_element& at(const neolib::i_string& aId) const = 0;
         virtual void generate_anonymous_id(neolib::i_string& aNewAnonymousId) const = 0;
-        virtual void indent(int32_t aLevel, neolib::i_string& aResult) const = 0;
+        virtual void indent(std::int32_t aLevel, neolib::i_string& aResult) const = 0;
         virtual void emit(const neolib::i_string& aText) const = 0;
         // implementation
     private:
@@ -88,7 +88,7 @@ namespace neogfx::nrc
             generate_anonymous_id(result);
             return result;
         }
-        std::string indent(int32_t aLevel) const
+        std::string indent(std::int32_t aLevel) const
         {
             neolib::string result;
             indent(aLevel, result);
@@ -141,7 +141,7 @@ namespace neogfx::nrc
             if (data_exists(aKey))
             {
                 if constexpr (std::is_integral_v<T> && !std::is_same_v<T, bool>)
-                    return static_cast<T>(get_data(aKey).get<int64_t>());
+                    return static_cast<T>(get_data(aKey).get<std::int64_t>());
                 else
                     return get_data(aKey).get<abstract_t<T>>();
             }

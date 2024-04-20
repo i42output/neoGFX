@@ -126,12 +126,12 @@ namespace neogfx
         MenuChanged.trigger();
     }
 
-    uint32_t menu::count() const
+    std::uint32_t menu::count() const
     {
-        return static_cast<uint32_t>(iItems.size());
+        return static_cast<std::uint32_t>(iItems.size());
     }
 
-    uint32_t menu::ideal_insert_index(uuid const& aGroup) const
+    std::uint32_t menu::ideal_insert_index(uuid const& aGroup) const
     {
         if (count() == 0u)
             return 0u;

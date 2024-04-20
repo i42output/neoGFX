@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    enum class slider_orientation : uint32_t
+    enum class slider_orientation : std::uint32_t
     {
         Horizontal,
         Vertical
@@ -114,17 +114,17 @@ namespace neogfx
         bool iSettingNormalizedValue;
     };
 
-    extern template basic_slider<int8_t>;
-    extern template basic_slider<uint8_t>;
+    extern template basic_slider<std::int8_t>;
+    extern template basic_slider<std::uint8_t>;
     extern template basic_slider<int16_t>;
     extern template basic_slider<uint16_t>;
-    extern template basic_slider<int32_t>;
-    extern template basic_slider<uint32_t>;
-    extern template basic_slider<int64_t>;
-    extern template basic_slider<uint64_t>;
+    extern template basic_slider<std::int32_t>;
+    extern template basic_slider<std::uint32_t>;
+    extern template basic_slider<std::int64_t>;
+    extern template basic_slider<std::uint64_t>;
     extern template basic_slider<float>;
     extern template basic_slider<double>;
 
-    typedef basic_slider<int32_t> slider;
+    typedef basic_slider<std::int32_t> slider;
     typedef basic_slider<double> double_slider;
 }

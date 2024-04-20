@@ -28,7 +28,7 @@ namespace neogfx
     class i_emoji_atlas
     {
     public:
-        typedef uint32_t emoji_id;
+        typedef std::uint32_t emoji_id;
     public:
         struct emoji_not_found : std::logic_error { emoji_not_found() : std::logic_error("neogfx::i_emoji_atlas::emoji_not_found") {} };
     public:

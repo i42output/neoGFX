@@ -107,7 +107,7 @@ namespace neogfx
                 neolib::tokens(screenResolution, ","s, bits, 2, false, false);
                 if (bits.size() == 2)
                 {
-                    auto result = size_u32{ boost::lexical_cast<uint32_t>(bits[0]), boost::lexical_cast<uint32_t>(bits[1]) };
+                    auto result = size_u32{ boost::lexical_cast<std::uint32_t>(bits[0]), boost::lexical_cast<std::uint32_t>(bits[1]) };
                     if (result.cx != 0 && result.cx != 0)
                         return result;
                 }
@@ -130,7 +130,7 @@ namespace neogfx
                 neolib::tokens(dpiOverride, ","s, bits, 2, false, false);
                 if (bits.size() == 2)
                 {
-                    auto result = size_u32{ boost::lexical_cast<uint32_t>(bits[0]), boost::lexical_cast<uint32_t>(bits[1]) };
+                    auto result = size_u32{ boost::lexical_cast<std::uint32_t>(bits[0]), boost::lexical_cast<std::uint32_t>(bits[1]) };
                     if (result.cx != 0 && result.cx != 0)
                         return result;
                 }

@@ -91,7 +91,7 @@ namespace neogfx
             auto dump = [&](std::string const& why)
             {
                 service<debug::logger>() << neolib::logger::severity::Debug << why << std::endl;
-                int32_t lineNumber = 1;
+                std::int32_t lineNumber = 1;
                 std::istringstream iss{ code.to_std_string() };
                 std::string line;
                 while (std::getline(iss, line))

@@ -31,7 +31,7 @@ namespace neogfx
     struct crack_shader_array_data_type;
 
     template <>
-    struct crack_shader_array_data_type<uint8_t>
+    struct crack_shader_array_data_type<std::uint8_t>
     { 
         static constexpr texture_data_format DATA_FORMAT = texture_data_format::Red;
         static constexpr texture_data_type DATA_TYPE = texture_data_type::UnsignedByte;

@@ -78,7 +78,7 @@ namespace neogfx
     public:
         neogfx::color_space color_space() const override;
     public:
-        uint64_t frame_counter() const override;
+        std::uint64_t frame_counter() const override;
         double fps() const override;
         double potential_fps() const override;
     public:
@@ -108,12 +108,12 @@ namespace neogfx
         neogfx::logical_coordinate_system iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         std::optional<rect> iInvalidatedArea;
-        uint64_t iFrameCounter;
+        std::uint64_t iFrameCounter;
         typedef std::chrono::time_point<std::chrono::high_resolution_clock> frame_time_point;
         typedef std::pair<frame_time_point, frame_time_point> frame_times;
         std::optional<frame_time_point> iLastFrameTime;
         std::deque<frame_times> iFpsData;
-        uint32_t iPaused;
+        std::uint32_t iPaused;
         bool iRendering;
         bool iDebug;
     };

@@ -665,8 +665,8 @@ namespace neogfx
         if ((aStyle & scrollbar_style::TYPE_MASK) == scrollbar_style::None)
             return 0.0;
         dimension w = ceil_rasterized((aStyle & scrollbar_style::TYPE_MASK)  == scrollbar_style::Normal ? 4.0_mm : 3.0_mm);
-        if (to_px<uint32_t>(w) % 2u == 0u)
-            w = from_px<dimension>(to_px<uint32_t>(w) + 1u);
+        if (to_px<std::uint32_t>(w) % 2u == 0u)
+            w = from_px<dimension>(to_px<std::uint32_t>(w) + 1u);
         return w;
     }
 

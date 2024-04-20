@@ -140,14 +140,14 @@ namespace neogfx
         ref_ptr<i_layout_item> iSubject;
         destroyed_flag iSubjectDestroyed;
         mutable layout_item_disposition iCachedDisposition = layout_item_disposition::Unknown;
-        mutable std::pair<uint32_t, bool> iVisible;
-        mutable std::pair<uint32_t, neogfx::size_policy> iSizePolicy;
-        mutable std::pair<uint32_t, size> iWeight;
-        mutable std::pair<uint32_t, std::pair<optional_size, size>> iIdealSize;
-        mutable std::pair<uint32_t, std::pair<optional_size, size>> iMinimumSize;
-        mutable std::pair<uint32_t, std::pair<optional_size, size>> iMaximumSize;
-        mutable std::pair<uint32_t, std::pair<optional_size, size>> iFixedSize;
-        mutable std::pair<uint32_t, mat33> iTransformation;
-        mutable std::pair<uint32_t, mat33> iCombinedTransformation;
+        mutable std::pair<std::uint32_t, bool> iVisible;
+        mutable std::pair<std::uint32_t, neogfx::size_policy> iSizePolicy;
+        mutable std::pair<std::uint32_t, size> iWeight;
+        mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iIdealSize;
+        mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iMinimumSize;
+        mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iMaximumSize;
+        mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iFixedSize;
+        mutable std::pair<std::uint32_t, mat33> iTransformation;
+        mutable std::pair<std::uint32_t, mat33> iCombinedTransformation;
     };
 }

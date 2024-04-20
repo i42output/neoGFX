@@ -30,11 +30,11 @@ namespace neogfx::game
 {
     struct box_collider
     {
-        uint64_t mask;
+        std::uint64_t mask;
         std::optional<aabb> untransformedAabb;
         std::optional<aabb> previousAabb;
         std::optional<aabb> currentAabb;
-        uint32_t collisionEventId;
+        std::uint32_t collisionEventId;
 
         struct meta : i_component_data::meta
         {
@@ -48,11 +48,11 @@ namespace neogfx::game
                 static const string sName = "Box Collider";
                 return sName;
             }
-            static uint32_t field_count()
+            static std::uint32_t field_count()
             {
                 return 5;
             }
-            static component_data_field_type field_type(uint32_t aFieldIndex)
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
                 switch (aFieldIndex)
                 {
@@ -68,7 +68,7 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(std::uint32_t aFieldIndex)
             {
                 static const string sFieldNames[] =
                 {
@@ -85,11 +85,11 @@ namespace neogfx::game
 
     struct box_collider_2d
     {
-        uint64_t mask;
+        std::uint64_t mask;
         std::optional<aabb_2d> untransformedAabb;
         std::optional<aabb_2d> previousAabb;
         std::optional<aabb_2d> currentAabb;
-        uint32_t collisionEventId;
+        std::uint32_t collisionEventId;
 
         struct meta : i_component_data::meta
         {
@@ -103,11 +103,11 @@ namespace neogfx::game
                 static const string sName = "Box Collider (2D)";
                 return sName;
             }
-            static uint32_t field_count()
+            static std::uint32_t field_count()
             {
                 return 5;
             }
-            static component_data_field_type field_type(uint32_t aFieldIndex)
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
                 switch (aFieldIndex)
                 {
@@ -123,7 +123,7 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(std::uint32_t aFieldIndex)
             {
                 static const string sFieldNames[] =
                 {

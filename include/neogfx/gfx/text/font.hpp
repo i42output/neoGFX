@@ -33,7 +33,7 @@ namespace neogfx
     struct glyph_char;
     class i_glyph;
 
-    enum class font_style : uint32_t
+    enum class font_style : std::uint32_t
     {
         Invalid             = 0x00000000,
         Normal              = 0x00000001,
@@ -57,37 +57,37 @@ namespace neogfx
 
     inline constexpr font_style operator~(font_style aLhs)
     {
-        return static_cast<font_style>(~static_cast<uint32_t>(aLhs));
+        return static_cast<font_style>(~static_cast<std::uint32_t>(aLhs));
     }
 
     inline constexpr font_style operator|(font_style aLhs, font_style aRhs)
     {
-        return static_cast<font_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<font_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr font_style operator&(font_style aLhs, font_style aRhs)
     {
-        return static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<font_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr font_style operator^(font_style aLhs, font_style aRhs)
     {
-        return static_cast<font_style>(static_cast<uint32_t>(aLhs) ^ static_cast<uint32_t>(aRhs));
+        return static_cast<font_style>(static_cast<std::uint32_t>(aLhs) ^ static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr font_style& operator|=(font_style& aLhs, font_style aRhs)
     {
-        return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<font_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr font_style& operator&=(font_style& aLhs, font_style aRhs)
     {
-        return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<font_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr font_style& operator^=(font_style& aLhs, font_style aRhs)
     {
-        return aLhs = static_cast<font_style>(static_cast<uint32_t>(aLhs) ^ static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<font_style>(static_cast<std::uint32_t>(aLhs) ^ static_cast<std::uint32_t>(aRhs));
     }
 }
 
@@ -287,10 +287,10 @@ namespace neogfx
         dimension descender() const;
         dimension line_spacing() const;
         bool kerning() const;
-        dimension kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const;
+        dimension kerning(std::uint32_t aLeftGlyphIndex, std::uint32_t aRightGlyphIndex) const;
         bool is_bitmap_font() const;
-        uint32_t num_fixed_sizes() const;
-        point_size fixed_size(uint32_t aFixedSizeIndex) const;
+        std::uint32_t num_fixed_sizes() const;
+        point_size fixed_size(std::uint32_t aFixedSizeIndex) const;
     public:
         const i_glyph& glyph(const glyph_char& aGlyphChar) const;
     public:

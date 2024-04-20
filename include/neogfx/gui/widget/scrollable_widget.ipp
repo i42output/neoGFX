@@ -597,7 +597,7 @@ namespace neogfx
             auto& updater = service<i_scrollbar_container_updater>();
             if (!updater.processing())
             {
-                neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
+                neolib::scoped_counter<std::uint32_t> sc(iIgnoreScrollbarUpdates);
                 update_scrollbar_visibility(UsvStageInit);
                 updater.queue(*this);
                 return;
@@ -614,7 +614,7 @@ namespace neogfx
         if ((scrolling_disposition() & neogfx::scrolling_disposition::ScrollChildWidgetHorizontally) == neogfx::scrolling_disposition::ScrollChildWidgetHorizontally)
             horizontal_scrollbar().lock(0.0);
         {
-            neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
+            neolib::scoped_counter<std::uint32_t> sc(iIgnoreScrollbarUpdates);
             update_scrollbar_visibility(UsvStageInit);
             auto const& cr = base_type::as_widget().client_rect();
             if (cr.cx > vertical_scrollbar().width() &&
@@ -689,7 +689,7 @@ namespace neogfx
             {
                 auto const& sa = units_converter{ *this }.to_device_units(scroll_area());
                 auto const& sp = units_converter{ *this }.to_device_units(scroll_page());
-                neolib::scoped_counter<uint32_t> sc(iIgnoreScrollbarUpdates);
+                neolib::scoped_counter<std::uint32_t> sc(iIgnoreScrollbarUpdates);
                 vertical_scrollbar().set_minimum(sa.top());
                 vertical_scrollbar().set_maximum(sa.bottom());
                 vertical_scrollbar().set_page(sp.cy);

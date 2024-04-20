@@ -212,13 +212,13 @@ int main(int argc, char* argv[])
                 window.buttonChina.set_maximum_size(ng::size{ 128_dip, 64_dip });
         });
 
-        for (int32_t i = 1; i <= 100; ++i)
+        for (std::int32_t i = 1; i <= 100; ++i)
             window.dropList3.model().insert_item(window.dropList3.model().end(), "Example_"_t + boost::lexical_cast<std::string>(i));
         neolib::random prng;
-        for (int32_t i = 1; i <= 250; ++i)
+        for (std::int32_t i = 1; i <= 250; ++i)
         {
             std::string randomString;
-            for (uint32_t j = prng(12); j-- > 0;)
+            for (std::uint32_t j = prng(12); j-- > 0;)
                 randomString += static_cast<char>('A' + prng('z' - 'A'));
             window.dropList4.model().insert_item(window.dropList4.model().end(), randomString);
         }
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
         prng.seed(3);
 //        auto transitionPrng = prng;
 //        std::vector<ng::transition_id> transitions;
-        for (uint32_t i = 0; i < 10; ++i)
+        for (std::uint32_t i = 0; i < 10; ++i)
         {
             auto& button = window.layout3.emplace<ng::push_button>(std::string(1, 'A' + i));
             ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
         };
         window.checkTriState.checked([&window, showHideTabs]()
         {
-            static uint32_t n;
+            static std::uint32_t n;
             if ((n++)%2 == 1)
                 window.checkTriState.set_indeterminate();
             showHideTabs();
@@ -529,8 +529,8 @@ int main(int argc, char* argv[])
             else
                 app.change_style("Light");
         });
-        for (uint32_t row = 0u; row < 3u; ++row)
-            for (uint32_t col = 0u; col < 3u; ++col)
+        for (std::uint32_t row = 0u; row < 3u; ++row)
+            for (std::uint32_t col = 0u; col < 3u; ++col)
                 window.keypad.add_item_at_position(row, col, ng::make_ref<keypad_button>(window.textEdit, row * 3u + col + 1u));
         window.keypad.add_item_at_position(3u, 1u, ng::make_ref<keypad_button>(window.textEdit, 0u));
         window.keypad.add_span(3u, 1u, 1u, 2u);
@@ -564,8 +564,8 @@ int main(int argc, char* argv[])
         {
         });
 
-        uint32_t standardButtons = 0;
-        uint32_t standardButton = 1;
+        std::uint32_t standardButtons = 0;
+        std::uint32_t standardButton = 1;
         while (standardButton != 0)
         {
             auto bd = ng::dialog_button_box::standard_button_details(static_cast<ng::standard_button>(standardButton));
@@ -622,7 +622,7 @@ int main(int argc, char* argv[])
         itemModel.reserve(100);
         #endif
         ng::event_processing_context epc{ app.thread() };
-        for (uint32_t row = 0; row < itemModel.capacity(); ++row)
+        for (std::uint32_t row = 0; row < itemModel.capacity(); ++row)
         {
             #ifdef NDEBUG
             if (row % 100 == 0)
@@ -632,7 +632,7 @@ int main(int argc, char* argv[])
                 app.process_events(epc);
             #endif
             neolib::random prng;
-            for (uint32_t col = 0; col < 9; ++col)
+            for (std::uint32_t col = 0; col < 9; ++col)
             {
                 if (col == 0)
                     itemModel.insert_item(ng::item_model_index(row), row + 1);
@@ -641,7 +641,7 @@ int main(int argc, char* argv[])
                 else if (col != 7)
                 {
                     std::string randomString;
-                    for (uint32_t j = prng(12); j-- > 0;)
+                    for (std::uint32_t j = prng(12); j-- > 0;)
                         randomString += static_cast<char>('A' + prng('z' - 'A'));
                     itemModel.insert_cell_data(ng::item_model_index(row, col), randomString);
                 }
@@ -747,13 +747,13 @@ int main(int argc, char* argv[])
         window.checkColumn5Unselectable.checked([&]() { ipm1.set_column_selectable(5, false); ipm2.set_column_selectable(5, false); update_column5_heading(window.checkColumn5ReadOnly.is_checked(), true); });
         window.checkColumn5Unselectable.unchecked([&]() { ipm1.set_column_selectable(5, true); ipm2.set_column_selectable(5, true); update_column5_heading(window.checkColumn5ReadOnly.is_checked(), false); });
 
-        window.checkUpperTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
-        window.checkUpperTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, {}); itpm1.set_column_image_size(0, {}); });
+        window.checkUpperTableViewImages.checked([&] { for (std::uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, ng::size{ 16_dip }); itpm1.set_column_image_size(0, ng::size{ 16_dip }); });
+        window.checkUpperTableViewImages.unchecked([&] { for (std::uint32_t c = 0u; c <= 6u; c += 2u) ipm1.set_column_image_size(c, {}); itpm1.set_column_image_size(0, {}); });
         window.radioUpperTableViewMonochrome.checked([&] { ipm1.set_color_role({}); window.tableView1.update(); itpm1.set_color_role({}); window.treeView1.update(); });
         window.radioUpperTableViewColoredText.checked([&] { ipm1.set_color_role(ng::color_role::Text); window.tableView1.update(); itpm1.set_color_role(ng::color_role::Text); window.treeView1.update(); });
         window.radioUpperTableViewColoredCells.checked([&] { ipm1.set_color_role(ng::color_role::Background); window.tableView1.update(); itpm1.set_color_role(ng::color_role::Background); window.treeView1.update(); });
-        window.checkLowerTableViewImages.checked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); itpm2.set_column_image_size(0, ng::size{ 16_dip }); });
-        window.checkLowerTableViewImages.unchecked([&] { for (uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, {}); itpm2.set_column_image_size(0, {}); });
+        window.checkLowerTableViewImages.checked([&] { for (std::uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, ng::size{ 16_dip }); itpm2.set_column_image_size(0, ng::size{ 16_dip }); });
+        window.checkLowerTableViewImages.unchecked([&] { for (std::uint32_t c = 0u; c <= 6u; c += 2u) ipm2.set_column_image_size(c, {}); itpm2.set_column_image_size(0, {}); });
         window.radioLowerTableViewMonochrome.checked([&] { ipm2.set_color_role({}); window.tableView2.update(); itpm2.set_color_role({}); window.treeView2.update(); });
         window.radioLowerTableViewColoredText.checked([&] { ipm2.set_color_role(ng::color_role::Text); window.tableView2.update(); itpm2.set_color_role(ng::color_role::Text); window.treeView2.update(); });
         window.radioLowerTableViewColoredCells.checked([&] { ipm2.set_color_role(ng::color_role::Background); window.tableView2.update(); itpm2.set_color_role(ng::color_role::Background); window.treeView2.update(); });
@@ -821,7 +821,7 @@ int main(int argc, char* argv[])
             window.layoutLots.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
 
         ng::image hash(":/test/resources/channel_32.png");
-        for (uint32_t i = 0; i < 9; ++i)
+        for (std::uint32_t i = 0; i < 9; ++i)
         {
             auto hashWidget = ng::make_ref<ng::image_widget>(hash, ng::aspect_ratio::Keep, static_cast<ng::cardinal>(i));
             hashWidget->set_size_policy(ng::size_constraint::Expanding);
@@ -867,7 +867,7 @@ int main(int argc, char* argv[])
             }
         });
 
-        neolib::basic_random<uint8_t> rngColor;
+        neolib::basic_random<std::uint8_t> rngColor;
         auto random_color = [&]()
         {
             return ng::color{ rngColor(255), rngColor(255), rngColor(255) };
@@ -1128,7 +1128,7 @@ int main(int argc, char* argv[])
             }
             if (!ecs)
             {
-                for (int32_t i = 0; i < window.sliderShapeCount.value(); ++i)
+                for (std::int32_t i = 0; i < window.sliderShapeCount.value(); ++i)
                 {
                     if (window.checkOutline.is_checked() && window.checkFill.is_unchecked())
                     {

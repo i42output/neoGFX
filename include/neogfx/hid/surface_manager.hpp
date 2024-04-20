@@ -65,10 +65,10 @@ namespace neogfx
         void render_surfaces() override;
         void display_error_message(std::string const& aTitle, std::string const& aMessage) const override;
         void display_error_message(const i_native_window& aParent, std::string const& aTitle, std::string const& aMessage) const override;
-        uint32_t display_count() const override;
-        i_display& display(uint32_t aDisplayIndex = 0) const override;
+        std::uint32_t display_count() const override;
+        i_display& display(std::uint32_t aDisplayIndex = 0) const override;
         i_display& display(const i_surface& aSurface) const override;
-        rect desktop_rect(uint32_t aDisplayIndex = 0) const override;
+        rect desktop_rect(std::uint32_t aDisplayIndex = 0) const override;
         rect desktop_rect(const i_surface& aSurface) const override;
     public:
         const i_surface& surface_at_position(const i_surface& aProgenitor, const point& aPosition, bool aForMouseEvent = false) const override;

@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    std::atomic<uint64_t> sNodeCounter;
+    std::atomic<std::uint64_t> sNodeCounter;
 
     template <typename Representation>
     inline basic_position<Representation>& eval_board()
@@ -42,15 +42,15 @@ namespace chess
     double constexpr BETA = std::numeric_limits<double>::infinity();
     double constexpr EPSILON = std::numeric_limits<double>::epsilon();
 
-    int32_t constexpr MAX_QUIESCE = -3;
+    std::int32_t constexpr MAX_QUIESCE = -3;
 
     // use stack to limit RAM usage... (todo: make configurable?)
-    constexpr int32_t USE_STACK_DEPTH = 4;
+    constexpr std::int32_t USE_STACK_DEPTH = 4;
     constexpr std::size_t STACK_NODE_STACK_CAPACITY = 32; // todo: what should this hard limit be?
     struct stack_node_stack_limit_exceeded : std::logic_error { stack_node_stack_limit_exceeded() : std::logic_error{ "chess::stack_node_stack_limit_exceeded" } {} };
 
     template <player Player, player Turn, typename Representation>
-    double minimax(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth)
+    double minimax(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, std::int32_t ply, std::int32_t depth)
     {
         if (state().stopped)
             return 0.0;
@@ -108,7 +108,7 @@ namespace chess
     }
 
     template <player Player, player Turn, typename Representation>
-    double quiesce(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
+    double quiesce(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, std::int32_t ply, std::int32_t depth, double alpha = ALPHA, double beta = BETA)
     {
         if (state().stopped)
             return 0.0;
@@ -144,7 +144,7 @@ namespace chess
     }
 
     template <player Player, player Turn, typename Representation>
-    double pvs(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply, int32_t depth, double alpha = ALPHA, double beta = BETA)
+    double pvs(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, std::int32_t ply, std::int32_t depth, double alpha = ALPHA, double beta = BETA)
     {
         if (state().stopped)
             return 0.0;
@@ -198,10 +198,10 @@ namespace chess
     }
 
     template <player Player, typename Representation>
-    void search(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, int32_t ply)
+    void search(move_tables<Representation> const& tables, basic_position<Representation>& position, game_tree_node& node, std::int32_t ply)
     {
         // iterative deepening
-        for (int32_t plyIteration = 1; plyIteration <= ply; ++plyIteration)
+        for (std::int32_t plyIteration = 1; plyIteration <= ply; ++plyIteration)
         {
             auto& candidateMoves = *node.children;
             for (auto& candidateMove : candidateMoves)
@@ -220,7 +220,7 @@ namespace chess
     }
         
     template <typename Representation, player Player>
-    ai_thread<Representation, Player>::ai_thread(i_player const& aPlayer, int32_t aPly) :
+    ai_thread<Representation, Player>::ai_thread(i_player const& aPlayer, std::int32_t aPly) :
         iPlayer{ aPlayer },
         iPly{ aPly },
         iMoveTables{ generate_move_tables<representation_type>() },

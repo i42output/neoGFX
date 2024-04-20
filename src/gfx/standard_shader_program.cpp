@@ -17,6 +17,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
 #include <neogfx/gfx/standard_shader_program.hpp>
 #include <neogfx/gfx/vertex_shader.hpp>
 #include <neogfx/gfx/fragment_shader.hpp>

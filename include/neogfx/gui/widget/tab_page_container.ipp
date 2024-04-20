@@ -122,9 +122,9 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline uint32_t tab_page_container<Base>::tab_count() const noexcept
+    inline std::uint32_t tab_page_container<Base>::tab_count() const noexcept
     {
-        return static_cast<uint32_t>(iTabs.size());
+        return static_cast<std::uint32_t>(iTabs.size());
     }
 
     template <typename Base>

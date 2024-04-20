@@ -53,7 +53,7 @@
 
 namespace neogfx
 {
-    enum scan_code_e : int32_t
+    enum scan_code_e : std::int32_t
     {
         ScanCode_UNKNOWN = 0,
         ScanCode_A = 4,
@@ -330,7 +330,7 @@ namespace neogfx
     #define NEOGFX_SCANCODE_MASK (1<<30)
     #define NEOGFX_SCANCODE_TO_KEYCODE(X)  (X | NEOGFX_SCANCODE_MASK)
 
-    enum key_code_e : int32_t
+    enum key_code_e : std::int32_t
     {
         KeyCode_UNKNOWN = 0,
 
@@ -618,7 +618,7 @@ namespace neogfx
         virtual bool sys_text_input(i_string const& aText) = 0;
     };
 
-    enum class keyboard_locks : uint32_t
+    enum class keyboard_locks : std::uint32_t
     {
         None        = 0x0000,
         CapsLock    = 0x0001,
@@ -629,12 +629,12 @@ namespace neogfx
 
     constexpr keyboard_locks operator|(keyboard_locks aLhs, keyboard_locks aRhs)
     {
-        return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<keyboard_locks>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     constexpr keyboard_locks operator&(keyboard_locks aLhs, keyboard_locks aRhs)
     {
-        return static_cast<keyboard_locks>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<keyboard_locks>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     class i_widget;

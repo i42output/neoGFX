@@ -270,7 +270,7 @@ namespace neogfx
         for (item_presentation_model_index::value_type row = first.first; row < presentation_model().rows() && !finished; ++row)
         {
             finished = true;
-            for (uint32_t col = 0u; col < presentation_model().columns(); ++col)
+            for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
             {
                 auto const itemIndex = item_presentation_model_index{ row, col };
                 bool const currentCell = selection_model().has_current_index() && selection_model().current_index() == itemIndex;
@@ -985,28 +985,28 @@ namespace neogfx
             switch (model().cell_info(presentation_model().to_item_model_index(aItemIndex)).dataType)
             {
             case item_data_type::Int32:
-                iEditor = std::make_shared<item_editor<basic_spin_box<int32_t>>>(*this);
-                static_cast<basic_spin_box<int32_t>&>(editor()).set_step(static_variant_cast<int32_t>(cellInfo.dataStep));
-                static_cast<basic_spin_box<int32_t>&>(editor()).set_minimum(static_variant_cast<int32_t>(cellInfo.dataMin));
-                static_cast<basic_spin_box<int32_t>&>(editor()).set_maximum(static_variant_cast<int32_t>(cellInfo.dataMax));
+                iEditor = std::make_shared<item_editor<basic_spin_box<std::int32_t>>>(*this);
+                static_cast<basic_spin_box<std::int32_t>&>(editor()).set_step(static_variant_cast<std::int32_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<std::int32_t>&>(editor()).set_minimum(static_variant_cast<std::int32_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<std::int32_t>&>(editor()).set_maximum(static_variant_cast<std::int32_t>(cellInfo.dataMax));
                 break;
             case item_data_type::UInt32:
-                iEditor = std::make_shared<item_editor<basic_spin_box<uint32_t>>>(*this);
-                static_cast<basic_spin_box<uint32_t>&>(editor()).set_step(static_variant_cast<uint32_t>(cellInfo.dataStep));
-                static_cast<basic_spin_box<uint32_t>&>(editor()).set_minimum(static_variant_cast<uint32_t>(cellInfo.dataMin));
-                static_cast<basic_spin_box<uint32_t>&>(editor()).set_maximum(static_variant_cast<uint32_t>(cellInfo.dataMax));
+                iEditor = std::make_shared<item_editor<basic_spin_box<std::uint32_t>>>(*this);
+                static_cast<basic_spin_box<std::uint32_t>&>(editor()).set_step(static_variant_cast<std::uint32_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<std::uint32_t>&>(editor()).set_minimum(static_variant_cast<std::uint32_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<std::uint32_t>&>(editor()).set_maximum(static_variant_cast<std::uint32_t>(cellInfo.dataMax));
                 break;
             case item_data_type::Int64:
-                iEditor = std::make_shared<item_editor<basic_spin_box<int64_t>>>(*this);
-                static_cast<basic_spin_box<int64_t>&>(editor()).set_step(static_variant_cast<int64_t>(cellInfo.dataStep));
-                static_cast<basic_spin_box<int64_t>&>(editor()).set_minimum(static_variant_cast<int64_t>(cellInfo.dataMin));
-                static_cast<basic_spin_box<int64_t>&>(editor()).set_maximum(static_variant_cast<int64_t>(cellInfo.dataMax));
+                iEditor = std::make_shared<item_editor<basic_spin_box<std::int64_t>>>(*this);
+                static_cast<basic_spin_box<std::int64_t>&>(editor()).set_step(static_variant_cast<std::int64_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<std::int64_t>&>(editor()).set_minimum(static_variant_cast<std::int64_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<std::int64_t>&>(editor()).set_maximum(static_variant_cast<std::int64_t>(cellInfo.dataMax));
                 break;
             case item_data_type::UInt64:
-                iEditor = std::make_shared<item_editor<basic_spin_box<uint64_t>>>(*this);
-                static_cast<basic_spin_box<uint64_t>&>(editor()).set_step(static_variant_cast<uint64_t>(cellInfo.dataStep));
-                static_cast<basic_spin_box<uint64_t>&>(editor()).set_minimum(static_variant_cast<uint64_t>(cellInfo.dataMin));
-                static_cast<basic_spin_box<uint64_t>&>(editor()).set_maximum(static_variant_cast<uint64_t>(cellInfo.dataMax));
+                iEditor = std::make_shared<item_editor<basic_spin_box<std::uint64_t>>>(*this);
+                static_cast<basic_spin_box<std::uint64_t>&>(editor()).set_step(static_variant_cast<std::uint64_t>(cellInfo.dataStep));
+                static_cast<basic_spin_box<std::uint64_t>&>(editor()).set_minimum(static_variant_cast<std::uint64_t>(cellInfo.dataMin));
+                static_cast<basic_spin_box<std::uint64_t>&>(editor()).set_maximum(static_variant_cast<std::uint64_t>(cellInfo.dataMax));
                 break;
             case item_data_type::Float:
                 iEditor = std::make_shared<item_editor<basic_spin_box<float>>>(*this);
@@ -1245,7 +1245,7 @@ namespace neogfx
                 coordinate x = indent;
                 if (aPart == cell_part::Background && aItemIndex.column() == 0)
                     x = 0.0;
-                for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+                for (std::uint32_t col = 0; col < presentation_model().columns(); ++col)
                 {
                     bool const firstColumn = (col == 0);
                     bool const lastColumn = (col == presentation_model().columns() - 1);
@@ -1380,7 +1380,7 @@ namespace neogfx
         point const adjustedPos = aPosition.max(item_display_rect().top_left()).min(item_display_rect().bottom_right() - size{ 1.0, 1.0 } );
         item_presentation_model_index const rowIndex = presentation_model().item_at(adjustedPos.y - item_display_rect().top() + vertical_scrollbar().position(), *this).first;
         item_presentation_model_index index = rowIndex;
-        for (uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
+        for (std::uint32_t col = 0; col < presentation_model().columns(); ++col) // TODO: O(n) isn't good enough if lots of columns
         {
             index.set_column(col);
             if (cell_rect(index, cell_part::Background).contains_x(adjustedPos))

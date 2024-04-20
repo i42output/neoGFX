@@ -96,17 +96,17 @@ namespace neogfx
 {
     inline text_edit_caps operator~(text_edit_caps aLhs)
     {
-        return static_cast<text_edit_caps>(~static_cast<uint32_t>(aLhs));
+        return static_cast<text_edit_caps>(~static_cast<std::uint32_t>(aLhs));
     }
 
     inline text_edit_caps operator&(text_edit_caps aLhs, text_edit_caps aRhs)
     {
-        return static_cast<text_edit_caps>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<text_edit_caps>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline text_edit_caps operator|(text_edit_caps aLhs, text_edit_caps aRhs)
     {
-        return static_cast<text_edit_caps>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<text_edit_caps>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     class text_edit : public framed_scrollable_widget, public i_clipboard_sink, public i_text_document
@@ -243,7 +243,7 @@ namespace neogfx
         private:
 			text_edit* iParent;
             style_cookie iCookie = neolib::invalid_cookie<style_cookie>;
-            mutable uint32_t iUseCount;
+            mutable std::uint32_t iUseCount;
             character_style iCharacter;
             paragraph_style iParagraph;
         };
@@ -563,8 +563,8 @@ namespace neogfx
         void set_read_only(bool aReadOnly = true);
         bool word_wrap() const;
         void set_word_wrap(bool aWordWrap = true);
-        uint32_t grow_lines() const;
-        void set_grow_lines(uint32_t aGrowLines = 5u);
+        std::uint32_t grow_lines() const;
+        void set_grow_lines(std::uint32_t aGrowLines = 5u);
         bool password() const;
         i_string const& password_mask() const;
         void set_password(bool aPassword, i_string const& aMask = string{ "\xE2\x97\x8F" });
@@ -681,7 +681,7 @@ namespace neogfx
         glyph_paragraphs iGlyphParagraphs;
         glyph_columns iGlyphColumns;
         optional_size iTextExtents;
-        uint64_t iCursorAnimationStartTime;
+        std::uint64_t iCursorAnimationStartTime;
         neogfx::size_hint iSizeHint;
         mutable std::optional<std::pair<neogfx::font, size>> iHintedSize;
         std::optional<neogfx::tab_stops> iTabStops;
@@ -691,15 +691,15 @@ namespace neogfx
         widget_timer iAnimator;
         std::unique_ptr<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
-        uint32_t iSuppressTextChangedNotification;
-        uint32_t iWantedToNotifyTextChanged;
+        std::uint32_t iSuppressTextChangedNotification;
+        std::uint32_t iWantedToNotifyTextChanged;
         std::optional<std::pair<text_edit::position_type, text_edit::position_type>> iSelectedUri;
         std::optional<password_bits> iPasswordBits;
         bool iOutOfMemory;
     public:
         define_property(property_category::other, bool, ReadOnly, read_only, false)
         define_property(property_category::other, bool, WordWrap, word_wrap, (iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
-        define_property(property_category::other, uint32_t, GrowLines, grow_lines, 5u)
+        define_property(property_category::other, std::uint32_t, GrowLines, grow_lines, 5u)
         define_property(property_category::other, bool, Password, password, false)
         define_property(property_category::other, string, PasswordMask, password_mask)
     };

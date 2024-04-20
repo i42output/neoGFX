@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-    enum class size_constraint : uint32_t
+    enum class size_constraint : std::uint32_t
     {
         Fixed,
         Minimum,
@@ -41,13 +41,13 @@ namespace neogfx
         Manual
     };
 
-    enum class visibility_constraint : uint32_t
+    enum class visibility_constraint : std::uint32_t
     {
         Ignore,
         Consider
     };
     
-    enum class aspect_ratio : uint32_t
+    enum class aspect_ratio : std::uint32_t
     {
         Ignore,
         Stretch,
@@ -55,7 +55,7 @@ namespace neogfx
         KeepExpanding
     };
 
-    enum class cardinal : uint32_t
+    enum class cardinal : std::uint32_t
     {
         NorthWest,
         North,
@@ -68,7 +68,7 @@ namespace neogfx
         SouthEast
     };
 
-    enum class corner : uint32_t
+    enum class corner : std::uint32_t
     {
         TopLeft,
         TopRight,

@@ -34,7 +34,7 @@
 
 namespace neogfx
 {
-    enum class decoration : uint32_t
+    enum class decoration : std::uint32_t
     {
         None            = 0x00000000,
         Border          = 0x00000001,
@@ -46,7 +46,7 @@ namespace neogfx
         StatusBar       = 0x00200000
     };
 
-    enum class decoration_style : uint32_t
+    enum class decoration_style : std::uint32_t
     {
         None            = 0x00000000,
         Window          = 0x00000001,
@@ -68,47 +68,47 @@ namespace neogfx
 
     inline constexpr decoration operator|(decoration aLhs, decoration aRhs)
     {
-        return static_cast<decoration>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<decoration>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration operator&(decoration aLhs, decoration aRhs)
     {
-        return static_cast<decoration>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<decoration>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration& operator|=(decoration& aLhs, decoration aRhs)
     {
-        return aLhs = static_cast<decoration>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<decoration>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration& operator&=(decoration& aLhs, decoration aRhs)
     {
-        return aLhs = static_cast<decoration>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<decoration>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration_style operator~(decoration_style aValue)
     {
-        return static_cast<decoration_style>(~static_cast<uint32_t>(aValue));
+        return static_cast<decoration_style>(~static_cast<std::uint32_t>(aValue));
     }
 
     inline constexpr decoration_style operator|(decoration_style aLhs, decoration_style aRhs)
     {
-        return static_cast<decoration_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<decoration_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration_style operator&(decoration_style aLhs, decoration_style aRhs)
     {
-        return static_cast<decoration_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<decoration_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration_style& operator|=(decoration_style& aLhs, decoration_style aRhs)
     {
-        return aLhs = static_cast<decoration_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<decoration_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr decoration_style& operator&=(decoration_style& aLhs, decoration_style aRhs)
     {
-        return aLhs = static_cast<decoration_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return aLhs = static_cast<decoration_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     template <Widget WidgetType, typename... OtherBases>

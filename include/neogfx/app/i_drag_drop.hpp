@@ -133,7 +133,7 @@ namespace neogfx
 
     struct drag_drop_target_not_a_widget : std::logic_error { drag_drop_target_not_a_widget() : std::logic_error{ "neogfx::drag_drop_target_not_a_widget" } {} };
 
-    enum class drop_operation : uint32_t
+    enum class drop_operation : std::uint32_t
     {
         None = 0x00000000,
         Copy = 0x00000001,

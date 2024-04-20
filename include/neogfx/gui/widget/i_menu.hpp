@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    enum class menu_type : uint32_t
+    enum class menu_type : std::uint32_t
     {
         MenuBar,
         Popup
@@ -38,7 +38,7 @@ namespace neogfx
     public:
         struct no_widget : std::logic_error { no_widget() : std::logic_error{ "neogfx::i_menu::no_widget" } {} };
     public:
-        typedef uint32_t item_index;
+        typedef std::uint32_t item_index;
     public:
         declare_event(menu_changed)
         declare_event(item_added, item_index)
@@ -50,7 +50,7 @@ namespace neogfx
         declare_event(selection_cleared)
         declare_event(open_sub_menu, i_menu&)
     public:
-        typedef uint32_t item_index;
+        typedef std::uint32_t item_index;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error("neogfx::i_menu::no_parent") {} };
         struct bad_item_index : std::logic_error { bad_item_index() : std::logic_error("neogfx::i_menu::bad_item_index") {} };
@@ -76,8 +76,8 @@ namespace neogfx
         virtual void set_image(i_string const& aUri) = 0;
         virtual void set_image(i_image const& aImage) = 0;
         virtual void set_image(i_texture const& aTexture) = 0;
-        virtual uint32_t count() const = 0;
-        virtual uint32_t ideal_insert_index(uuid const& aGroup) const = 0;
+        virtual std::uint32_t count() const = 0;
+        virtual std::uint32_t ideal_insert_index(uuid const& aGroup) const = 0;
         virtual const i_menu_item& item_at(item_index aItemIndex) const = 0;
         virtual i_menu_item& item_at(item_index aItemIndex) = 0;
         virtual void add_sub_menu(i_menu& aSubMenu) = 0;
@@ -107,11 +107,11 @@ namespace neogfx
         virtual bool is_modal() const = 0;
         virtual void set_modal(bool aModal) = 0;
     public:
-        uint32_t ideal_insert_index(i_action const& aAction) const
+        std::uint32_t ideal_insert_index(i_action const& aAction) const
         {
             return ideal_insert_index(aAction.group());
         }
-        uint32_t ideal_insert_index(i_menu const& aSubMenu) const
+        std::uint32_t ideal_insert_index(i_menu const& aSubMenu) const
         {
             return ideal_insert_index(aSubMenu.group());
         }

@@ -33,7 +33,7 @@ namespace neogfx
     {
         friend class gradient_manager;
     public:
-        gradient_sampler(i_shader_array<avec4u8> const& aSampler, uint32_t aRow) : 
+        gradient_sampler(i_shader_array<avec4u8> const& aSampler, std::uint32_t aRow) : 
             iSampler{ &aSampler },
             iRow{ aRow }
         {
@@ -43,7 +43,7 @@ namespace neogfx
         {
             return *iSampler;
         }
-        uint32_t sampler_row() const override
+        std::uint32_t sampler_row() const override
         {
             return iRow;
         }
@@ -68,11 +68,11 @@ namespace neogfx
         }
     private:
         i_shader_array<avec4u8> const* iSampler;
-        uint32_t iRow;
+        std::uint32_t iRow;
         mutable std::unordered_set<gradient_id> iReferences;
     };
 
-    constexpr uint32_t GRADIENT_FILTER_SIZE = 15;
+    constexpr std::uint32_t GRADIENT_FILTER_SIZE = 15;
 
     class gradient_filter : public i_gradient_filter
     {
@@ -108,8 +108,8 @@ namespace neogfx
         using filter_map_t = std::map<scalar, gradient_filter>;
         // constants
     public:
-        static constexpr uint32_t MaxSamplers = 1024;
-        static constexpr uint32_t MaxFilters = 16;
+        static constexpr std::uint32_t MaxSamplers = 1024;
+        static constexpr std::uint32_t MaxFilters = 16;
         // construction
     public:
         gradient_manager();

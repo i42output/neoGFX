@@ -34,7 +34,7 @@ namespace neogfx
 
     typedef neolib::variant<corner, scalar> gradient_orientation;
 
-    enum class gradient_direction : uint32_t
+    enum class gradient_direction : std::uint32_t
     {
         Vertical,
         Horizontal,
@@ -50,13 +50,13 @@ namespace neogfx
         auto operator<=>(const gradient_tile&) const = default;
     };
 
-    enum class gradient_shape : uint32_t
+    enum class gradient_shape : std::uint32_t
     {
         Ellipse,
         Circle
     };
 
-    enum class gradient_size : uint32_t
+    enum class gradient_size : std::uint32_t
     {
         ClosestSide,
         FarthestSide,
@@ -94,7 +94,7 @@ namespace neogfx
         virtual ~i_gradient_sampler() = default;
     public:
         virtual i_shader_array<avec4u8> const& sampler() const = 0;
-        virtual uint32_t sampler_row() const = 0;
+        virtual std::uint32_t sampler_row() const = 0;
         virtual bool used_by(gradient_id aGradient) const = 0;
         virtual void add_ref(gradient_id aGradient) const = 0;
         virtual void release(gradient_id aGradient) const = 0;

@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-    enum class standard_button : uint32_t
+    enum class standard_button : std::uint32_t
     {
         Ok              = 0x00000001,
         Cancel          = 0x00000002,
@@ -60,12 +60,12 @@ namespace neogfx
 
     inline constexpr standard_button operator|(standard_button aLhs, standard_button aRhs)
     {
-        return static_cast<standard_button>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<standard_button>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr standard_button operator&(standard_button aLhs, standard_button aRhs)
     {
-        return static_cast<standard_button>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<standard_button>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     enum class button_role

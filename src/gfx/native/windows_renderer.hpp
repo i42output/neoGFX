@@ -97,7 +97,7 @@ namespace neogfx
             std::unordered_map<const i_render_target*, std::shared_ptr<offscreen_window>> iOffscreenWindows;
             std::weak_ptr<offscreen_window> iDefaultOffscreenWindow;
             HGLRC iContext;
-            uint32_t iCreatingWindow;
+            std::uint32_t iCreatingWindow;
             std::vector<const i_render_target*> iTargetStack;
         };
     }

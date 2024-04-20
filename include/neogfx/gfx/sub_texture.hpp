@@ -53,13 +53,13 @@ namespace neogfx
         dimension dpi_scale_factor() const final;
         neogfx::color_space color_space() const final;
         texture_sampling sampling() const final;
-        uint32_t samples() const final;
+        std::uint32_t samples() const final;
         texture_data_format data_format() const final;
         texture_data_type data_type() const final;
         bool is_empty() const final;
         size extents() const final;
         size storage_extents() const final;
-        void set_pixels(rect const& aRect, void const* aPixelData, uint32_t aPackAlignment = 4u) final;
+        void set_pixels(rect const& aRect, void const* aPixelData, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(i_image const& aImage) final;
         void set_pixels(i_image const& aImage, rect const& aImagePart) final;
         void set_pixel(point const& aPosition, color const& aColor) final;

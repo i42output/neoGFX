@@ -134,28 +134,28 @@ namespace neogfx
                     }
                     break;
                 case neolib::setting_type::Int8:
-                    result = create_slider_box<int8_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::int8_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Int16:
                     result = create_slider_box<int16_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Int32:
-                    result = create_slider_box<int32_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::int32_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Int64:
-                    result = create_slider_box<int64_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::int64_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Uint8:
-                    result = create_slider_box<uint8_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::uint8_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Uint16:
                     result = create_slider_box<uint16_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Uint32:
-                    result = create_slider_box<uint32_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::uint32_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Uint64:
-                    result = create_slider_box<uint64_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::uint64_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Float32:
                     result = create_slider_box<float>{}(aSetting, aLayout, aSink);

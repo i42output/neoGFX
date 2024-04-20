@@ -30,7 +30,7 @@ namespace neogfx
 {
     namespace native::windows
     {
-        display::display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle) :
+        display::display(std::uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle) :
             neogfx::display{ aIndex, aRect, aDesktopRect }, 
             iNativeDisplayHandle{ aNativeDisplayHandle },
             iNativeDeviceContextHandle{ aNativeDeviceContextHandle }

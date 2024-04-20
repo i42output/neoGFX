@@ -241,7 +241,7 @@ namespace neogfx
                     data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
                     if constexpr (std::is_same_v<value_type, avec4u8>)
                     {
-                        const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                        const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 for (std::size_t c = 0; c < 4; ++c)
@@ -249,7 +249,7 @@ namespace neogfx
                     }
                     else if constexpr (std::is_same_v<value_type, std::array<float, 4>>)
                     {
-                        const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
+                        const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
                             for (std::size_t x = 1; x < 1 + iSize.cx; ++x)
                                 for (std::size_t c = 0; c < 4; ++c)
@@ -356,7 +356,7 @@ namespace neogfx
     }
 
     template <typename T>
-    uint32_t opengl_texture<T>::samples() const
+    std::uint32_t opengl_texture<T>::samples() const
     {
         switch (iSampling)
         {
@@ -405,7 +405,7 @@ namespace neogfx
     }
 
     template <typename T>
-    void opengl_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, uint32_t aPackAlignment)
+    void opengl_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, std::uint32_t aPackAlignment)
     {
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
@@ -447,8 +447,8 @@ namespace neogfx
         {
         case color_format::RGBA8:
             {
-                const uint8_t* imageData = static_cast<const uint8_t*>(aImage.cpixels());
-                thread_local std::vector<uint8_t> data;
+                const std::uint8_t* imageData = static_cast<const std::uint8_t*>(aImage.cpixels());
+                thread_local std::vector<std::uint8_t> data;
                 data.clear();
                 data.resize(imagePartExtents.cx * 4 * imagePartExtents.cy);
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
@@ -725,7 +725,7 @@ namespace neogfx
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
         if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
-        set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<int32_t>() });
+        set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<std::int32_t>() });
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         if (!alreadyActive)
@@ -794,7 +794,7 @@ namespace neogfx
             throw std::logic_error("neogfx::opengl_texture::read_pixel: not yet implemented for multisample render targets");
     }
 
-    template class opengl_texture<uint8_t>;
+    template class opengl_texture<std::uint8_t>;
     template class opengl_texture<float>;
     template class opengl_texture<avec4u8>;
     template class opengl_texture<std::array<float, 4>>;

@@ -104,7 +104,7 @@ namespace neogfx::game
             {
                 return const_cast<node&>(to_const(*this).parent());
             }
-            uint32_t depth() const
+            std::uint32_t depth() const
             {
                 return iDepth;
             }
@@ -426,7 +426,7 @@ namespace neogfx::game
         private:
             aabb_octree& iTree;
             const node* iParent;
-            uint32_t iDepth;
+            std::uint32_t iDepth;
             neogfx::aabb iAabb;
             octants iOctants;
             octants_2d iOctants2d;
@@ -536,11 +536,11 @@ namespace neogfx::game
             iRootNode.remove_entity(aItem);
         }
     public:
-        uint32_t count() const
+        std::uint32_t count() const
         {
             return iCount;
         }
-        uint32_t depth() const
+        std::uint32_t depth() const
         {
             return iDepth;
         }
@@ -571,9 +571,9 @@ namespace neogfx::game
         i_ecs& iEcs;
         aabb iRootAabb;
         scalar iMinimumOctantSize;
-        uint32_t iCount;
-        mutable uint32_t iDepth;
+        std::uint32_t iCount;
+        mutable std::uint32_t iDepth;
         node iRootNode;
-        mutable uint32_t iCollisionUpdateId;
+        mutable std::uint32_t iCollisionUpdateId;
     };
 }

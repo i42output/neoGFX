@@ -177,13 +177,13 @@ namespace neogfx::DesignStudio
                 scoped_opacity so{ aGc, aGc.opacity() * 0.5 };
                 scoped_scissor ss{ aGc, r };
                 size const iconSize{ std::min<scalar>(r.cx, std::min<scalar>(r.cy, 16.0_dip)), std::min<scalar>(r.cx, std::min<scalar>(r.cy, 16.0_dip)) };
-                for (int32_t y = 0; y < r.height() / iconSize.cy; ++y)
+                for (std::int32_t y = 0; y < r.height() / iconSize.cy; ++y)
                 {
-                    for (int32_t x = 0; x < r.width() / iconSize.cx; ++x)
+                    for (std::int32_t x = 0; x < r.width() / iconSize.cx; ++x)
                     {
                         if (y % 2 == 1 || x % 3 != y % 3)
                             continue;
-                        aGc.draw_texture(rect{ r.top_left() + point{ iconSize } / 4.0 + basic_point<int32_t>{ x, y }.as<scalar>() * iconSize, iconSize }, element().library().element_icon(element().type()));
+                        aGc.draw_texture(rect{ r.top_left() + point{ iconSize } / 4.0 + basic_point<std::int32_t>{ x, y }.as<scalar>() * iconSize, iconSize }, element().library().element_icon(element().type()));
                     }
                 }
             }

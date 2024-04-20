@@ -30,7 +30,7 @@ namespace neogfx
         return window_placement{ service<i_basic_services>().display().rect().extents() };
     }
 
-    display::display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect) :
+    display::display(std::uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect) :
         iIndex{ aIndex },
         iRect{ aRect },
         iDesktopRect{ aDesktopRect },
@@ -53,7 +53,7 @@ namespace neogfx
         return *this;
     }
 
-    uint32_t display::index() const
+    std::uint32_t display::index() const
     {
         return iIndex;
     }

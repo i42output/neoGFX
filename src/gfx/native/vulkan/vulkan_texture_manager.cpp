@@ -35,7 +35,7 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                aResult = add_texture(make_ref<vulkan_texture<std::array<uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                aResult = add_texture(make_ref<vulkan_texture<std::array<std::uint8_t,4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
                 break;
             case texture_data_type::Float:
                 aResult = add_texture(make_ref<vulkan_texture<std::array<float, 4>>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
@@ -47,7 +47,7 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                aResult = add_texture(make_ref<vulkan_texture<uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
+                aResult = add_texture(make_ref<vulkan_texture<std::uint8_t>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
                 break;
             case texture_data_type::Float:
                 aResult = add_texture(make_ref<vulkan_texture<float>>(*this, allocate_texture_id(), aExtents, aDpiScaleFactor, aSampling, aDataFormat, aColorSpace, aColor));
@@ -86,7 +86,7 @@ namespace neogfx
             {
             case texture_data_type::UnsignedByte:
             default:
-                aResult = add_texture(make_ref<vulkan_texture<uint8_t>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));
+                aResult = add_texture(make_ref<vulkan_texture<std::uint8_t>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));
                 break;
             case texture_data_type::Float:
                 aResult = add_texture(make_ref<vulkan_texture<float>>(*this, allocate_texture_id(), aImage, aImagePart, aDataFormat));

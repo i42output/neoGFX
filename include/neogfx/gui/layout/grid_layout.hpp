@@ -35,7 +35,7 @@ namespace neogfx
     public:
         struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
     public:
-        typedef uint32_t cell_coordinate;
+        typedef std::uint32_t cell_coordinate;
         typedef basic_point<cell_coordinate> cell_coordinates;
         typedef basic_size<cell_coordinate> cell_dimensions;
     private:
@@ -82,7 +82,7 @@ namespace neogfx
         void invalidate_combined_transformation() override;
     public:
         void set_spacing(optional_size const& aSpacing, bool aUpdateLayout = true) override;
-        grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns);
+        grid_layout& add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, std::uint32_t aRows, std::uint32_t aColumns);
         grid_layout& add_span(const cell_coordinates& aFrom, const cell_coordinates& aTo);
         void set_alignment(optional_alignment const& aAlignment, bool aUpdateLayout = true) override;
     public:
@@ -92,10 +92,10 @@ namespace neogfx
     protected:
         void remove(item_list::iterator aItem);
     private:
-        uint32_t visible_rows() const;
-        bool is_row_visible(uint32_t aRow) const;
-        uint32_t visible_columns() const;
-        bool is_column_visible(uint32_t aColumn) const;
+        std::uint32_t visible_rows() const;
+        bool is_row_visible(std::uint32_t aRow) const;
+        std::uint32_t visible_columns() const;
+        bool is_column_visible(std::uint32_t aColumn) const;
         size::dimension_type row_minimum_size(cell_coordinate aRow, optional_size const& aAvailableSpace = optional_size{}) const;
         size::dimension_type column_minimum_size(cell_coordinate aColumn, optional_size const& aAvailableSpace = optional_size{}) const;
         size::dimension_type row_maximum_size(cell_coordinate aRow, optional_size const& aAvailableSpace = optional_size{}) const;

@@ -92,7 +92,7 @@ namespace neogfx
         mutable optional_size iPixelDensityDpi;
         event_queue iEventQueue;
         native_event iCurrentEvent;
-        uint32_t iProcessingEvent;
+        std::uint32_t iProcessingEvent;
         string iTitleText;
         bool iNonClientEntered;
         neolib::callback_timer iUpdater;

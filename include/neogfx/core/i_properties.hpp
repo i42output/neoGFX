@@ -44,19 +44,19 @@ namespace neogfx
         }
         // helpers
     public:
-        uint32_t count() const
+        std::uint32_t count() const
         {
-            return static_cast<uint32_t>(property_map().size());
+            return static_cast<std::uint32_t>(property_map().size());
         }
-        std::string name(uint32_t aIndex) const
+        std::string name(std::uint32_t aIndex) const
         {
             return std::next(property_map().begin(), aIndex)->first().to_std_string();
         }
-        const i_property& property(uint32_t aIndex) const
+        const i_property& property(std::uint32_t aIndex) const
         {
             return *std::next(property_map().begin(), aIndex)->second();
         }
-        i_property& property(uint32_t aIndex)
+        i_property& property(std::uint32_t aIndex)
         {
             return *std::next(property_map().begin(), aIndex)->second();
         }

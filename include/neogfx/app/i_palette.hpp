@@ -28,7 +28,7 @@ namespace neogfx
 {
     class i_widget;
 
-    enum color_role : uint32_t
+    enum color_role : std::uint32_t
     {
         Theme,
         Background,

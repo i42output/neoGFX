@@ -38,7 +38,7 @@ namespace neogfx
         meta_object(widget<i_status_bar>)
     public:
         typedef i_status_bar abstract_type;
-        enum class style : uint32_t
+        enum class style : std::uint32_t
         {
             DisplayNone                 = 0x0000,
             DisplayMessage              = 0x0001,
@@ -48,11 +48,11 @@ namespace neogfx
         };
         friend constexpr style operator|(style aLhs, style aRhs)
         {
-            return static_cast<style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+            return static_cast<style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
         }
         friend constexpr style operator&(style aLhs, style aRhs)
         {
-            return static_cast<style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+            return static_cast<style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
         }
     public:
         class separator : public widget<>

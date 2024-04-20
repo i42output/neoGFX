@@ -139,8 +139,8 @@ namespace neogfx
         void set_kerning_method(neogfx::kerning_method aKerningMethod) final;
         dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const final;
         bool is_bitmap_font() const final;
-        uint32_t num_fixed_sizes() const final;
-        font::point_size fixed_size(uint32_t aFixedSizeIndex) const final;
+        std::uint32_t num_fixed_sizes() const final;
+        font::point_size fixed_size(std::uint32_t aFixedSizeIndex) const final;
         bool has_fallback() const final;
         bool fallback_cached() const final;
         i_native_font_face& fallback() const final;

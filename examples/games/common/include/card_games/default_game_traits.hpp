@@ -29,7 +29,7 @@ namespace neogames
     {
         struct default_game_traits
         {
-            static inline constexpr uint32_t hand_size = 5u;
+            static inline constexpr std::uint32_t hand_size = 5u;
             static inline constexpr bool ace_high = true;
             static inline constexpr bool jokers_present = false;
         };

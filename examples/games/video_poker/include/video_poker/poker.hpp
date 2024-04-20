@@ -100,11 +100,11 @@ namespace video_poker
     {
         typedef basic_card<GameTraits> card_type;
 
-        std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<const typename card_type::value, uint32_t>>> valueCounter;
-        for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
+        std::map<typename card_type::value, std::uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<const typename card_type::value, std::uint32_t>>> valueCounter;
+        for (std::uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
             ++valueCounter[aHand.card_at(cardIndex)];
 
-        std::multiset<uint32_t, std::greater<uint32_t>, boost::fast_pool_allocator<uint32_t>> valueCounts;
+        std::multiset<std::uint32_t, std::greater<std::uint32_t>, boost::fast_pool_allocator<std::uint32_t>> valueCounts;
         for (auto& valueCount : valueCounter)
             valueCounts.insert(valueCount.second);
 
@@ -116,7 +116,7 @@ namespace video_poker
             auto is_straight = [](auto const& aHandValues)
             {
                 for (auto iterHand = std::next(aHandValues.begin()); iterHand != aHandValues.end(); ++iterHand)
-                    if (static_cast<uint32_t>(std::prev(iterHand)->first) - static_cast<uint32_t>(iterHand->first) != 1)
+                    if (static_cast<std::uint32_t>(std::prev(iterHand)->first) - static_cast<std::uint32_t>(iterHand->first) != 1)
                         return false;
                 return true;
             };
@@ -134,7 +134,7 @@ namespace video_poker
 
         if (result == std::nullopt)
         {
-            static const std::vector<std::pair<std::vector<uint32_t>, poker_hand>> sValueHandTable
+            static const std::vector<std::pair<std::vector<std::uint32_t>, poker_hand>> sValueHandTable
             {
                 { { 4 }, poker_hand::FourOfAKind },
                 { { 3, 2 }, poker_hand::FullHouse },
@@ -154,7 +154,7 @@ namespace video_poker
         if (*result == poker_hand::HighCard || *result == poker_hand::Straight)
         {
             bool possibleFlush = true;
-            for (uint32_t cardIndex = 1; possibleFlush && cardIndex < GameTraits::hand_size; ++cardIndex)
+            for (std::uint32_t cardIndex = 1; possibleFlush && cardIndex < GameTraits::hand_size; ++cardIndex)
                 if (static_cast<typename card_type::suit>(aHand.card_at(cardIndex - 1)) != static_cast<typename card_type::suit>(aHand.card_at(cardIndex)))
                 possibleFlush = false;
             if (possibleFlush)
@@ -178,10 +178,10 @@ namespace video_poker
     inline typename basic_card<GameTraits>::value most_frequent_card(const basic_hand<GameTraits>& aHand)
     {
         typedef basic_card<GameTraits> card_type;
-        std::map<typename card_type::value, uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<const typename card_type::value, uint32_t>>> valueCounter;
-        for (uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
+        std::map<typename card_type::value, std::uint32_t, std::greater<typename card_type::value>, boost::fast_pool_allocator<std::pair<const typename card_type::value, std::uint32_t>>> valueCounter;
+        for (std::uint32_t cardIndex = 0; cardIndex < GameTraits::hand_size; ++cardIndex)
             ++valueCounter[aHand.card_at(cardIndex)];
-        std::pair<typename card_type::value, uint32_t> mostFrequent;
+        std::pair<typename card_type::value, std::uint32_t> mostFrequent;
         for (auto const& v : valueCounter)
             if (v.second > mostFrequent.second)
                 mostFrequent = v;

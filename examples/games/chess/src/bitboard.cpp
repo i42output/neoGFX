@@ -150,7 +150,7 @@ namespace chess
             valid_moves<Player>(aTables, aPosition, playerNode);
             valid_moves<opponent_v<Player>>(aTables, aPosition, opponentNode);
 
-            mobility = static_cast<double>(static_cast<int64_t>(as_valid_moves(playerNode).size()) - static_cast<int64_t>(as_valid_moves(opponentNode).size()));
+            mobility = static_cast<double>(static_cast<std::int64_t>(as_valid_moves(playerNode).size()) - static_cast<std::int64_t>(as_valid_moves(opponentNode).size()));
             mobilityPlayer = !as_valid_moves(playerNode).empty();
             mobilityOpponent = !as_valid_moves(opponentNode).empty();
             mobilityPlayerKing = *playerNode.kingMobility;

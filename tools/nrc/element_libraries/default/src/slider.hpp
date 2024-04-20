@@ -94,6 +94,6 @@ namespace neogfx::nrc
         neolib::optional<T> iValue;
     };
 
-    typedef basic_slider<int32_t, ui_element_type::Slider> slider;
+    typedef basic_slider<std::int32_t, ui_element_type::Slider> slider;
     typedef basic_slider<double, ui_element_type::DoubleSlider> double_slider;
 }

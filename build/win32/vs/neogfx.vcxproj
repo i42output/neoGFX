@@ -589,17 +589,17 @@
     <ClInclude Include="..\..\..\src\hid\native\windows_mouse.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_window_manager.hpp" />
     <ClInclude Include="..\..\..\src\hid\native\windows_xinput_controller.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-filter.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-glyph.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-gradient.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-shape.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-stipple.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard.frag.hpp" />
-    <ClInclude Include="x64\Release\GeneratedFiles\standard.vert.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\shader.glsl-gles.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\shader.glsl.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-filter.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-glyph.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-gradient.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-shape.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-stipple.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-texture.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-texture.vert.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard.frag.hpp" />
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard.vert.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\app\action.cpp" />
@@ -784,44 +784,44 @@
     <ClCompile Include="..\..\..\src\hid\surface_window.cpp" />
     <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
-    <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
+    <ClCompile Include="neoGFX\x64\Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
+    <ClCompile Include="neoGFX\x64\Debug\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
+    <ClCompile Include="neoGFX\x64\Release\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
+    <ClCompile Include="neoGFX\x64\Release\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Tools\GeneratedFiles\icons.res.cpp">
+    <ClCompile Include="neoGFX\x64\Tools\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
+    <ClCompile Include="neoGFX\x64\Tools\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
+    <ClCompile Include="neoGFX\x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
+    <ClCompile Include="neoGFX\x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">false</ExcludedFromBuild>

@@ -88,6 +88,6 @@ namespace neogfx::nrc
         neolib::optional<T> iValue;
     };
 
-    typedef basic_spin_box<int32_t, ui_element_type::SpinBox> spin_box;
+    typedef basic_spin_box<std::int32_t, ui_element_type::SpinBox> spin_box;
     typedef basic_spin_box<double, ui_element_type::DoubleSpinBox> double_spin_box;
 }

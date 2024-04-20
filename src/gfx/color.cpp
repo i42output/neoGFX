@@ -116,9 +116,9 @@ namespace neogfx
                             if (moreBits.size() == 3)
                             {
                                 *this = sRGB_color{
-                                    boost::lexical_cast<uint32_t>(moreBits[0]),
-                                    boost::lexical_cast<uint32_t>(moreBits[1]),
-                                    boost::lexical_cast<uint32_t>(moreBits[2]) };
+                                    boost::lexical_cast<std::uint32_t>(moreBits[0]),
+                                    boost::lexical_cast<std::uint32_t>(moreBits[1]),
+                                    boost::lexical_cast<std::uint32_t>(moreBits[2]) };
                             }
                         }
                         else if (bits[0] == "rgba")
@@ -128,10 +128,10 @@ namespace neogfx
                             if (moreBits.size() == 4)
                             {
                                 *this = sRGB_color{
-                                    boost::lexical_cast<uint32_t>(moreBits[0]),
-                                    boost::lexical_cast<uint32_t>(moreBits[1]),
-                                    boost::lexical_cast<uint32_t>(moreBits[2]),
-                                    static_cast<uint32_t>(boost::lexical_cast<double>(moreBits[3]) * 255.0) };
+                                    boost::lexical_cast<std::uint32_t>(moreBits[0]),
+                                    boost::lexical_cast<std::uint32_t>(moreBits[1]),
+                                    boost::lexical_cast<std::uint32_t>(moreBits[2]),
+                                    static_cast<std::uint32_t>(boost::lexical_cast<double>(moreBits[3]) * 255.0) };
                             }
                         }
                         else

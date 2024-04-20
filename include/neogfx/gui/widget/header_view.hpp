@@ -44,7 +44,7 @@ namespace neogfx
         virtual void header_view_updated(header_view& aHeaderView, header_view_update_reason aUpdateReason) = 0;
     };
 
-    enum class header_view_type : uint32_t
+    enum class header_view_type : std::uint32_t
     {
         Horizontal      = 0x0001,
         Vertical        = 0x0002
@@ -81,14 +81,14 @@ namespace neogfx
     public:
         dimension separator_width() const;
         void set_separator_width(const optional_dimension& aWidth);
-        uint32_t section_count() const;
-        dimension section_width(uint32_t aSectionIndex, bool aForHeaderButton = false) const;
+        std::uint32_t section_count() const;
+        dimension section_width(std::uint32_t aSectionIndex, bool aForHeaderButton = false) const;
         dimension total_width() const;
     public:
         bool is_managing_layout() const override;
     public:
         void panes_resized() override;
-        void reset_pane_sizes_requested(const std::optional<uint32_t>& aPane = {}) override;
+        void reset_pane_sizes_requested(const std::optional<std::uint32_t>& aPane = {}) override;
     protected:
         virtual void column_info_changed(item_presentation_model_index::column_type aColumnIndex);
         virtual void item_model_changed(const i_item_model& aItemModel);
@@ -103,7 +103,7 @@ namespace neogfx
     private:
         void init();
         void full_update();
-        bool update_section_width(uint32_t aColumn, dimension aColumnWidth);
+        bool update_section_width(std::uint32_t aColumn, dimension aColumnWidth);
     private:
         i_header_view_owner& iOwner;
         sink iSink;

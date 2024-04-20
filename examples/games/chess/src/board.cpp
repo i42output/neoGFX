@@ -74,13 +74,13 @@ namespace chess::gui
         if (iEditBoard)
             draw_alpha_background(aGc, board_rect(), std::min<ng::scalar>(square_rect({ 0, 0 }).width() / 4, 8.0_dip));
         auto const now = std::chrono::steady_clock::now();
-        int32_t constexpr RENDER_BOARD                  = 1;
-        int32_t constexpr RENDER_NON_SELECTED_PIECES    = 2;
-        int32_t constexpr RENDER_SELECTED_PIECES        = 3;
-        int32_t constexpr RENDER_ANIMATIONS             = 4;
+        std::int32_t constexpr RENDER_BOARD                  = 1;
+        std::int32_t constexpr RENDER_NON_SELECTED_PIECES    = 2;
+        std::int32_t constexpr RENDER_SELECTED_PIECES        = 3;
+        std::int32_t constexpr RENDER_ANIMATIONS             = 4;
         coordinate const coordMin = (!iFlipped ? 0u : 7u);
         coordinate const coordMax = (!iFlipped ? 0u : 7u);
-        for (int32_t pass = RENDER_BOARD; pass <= RENDER_ANIMATIONS; ++pass)
+        for (std::int32_t pass = RENDER_BOARD; pass <= RENDER_ANIMATIONS; ++pass)
             for (coordinate y = 0u; y <= 7u; ++y)
                 for (coordinate x = 0u; x <= 7u; ++x)
                 {
@@ -246,7 +246,7 @@ namespace chess::gui
     {
         if (aKeyCode == ng::key_code_e::KeyCode_i)
         {
-            iSquareIdentification = static_cast<square_identification>((static_cast<uint32_t>(iSquareIdentification) + 1u) % static_cast<uint32_t>(square_identification::COUNT));
+            iSquareIdentification = static_cast<square_identification>((static_cast<std::uint32_t>(iSquareIdentification) + 1u) % static_cast<std::uint32_t>(square_identification::COUNT));
             iAnimations.clear();
             update();
             return true;

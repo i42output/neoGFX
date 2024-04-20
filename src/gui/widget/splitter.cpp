@@ -185,7 +185,7 @@ namespace neogfx
         layout_items();
     }
 
-    void splitter::reset_pane_sizes_requested(const std::optional<uint32_t>&)
+    void splitter::reset_pane_sizes_requested(const std::optional<std::uint32_t>&)
     {
     }
 
@@ -207,7 +207,7 @@ namespace neogfx
 
     std::optional<splitter::separator_type> splitter::separator_at(const point& aPosition) const
     {
-        for (uint32_t i = 1u; i < layout().count(); ++i)
+        for (std::uint32_t i = 1u; i < layout().count(); ++i)
             if (separator_rect(layout(), {i - 1u, i}).contains(aPosition))
                     return separator_type{ i - 1u, i };
         return {};

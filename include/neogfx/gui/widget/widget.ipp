@@ -1286,7 +1286,7 @@ namespace neogfx
 
             PaintingChildren.trigger(aGc);
 
-            typedef std::map<int32_t, std::vector<i_widget const*>> widget_layers_t;
+            typedef std::map<std::int32_t, std::vector<i_widget const*>> widget_layers_t;
             shared_thread_local(std::vector<std::unique_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
 
             shared_thread_local(std::size_t, neogfx::widget::render, stack);

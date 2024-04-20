@@ -110,9 +110,9 @@ namespace neogfx
         return !iTabs.empty();
     }
 
-    uint32_t tab_bar::tab_count() const noexcept
+    std::uint32_t tab_bar::tab_count() const noexcept
     {
-        return static_cast<uint32_t>(iTabs.size());
+        return static_cast<std::uint32_t>(iTabs.size());
     }
 
     tab_bar::tab_index tab_bar::index_of(const i_tab& aTab) const

@@ -176,7 +176,7 @@ namespace neogfx
         buffer* iActiveBuffer = &iPrimaryBuffer;
         std::optional<std::string> iEscapeSequence;
         mutable bool iOutputting = false;
-        uint64_t iCursorAnimationStartTime;
+        std::uint64_t iCursorAnimationStartTime;
         widget_timer iAnimator;
         sink iSink;
     };

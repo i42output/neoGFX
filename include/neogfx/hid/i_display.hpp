@@ -31,7 +31,7 @@
 
 namespace neogfx
 {
-    enum class subpixel_format : uint32_t
+    enum class subpixel_format : std::uint32_t
     {
         None,
         RGBHorizontal,
@@ -63,7 +63,7 @@ namespace neogfx
     public:
         virtual ~i_display() = default;
     public:
-        virtual uint32_t index() const = 0;
+        virtual std::uint32_t index() const = 0;
     public:
         virtual const i_device_metrics& metrics() const = 0;
         virtual void update_dpi() = 0;

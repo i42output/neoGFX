@@ -38,7 +38,7 @@ namespace neogfx
     class i_drag_drop_item;
     class i_drag_drop_target;
 
-    enum class item_cell_flags : uint32_t
+    enum class item_cell_flags : std::uint32_t
     {
         Invalid                 = 0x00000000,
         Enabled                 = 0x00000001,
@@ -57,7 +57,7 @@ namespace neogfx
 
     typedef std::optional<item_cell_flags> optional_item_cell_flags;
 
-    enum class item_cell_selection_flags : uint8_t
+    enum class item_cell_selection_flags : std::uint8_t
     {
         None = 0x00,
         Current = 0x01,
@@ -82,12 +82,12 @@ namespace neogfx
 {
     inline item_cell_flags operator|(item_cell_flags lhs, item_cell_flags rhs)
     {
-        return static_cast<item_cell_flags>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+        return static_cast<item_cell_flags>(static_cast<std::uint32_t>(lhs) | static_cast<std::uint32_t>(rhs));
     }
 
     inline item_cell_flags operator&(item_cell_flags lhs, item_cell_flags rhs)
     {
-        return static_cast<item_cell_flags>(static_cast<uint32_t>(lhs)& static_cast<uint32_t>(rhs));
+        return static_cast<item_cell_flags>(static_cast<std::uint32_t>(lhs)& static_cast<std::uint32_t>(rhs));
     }
 
     inline item_cell_flags& operator|=(item_cell_flags& lhs, item_cell_flags rhs)
@@ -104,22 +104,22 @@ namespace neogfx
 
     inline item_cell_flags operator~(item_cell_flags flags)
     {
-        return static_cast<item_cell_flags>(~static_cast<uint32_t>(flags));
+        return static_cast<item_cell_flags>(~static_cast<std::uint32_t>(flags));
     }
 
     inline item_cell_selection_flags operator|(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
     {
-        return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<item_cell_selection_flags>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline item_cell_selection_flags operator&(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
     {
-        return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<item_cell_selection_flags>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline item_cell_selection_flags operator^(item_cell_selection_flags aLhs, item_cell_selection_flags aRhs)
     {
-        return static_cast<item_cell_selection_flags>(static_cast<uint32_t>(aLhs) ^ static_cast<uint32_t>(aRhs));
+        return static_cast<item_cell_selection_flags>(static_cast<std::uint32_t>(aLhs) ^ static_cast<std::uint32_t>(aRhs));
     }
 
     inline item_cell_selection_flags& operator|=(item_cell_selection_flags& lhs, item_cell_selection_flags rhs)
@@ -142,7 +142,7 @@ namespace neogfx
 
     inline item_cell_selection_flags operator~(item_cell_selection_flags aLhs)
     {
-        return static_cast<item_cell_selection_flags>(~static_cast<uint32_t>(aLhs));
+        return static_cast<item_cell_selection_flags>(~static_cast<std::uint32_t>(aLhs));
     }
 
     struct item_presentation_model_index : item_index<item_presentation_model_index> 
@@ -268,9 +268,9 @@ namespace neogfx
         virtual bool has_item_model_index(item_model_index const& aIndex) const = 0;
         virtual item_presentation_model_index from_item_model_index(item_model_index const& aIndex, bool aIgnoreColumn = false) const = 0;
     public:
-        virtual uint32_t rows() const = 0;
-        virtual uint32_t columns() const = 0;
-        virtual uint32_t columns(item_presentation_model_index const& aIndex) const = 0;
+        virtual std::uint32_t rows() const = 0;
+        virtual std::uint32_t columns() const = 0;
+        virtual std::uint32_t columns(item_presentation_model_index const& aIndex) const = 0;
     public:
         virtual void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) = 0;
     public:

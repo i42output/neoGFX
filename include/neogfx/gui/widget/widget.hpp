@@ -333,15 +333,15 @@ namespace neogfx
         i_layout* iParentLayout;
         bool iResizing;
         bool iLayoutPending;
-        uint32_t iLayoutInProgress;
+        std::uint32_t iLayoutInProgress;
         optional<neogfx::layout_reason> iLayoutReason;
         ref_ptr<i_layout> iLayout;
         mutable cache<rect> iDefaultNonClientClipRect;
         mutable cache<rect> iDefaultClientClipRect;
         optional_point iCapturePosition;
-        int32_t iLayer;
+        std::int32_t iLayer;
         optional_view iView;
-        std::optional<int32_t> iRenderLayer;
+        std::optional<std::int32_t> iRenderLayer;
         // properties / anchors
     public:
         define_property(property_category::hard_geometry, optional_logical_coordinate_system, LogicalCoordinateSystem, logical_coordinate_system)

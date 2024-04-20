@@ -64,7 +64,7 @@ namespace neogfx
         uGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
         uGradientTile = (aGradient.tile() != std::nullopt);
         if (aGradient.tile() != std::nullopt)
-            uGradientTileParams = vec3{ aGradient.tile()->extents.cx, aGradient.tile()->extents.cy, aGradient.tile()->aligned ? 1.0 : 0.0 }.as<int32_t>();
+            uGradientTileParams = vec3{ aGradient.tile()->extents.cx, aGradient.tile()->extents.cy, aGradient.tile()->aligned ? 1.0 : 0.0 }.as<std::int32_t>();
         else
             uGradientTileParams = vec3i32{};
         uGradientColorCount = static_cast<int>(aGradient.colors().sampler().data().extents().cx);
@@ -163,7 +163,7 @@ namespace neogfx
         uFilterEnabled = true;
         uFilterType = aFilter;
         if (aFilter == shader_filter::GaussianBlur)
-            aArgument1 += (1u - static_cast<uint32_t>(aArgument1) % 2u);
+            aArgument1 += (1u - static_cast<std::uint32_t>(aArgument1) % 2u);
         auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
         uFilterArguments = arguments.as<float>();
         auto kernel = iFilterKernel.find(std::make_pair(aFilter, arguments));
@@ -172,7 +172,7 @@ namespace neogfx
             if (aFilter == shader_filter::GaussianBlur)
             {
                 kernel = iFilterKernel.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
-                auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<uint32_t>(aArgument1), static_cast<float>(aArgument2));
+                auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<std::uint32_t>(aArgument1), static_cast<float>(aArgument2));
                 kernel->second.emplace(size{ aArgument1, aArgument1 });
                 kernel->second->data().set_pixels(rect{ point{0.0, 0.0}, size{aArgument1, aArgument1} }, &kernelValues[0][0]);
             }
@@ -208,7 +208,7 @@ namespace neogfx
         bool subpixelRender = subpixel(aGlyphChar) && aText.glyph(aGlyphChar).subpixel();
         if (subpixelRender)
             aContext.render_target().target_texture().bind(7);
-        uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<int32_t>();
+        uGlyphRenderTargetExtents = aContext.render_target().extents().to_vec2().as<std::int32_t>();
         uGlyphGuiCoordinates = aContext.logical_coordinates().is_gui_orientation();
         uGlyphRenderOutput = sampler2DMS{ 7 };
         uGlyphSubpixel = aText.glyph(aGlyphChar).subpixel();

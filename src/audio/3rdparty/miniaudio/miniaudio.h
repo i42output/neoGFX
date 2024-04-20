@@ -26685,7 +26685,7 @@ typedef int                      (* ma_pa_stream_is_corked_proc)               (
 typedef ma_pa_operation*         (* ma_pa_stream_cork_proc)                    (ma_pa_stream* s, int b, ma_pa_stream_success_cb_t cb, void* userdata);
 typedef ma_pa_operation*         (* ma_pa_stream_trigger_proc)                 (ma_pa_stream* s, ma_pa_stream_success_cb_t cb, void* userdata);
 typedef int                      (* ma_pa_stream_begin_write_proc)             (ma_pa_stream* s, void** data, size_t* nbytes);
-typedef int                      (* ma_pa_stream_write_proc)                   (ma_pa_stream* s, const void* data, size_t nbytes, ma_pa_free_cb_t free_cb, int64_t offset, ma_pa_seek_mode_t seek);
+typedef int                      (* ma_pa_stream_write_proc)                   (ma_pa_stream* s, const void* data, size_t nbytes, ma_pa_free_cb_t free_cb, std::int64_t offset, ma_pa_seek_mode_t seek);
 typedef int                      (* ma_pa_stream_peek_proc)                    (ma_pa_stream* s, const void** data, size_t* nbytes);
 typedef int                      (* ma_pa_stream_drop_proc)                    (ma_pa_stream* s);
 typedef size_t                   (* ma_pa_stream_writable_size_proc)           (ma_pa_stream* s);
@@ -34534,16 +34534,16 @@ AAudio Backend
 
 /*#include <AAudio/AAudio.h>*/
 
-typedef int32_t                                         ma_aaudio_result_t;
-typedef int32_t                                         ma_aaudio_direction_t;
-typedef int32_t                                         ma_aaudio_sharing_mode_t;
-typedef int32_t                                         ma_aaudio_format_t;
-typedef int32_t                                         ma_aaudio_stream_state_t;
-typedef int32_t                                         ma_aaudio_performance_mode_t;
-typedef int32_t                                         ma_aaudio_usage_t;
-typedef int32_t                                         ma_aaudio_content_type_t;
-typedef int32_t                                         ma_aaudio_input_preset_t;
-typedef int32_t                                         ma_aaudio_data_callback_result_t;
+typedef std::int32_t                                         ma_aaudio_result_t;
+typedef std::int32_t                                         ma_aaudio_direction_t;
+typedef std::int32_t                                         ma_aaudio_sharing_mode_t;
+typedef std::int32_t                                         ma_aaudio_format_t;
+typedef std::int32_t                                         ma_aaudio_stream_state_t;
+typedef std::int32_t                                         ma_aaudio_performance_mode_t;
+typedef std::int32_t                                         ma_aaudio_usage_t;
+typedef std::int32_t                                         ma_aaudio_content_type_t;
+typedef std::int32_t                                         ma_aaudio_input_preset_t;
+typedef std::int32_t                                         ma_aaudio_data_callback_result_t;
 typedef struct ma_AAudioStreamBuilder_t*                ma_AAudioStreamBuilder;
 typedef struct ma_AAudioStream_t*                       ma_AAudioStream;
 
@@ -34622,19 +34622,19 @@ typedef struct ma_AAudioStream_t*                       ma_AAudioStream;
 #define MA_AAUDIO_CALLBACK_RESULT_STOP                  1
 
 
-typedef ma_aaudio_data_callback_result_t (* ma_AAudioStream_dataCallback) (ma_AAudioStream* pStream, void* pUserData, void* pAudioData, int32_t numFrames);
+typedef ma_aaudio_data_callback_result_t (* ma_AAudioStream_dataCallback) (ma_AAudioStream* pStream, void* pUserData, void* pAudioData, std::int32_t numFrames);
 typedef void                             (* ma_AAudioStream_errorCallback)(ma_AAudioStream *pStream, void *pUserData, ma_aaudio_result_t error);
 
 typedef ma_aaudio_result_t       (* MA_PFN_AAudio_createStreamBuilder)                   (ma_AAudioStreamBuilder** ppBuilder);
 typedef ma_aaudio_result_t       (* MA_PFN_AAudioStreamBuilder_delete)                   (ma_AAudioStreamBuilder* pBuilder);
-typedef void                     (* MA_PFN_AAudioStreamBuilder_setDeviceId)              (ma_AAudioStreamBuilder* pBuilder, int32_t deviceId);
+typedef void                     (* MA_PFN_AAudioStreamBuilder_setDeviceId)              (ma_AAudioStreamBuilder* pBuilder, std::int32_t deviceId);
 typedef void                     (* MA_PFN_AAudioStreamBuilder_setDirection)             (ma_AAudioStreamBuilder* pBuilder, ma_aaudio_direction_t direction);
 typedef void                     (* MA_PFN_AAudioStreamBuilder_setSharingMode)           (ma_AAudioStreamBuilder* pBuilder, ma_aaudio_sharing_mode_t sharingMode);
 typedef void                     (* MA_PFN_AAudioStreamBuilder_setFormat)                (ma_AAudioStreamBuilder* pBuilder, ma_aaudio_format_t format);
-typedef void                     (* MA_PFN_AAudioStreamBuilder_setChannelCount)          (ma_AAudioStreamBuilder* pBuilder, int32_t channelCount);
-typedef void                     (* MA_PFN_AAudioStreamBuilder_setSampleRate)            (ma_AAudioStreamBuilder* pBuilder, int32_t sampleRate);
-typedef void                     (* MA_PFN_AAudioStreamBuilder_setBufferCapacityInFrames)(ma_AAudioStreamBuilder* pBuilder, int32_t numFrames);
-typedef void                     (* MA_PFN_AAudioStreamBuilder_setFramesPerDataCallback) (ma_AAudioStreamBuilder* pBuilder, int32_t numFrames);
+typedef void                     (* MA_PFN_AAudioStreamBuilder_setChannelCount)          (ma_AAudioStreamBuilder* pBuilder, std::int32_t channelCount);
+typedef void                     (* MA_PFN_AAudioStreamBuilder_setSampleRate)            (ma_AAudioStreamBuilder* pBuilder, std::int32_t sampleRate);
+typedef void                     (* MA_PFN_AAudioStreamBuilder_setBufferCapacityInFrames)(ma_AAudioStreamBuilder* pBuilder, std::int32_t numFrames);
+typedef void                     (* MA_PFN_AAudioStreamBuilder_setFramesPerDataCallback) (ma_AAudioStreamBuilder* pBuilder, std::int32_t numFrames);
 typedef void                     (* MA_PFN_AAudioStreamBuilder_setDataCallback)          (ma_AAudioStreamBuilder* pBuilder, ma_AAudioStream_dataCallback callback, void* pUserData);
 typedef void                     (* MA_PFN_AAudioStreamBuilder_setErrorCallback)         (ma_AAudioStreamBuilder* pBuilder, ma_AAudioStream_errorCallback callback, void* pUserData);
 typedef void                     (* MA_PFN_AAudioStreamBuilder_setPerformanceMode)       (ma_AAudioStreamBuilder* pBuilder, ma_aaudio_performance_mode_t mode);
@@ -34644,13 +34644,13 @@ typedef void                     (* MA_PFN_AAudioStreamBuilder_setInputPreset)  
 typedef ma_aaudio_result_t       (* MA_PFN_AAudioStreamBuilder_openStream)               (ma_AAudioStreamBuilder* pBuilder, ma_AAudioStream** ppStream);
 typedef ma_aaudio_result_t       (* MA_PFN_AAudioStream_close)                           (ma_AAudioStream* pStream);
 typedef ma_aaudio_stream_state_t (* MA_PFN_AAudioStream_getState)                        (ma_AAudioStream* pStream);
-typedef ma_aaudio_result_t       (* MA_PFN_AAudioStream_waitForStateChange)              (ma_AAudioStream* pStream, ma_aaudio_stream_state_t inputState, ma_aaudio_stream_state_t* pNextState, int64_t timeoutInNanoseconds);
+typedef ma_aaudio_result_t       (* MA_PFN_AAudioStream_waitForStateChange)              (ma_AAudioStream* pStream, ma_aaudio_stream_state_t inputState, ma_aaudio_stream_state_t* pNextState, std::int64_t timeoutInNanoseconds);
 typedef ma_aaudio_format_t       (* MA_PFN_AAudioStream_getFormat)                       (ma_AAudioStream* pStream);
-typedef int32_t                  (* MA_PFN_AAudioStream_getChannelCount)                 (ma_AAudioStream* pStream);
-typedef int32_t                  (* MA_PFN_AAudioStream_getSampleRate)                   (ma_AAudioStream* pStream);
-typedef int32_t                  (* MA_PFN_AAudioStream_getBufferCapacityInFrames)       (ma_AAudioStream* pStream);
-typedef int32_t                  (* MA_PFN_AAudioStream_getFramesPerDataCallback)        (ma_AAudioStream* pStream);
-typedef int32_t                  (* MA_PFN_AAudioStream_getFramesPerBurst)               (ma_AAudioStream* pStream);
+typedef std::int32_t                  (* MA_PFN_AAudioStream_getChannelCount)                 (ma_AAudioStream* pStream);
+typedef std::int32_t                  (* MA_PFN_AAudioStream_getSampleRate)                   (ma_AAudioStream* pStream);
+typedef std::int32_t                  (* MA_PFN_AAudioStream_getBufferCapacityInFrames)       (ma_AAudioStream* pStream);
+typedef std::int32_t                  (* MA_PFN_AAudioStream_getFramesPerDataCallback)        (ma_AAudioStream* pStream);
+typedef std::int32_t                  (* MA_PFN_AAudioStream_getFramesPerBurst)               (ma_AAudioStream* pStream);
 typedef ma_aaudio_result_t       (* MA_PFN_AAudioStream_requestStart)                    (ma_AAudioStream* pStream);
 typedef ma_aaudio_result_t       (* MA_PFN_AAudioStream_requestStop)                     (ma_AAudioStream* pStream);
 
@@ -34736,7 +34736,7 @@ static void ma_stream_error_callback__aaudio(ma_AAudioStream* pStream, void* pUs
     }
 }
 
-static ma_aaudio_data_callback_result_t ma_stream_data_callback_capture__aaudio(ma_AAudioStream* pStream, void* pUserData, void* pAudioData, int32_t frameCount)
+static ma_aaudio_data_callback_result_t ma_stream_data_callback_capture__aaudio(ma_AAudioStream* pStream, void* pUserData, void* pAudioData, std::int32_t frameCount)
 {
     ma_device* pDevice = (ma_device*)pUserData;
     MA_ASSERT(pDevice != NULL);
@@ -34747,7 +34747,7 @@ static ma_aaudio_data_callback_result_t ma_stream_data_callback_capture__aaudio(
     return MA_AAUDIO_CALLBACK_RESULT_CONTINUE;
 }
 
-static ma_aaudio_data_callback_result_t ma_stream_data_callback_playback__aaudio(ma_AAudioStream* pStream, void* pUserData, void* pAudioData, int32_t frameCount)
+static ma_aaudio_data_callback_result_t ma_stream_data_callback_playback__aaudio(ma_AAudioStream* pStream, void* pUserData, void* pAudioData, std::int32_t frameCount)
 {
     ma_device* pDevice = (ma_device*)pUserData;
     MA_ASSERT(pDevice != NULL);
@@ -35040,8 +35040,8 @@ static ma_result ma_device_uninit__aaudio(ma_device* pDevice)
 static ma_result ma_device_init_by_type__aaudio(ma_device* pDevice, const ma_device_config* pConfig, ma_device_type deviceType, ma_device_descriptor* pDescriptor, ma_AAudioStream** ppStream)
 {
     ma_result result;
-    int32_t bufferCapacityInFrames;
-    int32_t framesPerDataCallback;
+    std::int32_t bufferCapacityInFrames;
+    std::int32_t framesPerDataCallback;
     ma_AAudioStream* pStream;
 
     MA_ASSERT(pDevice     != NULL);

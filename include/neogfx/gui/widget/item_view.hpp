@@ -32,7 +32,7 @@
 
 namespace neogfx
 {
-    enum class cell_part : uint32_t
+    enum class cell_part : std::uint32_t
     {
         Background,
         Base,
@@ -113,7 +113,7 @@ namespace neogfx
     protected:
         virtual rect item_display_rect(bool aIntersectItemArea = false) const = 0;
         virtual size total_item_area(i_units_context const& aUnitsContext) const = 0;
-        virtual dimension column_width(uint32_t aColumn) const = 0;
+        virtual dimension column_width(std::uint32_t aColumn) const = 0;
         std::pair<item_model_index::value_type, coordinate> first_visible_item(i_graphics_context& aGc) const;
         std::pair<item_model_index::value_type, coordinate> last_visible_item(i_graphics_context& aGc) const;
     protected:

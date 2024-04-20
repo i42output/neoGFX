@@ -31,13 +31,13 @@ namespace neogfx
     class display : public i_display, public i_device_metrics
     {
     public:
-        display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect);
+        display(std::uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect);
         ~display();
     public:
         bool device_metrics_available() const override;
         const i_device_metrics& device_metrics() const override;
     public:
-        uint32_t index() const override;
+        std::uint32_t index() const override;
     public:
         const i_device_metrics& metrics() const override;
     public:
@@ -54,7 +54,7 @@ namespace neogfx
         dimension ppi() const override;
         dimension em_size() const override;
     private:
-        uint32_t iIndex;
+        std::uint32_t iIndex;
         mutable neogfx::rect iRect;
         mutable neogfx::rect iDesktopRect;
     protected:

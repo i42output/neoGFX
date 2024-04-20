@@ -33,10 +33,10 @@ namespace neogfx
     class i_title_bar;
     class i_status_bar;
 
-    typedef uint32_t layout_item_index;
+    typedef std::uint32_t layout_item_index;
     typedef std::optional<layout_item_index> optional_layout_item_index;
 
-    enum class layout_position : uint32_t
+    enum class layout_position : std::uint32_t
     {
         None    = 0x00000000,
         Top     = 0x00000001,
@@ -46,7 +46,7 @@ namespace neogfx
         Bottom  = 0x00000010
     };
 
-    enum class standard_layout : uint32_t
+    enum class standard_layout : std::uint32_t
     {
         Default         = 0x00000000,
         Client          = 0x00000001,
@@ -184,7 +184,7 @@ namespace neogfx
         }
     };
 
-    enum class autoscale : uint32_t
+    enum class autoscale : std::uint32_t
     {
         Default         = 0x00000000,
         Active          = 0x00000001,
@@ -193,20 +193,20 @@ namespace neogfx
 
     inline constexpr autoscale operator~(autoscale aLhs)
     {
-        return static_cast<autoscale>(~static_cast<uint32_t>(aLhs));
+        return static_cast<autoscale>(~static_cast<std::uint32_t>(aLhs));
     }
 
     inline constexpr autoscale operator|(autoscale aLhs, autoscale aRhs)
     {
-        return static_cast<autoscale>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<autoscale>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr autoscale operator&(autoscale aLhs, autoscale aRhs)
     {
-        return static_cast<autoscale>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<autoscale>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
-    enum class layout_direction : uint32_t
+    enum class layout_direction : std::uint32_t
     {
         Unknown     = 0x00000000,
         Horizontal  = 0x00000001,
@@ -215,17 +215,17 @@ namespace neogfx
 
     inline constexpr layout_direction operator~(layout_direction aLhs)
     {
-        return static_cast<layout_direction>(~static_cast<uint32_t>(aLhs));
+        return static_cast<layout_direction>(~static_cast<std::uint32_t>(aLhs));
     }
 
     inline constexpr layout_direction operator|(layout_direction aLhs, layout_direction aRhs)
     {
-        return static_cast<layout_direction>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<layout_direction>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr layout_direction operator&(layout_direction aLhs, layout_direction aRhs)
     {
-        return static_cast<layout_direction>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<layout_direction>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     class i_layout : public i_layout_item

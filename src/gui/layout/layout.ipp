@@ -40,9 +40,9 @@ namespace neogfx
                 return true;
             return false;
         }
-        static uint32_t items_zero_sized(layout const& aLayout, optional_size const& aAvailableSpace = optional_size{})
+        static std::uint32_t items_zero_sized(layout const& aLayout, optional_size const& aAvailableSpace = optional_size{})
         {
-            uint32_t result = 0;
+            std::uint32_t result = 0;
             bool const noSpace = (aAvailableSpace == std::nullopt ||
                 SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) ||
                 aLayout.items_visible(ItemTypeSpacer));
@@ -154,7 +154,7 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
-        uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+        std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
         if (has_minimum_size() && !querying_ideal_size())
             result = base_type::minimum_size(aAvailableSpace);
@@ -163,7 +163,7 @@ namespace neogfx
             auto availableSpaceForChildren = aAvailableSpace;
             if (availableSpaceForChildren != std::nullopt)
                 *availableSpaceForChildren -= internal_spacing().size();
-            uint32_t itemsZeroSized = 0;
+            std::uint32_t itemsZeroSized = 0;
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
@@ -217,8 +217,8 @@ namespace neogfx
             auto availableSpaceForChildren = aAvailableSpace;
             if (availableSpaceForChildren != std::nullopt)
                 *availableSpaceForChildren -= internal_spacing().size();
-            uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
-            uint32_t itemsZeroSized = 0;
+            std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+            std::uint32_t itemsZeroSized = 0;
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
@@ -285,7 +285,7 @@ namespace neogfx
         auto spaces = itemsVisible - itemsZeroSized - 1;
         AxisPolicy::cx(availableSpace) -= (AxisPolicy::cx(spacing()) * spaces);
         size::dimension_type leftover = AxisPolicy::cx(availableSpace);
-        uint32_t itemsUsingLeftover = 0u;
+        std::uint32_t itemsUsingLeftover = 0u;
         size totalExpanderWeight;
         for (auto const& itemRef : items())
         {
@@ -376,11 +376,11 @@ namespace neogfx
                 if (disposition == layout_item_disposition::Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace);
             }
-        uint32_t bitsLeft = 0;
+        std::uint32_t bitsLeft = 0;
         if (itemsUsingLeftover > 0)
-            bitsLeft = static_cast<int32_t>(leftover - weightedAmount);
-        neolib::bresenham_counter<int32_t> bits(bitsLeft, itemsUsingLeftover);
-        uint32_t previousBit = 0;
+            bitsLeft = static_cast<std::int32_t>(leftover - weightedAmount);
+        neolib::bresenham_counter<std::int32_t> bits(bitsLeft, itemsUsingLeftover);
+        std::uint32_t previousBit = 0;
         point nextPos = aPosition + internal_spacing().top_left();
         bool addSpace = false;
         for (auto& itemRef : *this)
@@ -409,7 +409,7 @@ namespace neogfx
                 AxisPolicy::cx(s) = AxisPolicy::cx(AxisPolicy::size_policy_x(itemSizePolicy) == size_constraint::Minimum ? itemMinSize : itemMaxSize);
             else if (disposition == layout_item_disposition::Weighted && leftover > 0.0)
             {
-                uint32_t bit = 0;
+                std::uint32_t bit = 0;
                 if (AxisPolicy::size_policy_x(itemSizePolicy, false) != size_constraint::ExpandingUniform)
                     bit = (bitsLeft != 0 ? bits() : 0);
                 AxisPolicy::cx(s) = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace) + static_cast<size::dimension_type>(bit - previousBit);

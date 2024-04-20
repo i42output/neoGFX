@@ -35,15 +35,15 @@ namespace neogfx
     layout_item_cache::layout_item_cache(i_ref_ptr<i_layout_item> const& aItem) :
         iSubject{ aItem },  
         iSubjectDestroyed{ *iSubject },
-        iVisible{ static_cast<uint32_t>(-1), {} },
-        iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } }, 
-        iWeight{ static_cast<uint32_t>(-1), {} },
-        iIdealSize{ static_cast<uint32_t>(-1), {} },
-        iMinimumSize{ static_cast<uint32_t>(-1), {} },
-        iMaximumSize{ static_cast<uint32_t>(-1), {} },
-        iFixedSize{ static_cast<uint32_t>(-1), {} },
-        iTransformation{ static_cast<uint32_t>(-1), mat33::identity() },
-        iCombinedTransformation{ static_cast<uint32_t>(-1), mat33::identity() }
+        iVisible{ static_cast<std::uint32_t>(-1), {} },
+        iSizePolicy{ static_cast<std::uint32_t>(-1), { size_constraint::Minimum } }, 
+        iWeight{ static_cast<std::uint32_t>(-1), {} },
+        iIdealSize{ static_cast<std::uint32_t>(-1), {} },
+        iMinimumSize{ static_cast<std::uint32_t>(-1), {} },
+        iMaximumSize{ static_cast<std::uint32_t>(-1), {} },
+        iFixedSize{ static_cast<std::uint32_t>(-1), {} },
+        iTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() },
+        iCombinedTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() }
     {
         set_alive();
     }
@@ -51,15 +51,15 @@ namespace neogfx
     layout_item_cache::layout_item_cache(const layout_item_cache& aOther) :
         iSubject{ aOther.iSubject }, 
         iSubjectDestroyed{ *iSubject },
-        iVisible{ static_cast<uint32_t>(-1), {} },
-        iSizePolicy{ static_cast<uint32_t>(-1), { size_constraint::Minimum } },
-        iWeight{ static_cast<uint32_t>(-1), {} },
-        iIdealSize{ static_cast<uint32_t>(-1), {} },
-        iMinimumSize{ static_cast<uint32_t>(-1), {} },
-        iMaximumSize{ static_cast<uint32_t>(-1), {} },
-        iFixedSize{ static_cast<uint32_t>(-1), {} },
-        iTransformation{ static_cast<uint32_t>(-1), mat33::identity() },
-        iCombinedTransformation{ static_cast<uint32_t>(-1), mat33::identity() }
+        iVisible{ static_cast<std::uint32_t>(-1), {} },
+        iSizePolicy{ static_cast<std::uint32_t>(-1), { size_constraint::Minimum } },
+        iWeight{ static_cast<std::uint32_t>(-1), {} },
+        iIdealSize{ static_cast<std::uint32_t>(-1), {} },
+        iMinimumSize{ static_cast<std::uint32_t>(-1), {} },
+        iMaximumSize{ static_cast<std::uint32_t>(-1), {} },
+        iFixedSize{ static_cast<std::uint32_t>(-1), {} },
+        iTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() },
+        iCombinedTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() }
     {
         set_alive();
     }

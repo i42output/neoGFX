@@ -500,9 +500,9 @@ namespace neogfx
                 {
                     auto const& setViewport = static_variant_cast<const graphics_operation::set_viewport&>(*op);
                     if (setViewport.viewport)
-                        render_target().set_viewport(setViewport.viewport.value().as<int32_t>());
+                        render_target().set_viewport(setViewport.viewport.value().as<std::int32_t>());
                     else
-                        render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<int32_t>());
+                        render_target().set_viewport(rect{ render_target().target_origin(), render_target().extents() }.as<std::int32_t>());
                 }
                 break;
             case graphics_operation::operation_type::ScissorOn:
@@ -935,7 +935,7 @@ namespace neogfx
 
         auto v1 = aFrom.to_vec3();
         auto v2 = aTo.to_vec3();
-        if (snap_to_pixel() && static_cast<int32_t>(aPen.width()) % 2 == 0)
+        if (snap_to_pixel() && static_cast<std::int32_t>(aPen.width()) % 2 == 0)
         {
             v1 -= vec3{ 0.5, 0.5, 0.0 };
             v2 -= vec3{ 0.5, 0.5, 0.0 };
@@ -1126,7 +1126,7 @@ namespace neogfx
 
         // todo: add a shader-based primitive for this operation
 
-        for (int32_t step = 0; step <= 1; ++step)
+        for (std::int32_t step = 0; step <= 1; ++step)
         {
             auto& firstOp = static_variant_cast<const graphics_operation::draw_checker_rect&>(*aDrawCheckerRectOps.cbegin());
 
@@ -1140,13 +1140,13 @@ namespace neogfx
                     if (std::holds_alternative<std::monostate>(drawOp.fill1) || std::holds_alternative<std::monostate>(drawOp.fill2))
                         continue;
 
-                    auto const squareCount = static_cast<uint32_t>(
+                    auto const squareCount = static_cast<std::uint32_t>(
                         std::ceil(std::ceil(drawOp.rect.extents().cx / drawOp.squareSize.cx) * std::ceil(std::ceil(drawOp.rect.extents().cy / drawOp.squareSize.cy)) / 2.0));
                     use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * squareCount) };
 
                     for (coordinate x = 0; x < drawOp.rect.cx; x += drawOp.squareSize.cx)
                     {
-                        bool alt = ((static_cast<int32_t>(x / drawOp.squareSize.cx) % 2) == step);
+                        bool alt = ((static_cast<std::int32_t>(x / drawOp.squareSize.cx) % 2) == step);
 
                         for (coordinate y = 0; y < drawOp.rect.cy; y += drawOp.squareSize.cy)
                         {
@@ -2188,8 +2188,8 @@ namespace neogfx
                             ++nextIndex;
                         }
                     }
-                    cacheIndices[0] = static_cast<uint32_t>(vertexStartIndex);
-                    cacheIndices[1] = static_cast<uint32_t>(nextIndex);
+                    cacheIndices[0] = static_cast<std::uint32_t>(vertexStartIndex);
+                    cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                 }
                 patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
             };

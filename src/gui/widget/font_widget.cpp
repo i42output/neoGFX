@@ -99,8 +99,8 @@ namespace neogfx
                         auto fontFamilyIndex = iFamilyPickerSelectionModel.presentation_model().to_item_model_index(*aCurrentIndex).row();
                         auto& fm = service<i_font_manager>();
                         auto styleCount = fm.font_style_count(fontFamilyIndex);
-                        std::optional<uint32_t> matchingStyle;
-                        for (uint32_t s = 0; s < styleCount; ++s)
+                        std::optional<std::uint32_t> matchingStyle;
+                        for (std::uint32_t s = 0; s < styleCount; ++s)
                         {
                             item_model().insert_item(item_model().end(), fm.font_style_name(fontFamilyIndex, s));
                             if (existingStyle && *existingStyle == fm.font_style_name(fontFamilyIndex, s))
@@ -381,7 +381,7 @@ namespace neogfx
 
             auto& fm = service<i_font_manager>();
 
-            for (uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
+            for (std::uint32_t fi = 0; fi < fm.font_family_count(); ++fi)
                 iFamilyPicker->model().insert_item(item_model_index{ fi }, fm.font_family(fi));
         }
 
@@ -406,7 +406,7 @@ namespace neogfx
                     for (auto sz : { 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 26, 28, 36, 48, 72 })
                         iSizePicker->model().insert_item(item_model_index{ iSizePicker->model().rows() }, sz);
                 else
-                    for (uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
+                    for (std::uint32_t fsi = 0; fsi < iSelectedFont.num_fixed_sizes(); ++fsi)
                         iSizePicker->model().insert_item(item_model_index{ iSizePicker->model().rows() }, iSelectedFont.fixed_size(fsi));
                 iSizePicker->input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
             }

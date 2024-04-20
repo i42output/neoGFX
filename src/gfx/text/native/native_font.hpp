@@ -53,11 +53,11 @@ namespace neogfx
     public:
         i_string const& family_name() const final;
         bool has_style(font_style aStyle) const final;
-        uint32_t style_count() const final;
-        font_style style(uint32_t aStyle) const final;
-        i_string const& style_name(uint32_t aStyleIndex) const final;
+        std::uint32_t style_count() const final;
+        font_style style(std::uint32_t aStyle) const final;
+        i_string const& style_name(std::uint32_t aStyleIndex) const final;
         void remove_style(font_style aStyleIndex) final;
-        void remove_style(uint32_t aStyleIndex) final;
+        void remove_style(std::uint32_t aStyleIndex) final;
         void create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
         void create_face(font_style aStyle, i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;
         void create_face(font_info const& aFontIinfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) final;

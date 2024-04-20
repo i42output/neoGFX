@@ -39,7 +39,7 @@ namespace neogfx
     struct item_model_index : item_index<item_model_index> { using item_index::item_index; };
     typedef std::optional<item_model_index> optional_item_model_index;
 
-    enum class item_data_type : uint32_t
+    enum class item_data_type : std::uint32_t
     {
         Unknown,
         Bool,
@@ -64,7 +64,7 @@ namespace neogfx
         ChoiceCustomType
     };
 
-    enum class item_cell_data_category : uint32_t
+    enum class item_cell_data_category : std::uint32_t
     {
         Invalid,
         Value,
@@ -122,20 +122,20 @@ namespace neogfx
 
     typedef neolib::variant<
         bool,
-        int32_t,
-        uint32_t,
-        int64_t,
-        uint64_t,
+        std::int32_t,
+        std::uint32_t,
+        std::int64_t,
+        std::uint64_t,
         float,
         double,
         string,
         void*,
         custom_type,
         item_cell_choice_type<bool>::type::value_type const*,
-        item_cell_choice_type<int32_t>::type::value_type const*,
-        item_cell_choice_type<uint32_t>::type::value_type const*,
-        item_cell_choice_type<int64_t>::type::value_type const*,
-        item_cell_choice_type<uint64_t>::type::value_type const*,
+        item_cell_choice_type<std::int32_t>::type::value_type const*,
+        item_cell_choice_type<std::uint32_t>::type::value_type const*,
+        item_cell_choice_type<std::int64_t>::type::value_type const*,
+        item_cell_choice_type<std::uint64_t>::type::value_type const*,
         item_cell_choice_type<float>::type::value_type const*,
         item_cell_choice_type<double>::type::value_type const*,
         item_cell_choice_type<string>::type::value_type const*,
@@ -144,20 +144,20 @@ namespace neogfx
 
     template <typename T> struct classify_item_call_data { static constexpr item_cell_data_category category = item_cell_data_category::Invalid; };
     template <> struct classify_item_call_data<bool> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
-    template <> struct classify_item_call_data<int32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
-    template <> struct classify_item_call_data<uint32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
-    template <> struct classify_item_call_data<int64_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
-    template <> struct classify_item_call_data<uint64_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
+    template <> struct classify_item_call_data<std::int32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
+    template <> struct classify_item_call_data<std::uint32_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
+    template <> struct classify_item_call_data<std::int64_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
+    template <> struct classify_item_call_data<std::uint64_t> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<float> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<double> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<string> { static constexpr item_cell_data_category category = item_cell_data_category::Value; };
     template <> struct classify_item_call_data<void*> { static constexpr item_cell_data_category category = item_cell_data_category::Pointer; };
     template <> struct classify_item_call_data<custom_type> { static constexpr item_cell_data_category category = item_cell_data_category::CustomType; };
     template <> struct classify_item_call_data<item_cell_choice_type<bool>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<int32_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<uint32_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<int64_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
-    template <> struct classify_item_call_data<item_cell_choice_type<uint64_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<std::int32_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<std::uint32_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<std::int64_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
+    template <> struct classify_item_call_data<item_cell_choice_type<std::uint64_t>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
     template <> struct classify_item_call_data<item_cell_choice_type<float>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
     template <> struct classify_item_call_data<item_cell_choice_type<double>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
     template <> struct classify_item_call_data<item_cell_choice_type<string>::type::value_type const*> { static constexpr item_cell_data_category category = item_cell_data_category::ChooseValue; };
@@ -285,9 +285,9 @@ namespace neogfx
         virtual ~i_item_model() = default;
     public:
         virtual bool is_tree() const = 0;
-        virtual uint32_t rows() const = 0;
-        virtual uint32_t columns() const = 0;
-        virtual uint32_t columns(item_model_index const& aIndex) const = 0;
+        virtual std::uint32_t rows() const = 0;
+        virtual std::uint32_t columns() const = 0;
+        virtual std::uint32_t columns(item_model_index const& aIndex) const = 0;
         virtual std::string const& column_name(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_name(item_model_index::column_type aColumnIndex, std::string const& aName) = 0;
         virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
@@ -323,8 +323,8 @@ namespace neogfx
         virtual const_iterator send(const_iterator aParent) const = 0;
     public:
         virtual bool empty() const = 0;
-        virtual void reserve(uint32_t aItemCount) = 0;
-        virtual uint32_t capacity() const = 0;
+        virtual void reserve(std::uint32_t aItemCount) = 0;
+        virtual std::uint32_t capacity() const = 0;
         virtual iterator insert_item(const_iterator aPosition, item_cell_data const& aCellData) = 0;
         virtual iterator insert_item(item_model_index const& aIndex, item_cell_data const& aCellData) = 0;
         virtual iterator append_item(const_iterator aParent, item_cell_data const& aCellData) = 0;

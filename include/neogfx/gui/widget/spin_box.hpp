@@ -83,7 +83,7 @@ namespace neogfx
     protected:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
     private:
-        void do_step(step_direction aDirection, uint32_t aAmount = 1);
+        void do_step(step_direction aDirection, std::uint32_t aAmount = 1);
         std::optional<value_type> string_to_value(std::string const& aString) const;
         void init();
         void update_size_hint();
@@ -109,25 +109,25 @@ namespace neogfx
         bool iDontSetText = false;
     };
 
-    extern template class basic_spin_box<int8_t>;
-    extern template class basic_spin_box<uint8_t>;
+    extern template class basic_spin_box<std::int8_t>;
+    extern template class basic_spin_box<std::uint8_t>;
     extern template class basic_spin_box<int16_t>;
     extern template class basic_spin_box<uint16_t>;
-    extern template class basic_spin_box<int32_t>;
-    extern template class basic_spin_box<uint32_t>;
-    extern template class basic_spin_box<int64_t>;
-    extern template class basic_spin_box<uint64_t>;
+    extern template class basic_spin_box<std::int32_t>;
+    extern template class basic_spin_box<std::uint32_t>;
+    extern template class basic_spin_box<std::int64_t>;
+    extern template class basic_spin_box<std::uint64_t>;
     extern template class basic_spin_box<float>;
     extern template class basic_spin_box<double>;
     
-    typedef basic_spin_box<int8_t> int8_spin_box;
-    typedef basic_spin_box<uint8_t> uint8_spin_box;
+    typedef basic_spin_box<std::int8_t> int8_spin_box;
+    typedef basic_spin_box<std::uint8_t> uint8_spin_box;
     typedef basic_spin_box<int16_t> int16_spin_box;
     typedef basic_spin_box<uint16_t> uint16_spin_box;
-    typedef basic_spin_box<int32_t> int32_spin_box;
-    typedef basic_spin_box<uint32_t> uint32_spin_box;
-    typedef basic_spin_box<int64_t> int64_spin_box;
-    typedef basic_spin_box<uint64_t> uint64_spin_box;
+    typedef basic_spin_box<std::int32_t> int32_spin_box;
+    typedef basic_spin_box<std::uint32_t> uint32_spin_box;
+    typedef basic_spin_box<std::int64_t> int64_spin_box;
+    typedef basic_spin_box<std::uint64_t> uint64_spin_box;
     typedef basic_spin_box<float> float_spin_box;
     typedef basic_spin_box<double> double_spin_box;
 

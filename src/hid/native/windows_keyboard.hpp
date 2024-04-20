@@ -27,7 +27,7 @@ namespace neogfx
 {
     namespace native::windows
     {
-        typedef int32_t vkey_t;
+        typedef std::int32_t vkey_t;
         struct kaymapping
         {
             key_code_e keyCode;

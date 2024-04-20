@@ -134,9 +134,9 @@ namespace neogfx
         return iSliderPosition;
     }
 
-    uint32_t game_controller::button_count() const
+    std::uint32_t game_controller::button_count() const
     {
-        return static_cast<uint32_t>(iButtonMap.size());
+        return static_cast<std::uint32_t>(iButtonMap.size());
     }
 
     bool game_controller::button_mapped(game_controller_button aButton) const

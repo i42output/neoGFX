@@ -63,8 +63,8 @@ namespace neogfx
         void set_image(i_string const& aUri) override;
         void set_image(const i_image& aImage) override;
         void set_image(const i_texture& aTexture) override;
-        uint32_t count() const override;
-        uint32_t ideal_insert_index(uuid const& aGroup) const override;
+        std::uint32_t count() const override;
+        std::uint32_t ideal_insert_index(uuid const& aGroup) const override;
         const i_menu_item& item_at(item_index aItemIndex) const override;
         i_menu_item& item_at(item_index aItemIndex) override;
         void add_sub_menu(i_menu& aSubMenu) override;
@@ -107,7 +107,7 @@ namespace neogfx
         texture iImage;
         item_list iItems;
         action iSeparator;
-        uint32_t iOpenCount;
+        std::uint32_t iOpenCount;
         std::optional<item_index> iSelection;
         bool iModal;
     };

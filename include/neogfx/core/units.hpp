@@ -217,7 +217,11 @@ namespace neogfx
     public:
         typedef T value_type;
     public:
-        explicit basic_length(value_type aValue = value_type{}, neogfx::units aUnits = neogfx::units::Pixels) :
+        basic_length() :
+            iValue{}, iUnits{ neogfx::units::Pixels }
+        {
+        }
+        explicit basic_length(value_type aValue, neogfx::units aUnits = neogfx::units::Pixels) :
             iValue{ aValue }, iUnits{ aUnits }
         {
         }
@@ -368,35 +372,35 @@ namespace neogfx
         point from_device_units(const size& aExtents, const point& aValue) const;
         rect from_device_units(const size& aExtents, const rect& aValue) const;
     public:
-        template <typename T, uint32_t D>
+        template <typename T, std::uint32_t D>
         basic_vector<T, D> to_device_units(const basic_vector<T, D>& aValue)
         {
             basic_vector<T, D> result;
-            for (uint32_t i = 0; i < D; ++i)
+            for (std::uint32_t i = 0; i < D; ++i)
                 result[i] = to_device_units(aValue[i]);
             return result;
         }
-        template <typename T, uint32_t D>
+        template <typename T, std::uint32_t D>
         basic_vector<T, D> to_device_units(const size& aExtents, const basic_vector<T, D>& aValue)
         {
             basic_vector<T, D> result;
-            for (uint32_t i = 0; i < D; ++i)
+            for (std::uint32_t i = 0; i < D; ++i)
                 result[i] = to_device_units(aExtents, aValue[i]);
             return result;
         }
-        template <typename T, uint32_t D>
+        template <typename T, std::uint32_t D>
         basic_vector<T, D> from_device_units(const basic_vector<T, D>& aValue)
         {
             basic_vector<T, D> result;
-            for (uint32_t i = 0; i < D; ++i)
+            for (std::uint32_t i = 0; i < D; ++i)
                 result[i] = from_device_units(aValue[i]);
             return result;
         }
-        template <typename T, uint32_t D>
+        template <typename T, std::uint32_t D>
         basic_vector<T, D> from_device_units(const size& aExtents, const basic_vector<T, D>& aValue)
         {
             basic_vector<T, D> result;
-            for (uint32_t i = 0; i < D; ++i)
+            for (std::uint32_t i = 0; i < D; ++i)
                 result[i] = from_device_units(aExtents, aValue[i]);
             return result;
         }

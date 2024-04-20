@@ -30,5 +30,5 @@
 
 namespace neogfx
 {
-    typedef uint32_t id;
+    typedef std::uint32_t id;
 }

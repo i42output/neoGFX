@@ -456,7 +456,7 @@ namespace neogfx
         {
             keymap_t keymap = {};
 
-            for (uint32_t i = 0u; i < sWindowsScanCodes.size(); ++i) 
+            for (std::uint32_t i = 0u; i < sWindowsScanCodes.size(); ++i) 
             {
                 auto const scanCode = sWindowsScanCodes[i];
                 if (scanCode == ScanCode_UNKNOWN)

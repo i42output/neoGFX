@@ -41,17 +41,17 @@ namespace neogfx
 
     inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)
     {
-        return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<text_widget_flags>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr text_widget_flags operator&(text_widget_flags aLhs, text_widget_flags aRhs)
     {
-        return static_cast<text_widget_flags>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<text_widget_flags>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr text_widget_flags operator~(text_widget_flags aLhs)
     {
-        return static_cast<text_widget_flags>(~static_cast<uint32_t>(aLhs));
+        return static_cast<text_widget_flags>(~static_cast<std::uint32_t>(aLhs));
     }
 
     class i_text_widget : public i_widget

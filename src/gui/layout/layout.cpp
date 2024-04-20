@@ -40,13 +40,13 @@ namespace neogfx
         {
         }
     public:
-        uint32_t id() const final
+        std::uint32_t id() const final
         {
             return iLayoutId;
         }
         void increment_id() final
         {
-            if (++iLayoutId == static_cast<uint32_t>(-1))
+            if (++iLayoutId == static_cast<std::uint32_t>(-1))
                 iLayoutId = 0u;
         }
         bool& in_progress() final
@@ -58,7 +58,7 @@ namespace neogfx
             return iQueryingIdealSize;
         }
     private:
-        uint32_t iLayoutId;
+        std::uint32_t iLayoutId;
         bool iLayoutInProgress;
         bool iQueryingIdealSize;
     };
@@ -681,9 +681,9 @@ namespace neogfx
         return iItems;
     }
 
-    uint32_t layout::spacer_count() const
+    std::uint32_t layout::spacer_count() const
     {
-        uint32_t count = 0u;
+        std::uint32_t count = 0u;
         for (auto const& i : items())
             if (i->is_spacer())
                 ++count;
@@ -710,9 +710,9 @@ namespace neogfx
         }
     }
 
-    uint32_t layout::items_visible(item_type_e aItemType) const
+    std::uint32_t layout::items_visible(item_type_e aItemType) const
     {
-        uint32_t count = 0u;
+        std::uint32_t count = 0u;
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;

@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    enum class toolbar_style : uint32_t
+    enum class toolbar_style : std::uint32_t
     {
         Horizontal  = 0x00000001,
         Vertical    = 0x00000002,
@@ -41,12 +41,12 @@ namespace neogfx
 
     inline constexpr toolbar_style operator|(toolbar_style aLhs, toolbar_style aRhs)
     {
-        return static_cast<toolbar_style>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<toolbar_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr toolbar_style operator&(toolbar_style aLhs, toolbar_style aRhs)
     {
-        return static_cast<toolbar_style>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<toolbar_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     class toolbar : public widget<>, public i_action_container
@@ -56,7 +56,7 @@ namespace neogfx
         typedef std::unique_ptr<toolbar_button> button_pointer;
         typedef std::vector<button_pointer> button_list;
     public:
-        typedef uint32_t button_index;
+        typedef std::uint32_t button_index;
     public:
         struct bad_button_index : std::logic_error { bad_button_index() : std::logic_error("neogfx::toolbar::bad_button_index") {} };
     public:
@@ -70,7 +70,7 @@ namespace neogfx
     public:
         virtual size button_image_extents() const;
         virtual void set_button_image_extents(optional_size const& aExtents);
-        virtual uint32_t button_count() const;
+        virtual std::uint32_t button_count() const;
         virtual const toolbar_button& button(button_index aButtonIndex) const;
         virtual toolbar_button& button(button_index aButtonIndex);
         i_action& add_action(i_action& aAction) override;

@@ -47,7 +47,7 @@ namespace neogfx::nrc
         return ((category(aType) & (ui_element_type::Widget | ui_element_type::Layout)) != ui_element_type::Invalid);
     }
 
-    enum class widget_type : uint32_t
+    enum class widget_type : std::uint32_t
     {
         TopLevel,
         Child
@@ -292,8 +292,8 @@ namespace neogfx::nrc
             std::visit([&result](auto&& v)
             {
                 typedef std::decay_t<decltype(v)> vt;
-                if constexpr (std::is_same_v<vt, int64_t>)
-                    result = color{ static_cast<uint32_t>(v) };
+                if constexpr (std::is_same_v<vt, std::int64_t>)
+                    result = color{ static_cast<std::uint32_t>(v) };
                 else if constexpr (std::is_same_v<vt, neolib::i_string>)
                     result = v.to_std_string();
                 else
@@ -304,9 +304,9 @@ namespace neogfx::nrc
         color get_color(const array_data_t& aArrayData) const
         {
             if (aArrayData.size() == 3)
-                return color{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]) };
+                return color{ neolib::get_as<std::uint8_t>(aArrayData[0]), neolib::get_as<std::uint8_t>(aArrayData[1]), neolib::get_as<std::uint8_t>(aArrayData[2]) };
             else if (aArrayData.size() == 4)
-                return color{ neolib::get_as<uint8_t>(aArrayData[0]), neolib::get_as<uint8_t>(aArrayData[1]), neolib::get_as<uint8_t>(aArrayData[2]), neolib::get_as<uint8_t>(aArrayData[3]) };
+                return color{ neolib::get_as<std::uint8_t>(aArrayData[0]), neolib::get_as<std::uint8_t>(aArrayData[1]), neolib::get_as<std::uint8_t>(aArrayData[2]), neolib::get_as<std::uint8_t>(aArrayData[3]) };
             else
                 throw element_ill_formed(id().to_std_string());
         }

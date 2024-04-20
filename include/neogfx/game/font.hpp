@@ -51,11 +51,11 @@ namespace neogfx::game
                 static const string sName = "Font";
                 return sName;
             }
-            static uint32_t field_count()
+            static std::uint32_t field_count()
             {
                 return 5;
             }
-            static component_data_field_type field_type(uint32_t aFieldIndex)
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
                 switch (aFieldIndex)
                 {
@@ -72,7 +72,7 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(std::uint32_t aFieldIndex)
             {
                 static const string sFieldNames[] =
                 {

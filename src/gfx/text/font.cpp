@@ -601,7 +601,7 @@ namespace neogfx
         return info().kerning();
     }
 
-    dimension font::kerning(uint32_t aLeftGlyphIndex, uint32_t aRightGlyphIndex) const
+    dimension font::kerning(std::uint32_t aLeftGlyphIndex, std::uint32_t aRightGlyphIndex) const
     {
         if (kerning())
         {
@@ -617,12 +617,12 @@ namespace neogfx
         return native_font_face().is_bitmap_font();
     }
 
-    uint32_t font::num_fixed_sizes() const
+    std::uint32_t font::num_fixed_sizes() const
     {
         return native_font_face().num_fixed_sizes();
     }
 
-    font::point_size font::fixed_size(uint32_t aFixedSizeIndex) const
+    font::point_size font::fixed_size(std::uint32_t aFixedSizeIndex) const
     {
         return native_font_face().fixed_size(aFixedSizeIndex);
     }

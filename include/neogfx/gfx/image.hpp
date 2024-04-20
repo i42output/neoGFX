@@ -42,7 +42,7 @@ namespace neogfx
             PngImage
         };
     public:
-        typedef neolib::vector<uint8_t> data_type;
+        typedef neolib::vector<std::uint8_t> data_type;
         typedef data_type hash_digest_type;
     private:
         struct error_parsing_image_pattern : std::logic_error { error_parsing_image_pattern() : std::logic_error("neogfx::image::error_parsing_image_pattern") {} };

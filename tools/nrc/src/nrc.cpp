@@ -124,6 +124,7 @@ int main(int argc, char* argv[])
                         std::cout << "Creating " << resourceOutputPath << "..." << std::endl;
                         resourceOutput.emplace(resourceOutputPath);
                         *resourceOutput << "// This is an automatically generated file, do not edit!" << std::endl << std::endl;
+                        *resourceOutput << "#include <neogfx/neogfx.hpp>" << std::endl << std::endl;
                         *resourceOutput << "#include <neogfx/app/resource_manager.hpp>" << std::endl << std::endl;
                     }
                     if (resourceParser == std::nullopt)

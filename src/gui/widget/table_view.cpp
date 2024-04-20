@@ -127,7 +127,7 @@ namespace neogfx
         return size(column_header().total_width(), has_presentation_model() ? presentation_model().total_height(aUnitsContext) : 0.0);
     }
 
-    dimension table_view::column_width(uint32_t aColumn) const
+    dimension table_view::column_width(std::uint32_t aColumn) const
     {
         return column_header().section_width(aColumn);
     }

@@ -248,7 +248,7 @@ namespace neogfx
         std::ostringstream result;
         result << "#" << std::uppercase << std::hex << std::setfill('0') << std::setw(6) << with_alpha(0).as_argb();
         if (alpha() != 0xFF)
-            result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<uint32_t>(alpha());
+            result << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << static_cast<std::uint32_t>(alpha());
         return result.str();
     }
 

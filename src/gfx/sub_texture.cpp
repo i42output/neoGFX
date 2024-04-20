@@ -140,7 +140,7 @@ namespace neogfx
         return native_texture().sampling();
     }
 
-    uint32_t sub_texture::samples() const
+    std::uint32_t sub_texture::samples() const
     {
         return native_texture().samples();
     }
@@ -174,7 +174,7 @@ namespace neogfx
         return iStorageExtents;
     }
 
-    void sub_texture::set_pixels(rect const& aRect, void const* aPixelData, uint32_t aPackAlignment)
+    void sub_texture::set_pixels(rect const& aRect, void const* aPixelData, std::uint32_t aPackAlignment)
     {
         rect r = aRect;
         r.position() += atlas_location().position();
@@ -198,8 +198,8 @@ namespace neogfx
         {
         case color_format::RGBA8:
             {
-                const uint8_t* imageData = static_cast<uint8_t const*>(aImage.cpixels());
-                std::vector<uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
+                const std::uint8_t* imageData = static_cast<std::uint8_t const*>(aImage.cpixels());
+                std::vector<std::uint8_t> data(imagePartExtents.cx * 4 * imagePartExtents.cy);
                 for (std::size_t y = 0; y < imagePartExtents.cy; ++y)
                     for (std::size_t x = 0; x < imagePartExtents.cx; ++x)
                         for (std::size_t c = 0; c < 4; ++c)

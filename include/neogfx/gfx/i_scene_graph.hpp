@@ -31,7 +31,7 @@ namespace neogfx
 {
     namespace scene_graph
     {
-        enum class accessor_component_type : uint32_t
+        enum class accessor_component_type : std::uint32_t
         {
             BYTE            = 5120,
             UNSIGNED_BYTE   = 5121,
@@ -41,7 +41,7 @@ namespace neogfx
             FLOAT           = 5126
         };
 
-        enum class accessor_type : uint32_t
+        enum class accessor_type : std::uint32_t
         {
             SCALAR  = 0,
             VEC2    = 1,
@@ -52,13 +52,13 @@ namespace neogfx
             MAT4    = 6
         };
 
-        enum class buffer_view_target : uint32_t
+        enum class buffer_view_target : std::uint32_t
         {
             ARRAY_BUFFER            = 34962,
             ELEMENT_ARRAY_BUFFER    = 34963
         };
 
-        enum class rendering_mode : uint32_t
+        enum class rendering_mode : std::uint32_t
         {
             POINTS          = 0,
             LINES           = 1,
@@ -69,7 +69,7 @@ namespace neogfx
             TRIANGLE_FAN    = 6
         };
 
-        enum class vertex_attribute : uint32_t
+        enum class vertex_attribute : std::uint32_t
         {
             POSITION    = 0,
             NORMAL      = 1,
@@ -81,19 +81,19 @@ namespace neogfx
             WEIGHTS_0   = 7
         };
 
-        enum class camera_type : uint32_t
+        enum class camera_type : std::uint32_t
         {
             Perspective     = 0,
             Orthographic    = 1
         };
 
-        enum class mag_filter : uint32_t
+        enum class mag_filter : std::uint32_t
         {
             NEAREST = 9728,
             LINEAR  = 9729
         };
 
-        enum class min_filter : uint32_t
+        enum class min_filter : std::uint32_t
         {
             NEAREST                 = 9728,
             LINEAR                  = 9729,
@@ -103,21 +103,21 @@ namespace neogfx
             LINEAR_MIPMAP_LINEAR    = 9987
         };
 
-        enum class wrapping_mode : uint32_t
+        enum class wrapping_mode : std::uint32_t
         {
             CLAMP_TO_EDGE   = 33071,
             MIRRORED_REPEAT = 33648,
             REPEAT          = 10497
         };
 
-        enum class alpha_mode : uint32_t
+        enum class alpha_mode : std::uint32_t
         {
             Opaque  = 0,
             Mask    = 1,
             Blend   = 2
         };
 
-        enum class tex_coord : uint32_t
+        enum class tex_coord : std::uint32_t
         {
             TEXCOORD_0  = 0,
             TEXCOORD_1  = 1,
@@ -431,7 +431,7 @@ namespace neogfx
         public:
             typedef mat44 matrix_transform;
             typedef struct { vec3 translation; vec4 rotation; vec3 scale; } trs_transform;
-            enum class local_transform_flavour : uint32_t { Matrix, TRS };
+            enum class local_transform_flavour : std::uint32_t { Matrix, TRS };
             typedef neolib::i_plugin_variant<local_transform_flavour, matrix_transform, trs_transform> local_transform_type;
         public:
             virtual ~i_node() = default;

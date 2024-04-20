@@ -26,7 +26,7 @@
 
 namespace neogfx::DesignStudio
 {
-    enum class workspace_grid : int32_t
+    enum class workspace_grid : std::int32_t
     {
         None    = 0x00000000,
         Lines   = 0x00000001,
@@ -34,7 +34,7 @@ namespace neogfx::DesignStudio
         Points  = 0x00000003
     };
 
-    enum class toolbar_icon_size : int32_t
+    enum class toolbar_icon_size : std::int32_t
     {
         Size16x16 = 0x00000000,
         Size24x24 = 0x00000001,

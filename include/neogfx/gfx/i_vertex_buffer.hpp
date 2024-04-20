@@ -29,7 +29,7 @@ namespace neogfx
     class i_shader_program;
 
     // todo
-    enum class vertex_buffer_type : uint32_t
+    enum class vertex_buffer_type : std::uint32_t
     {
         Invalid     = 0x00000000,
         Vertices    = 0x00000001,
@@ -101,12 +101,12 @@ namespace neogfx
 
     inline constexpr vertex_buffer_type operator|(vertex_buffer_type aLhs, vertex_buffer_type aRhs)
     {
-        return static_cast<vertex_buffer_type>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<vertex_buffer_type>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr vertex_buffer_type operator&(vertex_buffer_type aLhs, vertex_buffer_type aRhs)
     {
-        return static_cast<vertex_buffer_type>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<vertex_buffer_type>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     // todo

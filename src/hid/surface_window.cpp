@@ -263,7 +263,7 @@ namespace neogfx
 
     double surface_window::rendering_priority() const
     {
-        uint32_t surfacesThatCanRender = 0;
+        std::uint32_t surfacesThatCanRender = 0;
         for (std::size_t i = 0; i < service<i_surface_manager>().surface_count(); ++i)
             if (service<i_surface_manager>().surface(i).has_native_surface() && service<i_surface_manager>().surface(i).native_surface().can_render())
                 ++surfacesThatCanRender;

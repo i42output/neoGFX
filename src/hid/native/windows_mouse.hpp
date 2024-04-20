@@ -32,7 +32,7 @@ namespace neogfx
         class mouse : public neogfx::mouse
         {
         public:
-            typedef uint32_t virtual_key_code_t;
+            typedef std::uint32_t virtual_key_code_t;
         public:
             mouse();
         public:

@@ -86,11 +86,11 @@ namespace neogfx
         i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) final;
         i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const font_info& aInfo, const i_device_resolution& aDevice) final;
     public:
-        uint32_t font_family_count() const final;
-        i_string const& font_family(uint32_t aFamilyIndex) const final;
-        uint32_t font_style_count(uint32_t aFamilyIndex) const final;
-        neogfx::font_style font_style(uint32_t aFamilyIndex, uint32_t aStyleIndex) const final;
-        i_string const& font_style_name(uint32_t aFamilyIndex, uint32_t aStyleIndex) const final;
+        std::uint32_t font_family_count() const final;
+        i_string const& font_family(std::uint32_t aFamilyIndex) const final;
+        std::uint32_t font_style_count(std::uint32_t aFamilyIndex) const final;
+        neogfx::font_style font_style(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const final;
+        i_string const& font_style_name(std::uint32_t aFamilyIndex, std::uint32_t aStyleIndex) const final;
     private:
         font_id allocate_font_id() final;
     public:

@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    enum class glyph_pixel_mode : uint32_t
+    enum class glyph_pixel_mode : std::uint32_t
     {
         None,
         Mono,

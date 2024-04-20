@@ -28,13 +28,13 @@
 
 namespace neogfx
 {
-    enum class hid_device_type : uint32_t
+    enum class hid_device_type : std::uint32_t
     {
         Input,
         Output
     };
 
-    enum class hid_device_class : uint32_t
+    enum class hid_device_class : std::uint32_t
     {
         Keyboard,
         Mouse,
@@ -42,7 +42,7 @@ namespace neogfx
         Unknown
     };
 
-    enum class hid_device_subclass : uint32_t
+    enum class hid_device_subclass : std::uint32_t
     {
         Keyboard,
         Keypad,

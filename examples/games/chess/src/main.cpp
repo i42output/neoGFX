@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
         auto update_toolbar = [&]()
         {
             auto const scale = std::min(1.0, window.extents().cx / 800.0_dip);
-            for (uint32_t i = 0u; i < toolbar.button_count(); ++i)
+            for (std::uint32_t i = 0u; i < toolbar.button_count(); ++i)
                 if (!toolbar.button(i).action().is_separator())
                     toolbar.button(i).set_transformation(ng::mat33
                         {{ scale, 0.0, 0.0 },

@@ -95,51 +95,51 @@ namespace neogfx
     }
 
     template <>
-    inline bool item_editor<basic_spin_box<int32_t>>::has_text_edit() const
+    inline bool item_editor<basic_spin_box<std::int32_t>>::has_text_edit() const
     {
         return true;
     }
 
     template <>
-    inline text_edit& item_editor<basic_spin_box<int32_t>>::text_edit() const
+    inline text_edit& item_editor<basic_spin_box<std::int32_t>>::text_edit() const
     {
-        return static_cast<basic_spin_box<int32_t>&>(*iEditorWidget).text_box();
+        return static_cast<basic_spin_box<std::int32_t>&>(*iEditorWidget).text_box();
     }
 
     template <>
-    inline bool item_editor<basic_spin_box<uint32_t>>::has_text_edit() const
+    inline bool item_editor<basic_spin_box<std::uint32_t>>::has_text_edit() const
     {
         return true;
     }
 
     template <>
-    inline text_edit& item_editor<basic_spin_box<uint32_t>>::text_edit() const
+    inline text_edit& item_editor<basic_spin_box<std::uint32_t>>::text_edit() const
     {
-        return static_cast<basic_spin_box<uint32_t>&>(*iEditorWidget).text_box();
+        return static_cast<basic_spin_box<std::uint32_t>&>(*iEditorWidget).text_box();
     }
 
     template <>
-    inline bool item_editor<basic_spin_box<int64_t>>::has_text_edit() const
+    inline bool item_editor<basic_spin_box<std::int64_t>>::has_text_edit() const
     {
         return true;
     }
 
     template <>
-    inline text_edit& item_editor<basic_spin_box<int64_t>>::text_edit() const
+    inline text_edit& item_editor<basic_spin_box<std::int64_t>>::text_edit() const
     {
-        return static_cast<basic_spin_box<int64_t>&>(*iEditorWidget).text_box();
+        return static_cast<basic_spin_box<std::int64_t>&>(*iEditorWidget).text_box();
     }
 
     template <>
-    inline bool item_editor<basic_spin_box<uint64_t>>::has_text_edit() const
+    inline bool item_editor<basic_spin_box<std::uint64_t>>::has_text_edit() const
     {
         return true;
     }
 
     template <>
-    inline text_edit& item_editor<basic_spin_box<uint64_t>>::text_edit() const
+    inline text_edit& item_editor<basic_spin_box<std::uint64_t>>::text_edit() const
     {
-        return static_cast<basic_spin_box<uint64_t>&>(*iEditorWidget).text_box();
+        return static_cast<basic_spin_box<std::uint64_t>&>(*iEditorWidget).text_box();
     }
 
     template <>

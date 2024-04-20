@@ -28,8 +28,8 @@
 
 namespace neogfx
 {
-    uint32_t constexpr HARDWARE_BUS_USB         = 0x03;
-    uint32_t constexpr HARDWARE_BUS_BLUETOOTH   = 0x05;
+    std::uint32_t constexpr HARDWARE_BUS_USB         = 0x03;
+    std::uint32_t constexpr HARDWARE_BUS_BLUETOOTH   = 0x05;
 
     class game_controllers : public i_game_controllers
     {

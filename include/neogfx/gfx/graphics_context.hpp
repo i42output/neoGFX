@@ -268,7 +268,7 @@ namespace neogfx
         mutable font iDefaultFont;
         mutable point iOrigin;
         mutable size iExtents;
-        mutable int32_t iLayer;
+        mutable std::int32_t iLayer;
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         mutable bool iSnapToPixel;

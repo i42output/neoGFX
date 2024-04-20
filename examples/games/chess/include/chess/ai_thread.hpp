@@ -50,7 +50,7 @@ namespace chess
             std::promise<game_tree_node> result;
         };
     public:
-        ai_thread(i_player const& aPlayer, int32_t aPly);
+        ai_thread(i_player const& aPlayer, std::int32_t aPly);
         ~ai_thread();
     public:
         std::promise<game_tree_node>& eval(position_type const& aPosition, game_tree_node&& aNode);
@@ -61,7 +61,7 @@ namespace chess
         void process();
     private:
         i_player const& iPlayer;
-        int32_t iPly;
+        std::int32_t iPly;
         move_tables<representation_type> const iMoveTables;
         std::deque<work_item> iQueue;
         std::mutex iMutex;

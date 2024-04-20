@@ -40,9 +40,9 @@ namespace neogfx
     public:
         static skin_manager& instance();
     public:
-        uint32_t skin_count() const override;
-        const i_skin& skin(uint32_t aIndex) const override;
-        i_skin& skin(uint32_t aIndex) override;
+        std::uint32_t skin_count() const override;
+        const i_skin& skin(std::uint32_t aIndex) const override;
+        i_skin& skin(std::uint32_t aIndex) override;
         void register_skin(i_skin& aSkin) override;
         void unregister_skin(i_skin& aSkin) override;
     public:

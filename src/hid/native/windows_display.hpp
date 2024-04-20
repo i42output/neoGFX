@@ -30,7 +30,7 @@ namespace neogfx
         class display : public neogfx::display
         {
         public:
-            display(uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
+            display(std::uint32_t aIndex, const neogfx::rect& aRect, const neogfx::rect& aDesktopRect, void* aNativeDisplayHandle, void* aNativeDeviceContextHandle);
             ~display();
         public:
             void update_dpi() override;

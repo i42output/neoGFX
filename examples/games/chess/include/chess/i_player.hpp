@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace chess
 {
-    enum class player_type : uint32_t
+    enum class player_type : std::uint32_t
     {
         Human,
         NetworkedHuman,
@@ -49,7 +49,7 @@ namespace chess
         virtual void undo() = 0;
         virtual void setup(mailbox_position const& aSetup) = 0;
     public:
-        virtual uint64_t nodes_per_second() const = 0;
+        virtual std::uint64_t nodes_per_second() const = 0;
     };
 
     class i_player_factory

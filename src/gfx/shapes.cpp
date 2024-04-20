@@ -25,13 +25,13 @@
 
 namespace neogfx
 {
-    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, uint32_t aArcSegments)
+    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, std::uint32_t aArcSegments)
     {
         vertices result;
         angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
-        uint32_t arcSegments = aArcSegments;
+        std::uint32_t arcSegments = aArcSegments;
         if (arcSegments == 0)
-            arcSegments = static_cast<uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
+            arcSegments = static_cast<std::uint32_t>(std::ceil(std::sqrt(aRadius) * 10.0) * arc / boost::math::constants::two_pi<angle>());
         angle theta = arc / static_cast<angle>(arcSegments);
         if (aType == mesh_type::TriangleFan)
         {
@@ -48,7 +48,7 @@ namespace neogfx
             vec2{ aRadius, 0.0 };
         coordinate x = startCoordinate.x;
         coordinate y = startCoordinate.y;
-        for (uint32_t i = 0; i < arcSegments; ++i)
+        for (std::uint32_t i = 0; i < arcSegments; ++i)
         {
             if (aType == mesh_type::Triangles)
                 result.push_back(xyz{ aOrigin.x, aOrigin.y });
@@ -69,12 +69,12 @@ namespace neogfx
         return result;
     }
 
-    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, uint32_t aArcSegments)
+    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, std::uint32_t aArcSegments)
     {
         return arc_vertices(aCenter, aRadius, aStartAngle, aStartAngle, aCenter, aType, aArcSegments);
     }
 
-    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, uint32_t aArcSegments)
+    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, std::uint32_t aArcSegments)
     {
         vertices result;
         auto const topLeft = arc_vertices(

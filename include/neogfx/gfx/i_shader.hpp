@@ -34,7 +34,7 @@
 
 namespace neogfx
 {
-    enum class shader_type : uint32_t
+    enum class shader_type : std::uint32_t
     {
         Compute                 = 0,
         Vertex                  = 1,
@@ -45,7 +45,7 @@ namespace neogfx
         COUNT
     };
 
-    enum class shader_variable_qualifier : uint32_t
+    enum class shader_variable_qualifier : std::uint32_t
     {
         In      = 0x00000001,
         Out     = 0x00000002,
@@ -54,20 +54,20 @@ namespace neogfx
 
     inline constexpr shader_variable_qualifier operator|(shader_variable_qualifier aLhs, shader_variable_qualifier aRhs)
     {
-        return static_cast<shader_variable_qualifier>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<shader_variable_qualifier>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr shader_variable_qualifier operator&(shader_variable_qualifier aLhs, shader_variable_qualifier aRhs)
     {
-        return static_cast<shader_variable_qualifier>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<shader_variable_qualifier>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
-    enum class shader_language : uint32_t
+    enum class shader_language : std::uint32_t
     {
         Glsl
     };
 
-    enum class shader_data_type : uint32_t
+    enum class shader_data_type : std::uint32_t
     {
         Boolean,
         Float,
@@ -167,11 +167,11 @@ namespace neogfx
     typedef shader_handle<shader_data_type::Sampler2DMS> sampler2DMS;
     typedef shader_handle<shader_data_type::Sampler2DRect> sampler2DRect;
 
-    typedef neolib::plugin_variant<shader_data_type, bool, float, double, int32_t, uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
+    typedef neolib::plugin_variant<shader_data_type, bool, float, double, std::int32_t, std::uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
 
-    typedef uint32_t shader_variable_location;
+    typedef std::uint32_t shader_variable_location;
     typedef void* shader_uniform_storage;
-    typedef int32_t shader_uniform_location;
+    typedef std::int32_t shader_uniform_location;
 
     typedef neolib::cookie shader_uniform_id;
     constexpr shader_uniform_id no_uniform = shader_uniform_id{};
@@ -207,17 +207,17 @@ namespace neogfx
             {
                 if constexpr (std::is_same_v<T, bool>)
                     set_value(to_abstract(shader_value_type{ aValue }));
-                else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>)
+                else if constexpr (std::is_same_v<T, std::int32_t> || std::is_same_v<T, std::uint32_t>)
                     set_value(to_abstract(shader_value_type{ aValue }));
                 else if constexpr (std::is_signed_v<T>)
-                    set_value(to_abstract(shader_value_type{ static_cast<int32_t>(aValue) }));
+                    set_value(to_abstract(shader_value_type{ static_cast<std::int32_t>(aValue) }));
                 else if constexpr (std::is_unsigned_v<T>)
-                    set_value(to_abstract(shader_value_type{ static_cast<uint32_t>(aValue) }));
+                    set_value(to_abstract(shader_value_type{ static_cast<std::uint32_t>(aValue) }));
                 else
-                    set_value(to_abstract(shader_value_type{ static_cast<int32_t>(aValue) }));
+                    set_value(to_abstract(shader_value_type{ static_cast<std::int32_t>(aValue) }));
             }
             else if constexpr (std::is_enum_v<T>)
-                set_value(to_abstract(shader_value_type{ static_cast<int32_t>(aValue) }));
+                set_value(to_abstract(shader_value_type{ static_cast<std::int32_t>(aValue) }));
             else
                 set_value(to_abstract(shader_value_type{ aValue }));
         }

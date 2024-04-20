@@ -47,6 +47,6 @@ namespace neogfx::DesignStudio
         sink iSink;
         i_drag_drop_item const* iDragDropItem = nullptr;
         ref_ptr<i_element> iSelectedElement;
-        std::map<std::string, uint32_t> iIdCounters;
+        std::map<std::string, std::uint32_t> iIdCounters;
     };
 }

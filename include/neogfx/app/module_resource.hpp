@@ -32,7 +32,7 @@ namespace neogfx
         define_declared_event(Downloaded, downloaded)
         define_declared_event(FailedToDownload, failed_to_download)
     public:
-        typedef neolib::vector<uint8_t> data_type;
+        typedef neolib::vector<std::uint8_t> data_type;
         typedef data_type hash_digest_type;
     public:
         module_resource(std::string const& aUri, const void* aData, std::size_t aSize);

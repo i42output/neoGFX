@@ -260,12 +260,12 @@ namespace neogfx
             iSeparatorWidth = std::nullopt;
     }
 
-    uint32_t header_view::section_count() const
+    std::uint32_t header_view::section_count() const
     {
-        return static_cast<uint32_t>(iSectionWidths.size());
+        return static_cast<std::uint32_t>(iSectionWidths.size());
     }
 
-    dimension header_view::section_width(uint32_t aSectionIndex, bool aForHeaderButton) const
+    dimension header_view::section_width(std::uint32_t aSectionIndex, bool aForHeaderButton) const
     {
         if (iSectionWidths.empty())
             return 0.0;
@@ -291,7 +291,7 @@ namespace neogfx
         if (!has_presentation_model())
             return 0.0;
         dimension result = 0.0;
-        for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+        for (std::uint32_t col = 0; col < presentation_model().columns(); ++col)
         {
             if (col != 0)
                 result += separator_width();
@@ -309,7 +309,7 @@ namespace neogfx
 
     void header_view::panes_resized()
     {
-        for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+        for (std::uint32_t col = 0; col < presentation_model().columns(); ++col)
         {
             dimension oldSectionWidth = section_width(col);
             dimension newSectionWidth = layout().get_widget_at(col).fixed_size().cx;
@@ -322,9 +322,9 @@ namespace neogfx
         iOwner.header_view_updated(*this, header_view_update_reason::PanesResized);
     }
 
-    void header_view::reset_pane_sizes_requested(const std::optional<uint32_t>& aPane)
+    void header_view::reset_pane_sizes_requested(const std::optional<std::uint32_t>& aPane)
     {
-        for (uint32_t col = 0; col < presentation_model().columns(); ++col)
+        for (std::uint32_t col = 0; col < presentation_model().columns(); ++col)
         {
             if (aPane != std::nullopt && *aPane != col)
                 continue;
@@ -361,7 +361,7 @@ namespace neogfx
             layout().add(make_ref<header_button>(*this));
         if (iButtonSinks.size() < layout().count())
             iButtonSinks.resize(layout().count());
-        for (uint32_t i = 0u; i < layout().count(); ++i)
+        for (std::uint32_t i = 0u; i < layout().count(); ++i)
         {
             header_button& button = layout().get_widget_at<header_button>(i);
             button.layout().set_alignment(alignment::Left | alignment::VCenter);
@@ -447,12 +447,12 @@ namespace neogfx
                 button.enable(false);
             }
         }
-        for (uint32_t col = 0u; col < presentation_model().columns(); ++col)
+        for (std::uint32_t col = 0u; col < presentation_model().columns(); ++col)
             update_section_width(col, presentation_model().column_width(col, *this, true));
         iOwner.header_view_updated(*this, header_view_update_reason::FullUpdate);
     }
 
-    bool header_view::update_section_width(uint32_t aColumn, dimension aColumnWidth)
+    bool header_view::update_section_width(std::uint32_t aColumn, dimension aColumnWidth)
     {
         neolib::scoped_flag sf{ iUpdatingSectionWidth };
         auto& calculatedSectionWidth = iSectionWidths[aColumn].calculated;

@@ -27,7 +27,7 @@ namespace neogfx
 {
     class i_menu;
 
-    enum class menu_item_type : uint32_t
+    enum class menu_item_type : std::uint32_t
     {
         Action,
         SubMenu

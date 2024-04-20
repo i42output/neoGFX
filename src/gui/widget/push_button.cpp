@@ -460,7 +460,7 @@ namespace neogfx
         return capturing() ? hover_color().shaded(0x40) : hover_color();
     }
 
-    color push_button::animation_color(uint32_t aAnimationFrame) const
+    color push_button::animation_color(std::uint32_t aAnimationFrame) const
     {
         color faceColor = face_color();
         if (capturing())

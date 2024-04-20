@@ -130,7 +130,7 @@ namespace neogfx::DesignStudio
                 }
                 else if (command == "lc")
                 {
-                    auto print_concept_library = [&](auto const& self, const neos::language::i_concept_library& aConceptLibrary, uint32_t aDepth = 0) -> void
+                    auto print_concept_library = [&](auto const& self, const neos::language::i_concept_library& aConceptLibrary, std::uint32_t aDepth = 0) -> void
                     {
                         cout << std::string(aDepth * 2, ' ') << "[" << aConceptLibrary.name() << "]";
                         if (aDepth == 0)
@@ -147,7 +147,7 @@ namespace neogfx::DesignStudio
                 {
                     if (words.size() >= 2)
                         iContext.compiler().set_trace(
-                            boost::lexical_cast<uint32_t>(std::string{ words[1].first, words[1].second }),
+                            boost::lexical_cast<std::uint32_t>(std::string{ words[1].first, words[1].second }),
                             words.size() > 2 ? std::string{ words[2].first, words[2].second } : std::optional<std::string>{});
                     else
                         throw std::runtime_error("invalid command argument(s)");

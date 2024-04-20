@@ -59,17 +59,17 @@ namespace neogfx
         return result != iStyleMap.end();
     }
 
-    uint32_t native_font::style_count() const
+    std::uint32_t native_font::style_count() const
     {
-        return static_cast<uint32_t>(iStyleMap.size());
+        return static_cast<std::uint32_t>(iStyleMap.size());
     }
 
-    font_style native_font::style(uint32_t aStyleIndex) const
+    font_style native_font::style(std::uint32_t aStyleIndex) const
     {
         return std::next(iStyleMap.begin(), aStyleIndex)->first.first;
     }
 
-    i_string const& native_font::style_name(uint32_t aStyleIndex) const
+    i_string const& native_font::style_name(std::uint32_t aStyleIndex) const
     {
         return std::next(iStyleMap.begin(), aStyleIndex)->first.second;
     }
@@ -82,21 +82,21 @@ namespace neogfx
             iStyleMap.erase(existing);
     }
 
-    void native_font::remove_style(uint32_t aStyleIndex)
+    void native_font::remove_style(std::uint32_t aStyleIndex)
     {
         iStyleMap.erase(std::next(iStyleMap.begin(), aStyleIndex));
     }
 
     namespace
     {
-        using matching_bits_t = std::pair<int32_t, int32_t>;
+        using matching_bits_t = std::pair<std::int32_t, std::int32_t>;
 
-        matching_bits_t matching_bits(int32_t lhs, int32_t rhs)
+        matching_bits_t matching_bits(std::int32_t lhs, std::int32_t rhs)
         {
             if (lhs == rhs)
                 return matching_bits_t{ 32, 0 };
             matching_bits_t result;
-            uint32_t test = 1;
+            std::uint32_t test = 1;
             while (test != 0)
             {
                 if ((lhs & rhs) & test)

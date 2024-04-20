@@ -257,8 +257,8 @@ namespace neogfx
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
         size result;
-        uint32_t visibleColumns = visible_columns();
-        uint32_t visibleRows = visible_rows();
+        std::uint32_t visibleColumns = visible_columns();
+        std::uint32_t visibleRows = visible_rows();
         for (cell_coordinate row = 0; row < rows(); ++row)
         {
             if (!is_row_visible(row))
@@ -351,7 +351,7 @@ namespace neogfx
             update_layout();
     }
 
-    grid_layout& grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, uint32_t aRows, uint32_t aColumns)
+    grid_layout& grid_layout::add_span(cell_coordinate aRowFrom, cell_coordinate aColumnFrom, std::uint32_t aRows, std::uint32_t aColumns)
     {
         add_span({ aColumnFrom, aRowFrom }, { aColumnFrom + aColumns - 1, aRowFrom + aRows - 1});
         return *this;
@@ -525,9 +525,9 @@ namespace neogfx
         }
     }
 
-    uint32_t grid_layout::visible_rows() const
+    std::uint32_t grid_layout::visible_rows() const
     {
-        uint32_t result = 0;
+        std::uint32_t result = 0;
         for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
             for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
             {
@@ -541,7 +541,7 @@ namespace neogfx
         return result;
     }
 
-    bool grid_layout::is_row_visible(uint32_t aRow) const
+    bool grid_layout::is_row_visible(std::uint32_t aRow) const
     {
         for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
         {
@@ -552,9 +552,9 @@ namespace neogfx
         return false;
     }
 
-    uint32_t grid_layout::visible_columns() const
+    std::uint32_t grid_layout::visible_columns() const
     {
-        uint32_t result = 0;
+        std::uint32_t result = 0;
         for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
             for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
             {
@@ -568,7 +568,7 @@ namespace neogfx
         return result;
     }
 
-    bool grid_layout::is_column_visible(uint32_t aColumn) const
+    bool grid_layout::is_column_visible(std::uint32_t aColumn) const
     {
         for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
         {

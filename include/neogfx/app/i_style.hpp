@@ -28,7 +28,7 @@
 
 namespace neogfx
 {
-    enum class style_aspect : uint32_t
+    enum class style_aspect : std::uint32_t
     {
         None        = 0x0000,
         Geometry    = 0x0001,
@@ -37,7 +37,7 @@ namespace neogfx
         Style       = Geometry | Font | Color
     };
 
-    enum class box_role : uint32_t
+    enum class box_role : std::uint32_t
     {
         Layout  = 0x0000,
         Widget  = 0x0001,
@@ -55,15 +55,15 @@ namespace neogfx
 
     inline constexpr style_aspect operator|(style_aspect aLhs, style_aspect aRhs)
     {
-        return static_cast<style_aspect>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<style_aspect>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr style_aspect operator&(style_aspect aLhs, style_aspect aRhs)
     {
-        return static_cast<style_aspect>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<style_aspect>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
-    enum class font_role : uint32_t
+    enum class font_role : std::uint32_t
     {
         Caption,
         Menu,

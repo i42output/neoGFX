@@ -593,13 +593,13 @@ namespace neogfx
             }
             allocated->second.release_all();
             avec4u8 colorValues[i_gradient::MaxStops];
-            auto const cx = static_cast<uint32_t>(samplers().data().extents().cx);
-            for (uint32_t x = 0u; x < cx; ++x)
+            auto const cx = static_cast<std::uint32_t>(samplers().data().extents().cx);
+            for (std::uint32_t x = 0u; x < cx; ++x)
             {
                 auto const color = aGradient.at(x, 0u, cx - 1u);
                 colorValues[x] = avec4u8{ color.red(), color.green(), color.blue(), color.alpha() };
             }
-            samplers().data().set_pixels(rect{ basic_point<uint32_t>{ 0u, allocated->second.sampler_row() }, size_u32{ i_gradient::MaxStops, 1u } }, &colorValues[0]);
+            samplers().data().set_pixels(rect{ basic_point<std::uint32_t>{ 0u, allocated->second.sampler_row() }, size_u32{ i_gradient::MaxStops, 1u } }, &colorValues[0]);
         }
         auto existingQueueEntry = std::find(iSamplerQueue.begin(), iSamplerQueue.end(), allocated);
         if (existingQueueEntry != iSamplerQueue.end())
@@ -753,7 +753,7 @@ namespace neogfx
         if (iFreeSamplers == std::nullopt)
         {
             iFreeSamplers.emplace();
-            for (uint32_t row = 0; row < MaxSamplers; ++row)
+            for (std::uint32_t row = 0; row < MaxSamplers; ++row)
                 free_samplers().emplace_back(samplers(), row);
         }
         return *iFreeSamplers;
@@ -764,7 +764,7 @@ namespace neogfx
         if (iFreeFilters == std::nullopt)
         {
             iFreeFilters.emplace();
-            for (uint32_t filter = 0; filter < MaxFilters; ++filter)
+            for (std::uint32_t filter = 0; filter < MaxFilters; ++filter)
                 free_filters().emplace_back();
         }
         return *iFreeFilters;

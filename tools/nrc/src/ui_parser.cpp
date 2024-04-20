@@ -128,7 +128,7 @@ namespace neogfx::nrc
         aNewAnonymousId = neolib::string { element_namespace() + "_" + boost::lexical_cast<std::string>(++iAnonymousIdCounter) };
     }
 
-    void ui_parser::indent(int32_t aLevel, neolib::i_string& aResult) const
+    void ui_parser::indent(std::int32_t aLevel, neolib::i_string& aResult) const
     {
         aResult = std::string(aLevel * 4, ' '); // todo: make indentation configurable
     }
@@ -200,7 +200,7 @@ namespace neogfx::nrc
             if constexpr (std::is_same_v<vt, bool>)
                 data = neolib::simple_variant{ v };
             else if constexpr (std::is_integral_v<vt>)
-                data = neolib::simple_variant{ static_cast<int64_t>(v) };
+                data = neolib::simple_variant{ static_cast<std::int64_t>(v) };
             else if constexpr (std::is_floating_point_v<vt>)
                 data = neolib::simple_variant{ static_cast<double>(v) };
             else if constexpr (std::is_same_v<vt, neolib::fjson_string>)
@@ -221,7 +221,7 @@ namespace neogfx::nrc
                 if constexpr (std::is_same_v<vt, bool>)
                     data = neolib::simple_variant{ v };
                 else if constexpr (std::is_integral_v<vt>)
-                    data = neolib::simple_variant{ static_cast<int64_t>(v) };
+                    data = neolib::simple_variant{ static_cast<std::int64_t>(v) };
                 else if constexpr (std::is_floating_point_v<vt>)
                     data = neolib::simple_variant{ static_cast<double>(v) };
                 else if constexpr (std::is_same_v<vt, neolib::fjson_string>)

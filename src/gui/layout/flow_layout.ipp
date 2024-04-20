@@ -36,13 +36,13 @@ namespace neogfx
 #endif
         if (has_minimum_size() || aAvailableSpace == std::nullopt)
             return layout::minimum_size(aAvailableSpace);
-        uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+        std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         if (itemsVisible == 0)
             return size{};
         auto availableSpaceForChildren = aAvailableSpace;
         *availableSpaceForChildren -= internal_spacing().size();
         size result;
-        uint32_t itemsZeroSized = 0;
+        std::uint32_t itemsZeroSized = 0;
         size extent;
         point pos;
         bool previousNonZeroSize = false;
@@ -97,7 +97,7 @@ namespace neogfx
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
-        uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+        std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
         coordinate extent = 0.0;
         point pos;
@@ -222,7 +222,7 @@ namespace neogfx
         }
         rows.set_padding(neogfx::padding{});
         rows.set_spacing(spacing());
-        for (uint32_t i = 0; i < rows.count(); ++i)
+        for (std::uint32_t i = 0; i < rows.count(); ++i)
         {
             rows.get_layout_at(i).set_padding(neogfx::padding{});
             rows.get_layout_at(i).set_spacing(spacing());

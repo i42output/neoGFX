@@ -23,7 +23,7 @@
 
 namespace neogfx
 {
-    enum class color_space : uint32_t
+    enum class color_space : std::uint32_t
     {
         LinearRGB   = 0x0000,
         sRGB        = 0x0001

@@ -240,7 +240,7 @@ namespace neogfx
         if (!iHash)
         {
             hash_digest_type::std_type result(SHA256_DIGEST_LENGTH);
-            SHA256(static_cast<const uint8_t*>(cdata()), size(), &result[0]);
+            SHA256(static_cast<const std::uint8_t*>(cdata()), size(), &result[0]);
             iHash = result;
         }
         return iHash.value();
@@ -304,7 +304,7 @@ namespace neogfx
         {
         case neogfx::color_format::RGBA8:
             {
-                const uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
+                const std::uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
                 return color{pixel[0], pixel[1], pixel[2], pixel[3]};
             }
         default:
@@ -318,7 +318,7 @@ namespace neogfx
         {
         case neogfx::color_format::RGBA8:
             {
-                uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
+                std::uint8_t* pixel = &iData[static_cast<std::size_t>(aPoint.y * extents().cx * 4 + aPoint.x * 4)];
                 pixel[0] = aColor.red();
                 pixel[1] = aColor.green();
                 pixel[2] = aColor.blue();
@@ -350,7 +350,7 @@ namespace neogfx
             {
                 if (resource().size() >= 4)
                 {
-                    const uint8_t* magic = static_cast<const uint8_t*>(resource().data());
+                    const std::uint8_t* magic = static_cast<const std::uint8_t*>(resource().data());
                     if (magic[0] == 0x89 && magic[1] == 'P' && magic[2] == 'N' && magic[3] == 'G')
                         return PngImage;
                 }

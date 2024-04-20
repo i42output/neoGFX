@@ -328,7 +328,7 @@ namespace neogfx
         return 1.0;
     }
 
-    enum class easing_class : uint32_t
+    enum class easing_class : std::uint32_t
     {
         Linear         = 0x0000,
         Quad           = 0x0001,
@@ -356,17 +356,17 @@ namespace neogfx
 
     inline constexpr easing_class operator|(easing_class lhs, easing_class rhs)
     {
-        return static_cast<easing_class>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+        return static_cast<easing_class>(static_cast<std::uint32_t>(lhs) | static_cast<std::uint32_t>(rhs));
     }
 
     inline constexpr easing_class operator&(easing_class lhs, easing_class rhs)
     {
-        return static_cast<easing_class>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+        return static_cast<easing_class>(static_cast<std::uint32_t>(lhs) & static_cast<std::uint32_t>(rhs));
     }
 
     inline constexpr easing_class operator~(easing_class lhs)
     {
-        return static_cast<easing_class>(~static_cast<uint32_t>(lhs));
+        return static_cast<easing_class>(~static_cast<std::uint32_t>(lhs));
     }
 
     enum class easing : std::uint32_t
@@ -469,12 +469,12 @@ namespace neogfx
 
     inline constexpr easing operator|(easing lhs, easing_class rhs)
     {
-        return static_cast<easing>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+        return static_cast<easing>(static_cast<std::uint32_t>(lhs) | static_cast<std::uint32_t>(rhs));
     }
 
     inline constexpr easing operator&(easing lhs, easing_class rhs)
     {
-        return static_cast<easing>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+        return static_cast<easing>(static_cast<std::uint32_t>(lhs) & static_cast<std::uint32_t>(rhs));
     }
 
     typedef std::optional<easing> optional_easing;
@@ -532,12 +532,12 @@ namespace neogfx
         return STANDARD_EASINGS;
     }
 
-    inline uint32_t standard_easing_index(easing aEasing)
+    inline std::uint32_t standard_easing_index(easing aEasing)
     {
         // todo: optimize this; perhaps use polymorphic enum.
         auto standardEasing = std::find(standard_easings().begin(), standard_easings().end(), aEasing);
         if (standardEasing != standard_easings().end())
-            return static_cast<uint32_t>(std::distance(standard_easings().begin(), standardEasing));
+            return static_cast<std::uint32_t>(std::distance(standard_easings().begin(), standardEasing));
         return standard_easing_index(easing::Zero);
     }
 

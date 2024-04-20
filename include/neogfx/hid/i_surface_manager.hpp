@@ -56,10 +56,10 @@ namespace neogfx
         virtual void render_surfaces() = 0;
         virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
         virtual void display_error_message(i_native_window const& aParent, std::string const& aTitle, std::string const& aMessage) const = 0;
-        virtual uint32_t display_count() const = 0;
-        virtual i_display& display(uint32_t aDisplayIndex = 0) const = 0;
+        virtual std::uint32_t display_count() const = 0;
+        virtual i_display& display(std::uint32_t aDisplayIndex = 0) const = 0;
         virtual i_display& display(i_surface const& aSurface) const = 0;
-        virtual rect desktop_rect(uint32_t aDisplayIndex = 0) const = 0;
+        virtual rect desktop_rect(std::uint32_t aDisplayIndex = 0) const = 0;
         virtual rect desktop_rect(i_surface const& aSurface) const = 0;
     public:
         virtual const i_surface& surface_at_position(i_surface const& aProgenitor, point const& aPosition, bool aForMouseEvent = false) const = 0;

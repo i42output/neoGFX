@@ -35,10 +35,10 @@
 
 namespace neogfx
 {
-    template <typename T, typename CellType, uint32_t Columns, bool CellsCached>
+    template <typename T, typename CellType, std::uint32_t Columns, bool CellsCached>
     class item_row_traits;
 
-    template <typename T, typename CellType, uint32_t Columns>
+    template <typename T, typename CellType, std::uint32_t Columns>
     class item_row_traits<T, CellType, Columns, false>
     {
     public:
@@ -53,7 +53,7 @@ namespace neogfx
         };
     };
 
-    template <typename T, typename CellType, uint32_t Columns>
+    template <typename T, typename CellType, std::uint32_t Columns>
     class item_row_traits<T, CellType, Columns, true>
     {
     public:
@@ -98,7 +98,7 @@ namespace neogfx
         };
     };
 
-    template <typename T, typename CellType, uint32_t Columns, bool CellsCached = false>
+    template <typename T, typename CellType, std::uint32_t Columns, bool CellsCached = false>
     class item_flat_container_traits
     {
     public:
@@ -125,7 +125,7 @@ namespace neogfx
         };
     };
 
-    template <typename T, typename CellType, uint32_t Columns, bool CellsCached = false>
+    template <typename T, typename CellType, std::uint32_t Columns, bool CellsCached = false>
     class item_tree_container_traits
     {
     public:
@@ -206,7 +206,7 @@ namespace neogfx
         };
     };
 
-    template <typename T, uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_flat_container_traits<T, CellType, Columns>>
+    template <typename T, std::uint32_t Columns = 0, typename CellType = item_cell_data, typename ContainerTraits = item_flat_container_traits<T, CellType, Columns>>
     class basic_item_model : public object<reference_counted<i_basic_item_model<T>>>
     {
         typedef object<reference_counted<i_basic_item_model<T>>> base_type;
@@ -254,17 +254,17 @@ namespace neogfx
         {
             return container_traits::is_tree;
         }
-        uint32_t rows() const override
+        std::uint32_t rows() const override
         {
-            return static_cast<uint32_t>(iItems.size());
+            return static_cast<std::uint32_t>(iItems.size());
         }
-        uint32_t columns() const override
+        std::uint32_t columns() const override
         {
-            return static_cast<uint32_t>(iColumns.size());
+            return static_cast<std::uint32_t>(iColumns.size());
         }
-        uint32_t columns(item_model_index const& aIndex) const override
+        std::uint32_t columns(item_model_index const& aIndex) const override
         {
-            return static_cast<uint32_t>(row(aIndex).cells.size());
+            return static_cast<std::uint32_t>(row(aIndex).cells.size());
         }
         std::string const& column_name(item_model_index::value_type aColumnIndex) const override
         {
@@ -326,7 +326,7 @@ namespace neogfx
         }
         item_model_index iterator_to_index(i_item_model::const_iterator aPosition) const override
         {
-            return item_model_index{ static_cast<uint32_t>(std::distance(iItems.begin(), const_base_iterator{ aPosition }.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>())), 0 };
+            return item_model_index{ static_cast<std::uint32_t>(std::distance(iItems.begin(), const_base_iterator{ aPosition }.get<const_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>())), 0 };
         }
         i_item_model::iterator begin() override
         {
@@ -466,17 +466,17 @@ namespace neogfx
         {
             return iItems.empty();
         }
-        void reserve(uint32_t aItemCount) override
+        void reserve(std::uint32_t aItemCount) override
         {
             if constexpr (container_traits::is_flat)
                 iItems.reserve(aItemCount);
             else
                 throw base_type::wrong_model_type();
         }
-        uint32_t capacity() const override
+        std::uint32_t capacity() const override
         {
             if constexpr (container_traits::is_flat)
-                return static_cast<uint32_t>(iItems.capacity());
+                return static_cast<std::uint32_t>(iItems.capacity());
             else
                 throw base_type::wrong_model_type();
         }
@@ -689,6 +689,6 @@ namespace neogfx
     typedef basic_item_model<void*> item_model;
     typedef basic_item_model<void*, 0, item_cell_data, item_tree_container_traits<void*, item_cell_data, 0>> item_tree_model;
 
-    template <typename T, uint32_t Columns = 0>
+    template <typename T, std::uint32_t Columns = 0>
     using basic_item_tree_model = basic_item_model<T, Columns, item_cell_data, item_tree_container_traits<T, item_cell_data, Columns>>;
 }

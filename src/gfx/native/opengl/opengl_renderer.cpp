@@ -45,7 +45,7 @@
 
 namespace neogfx
 {
-    frame_counter::frame_counter(uint32_t aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
+    frame_counter::frame_counter(std::uint32_t aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             ++iCounter;
@@ -55,7 +55,7 @@ namespace neogfx
     {
     }
 
-    uint32_t frame_counter::counter() const
+    std::uint32_t frame_counter::counter() const
     {
         return iCounter;
     }
@@ -345,12 +345,12 @@ namespace neogfx
         iLimitFrameRate = aEnable;
     }
 
-    uint32_t opengl_renderer::frame_rate_limit() const
+    std::uint32_t opengl_renderer::frame_rate_limit() const
     {
         return iFrameRateLimit;
     }
 
-    void opengl_renderer::set_frame_rate_limit(uint32_t aFps)
+    void opengl_renderer::set_frame_rate_limit(std::uint32_t aFps)
     {
         iFrameRateLimit = aFps;
     }
@@ -382,7 +382,7 @@ namespace neogfx
         return didSome;
     }
 
-    void opengl_renderer::register_frame_counter(i_widget& aWidget, uint32_t aDuration)
+    void opengl_renderer::register_frame_counter(i_widget& aWidget, std::uint32_t aDuration)
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter == iFrameCounters.end())
@@ -390,14 +390,14 @@ namespace neogfx
         iterFrameCounter->second.add(aWidget);
     }
 
-    void opengl_renderer::unregister_frame_counter(i_widget& aWidget, uint32_t aDuration)
+    void opengl_renderer::unregister_frame_counter(i_widget& aWidget, std::uint32_t aDuration)
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter != iFrameCounters.end())
             iterFrameCounter->second.remove(aWidget);
     }
 
-    uint32_t opengl_renderer::frame_counter(uint32_t aDuration) const
+    std::uint32_t opengl_renderer::frame_counter(std::uint32_t aDuration) const
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter != iFrameCounters.end())
@@ -415,7 +415,7 @@ namespace neogfx
             return existing->second.first;
         }
         auto const sizeMultiple = 1024;
-        basic_size<int32_t> idealSize{ (((static_cast<int32_t>(aExtents.cx) - 1) / sizeMultiple) + 1) * sizeMultiple, (((static_cast<int32_t>(aExtents.cy) - 1) / sizeMultiple) + 1) * sizeMultiple };
+        basic_size<std::int32_t> idealSize{ (((static_cast<std::int32_t>(aExtents.cx) - 1) / sizeMultiple) + 1) * sizeMultiple, (((static_cast<std::int32_t>(aExtents.cy) - 1) / sizeMultiple) + 1) * sizeMultiple };
         auto newBuffer = aBufferList.emplace(std::make_pair(aSampling, idealSize), std::make_pair(texture{ idealSize, 1.0, aSampling }, aExtents)).first;
         newBuffer->second.second = aExtents;
         aPreviousExtents = idealSize;

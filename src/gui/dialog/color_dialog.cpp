@@ -284,7 +284,7 @@ namespace neogfx
         rect cr = client_rect(false);
         if (iOwner.current_channel() == ChannelAlpha)
             draw_alpha_background(aGc, cr);
-        for (uint32_t y = 0; y < cr.height(); ++y)
+        for (std::uint32_t y = 0; y < cr.height(); ++y)
         {
             rect line{ cr.top_left() + point{ 0.0, static_cast<coordinate>(y) }, size{ cr.width(), 1.0 } };
             auto r = color_at_position(point{ 0.0, static_cast<coordinate>(y) * (1.0 / dpi_scale_factor())});
@@ -710,9 +710,9 @@ namespace neogfx
 
     void color_dialog::yz_picker::update_texture()
     {
-        for (uint32_t y = 0; y < 256; ++y)
+        for (std::uint32_t y = 0; y < 256; ++y)
         {
-            for (uint32_t z = 0; z < 256; ++z)
+            for (std::uint32_t z = 0; z < 256; ++z)
             {
                 auto r = color_at_position(point{ static_cast<coordinate>(y), static_cast<coordinate>(255 - z) });
                 color rgbColor = (std::holds_alternative<hsv_color>(r) ? static_variant_cast<const hsv_color&>(r).to_rgb<color>() : static_variant_cast<const color&>(r));
@@ -1201,11 +1201,11 @@ namespace neogfx
             return;
         neolib::scoped_flag sf{ iUpdatingWidgets };
         if (&aUpdatingWidget != &iH.second)
-            iH.second.set_value(static_cast<int32_t>(selected_color_as_hsv(false).hue()));
+            iH.second.set_value(static_cast<std::int32_t>(selected_color_as_hsv(false).hue()));
         if (&aUpdatingWidget != &iS.second)
-            iS.second.set_value(static_cast<int32_t>(selected_color_as_hsv(false).saturation() * 100.0));
+            iS.second.set_value(static_cast<std::int32_t>(selected_color_as_hsv(false).saturation() * 100.0));
         if (&aUpdatingWidget != &iV.second)
-            iV.second.set_value(static_cast<int32_t>(selected_color_as_hsv(false).value() * 100.0));
+            iV.second.set_value(static_cast<std::int32_t>(selected_color_as_hsv(false).value() * 100.0));
         if (&aUpdatingWidget != &iR.second)
             iR.second.set_value(selected_color_in_color_space()[0] * color_space_coefficient());
         if (&aUpdatingWidget != &iG.second)

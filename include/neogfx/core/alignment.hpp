@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    enum class alignment : uint32_t
+    enum class alignment : std::uint32_t
     {
         None        = 0x0000,
         Left        = 0x0001,
@@ -61,12 +61,12 @@ namespace neogfx
 {
     inline constexpr alignment operator|(alignment aLhs, alignment aRhs)
     {
-        return static_cast<alignment>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<alignment>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr alignment operator&(alignment aLhs, alignment aRhs)
     {
-        return static_cast<alignment>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<alignment>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
 }

@@ -37,7 +37,7 @@
 namespace neogfx
 {
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline game::mesh const& to_ecs_component(game::mesh& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(game::mesh& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         auto const& rectVertices = rect_vertices(aRect, aMeshType, aTransformation);
         aResult.vertices.assign(rectVertices.begin(), rectVertices.end());
@@ -51,7 +51,7 @@ namespace neogfx
     }
 
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline game::mesh const& to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         thread_local game::mesh result;
         return to_ecs_component(result, aRect, aMeshType, aTransformation, aOffset);
@@ -81,7 +81,7 @@ namespace neogfx
         return result;
     }
 
-    inline game::mesh const& to_ecs_component(game::mesh& aResult, const quad& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(game::mesh& aResult, const quad& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         if (!aTransformation)
         {
@@ -108,18 +108,18 @@ namespace neogfx
         return aResult;
     }
 
-    inline game::mesh const& to_ecs_component(const quad& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(const quad& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         thread_local game::mesh result;
         return to_ecs_component(result, aQuad, aMeshType, aTransformation, aOffset);
     }
 
-    inline game::mesh const& to_ecs_component(game::mesh& aResult, const quad_2d& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(game::mesh& aResult, const quad_2d& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         return to_ecs_component(aResult, quad{ aQuad[0], aQuad[1], aQuad[2], aQuad[3] }, aMeshType, aTransformation, aOffset);
     }
 
-    inline game::mesh const& to_ecs_component(const quad_2d& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, uint32_t aOffset = 0)
+    inline game::mesh const& to_ecs_component(const quad_2d& aQuad, mesh_type aMeshType = mesh_type::Triangles, optional_mat44 const& aTransformation = {}, std::uint32_t aOffset = 0)
     {
         thread_local game::mesh result;
         return to_ecs_component(result, aQuad, aMeshType, aTransformation, aOffset);
@@ -329,7 +329,7 @@ namespace neogfx
     inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const quad& aQuad, const neogfx::i_texture& aTexture, const mat33& aTextureTransform = mat33::identity())
     {
         thread_local game::mesh patchMesh;
-        to_ecs_component(patchMesh, aQuad, mesh_type::Triangles, std::nullopt, static_cast<uint32_t>(aMesh.vertices.size()));
+        to_ecs_component(patchMesh, aQuad, mesh_type::Triangles, std::nullopt, static_cast<std::uint32_t>(aMesh.vertices.size()));
         aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
         if (!aTextureTransform.is_identity())
             for (auto& uv : patchMesh.uv)
@@ -343,7 +343,7 @@ namespace neogfx
     inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const quad_2d& aQuad, const neogfx::i_texture& aTexture, const mat33& aTextureTransform = mat33::identity())
     {
         thread_local game::mesh patchMesh;
-        to_ecs_component(patchMesh, aQuad, mesh_type::Triangles, std::nullopt, static_cast<uint32_t>(aMesh.vertices.size()));
+        to_ecs_component(patchMesh, aQuad, mesh_type::Triangles, std::nullopt, static_cast<std::uint32_t>(aMesh.vertices.size()));
         aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
         if (!aTextureTransform.is_identity())
             for (auto& uv : patchMesh.uv)
@@ -357,7 +357,7 @@ namespace neogfx
     inline void add_patch(game::mesh& aMesh, game::mesh_renderer& aMeshRenderer, const rect& aRect, const neogfx::i_texture& aTexture, const mat33& aTextureTransform = mat33::identity())
     {
         thread_local game::mesh patchMesh;
-        to_ecs_component(patchMesh, aRect, mesh_type::Triangles, std::nullopt, static_cast<uint32_t>(aMesh.vertices.size()));
+        to_ecs_component(patchMesh, aRect, mesh_type::Triangles, std::nullopt, static_cast<std::uint32_t>(aMesh.vertices.size()));
         aMesh.vertices.insert(aMesh.vertices.end(), patchMesh.vertices.begin(), patchMesh.vertices.end());
         if (!aTextureTransform.is_identity())
             for (auto& uv : patchMesh.uv)

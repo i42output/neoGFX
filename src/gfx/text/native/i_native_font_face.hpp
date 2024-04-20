@@ -47,7 +47,7 @@ namespace neogfx
         struct bad_fixed_size_index : std::logic_error { bad_fixed_size_index() : std::logic_error("neogfx::i_native_font_face::bad_fixed_size_index") {} };
     public:
         typedef i_native_font_face abstract_type;
-        typedef uint32_t glyph_index_t;
+        typedef std::uint32_t glyph_index_t;
     public:
         virtual ~i_native_font_face() = default;
     public:
@@ -72,8 +72,8 @@ namespace neogfx
         virtual void set_kerning_method(neogfx::kerning_method aKerningMethod) = 0;
         virtual dimension kerning(glyph_index_t aLeftGlyphIndex, glyph_index_t aRightGlyphIndex) const = 0;
         virtual bool is_bitmap_font() const = 0;
-        virtual uint32_t num_fixed_sizes() const = 0;
-        virtual font::point_size fixed_size(uint32_t aFixedSizeIndex) const = 0;
+        virtual std::uint32_t num_fixed_sizes() const = 0;
+        virtual font::point_size fixed_size(std::uint32_t aFixedSizeIndex) const = 0;
         virtual bool has_fallback() const = 0;
         virtual bool fallback_cached() const = 0;
         virtual i_native_font_face& fallback() const = 0;

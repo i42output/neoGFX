@@ -38,19 +38,19 @@ namespace neogfx
         return sInstance;
     }
 
-    uint32_t skin_manager::skin_count() const
+    std::uint32_t skin_manager::skin_count() const
     {
-        return static_cast<uint32_t>(iSkins.size());
+        return static_cast<std::uint32_t>(iSkins.size());
     }
 
-    const i_skin& skin_manager::skin(uint32_t aIndex) const
+    const i_skin& skin_manager::skin(std::uint32_t aIndex) const
     {
         if (aIndex < iSkins.size())
             return **std::next(iSkins.begin(), aIndex);
         throw skin_not_found();
     }
 
-    i_skin& skin_manager::skin(uint32_t aIndex)
+    i_skin& skin_manager::skin(std::uint32_t aIndex)
     {
         return const_cast<i_skin&>(to_const(*this).skin(aIndex));
     }

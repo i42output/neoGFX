@@ -86,13 +86,13 @@ namespace neogfx
 
     inline item_selection_operation& operator|=(item_selection_operation& aLhs, item_selection_operation aRhs)
     {
-        aLhs = static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        aLhs = static_cast<item_selection_operation>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
         return aLhs;
     }
 
     inline item_selection_operation& operator&=(item_selection_operation& aLhs, item_selection_operation aRhs)
     {
-        aLhs = static_cast<item_selection_operation>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        aLhs = static_cast<item_selection_operation>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
         return aLhs;
     }
 
@@ -110,7 +110,7 @@ namespace neogfx
 
     inline item_selection_operation operator~(item_selection_operation aLhs)
     {
-        return static_cast<item_selection_operation>(~static_cast<uint32_t>(aLhs));
+        return static_cast<item_selection_operation>(~static_cast<std::uint32_t>(aLhs));
     }
 
     struct selection_area

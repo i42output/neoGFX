@@ -276,7 +276,7 @@ namespace neogfx
     template <>
     struct opengl_attrib_data_type<float> { static constexpr GLenum type = GL_FLOAT; };
     template <>
-    struct opengl_attrib_data_type<uint8_t> { static constexpr GLenum type = GL_UNSIGNED_BYTE; };
+    struct opengl_attrib_data_type<std::uint8_t> { static constexpr GLenum type = GL_UNSIGNED_BYTE; };
 
     template <typename Vertex, typename Attrib>
     class opengl_vertex_attrib_array

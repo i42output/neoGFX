@@ -25,7 +25,7 @@ namespace neogfx
 {
     namespace plugin
     {
-        enum property_type : uint32_t
+        enum property_type : std::uint32_t
         {
             Pointer,
             Boolean,

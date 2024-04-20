@@ -125,7 +125,7 @@ namespace neogames
             template <typename HandIter>
             void deal_hands(HandIter aFirstHand, HandIter aLastHand)
             {
-                for (uint32_t i = 0; i < game_traits::hand_size; ++i)
+                for (std::uint32_t i = 0; i < game_traits::hand_size; ++i)
                     for (auto hand = aFirstHand; hand != aLastHand; ++hand)
                         hand->pick(*this);
             }

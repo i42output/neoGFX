@@ -184,7 +184,7 @@ namespace neogfx
         using typename base_type::base_component;
         using typename base_type::view_component;
         using typename base_type::return_type;
-        typedef uint32_t argb;
+        typedef std::uint32_t argb;
     protected:
         static const argb AlphaShift = 24;
         static const argb RedShift = 16;
@@ -206,9 +206,9 @@ namespace neogfx
             base_type{ aBase } {}
         basic_rgb_color(view_component aRed, view_component aGreen, view_component aBlue, view_component aAlpha = 0xFF) :
             base_type{ convert<base_component>(aRed), convert<base_component>(aGreen), convert<base_component>(aBlue), convert<base_component>(aAlpha) } {}
-        basic_rgb_color(int32_t aRed, int32_t aGreen, int32_t aBlue, int32_t aAlpha = 0xFF) :
+        basic_rgb_color(std::int32_t aRed, std::int32_t aGreen, std::int32_t aBlue, std::int32_t aAlpha = 0xFF) :
             basic_rgb_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
-        basic_rgb_color(uint32_t aRed, uint32_t aGreen, uint32_t aBlue, uint32_t aAlpha = 0xFF) :
+        basic_rgb_color(std::uint32_t aRed, std::uint32_t aGreen, std::uint32_t aBlue, std::uint32_t aAlpha = 0xFF) :
             basic_rgb_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
         template <typename T>
         basic_rgb_color(T aRed, T aGreen, T aBlue, T aAlpha = 1.0, std::enable_if_t<std::is_scalar_v<T> && !std::is_same_v<view_component, T>, sfinae> = {}) :
@@ -373,9 +373,9 @@ namespace neogfx
         
     using linear_color = basic_rgb_color<color_space::LinearRGB, scalar>;
 
-    class sRGB_color : public basic_rgb_color<color_space::sRGB, scalar, uint8_t, sRGB_color>
+    class sRGB_color : public basic_rgb_color<color_space::sRGB, scalar, std::uint8_t, sRGB_color>
     {
-        typedef basic_rgb_color<color_space::sRGB, scalar, uint8_t, sRGB_color> base_type;
+        typedef basic_rgb_color<color_space::sRGB, scalar, std::uint8_t, sRGB_color> base_type;
         // types
     public:
         typedef view_component component;

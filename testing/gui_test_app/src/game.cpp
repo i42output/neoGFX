@@ -55,7 +55,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     struct game_state
     {
         neolib::basic_random<ng::scalar> prng;
-        uint32_t score = 0u;
+        std::uint32_t score = 0u;
         bool autoFire = false;
         bool showAabbGrid = false;
         bool showMetrics = false;
@@ -125,9 +125,9 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         asteroidMesh.vertices.push_back(ng::vec3{ 0.0, 0.0, 0.0 });
         for (ng::scalar angle = 0.0; angle < 360.0; angle += (gameState->prng(30.0) + 30.0))
             asteroidMesh.vertices.push_back(ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }) * ng::vec3{ w + gameState->prng(10.0) - 5.0, 0.0, 0.0 });
-        for (uint32_t i = 1; i < asteroidMesh.vertices.size() - 1; ++i)
+        for (std::uint32_t i = 1; i < asteroidMesh.vertices.size() - 1; ++i)
             asteroidMesh.faces.push_back(ng::game::face{ 0u, i, i + 1u });
-        asteroidMesh.faces.push_back(ng::game::face{ 0u, 1u, static_cast<uint32_t>(asteroidMesh.vertices.size()) - 1u });
+        asteroidMesh.faces.push_back(ng::game::face{ 0u, 1u, static_cast<std::uint32_t>(asteroidMesh.vertices.size()) - 1u });
         return asteroidMesh;
     };
 
@@ -209,7 +209,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };
     ng::font scoreFont{ "SnareDrum Two NBP", "Regular", 60.0 };
     // Some information text...
-    canvas.EntitiesRendered([&canvas, &ecs, gameState, debugFont, clockFont, scoreFont](ng::i_graphics_context& gc, int32_t layer)
+    canvas.EntitiesRendered([&canvas, &ecs, gameState, debugFont, clockFont, scoreFont](ng::i_graphics_context& gc, std::int32_t layer)
     {
         if (layer == 3)
         {
@@ -240,7 +240,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
             }
 
             std::ostringstream text;
-            auto worldTime = static_cast<uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
+            auto worldTime = static_cast<std::uint64_t>(ng::game::from_step_time(ecs.system<ng::game::time>().world_time()) * 1000.0);
             text.fill('0');
             text << std::setw(2) << worldTime / (1000 * 60 * 60) << " : " << std::setw(2) << worldTime / (1000 * 60) % 60 << " : " << std::setw(2) << worldTime / (1000) % 60 << " . " << std::setw(3) << worldTime % 1000;
             gc.draw_text(ng::point{ 0.0, 0.0 }, text.str(), clockFont, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });

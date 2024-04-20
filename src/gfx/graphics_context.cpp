@@ -986,10 +986,10 @@ namespace neogfx
         scoped_render_target srt2{ aSource };
         scoped_blending_mode sbm2{ aSource, neogfx::blending_mode::Blit };
         scoped_scissor ss2{ aSource, aSourceRect };
-        int32_t passes = static_cast<int32_t>(aRadius);
+        std::int32_t passes = static_cast<std::int32_t>(aRadius);
         if (passes % 2 == 0)
             ++passes;
-        for (int32_t pass = 0; pass < passes; ++pass)
+        for (std::int32_t pass = 0; pass < passes; ++pass)
         {
             if (pass % 2 == 0)
                 neogfx::blur(*this, aDestinationRect, aSource, aSourceRect, aAlgorithm, aParameter1, aParameter2);

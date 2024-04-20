@@ -97,9 +97,9 @@ namespace neogfx
             button->set_image_extents(button_image_extents());
     }
 
-    uint32_t toolbar::button_count() const
+    std::uint32_t toolbar::button_count() const
     {
-        return static_cast<uint32_t>(iButtons.size());
+        return static_cast<std::uint32_t>(iButtons.size());
     }
 
     const toolbar_button& toolbar::button(button_index aButtonIndex) const

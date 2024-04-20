@@ -102,7 +102,7 @@ namespace neogfx
             ~column_info() {}
             mutable item_model_index::optional_column_type modelColumn;
             item_cell_flags flags = item_cell_flags::Default;
-            mutable std::map<dimension, uint32_t> cellWidths;
+            mutable std::map<dimension, std::uint32_t> cellWidths;
             mutable std::optional<std::string> headingText;
             mutable font headingFont;
             mutable optional_size headingExtents;
@@ -265,20 +265,20 @@ namespace neogfx
             throw bad_index();
         }
     public:
-        uint32_t rows() const final
+        std::uint32_t rows() const final
         {
             if constexpr (container_traits::is_flat)
-                return static_cast<uint32_t>(iRows.size());
+                return static_cast<std::uint32_t>(iRows.size());
             else
-                return static_cast<uint32_t>(iRows.ksize());
+                return static_cast<std::uint32_t>(iRows.ksize());
         }
-        uint32_t columns() const final
+        std::uint32_t columns() const final
         {
-            return static_cast<uint32_t>(iColumns.size());
+            return static_cast<std::uint32_t>(iColumns.size());
         }
-        uint32_t columns(item_presentation_model_index const& aIndex) const final
+        std::uint32_t columns(item_presentation_model_index const& aIndex) const final
         {
-            return static_cast<uint32_t>(row(aIndex).cells.size());
+            return static_cast<std::uint32_t>(row(aIndex).cells.size());
         }
     public:
         void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) final
@@ -523,10 +523,10 @@ namespace neogfx
                 if (attached())
                     su.emplace(attachment(), scoped_units::current_units());
                 size result{ 1.0_mm, 1.0_mm };
-                if (to_px<uint32_t>(result.cx) % 2u == 1u)
-                    result.cx = from_px<dimension>(to_px<uint32_t>(result.cx) + 1u);
-                if (to_px<uint32_t>(result.cy) % 2u == 1u)
-                    result.cy = from_px<dimension>(to_px<uint32_t>(result.cy) + 1u);
+                if (to_px<std::uint32_t>(result.cx) % 2u == 1u)
+                    result.cx = from_px<dimension>(to_px<std::uint32_t>(result.cx) + 1u);
+                if (to_px<std::uint32_t>(result.cy) % 2u == 1u)
+                    result.cy = from_px<dimension>(to_px<std::uint32_t>(result.cy) + 1u);
                 return result;
             }
             return units_converter(aUnitsContext).from_device_units(*iCellSpacing);
@@ -565,7 +565,7 @@ namespace neogfx
         dimension item_height(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const final
         {
             dimension height = 0.0;
-            for (uint32_t col = 0; col < row(aIndex).cells.size(); ++col)
+            for (std::uint32_t col = 0; col < row(aIndex).cells.size(); ++col)
             {
                 auto const index = item_presentation_model_index{ aIndex.row(), col };
                 auto const modelIndex = to_item_model_index(index);
@@ -729,58 +729,58 @@ namespace neogfx
                 }
             case item_data_type::Int32:
                 {
-                    int32_t value;
+                    std::int32_t value;
                     if (!(input >> value) || (input >> guff))
                     {
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
                     if (cellInfo.dataMin != neolib::none)
-                        value = std::max(value, static_variant_cast<int32_t>(cellInfo.dataMin));
+                        value = std::max(value, static_variant_cast<std::int32_t>(cellInfo.dataMin));
                     if (cellInfo.dataMax != neolib::none)
-                        value = std::min(value, static_variant_cast<int32_t>(cellInfo.dataMax));
+                        value = std::min(value, static_variant_cast<std::int32_t>(cellInfo.dataMax));
                     return value;
                 }
             case item_data_type::UInt32:
                 {
-                    uint32_t value;
+                    std::uint32_t value;
                     if (!(input >> value) || (input >> guff))
                     {
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
                     if (cellInfo.dataMin != neolib::none)
-                        value = std::max(value, static_variant_cast<uint32_t>(cellInfo.dataMin));
+                        value = std::max(value, static_variant_cast<std::uint32_t>(cellInfo.dataMin));
                     if (cellInfo.dataMax != neolib::none)
-                        value = std::min(value, static_variant_cast<uint32_t>(cellInfo.dataMax));
+                        value = std::min(value, static_variant_cast<std::uint32_t>(cellInfo.dataMax));
                     return value;
                 }
             case item_data_type::Int64:
                 {
-                    int64_t value;
+                    std::int64_t value;
                     if (!(input >> value) || (input >> guff))
                     {
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
                     if (cellInfo.dataMin != neolib::none)
-                        value = std::max(value, static_variant_cast<int64_t>(cellInfo.dataMin));
+                        value = std::max(value, static_variant_cast<std::int64_t>(cellInfo.dataMin));
                     if (cellInfo.dataMax != neolib::none)
-                        value = std::min(value, static_variant_cast<int64_t>(cellInfo.dataMax));
+                        value = std::min(value, static_variant_cast<std::int64_t>(cellInfo.dataMax));
                     return value;
                 }
             case item_data_type::UInt64:
                 {
-                    uint64_t value;
+                    std::uint64_t value;
                     if (!(input >> value) || (input >> guff))
                     {
                         aError = true;
                         return has_item_model() ? item_model().cell_data(to_item_model_index(aIndex)) : item_cell_data{};
                     }
                     if (cellInfo.dataMin != neolib::none)
-                        value = std::max(value, static_variant_cast<uint64_t>(cellInfo.dataMin));
+                        value = std::max(value, static_variant_cast<std::uint64_t>(cellInfo.dataMin));
                     if (cellInfo.dataMax != neolib::none)
-                        value = std::min(value, static_variant_cast<uint64_t>(cellInfo.dataMax));
+                        value = std::min(value, static_variant_cast<std::uint64_t>(cellInfo.dataMax));
                     return value;
                 }
             case item_data_type::Float:

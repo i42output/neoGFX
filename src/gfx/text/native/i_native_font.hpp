@@ -42,11 +42,11 @@ namespace neogfx
     public:
         virtual i_string const& family_name() const = 0;
         virtual bool has_style(font_style aStyle) const = 0;
-        virtual uint32_t style_count() const = 0;
-        virtual font_style style(uint32_t aStyleIndex) const = 0;
-        virtual i_string const& style_name(uint32_t aStyleIndex) const = 0;
+        virtual std::uint32_t style_count() const = 0;
+        virtual font_style style(std::uint32_t aStyleIndex) const = 0;
+        virtual i_string const& style_name(std::uint32_t aStyleIndex) const = 0;
         virtual void remove_style(font_style aStyle) = 0;
-        virtual void remove_style(uint32_t aStyleIndex) = 0;
+        virtual void remove_style(std::uint32_t aStyleIndex) = 0;
         virtual void create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         virtual void create_face(font_style aStyle, i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;
         virtual void create_face(font_info const& aFontInfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult) = 0;

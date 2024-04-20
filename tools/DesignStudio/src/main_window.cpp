@@ -661,35 +661,35 @@ namespace neogfx::DesignStudio
         {
             if (workspaceGridType.value<workspace_grid>(true) != workspace_grid::None)
             {
-                auto const& gridSize = ng::from_dip(ng::basic_size<uint32_t>{
-                    workspaceGridSize.value<uint32_t>(true) / workspaceGridSubdivisions.value<uint32_t>(true),
-                        workspaceGridSize.value<uint32_t>(true) / workspaceGridSubdivisions.value<uint32_t>(true)});
-                ng::basic_size<int32_t> const cells = ng::size{ scrollArea.cx / gridSize.cx, scrollArea.cy / gridSize.cy };
+                auto const& gridSize = ng::from_dip(ng::basic_size<std::uint32_t>{
+                    workspaceGridSize.value<std::uint32_t>(true) / workspaceGridSubdivisions.value<std::uint32_t>(true),
+                        workspaceGridSize.value<std::uint32_t>(true) / workspaceGridSubdivisions.value<std::uint32_t>(true)});
+                ng::basic_size<std::int32_t> const cells = ng::size{ scrollArea.cx / gridSize.cx, scrollArea.cy / gridSize.cy };
                 aGc.set_gradient(workspaceGridColor.value<ng::gradient>(true), scrollArea);
                 if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Lines)
                 {
-                    for (int32_t x = 0; x <= cells.cx; ++x)
+                    for (std::int32_t x = 0; x <= cells.cx; ++x)
                         aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, ng::color::White);
-                    for (int32_t y = 0; y <= cells.cy; ++y)
+                    for (std::int32_t y = 0; y <= cells.cy; ++y)
                         aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, ng::color::White);
                 }
                 else if (workspaceGridType.value<workspace_grid>(true) == workspace_grid::Quads)
                 {
-                    for (int32_t x = 0; x <= cells.cx; ++x)
-                        for (int32_t y = 0; y <= cells.cy; ++y)
+                    for (std::int32_t x = 0; x <= cells.cx; ++x)
+                        for (std::int32_t y = 0; y <= cells.cy; ++y)
                             if ((x + y) % 2 == 0)
                                 aGc.fill_rect(ng::rect{ ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, gridSize }, ng::color::White);
                 }
                 else // Points
                 {
-                    for (int32_t x = 0; x <= cells.cx; ++x)
-                        for (int32_t y = 0; y <= cells.cy; ++y)
+                    for (std::int32_t x = 0; x <= cells.cx; ++x)
+                        for (std::int32_t y = 0; y <= cells.cy; ++y)
                             aGc.draw_pixel(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() + y * gridSize.cy }, ng::color::White);
                 }
                 aGc.clear_gradient();
-                for (int32_t x = 0; x <= cells.cx; x += workspaceGridSubdivisions.value<uint32_t>(true))
+                for (std::int32_t x = 0; x <= cells.cx; x += workspaceGridSubdivisions.value<std::uint32_t>(true))
                     aGc.draw_line(ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.top() }, ng::point{ scrollArea.left() + x * gridSize.cx, scrollArea.bottom() }, service<i_app>().current_style().palette().color(color_role::Void));
-                for (int32_t y = 0; y <= cells.cy; y += workspaceGridSubdivisions.value<uint32_t>(true))
+                for (std::int32_t y = 0; y <= cells.cy; y += workspaceGridSubdivisions.value<std::uint32_t>(true))
                     aGc.draw_line(ng::point{ scrollArea.left(), scrollArea.top() + y * gridSize.cy }, ng::point{ scrollArea.right(), scrollArea.top() + y * gridSize.cy }, service<i_app>().current_style().palette().color(color_role::Void));
             }            
         }

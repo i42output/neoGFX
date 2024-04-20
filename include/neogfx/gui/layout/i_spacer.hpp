@@ -30,7 +30,7 @@ namespace neogfx
     class i_widget;
     class i_layout;
 
-    enum class expansion_policy : uint32_t
+    enum class expansion_policy : std::uint32_t
     {
         ExpandHorizontally  = 0x0001,
         ExpandVertically    = 0x0002
@@ -38,12 +38,12 @@ namespace neogfx
 
     inline constexpr expansion_policy operator|(expansion_policy aLhs, expansion_policy aRhs)
     {
-        return static_cast<expansion_policy>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<expansion_policy>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr expansion_policy operator&(expansion_policy aLhs, expansion_policy aRhs)
     {
-        return static_cast<expansion_policy>(static_cast<uint32_t>(aLhs)& static_cast<uint32_t>(aRhs));
+        return static_cast<expansion_policy>(static_cast<std::uint32_t>(aLhs)& static_cast<std::uint32_t>(aRhs));
     }
 }
 

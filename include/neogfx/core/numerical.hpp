@@ -83,27 +83,27 @@ namespace neogfx
     }
 
     // why? most of these operations would normally be indeterminate; only use these functions if inf is being used as a special a sentinal value (e.g. neoGFX unbounded dimensions)
-    template <typename T, uint32_t D>
+    template <typename T, std::uint32_t D>
     inline basic_vector<T, D, column_vector> inf_multiply(const basic_matrix<T, D, D>& left, const basic_vector<T, D, column_vector>& right)
     {
         if (left.is_identity())
             return right;
         basic_vector<T, D, column_vector> result;
-        for (uint32_t row = 0; row < D; ++row)
-            for (uint32_t index = 0; index < D; ++index)
+        for (std::uint32_t row = 0; row < D; ++row)
+            for (std::uint32_t index = 0; index < D; ++index)
                 result[row] = inf_add(result[row], inf_multiply(left[index][row], right[index]));
         return result;
     }
 
     // why? most of these operations would normally be indeterminate; only use these functions if inf is being used as a special a sentinal value (e.g. neoGFX unbounded dimensions)
-    template <typename T, uint32_t D>
+    template <typename T, std::uint32_t D>
     inline basic_vector<T, D, row_vector> inf_multiply(const basic_vector<T, D, row_vector>& left, const basic_matrix<T, D, D>& right)
     {
         if (right.is_identity())
             return left;
         basic_vector<T, D, row_vector> result;
-        for (uint32_t column = 0; column < D; ++column)
-            for (uint32_t index = 0; index < D; ++index)
+        for (std::uint32_t column = 0; column < D; ++column)
+            for (std::uint32_t index = 0; index < D; ++index)
                 result[column] = inf_add(result[column], inf_multiply(left[index], right[column][index]));
         return result;
     }

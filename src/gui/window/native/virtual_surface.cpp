@@ -201,7 +201,7 @@ namespace neogfx
         return parent().create_graphics_context(aWidget, aBlendingMode);
     }
 
-    uint64_t virtual_surface::frame_counter() const
+    std::uint64_t virtual_surface::frame_counter() const
     {
         return parent().frame_counter();
     }

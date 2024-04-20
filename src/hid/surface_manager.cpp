@@ -273,12 +273,12 @@ namespace neogfx
         iBasicServices.display_error_dialog(aTitle.c_str(), aMessage.c_str(), aParent.handle());
     }
 
-    uint32_t surface_manager::display_count() const
+    std::uint32_t surface_manager::display_count() const
     {
         return iBasicServices.display_count();
     }
 
-    i_display& surface_manager::display(uint32_t aDisplayIndex) const
+    i_display& surface_manager::display(std::uint32_t aDisplayIndex) const
     {
         return iBasicServices.display(aDisplayIndex);
     }
@@ -288,8 +288,8 @@ namespace neogfx
         if (aSurface.is_window() && (aSurface.as_surface_window().style() & surface_style::Nested) == surface_style::Nested)
             return display(aSurface.parent_surface());
         rect rectSurface{ aSurface.surface_position(), aSurface.surface_extents() };
-        std::multimap<double, uint32_t> matches;
-        for (uint32_t i = 0; i < display_count(); ++i)
+        std::multimap<double, std::uint32_t> matches;
+        for (std::uint32_t i = 0; i < display_count(); ++i)
         {
             rect rectDisplay = desktop_rect(i);
             rect rectIntersection = rectDisplay.intersection(rectSurface);
@@ -301,7 +301,7 @@ namespace neogfx
         return display(matches.rbegin()->second);
     }
 
-    rect surface_manager::desktop_rect(uint32_t aDisplayIndex) const
+    rect surface_manager::desktop_rect(std::uint32_t aDisplayIndex) const
     {
         return display(aDisplayIndex).desktop_rect();
     }

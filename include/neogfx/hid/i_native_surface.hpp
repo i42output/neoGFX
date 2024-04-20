@@ -43,7 +43,7 @@ namespace neogfx
     public:
         virtual ~i_native_surface() = default;
     public:
-        virtual uint64_t frame_counter() const = 0;
+        virtual std::uint64_t frame_counter() const = 0;
         virtual double fps() const = 0;
         virtual double potential_fps() const = 0;
     public:

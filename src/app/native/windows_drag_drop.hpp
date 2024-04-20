@@ -47,7 +47,7 @@ namespace neogfx
         private:
             i_drag_drop_target* target_for_internal_source(POINTL pt) const;
         private:
-            std::map<HWND, std::pair<std::optional<destroyed_flag>, uint32_t>> iNativeDragDropTargets;
+            std::map<HWND, std::pair<std::optional<destroyed_flag>, std::uint32_t>> iNativeDragDropTargets;
             std::unique_ptr<i_drag_drop_source> iActiveInternalDragDropSource;
             std::unique_ptr<i_drag_drop_object> iActiveInternalDragDropObject;
         };

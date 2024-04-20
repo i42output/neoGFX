@@ -17,7 +17,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <neogfx/neogfx.hpp>
+
 #include <boost/algorithm/string.hpp>
+
 #include <neogfx/gui/layout/spacer.hpp>
 #include <neogfx/gui/widget/i_skin_manager.hpp>
 #include <neogfx/gui/widget/progress_bar.hpp>

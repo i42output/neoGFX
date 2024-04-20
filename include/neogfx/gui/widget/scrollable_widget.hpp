@@ -26,7 +26,7 @@
 
 namespace neogfx
 {
-    enum class scrolling_disposition : uint32_t
+    enum class scrolling_disposition : std::uint32_t
     {
         DontScrollChildWidget = 0x00,
         ScrollChildWidgetVertically = 0x01,
@@ -36,12 +36,12 @@ namespace neogfx
 
     inline constexpr scrolling_disposition operator|(scrolling_disposition aLhs, scrolling_disposition aRhs)
     {
-        return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) | static_cast<uint32_t>(aRhs));
+        return static_cast<scrolling_disposition>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
     }
 
     inline constexpr scrolling_disposition operator&(scrolling_disposition aLhs, scrolling_disposition aRhs)
     {
-        return static_cast<scrolling_disposition>(static_cast<uint32_t>(aLhs) & static_cast<uint32_t>(aRhs));
+        return static_cast<scrolling_disposition>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
     template <Widget Base = widget<>>
@@ -181,7 +181,7 @@ namespace neogfx
         scrollbar iVerticalScrollbar;
         scrollbar iHorizontalScrollbar;
         point iOldScrollPosition;
-        uint32_t iIgnoreScrollbarUpdates;
+        std::uint32_t iIgnoreScrollbarUpdates;
         bool iUpdatingScrollbarVisibility;
         bool iMovingWidgets;
         bool iSuppressScrollbarVisibilityUpdates;

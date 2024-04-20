@@ -142,7 +142,7 @@ namespace neogfx
 
     bool native_window::pump_event()
     {
-        neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
+        neolib::scoped_counter<std::uint32_t> sc{ iProcessingEvent };
         if (iEventQueue.empty())
             return false;
         auto e = iEventQueue.front();
@@ -154,7 +154,7 @@ namespace neogfx
     void native_window::handle_event(const native_event& aEvent)
     {
         destroyed_flag destroyed{ *this };
-        neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
+        neolib::scoped_counter<std::uint32_t> sc{ iProcessingEvent };
         native_event previousEvent;
         if (has_current_event())
             previousEvent = current_event();
@@ -188,7 +188,7 @@ namespace neogfx
     void native_window::handle_event()
     {
         destroyed_flag destroyed{ *this };
-        neolib::scoped_counter<uint32_t> sc{ iProcessingEvent };
+        neolib::scoped_counter<std::uint32_t> sc{ iProcessingEvent };
         if (event_consumed(Filter.trigger(current_event())))
         {
             if (destroyed)

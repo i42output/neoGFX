@@ -67,8 +67,8 @@ namespace neogfx::DesignStudio
         register_setting<extended_font>("environment.fonts_and_colors.console_font"_s, extended_font{ service<i_app>().current_style().font_info(), text_format{} }, "Console font: %?%"_t);
         register_setting<bool>("environment.fonts_and_colors.subpixel"_s, false, "Subpixel text rendering: %?%"_t);
         register_setting<workspace_grid>("environment.workspace.grid_type"_s, workspace_grid::Lines, "Grid type: %?%\nGrid size: %environment.workspace.grid_size:?%\nGrid subdivisions: %environment.workspace.grid_subdivisions:?%"_t);
-        register_setting<uint32_t>("environment.workspace.grid_size"_s, 64, ng::setting_constraints<uint32_t>{ false, false, 2, 256, 2 });
-        register_setting<uint32_t>("environment.workspace.grid_subdivisions"_s, 8, ng::setting_constraints<uint32_t>{ false, false, 2, 32, 2 });
+        register_setting<std::uint32_t>("environment.workspace.grid_size"_s, 64, ng::setting_constraints<std::uint32_t>{ false, false, 2, 256, 2 });
+        register_setting<std::uint32_t>("environment.workspace.grid_subdivisions"_s, 8, ng::setting_constraints<std::uint32_t>{ false, false, 2, 32, 2 });
         register_setting<gradient>("environment.workspace.grid_color"_s, gradient{ service<i_app>().current_style().palette().color(color_role::Theme).with_alpha(0.25) }, { true }, "Grid color: %?%"_t);
 
         if (modified())

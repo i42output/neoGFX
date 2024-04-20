@@ -1134,39 +1134,6 @@
     <ClInclude Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.hpp">
       <Filter>Source Files\native\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\shader.glsl-gles.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard.vert.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.vert.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-filter.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-glyph.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-gradient.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-shape.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-stipple.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="x64\Release\GeneratedFiles\standard-texture.frag.hpp">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\unit_spin_box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1220,6 +1187,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_native_widget.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\shader.glsl.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\shader.glsl-gles.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard.vert.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-filter.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-glyph.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-gradient.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-shape.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-stipple.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-texture.frag.hpp">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="neoGFX\x64\Release\GeneratedFiles\standard-texture.vert.hpp">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1492,26 +1492,8 @@
     <ClCompile Include="..\..\..\src\core\units.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\icons.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\icons.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Release\GeneratedFiles\resources.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Debug\GeneratedFiles\resources.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\tab_page.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Tools\GeneratedFiles\icons.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Tools\GeneratedFiles\resources.res.cpp">
-      <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp">
       <Filter>Source Files</Filter>
@@ -1687,12 +1669,6 @@
     <ClCompile Include="..\..\..\src\gui\widget\font_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1818,6 +1794,30 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\native_widget.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Tools_Debug\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Debug\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Release\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Tools\GeneratedFiles\icons.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Tools\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Debug\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Release\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="neoGFX\x64\Tools_Debug\GeneratedFiles\resources.res.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

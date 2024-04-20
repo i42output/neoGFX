@@ -77,7 +77,7 @@ namespace neogfx
         const vec3& stick_rotation() const override;
         const vec2& slider_position() const override;
     public:
-        uint32_t button_count() const override;
+        std::uint32_t button_count() const override;
         bool button_mapped(game_controller_button aButton) const override;
         bool button_mapped(game_controller_button_ordinal aButtonOrdinal) const override;
         game_controller_button_ordinal button_to_button_ordinal(game_controller_button aButton) const override;

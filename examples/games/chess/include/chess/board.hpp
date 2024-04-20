@@ -39,7 +39,7 @@ namespace chess::gui
         mutable bool hold = false;
     };
 
-    enum class square_identification : uint32_t
+    enum class square_identification : std::uint32_t
     {
         None,
         Outer,

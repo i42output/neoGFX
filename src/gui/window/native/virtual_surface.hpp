@@ -83,7 +83,7 @@ namespace neogfx
         std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode) const final;
         std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const final;
     public:
-        uint64_t frame_counter() const final;
+        std::uint64_t frame_counter() const final;
         double fps() const final;
         double potential_fps() const final;
     public:

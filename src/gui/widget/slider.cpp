@@ -25,14 +25,14 @@
 
 namespace neogfx
 {
-    template class basic_slider<int8_t>;
-    template class basic_slider<uint8_t>;
+    template class basic_slider<std::int8_t>;
+    template class basic_slider<std::uint8_t>;
     template class basic_slider<int16_t>;
     template class basic_slider<uint16_t>;
-    template class basic_slider<int32_t>;
-    template class basic_slider<uint32_t>;
-    template class basic_slider<int64_t>;
-    template class basic_slider<uint64_t>;
+    template class basic_slider<std::int32_t>;
+    template class basic_slider<std::uint32_t>;
+    template class basic_slider<std::int64_t>;
+    template class basic_slider<std::uint64_t>;
     template class basic_slider<float>;
     template class basic_slider<double>;
 

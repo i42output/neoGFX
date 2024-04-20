@@ -29,7 +29,7 @@
 
 namespace neogfx::game
 {
-    enum class cache_state : uint32_t
+    enum class cache_state : std::uint32_t
     {
         Invalid = 0x00000000,
         Dirty   = 0x00000001,
@@ -54,11 +54,11 @@ namespace neogfx::game
                 static const string sName = "mesh_render_cache";
                 return sName;
             }
-            static uint32_t field_count()
+            static std::uint32_t field_count()
             {
                 return 3;
             }
-            static component_data_field_type field_type(uint32_t aFieldIndex)
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
                 switch (aFieldIndex)
                 {
@@ -72,7 +72,7 @@ namespace neogfx::game
                     throw invalid_field_index();
                 }
             }
-            static const i_string& field_name(uint32_t aFieldIndex)
+            static const i_string& field_name(std::uint32_t aFieldIndex)
             {
                 static const string sFieldNames[] =
                 {

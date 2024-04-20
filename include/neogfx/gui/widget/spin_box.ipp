@@ -166,7 +166,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline void basic_spin_box<T>::do_step(step_direction aDirection, uint32_t aAmount)
+    inline void basic_spin_box<T>::do_step(step_direction aDirection, std::uint32_t aAmount)
     {
         auto result = std::max(minimum(),
             std::min(maximum(),
