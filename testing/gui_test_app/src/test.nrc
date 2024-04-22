@@ -987,6 +987,7 @@
                         tab_text: "Web Browser"
                         vertical_layout: {
                             id: layoutWebView
+                            size_policy: Expanding
                             line_edit: {
                                 id: webViewUrl
                             }

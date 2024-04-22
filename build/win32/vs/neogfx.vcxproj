@@ -473,6 +473,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_text_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_title_bar.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_tool.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_web_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\label.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\line_edit.hpp" />
