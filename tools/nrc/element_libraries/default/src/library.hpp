@@ -57,7 +57,14 @@ namespace neogfx::nrc
         static std::string const& library_name() { static const std::string sName = "default"; return sName; }
         static std::string const& library_description() { static const std::string sDescription = "Default widget library"; return sDescription; }
         static const neolib::version& library_version() { static const neolib::version sVersion = { 1, 0, 0, 0 }; return sVersion; }
-        static std::string const& library_copyright() { static const std::string sCopyright = "Copyright (C) 2019 Leigh Johnston"; return sCopyright; };
+        static std::string const& library_copyright() { static const std::string sCopyright = "Copyright (C) 2019 Leigh Johnston"; return sCopyright; }
+        // plugin
+    public:
+        static const neolib::uuid& plugin_id() { return library_id(); }
+        static std::string const& plugin_name() { return library_name(); }
+        static std::string const& plugin_description() { return library_description(); }
+        static const neolib::version& plugin_version() { return library_version(); }
+        static std::string const& plugin_copyright() { return library_copyright(); }
         // state
     private:
         neolib::i_application& iApplication;

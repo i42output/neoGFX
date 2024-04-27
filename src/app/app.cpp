@@ -322,6 +322,11 @@ namespace neogfx
         actionSelectAll.triggered([this]() { service<i_clipboard>().select_all(); });
     
         load_translations();
+
+        plugin_manager().plugin_load_failure([](i_string const& reason)
+        {
+            service<i_basic_services>().display_error_dialog("Plugin Load Failure"_t, reason);
+        });
     }
     catch (std::exception& e)
     {

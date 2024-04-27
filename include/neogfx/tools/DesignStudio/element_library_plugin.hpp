@@ -27,92 +27,12 @@
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/app/version.hpp>
 #include <neolib/app/i_application.hpp>
+#include <neolib/plugin/plugin.hpp>
 
 #include <neogfx/tools/DesignStudio/i_element_library.hpp>
 
 namespace neogfx::DesignStudio
 {
     template <typename ElementLibrary>
-    class element_library_plugin : public neolib::reference_counted<neolib::i_plugin>
-    {
-    public:
-        typedef ElementLibrary library_type;
-    public:
-        element_library_plugin(
-            neolib::i_application& aApplication,
-            const neolib::uuid& aId = library_type::library_id(),
-            std::string const& aName = library_type::library_name(),
-            std::string const& aDescription = library_type::library_description(),
-            const neolib::version& aVersion = library_type::library_version(),
-            std::string const& aCopyright = library_type::library_copyright()) :
-            iApplication{ aApplication },
-            iId{ aId },
-            iName{ aName },
-            iDescription{ aDescription },
-            iVersion{ aVersion },
-            iCopyright{ aCopyright },
-            iLoaded{ false }
-        {
-        }
-    public:
-        bool discover(const neolib::uuid& aId, void*& aObject) override
-        {
-            if (aId == i_element_library::iid())
-            {
-                if (!iLibrary)
-                    iLibrary = neolib::make_ref<library_type>(iApplication, "file:///" + boost::dll::this_line_location().string());
-                aObject = &*iLibrary;
-                return true;
-            }
-            return false;
-        }
-    public:
-        const neolib::uuid& id() const override
-        {
-            return iId;
-        }
-        const neolib::i_string& name() const override
-        {
-            return iName;
-        }
-        const neolib::i_string& description() const override
-        {
-            return iDescription;
-        }
-        const neolib::i_version& version() const override
-        {
-            return iVersion;
-        }
-        const neolib::i_string& copyright() const override
-        {
-            return iCopyright;
-        }
-        bool load() override
-        {
-            iLoaded = true;
-            return true;
-        }
-        bool unload() override
-        {
-            iLoaded = false;
-            return true;
-        }
-        bool loaded() const override
-        {
-            return iLoaded;
-        }
-        bool open_uri(const neolib::i_string& aUri) override
-        {
-            return false;
-        }
-    private:
-        neolib::i_application& iApplication;
-        neolib::uuid iId;
-        neolib::string iName;
-        neolib::string iDescription;
-        neolib::version iVersion;
-        neolib::string iCopyright;
-        bool iLoaded;
-        ref_ptr<i_element_library> iLibrary;
-    };
+    using element_library_plugin = neolib::simple_plugin<ElementLibrary>;
 }
