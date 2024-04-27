@@ -635,7 +635,7 @@ namespace neogfx
 
     void graphics_context::draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const
     {
-        draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aFont), aTextFormat);
+        draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aTextFormat.apply(aFont)), aTextFormat);
     }
 
     void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment) const
@@ -675,7 +675,7 @@ namespace neogfx
     
     void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
-        draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aFont, aMaxWidth, aAlignment), aTextFormat);
+        draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aTextFormat.apply(aFont), aMaxWidth, aAlignment), aTextFormat);
     }
 
     void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const

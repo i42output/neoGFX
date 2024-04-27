@@ -270,6 +270,10 @@ namespace neogfx
         {
             iColor = aColor;
         }
+        bool has_width() const
+        {
+            return iWidth != std::nullopt;
+        }
         dimension width() const
         {
             if (iWidth != std::nullopt)
@@ -606,6 +610,13 @@ namespace neogfx
             auto copy = *this;
             copy.iBeingFiltered = true;
             return copy;
+        }
+        font apply(font const& aFont) const
+        {
+            if (iEffect && iEffect.value().type() == text_effect_type::Outline && aFont.info().outline().radius == 0.0)
+                return aFont.with_outline(stroke{ iEffect.value().width() });
+            else
+                return aFont;
         }
     private:
         text_color iInk;

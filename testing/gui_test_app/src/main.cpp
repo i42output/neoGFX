@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
         app.current_style().palette().set_color(ng::color_role::Theme, ng::color::Black);
         app.change_style("Dark");
 
+        app.plugin_manager().load_plugins();
+
         test::main_window window{ app };
 
         window.labelDPI.set_text(ng::string{ (std::ostringstream{} << "DPI: " <<
