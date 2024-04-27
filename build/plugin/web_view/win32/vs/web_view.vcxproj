@@ -203,11 +203,11 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\src\plugin\web_view\src\dllmain.cpp" />
     <ClCompile Include="..\..\..\..\..\src\plugin\web_view\src\plugin.cpp" />
-    <ClCompile Include="..\..\..\..\..\src\plugin\web_view\src\web_view_impl.cpp" />
+    <ClCompile Include="..\..\..\..\..\src\plugin\web_view\src\web_view_canvas.cpp" />
     <ClCompile Include="..\..\..\..\..\src\plugin\web_view\src\web_view_plugin.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\src\plugin\web_view\hdr\web_view_impl.hpp" />
+    <ClInclude Include="..\..\..\..\..\src\plugin\web_view\hdr\web_view_canvas.hpp" />
     <ClInclude Include="..\..\..\..\..\src\plugin\web_view\hdr\web_view_plugin.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

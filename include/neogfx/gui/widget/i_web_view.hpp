@@ -44,20 +44,20 @@ namespace neogfx
         using abstract_type = i_web_view_factory;
         // interface
     public:
-        virtual void create_web_view(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView) = 0;
-        virtual void create_web_view(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView) = 0;
+        virtual void create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView) = 0;
+        virtual void create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView) = 0;
         // helpers
     public:
-        ref_ptr<i_web_view> create_web_view(i_widget& aParent)
+        ref_ptr<i_web_view> create_canvas(i_widget& aParent)
         {
             ref_ptr<i_web_view> newWebView;
-            create_web_view(aParent, newWebView);
+            create_canvas(aParent, newWebView);
             return newWebView;
         }
-        ref_ptr<i_web_view> create_web_view(i_layout& aLayout)
+        ref_ptr<i_web_view> create_canvas(i_layout& aLayout)
         {
             ref_ptr<i_web_view> newWebView;
-            create_web_view(aLayout, newWebView);
+            create_canvas(aLayout, newWebView);
             return newWebView;
         }
         // discovery

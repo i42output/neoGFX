@@ -49,8 +49,12 @@ namespace neogfx
     void web_view::paint(i_graphics_context& aGc) const
     {
         base_type::paint(aGc);
-        if (!iWebViewInstance)
-            draw_alpha_background(aGc, client_rect(), 8.0_dip);
+
+        rect canvasRect{ iLayout.position(), iLayout.extents() };
+        canvasRect.deflate(iLayout.margin());
+        canvasRect.deflate(iLayout.border());
+        canvasRect.deflate(iLayout.padding());
+        draw_alpha_background(aGc, canvasRect, 8.0_dip);
     }
 
     void web_view::init()
@@ -61,7 +65,7 @@ namespace neogfx
         try
         {
             ref_ptr<i_web_view_factory> factory{ service<i_app>() };
-            iWebViewInstance = factory->create_web_view(iLayout);
+            iCanvas = factory->create_canvas(iLayout);
         }
         catch(...)
         {

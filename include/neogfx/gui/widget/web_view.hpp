@@ -51,7 +51,7 @@ namespace neogfx
         void init();
     private:
         vertical_layout iLayout;
-        ref_ptr<i_web_view> iWebViewInstance;
+        ref_ptr<i_web_view> iCanvas;
         std::optional<text_widget> iErrorBox;
         sink iSink;
     };
