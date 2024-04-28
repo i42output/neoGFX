@@ -375,7 +375,13 @@ namespace neogfx
     }
 
     template <typename T>
-    void vulkan_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, std::uint32_t aPackAlignment)
+    void vulkan_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aPackAlignment)
+    {
+        set_pixels(aRect, aPixelData, data_format(), aPackAlignment);
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment)
     {
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)

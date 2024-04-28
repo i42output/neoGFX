@@ -35,13 +35,14 @@ namespace neogfx
             switch (aDataFormat)
             {
             case texture_data_format::RGBA:
+            case texture_data_format::BGRA:
             case texture_data_format::SubPixel:
                 switch (aDataType)
                 {
                 case texture_data_type::UnsignedByte:
-                    return std::make_tuple(GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+                    return std::make_tuple(GL_RGBA8, aDataFormat != texture_data_format::BGRA ? GL_RGBA : GL_BGRA, GL_UNSIGNED_BYTE);
                 case texture_data_type::Float:
-                    return std::make_tuple(GL_RGBA32F, GL_RGBA, GL_FLOAT);
+                    return std::make_tuple(GL_RGBA32F, aDataFormat != texture_data_format::BGRA ? GL_RGBA : GL_BGRA, GL_FLOAT);
                 default:
                     throw std::logic_error("neogfx::to_gl_enums: bad data type");
                 }
@@ -405,7 +406,13 @@ namespace neogfx
     }
 
     template <typename T>
-    void opengl_texture<T>::set_pixels(const rect& aRect, const void* aPixelData, std::uint32_t aPackAlignment)
+    void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aPackAlignment)
+    {
+        set_pixels(aRect, aPixelData, iDataFormat, aPackAlignment);
+    }
+
+    template <typename T>
+    void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment)
     {
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
@@ -413,10 +420,10 @@ namespace neogfx
             bind(1);
             GLint previousPackAlignment;
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
-            glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
-            auto const [internalformat, format, type] = to_gl_enums(iDataFormat, kDataType);
+                glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
+            auto const [internalformat, format, type] = to_gl_enums(aDataFormat, kDataType);
             glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
-                static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y), 
+                static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y),
                 static_cast<GLsizei>(adjustedRect.cx), static_cast<GLsizei>(adjustedRect.cy),
                 format, type, aPixelData));
             if (sampling() == texture_sampling::NormalMipmap)

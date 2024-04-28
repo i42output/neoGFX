@@ -176,12 +176,17 @@ namespace neogfx
 
     void sub_texture::set_pixels(rect const& aRect, void const* aPixelData, std::uint32_t aPackAlignment)
     {
+        set_pixels(aRect, aPixelData, data_format(), aPackAlignment);
+    }
+
+    void sub_texture::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment)
+    {
         rect r = aRect;
         r.position() += atlas_location().position();
         r = r.intersection(atlas_location());
         if (r.cx != aRect.cx || r.cy != aRect.cy)
             throw bad_rectangle();
-        native_texture().set_pixels(r, aPixelData, aPackAlignment);
+        native_texture().set_pixels(r, aPixelData, aDataFormat, aPackAlignment);
     }
 
     void sub_texture::set_pixels(i_image const& aImage)

@@ -58,8 +58,9 @@ namespace neogfx
     {
         // todo: add remaining GL texture data formats
         RGBA        = 0x01,
-        Red         = 0x02,
-        SubPixel    = 0x03
+        BGRA        = 0x02,
+        Red         = 0x03,
+        SubPixel    = 0x04
     };
 
     enum class texture_data_type : std::uint32_t
@@ -109,7 +110,8 @@ namespace neogfx
         virtual bool is_empty() const = 0;
         virtual size extents() const = 0;
         virtual size storage_extents() const = 0;
-        virtual void set_pixels(const rect& aRect, const void* aPixelData, std::uint32_t aPackAlignment = 4u) = 0;
+        virtual void set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aPackAlignment = 4u) = 0;
+        virtual void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment = 4u) = 0;
         virtual void set_pixels(const i_image& aImage) = 0;
         virtual void set_pixels(const i_image& aImage, const rect& aImagePart) = 0;
         virtual void set_pixel(const point& aPosition, const color& aColor) = 0;

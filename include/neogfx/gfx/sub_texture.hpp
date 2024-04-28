@@ -60,6 +60,7 @@ namespace neogfx
         size extents() const final;
         size storage_extents() const final;
         void set_pixels(rect const& aRect, void const* aPixelData, std::uint32_t aPackAlignment = 4u) final;
+        void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment = 4u) final;
         void set_pixels(i_image const& aImage) final;
         void set_pixels(i_image const& aImage, rect const& aImagePart) final;
         void set_pixel(point const& aPosition, color const& aColor) final;
