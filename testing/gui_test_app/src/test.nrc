@@ -990,6 +990,7 @@
                             size_policy: Expanding
                             line_edit: {
                                 id: webViewUrl
+                                focus_policy: [ Default ConsumeReturnKey ]
                             }
                             web_view: {
                                 id: webView

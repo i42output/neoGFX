@@ -43,6 +43,9 @@ namespace neogfx
         web_view(i_widget& aParent);
         web_view(i_layout& aLayout);
         ~web_view();
+        // i_web_view
+    public:
+        void load_url(i_string const& aUrl) override;
         // widget
     public:
         void paint(i_graphics_context& aGc) const override;

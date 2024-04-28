@@ -46,6 +46,12 @@ namespace neogfx
     {
     }
 
+    void web_view::load_url(i_string const& aUrl)
+    {
+        if (iCanvas)
+            iCanvas->load_url(aUrl);
+    }
+
     void web_view::paint(i_graphics_context& aGc) const
     {
         base_type::paint(aGc);

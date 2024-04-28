@@ -458,6 +458,15 @@ int main(int argc, char* argv[])
             update_theme_color();
         });
 
+        window.webViewUrl.can_accept_text([](ng::i_string const& aUrl, bool& aAccept)
+        {
+            aAccept = true;
+        });
+        window.webViewUrl.accept_text([&](ng::i_string const& aUrl)
+        {
+            window.webView.load_url(aUrl);
+        });
+
         app.actionGameControllerCalibration.triggered([&window]()
         {
             ng::game_controller_dialog gameControllerDialog(window);

@@ -35,6 +35,7 @@ namespace neogfx
         using abstract_type = i_web_view;
         // operations
     public:
+        virtual void load_url(i_string const& aUrl) = 0;
     };
 
     class i_web_view_factory : public i_reference_counted
@@ -44,20 +45,26 @@ namespace neogfx
         using abstract_type = i_web_view_factory;
         // interface
     public:
-        virtual void create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView) = 0;
-        virtual void create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView) = 0;
+        virtual void create_canvas(i_widget& aParent, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl = optional<string>{}) = 0;
+        virtual void create_canvas(i_layout& aLayout, i_ref_ptr<i_web_view>& aWebView, i_optional<i_string> const& aUrl = optional<string>{}) = 0;
         // helpers
     public:
-        ref_ptr<i_web_view> create_canvas(i_widget& aParent)
+        ref_ptr<i_web_view> create_canvas(i_widget& aParent, std::optional<std::string> const& aUrl = {})
         {
+            optional<string> url;
+            if (aUrl)
+                url = aUrl.value();
             ref_ptr<i_web_view> newWebView;
-            create_canvas(aParent, newWebView);
+            create_canvas(aParent, newWebView, url);
             return newWebView;
         }
-        ref_ptr<i_web_view> create_canvas(i_layout& aLayout)
+        ref_ptr<i_web_view> create_canvas(i_layout& aLayout, std::optional<std::string> const& aUrl = {})
         {
+            optional<string> url;
+            if (aUrl)
+                url = aUrl.value();
             ref_ptr<i_web_view> newWebView;
-            create_canvas(aLayout, newWebView);
+            create_canvas(aLayout, newWebView, url);
             return newWebView;
         }
         // discovery
