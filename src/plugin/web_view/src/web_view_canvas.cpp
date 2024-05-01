@@ -174,6 +174,83 @@ namespace neogfx
         iBrowser->GetHost()->SendMouseMoveEvent(cefEvent, true);
     }
 
+    mouse_cursor web_view_canvas::mouse_cursor() const
+    {
+        switch (iCursorType)
+        {
+        case CT_POINTER:
+            return mouse_system_cursor::Arrow;
+        case CT_CROSS:
+            return mouse_system_cursor::Crosshair;
+        case CT_HAND:
+            return mouse_system_cursor::Hand;
+        case CT_IBEAM:
+            return mouse_system_cursor::IBeam;
+        case CT_WAIT:
+            return mouse_system_cursor::Wait;
+        case CT_HELP:
+            return mouse_system_cursor::Arrow;
+        case CT_EASTRESIZE:
+            return mouse_system_cursor::SizeWE;
+        case CT_NORTHRESIZE:
+            return mouse_system_cursor::SizeNS;
+        case CT_NORTHEASTRESIZE:
+            return mouse_system_cursor::SizeNESW;
+        case CT_NORTHWESTRESIZE:
+            return mouse_system_cursor::SizeNWSE;
+        case CT_SOUTHRESIZE:
+            return mouse_system_cursor::SizeNS;
+        case CT_SOUTHEASTRESIZE:
+            return mouse_system_cursor::SizeNWSE;
+        case CT_SOUTHWESTRESIZE:
+            return mouse_system_cursor::SizeNESW;
+        case CT_WESTRESIZE:
+            return mouse_system_cursor::SizeWE;
+        case CT_NORTHSOUTHRESIZE:
+            return mouse_system_cursor::SizeNS;
+        case CT_EASTWESTRESIZE:
+            return mouse_system_cursor::SizeWE;
+        case CT_NORTHEASTSOUTHWESTRESIZE:
+            return mouse_system_cursor::SizeNESW;
+        case CT_NORTHWESTSOUTHEASTRESIZE:
+            return mouse_system_cursor::SizeNWSE;
+        case CT_COLUMNRESIZE:
+        case CT_ROWRESIZE:
+        case CT_MIDDLEPANNING:
+        case CT_EASTPANNING:
+        case CT_NORTHPANNING:
+        case CT_NORTHEASTPANNING:
+        case CT_NORTHWESTPANNING:
+        case CT_SOUTHPANNING:
+        case CT_SOUTHEASTPANNING:
+        case CT_SOUTHWESTPANNING:
+        case CT_WESTPANNING:
+        case CT_MOVE:
+        case CT_VERTICALTEXT:
+        case CT_CELL:
+        case CT_CONTEXTMENU:
+        case CT_ALIAS:
+        case CT_PROGRESS:
+        case CT_NODROP:
+        case CT_COPY:
+        case CT_NONE:
+        case CT_NOTALLOWED:
+        case CT_ZOOMIN:
+        case CT_ZOOMOUT:
+        case CT_GRAB:
+        case CT_GRABBING:
+        case CT_MIDDLE_PANNING_VERTICAL:
+        case CT_MIDDLE_PANNING_HORIZONTAL:
+        case CT_CUSTOM:
+        case CT_DND_NONE:
+        case CT_DND_MOVE:
+        case CT_DND_COPY:
+        case CT_DND_LINK:
+        default:
+            return mouse_system_cursor::Arrow;
+        }
+    }
+
     focus_policy web_view_canvas::focus_policy() const
     {
         if (has_focus_policy())
@@ -219,6 +296,11 @@ namespace neogfx
         return *iBackBuffer;
     }
 
+    CefRefPtr<CefDisplayHandler> web_view_canvas::GetDisplayHandler()
+    {
+        return this;
+    }
+
     CefRefPtr<CefRenderHandler> web_view_canvas::GetRenderHandler()
     {
         return this;
@@ -253,5 +335,11 @@ namespace neogfx
                 static_cast<std::byte const*>(buffer) + 4 * (width * dirtyRect.y + dirtyRect.x), width);
             update(updateRect);
         }
+    }
+
+    bool web_view_canvas::OnCursorChange(CefRefPtr<CefBrowser> browser, CefCursorHandle cursor, cef_cursor_type_t type, const CefCursorInfo& custom_cursor_info)
+    {
+        iCursorType = type;
+        return true;
     }
 }
