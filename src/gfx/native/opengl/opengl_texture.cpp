@@ -406,21 +406,24 @@ namespace neogfx
     }
 
     template <typename T>
-    void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aPackAlignment)
+    void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
-        set_pixels(aRect, aPixelData, iDataFormat, aPackAlignment);
+        set_pixels(aRect, aPixelData, iDataFormat, aStride, aPackAlignment);
     }
 
     template <typename T>
-    void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment)
+    void opengl_texture<T>::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
         {
             bind(1);
             GLint previousPackAlignment;
-            glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment))
-                glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
+            GLint previousPackRowLength;
+            glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment));
+            glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, aPackAlignment));
+            glCheck(glGetIntegerv(GL_UNPACK_ROW_LENGTH, &previousPackRowLength));
+            glCheck(glPixelStorei(GL_UNPACK_ROW_LENGTH, aStride));
             auto const [internalformat, format, type] = to_gl_enums(aDataFormat, kDataType);
             glCheck(glTexSubImage2D(to_gl_enum(sampling()), 0,
                 static_cast<GLint>(adjustedRect.x), static_cast<GLint>(adjustedRect.y),
@@ -431,6 +434,7 @@ namespace neogfx
                 glCheck(glGenerateMipmap(to_gl_enum(sampling())));
             }
             glCheck(glPixelStorei(GL_UNPACK_ALIGNMENT, previousPackAlignment));
+            glCheck(glPixelStorei(GL_UNPACK_ROW_LENGTH, previousPackRowLength));
             unbind();
             iPixelData.clear();
         }

@@ -29,6 +29,7 @@ namespace neogfx
         switch (aDataFormat)
         {
         case texture_data_format::RGBA:
+        case texture_data_format::BGRA:
         case texture_data_format::SubPixel:
         default:
             switch (aDataType)
@@ -68,6 +69,7 @@ namespace neogfx
         switch (aDataFormat)
         {
         case texture_data_format::RGBA:
+        case texture_data_format::BGRA:
         case texture_data_format::SubPixel:
         default:
             switch (aDataType)

@@ -110,8 +110,8 @@ namespace neogfx
         virtual bool is_empty() const = 0;
         virtual size extents() const = 0;
         virtual size storage_extents() const = 0;
-        virtual void set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aPackAlignment = 4u) = 0;
-        virtual void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment = 4u) = 0;
+        virtual void set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) = 0;
+        virtual void set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride = 0u, std::uint32_t aPackAlignment = 4u) = 0;
         virtual void set_pixels(const i_image& aImage) = 0;
         virtual void set_pixels(const i_image& aImage, const rect& aImagePart) = 0;
         virtual void set_pixel(const point& aPosition, const color& aColor) = 0;

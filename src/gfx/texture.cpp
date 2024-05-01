@@ -162,14 +162,14 @@ namespace neogfx
         return native_texture().storage_extents();
     }
 
-    void texture::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aPackAlignment)
+    void texture::set_pixels(const rect& aRect, void const* aPixelData, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
-        native_texture().set_pixels(aRect, aPixelData, aPackAlignment);
+        native_texture().set_pixels(aRect, aPixelData, aStride, aPackAlignment);
     }
 
-    void texture::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aPackAlignment)
+    void texture::set_pixels(const rect& aRect, void const* aPixelData, texture_data_format aDataFormat, std::uint32_t aStride, std::uint32_t aPackAlignment)
     {
-        native_texture().set_pixels(aRect, aPixelData, aDataFormat, aPackAlignment);
+        native_texture().set_pixels(aRect, aPixelData, aDataFormat, aStride, aPackAlignment);
     }
 
     void texture::set_pixels(const i_image& aImage)

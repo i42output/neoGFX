@@ -528,7 +528,7 @@ namespace neogfx
                 textureData = &glyphTextureData[0];
             }
             static_cast<i_native_texture&>((!tRenderOutlineGlyph ? 
-                theGlyph.texture() : theGlyph.outline_texture()).native_texture()).set_pixels(glyphRect, &textureData[0], 1u);
+                theGlyph.texture() : theGlyph.outline_texture()).native_texture()).set_pixels(glyphRect, &textureData[0], 0u, 1u);
         }
 
         if (outline().radius != 0.0 && !tRenderOutlineGlyph)

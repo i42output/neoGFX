@@ -59,6 +59,7 @@ namespace neogfx
                 switch (data_format())
                 {
                 case texture_data_format::RGBA:
+                case texture_data_format::BGRA:
                     return pixel.alpha() * 1.0;
                 case texture_data_format::Red:
                     return pixel.red() * 1.0;

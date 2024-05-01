@@ -444,6 +444,12 @@ namespace neogfx
                 modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LGUI);
             if (GetAsyncKeyState(VK_RWIN) >> 1)
                 modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RGUI);
+            if ((locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CAPS);
+            if ((locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_NUM);
+            if ((locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock)
+                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SCROLL);
             return modifiers;
         }
 

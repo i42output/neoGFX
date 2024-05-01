@@ -45,15 +45,15 @@ namespace neogfx
         mouse_button mouse::button_state() const
         {
             mouse_button result = mouse_button::None;
-            if (GetKeyState(convert_button(mouse_button::Left)) & 0x0001)
+            if (GetKeyState(convert_button(mouse_button::Left)) >> 1)
                 result = result | mouse_button::Left;
-            if (GetKeyState(convert_button(mouse_button::Right)) & 0x0001)
+            if (GetKeyState(convert_button(mouse_button::Right)) >> 1)
                 result = result | mouse_button::Right;
-            if (GetKeyState(convert_button(mouse_button::Middle)) & 0x0001)
+            if (GetKeyState(convert_button(mouse_button::Middle)) >> 1)
                 result = result | mouse_button::Middle;
-            if (GetKeyState(convert_button(mouse_button::X1)) & 0x0001)
+            if (GetKeyState(convert_button(mouse_button::X1)) >> 1)
                 result = result | mouse_button::X1;
-            if (GetKeyState(convert_button(mouse_button::X2)) & 0x0001)
+            if (GetKeyState(convert_button(mouse_button::X2)) >> 1)
                 result = result | mouse_button::X2;
             return result;
         }

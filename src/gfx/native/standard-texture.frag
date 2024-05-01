@@ -12,12 +12,13 @@ vec4 texel_at(vec2 texCoord, int sampleId)
     switch(uTextureDataFormat)
     {
     case 1: // RGBA
+    case 2: // BGRA
     default:
         break;
-    case 2: // Red
+    case 3: // Red
         texel = vec4(1.0, 1.0, 1.0, texel.r);
         break;
-    case 3: // SubPixel
+    case 4: // SubPixel
         texel = vec4(1.0, 1.0, 1.0, (texel.r + texel.g + texel.b) / 3.0);
         break;
     }

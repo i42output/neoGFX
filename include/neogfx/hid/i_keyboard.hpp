@@ -604,8 +604,9 @@ namespace neogfx
         KeyModifier_GUI = KeyModifier_LGUI | KeyModifier_RGUI,
         KeyModifier_NUM = 0x1000,
         KeyModifier_CAPS = 0x2000,
-        KeyModifier_MODE = 0x4000,
-        KeyModifier_LOCKS = KeyModifier_NUM | KeyModifier_CAPS | KeyModifier_MODE,
+        KeyModifier_SCROLL = 0x4000,
+        KeyModifier_MODE = 0x8000,
+        KeyModifier_LOCKS = KeyModifier_NUM | KeyModifier_CAPS | KeyModifier_SCROLL | KeyModifier_MODE,
         KeyModifier_RESERVED = 0x8000
     };
 
