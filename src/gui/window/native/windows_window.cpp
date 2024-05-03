@@ -1309,6 +1309,42 @@ namespace neogfx
                     }
                 }
                 break;
+            case WM_MOVING:
+                {
+                    auto const& rc = *reinterpret_cast<RECT const*>(lparam);
+                    bool placementChanged = false;
+                    if (self.iPosition != basic_point<int>{ rc.left, rc.top }.as<scalar>())
+                    {
+                        self.iPosition.emplace(rc.left, rc.top);
+                        self.push_event(window_event{ window_event_type::Moving, *self.iPosition });
+                        placementChanged = true;
+                    }
+                    if (placementChanged)
+                    {
+                        if (!self.iInMoveResizeCall)
+                            self.iPlacementChangedExplicitly = true;
+                    }
+                }
+                result = wndproc(hwnd, msg, wparam, lparam);
+                break;
+            case WM_MOVE:
+                {
+                    bool placementChanged = false;
+                    auto pos = basic_point<int>{ LOWORD(lparam), HIWORD(lparam) }.as<scalar>();
+                    if (self.iPosition != pos)
+                    {
+                        self.iPosition.emplace(pos.x, pos.y);
+                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
+                        placementChanged = true;
+                    }
+                    if (placementChanged)
+                    {
+                        if (!self.iInMoveResizeCall)
+                            self.iPlacementChangedExplicitly = true;
+                    }
+                }
+                result = wndproc(hwnd, msg, wparam, lparam);
+                break;
             case WM_WINDOWPOSCHANGED:
                 {
                     auto const& wpc = *reinterpret_cast<WINDOWPOS const*>(lparam);

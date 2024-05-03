@@ -45,7 +45,7 @@ namespace neogfx
         ~web_view();
         // i_web_view
     public:
-        void load_url(i_string const& aUrl) override;
+        void load_url(i_string const& aUrl, bool aSetFocus = true) override;
         // widget
     public:
         void paint(i_graphics_context& aGc) const override;

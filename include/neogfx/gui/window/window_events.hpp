@@ -35,6 +35,7 @@ namespace neogfx
         Close,
         Enabled,
         Disabled,
+        Moving,
         Moved,
         Resizing,
         Resized,

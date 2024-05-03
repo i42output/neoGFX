@@ -1,5 +1,5 @@
 /*
-  web_view_canvas.hpp
+  web_view_canvas.cpp
 
   Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
 
@@ -22,6 +22,7 @@
 #include <cef/include/views/cef_window.h>
 
 #include <neogfx/gui/window/i_native_window.hpp>
+#include <neogfx/gui/window/window_events.hpp>
 
 #include "web_view_canvas.hpp"
 
@@ -251,45 +252,37 @@ namespace neogfx
         }
     }
 
+    void web_view_canvas::capture_released()
+    {
+        iBrowser->GetHost()->SendCaptureLostEvent();
+    }
+
     focus_policy web_view_canvas::focus_policy() const
     {
         if (has_focus_policy())
             return base_type::focus_policy();
-        return neogfx::focus_policy::StrongFocus;
+        return neogfx::focus_policy::StrongFocus | neogfx::focus_policy::ConsumeAllKeys;
     }
 
-    bool web_view_canvas::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    void web_view_canvas::focus_gained(focus_reason aFocusReason)
     {
-        //CefKeyEvent cefEvent{};
-        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
-        return true;
+        base_type::focus_gained(aFocusReason);
+
+        iBrowser->GetHost()->SetFocus(true);
     }
 
-    bool web_view_canvas::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    void web_view_canvas::focus_lost(focus_reason aFocusReason)
     {
-        //CefKeyEvent cefEvent{};
-        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
-        return true;
+        base_type::focus_lost(aFocusReason);
+
+        iBrowser->GetHost()->SetFocus(false);
     }
 
-    bool web_view_canvas::text_input(i_string const& aText)
-    {
-        //CefKeyEvent cefEvent{};
-        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
-        return true;
-    }
-
-    bool web_view_canvas::sys_text_input(i_string const& aText)
-    {
-        //CefKeyEvent cefEvent{};
-        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
-        return true;
-    }
-
-    void web_view_canvas::load_url(i_string const& aUrl)
+    void web_view_canvas::load_url(i_string const& aUrl, bool aSetFocus)
     {
         iUrl = aUrl.to_std_string_view();
         iBrowser->GetMainFrame()->LoadURL(CefString{ aUrl.to_std_string() });
+        iSetFocusAfterLoad = aSetFocus;
     }
 
     void web_view_canvas::init()
@@ -308,6 +301,46 @@ namespace neogfx
         browser_settings.windowless_frame_rate = 60;
 
         iBrowser = CefBrowserHost::CreateBrowserSync(window_info, this, !iUrl ? CefString{} : CefString{ iUrl.value() }, browser_settings, nullptr, nullptr);
+
+        iSink += root().position_changed([&]()
+        {
+            iBrowser->GetHost()->NotifyMoveOrResizeStarted(); 
+        });
+
+        iSink += Keyboard([&](neogfx::keyboard_event const& aEvent)
+        {
+            CefKeyEvent cefEvent;
+            cefEvent.windows_key_code = service<i_keyboard>().native_key_code_to_usb_hid_key_code(aEvent.native_key_code());
+            cefEvent.native_key_code = aEvent.native_scan_code();
+            cefEvent.is_system_key = ((aEvent.key_modifiers() & KeyModifier_SYSTEM) == KeyModifier_SYSTEM);
+            std::optional<std::u16string> text;
+            switch (aEvent.type())
+            {
+            case keyboard_event_type::KeyPressed:
+                cefEvent.type = KEYEVENT_RAWKEYDOWN;
+                break;
+            case keyboard_event_type::KeyReleased:
+                cefEvent.type = KEYEVENT_KEYUP;
+                break;
+            case keyboard_event_type::TextInput:
+                cefEvent.type = KEYEVENT_CHAR;
+                text = neolib::utf8_to_utf16(aEvent.text());
+                cefEvent.windows_key_code = (*text)[0];
+                break;
+            case keyboard_event_type::SysTextInput:
+                cefEvent.type = KEYEVENT_CHAR;
+                text = neolib::utf8_to_utf16(aEvent.text());
+                cefEvent.windows_key_code = (*text)[0];
+                break;
+            }
+            cefEvent.modifiers = convert_key_modifiers(aEvent.key_modifiers(), mouse_button::None);
+            iBrowser->GetHost()->SendKeyEvent(cefEvent);
+            if (text && (*text).size() == 2)
+            {
+                cefEvent.windows_key_code = (*text)[1];
+                iBrowser->GetHost()->SendKeyEvent(cefEvent);
+            }
+        });
     }
 
     i_texture& web_view_canvas::back_buffer() const
@@ -324,6 +357,21 @@ namespace neogfx
         return *iBackBuffer;
     }
 
+    CefRefPtr<CefLoadHandler> web_view_canvas::GetLoadHandler()
+    {
+        return this;
+    }
+
+    CefRefPtr<CefKeyboardHandler> web_view_canvas::GetKeyboardHandler()
+    {
+        return this;
+    }
+
+    CefRefPtr<CefContextMenuHandler> web_view_canvas::GetContextMenuHandler()
+    {
+        return this;
+    }
+
     CefRefPtr<CefDisplayHandler> web_view_canvas::GetDisplayHandler()
     {
         return this;
@@ -332,6 +380,38 @@ namespace neogfx
     CefRefPtr<CefRenderHandler> web_view_canvas::GetRenderHandler()
     {
         return this;
+    }
+
+    CefRefPtr<CefFocusHandler> web_view_canvas::GetFocusHandler()
+    {
+        return this;
+    }
+       
+    void web_view_canvas::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type)
+    {
+    }
+
+    void web_view_canvas::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)
+    {
+        if (iSetFocusAfterLoad && *iSetFocusAfterLoad)
+            set_focus();
+        iSetFocusAfterLoad = std::nullopt;
+    }
+
+    void web_view_canvas::OnLoadError(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, ErrorCode errorCode, const CefString& errorText, const CefString& failedUrl)
+    {
+        iSetFocusAfterLoad = std::nullopt;
+    }
+
+    bool web_view_canvas::OnPreKeyEvent(CefRefPtr<CefBrowser> browser, const CefKeyEvent& event, CefEventHandle os_event, bool* is_keyboard_shortcut)
+    {
+        return false;
+    }
+
+    void web_view_canvas::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model)
+    {
+        /// @todo position context menu correctly.
+        model->Clear();
     }
 
     bool web_view_canvas::GetScreenInfo(CefRefPtr<CefBrowser> browser, CefScreenInfo& screen_info)
@@ -349,8 +429,9 @@ namespace neogfx
     {
         scoped_units_context suc{ *this };
         auto const clientRect = client_rect(false);
+        basic_point<int> const viewPosition = to_window_coordinates(point{}).as<int>();
         basic_size<int> const viewExtents = (clientRect.extents() / dpi_scale(1.0f)).ceil();
-        rect = CefRect(0, 0, viewExtents.cx, viewExtents.cy);
+        rect = CefRect(viewPosition.x, viewPosition.y, viewExtents.cx, viewExtents.cy);
     }
 
     void web_view_canvas::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects, const void* buffer, int width, int height)
@@ -369,5 +450,18 @@ namespace neogfx
     {
         iCursorType = type;
         return true;
+    }
+
+    void web_view_canvas::OnTakeFocus(CefRefPtr<CefBrowser> browser, bool next)
+    {
+    }
+
+    bool web_view_canvas::OnSetFocus(CefRefPtr<CefBrowser> browser, FocusSource source)
+    {
+        return false;
+    }
+
+    void web_view_canvas::OnGotFocus(CefRefPtr<CefBrowser> browser)
+    {
     }
 }

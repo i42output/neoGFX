@@ -778,14 +778,14 @@ namespace neogfx
             {
                 if (aText == "\t" && (aWidget.focus_policy() & focus_policy::ConsumeTabKey) != focus_policy::ConsumeTabKey)
                     return false;
-                else if (aText == "\n" && (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) != focus_policy::ConsumeReturnKey)
+                else if ((aText == "\r" || aText == "\n") && (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) != focus_policy::ConsumeReturnKey)
                     return false;
                 return true;
             };
             if (targetWindow.has_focused_widget())
             {
                 i_widget* w = &targetWindow.focused_widget();
-                while ((!can_consume(*w) || event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
+                while ((!can_consume(*w) || event_consumed(w->keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
                     !w->text_input(aText)) && w != &targetWidget)
                     w = &w->parent();
                 if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
@@ -814,7 +814,7 @@ namespace neogfx
         if (as_window().has_focused_widget())
         {
             i_widget* w = &as_window().focused_widget();
-            while ((event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
+            while ((event_consumed(w->keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
                 !w->sys_text_input(aText)) && w != &targetWidget)
                 w = &w->parent();
             if (w == &targetWidget && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))

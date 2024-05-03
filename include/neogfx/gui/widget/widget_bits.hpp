@@ -131,6 +131,7 @@ namespace neogfx
         ConsumeTabKey     = 0x10000000,
         ConsumeReturnKey  = 0x20000000,
         ConsumeEscapeKey  = 0x20000000,
+        ConsumeAllKeys    = ConsumeTabKey | ConsumeReturnKey | ConsumeEscapeKey,
         IgnoreNonClient   = 0x40000000
     };
 

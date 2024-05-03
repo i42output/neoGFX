@@ -46,10 +46,10 @@ namespace neogfx
     {
     }
 
-    void web_view::load_url(i_string const& aUrl)
+    void web_view::load_url(i_string const& aUrl, bool aSetFocus)
     {
         if (iCanvas)
-            iCanvas->load_url(aUrl);
+            iCanvas->load_url(aUrl, aSetFocus);
     }
 
     void web_view::paint(i_graphics_context& aGc) const
