@@ -410,8 +410,6 @@ namespace neogfx
 
     void web_view_canvas::OnBeforeContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model)
     {
-        /// @todo position context menu correctly.
-        model->Clear();
     }
 
     bool web_view_canvas::GetScreenInfo(CefRefPtr<CefBrowser> browser, CefScreenInfo& screen_info)
@@ -432,6 +430,14 @@ namespace neogfx
         basic_point<int> const viewPosition = to_window_coordinates(point{}).as<int>();
         basic_size<int> const viewExtents = (clientRect.extents() / dpi_scale(1.0f)).ceil();
         rect = CefRect(viewPosition.x, viewPosition.y, viewExtents.cx, viewExtents.cy);
+    }
+
+    bool web_view_canvas::GetScreenPoint(CefRefPtr<CefBrowser> browser, int viewX, int viewY, int& screenX, int& screenY)
+    {
+        auto pos = (to_window_coordinates(point{ viewX * 1.0_dip, viewY * 1.0_dip }) + root().window_position()).as<int>();
+        screenX = pos.x;
+        screenY = pos.y;
+        return true;
     }
 
     void web_view_canvas::OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type, const RectList& dirtyRects, const void* buffer, int width, int height)
