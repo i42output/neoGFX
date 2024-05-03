@@ -197,12 +197,29 @@ namespace neogfx
     class keyboard_event
     {
     public:
-        typedef keyboard_event abstract_type; // todo
+        using abstract_type = keyboard_event ; // todo
     public:
-        typedef neolib::variant<neogfx::scan_code_e, neogfx::key_code_e, neogfx::key_modifiers_e, string> parameter_type;
+        using parameter_type = neolib::variant<
+            scan_code_e, 
+            key_code_e, 
+            key_modifiers_e, 
+            string,
+            native_scan_code_e,
+            native_key_code_e>;
     public:
-        keyboard_event(keyboard_event_type aType, const parameter_type& aParameter1 = parameter_type(), const parameter_type& aParameter2 = parameter_type(), const parameter_type& aParameter3 = parameter_type()) :
-            iType(aType), iParameter1(aParameter1), iParameter2(aParameter2), iParameter3(aParameter3)
+        keyboard_event(
+            keyboard_event_type aType,
+            const parameter_type& aScanCodeOrText = parameter_type{},
+            const parameter_type& aKeyCode = parameter_type{},
+            const parameter_type& aKeyModifiers = parameter_type{},
+            const parameter_type& aNativeScanCode = parameter_type{},
+            const parameter_type& aNativeKeyCode = parameter_type{}) :
+            iType{ aType },
+            iScanCodeOrText{ aScanCodeOrText },
+            iKeyCode{ aKeyCode },
+            iKeyModifiers{ aKeyModifiers },
+            iNativeScanCode{ aNativeScanCode },
+            iNativeKeyCode{ aNativeKeyCode }
         {
         }
     public:
@@ -210,26 +227,36 @@ namespace neogfx
         {
             return iType;
         }
-        neogfx::scan_code_e scan_code() const
+        scan_code_e scan_code() const
         {
-            return static_variant_cast<neogfx::scan_code_e>(iParameter1);
+            return static_variant_cast<scan_code_e>(iScanCodeOrText);
         }
-        neogfx::key_code_e key_code() const
+        key_code_e key_code() const
         {
-            return static_variant_cast<neogfx::key_code_e>(iParameter2);
+            return static_variant_cast<key_code_e>(iKeyCode);
         }
-        neogfx::key_modifiers_e key_modifiers() const
+        key_modifiers_e key_modifiers() const
         {
-            return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
+            return static_variant_cast<key_modifiers_e>(iKeyModifiers);
         }
         std::string text() const
         {
-            return static_variant_cast<string>(iParameter1);
+            return static_variant_cast<string>(iScanCodeOrText);
+        }
+        native_scan_code_e native_scan_code() const
+        {
+            return static_variant_cast<native_scan_code_e>(iNativeScanCode);
+        }
+        native_key_code_e native_key_code() const
+        {
+            return static_variant_cast<native_key_code_e>(iNativeKeyCode);
         }
     private:
         keyboard_event_type iType;
-        parameter_type iParameter1;
-        parameter_type iParameter2;
-        parameter_type iParameter3;
+        parameter_type iScanCodeOrText;
+        parameter_type iKeyCode;
+        parameter_type iKeyModifiers;
+        parameter_type iNativeScanCode;
+        parameter_type iNativeKeyCode;
     };
 }

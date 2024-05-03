@@ -258,6 +258,34 @@ namespace neogfx
         return neogfx::focus_policy::StrongFocus;
     }
 
+    bool web_view_canvas::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    {
+        //CefKeyEvent cefEvent{};
+        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
+        return true;
+    }
+
+    bool web_view_canvas::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    {
+        //CefKeyEvent cefEvent{};
+        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
+        return true;
+    }
+
+    bool web_view_canvas::text_input(i_string const& aText)
+    {
+        //CefKeyEvent cefEvent{};
+        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
+        return true;
+    }
+
+    bool web_view_canvas::sys_text_input(i_string const& aText)
+    {
+        //CefKeyEvent cefEvent{};
+        //iBrowser->GetHost()->SendKeyEvent(cefEvent);
+        return true;
+    }
+
     void web_view_canvas::load_url(i_string const& aUrl)
     {
         iUrl = aUrl.to_std_string_view();

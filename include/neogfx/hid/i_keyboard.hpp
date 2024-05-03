@@ -53,6 +53,9 @@
 
 namespace neogfx
 {
+    enum native_scan_code_e : std::uintptr_t {};
+    enum native_key_code_e : std::uintptr_t {};
+
     enum scan_code_e : std::int32_t
     {
         ScanCode_UNKNOWN = 0,
@@ -589,25 +592,26 @@ namespace neogfx
 
     enum key_modifiers_e : uint16_t
     {
-        KeyModifier_NONE = 0x0000,
-        KeyModifier_LSHIFT = 0x0001,
-        KeyModifier_RSHIFT = 0x0002,
-        KeyModifier_SHIFT = KeyModifier_LSHIFT | KeyModifier_RSHIFT,
-        KeyModifier_LCTRL = 0x0040,
-        KeyModifier_RCTRL = 0x0080,
-        KeyModifier_CTRL = KeyModifier_LCTRL | KeyModifier_RCTRL,
-        KeyModifier_LALT = 0x0100,
-        KeyModifier_RALT = 0x0200,
-        KeyModifier_ALT = KeyModifier_LALT | KeyModifier_RALT,
-        KeyModifier_LGUI = 0x0400,
-        KeyModifier_RGUI = 0x0800,
-        KeyModifier_GUI = KeyModifier_LGUI | KeyModifier_RGUI,
-        KeyModifier_NUM = 0x1000,
-        KeyModifier_CAPS = 0x2000,
-        KeyModifier_SCROLL = 0x4000,
-        KeyModifier_MODE = 0x8000,
-        KeyModifier_LOCKS = KeyModifier_NUM | KeyModifier_CAPS | KeyModifier_SCROLL | KeyModifier_MODE,
-        KeyModifier_RESERVED = 0x8000
+        KeyModifier_NONE        = 0x0000,
+        KeyModifier_LSHIFT      = 0x0001,
+        KeyModifier_RSHIFT      = 0x0002,
+        KeyModifier_SHIFT       = KeyModifier_LSHIFT | KeyModifier_RSHIFT,
+        KeyModifier_LCTRL       = 0x0004,
+        KeyModifier_RCTRL       = 0x0008,
+        KeyModifier_CTRL        = KeyModifier_LCTRL | KeyModifier_RCTRL,
+        KeyModifier_LALT        = 0x0010,
+        KeyModifier_RALT        = 0x0020,
+        KeyModifier_ALT         = KeyModifier_LALT | KeyModifier_RALT,
+        KeyModifier_LGUI        = 0x0040,
+        KeyModifier_RGUI        = 0x0080,
+        KeyModifier_GUI         = KeyModifier_LGUI | KeyModifier_RGUI,
+        KeyModifier_EXTENDED    = 0x0100,
+        KeyModifier_KEYPAD      = KeyModifier_EXTENDED,
+        KeyModifier_SYSTEM      = 0x0200,
+        KeyModifier_NUM         = 0x1000,
+        KeyModifier_CAPS        = 0x2000,
+        KeyModifier_SCROLL      = 0x4000,
+        KeyModifier_LOCKS       = KeyModifier_NUM | KeyModifier_CAPS | KeyModifier_SCROLL,
     };
 
     class i_keyboard_handler
@@ -693,6 +697,7 @@ namespace neogfx
         virtual i_keyboard_handler& grabber() const = 0;
     public:
         virtual key_code_e scan_code_to_key_code(scan_code_e aScanCode) const = 0;
+        virtual native_key_code_e native_key_code_to_usb_hid_key_code(native_key_code_e aKeyCode) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x878ef7c6, 0x8d4b, 0x4c0d, 0x81dd, { 0x70, 0xd1, 0x74, 0x3c, 0x6b, 0x82 } }; return sIid; }
     };

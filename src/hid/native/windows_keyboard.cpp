@@ -458,6 +458,11 @@ namespace neogfx
             return iKeymap[aScanCode].keyCode;
         }
 
+        native_key_code_e keyboard::native_key_code_to_usb_hid_key_code(native_key_code_e aKeyCode) const
+        {
+            return aKeyCode;
+        }
+
         void keyboard::update_keymap()
         {
             keymap_t keymap = {};

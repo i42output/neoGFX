@@ -758,7 +758,8 @@ namespace neogfx
         if (targetWindow.has_focused_widget())
         {
             i_widget* w = &targetWindow.focused_widget();
-            while ((!can_consume(*w) || event_consumed(w->keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != &targetWidget)
+            while ((!can_consume(*w) || event_consumed(w->keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
+                !w->key_released(aScanCode, aKeyCode, aKeyModifiers)) && w != &targetWidget)
                 w = &w->parent();
             if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
                 targetWidget.key_released(aScanCode, aKeyCode, aKeyModifiers);
@@ -784,7 +785,8 @@ namespace neogfx
             if (targetWindow.has_focused_widget())
             {
                 i_widget* w = &targetWindow.focused_widget();
-                while ((!can_consume(*w) || event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->text_input(aText)) && w != &targetWidget)
+                while ((!can_consume(*w) || event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
+                    !w->text_input(aText)) && w != &targetWidget)
                     w = &w->parent();
                 if (w == &targetWidget && can_consume(targetWidget) && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
                     targetWidget.text_input(aText);
@@ -812,7 +814,8 @@ namespace neogfx
         if (as_window().has_focused_widget())
         {
             i_widget* w = &as_window().focused_widget();
-            while ((event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || !w->sys_text_input(aText)) && w != &targetWidget)
+            while ((event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))) || 
+                !w->sys_text_input(aText)) && w != &targetWidget)
                 w = &w->parent();
             if (w == &targetWidget && !event_consumed(targetWidget.keyboard_event().trigger(std::get<keyboard_event>(native_window().current_event()))))
                 targetWidget.sys_text_input(aText);

@@ -942,7 +942,14 @@ namespace neogfx
                 {
                     char16_t characterCode = static_cast<char16_t>(wparam);
                     std::string text = neolib::utf16_to_utf8(std::u16string(&characterCode, 1));
-                    self.push_event(keyboard_event{ keyboard_event_type::SysTextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
+                    self.push_event(keyboard_event{ 
+                        keyboard_event_type::SysTextInput, 
+                        text, 
+                        KeyCode_UNKNOWN, 
+                        static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
+                            ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED | KeyModifier_SYSTEM: KeyModifier_SYSTEM)),
+                        static_cast<native_scan_code_e>(lparam),
+                        static_cast<native_key_code_e>(wparam) });
                 }
                 break;
             case WM_MENUCHAR:
@@ -956,7 +963,14 @@ namespace neogfx
                     char32_t characterCode = static_cast<char32_t>(wparam);
                     std::string text = neolib::utf32_to_utf8(std::u32string(&characterCode, 1));
                     if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
-                        self.push_event(keyboard_event{ keyboard_event_type::TextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
+                        self.push_event(keyboard_event{ 
+                            keyboard_event_type::TextInput, 
+                            text, 
+                            KeyCode_UNKNOWN, 
+                            static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
+                                ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                            static_cast<native_scan_code_e>(lparam),
+                            static_cast<native_key_code_e>(wparam) });
                 }
                 break;
             case WM_CHAR:
@@ -974,7 +988,14 @@ namespace neogfx
                         self.iHighSurrogate.reset();
                     }
                     if (!text.empty() && (text.size() > 1 || text[0] >= ' ' || std::isspace(text[0])))
-                        self.push_event(keyboard_event{ keyboard_event_type::TextInput, text, KeyCode_UNKNOWN, service<i_keyboard>().modifiers() });
+                        self.push_event(keyboard_event{ 
+                            keyboard_event_type::TextInput, 
+                            text, 
+                            KeyCode_UNKNOWN, 
+                            static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
+                                ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                            static_cast<native_scan_code_e>(lparam),
+                            static_cast<native_key_code_e>(wparam) });
                 }
                 break;
             case WM_KEYDOWN:
@@ -984,8 +1005,11 @@ namespace neogfx
                         keyboard_event_type::KeyPressed,
                         keyboard::scan_code_from_message(lparam, wparam),
                         service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
-                        service<i_keyboard>().modifiers()
-                    });
+                        static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
+                            (msg == WM_SYSKEYDOWN ? KeyModifier_SYSTEM : KeyModifier_NONE) |
+                            ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                        static_cast<native_scan_code_e>(lparam),
+                        static_cast<native_key_code_e>(wparam) });
                 if (!self.iNonClientCapturing)
                     service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                 break;
@@ -993,11 +1017,14 @@ namespace neogfx
             case WM_KEYUP:
                 self.push_event(
                     keyboard_event{ 
-                        keyboard_event_type::KeyReleased, 
+                        keyboard_event_type::KeyReleased,
                         keyboard::scan_code_from_message(lparam, wparam),
                         service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
-                        service<i_keyboard>().modifiers()
-                    });
+                        static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
+                            (msg == WM_SYSKEYUP ? KeyModifier_SYSTEM : KeyModifier_NONE) |
+                            ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                        static_cast<native_scan_code_e>(lparam),
+                        static_cast<native_key_code_e>(wparam) });
                 if (!self.iNonClientCapturing)
                     service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                 break;
