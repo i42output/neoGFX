@@ -389,6 +389,11 @@ namespace neogfx
        
     void web_view_canvas::OnLoadStart(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, TransitionType transition_type)
     {
+        if (frame->IsMain())
+        {
+            std::string const url = frame->GetURL();
+            NavigatedTo.trigger(string{ url });
+        }
     }
 
     void web_view_canvas::OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, int httpStatusCode)

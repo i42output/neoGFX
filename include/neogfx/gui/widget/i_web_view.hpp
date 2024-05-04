@@ -30,6 +30,7 @@ namespace neogfx
     {
         // events
     public:
+        declare_event(navigated_to, i_string const&)
         // types
     public:
         using abstract_type = i_web_view;

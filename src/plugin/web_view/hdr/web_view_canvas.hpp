@@ -38,6 +38,7 @@ namespace neogfx
         using base_type = widget<i_web_view>;
         // events
     public:
+        define_declared_event(NavigatedTo, navigated_to, i_string const&)
         // types
     public:
         using abstract_type = i_web_view;

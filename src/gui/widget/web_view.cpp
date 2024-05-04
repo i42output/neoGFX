@@ -88,6 +88,11 @@ namespace neogfx
             iErrorBox.value().set_text_color(color::White);
             return;
         }
+
+        iCanvas->navigated_to([&](i_string const& aUrl)
+        {
+            NavigatedTo.trigger(aUrl);
+        });
     }
 }
 

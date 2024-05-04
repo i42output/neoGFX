@@ -29,11 +29,12 @@
 
 namespace neogfx
 {
-    class web_view : widget<i_web_view>
+    class web_view : public widget<i_web_view>
     {
         meta_object(widget<i_web_view>)
         // events
     public:
+        define_declared_event(NavigatedTo, navigated_to, i_string const&)
         // types
     public:
     private:

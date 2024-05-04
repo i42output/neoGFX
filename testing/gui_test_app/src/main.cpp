@@ -466,6 +466,11 @@ int main(int argc, char* argv[])
         {
             window.webView.load_url(aUrl);
         });
+        window.webView.navigated_to([&](ng::i_string const& aUrl)
+        {
+            window.webViewUrl.set_text(aUrl);
+            window.webViewUrl.cursor().set_position(0);
+        });
 
         app.actionGameControllerCalibration.triggered([&window]()
         {
