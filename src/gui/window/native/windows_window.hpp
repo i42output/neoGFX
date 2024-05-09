@@ -98,8 +98,6 @@ namespace neogfx
             void resize_surface(const size& aExtents) final;
         public:
             void close(bool aForce = false) final;
-            bool placement_changed_explicitly() const final;
-            void set_placement_changed_explicitly() final;
             bool visible() const final;
             void show(bool aActivate = false) final;
             void hide() final;
@@ -150,7 +148,6 @@ namespace neogfx
             mutable optional_point iPosition;
             mutable optional_size iExtents;
             bool iInMoveResizeCall = false;
-            bool iPlacementChangedExplicitly = false;
             bool iVisible = false;
             bool iActive = false;
             std::optional<char16_t> iHighSurrogate;

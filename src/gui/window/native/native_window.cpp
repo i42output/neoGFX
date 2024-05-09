@@ -209,15 +209,13 @@ namespace neogfx
                 close();
                 break;
             case window_event_type::Resizing:
-                surface_window().native_window_resized();
-                attachment().invalidate(rect{ surface_extents() });
-                render();
+                surface_window().native_window_resizing();
                 break;
             case window_event_type::Resized:
                 surface_window().native_window_resized();
                 break;
             case window_event_type::Moving:
-                surface_window().native_window_moved();
+                surface_window().native_window_moving();
                 break;
             case window_event_type::Moved:
                 surface_window().native_window_moved();
@@ -429,6 +427,13 @@ namespace neogfx
     bool native_window::processing_event() const
     {
         return iProcessingEvent != 0;
+    }
+
+    bool native_window::event_cause_external() const
+    {
+        if (has_current_event() && std::holds_alternative<window_event>(current_event()))
+            return static_variant_cast<window_event const&>(current_event()).cause_external();
+        return false;
     }
 
     i_string const& native_window::title_text() const

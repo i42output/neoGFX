@@ -306,7 +306,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::parent_changed()
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (!widget::is_root())
         {
@@ -710,7 +710,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::layout_items(bool aDefer)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (layout_items_in_progress())
             return;
@@ -839,7 +839,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::move(const point& aPosition)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -851,7 +851,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::moved()
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (!widget::is_root() || widget::root().is_nested())
         {
@@ -875,7 +875,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::parent_moved()
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         self.reset_origin();
         for (auto& child : iChildren)
@@ -892,7 +892,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::resize(const size& aSize)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         neolib::scoped_flag sf{ iResizing };
 
@@ -911,7 +911,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::resized()
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (widget::is_root())
             widget::root().surface().resize_surface(self.extents());
@@ -935,14 +935,14 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline rect widget<Interface>::non_client_rect() const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
         return rect{self.origin(), self.extents()};
     }
 
     template <WidgetInterface Interface>
     inline rect widget<Interface>::client_rect(bool aExtendIntoPadding) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
         return base_type::to_client_rect(self.extents(), aExtendIntoPadding);
     }
 
@@ -1004,7 +1004,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline size_policy widget<Interface>::size_policy() const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1021,7 +1021,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline size widget<Interface>::minimum_size(optional_size const& aAvailableSpace) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1053,7 +1053,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline size widget<Interface>::maximum_size(optional_size const& aAvailableSpace) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1089,7 +1089,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline padding widget<Interface>::padding() const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
         auto const& adjustedPadding = (self.has_padding() ? 
             *base_type::Padding : service<i_app>().current_style().padding(widget::is_root() ? padding_role::Window : padding_role::Widget));
         return self.transformation() * units_converter{ *this }.from_device_units(adjustedPadding);
@@ -1098,7 +1098,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::layout_as(const point& aPosition, const size& aSize)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
@@ -1219,7 +1219,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::render(i_graphics_context& aGc) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (effectively_hidden())
             return;
@@ -1338,7 +1338,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::paint_non_client(i_graphics_context& aGc) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         auto const& updateRect = update_rect();
 
@@ -1357,7 +1357,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::paint_non_client_after(i_graphics_context& aGc) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         // todo: move to debug::layoutItem function/service
@@ -1585,7 +1585,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::set_font(optional_font const& aFont)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (Font != aFont)
         {
@@ -1622,6 +1622,8 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline bool widget<Interface>::show(bool aVisible)
     {
+        auto& self = *this;
+
         if (Visible != aVisible)
         {
             bool isEntered = entered();
@@ -1636,7 +1638,7 @@ namespace neogfx
             VisibilityChanged.trigger();
             if (effectively_hidden())
                 release_focus();
-            base_type::as_widget().update_layout(true, true);
+            self.update_layout(true, true);
             return true;
         }
         return false;
@@ -1713,7 +1715,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::set_capture(capture_reason aReason, const optional_point& aPosition)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (can_capture())
         {
@@ -1738,7 +1740,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::release_capture(capture_reason aReason)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         switch (aReason)
         {
@@ -1922,7 +1924,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (has_parent() && same_surface(parent()))
             return parent().mouse_wheel_scrolled(aWheel, aPosition + self.position(), aDelta, aKeyModifiers);
@@ -1933,7 +1935,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_pressed(aButton, aPosition + self.position(), aKeyModifiers);
@@ -1944,7 +1946,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_double_clicked(aButton, aPosition + self.position(), aKeyModifiers);
@@ -1955,7 +1957,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::mouse_button_released(mouse_button aButton, const point& aPosition)
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_released(aButton, aPosition + self.position());
@@ -1984,7 +1986,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline point widget<Interface>::mouse_position() const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         auto const rootMousePosition = widget::root().mouse_position();
         if (widget::is_root())
@@ -2073,7 +2075,7 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline const i_widget& widget<Interface>::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
     {
-        auto& self = base_type::as_widget();
+        auto& self = *this;
 
         scoped_units su{ *this, units::Pixels };
 

@@ -119,7 +119,9 @@ namespace neogfx
         void native_window_closed() final;
         void native_window_focus_gained() final;
         void native_window_focus_lost() final;
+        void native_window_resizing() final;
         void native_window_resized() final;
+        void native_window_moving() final;
         void native_window_moved() final;
         double native_window_rendering_priority() const final;
         bool native_window_ready_to_render() const final;

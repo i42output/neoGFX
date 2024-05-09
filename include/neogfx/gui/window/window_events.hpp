@@ -63,6 +63,15 @@ namespace neogfx
         {
         }
     public:
+        bool cause_external() const
+        {
+            return iCauseExternal;
+        }
+        window_event& with_external_cause(bool aCauseExternal = true)
+        {
+            iCauseExternal = aCauseExternal;
+            return *this;
+        }
         window_event_type type() const
         {
             return iType;
@@ -89,6 +98,7 @@ namespace neogfx
         }
     private:
         window_event_type iType;
+        bool iCauseExternal = false;
         parameter_type iParameter;
     };
 

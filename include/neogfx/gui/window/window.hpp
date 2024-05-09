@@ -104,6 +104,9 @@ namespace neogfx
         color frame_color() const override;
     public:
         void set_parent(i_widget& aParent) override;
+    public:
+        void resized() override;
+    public:
         bool is_managing_layout() const override;
         void layout_items_completed() override;
     public:

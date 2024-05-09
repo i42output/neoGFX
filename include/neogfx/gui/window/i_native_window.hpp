@@ -83,9 +83,8 @@ namespace neogfx
         virtual native_event& current_event() = 0;
         virtual void handle_event() = 0;
         virtual bool processing_event() const = 0;
+        virtual bool event_cause_external() const = 0;
         virtual void close(bool aForce = false) = 0;
-        virtual bool placement_changed_explicitly() const = 0;
-        virtual void set_placement_changed_explicitly() = 0;
         virtual bool visible() const = 0;
         virtual void show(bool aActivate = false) = 0;
         virtual void hide() = 0;

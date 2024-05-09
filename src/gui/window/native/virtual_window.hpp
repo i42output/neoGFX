@@ -61,8 +61,6 @@ namespace neogfx
         void display() final;
     public:
         void close(bool aForce = false) final;
-        bool placement_changed_explicitly() const final;
-        void set_placement_changed_explicitly() final;
         bool visible() const final;
         void show(bool aActivate = false) final;
         void hide() final;

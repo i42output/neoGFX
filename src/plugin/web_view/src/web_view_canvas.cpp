@@ -302,11 +302,6 @@ namespace neogfx
 
         iBrowser = CefBrowserHost::CreateBrowserSync(window_info, this, !iUrl ? CefString{} : CefString{ iUrl.value() }, browser_settings, nullptr, nullptr);
 
-        iSink += root().position_changed([&]()
-        {
-            iBrowser->GetHost()->NotifyMoveOrResizeStarted(); 
-        });
-
         iSink += Keyboard([&](neogfx::keyboard_event const& aEvent)
         {
             CefKeyEvent cefEvent;

@@ -533,6 +533,14 @@ namespace neogfx
             base_type::set_parent(aParent);
     }
 
+    void window::resized()
+    {
+        base_type::resized();
+        if (has_native_window() && !native_window().event_cause_external() &&
+            (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
+            center_on_parent((style() & window_style::Resize) != window_style::Resize);
+    }
+
     bool window::is_managing_layout() const
     {
         return true;
@@ -541,9 +549,6 @@ namespace neogfx
     void window::layout_items_completed()
     {
         base_type::layout_items_completed();
-        if (has_native_window() && !native_window().placement_changed_explicitly() && 
-            (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
-            center_on_parent((style() & window_style::Resize) != window_style::Resize);
         if (iEnteredWidget != nullptr)
         {
             i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(mouse_position()) : surface().capturing_widget());

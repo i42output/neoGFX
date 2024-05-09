@@ -60,6 +60,7 @@ namespace neogfx
         native_event& current_event() final;
         void handle_event() final;
         bool processing_event() const final;
+        bool event_cause_external() const final;
         i_string const& title_text() const final;
         void set_title_text(i_string const& aTitleText) override;
     public:

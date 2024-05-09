@@ -522,16 +522,6 @@ namespace neogfx
             }
         }
 
-        bool window::placement_changed_explicitly() const
-        {
-            return iPlacementChangedExplicitly;
-        }
-
-        void window::set_placement_changed_explicitly()
-        {
-            iPlacementChangedExplicitly = true;
-        }
-
         bool window::visible() const
         {
             return iVisible;
@@ -1312,35 +1302,21 @@ namespace neogfx
             case WM_MOVING:
                 {
                     auto const& rc = *reinterpret_cast<RECT const*>(lparam);
-                    bool placementChanged = false;
                     if (self.iPosition != basic_point<int>{ rc.left, rc.top }.as<scalar>())
                     {
                         self.iPosition.emplace(rc.left, rc.top);
-                        self.push_event(window_event{ window_event_type::Moving, *self.iPosition });
-                        placementChanged = true;
-                    }
-                    if (placementChanged)
-                    {
-                        if (!self.iInMoveResizeCall)
-                            self.iPlacementChangedExplicitly = true;
+                        self.push_event(window_event{ window_event_type::Moving, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
                     }
                 }
                 result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_MOVE:
                 {
-                    bool placementChanged = false;
                     auto pos = basic_point<int>{ LOWORD(lparam), HIWORD(lparam) }.as<scalar>();
                     if (self.iPosition != pos)
                     {
                         self.iPosition.emplace(pos.x, pos.y);
-                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
-                        placementChanged = true;
-                    }
-                    if (placementChanged)
-                    {
-                        if (!self.iInMoveResizeCall)
-                            self.iPlacementChangedExplicitly = true;
+                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
                     }
                 }
                 result = wndproc(hwnd, msg, wparam, lparam);
@@ -1348,25 +1324,17 @@ namespace neogfx
             case WM_WINDOWPOSCHANGED:
                 {
                     auto const& wpc = *reinterpret_cast<WINDOWPOS const*>(lparam);
-                    bool placementChanged = false;
                     bool needRedraw = ((wpc.flags & SWP_DRAWFRAME) == SWP_DRAWFRAME);
                     if (self.iPosition != basic_point<int>{ wpc.x, wpc.y }.as<scalar>())
                     {
                         self.iPosition.emplace(wpc.x, wpc.y);
-                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition });
-                        placementChanged = true;
+                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
                     }
                     if (self.iExtents != basic_size<int>{ wpc.cx, wpc.cy }.as<scalar>())
                     {
                         self.iExtents.emplace(wpc.cx, wpc.cy);
-                        self.push_event(window_event{ window_event_type::Resized, *self.iExtents });
-                        placementChanged = true;
+                        self.push_event(window_event{ window_event_type::Resized, *self.iExtents }.with_external_cause(!self.iInMoveResizeCall));
                         needRedraw = true;
-                    }
-                    if (placementChanged)
-                    {
-                        if (!self.iInMoveResizeCall)
-                            self.iPlacementChangedExplicitly = true;
                     }
                     if (!self.initialising() && needRedraw)
                     {
@@ -1418,9 +1386,7 @@ namespace neogfx
                                 basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
                         }
                         result = wndproc(hwnd, msg, wparam, lparam);
-                        if (!self.iInMoveResizeCall)
-                            self.iPlacementChangedExplicitly = true;
-                        self.handle_event(window_event(window_event_type::Resizing, self.surface_extents()));
+                        self.handle_event(window_event{ window_event_type::Resizing, self.surface_extents() }.with_external_cause(!self.iInMoveResizeCall));
                     }
                 }
                 break;

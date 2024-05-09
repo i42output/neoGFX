@@ -198,16 +198,6 @@ namespace neogfx
         set_destroyed();
     }
 
-    bool virtual_window::placement_changed_explicitly() const
-    {
-        return true; ///< @todo
-    }
-
-    void virtual_window::set_placement_changed_explicitly()
-    {
-        /// @todo
-    }
-
     bool virtual_window::visible() const
     {
         return iVisible;

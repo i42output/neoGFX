@@ -514,9 +514,23 @@ namespace neogfx
             native_window().release_capture();
     }
 
+    void surface_window::native_window_resizing()
+    {
+        as_widget().resize(native_window().surface_extents());
+        native_surface().invalidate(rect{surface_extents()});
+        native_window().render();
+    }
+
     void surface_window::native_window_resized()
     {
         as_widget().resize(native_window().surface_extents());
+        native_surface().invalidate(rect{ surface_extents() });
+        native_window().render();
+    }
+
+    void surface_window::native_window_moving()
+    {
+        as_widget().move(native_window().surface_position());
     }
 
     void surface_window::native_window_moved()
