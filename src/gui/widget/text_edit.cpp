@@ -2486,7 +2486,8 @@ namespace neogfx
             if (paragraph->glyph_begin() > aWhere)
                 --paragraph;
             auto const textStart = paragraph->span.textFirst;
-            return std::make_pair(textStart + aWhere->clusters.first, textStart + aWhere->clusters.second);
+            auto const& clusters = aWhere->clusters;
+            return std::make_pair(textStart + clusters.first, textStart + clusters.second);
         }
         return std::make_pair(iText.size(), iText.size());
     }
@@ -2631,12 +2632,13 @@ namespace neogfx
         for (auto paragraphToAdjust = std::next(iGlyphParagraphs.begin(), std::distance(iGlyphParagraphs.cbegin(), glyphParagraphsInsertPos)); 
             paragraphToAdjust != iGlyphParagraphs.end(); ++paragraphToAdjust)
         {
-            paragraphToAdjust->span.textFirst += charsInserted;
-            paragraphToAdjust->span.textLast += charsInserted;
-            paragraphToAdjust->span.glyphsFirst += glyphsInserted;
-            paragraphToAdjust->span.glyphsLast += glyphsInserted;
-            paragraphToAdjust->heightMap.clear();
-            paragraphToAdjust->ypos = 0.0;
+            auto& p = *paragraphToAdjust;
+            p.span.textFirst += charsInserted;
+            p.span.textLast += charsInserted;
+            p.span.glyphsFirst += glyphsInserted;
+            p.span.glyphsLast += glyphsInserted;
+            p.heightMap.clear();
+            p.ypos = 0.0;
         }
 
         iGlyphColumns.resize(std::max(columnCount, iGlyphColumns.size()), { this });
@@ -2711,8 +2713,7 @@ namespace neogfx
                     paragraphLines.emplace_back(lastBreak + paragraph.span.glyphsFirst, paragraph.span.glyphsLast);
                     if (paragraphLines.back().first != paragraphLines.back().second &&
                         is_line_breaking_whitespace(glyphs().back()) && std::next(iterParagraph) == iGlyphParagraphs.end())
-                        paragraphLines.emplace_back(
-                            paragraph.span.glyphsLast, paragraph.span.glyphsLast);
+                        paragraphLines.emplace_back(paragraph.span.glyphsLast, paragraph.span.glyphsLast);
 
                     auto const& paragraphStyle = glyph_style(paragraph.glyph_begin(), iColumns[columnIndex]);
 
@@ -2741,22 +2742,30 @@ namespace neogfx
                                 paragraphLineEnd : paragraphLineStart;
 
                             auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
+                            auto clusters = alignBaselinesResult.clusters;
+                            if (clusters == std::nullopt)
+                                clusters.emplace(
+                                    static_cast<glyph_char::cluster_index>(from_glyph(lineStart).first),
+                                    static_cast<glyph_char::cluster_index>(from_glyph(lineEnd).second));
+
+                            document_span const span{
+                                static_cast<position_type>(clusters.value().first) - paragraph.span.textFirst,
+                                static_cast<position_type>(clusters.value().second) - paragraph.span.textFirst,
+                                lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
+                                lineEnd - glyphs().begin() - paragraph.span.glyphsFirst };
 
                             lines.emplace_back(
                                 this,
                                 std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                 column.index(),
-                                document_span{
-                                    static_cast<position_type>(from_glyph(lineStart).first) - paragraph.span.textFirst,
-                                    static_cast<position_type>(from_glyph(lineEnd).second) - paragraph.span.textFirst,
-                                    lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
-                                    lineEnd - glyphs().begin() - paragraph.span.glyphsFirst },
+                                span,
                                 yLine,
                                 size{ 
                                     lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, 
                                     alignBaselinesResult.yExtent },
                                 alignBaselinesResult.majorFont,
                                 alignBaselinesResult.baseline);
+
                             yLine += lines.back().extents.cy;
                             iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                         }
@@ -2766,26 +2775,36 @@ namespace neogfx
                             {
                                 if (last != first && is_line_breaking_whitespace(*(last - 1)))
                                     --last;
+
                                 auto const alignBaselinesResult = glyphs().align_baselines(first, last, true);
-                                auto textLineStart = static_cast<position_type>(from_glyph(first).first) - paragraph.span.textFirst;
-                                auto textLineEnd = static_cast<position_type>(from_glyph(last).second) - paragraph.span.textFirst;
+                                auto clusters = alignBaselinesResult.clusters;
+                                if (clusters == std::nullopt)
+                                    clusters.emplace(
+                                        static_cast<glyph_char::cluster_index>(from_glyph(first).first), 
+                                        static_cast<glyph_char::cluster_index>(from_glyph(last).second));
+                                auto textLineStart = static_cast<position_type>(clusters.value().first) - paragraph.span.textFirst;
+                                auto textLineEnd = static_cast<position_type>(clusters.value().second) - paragraph.span.textFirst;
                                 if (first != last && std::prev(last)->clusters.first < first->clusters.first) // RTL
                                     textLineStart = std::prev(last)->clusters.first;
+
+                                document_span const span{
+                                    textLineStart,
+                                    textLineEnd,
+                                    first - glyphs().begin() - paragraph.span.glyphsFirst,
+                                    last - glyphs().begin() - paragraph.span.glyphsFirst };
+
                                 lines.emplace_back(
                                     this,
                                     std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                     column.index(),
-                                    document_span{
-                                        textLineStart,
-                                        textLineEnd,
-                                        first - glyphs().begin() - paragraph.span.glyphsFirst,
-                                        last - glyphs().begin() - paragraph.span.glyphsFirst },
+                                    span,
                                     yLine,
                                     size{
                                         last != first ? (last - 1)->cell[1].x - (first)->cell[0].x : 0.0f,
                                         alignBaselinesResult.yExtent },
                                     alignBaselinesResult.majorFont,
                                     alignBaselinesResult.baseline);
+
                                 yLine += lines.back().extents.cy;
                                 iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                             };
@@ -2877,26 +2896,36 @@ namespace neogfx
                             auto lineEnd = paragraphLineEnd;
                             if (lineEnd != lineStart && is_line_breaking_whitespace(*(lineEnd - 1)))
                                 --lineEnd;
-                            auto textLineStart = static_cast<position_type>(from_glyph(lineStart).first) - paragraph.span.textFirst;
-                            auto textLineEnd = static_cast<position_type>(from_glyph(lineEnd).second) - paragraph.span.textFirst;
+
+                            auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
+                            auto clusters = alignBaselinesResult.clusters;
+                            if (clusters == std::nullopt)
+                                clusters.emplace(
+                                    static_cast<glyph_char::cluster_index>(from_glyph(lineStart).first),
+                                    static_cast<glyph_char::cluster_index>(from_glyph(lineEnd).second));
+                            auto textLineStart = static_cast<position_type>(clusters.value().first) - paragraph.span.textFirst;
+                            auto textLineEnd = static_cast<position_type>(clusters.value().second) - paragraph.span.textFirst;
                             if (lineEnd != lineStart && std::prev(lineEnd)->clusters.first < lineStart->clusters.first) // RTL
                                 textLineStart = std::prev(lineEnd)->clusters.first;
-                            auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
+                            
+                            document_span const span{
+                                textLineStart,
+                                textLineEnd,
+                                lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
+                                lineEnd - glyphs().begin() - paragraph.span.glyphsFirst };
+
                             lines.emplace_back(
                                 this,
                                 std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                 column.index(),
-                                document_span{
-                                    textLineStart,
-                                    textLineEnd,
-                                    lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
-                                    lineEnd - glyphs().begin() - paragraph.span.glyphsFirst },
+                                span,
                                 yLine,
                                 size{
                                     lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
                                     alignBaselinesResult.yExtent },
                                 alignBaselinesResult.majorFont,
                                 alignBaselinesResult.baseline);
+                            
                             yLine += lines.back().extents.cy;
                             iTextExtents->cx = std::max(iTextExtents->cx, lines.back().extents.cx);
                         }

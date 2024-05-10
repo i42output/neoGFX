@@ -296,6 +296,7 @@ namespace neogfx
             float yExtent;
             font_id majorFont;
             float baseline;
+            std::optional<glyph_char::cluster_range> clusters;
         };
     public:
         virtual void clone(i_ref_ptr<i_basic_glyph_text>& aClone) const = 0;

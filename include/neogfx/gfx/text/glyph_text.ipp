@@ -340,6 +340,10 @@ namespace neogfx
                     result.baseline = cyMax;
                 }
                 yMax = std::max(yMax, existingExtents.y);
+                if (!result.clusters)
+                    result.clusters = g.clusters;
+                else
+                    result.clusters.emplace(std::min(result.clusters->first, g.clusters.first), std::max(result.clusters->second, g.clusters.second));
             }
         }
         else
