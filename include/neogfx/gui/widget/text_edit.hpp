@@ -372,6 +372,12 @@ namespace neogfx
 
         struct glyph_column;
 
+        struct paragraph_span
+        {
+            std::size_t paragraphIndex;
+            document_span paragraphSpan;
+        };
+
         struct paragraph_line_span
         {
             std::size_t paragraphIndex;
@@ -639,6 +645,7 @@ namespace neogfx
         void delete_any_selection();
         void notify_text_changed();
         bool same_paragraph(position_type aFirstGlyphPos, position_type aSecondGlyphPos) const;
+        paragraph_span character_to_paragraph(position_type aCharacterPos) const;
         paragraph_line_span character_to_line(position_type aCharacterPos) const;
         glyph_paragraphs::const_iterator glyph_to_paragraph(position_type aGlyphPos) const;
         document_glyphs::const_iterator to_glyph(document_text::const_iterator aWhere) const;

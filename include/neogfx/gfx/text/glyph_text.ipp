@@ -334,16 +334,19 @@ namespace neogfx
                 result.yExtent = std::max(result.yExtent, existingExtents.y);
                 float cy = existingExtents.y + static_cast<float>(gf.descender());
                 if (cy > cyMax)
-                {
+                {   
                     cyMax = cy;
                     result.majorFont = gf.id();
                     result.baseline = cyMax;
                 }
                 yMax = std::max(yMax, existingExtents.y);
-                if (!result.clusters)
-                    result.clusters = g.clusters;
-                else
-                    result.clusters.emplace(std::min(result.clusters->first, g.clusters.first), std::max(result.clusters->second, g.clusters.second));
+                if (!is_line_breaking_whitespace(g))
+                {
+                    if (!result.clusters)
+                        result.clusters = g.clusters;
+                    else
+                        result.clusters.emplace(std::min(result.clusters->first, g.clusters.first), std::max(result.clusters->second, g.clusters.second));
+                }
             }
         }
         else

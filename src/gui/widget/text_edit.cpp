@@ -2086,6 +2086,18 @@ namespace neogfx
         return glyph_to_paragraph(aFirstGlyphPos) == glyph_to_paragraph(aSecondGlyphPos);
     }
 
+    text_edit::paragraph_span text_edit::character_to_paragraph(position_type aCharacterPos) const
+    {
+        auto paragraph = std::lower_bound(iGlyphParagraphs.begin(), iGlyphParagraphs.end(), aCharacterPos,
+            [](glyph_paragraph const& p, position_type cp)
+            {
+                return p.text_begin_index() < cp;
+            });
+        if (paragraph != iGlyphParagraphs.begin() && (paragraph == iGlyphParagraphs.end() || aCharacterPos < paragraph->text_begin_index()))
+            paragraph = std::prev(paragraph);
+        return { static_cast<std::size_t>(std::distance(iGlyphParagraphs.begin(), paragraph)), paragraph->span };
+    }
+
     text_edit::paragraph_line_span text_edit::character_to_line(position_type aCharacterPos) const
     {
         for (auto const& column : iGlyphColumns)
@@ -2097,8 +2109,13 @@ namespace neogfx
                 });
             if (line != column.lines.begin() && (line == column.lines.end() || aCharacterPos < line->text_begin_index()))
                 line = std::prev(line);
-            if (line != column.lines.end() && aCharacterPos >= line->text_begin_index() && 
-                (aCharacterPos < line->text_end_index() || (&column == &*std::prev(iGlyphColumns.end()) && std::next(line) == column.lines.end())))
+            if (line == column.lines.end())
+                continue;
+            if (aCharacterPos < line->text_begin_index())
+                continue;
+            if (aCharacterPos < line->text_end_index())
+                return line->paragraph_span();
+            if (&column == &*std::prev(iGlyphColumns.end()) && std::next(line) == column.lines.end())
                 return line->paragraph_span();
         }
         return paragraph_line_span{};
@@ -2534,8 +2551,8 @@ namespace neogfx
             glyphParagraphsInsertPos = iGlyphParagraphs.end();
         }
         else if (aDelta > 0)
-        {
-            auto const fromParagraph = character_to_line(std::distance(iText.cbegin(), aWhere));
+        {   
+            auto const fromParagraph = character_to_paragraph(std::distance(iText.cbegin(), aWhere));
             first = std::next(iText.begin(), fromParagraph.paragraphSpan.textFirst);
             last = std::next(iText.begin(), fromParagraph.paragraphSpan.textLast + aDelta);
             glyphsInsertPos = glyphs().erase(
@@ -2547,8 +2564,8 @@ namespace neogfx
         }
         else // aDelta < 0
         {
-            auto const fromParagraph = character_to_line(std::distance(iText.cbegin(), aWhere));
-            auto const toParagraph = character_to_line(std::distance(iText.cbegin(), aWhere + -aDelta));
+            auto const fromParagraph = character_to_paragraph(std::distance(iText.cbegin(), aWhere));
+            auto const toParagraph = character_to_paragraph(std::distance(iText.cbegin(), aWhere) + -aDelta);
             first = std::next(iText.begin(), fromParagraph.paragraphSpan.textFirst);
             last = std::next(iText.begin(), toParagraph.paragraphSpan.textLast + aDelta);
             glyphsInsertPos = glyphs().erase(
@@ -2610,13 +2627,12 @@ namespace neogfx
                     glyphsInsertPos = std::next(paragraphGlyphs, gt.size());
                     for (auto& newGlyph : gt)
                         glyphs().glyph_font(newGlyph);
-                    auto const paragraph = iGlyphParagraphs.emplace(glyphParagraphsInsertPos,
-                        this,
-                        document_span{
-                            std::distance(iText.cbegin(), nextParagraph),
-                            std::distance(iText.cbegin(), std::next(iterChar)),
-                            std::distance(glyphs().begin(), paragraphGlyphs),
-                            std::distance(glyphs().begin(), std::next(paragraphGlyphs, gt.size())) });
+                    document_span const span{
+                        std::distance(iText.cbegin(), nextParagraph),
+                        std::distance(iText.cbegin(), std::next(iterChar)),
+                        std::distance(glyphs().begin(), paragraphGlyphs),
+                        std::distance(glyphs().begin(), std::next(paragraphGlyphs, gt.size())) };
+                    auto const paragraph = iGlyphParagraphs.emplace(glyphParagraphsInsertPos, this, span);
                     paragraph->columnBreaks.assign(columnDelimiters.begin(), columnDelimiters.end());
                     paragraph->lineBreaks.assign(gt.content().line_breaks().begin(), gt.content().line_breaks().end());
                     glyphParagraphsInsertPos = std::next(paragraph);
@@ -2742,15 +2758,23 @@ namespace neogfx
                                 paragraphLineEnd : paragraphLineStart;
 
                             auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
-                            auto clusters = alignBaselinesResult.clusters;
-                            if (clusters == std::nullopt)
-                                clusters.emplace(
-                                    static_cast<glyph_char::cluster_index>(from_glyph(lineStart).first),
-                                    static_cast<glyph_char::cluster_index>(from_glyph(lineEnd).second));
+
+                            glyph_char::cluster_range clusters{
+                                static_cast<glyph_char::cluster_index>(from_glyph(lineStart).first),
+                                static_cast<glyph_char::cluster_index>(from_glyph(lineEnd).second) };
+                            if (alignBaselinesResult.clusters)
+                            {
+                                clusters.first = std::min(clusters.first, alignBaselinesResult.clusters.value().first + static_cast<glyph_char::cluster_index>(paragraph.span.textFirst));
+                                clusters.second = std::max(clusters.second, alignBaselinesResult.clusters.value().second + static_cast<glyph_char::cluster_index>(paragraph.span.textFirst));
+                            }
+                            auto textLineStart = static_cast<position_type>(clusters.first) - paragraph.span.textFirst;
+                            auto textLineEnd = static_cast<position_type>(clusters.second) - paragraph.span.textFirst;
+                            if (lineStart != lineEnd && std::prev(lineEnd)->clusters.first < lineStart->clusters.first) // RTL
+                                textLineStart = std::prev(lineEnd)->clusters.first;
 
                             document_span const span{
-                                static_cast<position_type>(clusters.value().first) - paragraph.span.textFirst,
-                                static_cast<position_type>(clusters.value().second) - paragraph.span.textFirst,
+                                textLineStart,
+                                textLineEnd,
                                 lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
                                 lineEnd - glyphs().begin() - paragraph.span.glyphsFirst };
 
@@ -2777,13 +2801,17 @@ namespace neogfx
                                     --last;
 
                                 auto const alignBaselinesResult = glyphs().align_baselines(first, last, true);
-                                auto clusters = alignBaselinesResult.clusters;
-                                if (clusters == std::nullopt)
-                                    clusters.emplace(
-                                        static_cast<glyph_char::cluster_index>(from_glyph(first).first), 
-                                        static_cast<glyph_char::cluster_index>(from_glyph(last).second));
-                                auto textLineStart = static_cast<position_type>(clusters.value().first) - paragraph.span.textFirst;
-                                auto textLineEnd = static_cast<position_type>(clusters.value().second) - paragraph.span.textFirst;
+
+                                glyph_char::cluster_range clusters{
+                                    static_cast<glyph_char::cluster_index>(from_glyph(first).first),
+                                    static_cast<glyph_char::cluster_index>(from_glyph(last).second) };
+                                if (alignBaselinesResult.clusters)
+                                {
+                                    clusters.first = std::min(clusters.first, alignBaselinesResult.clusters.value().first + static_cast<glyph_char::cluster_index>(paragraph.span.textFirst));
+                                    clusters.second = std::max(clusters.second, alignBaselinesResult.clusters.value().second + static_cast<glyph_char::cluster_index>(paragraph.span.textFirst));
+                                }
+                                auto textLineStart = static_cast<position_type>(clusters.first) - paragraph.span.textFirst;
+                                auto textLineEnd = static_cast<position_type>(clusters.second) - paragraph.span.textFirst;
                                 if (first != last && std::prev(last)->clusters.first < first->clusters.first) // RTL
                                     textLineStart = std::prev(last)->clusters.first;
 
@@ -2898,13 +2926,17 @@ namespace neogfx
                                 --lineEnd;
 
                             auto const alignBaselinesResult = glyphs().align_baselines(lineStart, lineEnd, true);
-                            auto clusters = alignBaselinesResult.clusters;
-                            if (clusters == std::nullopt)
-                                clusters.emplace(
-                                    static_cast<glyph_char::cluster_index>(from_glyph(lineStart).first),
-                                    static_cast<glyph_char::cluster_index>(from_glyph(lineEnd).second));
-                            auto textLineStart = static_cast<position_type>(clusters.value().first) - paragraph.span.textFirst;
-                            auto textLineEnd = static_cast<position_type>(clusters.value().second) - paragraph.span.textFirst;
+
+                            glyph_char::cluster_range clusters{
+                                static_cast<glyph_char::cluster_index>(from_glyph(lineStart).first),
+                                static_cast<glyph_char::cluster_index>(from_glyph(lineEnd).second) };
+                            if (alignBaselinesResult.clusters)
+                            {
+                                clusters.first = std::min(clusters.first, alignBaselinesResult.clusters.value().first + static_cast<glyph_char::cluster_index>(paragraph.span.textFirst));
+                                clusters.second = std::max(clusters.second, alignBaselinesResult.clusters.value().second + static_cast<glyph_char::cluster_index>(paragraph.span.textFirst));
+                            }
+                            auto textLineStart = static_cast<position_type>(clusters.first) - paragraph.span.textFirst;
+                            auto textLineEnd = static_cast<position_type>(clusters.second) - paragraph.span.textFirst;
                             if (lineEnd != lineStart && std::prev(lineEnd)->clusters.first < lineStart->clusters.first) // RTL
                                 textLineStart = std::prev(lineEnd)->clusters.first;
                             
