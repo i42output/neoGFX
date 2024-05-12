@@ -136,6 +136,8 @@ namespace neogfx
         private:
             static window* new_window();
             void init();
+            void update_position(optional_point const& aPosition) const;
+            void update_extents(optional_size const& aExtents) const;
         private:
             static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
         private:
@@ -148,6 +150,7 @@ namespace neogfx
             mutable optional_point iPosition;
             mutable optional_size iExtents;
             bool iInMoveResizeCall = false;
+            bool iInWindowPosChanged = false;
             bool iVisible = false;
             bool iActive = false;
             std::optional<char16_t> iHighSurrogate;

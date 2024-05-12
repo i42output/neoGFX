@@ -463,7 +463,7 @@ namespace neogfx
             {
                 RECT rc;
                 ::GetWindowRect(iHandle, &rc);
-                iPosition.emplace(rc.right - rc.left, rc.bottom - rc.top);
+                update_position(basic_point<int>{ rc.right - rc.left, rc.bottom - rc.top });
             }
             return *iPosition;
         }
@@ -480,7 +480,7 @@ namespace neogfx
             {
                 RECT rc;
                 ::GetWindowRect(iHandle, &rc);
-                iExtents.emplace(rc.right - rc.left, rc.bottom - rc.top);
+                update_extents(basic_size<int>{ rc.right - rc.left, rc.bottom - rc.top });
             }
             return *iExtents;
         }
@@ -1304,7 +1304,7 @@ namespace neogfx
                     auto const& rc = *reinterpret_cast<RECT const*>(lparam);
                     if (self.iPosition != basic_point<int>{ rc.left, rc.top }.as<scalar>())
                     {
-                        self.iPosition.emplace(rc.left, rc.top);
+                        self.update_position(basic_point<int>{ rc.left, rc.top });
                         self.push_event(window_event{ window_event_type::Moving, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
                     }
                 }
@@ -1312,27 +1312,31 @@ namespace neogfx
                 break;
             case WM_MOVE:
                 {
-                    auto pos = basic_point<int>{ LOWORD(lparam), HIWORD(lparam) }.as<scalar>();
-                    if (self.iPosition != pos)
+                    if (!self.iInWindowPosChanged)
                     {
-                        self.iPosition.emplace(pos.x, pos.y);
-                        self.push_event(window_event{ window_event_type::Moved, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
+                        auto pos = basic_point<int>{ LOWORD(lparam), HIWORD(lparam) }.as<scalar>();
+                        if (self.iPosition != pos)
+                        {
+                            self.update_position(pos);
+                            self.push_event(window_event{ window_event_type::Moved, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
+                        }
                     }
                 }
                 result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_WINDOWPOSCHANGED:
                 {
+                    neolib::scoped_flag sf{ self.iInWindowPosChanged };
                     auto const& wpc = *reinterpret_cast<WINDOWPOS const*>(lparam);
                     bool needRedraw = ((wpc.flags & SWP_DRAWFRAME) == SWP_DRAWFRAME);
                     if (self.iPosition != basic_point<int>{ wpc.x, wpc.y }.as<scalar>())
                     {
-                        self.iPosition.emplace(wpc.x, wpc.y);
+                        self.update_position(basic_point<int>{ wpc.x, wpc.y });
                         self.push_event(window_event{ window_event_type::Moved, *self.iPosition }.with_external_cause(!self.iInMoveResizeCall));
                     }
                     if (self.iExtents != basic_size<int>{ wpc.cx, wpc.cy }.as<scalar>())
                     {
-                        self.iExtents.emplace(wpc.cx, wpc.cy);
+                        self.update_extents(basic_size<int>{ wpc.cx, wpc.cy });
                         self.push_event(window_event{ window_event_type::Resized, *self.iExtents }.with_external_cause(!self.iInMoveResizeCall));
                         needRedraw = true;
                     }
@@ -1341,8 +1345,8 @@ namespace neogfx
                         ::InvalidateRect(hwnd, NULL, FALSE);
                         ::UpdateWindow(hwnd);
                     }
+                    result = wndproc(hwnd, msg, wparam, lparam);
                 }
-                result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_ENTERSIZEMOVE:
                 ::SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
@@ -1375,15 +1379,16 @@ namespace neogfx
                     auto const previousSize = self.iExtents;
                     if (newSize != previousSize)
                     {
-                        self.iExtents = newSize;
+                        self.update_extents(newSize);
                         if (!CUSTOM_DECORATION)
                         {
                             const RECT referenceClientRect = { 0, 0, 256, 256 };
                             RECT referenceWindowRect = referenceClientRect;
                             AdjustWindowRectEx(&referenceWindowRect, GetWindowLong(hwnd, GWL_STYLE), false, GetWindowLong(hwnd, GWL_EXSTYLE));
-                            *self.iExtents += size{
-                                basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
-                                basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } };
+                            self.update_extents(
+                                *self.iExtents += size{
+                                    basic_size<LONG>{ referenceClientRect.right - referenceClientRect.left, referenceClientRect.bottom - referenceClientRect.top } -
+                                    basic_size<LONG>{ referenceWindowRect.right - referenceWindowRect.left, referenceWindowRect.bottom - referenceWindowRect.top } });
                         }
                         result = wndproc(hwnd, msg, wparam, lparam);
                         self.handle_event(window_event{ window_event_type::Resizing, self.surface_extents() }.with_external_cause(!self.iInMoveResizeCall));
@@ -1505,9 +1510,33 @@ namespace neogfx
             }
 #endif
             surface_window().set_native_window(*this);
-         }
+        }
 
-         void window::set_destroying()
+        void window::update_position(optional_point const& aPosition) const
+        {
+            if (iPosition != aPosition)
+            {
+                iPosition = aPosition;
+#ifdef NEOGFX_DEBUG
+                if (debug::item == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": update_position(" << aPosition << ")" << std::endl;
+#endif
+            }
+        }
+
+        void window::update_extents(optional_size const& aExtents) const
+        {
+            if (iExtents != aExtents)
+            {
+                iExtents = aExtents;
+#ifdef NEOGFX_DEBUG
+                if (debug::item == this)
+                    service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": update_extents(" << aExtents << ")" << std::endl;
+#endif
+            }
+        }
+
+        void window::set_destroying()
         {
             native_window::set_destroying();
             release_capture();
