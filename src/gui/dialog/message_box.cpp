@@ -229,7 +229,7 @@ namespace neogfx
     {
         auto result = dialog::exec();
         if (!has_response())
-            set_response(button_box().button_with_role(button_role::Reject));
+            set_response(button_box().button_with_role(result != dialog_result::Rejected ? button_role::Accept : button_role::Reject));
         return result;
     }
 
