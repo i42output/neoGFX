@@ -139,7 +139,7 @@ namespace neogfx
                 thread_local std::vector<value_type> data;
                 data.clear();
                 data.resize(iStorageSize.cx * 4 * iStorageSize.cy);
-                if (aColor != std::nullopt)
+                if (aColor.has_value())
                 {
                     if constexpr (std::is_same_v<value_type, avec4u8>)
                         for (std::size_t y = 1; y < 1 + iSize.cy; ++y)
@@ -170,7 +170,7 @@ namespace neogfx
             }
             else
             {
-                if (aColor != std::nullopt)
+                if (aColor.has_value())
                     throw multisample_texture_initialization_unsupported();
                 glCheck(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples(), internalformat, static_cast<GLsizei>(iStorageSize.cx), static_cast<GLsizei>(iStorageSize.cy), true));
             }
@@ -546,8 +546,12 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::bind(std::uint32_t aTextureUnit) const
     {
-        if (iBoundTextureUnit != std::nullopt)
+        if (iBoundTextureUnit.has_value())
+        {
+            if (iBoundTextureUnit.value() == aTextureUnit)
+                return;
             unbind();
+        }
         glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
         GLint previousTexture = 0;
         glCheck(glGetIntegerv(to_gl_binding_enum(sampling()), &previousTexture));
@@ -559,7 +563,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::unbind() const
     {
-        if (iBoundTextureUnit == std::nullopt)
+        if (!iBoundTextureUnit.has_value())
             return;
         glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(iPreviouslyBoundTexture.value())));
@@ -636,8 +640,8 @@ namespace neogfx
     template <typename T>
     logical_coordinates opengl_texture<T>::logical_coordinates() const
     {
-        if (iLogicalCoordinates != std::nullopt)
-            return *iLogicalCoordinates;
+        if (iLogicalCoordinates.has_value())
+            return iLogicalCoordinates.value();
         neogfx::logical_coordinates result;
         switch (iLogicalCoordinateSystem)
         {

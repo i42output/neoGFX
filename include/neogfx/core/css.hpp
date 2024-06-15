@@ -123,12 +123,10 @@ namespace neogfx
         css(std::istream& aStyleSheet);
     public:
         void accept(i_visitor& aVisitor) const;
-        const rule_list& rules() const;
         std::string to_string() const;
     private:
         void parse();
     private:
         std::shared_ptr<std::istream> iStyleSheet;
-        rule_list iRules;
     };
 }

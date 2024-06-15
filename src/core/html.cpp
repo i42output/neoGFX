@@ -21,7 +21,7 @@
 
 #include <string>
 
-#include <neolib/file/lexer.hpp>
+#include <neolib/file/parser.hpp>
 #include <neogfx/core/html.hpp>
 
 namespace neogfx
