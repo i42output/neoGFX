@@ -22,7 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/core/i_property.hpp>
-#include <neogfx/core/i_css.hpp>
+#include <neogfx/core/i_style_sheet.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
@@ -58,7 +58,7 @@ namespace neogfx
     {
         friend class layout_item_cache;
     public:
-        declare_event(style_sheet_changed, i_optional_css const&)
+        declare_event(style_sheet_changed, i_optional_style_sheet const&)
     public:
         using abstract_type = i_layout_item;
     public:
@@ -69,14 +69,14 @@ namespace neogfx
     public:
         virtual bool is_cache() const = 0;
     public:
-        virtual i_optional_css const& style_sheet() const = 0;
-        virtual i_optional_css const& set_style_sheet(i_optional_css const& aStyleSheet) = 0;
-        virtual i_optional_css const& set_style_sheet(i_string_view const& aStyleSheet) = 0;
-        i_optional_css const& set_style_sheet(std::string const& aStyleSheet)
+        virtual i_optional_style_sheet const& style_sheet() const = 0;
+        virtual i_optional_style_sheet const& set_style_sheet(i_optional_style_sheet const& aStyleSheet) = 0;
+        virtual i_optional_style_sheet const& set_style_sheet(i_string_view const& aStyleSheet) = 0;
+        i_optional_style_sheet const& set_style_sheet(std::string const& aStyleSheet)
         {
             return set_style_sheet(std::string_view{ aStyleSheet });
         }
-        i_optional_css const& set_style_sheet(std::string_view const& aStyleSheet)
+        i_optional_style_sheet const& set_style_sheet(std::string_view const& aStyleSheet)
         {
             return set_style_sheet(string_view{ aStyleSheet });
         }

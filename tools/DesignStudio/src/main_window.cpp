@@ -495,8 +495,6 @@ namespace neogfx::DesignStudio
             dialog.exec();
         });
 
-        //        ng::css css{"test.css"};
-
         activate();
     }
 

@@ -27,12 +27,12 @@
 
 namespace neogfx
 {
-    const neolib::i_event<i_optional_css const&>& layout_item_cache::ev_style_sheet_changed() const
+    const neolib::i_event<i_optional_style_sheet const&>& layout_item_cache::ev_style_sheet_changed() const
     {
         return subject().ev_style_sheet_changed();
     }
 
-    neolib::i_event<i_optional_css const&>& layout_item_cache::ev_style_sheet_changed()
+    neolib::i_event<i_optional_style_sheet const&>& layout_item_cache::ev_style_sheet_changed()
     {
         return subject().ev_style_sheet_changed();
     }
@@ -125,17 +125,17 @@ namespace neogfx
         return true;
     }
 
-    i_optional_css const& layout_item_cache::style_sheet() const
+    i_optional_style_sheet const& layout_item_cache::style_sheet() const
     {
         return subject().style_sheet();
     }
 
-    i_optional_css const& layout_item_cache::set_style_sheet(i_optional_css const& aStyleSheet)
+    i_optional_style_sheet const& layout_item_cache::set_style_sheet(i_optional_style_sheet const& aStyleSheet)
     {
         return subject().set_style_sheet(aStyleSheet);
     }
 
-    i_optional_css const& layout_item_cache::set_style_sheet(i_string_view const& aStyleSheet)
+    i_optional_style_sheet const& layout_item_cache::set_style_sheet(i_string_view const& aStyleSheet)
     {
         return subject().set_style_sheet(aStyleSheet);
     }

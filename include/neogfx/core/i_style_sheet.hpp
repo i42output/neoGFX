@@ -1,4 +1,4 @@
-// i_css.hpp
+// i_style_sheet.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
@@ -27,15 +27,15 @@
 
 namespace neogfx
 {
-    class i_css
+    class i_style_sheet
     {
     public:
-        using abstract_type = i_css;
+        using abstract_type = i_style_sheet;
     public:
-        struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::i_css::failed_to_open_style_sheet") {} };
+        struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::i_style_sheet::failed_to_open_style_sheet") {} };
     public:
-        virtual ~i_css() = default;
+        virtual ~i_style_sheet() = default;
     };
 
-    using i_optional_css = neolib::i_optional<i_css>;
+    using i_optional_style_sheet = neolib::i_optional<i_style_sheet>;
 }

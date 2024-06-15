@@ -256,12 +256,12 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_waveform.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\i_css.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_style_sheet.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\core\css.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\style_sheet.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\device_metrics.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\event.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\geometrical.hpp" />
@@ -633,7 +633,7 @@
     <ClCompile Include="..\..\..\src\core\transition_animator.cpp" />
     <ClCompile Include="..\..\..\src\core\async_task.cpp" />
     <ClCompile Include="..\..\..\src\core\async_thread.cpp" />
-    <ClCompile Include="..\..\..\src\core\css.cpp" />
+    <ClCompile Include="..\..\..\src\core\style_sheet.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\animator.cpp" />

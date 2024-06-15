@@ -393,7 +393,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\dialog\gradient_dialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\css.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\style_sheet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\drop_list.hpp">
@@ -1227,7 +1227,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_web_view.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\core\i_css.hpp">
+    <ClInclude Include="..\..\..\include\neogfx\core\i_style_sheet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1438,7 +1438,7 @@
     <ClCompile Include="..\..\..\src\gui\dialog\gradient_dialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\core\css.cpp">
+    <ClCompile Include="..\..\..\src\core\style_sheet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp">

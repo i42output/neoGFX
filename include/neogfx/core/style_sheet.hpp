@@ -1,4 +1,4 @@
-// css.hpp
+// style_sheet.hpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
@@ -24,11 +24,11 @@
 #include <neolib/core/variant.hpp>
 #include <neolib/core/vecarray.hpp>
 
-#include <neogfx/core/i_css.hpp>
+#include <neogfx/core/i_style_sheet.hpp>
 
 namespace neogfx
 {
-    class css : public i_css
+    class style_sheet : public i_style_sheet
     {
     public:
         class selector
@@ -117,14 +117,14 @@ namespace neogfx
             virtual void apply(const declaration_block& aDeclarations) = 0;
         };
     public:
-        css(i_css const& aStyle);
-        css(std::string const& aStyle);
-        css(std::string_view const& aStyle);
-        css(std::istream& aStyleSheet);
+        style_sheet(i_style_sheet const& aStyle);
+        style_sheet(std::string const& aStyle);
+        style_sheet(std::string_view const& aStyle);
+        style_sheet(std::istream& aStyleSheet);
     public:
-        css& operator=(std::string const& aStyle);
-        css& operator=(std::string_view const& aStyle);
-        css& operator=(std::istream& aStyleSheet);
+        style_sheet& operator=(std::string const& aStyle);
+        style_sheet& operator=(std::string_view const& aStyle);
+        style_sheet& operator=(std::istream& aStyleSheet);
     public:
         void accept(i_visitor& aVisitor) const;
         std::string to_string() const;
@@ -134,5 +134,5 @@ namespace neogfx
         std::shared_ptr<std::istream> iStyleSheet;
     };
 
-    using optional_css = neolib::optional<css>;
+    using optional_style_sheet = neolib::optional<style_sheet>;
 }

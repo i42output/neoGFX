@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <neogfx/core/css.hpp>
+#include <neogfx/core/style_sheet.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
@@ -36,7 +36,7 @@ namespace neogfx
         typedef layout_item<Base> self_type;
         // events
     public:
-        define_declared_event(StyleSheetChanged, style_sheet_changed, i_optional_css const&)
+        define_declared_event(StyleSheetChanged, style_sheet_changed, i_optional_style_sheet const&)
         define_event(AnchorUpdated, anchor_updated, i_anchor&)
         // types
     public:
@@ -68,18 +68,18 @@ namespace neogfx
             return false;
         }
     public:
-        optional_css const& style_sheet() const final
+        optional_style_sheet const& style_sheet() const final
         {
             return iStyleSheet;
         }
         using i_layout_item::set_style_sheet;
-        optional_css const& set_style_sheet(i_optional_css const& aStyleSheet) final
+        optional_style_sheet const& set_style_sheet(i_optional_style_sheet const& aStyleSheet) final
         {
             iStyleSheet = aStyleSheet;
             StyleSheetChanged.trigger(iStyleSheet);
             return iStyleSheet;
         }
-        optional_css const& set_style_sheet(i_string_view const& aStyleSheet) final
+        optional_style_sheet const& set_style_sheet(i_string_view const& aStyleSheet) final
         {
             iStyleSheet = aStyleSheet.to_std_string_view();
             StyleSheetChanged.trigger(iStyleSheet);
@@ -699,7 +699,7 @@ namespace neogfx
         define_anchor(MaximumSize)
     private:
         string iId;
-        optional_css iStyleSheet;
+        optional_style_sheet iStyleSheet;
         mutable cache<point> iOrigin;
         mutable cache<mat33> iCombinedTransformation;
     };

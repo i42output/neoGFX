@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/dock.hpp>
 #include <neogfx/gui/widget/dockable.hpp>
 #include <neogfx/gui/widget/table_view.hpp>
-#include <neogfx/core/css.hpp>
+#include <neogfx/core/style_sheet.hpp>
 #include <neogfx/gui/dialog/settings_dialog.hpp>
 #include <neogfx/app/file_dialog.hpp>
 #include <neogfx/app/i_clipboard.hpp>

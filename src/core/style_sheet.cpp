@@ -1,4 +1,4 @@
-// css.cpp
+// style_sheet.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
@@ -22,78 +22,78 @@
 #include <string>
 
 #include <neolib/file/parser.hpp>
-#include <neogfx/core/css.hpp>
+#include <neogfx/core/style_sheet.hpp>
 
 namespace neogfx
 {
-    css::selector::selector(type_e aType, const arguments_type& aArguments) :
+    style_sheet::selector::selector(type_e aType, const arguments_type& aArguments) :
         iType(aType), iArguments(aArguments)
     {
     }
 
-    css::selector::type_e css::selector::type() const
+    style_sheet::selector::type_e style_sheet::selector::type() const
     {
         return iType;
     }
 
-    css::declaration::declaration()
+    style_sheet::declaration::declaration()
     {
     }
 
-    css::css(i_css const& aStyle)
+    style_sheet::style_sheet(i_style_sheet const& aStyle)
     {
     }
 
-    css::css(std::string const& aStyle) :
+    style_sheet::style_sheet(std::string const& aStyle) :
         iStyleSheet{ std::make_shared<std::istringstream>(aStyle) }
     {
         parse();
     }
 
-    css::css(std::string_view const& aStyle) :
+    style_sheet::style_sheet(std::string_view const& aStyle) :
         iStyleSheet{ std::make_shared<std::istringstream>(std::string{ aStyle }) }
     {
         parse();
     }
 
-    css::css(std::istream& aStyleSheet) :
+    style_sheet::style_sheet(std::istream& aStyleSheet) :
         iStyleSheet{ std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet } }
     {
         parse();
     }
 
-    css& css::operator=(std::string const& aStyle)
+    style_sheet& style_sheet::operator=(std::string const& aStyle)
     {
         iStyleSheet = std::make_shared<std::istringstream>(aStyle);
         parse();
         return *this;
     }
 
-    css& css::operator=(std::string_view const& aStyle)
+    style_sheet& style_sheet::operator=(std::string_view const& aStyle)
     {
         iStyleSheet = std::make_shared<std::istringstream>(std::string{ aStyle });
         parse();
         return *this;
     }
 
-    css& css::operator=(std::istream& aStyleSheet)
+    style_sheet& style_sheet::operator=(std::istream& aStyleSheet)
     {
         iStyleSheet = std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet };
         parse();
         return *this;
     }
 
-    void css::accept(i_visitor& aVisitor) const
+    void style_sheet::accept(i_visitor& aVisitor) const
     {
     }
 
-    std::string css::to_string() const
+    std::string style_sheet::to_string() const
     {
         /* todo */
         return "";
     }
 
-    namespace css_parser
+    namespace style_sheet_parser
     {
         enum class symbol
         {
@@ -112,23 +112,23 @@ namespace neogfx
     }
 }
 
-declare_symbols(neogfx::css_parser::symbol)
-declare_symbol(neogfx::css_parser::symbol, Sheet)
-declare_symbol(neogfx::css_parser::symbol, Eof)
-declare_symbol(neogfx::css_parser::symbol, Whitespace)
-declare_symbol(neogfx::css_parser::symbol, Comment)
-declare_symbol(neogfx::css_parser::symbol, Rule)
-declare_symbol(neogfx::css_parser::symbol, Selector)
-declare_symbol(neogfx::css_parser::symbol, DeclarationBlock)
-declare_symbol(neogfx::css_parser::symbol, Declaration)
-declare_symbol(neogfx::css_parser::symbol, Property)
-declare_symbol(neogfx::css_parser::symbol, Value)
-declare_symbol(neogfx::css_parser::symbol, Identifier)
-end_declare_symbols(neogfx::css_parser::symbol)
+declare_symbols(neogfx::style_sheet_parser::symbol)
+declare_symbol(neogfx::style_sheet_parser::symbol, Sheet)
+declare_symbol(neogfx::style_sheet_parser::symbol, Eof)
+declare_symbol(neogfx::style_sheet_parser::symbol, Whitespace)
+declare_symbol(neogfx::style_sheet_parser::symbol, Comment)
+declare_symbol(neogfx::style_sheet_parser::symbol, Rule)
+declare_symbol(neogfx::style_sheet_parser::symbol, Selector)
+declare_symbol(neogfx::style_sheet_parser::symbol, DeclarationBlock)
+declare_symbol(neogfx::style_sheet_parser::symbol, Declaration)
+declare_symbol(neogfx::style_sheet_parser::symbol, Property)
+declare_symbol(neogfx::style_sheet_parser::symbol, Value)
+declare_symbol(neogfx::style_sheet_parser::symbol, Identifier)
+end_declare_symbols(neogfx::style_sheet_parser::symbol)
 
 namespace neogfx
 {
-    namespace css_parser
+    namespace style_sheet_parser
     {
         enable_neolib_parser(symbol)
 
@@ -154,7 +154,7 @@ namespace neogfx
         };
     }
 
-    void css::parse()
+    void style_sheet::parse()
     {
     }
 }
