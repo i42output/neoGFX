@@ -1,7 +1,7 @@
 // css.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@
 #include <neolib/core/variant.hpp>
 #include <neolib/core/vecarray.hpp>
 
-#include <neogfx/core/primitives.hpp>
+#include <neogfx/core/i_css.hpp>
 
 namespace neogfx
 {
-    class css
+    class css : public i_css
     {
     public:
         class selector
@@ -117,10 +117,14 @@ namespace neogfx
             virtual void apply(const declaration_block& aDeclarations) = 0;
         };
     public:
-        struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::css::failed_to_open_style_sheet") {} };
-    public:
+        css(i_css const& aStyle);
         css(std::string const& aStyle);
+        css(std::string_view const& aStyle);
         css(std::istream& aStyleSheet);
+    public:
+        css& operator=(std::string const& aStyle);
+        css& operator=(std::string_view const& aStyle);
+        css& operator=(std::istream& aStyleSheet);
     public:
         void accept(i_visitor& aVisitor) const;
         std::string to_string() const;
@@ -129,4 +133,6 @@ namespace neogfx
     private:
         std::shared_ptr<std::istream> iStyleSheet;
     };
+
+    using optional_css = neolib::optional<css>;
 }

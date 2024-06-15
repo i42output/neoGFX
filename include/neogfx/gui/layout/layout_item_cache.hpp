@@ -32,6 +32,9 @@ namespace neogfx
     class layout_item_cache : public object<reference_counted<i_layout_item_cache>>
     {
     public:
+        const neolib::i_event<i_optional_css const&>& ev_style_sheet_changed() const final;
+        neolib::i_event<i_optional_css const&>& ev_style_sheet_changed() final;
+    public:
         layout_item_cache(i_layout_item& aItem);
         layout_item_cache(i_ref_ptr<i_layout_item> const& aItem);
         layout_item_cache(const layout_item_cache& aOther);
@@ -45,6 +48,10 @@ namespace neogfx
         void set_id(const i_string& aId) final;
     public:
         bool is_cache() const final;
+    public:
+        i_optional_css const& style_sheet() const final;
+        i_optional_css const& set_style_sheet(i_optional_css const& aStyleSheet) final;
+        i_optional_css const& set_style_sheet(i_string_view const& aStyleSheet) final;
     public:
         bool is_layout() const final;
         const i_layout& as_layout() const final;

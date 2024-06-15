@@ -37,6 +37,7 @@ using namespace boost::multiprecision;
 #include <neolib/core/deque.hpp>
 #include <neolib/core/list.hpp>
 #include <neolib/core/string.hpp>
+#include <neolib/core/string_view.hpp>
 #include <neolib/core/string_utils.hpp>
 #include <neolib/task/i_async_task.hpp>
 #include <neolib/app/services.hpp>
@@ -112,6 +113,8 @@ namespace neogfx
         using namespace neolib::string_literals;
     }
     using namespace string_literals;
+    using neolib::i_string_view;
+    using neolib::string_view;
 
     string const empty_string;
 

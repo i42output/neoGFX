@@ -40,16 +40,47 @@ namespace neogfx
     {
     }
 
+    css::css(i_css const& aStyle)
+    {
+    }
+
     css::css(std::string const& aStyle) :
         iStyleSheet{ std::make_shared<std::istringstream>(aStyle) }
     {
         parse();
     }
 
-    css::css(std::istream& aStyleSheet) :
-        iStyleSheet{ std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{},& aStyleSheet } }
+    css::css(std::string_view const& aStyle) :
+        iStyleSheet{ std::make_shared<std::istringstream>(std::string{ aStyle }) }
     {
         parse();
+    }
+
+    css::css(std::istream& aStyleSheet) :
+        iStyleSheet{ std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet } }
+    {
+        parse();
+    }
+
+    css& css::operator=(std::string const& aStyle)
+    {
+        iStyleSheet = std::make_shared<std::istringstream>(aStyle);
+        parse();
+        return *this;
+    }
+
+    css& css::operator=(std::string_view const& aStyle)
+    {
+        iStyleSheet = std::make_shared<std::istringstream>(std::string{ aStyle });
+        parse();
+        return *this;
+    }
+
+    css& css::operator=(std::istream& aStyleSheet)
+    {
+        iStyleSheet = std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet };
+        parse();
+        return *this;
     }
 
     void css::accept(i_visitor& aVisitor) const

@@ -256,6 +256,7 @@
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_track.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\audio\i_audio_waveform.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\i_css.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />

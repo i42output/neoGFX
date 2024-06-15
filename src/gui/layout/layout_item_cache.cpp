@@ -27,6 +27,16 @@
 
 namespace neogfx
 {
+    const neolib::i_event<i_optional_css const&>& layout_item_cache::ev_style_sheet_changed() const
+    {
+        return subject().ev_style_sheet_changed();
+    }
+
+    neolib::i_event<i_optional_css const&>& layout_item_cache::ev_style_sheet_changed()
+    {
+        return subject().ev_style_sheet_changed();
+    }
+
     layout_item_cache::layout_item_cache(i_layout_item& aItem) :
         layout_item_cache{ ref_ptr<i_layout_item>{ ref_ptr<i_layout_item>{}, &aItem } } 
     {
@@ -113,6 +123,21 @@ namespace neogfx
     bool layout_item_cache::is_cache() const
     {
         return true;
+    }
+
+    i_optional_css const& layout_item_cache::style_sheet() const
+    {
+        return subject().style_sheet();
+    }
+
+    i_optional_css const& layout_item_cache::set_style_sheet(i_optional_css const& aStyleSheet)
+    {
+        return subject().set_style_sheet(aStyleSheet);
+    }
+
+    i_optional_css const& layout_item_cache::set_style_sheet(i_string_view const& aStyleSheet)
+    {
+        return subject().set_style_sheet(aStyleSheet);
     }
 
     bool layout_item_cache::is_layout() const
