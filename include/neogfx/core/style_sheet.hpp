@@ -117,21 +117,25 @@ namespace neogfx
             virtual void apply(const declaration_block& aDeclarations) = 0;
         };
     public:
-        style_sheet(i_style_sheet const& aStyle);
-        style_sheet(std::string const& aStyle);
-        style_sheet(std::string_view const& aStyle);
-        style_sheet(std::istream& aStyleSheet);
+        style_sheet(i_style_sheet const& aSheet);
+        style_sheet(std::string const& aSheet);
+        style_sheet(std::string_view const& aSheet);
+        style_sheet(std::istream& aSheet);
     public:
-        style_sheet& operator=(std::string const& aStyle);
-        style_sheet& operator=(std::string_view const& aStyle);
-        style_sheet& operator=(std::istream& aStyleSheet);
+        style_sheet& operator=(i_style_sheet const& aSheet);
+        style_sheet& operator=(std::string const& aSheet);
+        style_sheet& operator=(std::string_view const& aSheet);
+        style_sheet& operator=(std::istream& aSheet);
+    public:
+        i_string_view& sheet() const final;
     public:
         void accept(i_visitor& aVisitor) const;
         std::string to_string() const;
     private:
         void parse();
     private:
-        std::shared_ptr<std::istream> iStyleSheet;
+        std::shared_ptr<std::string> iSheet;
+        mutable std::optional<string_view> iSheetView;
     };
 
     using optional_style_sheet = neolib::optional<style_sheet>;

@@ -40,47 +40,71 @@ namespace neogfx
     {
     }
 
-    style_sheet::style_sheet(i_style_sheet const& aStyle)
-    {
-    }
-
-    style_sheet::style_sheet(std::string const& aStyle) :
-        iStyleSheet{ std::make_shared<std::istringstream>(aStyle) }
+    style_sheet::style_sheet(i_style_sheet const& aSheet) :
+        iSheet{ std::make_shared<std::string>(aSheet.sheet().to_std_string_view()) }
     {
         parse();
     }
 
-    style_sheet::style_sheet(std::string_view const& aStyle) :
-        iStyleSheet{ std::make_shared<std::istringstream>(std::string{ aStyle }) }
+    style_sheet::style_sheet(std::string const& aSheet) : 
+        iSheet{ std::make_shared<std::string>(aSheet) }
     {
         parse();
     }
 
-    style_sheet::style_sheet(std::istream& aStyleSheet) :
-        iStyleSheet{ std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet } }
+    style_sheet::style_sheet(std::string_view const& aSheet) :
+        iSheet{ std::make_shared<std::string>(aSheet) }
     {
         parse();
     }
 
-    style_sheet& style_sheet::operator=(std::string const& aStyle)
+    style_sheet::style_sheet(std::istream& aSheet)
     {
-        iStyleSheet = std::make_shared<std::istringstream>(aStyle);
+        std::ostringstream oss;
+        oss << aSheet.rdbuf();
+        iSheet = std::make_shared<std::string>(oss.str());
         parse();
-        return *this;
     }
 
-    style_sheet& style_sheet::operator=(std::string_view const& aStyle)
+    style_sheet& style_sheet::operator=(i_style_sheet const& aSheet)
     {
-        iStyleSheet = std::make_shared<std::istringstream>(std::string{ aStyle });
+        iSheet = std::make_shared<std::string>(aSheet.sheet().to_std_string_view());
+        iSheetView = std::nullopt;
         parse();
         return *this;
     }
 
-    style_sheet& style_sheet::operator=(std::istream& aStyleSheet)
+    style_sheet& style_sheet::operator=(std::string const& aSheet)
     {
-        iStyleSheet = std::shared_ptr<std::istream>{ std::shared_ptr<std::istream>{}, &aStyleSheet };
+        iSheet = std::make_shared<std::string>(aSheet);
+        iSheetView = std::nullopt;
         parse();
         return *this;
+    }
+
+    style_sheet& style_sheet::operator=(std::string_view const& aSheet)
+    {
+        iSheet = std::make_shared<std::string>(aSheet);
+        iSheetView = std::nullopt;
+        parse();
+        return *this;
+    }
+
+    style_sheet& style_sheet::operator=(std::istream& aSheet)
+    {
+        std::ostringstream oss;
+        oss << aSheet.rdbuf();
+        iSheet = std::make_shared<std::string>(oss.str());
+        iSheetView = std::nullopt;
+        parse();
+        return *this;
+    }
+
+    i_string_view& style_sheet::sheet() const
+    {
+        if (!iSheetView.has_value())
+            iSheetView.emplace(*iSheet);
+        return iSheetView.value();
     }
 
     void style_sheet::accept(i_visitor& aVisitor) const
@@ -89,11 +113,10 @@ namespace neogfx
 
     std::string style_sheet::to_string() const
     {
-        /* todo */
-        return "";
+        return sheet().to_std_string();
     }
 
-    namespace style_sheet_parser
+    namespace nss
     {
         enum class symbol
         {
@@ -104,6 +127,7 @@ namespace neogfx
             Rule,
             Selector,
             DeclarationBlock,
+            Declarations,
             Declaration,
             Property,
             Value,
@@ -112,23 +136,24 @@ namespace neogfx
     }
 }
 
-declare_symbols(neogfx::style_sheet_parser::symbol)
-declare_symbol(neogfx::style_sheet_parser::symbol, Sheet)
-declare_symbol(neogfx::style_sheet_parser::symbol, Eof)
-declare_symbol(neogfx::style_sheet_parser::symbol, Whitespace)
-declare_symbol(neogfx::style_sheet_parser::symbol, Comment)
-declare_symbol(neogfx::style_sheet_parser::symbol, Rule)
-declare_symbol(neogfx::style_sheet_parser::symbol, Selector)
-declare_symbol(neogfx::style_sheet_parser::symbol, DeclarationBlock)
-declare_symbol(neogfx::style_sheet_parser::symbol, Declaration)
-declare_symbol(neogfx::style_sheet_parser::symbol, Property)
-declare_symbol(neogfx::style_sheet_parser::symbol, Value)
-declare_symbol(neogfx::style_sheet_parser::symbol, Identifier)
-end_declare_symbols(neogfx::style_sheet_parser::symbol)
+declare_symbols(neogfx::nss::symbol)
+declare_symbol(neogfx::nss::symbol, Sheet)
+declare_symbol(neogfx::nss::symbol, Eof)
+declare_symbol(neogfx::nss::symbol, Whitespace)
+declare_symbol(neogfx::nss::symbol, Comment)
+declare_symbol(neogfx::nss::symbol, Rule)
+declare_symbol(neogfx::nss::symbol, Selector)
+declare_symbol(neogfx::nss::symbol, DeclarationBlock)
+declare_symbol(neogfx::nss::symbol, Declarations)
+declare_symbol(neogfx::nss::symbol, Declaration)
+declare_symbol(neogfx::nss::symbol, Property)
+declare_symbol(neogfx::nss::symbol, Value)
+declare_symbol(neogfx::nss::symbol, Identifier)
+end_declare_symbols(neogfx::nss::symbol)
 
 namespace neogfx
 {
-    namespace style_sheet_parser
+    namespace nss
     {
         enable_neolib_parser(symbol)
 
@@ -136,9 +161,13 @@ namespace neogfx
         {
             ( symbol::Sheet >> repeat(symbol::Rule) , discard(symbol::Eof) ),
             ( symbol::Rule >> symbol::Selector , symbol::DeclarationBlock ),
-            ( symbol::Identifier >> sequence((range('A', 'Z') | range('a', 'z')) , repeat(range('A', 'Z') | range('a', 'z') | range('0' , '9'))) ),
-            ( symbol::DeclarationBlock >> '{' , symbol::Declaration , repeat(sequence( ';' , symbol::Declaration )) ),
-            ( symbol::Declaration >> symbol::Property , ':', symbol::Value ),
+            ( symbol::Rule >> symbol::Declarations ),
+            ( symbol::Identifier >> sequence((range('A', 'Z') | range('a', 'z')) , repeat(range('A', 'Z') | range('a', 'z') | range('0' , '9') | '-' ))),
+            ( symbol::DeclarationBlock >> '{' , symbol::Declarations, '}' ),
+            ( symbol::Declarations >> symbol::Declaration , repeat(sequence(';' , symbol::Declaration)), optional(';')),
+            ( symbol::Declaration >> (sequence((symbol::Property <=> "nss.property"_concept), ':', (symbol::Value <=> "nss.value"_concept)) <=> "nss.declaration"_concept) ),
+            ( symbol::Property >> symbol::Identifier ),
+            ( symbol::Value >> symbol::Identifier ),
 
             ( symbol::Eof >> discard(symbol::Whitespace), "" ),
             ( symbol::Whitespace >> (' '_ | '\r' | '\n' | '\t') ),
@@ -146,8 +175,10 @@ namespace neogfx
             ( symbol::Comment >> discard(("/*"_ , repeat(range('\0', '\xFF')) , "*/"_)) ),
             ( symbol::Sheet >> discard(symbol::Whitespace) , symbol::Sheet , discard(symbol::Whitespace) ),
             ( symbol::Rule >> discard(symbol::Whitespace) , symbol::Rule , discard(symbol::Whitespace) ),
+            ( symbol::Identifier >> discard(symbol::Whitespace) , symbol::Identifier , discard(symbol::Whitespace) ),
             ( symbol::Selector >> discard(symbol::Whitespace) , symbol::Selector , discard(symbol::Whitespace) ),
             ( symbol::DeclarationBlock >> discard(symbol::Whitespace) , symbol::DeclarationBlock , discard(symbol::Whitespace) ),
+            ( symbol::Declarations >> discard(symbol::Whitespace) , symbol::Declarations , discard(symbol::Whitespace) ),
             ( symbol::Declaration >> discard(symbol::Whitespace) , symbol::Declaration , discard(symbol::Whitespace) ),
             ( symbol::Property >> discard(symbol::Whitespace) , symbol::Property , discard(symbol::Whitespace) ),
             ( symbol::Value >> discard(symbol::Whitespace) , symbol::Value , discard(symbol::Whitespace) )
@@ -156,5 +187,9 @@ namespace neogfx
 
     void style_sheet::parse()
     {
+        neolib::parser<nss::symbol> parser{ nss::sRules };
+        parser.parse(nss::symbol::Sheet, sheet().to_std_string_view());
+        parser.set_debug_output(std::cout);
+        parser.create_ast();
     }
 }

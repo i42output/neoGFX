@@ -35,6 +35,8 @@ namespace neogfx
         struct failed_to_open_style_sheet : std::runtime_error { failed_to_open_style_sheet() : std::runtime_error("neogfx::i_style_sheet::failed_to_open_style_sheet") {} };
     public:
         virtual ~i_style_sheet() = default;
+    public:
+        virtual i_string_view& sheet() const = 0;
     };
 
     using i_optional_style_sheet = neolib::i_optional<i_style_sheet>;
