@@ -186,8 +186,7 @@ namespace neogfx
             ( symbol::HexDigit >> choice(range('0', '9') | range('A', 'F') | range('a', 'f')) ),
 
             ( symbol::Eof >> discard(symbol::Whitespace), "" ),
-            ( symbol::Whitespace >> (' '_ | '\r' | '\n' | '\t') ),
-            ( symbol::Whitespace >> discard(symbol::Comment) ),
+            ( symbol::Whitespace >> (' '_ | '\r' | '\n' | '\t' | symbol::Comment) ),
             ( symbol::Comment >> sequence("/*"_ , repeat(range('\0', '\xFF')) , "*/"_) ),
             ( symbol::Sheet >> discard(symbol::Whitespace) , symbol::Sheet , discard(symbol::Whitespace) ),
             ( symbol::Rule >> discard(symbol::Whitespace) , symbol::Rule , discard(symbol::Whitespace) ),
