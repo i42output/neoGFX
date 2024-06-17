@@ -131,7 +131,11 @@ namespace neogfx
             Declaration,
             Property,
             Value,
-            Identifier
+            Identifier,
+            Hex3,
+            Hex6,
+            Hex8,
+            HexDigit
         };
     }
 }
@@ -149,6 +153,10 @@ declare_symbol(neogfx::nss::symbol, Declaration)
 declare_symbol(neogfx::nss::symbol, Property)
 declare_symbol(neogfx::nss::symbol, Value)
 declare_symbol(neogfx::nss::symbol, Identifier)
+declare_symbol(neogfx::nss::symbol, Hex3)
+declare_symbol(neogfx::nss::symbol, Hex6)
+declare_symbol(neogfx::nss::symbol, Hex8)
+declare_symbol(neogfx::nss::symbol, HexDigit)
 end_declare_symbols(neogfx::nss::symbol)
 
 namespace neogfx
@@ -160,19 +168,27 @@ namespace neogfx
         neolib::parser_rule<symbol> const sRules[] =
         {
             ( symbol::Sheet >> repeat(symbol::Rule) , discard(symbol::Eof) ),
-            ( symbol::Rule >> symbol::Selector , symbol::DeclarationBlock ),
+            ( symbol::Rule >> (symbol::Selector <=> "nss.selector"_concept), symbol::DeclarationBlock),
             ( symbol::Rule >> symbol::Declarations ),
             ( symbol::Identifier >> sequence((range('A', 'Z') | range('a', 'z')) , repeat(range('A', 'Z') | range('a', 'z') | range('0' , '9') | '-' ))),
             ( symbol::DeclarationBlock >> '{' , symbol::Declarations, '}' ),
             ( symbol::Declarations >> symbol::Declaration , repeat(sequence(';' , symbol::Declaration)), optional(';')),
             ( symbol::Declaration >> (sequence((symbol::Property <=> "nss.property"_concept), ':', (symbol::Value <=> "nss.value"_concept)) <=> "nss.declaration"_concept) ),
+            ( symbol::Selector >> optional('.') , symbol::Identifier ),
             ( symbol::Property >> symbol::Identifier ),
             ( symbol::Value >> symbol::Identifier ),
+            ( symbol::Value >> '#'_ , symbol::Hex3 ),
+            ( symbol::Value >> '#'_ , symbol::Hex6 ),
+            ( symbol::Value >> '#'_ , symbol::Hex8 ),
+            ( symbol::Hex3 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit ) ),
+            ( symbol::Hex6 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
+            ( symbol::Hex8 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
+            ( symbol::HexDigit >> choice(range('0', '9') | range('A', 'F') | range('a', 'f')) ),
 
             ( symbol::Eof >> discard(symbol::Whitespace), "" ),
             ( symbol::Whitespace >> (' '_ | '\r' | '\n' | '\t') ),
-            ( symbol::Whitespace >> symbol::Comment ),
-            ( symbol::Comment >> discard(("/*"_ , repeat(range('\0', '\xFF')) , "*/"_)) ),
+            ( symbol::Whitespace >> discard(symbol::Comment) ),
+            ( symbol::Comment >> sequence("/*"_ , repeat(range('\0', '\xFF')) , "*/"_) ),
             ( symbol::Sheet >> discard(symbol::Whitespace) , symbol::Sheet , discard(symbol::Whitespace) ),
             ( symbol::Rule >> discard(symbol::Whitespace) , symbol::Rule , discard(symbol::Whitespace) ),
             ( symbol::Identifier >> discard(symbol::Whitespace) , symbol::Identifier , discard(symbol::Whitespace) ),
@@ -188,8 +204,8 @@ namespace neogfx
     void style_sheet::parse()
     {
         neolib::parser<nss::symbol> parser{ nss::sRules };
-        parser.parse(nss::symbol::Sheet, sheet().to_std_string_view());
         parser.set_debug_output(std::cout);
+        parser.parse(nss::symbol::Sheet, sheet().to_std_string_view());
         parser.create_ast();
     }
 }

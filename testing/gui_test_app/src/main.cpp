@@ -41,7 +41,18 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
-        window.button5.set_style_sheet("background-color: red; color: white"_s);
+        window.button5.set_style_sheet(
+            R"(
+.button {
+    background-color: #04AA6D; /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    })"_s);
 
         window.labelDPI.set_text(ng::string{ (std::ostringstream{} << "DPI: " <<
             window.device_metrics().horizontal_dpi() << " x " << window.device_metrics().vertical_dpi()).str() });
