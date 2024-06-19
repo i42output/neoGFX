@@ -127,15 +127,23 @@ namespace neogfx
             Rule,
             Selector,
             DeclarationBlock,
+            BeginDeclarationBlock,
+            EndDeclarationBlock,
             Declarations,
             Declaration,
+            DeclarationSeparator,
+            EndDeclaration,
             Property,
             Value,
+            ValuePart,
             Identifier,
+            Integer,
+            Digit,
             Hex3,
             Hex6,
             Hex8,
-            HexDigit
+            HexDigit,
+            Length
         };
     }
 }
@@ -148,15 +156,23 @@ declare_symbol(neogfx::nss::symbol, Comment)
 declare_symbol(neogfx::nss::symbol, Rule)
 declare_symbol(neogfx::nss::symbol, Selector)
 declare_symbol(neogfx::nss::symbol, DeclarationBlock)
+declare_symbol(neogfx::nss::symbol, BeginDeclarationBlock)
+declare_symbol(neogfx::nss::symbol, EndDeclarationBlock)
 declare_symbol(neogfx::nss::symbol, Declarations)
 declare_symbol(neogfx::nss::symbol, Declaration)
+declare_symbol(neogfx::nss::symbol, DeclarationSeparator)
+declare_symbol(neogfx::nss::symbol, EndDeclaration)
 declare_symbol(neogfx::nss::symbol, Property)
 declare_symbol(neogfx::nss::symbol, Value)
+declare_symbol(neogfx::nss::symbol, ValuePart)
 declare_symbol(neogfx::nss::symbol, Identifier)
+declare_symbol(neogfx::nss::symbol, Integer)
+declare_symbol(neogfx::nss::symbol, Digit)
 declare_symbol(neogfx::nss::symbol, Hex3)
 declare_symbol(neogfx::nss::symbol, Hex6)
 declare_symbol(neogfx::nss::symbol, Hex8)
 declare_symbol(neogfx::nss::symbol, HexDigit)
+declare_symbol(neogfx::nss::symbol, Length)
 end_declare_symbols(neogfx::nss::symbol)
 
 namespace neogfx
@@ -170,33 +186,48 @@ namespace neogfx
             ( symbol::Sheet >> repeat(symbol::Rule) , discard(symbol::Eof) ),
             ( symbol::Rule >> (symbol::Selector <=> "nss.selector"_concept), symbol::DeclarationBlock),
             ( symbol::Rule >> symbol::Declarations ),
-            ( symbol::Identifier >> sequence((range('A', 'Z') | range('a', 'z')) , repeat(range('A', 'Z') | range('a', 'z') | range('0' , '9') | '-' ))),
-            ( symbol::DeclarationBlock >> '{' , symbol::Declarations, '}' ),
-            ( symbol::Declarations >> symbol::Declaration , repeat(sequence(';' , symbol::Declaration)), optional(';')),
-            ( symbol::Declaration >> (sequence((symbol::Property <=> "nss.property"_concept), ':', (symbol::Value <=> "nss.value"_concept)) <=> "nss.declaration"_concept) ),
+            ( symbol::Identifier >> sequence(+(range('A', 'Z') | range('a', 'z')) , repeat(range('A', 'Z') | range('a', 'z') | range('0' , '9') | '-' ))),
+            ( symbol::DeclarationBlock >> sequence(symbol::BeginDeclarationBlock , symbol::Declarations, symbol::EndDeclarationBlock) ),
+            ( symbol::BeginDeclarationBlock >> '{'_ ),
+            ( symbol::EndDeclarationBlock >> '}'_ ),
+            ( symbol::Declarations >> sequence(symbol::Declaration , repeat(sequence(symbol::EndDeclaration , symbol::Declaration)), optional(symbol::EndDeclaration)) ),
+            ( symbol::Declaration >> (sequence((symbol::Property <=> "nss.property"_concept), symbol::DeclarationSeparator, (symbol::Value <=> "nss.value"_concept)) <=> "nss.declaration"_concept) ),
+            ( symbol::DeclarationSeparator >> ':'_ ),
+            ( symbol::EndDeclaration >> ';'_ ),
             ( symbol::Selector >> optional('.') , symbol::Identifier ),
             ( symbol::Property >> symbol::Identifier ),
-            ( symbol::Value >> symbol::Identifier ),
-            ( symbol::Value >> '#'_ , symbol::Hex3 ),
-            ( symbol::Value >> '#'_ , symbol::Hex6 ),
-            ( symbol::Value >> '#'_ , symbol::Hex8 ),
+            ( symbol::Value >> +repeat(symbol::ValuePart) ),
+            ( symbol::ValuePart >> symbol::Identifier ),
+            ( symbol::ValuePart >> (symbol::Length <=> "nss.length"_concept) ),
+            ( symbol::ValuePart >> symbol::Integer ),
+            ( symbol::ValuePart >> '#'_ , symbol::Hex3 ),
+            ( symbol::ValuePart >> '#'_ , symbol::Hex6 ),
+            ( symbol::ValuePart >> '#'_ , symbol::Hex8 ),
+            ( symbol::Length >> sequence(symbol::Integer, choice("cm"_ | "mm"_ | "in"_ | "px"_ | "pt"_ | "pc"_ | "em"_ | "ex"_ | "ch"_ | "rem"_ | "vw"_ | "vh"_ | "vmin"_ | "vmax"_ | "%"_ )) ),
+            ( symbol::Integer >> +repeat(symbol::Digit) ),
+            ( symbol::Digit >> range('0', '9') ),
             ( symbol::Hex3 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit ) ),
             ( symbol::Hex6 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::Hex8 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::HexDigit >> choice(range('0', '9') | range('A', 'F') | range('a', 'f')) ),
 
-            ( symbol::Eof >> discard(symbol::Whitespace), "" ),
-            ( symbol::Whitespace >> (' '_ | '\r' | '\n' | '\t' | symbol::Comment) ),
+            ( symbol::Eof >> discard(optional(symbol::Whitespace)), "" ),
+            ( symbol::Whitespace >> +(' '_ | '\r' | '\n' | '\t' | symbol::Comment) ),
             ( symbol::Comment >> sequence("/*"_ , repeat(range('\0', '\xFF')) , "*/"_) ),
-            ( symbol::Sheet >> discard(symbol::Whitespace) , symbol::Sheet , discard(symbol::Whitespace) ),
-            ( symbol::Rule >> discard(symbol::Whitespace) , symbol::Rule , discard(symbol::Whitespace) ),
-            ( symbol::Identifier >> discard(symbol::Whitespace) , symbol::Identifier , discard(symbol::Whitespace) ),
-            ( symbol::Selector >> discard(symbol::Whitespace) , symbol::Selector , discard(symbol::Whitespace) ),
-            ( symbol::DeclarationBlock >> discard(symbol::Whitespace) , symbol::DeclarationBlock , discard(symbol::Whitespace) ),
-            ( symbol::Declarations >> discard(symbol::Whitespace) , symbol::Declarations , discard(symbol::Whitespace) ),
-            ( symbol::Declaration >> discard(symbol::Whitespace) , symbol::Declaration , discard(symbol::Whitespace) ),
-            ( symbol::Property >> discard(symbol::Whitespace) , symbol::Property , discard(symbol::Whitespace) ),
-            ( symbol::Value >> discard(symbol::Whitespace) , symbol::Value , discard(symbol::Whitespace) )
+            ( symbol::Sheet >> discard(optional(symbol::Whitespace)) , symbol::Sheet , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Rule >> discard(optional(symbol::Whitespace)) , symbol::Rule , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Identifier >> discard(optional(symbol::Whitespace)) , symbol::Identifier , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Selector >> discard(optional(symbol::Whitespace)) , symbol::Selector , discard(optional(symbol::Whitespace)) ),
+            ( symbol::DeclarationBlock >> discard(optional(symbol::Whitespace)) , symbol::DeclarationBlock , discard(optional(symbol::Whitespace)) ),
+            ( symbol::BeginDeclarationBlock >> discard(optional(symbol::Whitespace)) , symbol::BeginDeclarationBlock , discard(optional(symbol::Whitespace)) ),
+            ( symbol::EndDeclarationBlock >> discard(optional(symbol::Whitespace)) , symbol::EndDeclarationBlock , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Declarations >> discard(optional(symbol::Whitespace)) , symbol::Declarations , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Declaration >> discard(optional(symbol::Whitespace)) , symbol::Declaration , discard(optional(symbol::Whitespace)) ),
+            ( symbol::DeclarationSeparator >> discard(optional(symbol::Whitespace)) , symbol::DeclarationSeparator , discard(optional(symbol::Whitespace)) ),
+            ( symbol::EndDeclaration >> discard(optional(symbol::Whitespace)) , symbol::EndDeclaration , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Property >> discard(optional(symbol::Whitespace)) , symbol::Property , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Value >> discard(optional(symbol::Whitespace)) , symbol::Value , discard(optional(symbol::Whitespace)) ),
+            ( symbol::ValuePart >> discard(optional(symbol::Whitespace)) , symbol::ValuePart , discard(optional(symbol::Whitespace)) )
         };
     }
 
