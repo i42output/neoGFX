@@ -748,7 +748,10 @@ namespace neogfx
     {
         framed_scrollable_widget::set_font(aFont);
         if (!default_style().character().font())
+        {
+            glyphs().set_major_font(font());
             refresh_paragraph(iText.begin(), 0);
+        }
     }
 
     void text_edit::focus_gained(focus_reason aFocusReason)
@@ -1619,7 +1622,10 @@ namespace neogfx
         auto oldEffect = (default_style().character().text_effect() == std::nullopt);
         iDefaultStyle = aDefaultStyle;
         if (oldFont != font() || oldEffect != (default_style().character().text_effect() == std::nullopt))
+        {
+            glyphs().set_major_font(font());
             refresh_paragraph(iText.begin(), 0);
+        }
         iPersistDefaultStyle = aPersist;
         DefaultStyleChanged.trigger();
         update();
