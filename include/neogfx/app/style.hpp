@@ -23,6 +23,7 @@
 
 #include <unordered_map>
 
+#include <neogfx/core/style_sheet.hpp>
 #include "i_style.hpp"
 #include "palette.hpp"
 
@@ -45,6 +46,9 @@ namespace neogfx
         bool operator!=(const i_style& aOther) const;
     public:
         std::string const& name() const final;
+        neogfx::style_sheet const& style_sheet() const final;
+        void set_style_sheet(i_style_sheet const& aStyleSheet) final;
+        void set_style_sheet(i_string_view const& aStyleSheet) final;
         const margin_list& all_margin() const final;
         const neogfx::margin& margin(margin_role aMarginRole) const final;
         void set_margin(margin_role aMarginRole, const neogfx::margin& aMargin) final;
@@ -72,6 +76,7 @@ namespace neogfx
         void handle_change(style_aspect aAspect);
     private:
         std::string iName;
+        neogfx::style_sheet iStyleSheet;
         margin_list iMargin;
         border_list iBorder;
         padding_list iPadding;

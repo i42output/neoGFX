@@ -23,6 +23,7 @@
 
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/primitives.hpp>
+#include <neogfx/core/i_style_sheet.hpp>
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/app/i_palette.hpp>
 
@@ -88,6 +89,17 @@ namespace neogfx
         virtual ~i_style() = default;
     public:
         virtual std::string const& name() const = 0;
+        virtual i_style_sheet const& style_sheet() const = 0;
+        virtual void set_style_sheet(i_style_sheet const& aStyleSheet) = 0;
+        virtual void set_style_sheet(i_string_view const& aStyleSheet) = 0;
+        void set_style_sheet(std::string const& aStyleSheet)
+        {
+            set_style_sheet(std::string_view{ aStyleSheet });
+        }
+        void set_style_sheet(std::string_view const& aStyleSheet)
+        {
+            set_style_sheet(string_view{ aStyleSheet });
+        }
         virtual const margin_list& all_margin() const = 0;
         virtual const neogfx::margin& margin(margin_role aMarginRole) const = 0;
         virtual void set_margin(margin_role aMarginRole, const neogfx::margin& aMargin) = 0;

@@ -111,6 +111,23 @@ namespace neogfx
         return iName;
     }
 
+    style_sheet const& style::style_sheet() const
+    {
+        return iStyleSheet;
+    }
+
+    void style::set_style_sheet(i_style_sheet const& aStyleSheet)
+    {
+        iStyleSheet = aStyleSheet;
+        handle_change(style_aspect::Style);
+    }
+
+    void style::set_style_sheet(i_string_view const& aStyleSheet)
+    {
+        iStyleSheet = aStyleSheet.to_std_string_view();
+        handle_change(style_aspect::Style);
+    }
+
     const style::margin_list& style::all_margin() const
     {
         return iMargin;

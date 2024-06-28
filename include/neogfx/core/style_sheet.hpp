@@ -117,6 +117,7 @@ namespace neogfx
             virtual void apply(const declaration_block& aDeclarations) = 0;
         };
     public:
+        style_sheet();
         style_sheet(i_style_sheet const& aSheet);
         style_sheet(std::string const& aSheet);
         style_sheet(std::string_view const& aSheet);

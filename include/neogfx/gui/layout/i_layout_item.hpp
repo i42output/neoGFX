@@ -69,16 +69,18 @@ namespace neogfx
     public:
         virtual bool is_cache() const = 0;
     public:
-        virtual i_optional_style_sheet const& style_sheet() const = 0;
-        virtual i_optional_style_sheet const& set_style_sheet(i_optional_style_sheet const& aStyleSheet) = 0;
-        virtual i_optional_style_sheet const& set_style_sheet(i_string_view const& aStyleSheet) = 0;
-        i_optional_style_sheet const& set_style_sheet(std::string const& aStyleSheet)
+        virtual bool has_style_sheet() const = 0;
+        virtual i_style_sheet const& style_sheet() const = 0;
+        virtual void clear_style_sheet() = 0;
+        virtual void set_style_sheet(i_style_sheet const& aStyleSheet) = 0;
+        virtual void set_style_sheet(i_string_view const& aStyleSheet) = 0;
+        void set_style_sheet(std::string const& aStyleSheet)
         {
-            return set_style_sheet(std::string_view{ aStyleSheet });
+            set_style_sheet(std::string_view{ aStyleSheet });
         }
-        i_optional_style_sheet const& set_style_sheet(std::string_view const& aStyleSheet)
+        void set_style_sheet(std::string_view const& aStyleSheet)
         {
-            return set_style_sheet(string_view{ aStyleSheet });
+            set_style_sheet(string_view{ aStyleSheet });
         }
     public:
         virtual bool is_layout() const = 0;

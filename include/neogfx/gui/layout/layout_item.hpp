@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/core/style_sheet.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
@@ -68,22 +69,31 @@ namespace neogfx
             return false;
         }
     public:
-        optional_style_sheet const& style_sheet() const final
+        bool has_style_sheet() const final
         {
-            return iStyleSheet;
+            return iStyleSheet != std::nullopt;
+        }
+        i_style_sheet const& style_sheet() const final
+        {
+            if (has_style_sheet())
+                return iStyleSheet.value();
+            return service<i_app>().current_style().style_sheet();
+        }
+        void clear_style_sheet() final
+        {
+            iStyleSheet = std::nullopt;
+            StyleSheetChanged.trigger(iStyleSheet);
         }
         using i_layout_item::set_style_sheet;
-        optional_style_sheet const& set_style_sheet(i_optional_style_sheet const& aStyleSheet) final
+        void set_style_sheet(i_style_sheet const& aStyleSheet) final
         {
             iStyleSheet = aStyleSheet;
             StyleSheetChanged.trigger(iStyleSheet);
-            return iStyleSheet;
         }
-        optional_style_sheet const& set_style_sheet(i_string_view const& aStyleSheet) final
+        void set_style_sheet(i_string_view const& aStyleSheet) final
         {
             iStyleSheet = aStyleSheet.to_std_string_view();
             StyleSheetChanged.trigger(iStyleSheet);
-            return iStyleSheet;
         }
     public:
         bool is_layout() const final

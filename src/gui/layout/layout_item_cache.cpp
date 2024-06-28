@@ -125,19 +125,29 @@ namespace neogfx
         return true;
     }
 
-    i_optional_style_sheet const& layout_item_cache::style_sheet() const
+    bool layout_item_cache::has_style_sheet() const
+    {
+        return subject().has_style_sheet();
+    }
+
+    i_style_sheet const& layout_item_cache::style_sheet() const
     {
         return subject().style_sheet();
     }
 
-    i_optional_style_sheet const& layout_item_cache::set_style_sheet(i_optional_style_sheet const& aStyleSheet)
+    void layout_item_cache::clear_style_sheet()
     {
-        return subject().set_style_sheet(aStyleSheet);
+        subject().clear_style_sheet();
     }
 
-    i_optional_style_sheet const& layout_item_cache::set_style_sheet(i_string_view const& aStyleSheet)
+    void layout_item_cache::set_style_sheet(i_style_sheet const& aStyleSheet)
     {
-        return subject().set_style_sheet(aStyleSheet);
+        subject().set_style_sheet(aStyleSheet);
+    }
+
+    void layout_item_cache::set_style_sheet(i_string_view const& aStyleSheet)
+    {
+        subject().set_style_sheet(aStyleSheet);
     }
 
     bool layout_item_cache::is_layout() const

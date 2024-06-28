@@ -40,6 +40,10 @@ namespace neogfx
     {
     }
 
+    style_sheet::style_sheet()
+    {
+    }
+
     style_sheet::style_sheet(i_style_sheet const& aSheet) :
         iSheet{ std::make_shared<std::string>(aSheet.sheet().to_std_string_view()) }
     {
@@ -140,6 +144,7 @@ namespace neogfx
             Integer,
             Digit,
             Hex3,
+            Hex4,
             Hex6,
             Hex8,
             HexDigit,
@@ -169,6 +174,7 @@ declare_symbol(neogfx::nss::symbol, Identifier)
 declare_symbol(neogfx::nss::symbol, Integer)
 declare_symbol(neogfx::nss::symbol, Digit)
 declare_symbol(neogfx::nss::symbol, Hex3)
+declare_symbol(neogfx::nss::symbol, Hex4)
 declare_symbol(neogfx::nss::symbol, Hex6)
 declare_symbol(neogfx::nss::symbol, Hex8)
 declare_symbol(neogfx::nss::symbol, HexDigit)
@@ -199,14 +205,16 @@ namespace neogfx
             ( symbol::Value >> +repeat(symbol::ValuePart) ),
             ( symbol::ValuePart >> symbol::Identifier ),
             ( symbol::ValuePart >> (symbol::Length <=> "nss.length"_concept) ),
-            ( symbol::ValuePart >> symbol::Integer ),
-            ( symbol::ValuePart >> '#'_ , symbol::Hex3 ),
-            ( symbol::ValuePart >> '#'_ , symbol::Hex6 ),
-            ( symbol::ValuePart >> '#'_ , symbol::Hex8 ),
+            ( symbol::ValuePart >> (symbol::Integer <=> "nss.integer"_concept) ),
+            ( symbol::ValuePart >> (('#'_ , symbol::Hex3) <=> "nss.color"_concept) ),
+            ( symbol::ValuePart >> (('#'_ , symbol::Hex4) <=> "nss.color"_concept) ),
+            ( symbol::ValuePart >> (('#'_ , symbol::Hex6) <=> "nss.color"_concept) ),
+            ( symbol::ValuePart >> (('#'_ , symbol::Hex8) <=> "nss.color"_concept) ),
             ( symbol::Length >> sequence(symbol::Integer, choice("cm"_ | "mm"_ | "in"_ | "px"_ | "pt"_ | "pc"_ | "em"_ | "ex"_ | "ch"_ | "rem"_ | "vw"_ | "vh"_ | "vmin"_ | "vmax"_ | "%"_ )) ),
             ( symbol::Integer >> +repeat(symbol::Digit) ),
             ( symbol::Digit >> range('0', '9') ),
             ( symbol::Hex3 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit ) ),
+            ( symbol::Hex4 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::Hex6 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::Hex8 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::HexDigit >> choice(range('0', '9') | range('A', 'F') | range('a', 'f')) ),

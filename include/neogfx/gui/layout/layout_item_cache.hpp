@@ -49,9 +49,11 @@ namespace neogfx
     public:
         bool is_cache() const final;
     public:
-        i_optional_style_sheet const& style_sheet() const final;
-        i_optional_style_sheet const& set_style_sheet(i_optional_style_sheet const& aStyleSheet) final;
-        i_optional_style_sheet const& set_style_sheet(i_string_view const& aStyleSheet) final;
+        bool has_style_sheet() const final;
+        i_style_sheet const& style_sheet() const final;
+        void clear_style_sheet() final;
+        void set_style_sheet(i_style_sheet const& aStyleSheet) final;
+        void set_style_sheet(i_string_view const& aStyleSheet) final;
     public:
         bool is_layout() const final;
         const i_layout& as_layout() const final;
