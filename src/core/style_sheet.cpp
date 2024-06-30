@@ -23,21 +23,31 @@
 
 #include <neolib/file/parser.hpp>
 #include <neogfx/core/style_sheet.hpp>
+#include <neogfx/gfx/color.hpp>
 
 namespace neogfx
 {
-    style_sheet::selector::selector(type_e aType, const arguments_type& aArguments) :
-        iType(aType), iArguments(aArguments)
+    template <>
+    bool evaluate_style_sheet_value(i_style_sheet_value const& aValue, color& aResult)
     {
-    }
-
-    style_sheet::selector::type_e style_sheet::selector::type() const
-    {
-        return iType;
-    }
-
-    style_sheet::declaration::declaration()
-    {
+        for (auto const& v : aValue)
+        {
+            if (v.first() == "nss.color")
+            {
+                if (v.second().holds_alternative<i_string>())
+                {
+                    auto const& colorValue = v.second().get<i_string>();
+                    if (colorValue.empty())
+                        continue;
+                    if (colorValue[0] == '#')
+                    {
+                        aResult = colorValue.to_std_string();
+                        return true;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     style_sheet::style_sheet()
@@ -111,8 +121,19 @@ namespace neogfx
         return iSheetView.value();
     }
 
-    void style_sheet::accept(i_visitor& aVisitor) const
+    style_sheet_value const& style_sheet::value(i_string_view const& aSelector, i_string_view const& aProperty) const
     {
+        static style_sheet_value const tNoResult;
+
+        auto selector = iSelectors.find(aSelector.to_std_string_view());
+        if (selector != iSelectors.end())
+        {
+            auto property = selector->second.find(aProperty.to_std_string_view());
+            if (property != selector->second.end())
+                return property->second;
+        }
+
+        return tNoResult;
     }
 
     std::string style_sheet::to_string() const
@@ -197,7 +218,7 @@ namespace neogfx
             ( symbol::BeginDeclarationBlock >> '{'_ ),
             ( symbol::EndDeclarationBlock >> '}'_ ),
             ( symbol::Declarations >> sequence(symbol::Declaration , repeat(sequence(symbol::EndDeclaration , symbol::Declaration)), optional(symbol::EndDeclaration)) ),
-            ( symbol::Declaration >> (sequence((symbol::Property <=> "nss.property"_concept), symbol::DeclarationSeparator, (symbol::Value <=> "nss.value"_concept)) <=> "nss.declaration"_concept) ),
+            ( symbol::Declaration >> (sequence(symbol::Property <=> "nss.property"_concept), symbol::DeclarationSeparator, (symbol::Value <=> "nss.value"_concept)) ),
             ( symbol::DeclarationSeparator >> ':'_ ),
             ( symbol::EndDeclaration >> ';'_ ),
             ( symbol::Selector >> optional('.') , symbol::Identifier ),
@@ -213,7 +234,7 @@ namespace neogfx
             ( symbol::Length >> sequence(symbol::Integer, choice("cm"_ | "mm"_ | "in"_ | "px"_ | "pt"_ | "pc"_ | "em"_ | "ex"_ | "ch"_ | "rem"_ | "vw"_ | "vh"_ | "vmin"_ | "vmax"_ | "%"_ )) ),
             ( symbol::Integer >> +repeat(symbol::Digit) ),
             ( symbol::Digit >> range('0', '9') ),
-            ( symbol::Hex3 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit ) ),
+            ( symbol::Hex3 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::Hex4 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::Hex6 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
             ( symbol::Hex8 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
@@ -239,11 +260,29 @@ namespace neogfx
         };
     }
 
+    namespace
+    {
+        void create_values(style_sheet::selector_map& aSelectors, neolib::parser<nss::symbol>::ast_node const& aNode)
+        {
+            thread_local std::optional<style_sheet::selector_map::iterator> selector;
+            thread_local std::optional<style_sheet::property_map::iterator> property;
+            if (aNode.c.has_value() && aNode.c.value() == "nss.selector")
+                selector = aSelectors.emplace(aNode.value, style_sheet::property_map{}).first;
+            else if (selector.has_value() && aNode.c.has_value() && aNode.c.value() == "nss.property")
+                property = selector.value()->second.emplace(string{ aNode.value }, style_sheet_value{}).first;
+            else if (property.has_value())
+                property.value()->second.emplace_back(string{ aNode.c.value() }, style_sheet_value_type{ aNode.value });
+            for (auto const& child : aNode.children)
+                create_values(aSelectors, *child);
+        }
+    }
+
     void style_sheet::parse()
     {
         neolib::parser<nss::symbol> parser{ nss::sRules };
         parser.set_debug_output(std::cout);
         parser.parse(nss::symbol::Sheet, sheet().to_std_string_view());
         parser.create_ast();
+        create_values(iSelectors, parser.ast());
     }
 }

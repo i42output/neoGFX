@@ -30,6 +30,7 @@ using namespace boost::multiprecision;
 #include <neolib/core/lifetime.hpp>
 #include <neolib/core/reference_counted.hpp>
 #include <neolib/core/optional.hpp>
+#include <neolib/core/pair.hpp>
 #include <neolib/core/variant.hpp>
 #include <neolib/core/any.hpp>
 #include <neolib/core/enum.hpp>
@@ -81,7 +82,11 @@ namespace neogfx
     using neolib::optional;
     using neolib::i_optional;
 
+    using neolib::pair;
+    using neolib::i_pair;
+
     using neolib::variant;
+    using neolib::i_variant;
     using neolib::none;
     using neolib::none_t;
 

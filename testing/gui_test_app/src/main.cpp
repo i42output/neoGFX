@@ -41,19 +41,6 @@ int main(int argc, char* argv[])
 
         test::main_window window{ app };
 
-        window.button5.set_style_sheet(
-            R"(
-.button {
-    background-color: #04AA6D; /* Green */
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    })"_s);
-
         window.labelDPI.set_text(ng::string{ (std::ostringstream{} << "DPI: " <<
             window.device_metrics().horizontal_dpi() << " x " << window.device_metrics().vertical_dpi()).str() });
 
@@ -843,11 +830,26 @@ int main(int argc, char* argv[])
         ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
 
         #ifdef NDEBUG
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 1; i <= 1000; ++i)
         #else
-        for (int i = 0; i < 100; ++i)
+        for (int i = 1; i <= 100; ++i)
         #endif
-            window.layoutLots.emplace<ng::push_button>(boost::lexical_cast<std::string>(i));
+        {
+            auto& button = window.layoutLots.emplace<ng::push_button>(std::to_string(i));
+            if (i == 3)
+                button.set_style_sheet(
+                    R"(
+                    .button {
+                        background-color: #04AA6D; /* Green */
+                        border: none;
+                        color: white;
+                        padding: 15px 32px;
+                        text-align: center;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 16px;
+                        })"_s);
+        }
 
         ng::image hash(":/test/resources/channel_32.png");
         for (std::uint32_t i = 0; i < 9; ++i)

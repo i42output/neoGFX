@@ -79,7 +79,7 @@ namespace neogfx
     {
     }
 
-    sRGB_color::sRGB_color(std::string const& aTextValue) : 
+    sRGB_color::sRGB_color(std::string const& aTextValue) :
         base_type{}
     {
         if (aTextValue.empty())
@@ -146,6 +146,11 @@ namespace neogfx
                 }
             }
         }
+    }
+
+    sRGB_color::sRGB_color(std::string_view const& aTextValue) :
+        sRGB_color{ std::string{ aTextValue } }
+    {
     }
 
     sRGB_color& sRGB_color::operator=(const sRGB_color& aOther)

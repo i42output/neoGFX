@@ -23,6 +23,7 @@
 
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/core/i_style_sheet.hpp>
+#include <neogfx/app/i_app.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/i_geometry.hpp>
@@ -150,6 +151,11 @@ namespace neogfx
             return has_parent_widget() && aOther.has_parent_widget() && &parent_widget() == &aOther.parent_widget();
         }
     public:
+        template <typename T>
+        bool style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty, T& aResult) const
+        {
+            return style_sheet().evaluate(aSelector, aProperty, service<i_app>().current_style().style_sheet(), aResult);
+        }
     };
 
     template <typename LayoutItemType, layout_item_category ParentItemCategory = layout_item_category::Unspecified>

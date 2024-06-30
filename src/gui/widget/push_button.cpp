@@ -390,7 +390,11 @@ namespace neogfx
 
     color push_button::face_color() const
     {
-        return has_face_color() ? *iFaceColor : base_color();
+        if (has_face_color())
+            return iFaceColor.value();
+        color result = base_color();
+        style_sheet_value(".button", "background-color", result);
+        return result;
     }
 
     void push_button::set_face_color(const optional_color& aFaceColor)

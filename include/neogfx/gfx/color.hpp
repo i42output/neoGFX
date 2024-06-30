@@ -1049,6 +1049,7 @@ namespace neogfx
         explicit sRGB_color(const base_type& aOther);
         explicit sRGB_color(const linear_color& aLinear);
         sRGB_color(std::string const& aTextValue);
+        sRGB_color(std::string_view const& aTextValue);
         // assignment
     public:
         sRGB_color& operator=(const sRGB_color& aOther);
