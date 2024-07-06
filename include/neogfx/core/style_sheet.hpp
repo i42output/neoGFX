@@ -27,8 +27,7 @@
 
 namespace neogfx
 {
-    using style_sheet_value_type = variant<string, std::uint32_t, std::int32_t, double>;
-    using style_sheet_value = vector<pair<string, style_sheet_value_type>>;
+    using style_sheet_value = vector<pair<string, string>>;
 
     class style_sheet : public i_style_sheet
     {

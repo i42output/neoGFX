@@ -21,14 +21,14 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <neolib/core/map.hpp>
+#include <neolib/core/unordered_map.hpp>
 #include <neolib/core/i_string.hpp>
 
 namespace neogfx
 {
     class i_property;
 
-    typedef neolib::i_map<neolib::i_string, i_property*> property_map;
+    typedef neolib::i_unordered_map<neolib::i_string, i_property*> property_map;
 
     class i_properties
     {

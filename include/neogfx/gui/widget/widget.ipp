@@ -339,6 +339,7 @@ namespace neogfx
         if (oldParent != nullptr)
             oldParent->remove(*child, true);
         iChildren.push_back(child);
+        iChildMap[&*child] = iChildren.size() - 1u;
         child->set_parent(*this);
         child->set_singular(false);
         if (widget::has_root())
@@ -350,12 +351,20 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef)
     {
-        auto existing = find(aChild, false);
+        auto const posIter = iChildMap.find(&aChild);
+        if (posIter == iChildMap.end())
+            return;
+        auto const pos = posIter->second;
+        iChildMap.erase(posIter);
+        auto const existing = std::next(iChildren.begin(), pos);
         if (existing == iChildren.end())
             return;
         destroyed_flag childDestroyed{ aChild };
         ref_ptr<i_widget> keep = **existing;
         iChildren.erase(existing);
+        for (auto& cpos : iChildMap)
+            if (cpos.second > pos)
+                --cpos.second;
         if (childDestroyed)
             return;
         if (aSingular)
@@ -422,48 +431,60 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline typename widget<Interface>::widget_list::const_iterator widget<Interface>::find(const i_widget& aChild, bool aThrowIfNotFound) const
     {
-        for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
-            if (&**i == &aChild)
-                return i;
-        if (aThrowIfNotFound)
-            throw not_child();
-        else
-            return iChildren.end();
+        auto const pos = iChildMap.find(&aChild);
+        if (pos == iChildMap.end() || pos->second >= iChildren.size())
+        {
+            if (aThrowIfNotFound)
+                throw not_child();
+            else
+                return iChildren.end();
+        }
+        return std::next(iChildren.begin(), pos->second);
     }
 
     template <WidgetInterface Interface>
     inline typename widget<Interface>::widget_list::iterator widget<Interface>::find(const i_widget& aChild, bool aThrowIfNotFound)
     {
-        for (auto i = iChildren.begin(); i != iChildren.end(); ++i)
-            if (&**i == &aChild)
-                return i;
-        if (aThrowIfNotFound)
-            throw not_child();
-        else
-            return iChildren.end();
+        auto const pos = iChildMap.find(&aChild);
+        if (pos == iChildMap.end() || pos->second >= iChildren.size())
+        {
+            if (aThrowIfNotFound)
+                throw not_child();
+            else
+                return iChildren.end();
+        }
+        return std::next(iChildren.begin(), pos->second);
     }
 
     template <WidgetInterface Interface>
     inline void widget<Interface>::bring_child_to_front(const i_widget& aChild)
     {
-        auto existing = std::find_if(iChildren.begin(), iChildren.end(), [&](auto&& c) { return &*c == &aChild; });
-        if (existing != iChildren.end())
+        auto const pos = iChildMap.find(&aChild);
+        if (pos != iChildMap.end())
         {
+            auto existing = std::next(iChildren.begin(), pos->second);
             ref_ptr<i_widget> child = *existing;
             iChildren.erase(existing);
             iChildren.insert(iChildren.begin(), child);
+            widget_child_pos newPos = 0u;
+            for (auto& c : iChildren)
+                iChildMap[&*c] = newPos++;
         }
     }
 
     template <WidgetInterface Interface>
     inline void widget<Interface>::send_child_to_back(const i_widget& aChild)
     {
-        auto existing = std::find_if(iChildren.begin(), iChildren.end(), [&](auto&& c) { return &*c == &aChild; });
-        if (existing != iChildren.end())
+        auto const pos = iChildMap.find(&aChild);
+        if (pos != iChildMap.end())
         {
+            auto existing = std::next(iChildren.begin(), pos->second);
             ref_ptr<i_widget> child = *existing;
             iChildren.erase(existing);
             iChildren.insert(iChildren.end(), child);
+            widget_child_pos newPos = 0u;
+            for (auto& c : iChildren)
+                iChildMap[&*c] = newPos++;
         }
     }
 

@@ -20,6 +20,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <string>
+#include <boost/functional/hash.hpp>
 
 #include <neolib/file/parser.hpp>
 #include <neogfx/core/style_sheet.hpp>
@@ -30,24 +31,31 @@ namespace neogfx
     template <>
     bool evaluate_style_sheet_value(i_style_sheet_value const& aValue, color& aResult)
     {
+        thread_local std::unordered_map<std::pair<std::string_view, std::string_view>, color, boost::hash<std::pair<std::string_view, std::string_view>>> tCache;
+
         for (auto const& v : aValue)
         {
+            auto const key = std::make_pair(v.first().to_std_string_view(), v.second().to_std_string_view());
+            auto existing = tCache.find(key);
+            if (existing != tCache.end())
+            {
+                aResult = existing->second;
+                return true;
+            }
+
             if (v.first() == "nss.color")
             {
-                if (v.second().holds_alternative<i_string>())
+                if (v.second().empty())
+                    continue;
+                if (v.second()[0] == '#')
                 {
-                    auto const& colorValue = v.second().get<i_string>();
-                    if (colorValue.empty())
-                        continue;
-                    if (colorValue[0] == '#')
-                    {
-                        aResult = colorValue.to_std_string();
-                        return true;
-                    }
+                    aResult = v.second().to_std_string();
+                    tCache[key] = aResult;
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
 
     style_sheet::style_sheet()
@@ -271,7 +279,7 @@ namespace neogfx
             else if (selector.has_value() && aNode.c.has_value() && aNode.c.value() == "nss.property")
                 property = selector.value()->second.emplace(string{ aNode.value }, style_sheet_value{}).first;
             else if (property.has_value())
-                property.value()->second.emplace_back(string{ aNode.c.value() }, style_sheet_value_type{ aNode.value });
+                property.value()->second.emplace_back(string{ aNode.c.value() }, string{ aNode.value });
             for (auto const& child : aNode.children)
                 create_values(aSelectors, *child);
         }

@@ -111,13 +111,13 @@ namespace neogfx
         label(i_layout& aLayout, std::string const& aText, const i_image& aImage, label_type aType = label_type::MultiLine, neogfx::alignment aAlignment = neogfx::alignment::Left | neogfx::alignment::VCenter, label_placement aPlacement = label_placement::ImageTextHorizontal);
         ~label();
     public:
-        const grid_layout& layout() const override;
-        grid_layout& layout() override;
+        const grid_layout& layout() const final;
+        grid_layout& layout() final;
     public:
         neogfx::size_policy size_policy() const override;
     public:
-        void set_font_role(const optional_font_role& aFontRole) override;
-        void set_font(optional_font const& aFont) override;
+        void set_font_role(const optional_font_role& aFontRole) final;
+        void set_font(optional_font const& aFont) final;
     public:
         neogfx::alignment alignment() const;
         void set_alignment(neogfx::alignment aAlignment);

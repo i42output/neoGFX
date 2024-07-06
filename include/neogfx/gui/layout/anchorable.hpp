@@ -33,7 +33,7 @@ namespace neogfx
         // types
     public:
         using typename base_type::abstract_type;
-        typedef neolib::map<string, i_anchor*> anchor_map_type;
+        typedef neolib::unordered_flat_map<string, i_anchor*> anchor_map_type;
         // operations
     public:
         ~anchorable()

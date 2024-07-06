@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include <neogfx/gui/widget/timer.hpp>
 #include <neogfx/core/object.hpp>
@@ -75,10 +76,12 @@ namespace neogfx
         using typename base_type::layout_already_set;
         using typename base_type::no_layout;
     public:
-        typedef i_widget abstract_type;
-        typedef neolib::vector<ref_ptr<i_widget>> widget_list;
+        using abstract_type = i_widget;
+        using widget_list = neolib::vector<ref_ptr<i_widget>>;
     private:
-        typedef widget property_context_type;
+        using widget_child_pos = widget_list::size_type;
+        using widget_map = boost::unordered_flat_map<i_widget const*, widget_child_pos>;
+        using property_context_type = widget;
     public:
         widget();
         widget(const widget&) = delete;
@@ -107,18 +110,18 @@ namespace neogfx
         const i_widget& parent() const final;
         i_widget& parent() final;
         void set_parent(i_widget& aParent) override;
-        void parent_changed() final;
-        bool adding_child() const override;
-        i_widget& add(i_widget& aChild) override;
-        i_widget& add(const i_ref_ptr<i_widget>& aChild) override;
-        void remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef) override;
-        void remove_all() override;
-        bool has_children() const override;
-        const widget_list& children() const override;
-        widget_list::const_iterator last() const override;
-        widget_list::iterator last() override;
-        widget_list::const_iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) const override;
-        widget_list::iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) override;
+        void parent_changed() override;
+        bool adding_child() const final;
+        i_widget& add(i_widget& aChild) final;
+        i_widget& add(const i_ref_ptr<i_widget>& aChild) final;
+        void remove(i_widget& aChild, bool aSingular, i_ref_ptr<i_widget>& aChildRef) final;
+        void remove_all() final;
+        bool has_children() const final;
+        const widget_list& children() const final;
+        widget_list::const_iterator last() const final;
+        widget_list::iterator last() final;
+        widget_list::const_iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) const final;
+        widget_list::iterator find(const i_widget& aChild, bool aThrowIfNotFound = true) final;
     public:
         void bring_child_to_front(const i_widget& aChild) override;
         void send_child_to_back(const i_widget& aChild) override;
@@ -186,7 +189,7 @@ namespace neogfx
         i_widget& parent_widget() final;
         void set_parent_widget(i_widget* aParentWidget) final;
     public:
-        void layout_as(const point& aPosition, const size& aSize) override;
+        void layout_as(const point& aPosition, const size& aSize) final;
         // i_widget
     public:
         bool has_view() const override;
@@ -327,6 +330,7 @@ namespace neogfx
         mutable std::optional<const i_window*> iRoot;
         mutable std::optional<const i_device_metrics*> iDeviceMetrics;
         widget_list iChildren;
+        widget_map iChildMap;
         bool iAddingChild;
         i_widget* iLinkBefore;
         i_widget* iLinkAfter;

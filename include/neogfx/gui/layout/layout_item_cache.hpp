@@ -32,6 +32,8 @@ namespace neogfx
     class layout_item_cache : public object<reference_counted<i_layout_item_cache>>
     {
     public:
+        using abstract_type = i_layout_item_cache;
+    public:
         const neolib::i_event<i_optional_style_sheet const&>& ev_style_sheet_changed() const final;
         neolib::i_event<i_optional_style_sheet const&>& ev_style_sheet_changed() final;
     public:
@@ -152,9 +154,16 @@ namespace neogfx
         mutable std::pair<std::uint32_t, bool> iVisible;
         mutable std::pair<std::uint32_t, neogfx::size_policy> iSizePolicy;
         mutable std::pair<std::uint32_t, size> iWeight;
+        mutable std::pair<std::uint32_t, bool> iHasIdealSize;
+        mutable std::pair<std::uint32_t, bool> iIdealSizeConstrained;
         mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iIdealSize;
+        mutable std::pair<std::uint32_t, bool> iHasMinimumSize;
+        mutable std::pair<std::uint32_t, bool> iMinimumSizeConstrained;
         mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iMinimumSize;
+        mutable std::pair<std::uint32_t, bool> iHasMaximumSize;
+        mutable std::pair<std::uint32_t, bool> iMaximumSizeConstrained;
         mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iMaximumSize;
+        mutable std::pair<std::uint32_t, bool> iHasFixedSize;
         mutable std::pair<std::uint32_t, std::pair<optional_size, size>> iFixedSize;
         mutable std::pair<std::uint32_t, mat33> iTransformation;
         mutable std::pair<std::uint32_t, mat33> iCombinedTransformation;

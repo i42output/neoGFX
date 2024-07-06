@@ -21,7 +21,7 @@
 
 #include <neolib/neolib.hpp>
 #include <neolib/core/lifetime.hpp>
-#include <neolib/core/map.hpp>
+#include <neolib/core/unordered_map.hpp>
 #include <neolib/app/object.hpp>
 #include <neogfx/core/event.hpp>
 #include <neogfx/core/i_properties.hpp>
@@ -30,7 +30,7 @@
 namespace neogfx
 {
     template <typename Base = i_object>
-    class object : public neolib::object<Base>, public i_properties
+    class object : public neolib::object<Base>, i_properties
     {
         typedef neolib::object<Base> base_type;
     public:
@@ -58,26 +58,26 @@ namespace neogfx
             // default is to do nothing
         }
     public:
-        const i_properties& properties() const override
+        const i_properties& properties() const final
         {
             return *this;
         }
-        i_properties& properties() override
+        i_properties& properties() final
         {
             return *this;
         }
         // i_properties
     public:
-        void register_property(i_property& aProperty) override
+        void register_property(i_property& aProperty) final
         {
             iProperties.emplace(aProperty.name(), &aProperty);
         }
-        const neogfx::property_map& property_map() const override
+        const neogfx::property_map& property_map() const final
         {
             return iProperties;
         }
         // state
     private:
-        neolib::map<neolib::string, i_property*> iProperties;
+        neolib::unordered_flat_map<neolib::string, i_property*> iProperties;
     };
 }

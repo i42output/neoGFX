@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <map>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include "layout.hpp"
 #include "vertical_layout.hpp"
@@ -35,14 +35,14 @@ namespace neogfx
     public:
         struct cell_unoccupied : std::logic_error { cell_unoccupied() : std::logic_error("neogfx::grid_layout::cell_unoccupied") {} };
     public:
-        typedef std::uint32_t cell_coordinate;
-        typedef basic_point<cell_coordinate> cell_coordinates;
-        typedef basic_size<cell_coordinate> cell_dimensions;
+        using cell_coordinate = std::uint32_t;
+        using cell_coordinates = basic_point<cell_coordinate>;
+        using cell_dimensions = basic_size<cell_coordinate>;
     private:
         struct row_major;
         struct column_major;
-        typedef std::map<cell_coordinates, i_layout_item*, std::less<cell_coordinates>, neolib::fast_pool_allocator<std::pair<const cell_coordinates, i_layout_item*>>> cell_list;
-        typedef std::vector<std::pair<cell_coordinates, cell_coordinates>> span_list;
+        using cell_list = boost::unordered_flat_map<cell_coordinates, layout_item_cache*, std::hash<cell_coordinates>, std::equal_to<cell_coordinates>>;
+        using span_list = std::vector<std::pair<cell_coordinates, cell_coordinates>>;
     public:
         grid_layout(neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
         grid_layout(cell_coordinate aRows, cell_coordinate aColumns, neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);

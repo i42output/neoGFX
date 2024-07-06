@@ -30,8 +30,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, neogfx::texture{} },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -42,8 +42,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, neogfx::texture{} },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -54,8 +54,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aTexture },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -66,8 +66,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aImage },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -78,8 +78,8 @@ namespace neogfx
         iAlignment{ aAlignment },
         iPlacement{ aPlacement },
         iLayout{ *this },
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aTexture },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -90,8 +90,8 @@ namespace neogfx
         iAlignment{ aAlignment },
         iPlacement{ aPlacement },
         iLayout{ *this },
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aImage },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -102,8 +102,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, neogfx::texture{} },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -114,8 +114,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, neogfx::texture{} },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -126,8 +126,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aTexture },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -138,8 +138,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aImage },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -150,8 +150,8 @@ namespace neogfx
         iAlignment{ aAlignment },
         iPlacement{ aPlacement },
         iLayout{ *this },
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aTexture },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -162,8 +162,8 @@ namespace neogfx
         iAlignment{ aAlignment },
         iPlacement{ aPlacement },
         iLayout{ *this },
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aImage },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -174,8 +174,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, neogfx::texture{} },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -186,8 +186,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, neogfx::texture{} },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, neogfx::texture{} },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -198,8 +198,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aTexture },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -210,8 +210,8 @@ namespace neogfx
         iAlignment{ aAlignment }, 
         iPlacement{ aPlacement }, 
         iLayout{ *this }, 
-        iText{ iLayout, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aImage },
+        iText{ *this, std::string{}, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -222,8 +222,8 @@ namespace neogfx
         iAlignment{ aAlignment },
         iPlacement{ aPlacement },
         iLayout{ *this },
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aTexture },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aTexture },
         iCenterSpacer{ nullptr }
     {
         init();
@@ -234,8 +234,8 @@ namespace neogfx
         iAlignment{ aAlignment },
         iPlacement{ aPlacement },
         iLayout{ *this },
-        iText{ iLayout, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
-        iImage{ iLayout, aImage },
+        iText{ *this, aText, aType, text_widget_flags::TakesSpaceWhenEmpty },
+        iImage{ *this, aImage },
         iCenterSpacer{ nullptr }
     {
         init();

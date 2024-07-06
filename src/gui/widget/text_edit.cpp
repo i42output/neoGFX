@@ -1151,7 +1151,7 @@ namespace neogfx
         auto const& internalPadding = padding();
         auto const& colulmnPadding = column(0).padding; ///< todo: other columns?
         auto const& totalPadding = internalPadding + colulmnPadding;
-        return rect{ point{}, iTextExtents.value() + totalPadding.size()};
+        return rect{ point{}, iTextExtents.value_or(size{}) + totalPadding.size() };
     }
 
     rect text_edit::scroll_page() const

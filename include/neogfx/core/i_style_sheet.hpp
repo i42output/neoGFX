@@ -25,7 +25,7 @@
 
 namespace neogfx
 {
-    using i_style_sheet_value = i_vector<i_pair<i_string, i_variant<i_string, std::uint32_t, std::int32_t, double>>>;
+    using i_style_sheet_value = i_vector<i_pair<i_string, i_string>>;
 
     template <typename T>
     bool evaluate_style_sheet_value(i_style_sheet_value const& aValue, T& aResult);

@@ -50,7 +50,7 @@ namespace neogfx
     public:
         typedef i_layout abstract_type;
     protected:
-        typedef ref_ptr<i_layout_item_cache> item;
+        typedef ref_ptr<layout_item_cache> item;
         typedef std::list<item> item_list;
         enum item_type_e
         {

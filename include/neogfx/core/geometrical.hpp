@@ -1448,6 +1448,24 @@ define_setting_type(neogfx::rect)
 
 namespace std
 {
+    template <typename T>
+    struct hash<neogfx::basic_point<T>>
+    {
+        size_t operator()(const neogfx::basic_point<T>& aPoint) const
+        {
+            return std::hash<T>()(aPoint.x) ^ std::hash<T>()(aPoint.y);
+        }
+    };
+
+    template <typename T>
+    struct hash<neogfx::basic_size<T>>
+    {
+        size_t operator()(const neogfx::basic_size<T>& aSize) const
+        {
+            return std::hash<T>()(aSize.cx) ^ std::hash<T>()(aSize.cy);
+        }
+    };
+
     template <> struct hash<neogfx::rect>
     {
         size_t operator()(const neogfx::rect& aRect) const

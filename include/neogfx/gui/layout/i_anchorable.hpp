@@ -21,7 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <neolib/core/map.hpp>
+#include <neolib/core/unordered_map.hpp>
 #include <neolib/core/string.hpp>
 
 #include <neogfx/gui/layout/i_anchor.hpp>
@@ -37,7 +37,7 @@ namespace neogfx
         // types
     public:
         typedef i_anchorable abstract_type;
-        typedef neolib::i_map<i_string, i_anchor*> anchor_map_type;
+        typedef neolib::i_unordered_map<i_string, i_anchor*> anchor_map_type;
         // meta
     public:
         virtual i_object& as_object() = 0;

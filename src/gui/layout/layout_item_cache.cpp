@@ -48,9 +48,16 @@ namespace neogfx
         iVisible{ static_cast<std::uint32_t>(-1), {} },
         iSizePolicy{ static_cast<std::uint32_t>(-1), { size_constraint::Minimum } }, 
         iWeight{ static_cast<std::uint32_t>(-1), {} },
+        iHasIdealSize{ static_cast<std::uint32_t>(-1), {} },
+        iIdealSizeConstrained{ static_cast<std::uint32_t>(-1), {} },
         iIdealSize{ static_cast<std::uint32_t>(-1), {} },
+        iHasMinimumSize{ static_cast<std::uint32_t>(-1), {} },
+        iMinimumSizeConstrained{ static_cast<std::uint32_t>(-1), {} },
         iMinimumSize{ static_cast<std::uint32_t>(-1), {} },
+        iHasMaximumSize{ static_cast<std::uint32_t>(-1), {} },
+        iMaximumSizeConstrained{ static_cast<std::uint32_t>(-1), {} },
         iMaximumSize{ static_cast<std::uint32_t>(-1), {} },
+        iHasFixedSize{ static_cast<std::uint32_t>(-1), {} },
         iFixedSize{ static_cast<std::uint32_t>(-1), {} },
         iTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() },
         iCombinedTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() }
@@ -64,9 +71,16 @@ namespace neogfx
         iVisible{ static_cast<std::uint32_t>(-1), {} },
         iSizePolicy{ static_cast<std::uint32_t>(-1), { size_constraint::Minimum } },
         iWeight{ static_cast<std::uint32_t>(-1), {} },
+        iHasIdealSize{ static_cast<std::uint32_t>(-1), {} },
+        iIdealSizeConstrained{ static_cast<std::uint32_t>(-1), {} },
         iIdealSize{ static_cast<std::uint32_t>(-1), {} },
+        iHasMinimumSize{ static_cast<std::uint32_t>(-1), {} },
+        iMinimumSizeConstrained{ static_cast<std::uint32_t>(-1), {} },
         iMinimumSize{ static_cast<std::uint32_t>(-1), {} },
+        iHasMaximumSize{ static_cast<std::uint32_t>(-1), {} },
+        iMaximumSizeConstrained{ static_cast<std::uint32_t>(-1), {} },
         iMaximumSize{ static_cast<std::uint32_t>(-1), {} },
+        iHasFixedSize{ static_cast<std::uint32_t>(-1), {} },
         iFixedSize{ static_cast<std::uint32_t>(-1), {} },
         iTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() },
         iCombinedTransformation{ static_cast<std::uint32_t>(-1), mat33::identity() }
@@ -409,12 +423,24 @@ namespace neogfx
     
     bool layout_item_cache::has_ideal_size() const noexcept
     {
-        return subject().has_ideal_size();
+        auto& cachedHasIdealSize = iHasIdealSize.second;
+        if (iHasIdealSize.first != global_layout_id())
+        {
+            cachedHasIdealSize = subject().has_ideal_size();
+            iHasIdealSize.first = global_layout_id();
+        }
+        return cachedHasIdealSize;
     }
 
     bool layout_item_cache::is_ideal_size_constrained() const noexcept
     {
-        return subject().is_ideal_size_constrained();
+        auto& cachedIdealSizeConstrained = iIdealSizeConstrained.second;
+        if (iIdealSizeConstrained.first != global_layout_id())
+        {
+            cachedIdealSizeConstrained = subject().is_ideal_size_constrained();
+            iIdealSizeConstrained.first = global_layout_id();
+        }
+        return cachedIdealSizeConstrained;
     }
 
     size layout_item_cache::ideal_size(optional_size const& aAvailableSpace) const
@@ -427,7 +453,7 @@ namespace neogfx
             return size{};
         scoped_units su{ subject(), units::Pixels };
         auto& cachedIdealSize = iIdealSize.second.second;
-        if (iIdealSize.first != global_layout_id() || iIdealSize.second.first != aAvailableSpace || is_minimum_size_constrained())
+        if (iIdealSize.first != global_layout_id() || iIdealSize.second.first != aAvailableSpace || is_ideal_size_constrained())
         {
 #ifdef NEOGFX_DEBUG
             if (&subject() == debug::layoutItem)
@@ -474,12 +500,24 @@ namespace neogfx
 
     bool layout_item_cache::has_minimum_size() const noexcept
     {
-        return subject().has_minimum_size();
+        auto& cachedHasMinSize = iHasMinimumSize.second;
+        if (iHasMinimumSize.first != global_layout_id())
+        {
+            cachedHasMinSize = subject().has_minimum_size();
+            iHasMinimumSize.first = global_layout_id();
+        }
+        return cachedHasMinSize;
     }
 
     bool layout_item_cache::is_minimum_size_constrained() const noexcept
     {
-        return subject().is_minimum_size_constrained();
+        auto& cachedMinSizeConstrained = iMinimumSizeConstrained.second;
+        if (iMinimumSizeConstrained.first != global_layout_id())
+        {
+            cachedMinSizeConstrained = subject().is_minimum_size_constrained();
+            iMinimumSizeConstrained.first = global_layout_id();
+        }
+        return cachedMinSizeConstrained;
     }
 
     size layout_item_cache::minimum_size(optional_size const& aAvailableSpace) const
@@ -539,12 +577,24 @@ namespace neogfx
 
     bool layout_item_cache::has_maximum_size() const noexcept
     {
-        return subject().has_maximum_size();
+        auto& cachedHasMaxSize = iHasMaximumSize.second;
+        if (iHasMaximumSize.first != global_layout_id())
+        {
+            cachedHasMaxSize = subject().has_minimum_size();
+            iHasMaximumSize.first = global_layout_id();
+        }
+        return cachedHasMaxSize;
     }
 
     bool layout_item_cache::is_maximum_size_constrained() const noexcept
     {
-        return subject().is_maximum_size_constrained();
+        auto& cachedMaxSizeConstrained = iMaximumSizeConstrained.second;
+        if (iMaximumSizeConstrained.first != global_layout_id())
+        {
+            cachedMaxSizeConstrained = subject().is_maximum_size_constrained();
+            iMaximumSizeConstrained.first = global_layout_id();
+        }
+        return cachedMaxSizeConstrained;
     }
 
     size layout_item_cache::maximum_size(optional_size const& aAvailableSpace) const
@@ -584,7 +634,13 @@ namespace neogfx
 
     bool layout_item_cache::has_fixed_size() const noexcept
     {
-        return subject().has_fixed_size();
+        auto& cachedHasFixedSize = iHasFixedSize.second;
+        if (iHasFixedSize.first != global_layout_id())
+        {
+            cachedHasFixedSize = subject().has_minimum_size();
+            iHasFixedSize.first = global_layout_id();
+        }
+        return cachedHasFixedSize;
     }
 
     size layout_item_cache::fixed_size(optional_size const& aAvailableSpace) const
