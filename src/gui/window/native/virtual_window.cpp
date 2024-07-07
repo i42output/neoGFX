@@ -177,6 +177,12 @@ namespace neogfx
             surface_window().native_surface().invalidate(rect{ surface_position(), surface_extents() });
     }
 
+    bool virtual_window::resizing_or_moving() const
+    {
+        // todo
+        return false;
+    }
+
     bool virtual_window::can_render() const
     {
         return visible() && parent().can_render();

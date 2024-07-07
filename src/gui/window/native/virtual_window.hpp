@@ -55,6 +55,7 @@ namespace neogfx
         void move_surface(const point& aPosition) final;
         size surface_extents() const final;
         void resize_surface(const size& aExtents) final;
+        bool resizing_or_moving() const final;
     public:
         bool can_render() const final;
         void render(bool aOOBRequest = false) final;

@@ -96,6 +96,7 @@ namespace neogfx
             void move_surface(const point& aPosition) final;
             size surface_extents() const final;
             void resize_surface(const size& aExtents) final;
+            bool resizing_or_moving() const final;
         public:
             void close(bool aForce = false) final;
             bool visible() const final;
@@ -155,6 +156,7 @@ namespace neogfx
             bool iActive = false;
             std::optional<char16_t> iHighSurrogate;
             std::optional<point> iActivationMousePos;
+            bool iResizingOrMoving = false;
             bool iMouseEntered = false;
             bool iCapturingMouse = false;
             bool iNonClientCapturing = false;

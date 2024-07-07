@@ -491,6 +491,11 @@ namespace neogfx
             ::SetWindowPos(iHandle, HWND_NOTOPMOST, 0, 0, static_cast<int>(aExtents.cx), static_cast<int>(aExtents.cy), SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
         }
 
+        bool window::resizing_or_moving() const
+        {
+            return iResizingOrMoving;
+        }
+
         bool window::can_render() const
         {
             return visible() && attached() && attachment().can_render();
@@ -918,6 +923,7 @@ namespace neogfx
                 result = 0;
                 break;
             case WM_TIMER:
+                service<i_async_task>().pump_events();
                 ::InvalidateRect(hwnd, NULL, FALSE);
                 ::UpdateWindow(hwnd);
                 result = 0;
@@ -1309,6 +1315,9 @@ namespace neogfx
                     }
                 }
                 result = wndproc(hwnd, msg, wparam, lparam);
+                service<i_async_task>().pump_events();
+                ::InvalidateRect(hwnd, NULL, FALSE);
+                ::UpdateWindow(hwnd);
                 break;
             case WM_MOVE:
                 {
@@ -1349,12 +1358,16 @@ namespace neogfx
                 }
                 break;
             case WM_ENTERSIZEMOVE:
+                self.iResizingOrMoving = true;
                 ::SetTimer(hwnd, 1, USER_TIMER_MINIMUM, NULL);
                 result = wndproc(hwnd, msg, wparam, lparam);
+                service<i_async_task>().pump_events();
                 break;
             case WM_EXITSIZEMOVE:
                 ::KillTimer(hwnd, 1);
                 result = wndproc(hwnd, msg, wparam, lparam);
+                service<i_async_task>().pump_events();
+                self.iResizingOrMoving = false;
                 break;
             case WM_SIZE:
                 switch (wparam) 
@@ -1393,6 +1406,9 @@ namespace neogfx
                         result = wndproc(hwnd, msg, wparam, lparam);
                         self.handle_event(window_event{ window_event_type::Resizing, self.surface_extents() }.with_external_cause(!self.iInMoveResizeCall));
                     }
+                    service<i_async_task>().pump_events();
+                    ::InvalidateRect(hwnd, NULL, FALSE);
+                    ::UpdateWindow(hwnd);
                 }
                 break;
             case WM_GETMINMAXINFO:

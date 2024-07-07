@@ -831,9 +831,9 @@ int main(int argc, char* argv[])
 
         window.layoutLots.set_padding(ng::padding{});
         #ifdef NDEBUG
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i < 200; ++i)
         #else
-        for (int i = 0; i < 100; ++i)
+        for (int i = 0; i < 20; ++i)
         #endif
         {
             auto& layout = window.layoutLots.emplace<ng::horizontal_layout>();

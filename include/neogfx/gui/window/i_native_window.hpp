@@ -84,6 +84,7 @@ namespace neogfx
         virtual void handle_event() = 0;
         virtual bool processing_event() const = 0;
         virtual bool event_cause_external() const = 0;
+        virtual bool resizing_or_moving() const = 0;
         virtual void close(bool aForce = false) = 0;
         virtual bool visible() const = 0;
         virtual void show(bool aActivate = false) = 0;

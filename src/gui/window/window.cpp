@@ -536,7 +536,7 @@ namespace neogfx
     void window::resized()
     {
         base_type::resized();
-        if (has_native_window() && !native_window().event_cause_external() &&
+        if (has_native_window() && !native_window().event_cause_external() && !native_window().resizing_or_moving() &&
             (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
             center_on_parent((style() & window_style::Resize) != window_style::Resize);
     }
