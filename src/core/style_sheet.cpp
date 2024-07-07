@@ -274,6 +274,11 @@ namespace neogfx
         {
             thread_local std::optional<style_sheet::selector_map::iterator> selector;
             thread_local std::optional<style_sheet::property_map::iterator> property;
+            if (aNode.parent == nullptr)
+            {
+                selector = std::nullopt;
+                property = std::nullopt;
+            }
             if (aNode.c.has_value() && aNode.c.value() == "nss.selector")
                 selector = aSelectors.emplace(aNode.value, style_sheet::property_map{}).first;
             else if (selector.has_value() && aNode.c.has_value() && aNode.c.value() == "nss.property")
