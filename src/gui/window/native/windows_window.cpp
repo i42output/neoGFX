@@ -1315,9 +1315,6 @@ namespace neogfx
                     }
                 }
                 result = wndproc(hwnd, msg, wparam, lparam);
-                service<i_async_task>().pump_events();
-                ::InvalidateRect(hwnd, NULL, FALSE);
-                ::UpdateWindow(hwnd);
                 break;
             case WM_MOVE:
                 {
@@ -1406,9 +1403,6 @@ namespace neogfx
                         result = wndproc(hwnd, msg, wparam, lparam);
                         self.handle_event(window_event{ window_event_type::Resizing, self.surface_extents() }.with_external_cause(!self.iInMoveResizeCall));
                     }
-                    service<i_async_task>().pump_events();
-                    ::InvalidateRect(hwnd, NULL, FALSE);
-                    ::UpdateWindow(hwnd);
                 }
                 break;
             case WM_GETMINMAXINFO:

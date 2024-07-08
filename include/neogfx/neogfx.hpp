@@ -37,6 +37,9 @@ using namespace boost::multiprecision;
 #include <neolib/core/vector.hpp>
 #include <neolib/core/deque.hpp>
 #include <neolib/core/list.hpp>
+#include <neolib/core/map.hpp>
+#include <neolib/core/set.hpp>
+#include <neolib/core/unordered_map.hpp>
 #include <neolib/core/string.hpp>
 #include <neolib/core/string_view.hpp>
 #include <neolib/core/string_utils.hpp>
@@ -109,6 +112,17 @@ namespace neogfx
 
     using neolib::i_list;
     using neolib::list;
+
+    using neolib::i_map;
+    using neolib::i_multimap;
+    using neolib::map;
+    using neolib::multimap;
+    using neolib::i_set;
+    using neolib::set;
+    using neolib::multiset;
+    using neolib::i_unordered_map;
+    using neolib::unordered_map;
+    using neolib::unordered_flat_map;
 
     using neolib::i_string;
     using neolib::string;
