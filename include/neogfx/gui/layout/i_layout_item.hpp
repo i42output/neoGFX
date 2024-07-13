@@ -152,9 +152,21 @@ namespace neogfx
         }
     public:
         template <typename T>
-        bool style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty, T& aResult) const
+        T const& style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty, T const& aDefault) const
         {
-            return style_sheet().evaluate(aSelector, aProperty, service<i_app>().current_style().style_sheet(), aResult);
+            auto result = style_sheet().evaluate<T>(aSelector, aProperty, service<i_app>().current_style().style_sheet());
+            if (result != nullptr)
+                return *result;
+            return aDefault;
+        }
+        template <typename T>
+        T const& style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty, T&& aDefault) const
+        {
+            auto result = style_sheet().evaluate<T>(aSelector, aProperty, service<i_app>().current_style().style_sheet());
+            if (result != nullptr)
+                return *result;
+            thread_local std::optional<T> tResult;
+            return (tResult.emplace(std::move(aDefault)));
         }
     };
 

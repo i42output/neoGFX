@@ -245,6 +245,9 @@ namespace neogfx
     void push_button::paint(i_graphics_context& aGc) const
     {
         // todo: move to default skin
+
+        auto const& borderRadii = style_sheet_value(".button", "border-radius", std::vector<length>{});
+
         color faceColor = effective_face_color();
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
@@ -392,9 +395,7 @@ namespace neogfx
     {
         if (has_face_color())
             return iFaceColor.value();
-        color result = base_color();
-        style_sheet_value(".button", "background-color", result);
-        return result;
+        return style_sheet_value(".button", "background-color", base_color());
     }
 
     void push_button::set_face_color(const optional_color& aFaceColor)

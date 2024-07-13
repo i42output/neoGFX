@@ -28,7 +28,7 @@ namespace neogfx
     using i_style_sheet_value = i_vector<i_pair<i_string, i_string>>;
 
     template <typename T>
-    bool evaluate_style_sheet_value(i_style_sheet_value const& aValue, T& aResult);
+    T const* evaluate_style_sheet_value(i_style_sheet_value const& aValue);
 
     class i_style_sheet
     {
@@ -44,21 +44,22 @@ namespace neogfx
         virtual i_style_sheet_value const& value(i_string_view const& aSelector, i_string_view const& aProperty) const = 0;
     public:
         template <typename T>
-        bool evaluate(std::string_view const& aSelector, std::string_view const& aProperty, T& aResult) const
+        T const* evaluate(std::string_view const& aSelector, std::string_view const& aProperty) const
         {
             auto const& resultValue = value(string_view{ aSelector }, string_view{ aProperty });
             if (resultValue.empty())
-                return false;
-            return evaluate_style_sheet_value(resultValue, aResult);
+                return nullptr;
+            return evaluate_style_sheet_value<T>(resultValue);
         }
         template <typename T>
-        bool evaluate(std::string_view const& aSelector, std::string_view const& aProperty, i_style_sheet const& aParentStyleSheet, T& aResult) const
+        T const* evaluate(std::string_view const& aSelector, std::string_view const& aProperty, i_style_sheet const& aParentStyleSheet) const
         {
-            if (evaluate(aSelector, aProperty, aResult))
-                return true;
+            auto result = evaluate<T>(aSelector, aProperty);
+            if (result)
+                return result;
             if (&aParentStyleSheet != this)
-                return aParentStyleSheet.evaluate(aSelector, aProperty, aResult);
-            return false;
+                return aParentStyleSheet.evaluate<T>(aSelector, aProperty);
+            return nullptr;
         }
     };
 

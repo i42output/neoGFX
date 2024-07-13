@@ -211,7 +211,6 @@ namespace neogfx
     template <typename T>
     class basic_length
     {
-        typedef basic_length<T> self_type;
     public:
         struct unknown_unit : std::runtime_error { unknown_unit(std::string const& aUnitName) : std::runtime_error{ "neoGFX: Error: Unknown unit '" + aUnitName + "'" } {} };
     public:
@@ -226,15 +225,15 @@ namespace neogfx
         {
         }
     public:
-        bool operator==(const self_type& aRhs) const
+        bool operator==(const basic_length& aRhs) const
         {
             return iValue == aRhs.iValue && iUnits == aRhs.iUnits;
         }
-        bool operator!=(const self_type& aRhs) const
+        bool operator!=(const basic_length& aRhs) const
         {
             return !(*this == aRhs);
         }
-        bool operator<(const self_type& aRhs) const
+        bool operator<(const basic_length& aRhs) const
         {
             return std::forward_as_tuple(iValue, iUnits) < std::forward_as_tuple(aRhs.iValue, aRhs.iUnits);
         }
@@ -297,7 +296,7 @@ namespace neogfx
             }
             return oss.str();
         }
-        static self_type from_string(std::string const& aValue)
+        static basic_length from_string(std::string const& aValue)
         {
             static const std::unordered_map<std::string, neogfx::units> sUnitTypes
             {
@@ -313,8 +312,8 @@ namespace neogfx
                 { "pct", neogfx::units::Percentage }
             };
             if (aValue == "max")
-                return self_type{ 0.0, neogfx::units::NoUnitsAsMaximumLength };
-            self_type result;
+                return basic_length{ 0.0, neogfx::units::NoUnitsAsMaximumLength };
+            basic_length result;
             std::istringstream iss{ aValue };
             iss >> result.iValue;
             std::string unitName;

@@ -28,34 +28,85 @@
 
 namespace neogfx
 {
-    template <>
-    bool evaluate_style_sheet_value(i_style_sheet_value const& aValue, color& aResult)
+    namespace
     {
-        thread_local std::unordered_map<std::pair<std::string_view, std::string_view>, color, boost::hash<std::pair<std::string_view, std::string_view>>> tCache;
+        template <typename T>
+        using value_map_t = std::unordered_map<std::pair<std::string_view, std::string_view>, T, boost::hash<std::pair<std::string_view, std::string_view>>>;
 
+        template <typename T>
+        value_map_t<T>& value_map()
+        {
+            thread_local value_map_t<T> tValueMap;
+            return tValueMap;
+        }
+
+        template <typename T>
+        typename value_map_t<T>::iterator value_map_find(typename value_map_t<T>::key_type aKey)
+        {
+            return value_map<T>().find(aKey);
+        }
+
+        template <typename T>
+        typename value_map_t<T>::iterator value_map_find(std::string_view const& aSelector, std::string_view const& aProperty)
+        {
+            return value_map<T>().find(typename value_map_t<T>::key_type{ aSelector, aProperty });
+        }
+
+        template <typename T>
+        typename T& value_map_entry(std::string_view const& aSelector, std::string_view const& aProperty)
+        {
+            return value_map<T>()[typename value_map_t<T>::key_type{aSelector, aProperty}];
+        }
+    }
+
+    template <>
+    color const* evaluate_style_sheet_value<color>(i_style_sheet_value const& aValue)
+    {
         for (auto const& v : aValue)
         {
-            auto const key = std::make_pair(v.first().to_std_string_view(), v.second().to_std_string_view());
-            auto existing = tCache.find(key);
-            if (existing != tCache.end())
-            {
-                aResult = existing->second;
-                return true;
-            }
+            auto existing = value_map_find<color>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<color>().end())
+                return &existing->second;
 
             if (v.first() == "nss.color")
             {
                 if (v.second().empty())
                     continue;
                 if (v.second()[0] == '#')
-                {
-                    aResult = v.second().to_std_string();
-                    tCache[key] = aResult;
-                    return true;
-                }
+                    return &(value_map_entry<color>(v.first().to_std_string_view(), v.second().to_std_string_view()) = v.second().to_std_string());
             }
         }
-        return false;
+
+        return nullptr;
+    }
+
+    template <>
+    std::vector<length> const* evaluate_style_sheet_value<std::vector<length>>(i_style_sheet_value const& aValue)
+    {
+        std::vector<length>* result = nullptr;
+
+        for (auto const& v : aValue)
+        {
+            auto existing = value_map_find<std::vector<length>>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<std::vector<length>>().end())
+                return &existing->second;
+
+            if (v.first() == "nss.value")
+            {
+                if (v.second().empty())
+                    continue;
+                auto& lengths = value_map_entry<std::vector<length>>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                result = &lengths;
+            }
+            else if (v.first() == "nss.length" && result)
+            {
+                if (v.second().empty())
+                    continue;
+                result->push_back(length::from_string(v.second()));
+            }
+        }
+
+        return result;
     }
 
     style_sheet::style_sheet()
