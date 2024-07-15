@@ -1112,7 +1112,7 @@ namespace neogfx
     {
         auto& self = *this;
         auto const& adjustedPadding = (self.has_padding() ? 
-            *base_type::Padding : service<i_app>().current_style().padding(widget::is_root() ? padding_role::Window : padding_role::Widget));
+            base_type::padding() : service<i_app>().current_style().padding(widget::is_root() ? padding_role::Window : padding_role::Widget));
         return self.transformation() * units_converter{ *this }.from_device_units(adjustedPadding);
     }
 

@@ -373,13 +373,13 @@ namespace neogfx
 
     margin layout::margin() const
     {
-        auto const& adjustedMargin = (has_margin() ? *Margin : service<i_app>().current_style().margin(margin_role::Layout) * dpi_scale_factor());
+        auto const& adjustedMargin = (has_margin() ? base_type::margin() : service<i_app>().current_style().margin(margin_role::Layout) * dpi_scale_factor());
         return transformation(true) * units_converter{ *this }.from_device_units(adjustedMargin);
     }
 
     padding layout::padding() const
     {
-        auto const& adjustedPadding = (has_padding() ? *Padding : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
+        auto const& adjustedPadding = (has_padding() ? base_type::padding() : service<i_app>().current_style().padding(padding_role::Layout) * dpi_scale_factor());
         return transformation(true) * units_converter{ *this }.from_device_units(adjustedPadding);
     }
 

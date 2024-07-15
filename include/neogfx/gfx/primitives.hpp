@@ -90,7 +90,8 @@ namespace neogfx
         Ellipse     = 0x06,
         Pie         = 0x07,
         Arc         = 0x08,
-        RoundedRect = 0x09
+        RoundedRect = 0x09,
+        EllipseRect = 0x0A
     };
 
     enum class blurring_algorithm

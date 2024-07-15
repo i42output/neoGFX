@@ -200,10 +200,11 @@ void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     }
 }
                 
-float sdRoundedBox( in vec2 p, in vec2 b, in vec4 r )
+float sdRoundedBox(in vec2 p, in vec2 b, in vec4 r)
 {
-    r.xy = (p.x>0.0)?r.xy : r.zw;
-    r.x  = (p.y>0.0)?r.x  : r.y;
+    r.xy = (p.x>0.0)?r.yz : r.xw;
+    r.x  = (p.y>0.0)?r.y  : r.x;
+    r.x  = min(r.x, min(b.x, b.y));
     vec2 q = abs(p)-b+r.x;
     return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
@@ -218,6 +219,28 @@ void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
         discard;
     else
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+}
+
+float sdEllipseBox(in vec2 p, in vec2 b, in vec4 rx, in vec4 ry)
+{
+    // todo
+    rx.xy = (p.x>0.0)?rx.yz : rx.xw;
+    rx.x  = (p.y>0.0)?rx.y  : rx.x;
+    rx.x  = min(rx.x, min(b.x, b.y));
+    vec2 q = abs(p)-b+rx.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - rx.x;
+}
+                
+void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
+{
+    vec2 p0 = (Coord.xy - function1.xy);
+    float d0 = sdEllipseBox(p0, function1.zw * 0.5, function2, function3);
+    if (function4.w == 0.0)
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    else if (function4.y == 0.0 && abs(d0) > function4.w / 2.0)
+        discard;
+    else
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function4.w / 2.0, function4.w / 2.0 + function4.y, abs(d0))));
 }
 
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
@@ -252,6 +275,9 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
             break;
         case SHAPE_RoundedRect:
             draw_rounded_rect(color, function1, function2, function3);
+            break;
+        case SHAPE_EllipseRect:
+            draw_ellipse_rect(color, function1, function2, function3, function4);
             break;
         }
     }

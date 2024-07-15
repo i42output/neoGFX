@@ -401,6 +401,11 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
     }
 
+    void graphics_context::draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill) const
+    {
+        native_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect) + iOrigin, aRadiusX, aRadiusY, aPen, aFill });
+    }
+
     void graphics_context::draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const
     {
         native_context().enqueue(graphics_operation::draw_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });

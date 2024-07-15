@@ -229,6 +229,29 @@ namespace neogfx
         return button::maximum_size(aAvailableSpace);
     }
 
+    padding push_button::padding() const
+    {
+        if (has_padding())
+            return button::padding();
+        switch (iStyle)
+        {
+        case push_button_style::ItemViewHeader:
+            return neogfx::padding{ 1.0_dip, 2.0_dip };
+        case push_button_style::Toolbar:
+            return neogfx::padding{ 2.0_dip, 2.0_dip };
+        case push_button_style::TitleBar:
+            return neogfx::padding{};
+        case push_button_style::SpinBox:
+            return neogfx::padding{ 2.0_dip, 2.0_dip };
+        case push_button_style::Tab:
+            return button::padding();
+        case push_button_style::Normal:
+            return neogfx::padding{ 8.0_dip, 4.0_dip };
+        default:
+            return neogfx::padding{ 4.0_dip, 4.0_dip };
+        }
+    }
+
     void push_button::paint_non_client(i_graphics_context& aGc) const
     {
         button::paint_non_client(aGc);
@@ -246,12 +269,36 @@ namespace neogfx
     {
         // todo: move to default skin
 
-        auto const& borderRadii = style_sheet_value(".button", "border-radius", std::vector<length>{});
-
         color faceColor = effective_face_color();
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
+
         scoped_units su{ *this, units::Pixels };
+
+        auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::vector<length>{});
+
+        if (!borderRadii.empty())
+        {
+            vec4 radii;
+            switch (borderRadii.size())
+            {
+            case 1:
+                radii = { borderRadii[0], borderRadii[0], borderRadii[0], borderRadii[0] };
+                break;
+            case 2:
+                radii = { borderRadii[0], borderRadii[1], borderRadii[0], borderRadii[1] };
+                break;
+            case 3:
+                radii = { borderRadii[0], borderRadii[1], borderRadii[2], borderRadii[1] };
+                break;
+            case 4:
+                radii = { borderRadii[0], borderRadii[1], borderRadii[2], borderRadii[3] };
+                break;
+            }
+            aGc.fill_ellipse_rect(path_bounding_rect(), radii, radii, faceColor);
+            return;
+        }
+
         neogfx::path outline = path();
         dimension penWidth = 1.0;
         switch (iStyle)
@@ -395,7 +442,7 @@ namespace neogfx
     {
         if (has_face_color())
             return iFaceColor.value();
-        return style_sheet_value(".button", "background-color", base_color());
+        return style_sheet_value("." + class_name(), "background-color", base_color());
     }
 
     void push_button::set_face_color(const optional_color& aFaceColor)
@@ -484,27 +531,21 @@ namespace neogfx
         switch(iStyle)
         {
         case push_button_style::ItemViewHeader:
-            set_padding(neogfx::padding{ 1.0_dip, 2.0_dip });
             label().text_widget().set_alignment(neogfx::alignment::Left | neogfx::alignment::VCenter);
             break;
         case push_button_style::Toolbar:
-            set_padding(neogfx::padding{ 2.0_dip, 2.0_dip });
             label().text_widget().set_font_role(neogfx::font_role::Toolbar);
             break;
         case push_button_style::TitleBar:
-            set_padding(neogfx::padding{});
             label().text_widget().set_font_role(neogfx::font_role::Caption);
             break;
         case push_button_style::SpinBox:
-            set_padding(neogfx::padding{ 2.0_dip, 2.0_dip });
             break;
         case push_button_style::Tab:
             break;
         case push_button_style::Normal:
-            set_padding(neogfx::padding{ 8.0_dip, 4.0_dip });
             break;
         default:
-            set_padding(neogfx::padding{ 4.0_dip, 4.0_dip });
             break;
         }
     }

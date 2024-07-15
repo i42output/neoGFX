@@ -597,6 +597,9 @@ namespace neogfx
             case graphics_operation::operation_type::DrawRoundedRect:
                 draw_rounded_rects(opBatch);
                 break;
+            case graphics_operation::operation_type::DrawEllipseRect:
+                draw_ellipse_rects(opBatch);
+                break;
             case graphics_operation::operation_type::DrawCheckerRect:
                 draw_checker_rects(opBatch);
                 break;
@@ -1111,6 +1114,60 @@ namespace neogfx
                             function,
                             vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
                             drawOp.radius.as<float>(),
+                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+            }
+        }
+    }
+
+    void opengl_rendering_context::draw_ellipse_rects(const graphics_operation::batch& aDrawEllpseRectOps)
+    {
+        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
+
+        neolib::scoped_flag snap{ iSnapToPixelUsesOffset, false };
+
+        auto& firstOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(*aDrawEllpseRectOps.cbegin());
+
+        if (std::holds_alternative<gradient>(firstOp.fill))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
+        else if (std::holds_alternative<gradient>(firstOp.pen.color()))
+            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
+
+        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::EllipseRect);
+
+        {
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
+
+            for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
+            {
+                auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(*op);
+                auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
+                auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
+                auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const function = to_function(drawOp.fill, boundingRect);
+
+                if (!std::holds_alternative<std::monostate>(drawOp.fill))
+                    for (auto const& v : vertices)
+                        vertexArrays.push_back({ v,
+                            std::holds_alternative<color>(drawOp.fill) ?
+                                static_variant_cast<color>(drawOp.fill).as<float>() :
+                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                            {},
+                            function,
+                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
+                            drawOp.radiusX.as<float>(),
+                            drawOp.radiusY.as<float>() });
+
+                if (drawOp.pen.width())
+                    for (auto const& v : vertices)
+                        vertexArrays.push_back({ v,
+                            std::holds_alternative<color>(drawOp.pen.color()) ?
+                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                            {},
+                            function,
+                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
+                            drawOp.radiusX.as<float>(),
+                            drawOp.radiusY.as<float>(),
                             vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }

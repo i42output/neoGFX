@@ -313,6 +313,7 @@ namespace neogfx
         void draw_triangles(const graphics_operation::batch& aDrawTriangleOps);
         void draw_rects(const graphics_operation::batch& aDrawRectOps);
         void draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps);
+        void draw_ellipse_rects(const graphics_operation::batch& aDrawEllipseRectOps);
         void draw_checker_rects(const graphics_operation::batch& aDrawCheckerRectOps);
         void draw_circles(const graphics_operation::batch& aDrawCircleOps);
         void draw_ellipses(const graphics_operation::batch& aDrawEllipseOps);

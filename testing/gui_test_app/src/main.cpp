@@ -841,20 +841,83 @@ int main(int argc, char* argv[])
                 {
                     int const buttonIndex = i * 5 + j;
                     auto& button = layout.emplace<ng::push_button>(std::to_string(buttonIndex));
-                    if (buttonIndex == 8)
+                    switch (buttonIndex)
+                    {
+                    case 6:
                         button.set_style_sheet(
                             R"(
                             .button {
                                 background-color: #04AA6D; /* Green */
-                                border-radius: 2px 10px 20px 30px;
                                 border: none;
                                 color: white;
-                                padding: 15px 32px;
+                                padding: 50px;
                                 text-align: center;
                                 text-decoration: none;
                                 display: inline-block;
                                 font-size: 16px;
                                 })"_s);
+                        break;
+                    case 7:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                background-color: #04AA6D; /* Green */
+                                border-radius: 20px;
+                                border: none;
+                                color: white;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 8:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                background-color: #04AA6D; /* Green */
+                                border-radius: 20px 40px;
+                                border: none;
+                                color: white;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 9:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                background-color: #04AA6D; /* Green */
+                                border-radius: 20px 40px 60px;
+                                border: none;
+                                color: white;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 10:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                background-color: #04AA6D; /* Green */
+                                border-radius: 20px 40px 60px 120px;
+                                border: none;
+                                color: white;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    }
                 }
             }
         };

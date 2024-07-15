@@ -555,11 +555,27 @@ namespace neogfx
         }
         bool has_padding() const noexcept override
         {
-            return Padding != std::nullopt;
+            auto& self = as_layout_item();
+            return Padding != std::nullopt || !self.style_sheet_value("." + class_name(), "padding", std::vector<length>{}).empty();
         }
         neogfx::padding padding() const override
         {
-            return Padding != std::nullopt ? *Padding : neogfx::padding{};
+            if (Padding != std::nullopt)
+                return *Padding;
+            auto& self = as_layout_item();
+            auto const& ssPadding = self.style_sheet_value("." + class_name(), "padding", std::vector<length>{});
+            switch (ssPadding.size())
+            {
+            case 1:
+                return neogfx::padding{ ssPadding[0], ssPadding[0], ssPadding[0], ssPadding[0] };
+            case 2:
+                return neogfx::padding{ ssPadding[1], ssPadding[0], ssPadding[1], ssPadding[0] };
+            case 3:
+                return neogfx::padding{ ssPadding[1], ssPadding[0], ssPadding[1], ssPadding[2] };
+            case 4:
+                return neogfx::padding{ ssPadding[3], ssPadding[0], ssPadding[1], ssPadding[2] };
+            }
+            return neogfx::padding{};
         }
         void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) override
         {

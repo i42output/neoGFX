@@ -25,16 +25,42 @@
 #include <neolib/app/i_object.hpp>
 #include <neogfx/core/object_type.hpp>
 
+namespace neogfx
+{
+    namespace detail
+    {
+        template <typename ClassT>
+        inline std::string class_pretty_name()
+        {
+            auto temp = boost::typeindex::type_id<ClassT>().pretty_name();
+            boost::replace_all(temp, "::", "--");
+            boost::replace_all(temp, "class ", "");
+            boost::replace_all(temp, "neogfx--", "");
+            std::string::size_type templateStart = temp.find('<');
+            std::string::size_type templateEnd = temp.rfind('>');
+            if (templateStart != std::string::npos && templateEnd != std::string::npos)
+                temp.erase(templateStart, templateEnd - templateStart + 1);
+            return temp;
+        }
+    }
+}
+
 #define meta_object( ... ) \
-        typedef __VA_ARGS__ base_type; \
+        using base_type = __VA_ARGS__; \
     public: \
+        mutable std::optional<std::string> ClassName; \
+        using i_object::class_name; \
         void class_name(neolib::i_string& aClassName) const override \
         { \
-            auto temp = boost::typeindex::type_id<decltype(*this)>().pretty_name(); \
-            boost::replace_all(temp, "::", "--"); \
-            aClassName.append(temp); \
-            aClassName.append(":"sv); \
-            base_type::class_name(aClassName); \
+            if (ClassName == std::nullopt) \
+            { \
+                aClassName.append(neogfx::detail::class_pretty_name<decltype(*this)>()); \
+                aClassName.append(":"sv); \
+                base_type::class_name(aClassName); \
+                ClassName.emplace(aClassName.to_std_string_view()); \
+            } \
+            else \
+                aClassName = ClassName.value(); \
         }
 
 namespace neogfx
@@ -48,6 +74,15 @@ namespace neogfx
     public:
         virtual void class_name(neolib::i_string& aClassName) const = 0;
         virtual neogfx::object_type object_type() const = 0;
+        std::string const& class_name() const
+        {
+            thread_local neolib::string className;
+            className.clear();
+            class_name(className);
+            thread_local std::string className2;
+            className2 = className.as_std_string();
+            return className2;
+        }
     };
 
     inline std::string class_names(i_object const& aObject)

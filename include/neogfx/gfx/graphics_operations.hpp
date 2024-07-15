@@ -189,6 +189,15 @@ namespace neogfx
             brush fill;
         };
 
+        struct draw_ellipse_rect
+        {
+            rect rect;
+            vec4 radiusX;
+            vec4 radiusY;
+            pen pen;
+            brush fill;
+        };
+
         struct draw_checker_rect
         {
             rect rect;
@@ -314,6 +323,7 @@ namespace neogfx
             draw_triangle,
             draw_rect,
             draw_rounded_rect,
+            draw_ellipse_rect,
             draw_checker_rect,
             draw_circle,
             draw_ellipse,
@@ -359,6 +369,7 @@ namespace neogfx
             DrawTriangle,
             DrawRect,
             DrawRoundedRect,
+            DrawEllipseRect,
             DrawCheckerRect,
             DrawCircle,
             DrawEllipse,

@@ -187,8 +187,11 @@ namespace neogfx
         neogfx::padding result = base_type::padding();
         if (!base_type::has_padding() && (label().effective_placement() & label_placement::Text) == label_placement::Text)
         {
-            result.left *= 2.0;
-            result.right *= 2.0;
+            if (base_type::style_sheet_value(".button", "padding", std::vector<length>{}).empty())
+            {
+                result.left *= 2.0;
+                result.right *= 2.0;
+            }
         }
         return result;
     }

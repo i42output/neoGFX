@@ -184,12 +184,18 @@ namespace neogfx
     {
         static style_sheet_value const tNoResult;
 
-        auto selector = iSelectors.find(aSelector.to_std_string_view());
-        if (selector != iSelectors.end())
+        thread_local std::vector<std::pair<i_string_view::const_iterator, i_string_view::const_iterator>> tBits;
+        tBits.clear();
+        neolib::tokens(aSelector[0] == '.' ? std::next(aSelector.begin()) : aSelector.begin(), aSelector.end(), ":"s, tBits);
+        for (auto const& bit : tBits)
         {
-            auto property = selector->second.find(aProperty.to_std_string_view());
-            if (property != selector->second.end())
-                return property->second;
+            auto selector = iSelectors.find("." + std::string{ bit.first, bit.second });
+            if (selector != iSelectors.end())
+            {
+                auto property = selector->second.find(aProperty.to_std_string_view());
+                if (property != selector->second.end())
+                    return property->second;
+            }
         }
 
         return tNoResult;

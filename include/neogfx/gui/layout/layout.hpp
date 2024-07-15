@@ -48,7 +48,9 @@ namespace neogfx
         struct item_already_added : std::logic_error { item_already_added() : std::logic_error("neogfx::layout::item_already_added") {} };
         struct widget_is_floating : std::logic_error { widget_is_floating() : std::logic_error("neogfx::layout::widget_is_floating") {} };
     public:
-        typedef i_layout abstract_type;
+        using abstract_type = i_layout;
+    private:
+        using base_type = layout_item<object<i_layout>>;
     protected:
         typedef ref_ptr<layout_item_cache> item;
         typedef std::list<item> item_list;

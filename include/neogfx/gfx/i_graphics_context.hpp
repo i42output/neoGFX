@@ -217,6 +217,7 @@ namespace neogfx
         virtual void draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) const = 0;
+        virtual void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const = 0;
         virtual void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) const = 0;
@@ -331,6 +332,10 @@ namespace neogfx
         {
             draw_rounded_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, aPen, aFill);
         }
+        void draw_ellipse_rect(rect const& aRect, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const
+        {
+            draw_ellipse_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, vec4{ aRadius, aRadius, aRadius, aRadius }, aPen, aFill);
+        }
         void fill_triangle(point const& aP0, point const& aP1, point const& aP2, brush const& aFill) const
         {
             draw_triangle(aP0, aP1, aP2, pen{}, aFill);
@@ -342,6 +347,10 @@ namespace neogfx
         void fill_rounded_rect(rect const& aRect, const vec4& aRadius, brush const& aFill) const
         {
             draw_rounded_rect(aRect, aRadius, pen{}, aFill);
+        }
+        void fill_ellipse_rect(rect const& aRect, const vec4& aRadiusX, const vec4& aRadiusY, brush const& aFill) const
+        {
+            draw_ellipse_rect(aRect, aRadiusX, aRadiusY, pen{}, aFill);
         }
         void fill_checker_rect(rect const& aRect, const size& aSquareSize, brush const& aFill1, brush const& aFill2) const
         {
