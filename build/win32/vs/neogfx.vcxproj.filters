@@ -1230,6 +1230,12 @@
     <ClInclude Include="..\..\..\include\neogfx\core\i_style_sheet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\app\i_accessibility.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\app\native\windows_accessibility.hpp">
+      <Filter>Source Files\native\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1830,6 +1836,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\web_view.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\app\native\windows_accessibility.cpp">
+      <Filter>Source Files\native\windows</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

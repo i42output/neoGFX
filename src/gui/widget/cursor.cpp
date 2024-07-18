@@ -19,19 +19,22 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/app/i_accessibility.hpp>
 #include <neogfx/gui/widget/cursor.hpp>
 #include <neogfx/gui/widget/i_document.hpp>
 
 namespace neogfx
 {
     cursor::cursor() :
-        iDocument{}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iWidth{ 1.0 }, iFlashInterval{ 1000 }
+        iDocument{}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iFlashInterval{ 1000 }
     {
+        init();
     }
 
     cursor::cursor(i_document& aDocument) :
-        iDocument{&aDocument}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iWidth{1.0}, iFlashInterval{ 1000 }
+        iDocument{&aDocument}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iFlashInterval{ 1000 }
     {
+        init();
     }
 
     cursor::position_type cursor::position() const
@@ -115,7 +118,9 @@ namespace neogfx
 
     dimension cursor::width() const
     {
-        return iWidth;
+        if (iWidth.has_value())
+            return iWidth.value();
+        return service<i_accessibility>().text_cursor_width();
     }
 
     void cursor::set_width(dimension aWidth)
@@ -123,6 +128,15 @@ namespace neogfx
         if (iWidth != aWidth)
         {
             iWidth = aWidth;
+            AppearanceChanged.trigger();
+        }
+    }
+
+    void cursor::clear_wdith()
+    {
+        if (iWidth != std::nullopt)
+        {
+            iWidth = std::nullopt;
             AppearanceChanged.trigger();
         }
     }
@@ -155,5 +169,14 @@ namespace neogfx
     void cursor::hide()
     {
         iVisible = false;
+    }
+
+    void cursor::init()
+    {
+        iSink = service<i_accessibility>().settings_changed([&]()
+        {
+            if (!iWidth.has_value())
+                AppearanceChanged.trigger();
+        });
     }
 }

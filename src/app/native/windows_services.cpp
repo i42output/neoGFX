@@ -30,6 +30,7 @@
 #include "../../gfx/native/windows_renderer.hpp"
 #include "windows_drag_drop.hpp"
 //#include "../../audio/native/windows_audio.hpp"
+#include "windows_accessibility.hpp"
 
 template<> neogfx::i_basic_services& services::start_service<neogfx::i_basic_services>()
 { 
@@ -90,4 +91,10 @@ template<> neogfx::i_drag_drop& services::start_service<neogfx::i_drag_drop>()
 {
     static neogfx::native::windows::drag_drop sDragDrop{};
     return sDragDrop;
+}
+
+template<> neogfx::i_accessibility& services::start_service<neogfx::i_accessibility>()
+{
+    static neogfx::native::windows::accessibility sAccessibility{};
+    return sAccessibility;
 }

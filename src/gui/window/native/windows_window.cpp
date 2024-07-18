@@ -78,6 +78,7 @@
 #include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/app/i_accessibility.hpp>
 #include "../../../hid/native/windows_keyboard.hpp"
 #include "../../../hid/native/windows_mouse.hpp"
 #include "windows_window.hpp"
@@ -1452,6 +1453,10 @@ namespace neogfx
                 break;
             case WM_DPICHANGED:
                 self.surface_window().handle_dpi_changed();
+                result = wndproc(hwnd, msg, wparam, lparam);
+                break;
+            case WM_SETTINGCHANGE:
+                service<i_accessibility>().settings_changed().trigger();
                 result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             default:
