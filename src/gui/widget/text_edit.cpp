@@ -3201,7 +3201,9 @@ namespace neogfx
         else
             yHeight = current_style().character().font().value().height();
         auto const columnRectSansPadding = column_rect(cursorPos.column_index());
-        rect cursorRect{ point{ cursorPos.pos - point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ 0.0, yOffset },
+        rect cursorRect{ 
+            point{ cursorPos.pos - 
+                point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ 0.0, yOffset },
             size{ dpi_scale(static_cast<scalar>(cursor().width())), yHeight } };
         if (cursorRect.right() > columnRectSansPadding.right())
             cursorRect.x += (columnRectSansPadding.right() - cursorRect.right());

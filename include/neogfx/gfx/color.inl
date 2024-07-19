@@ -71,9 +71,9 @@ namespace neogfx
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::mid(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aOther) const
     {
         return typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type{
-            (self_type::template red<double>() + aOther.template red<double>()) / 2.0,
-            (self_type::template green<double>() + aOther.template green<double>()) / 2.0,
-            (self_type::template blue<double>() + aOther.template blue<double>()) / 2.0,
+            (basic_rgb_color::template red<double>() + aOther.template red<double>()) / 2.0,
+            (basic_rgb_color::template green<double>() + aOther.template green<double>()) / 2.0,
+            (basic_rgb_color::template blue<double>() + aOther.template blue<double>()) / 2.0,
             (base_type::template alpha<double>() + aOther.template alpha<double>()) / 2.0 };
     }
 
@@ -81,9 +81,9 @@ namespace neogfx
     inline typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::mix(const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aOther, scalar aValue) const
     {
         return typename basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>::return_type{
-            (self_type::template red<double>() * (1 - aValue) + aOther.template red<double>() * aValue),
-            (self_type::template green<double>() * (1 - aValue) + aOther.template green<double>() * aValue),
-            (self_type::template blue<double>() * (1 - aValue) + aOther.template blue<double>() * aValue),
+            (basic_rgb_color::template red<double>() * (1 - aValue) + aOther.template red<double>() * aValue),
+            (basic_rgb_color::template green<double>() * (1 - aValue) + aOther.template green<double>() * aValue),
+            (basic_rgb_color::template blue<double>() * (1 - aValue) + aOther.template blue<double>() * aValue),
             (base_type::template alpha<double>() * (1 - aValue) + aOther.template alpha<double>() * aValue) };
     }
 

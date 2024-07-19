@@ -76,15 +76,14 @@ namespace neogfx
     class basic_color : 
         public basic_vector<BaseComponent, ColorComponentCount + 1>
     {
-        typedef basic_color<ColorSpace, BaseComponent, ViewComponent, ColorComponentCount, Derived> self_type;
-        typedef basic_vector<BaseComponent, ColorComponentCount + 1> base_type;
-        typedef Derived derived_type;
+        using base_type = basic_vector<BaseComponent, ColorComponentCount + 1>;
+        using derived_type = Derived;
         // types
     public:
-        typedef base_type abstract_type; // todo
-        typedef BaseComponent base_component;
-        typedef ViewComponent view_component;
-        typedef typename color_return_type_cracker<self_type, derived_type>::return_type return_type;
+        using abstract_type = base_type; // todo
+        using base_component = BaseComponent;
+        using view_component = ViewComponent;
+        using return_type = typename color_return_type_cracker<basic_color, derived_type>::return_type;
         // constants
     public:
         static constexpr color_space color_space = ColorSpace;
@@ -117,13 +116,13 @@ namespace neogfx
         {
             set_alpha(1.0);
         }
-        basic_color(const self_type& aOther) :
+        basic_color(const basic_color& aOther) :
             base_type{ aOther }
         {
         }
         // assignment
     public:
-        self_type& operator=(const self_type& aOther)
+        basic_color& operator=(const basic_color& aOther)
         {
             base_type::operator=(aOther);
             return *this;
@@ -177,14 +176,13 @@ namespace neogfx
     template <color_space ColorSpace, typename BaseComponent, typename ViewComponent = BaseComponent, typename Derived = void>
     class basic_rgb_color : public basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived>
     {
-        typedef basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived> self_type;
-        typedef basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived> base_type;
+        using base_type = basic_color<ColorSpace, BaseComponent, ViewComponent, 3, Derived>;
     public:
         using typename base_type::abstract_type;
         using typename base_type::base_component;
         using typename base_type::view_component;
         using typename base_type::return_type;
-        typedef std::uint32_t argb;
+        using argb = std::uint32_t;
     protected:
         static const argb AlphaShift = 24;
         static const argb RedShift = 16;
@@ -198,7 +196,7 @@ namespace neogfx
     public:
         basic_rgb_color() :
             base_type{} {}
-        basic_rgb_color(const self_type& aOther) :
+        basic_rgb_color(const basic_rgb_color& aOther) :
             base_type{ aOther } {}
         explicit basic_rgb_color(const vec3& aBaseNoAlpha) :
             base_type{ aBaseNoAlpha } {}
@@ -217,21 +215,21 @@ namespace neogfx
             base_type{ from_argb(aValue) } {}
         // assignment
     public:
-        self_type& operator=(const self_type& aOther)
+        basic_rgb_color& operator=(const basic_rgb_color& aOther)
         {
             base_type::operator=(aOther);
             return *this;
         }
-        self_type& operator=(const base_type& aOther)
+        basic_rgb_color& operator=(const base_type& aOther)
         {
             base_type::operator=(aOther);
             return *this;
         }
         // operations
     public:
-        static self_type from_argb(argb aValue)
+        static basic_rgb_color from_argb(argb aValue)
         {
-            self_type result;
+            basic_rgb_color result;
             result.set_red((aValue >> RedShift) & 0xFF);
             result.set_green((aValue >> GreenShift) & 0xFF);
             result.set_blue((aValue >> BlueShift) & 0xFF);
@@ -340,9 +338,9 @@ namespace neogfx
         hsl_color to_hsl() const;
         hsv_color to_hsv() const;
         scalar intensity() const;
-        bool similar_intensity(const self_type& aOther, scalar aThreshold = 0.5) const;
-        return_type mid(const self_type& aOther) const;
-        return_type mix(const self_type& aOther, scalar aValue) const;
+        bool similar_intensity(const basic_rgb_color& aOther, scalar aThreshold = 0.5) const;
+        return_type mid(const basic_rgb_color& aOther) const;
+        return_type mix(const basic_rgb_color& aOther, scalar aValue) const;
         bool light(scalar aThreshold = 0.50) const;
         bool dark(scalar aThreshold = 0.50) const;
         return_type& lighten(view_component aDelta);
@@ -354,7 +352,7 @@ namespace neogfx
         return_type shaded(view_component aDelta) const;
         return_type unshaded(view_component aDelta) const;
         return_type monochrome() const;
-        return_type same_lightness_as(const self_type& aOther) const;
+        return_type same_lightness_as(const basic_rgb_color& aOther) const;
         return_type with_lightness(scalar aLightness) const;
         return_type inverse() const;
         return_type& operator+=(view_component aDelta);
@@ -362,9 +360,9 @@ namespace neogfx
         return_type operator~() const;
         // comparison
     public:
-        bool operator==(const self_type& aOther) const;
-        bool operator<(const self_type& aOther) const;
-        auto operator<=>(const self_type& aOther) const = default;
+        bool operator==(const basic_rgb_color& aOther) const;
+        bool operator<(const basic_rgb_color& aOther) const;
+        auto operator<=>(const basic_rgb_color& aOther) const = default;
         // string
     public:
         std::string to_string() const;
@@ -375,10 +373,10 @@ namespace neogfx
 
     class sRGB_color : public basic_rgb_color<color_space::sRGB, scalar, std::uint8_t, sRGB_color>
     {
-        typedef basic_rgb_color<color_space::sRGB, scalar, std::uint8_t, sRGB_color> base_type;
+        using base_type = basic_rgb_color<color_space::sRGB, scalar, std::uint8_t, sRGB_color>;
         // types
     public:
-        typedef view_component component;
+        using component = view_component;
         // constants
     public:
         static const sRGB_color AliceBlue;
