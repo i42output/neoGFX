@@ -41,6 +41,7 @@ v1.20   | WID + 36 months | macOS support
 # Implementation Progress
 
 ![](http://neogfx.org/temp/select_font.png?id=2)
+![](http://neogfx.org/temp/gradient2.png?id=1)
 ![](http://neogfx.org/temp/lol.png?id=1)
 
 
