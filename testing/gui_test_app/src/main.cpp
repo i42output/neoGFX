@@ -907,7 +907,7 @@ int main(int argc, char* argv[])
                             R"(
                             .button {
                                 background-color: #04AA6D; /* Green */
-                                border-radius: 20px 40px 60px 120px;
+                                border-radius: 20px 40px 60px 160px;
                                 border: none;
                                 color: white;
                                 padding: 50px;

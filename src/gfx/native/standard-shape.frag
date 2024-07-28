@@ -227,19 +227,43 @@ void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
-float sdEllipseBox(in vec2 p, in vec2 b, in vec4 rx, in vec4 ry)
+float sdEllipseBox(in vec2 f, in vec2 c, in vec2 b, in vec4 rx, in vec4 ry)
 {
-    // todo
-    rx.xy = (p.x>0.0)?rx.yz : rx.xw;
-    rx.x  = (p.y>0.0)?rx.y  : rx.x;
-    rx.x  = min(rx.x, min(b.x, b.y));
-    vec2 q = abs(p)-b+rx.x;
-    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - rx.x;
+    vec2 p = f - c;
+    if (rx.x + rx.y > b.x * 2.0)
+    {
+        rx.x *= (b.x * 2.0 / (rx.x + rx.y));
+        rx.y *= (b.x * 2.0 / (rx.x + rx.y));
+    }
+    if (rx.w + rx.z > b.x * 2.0)
+    {
+        rx.w *= (b.x * 2.0 / (rx.w + rx.z));
+        rx.z *= (b.x * 2.0 / (rx.w + rx.z));
+    }
+    if (ry.x + ry.w > b.y * 2.0)
+    {
+        ry.x *= (b.y * 2.0 / (ry.x + ry.w));
+        ry.w *= (b.y * 2.0 / (ry.x + ry.w));
+    }
+    if (ry.y + ry.z > b.y * 2.0)
+    {
+        ry.y *= (b.y * 2.0 / (ry.y + ry.z));
+        ry.z *= (b.y * 2.0 / (ry.y + ry.z));
+    }
+    vec2 tl = c + vec2(-b.x, -b.y) + vec2(rx.x, ry.x);
+    vec2 tr = c + vec2(b.x, -b.y) + vec2(-rx.y, ry.y);
+    vec2 br = c + vec2(b.x, b.y) + vec2(-rx.z, -ry.z);
+    vec2 bl = c + vec2(-b.x, b.y) + vec2(rx.w, -ry.w);
+    float d1 = (f.x < tl.x && f.y < tl.y) ? sdEllipse(f - tl, vec2(rx.x, ry.x)) : sdBox(p, b);
+    float d2 = (f.x > tr.x && f.y < tr.y) ? sdEllipse(f - tr, vec2(rx.y, ry.y)) : sdBox(p, b);
+    float d3 = (f.x > br.x && f.y > br.y) ? sdEllipse(f - br, vec2(rx.z, ry.z)) : sdBox(p, b);
+    float d4 = (f.x < bl.x && f.y > bl.y) ? sdEllipse(f - bl, vec2(rx.w, ry.w)) : sdBox(p, b);
+    return max(d1, max(d2, max(d3, d4)));
 }
                 
 void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
 {
-    float d0 = sdEllipseBox(Coord.xy - function1.xy, function1.zw * 0.5, function2, function3);
+    float d0 = sdEllipseBox(Coord.xy, function1.xy, function1.zw * 0.5, function2, function3);
     if (function4.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     else if (function4.y == 0.0 && abs(d0) > function4.w / 2.0)
