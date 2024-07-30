@@ -917,6 +917,21 @@ int main(int argc, char* argv[])
                                 font-size: 16px;
                                 })"_s);
                         break;
+                    case 11:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                background-color: #04AA6D; /* Green */
+                                border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+                                border: none;
+                                color: white;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
                     }
                 }
             }

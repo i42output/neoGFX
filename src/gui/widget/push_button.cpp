@@ -275,27 +275,21 @@ namespace neogfx
 
         scoped_units su{ *this, units::Pixels };
 
-        auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::vector<length>{});
-
-        if (!borderRadii.empty())
+        auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
+        
+        if (borderRadii.has_value())
         {
-            vec4 radii;
-            switch (borderRadii.size())
+            auto to_vec2 = [&](std::array<length, 2u> const& l)
             {
-            case 1:
-                radii = { borderRadii[0], borderRadii[0], borderRadii[0], borderRadii[0] };
-                break;
-            case 2:
-                radii = { borderRadii[0], borderRadii[1], borderRadii[0], borderRadii[1] };
-                break;
-            case 3:
-                radii = { borderRadii[0], borderRadii[1], borderRadii[2], borderRadii[1] };
-                break;
-            case 4:
-                radii = { borderRadii[0], borderRadii[1], borderRadii[2], borderRadii[3] };
-                break;
-            }
-            aGc.fill_ellipse_rect(path_bounding_rect(), radii, radii, faceColor);
+                basic_length<vec2> lx{ vec2{ l[0].unconverted_value(), 0.0 }, l[0].units() };
+                basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
+                return vec2{ lx.value().x, ly.value().y };
+            };
+            aGc.fill_ellipse_rect(
+                path_bounding_rect(), 
+                vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
+                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
+                faceColor);
             return;
         }
 

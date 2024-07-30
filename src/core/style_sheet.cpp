@@ -109,6 +109,79 @@ namespace neogfx
         return result;
     }
 
+    template <>
+    std::optional<std::array<std::array<length, 2u>, 4u>> const* evaluate_style_sheet_value<std::optional<std::array<std::array<length, 2u>, 4u>>>(i_style_sheet_value const& aValue)
+    {
+        std::optional<std::array<std::array<length, 2u>, 4u>>* result = nullptr;
+
+        std::pair<std::vector<length>, std::vector<length>> partialResult;
+        bool secondPair = false;
+
+        for (auto const& v : aValue)
+        {
+            auto existing = value_map_find<std::optional<std::array<std::array<length, 2u>, 4u>>>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<std::optional<std::array<std::array<length, 2u>, 4u>>>().end())
+                return &existing->second;
+
+            if (v.first() == "nss.value" || v.first() == "nss.paired_values")
+            {
+                if (v.second().empty())
+                    continue;
+                auto& lengths = value_map_entry<std::optional<std::array<std::array<length, 2u>, 4u>>>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                result = &lengths;
+            }
+            else if (v.first() == "nss.pair_separator" && result)
+            {
+                secondPair = true;
+            }
+            else if (v.first() == "nss.length" && result)
+            {
+                if (v.second().empty())
+                    continue;
+                if (!secondPair)
+                    partialResult.first.push_back(length::from_string(v.second()));
+                else
+                    partialResult.second.push_back(length::from_string(v.second()));
+            }
+        }
+
+        if (result)
+        {
+            std::array<std::array<std::size_t, 4u>, 4u> constexpr indices =
+            { {
+                { 0, 0, 0, 0 },
+                { 0, 1, 0, 1 },
+                { 0, 1, 2, 1 },
+                { 0, 1, 2, 3 }
+            } };
+            if (!partialResult.first.empty())
+            {
+                if (!result->has_value())
+                    result->emplace();
+                result->value()[0][0] = partialResult.first[indices[partialResult.first.size() - 1][0]];
+                result->value()[1][0] = partialResult.first[indices[partialResult.first.size() - 1][1]];
+                result->value()[2][0] = partialResult.first[indices[partialResult.first.size() - 1][2]];
+                result->value()[3][0] = partialResult.first[indices[partialResult.first.size() - 1][3]];
+            }
+            if (result->has_value() && !partialResult.second.empty())
+            {
+                result->value()[0][1] = partialResult.second[indices[partialResult.second.size() - 1][0]];
+                result->value()[1][1] = partialResult.second[indices[partialResult.second.size() - 1][1]];
+                result->value()[2][1] = partialResult.second[indices[partialResult.second.size() - 1][2]];
+                result->value()[3][1] = partialResult.second[indices[partialResult.second.size() - 1][3]];
+            }
+            else if (result->has_value())
+            {
+                result->value()[0][1] = result->value()[0][0];
+                result->value()[1][1] = result->value()[1][0];
+                result->value()[2][1] = result->value()[2][0];
+                result->value()[3][1] = result->value()[3][0];
+            }
+        }
+
+        return result;
+    }
+
     style_sheet::style_sheet()
     {
     }
@@ -225,6 +298,8 @@ namespace neogfx
             EndDeclaration,
             Property,
             Value,
+            PairedValues,
+            PairSeparator,
             ValuePart,
             Identifier,
             Integer,
@@ -255,6 +330,8 @@ declare_symbol(neogfx::nss::symbol, DeclarationSeparator)
 declare_symbol(neogfx::nss::symbol, EndDeclaration)
 declare_symbol(neogfx::nss::symbol, Property)
 declare_symbol(neogfx::nss::symbol, Value)
+declare_symbol(neogfx::nss::symbol, PairedValues)
+declare_symbol(neogfx::nss::symbol, PairSeparator)
 declare_symbol(neogfx::nss::symbol, ValuePart)
 declare_symbol(neogfx::nss::symbol, Identifier)
 declare_symbol(neogfx::nss::symbol, Integer)
@@ -284,11 +361,14 @@ namespace neogfx
             ( symbol::EndDeclarationBlock >> '}'_ ),
             ( symbol::Declarations >> sequence(symbol::Declaration , repeat(sequence(symbol::EndDeclaration , symbol::Declaration)), optional(symbol::EndDeclaration)) ),
             ( symbol::Declaration >> (sequence(symbol::Property <=> "nss.property"_concept), symbol::DeclarationSeparator, (symbol::Value <=> "nss.value"_concept)) ),
+            ( symbol::Declaration >> (sequence(symbol::Property <=> "nss.property"_concept), symbol::DeclarationSeparator, (symbol::PairedValues <=> "nss.paired_values"_concept)) ),
             ( symbol::DeclarationSeparator >> ':'_ ),
             ( symbol::EndDeclaration >> ';'_ ),
             ( symbol::Selector >> optional('.') , symbol::Identifier ),
             ( symbol::Property >> symbol::Identifier ),
             ( symbol::Value >> +repeat(symbol::ValuePart) ),
+            ( symbol::PairedValues >> sequence( +repeat(symbol::ValuePart), symbol::PairSeparator <=> "nss.pair_separator"_concept, +repeat(symbol::ValuePart))),
+            ( symbol::PairSeparator >> '/'_ ),
             ( symbol::ValuePart >> symbol::Identifier ),
             ( symbol::ValuePart >> (symbol::Length <=> "nss.length"_concept) ),
             ( symbol::ValuePart >> (symbol::Integer <=> "nss.integer"_concept) ),
@@ -321,6 +401,8 @@ namespace neogfx
             ( symbol::EndDeclaration >> discard(optional(symbol::Whitespace)) , symbol::EndDeclaration , discard(optional(symbol::Whitespace)) ),
             ( symbol::Property >> discard(optional(symbol::Whitespace)) , symbol::Property , discard(optional(symbol::Whitespace)) ),
             ( symbol::Value >> discard(optional(symbol::Whitespace)) , symbol::Value , discard(optional(symbol::Whitespace)) ),
+            ( symbol::PairedValues >> discard(optional(symbol::Whitespace)) , symbol::PairedValues , discard(optional(symbol::Whitespace))),
+            ( symbol::PairSeparator >> discard(optional(symbol::Whitespace)) , symbol::PairSeparator, discard(optional(symbol::Whitespace))),
             ( symbol::ValuePart >> discard(optional(symbol::Whitespace)) , symbol::ValuePart , discard(optional(symbol::Whitespace)) )
         };
     }

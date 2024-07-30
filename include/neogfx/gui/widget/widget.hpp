@@ -328,7 +328,41 @@ namespace neogfx
         bool iSingular;
         i_widget* iParent;
         mutable std::optional<const i_window*> iRoot;
-        mutable std::optional<const i_device_metrics*> iDeviceMetrics;
+        struct device_metrics_proxy : i_device_metrics
+        {
+            widget const& owner;
+            i_device_metrics const& surrogate;
+
+            device_metrics_proxy(widget const& owner) : owner{ owner }, surrogate{ owner.surface() }
+            {
+            }
+            dimension horizontal_dpi() const final
+            {
+                return surrogate.horizontal_dpi();
+            }
+            dimension vertical_dpi() const final
+            {
+                return surrogate.vertical_dpi();
+            }
+            dimension ppi() const final
+            {
+                return surrogate.ppi();
+            }
+            bool metrics_available() const final
+            {
+                return true;
+            }
+            size extents() const final
+            {
+                return !owner.Anchor_Size.active() ? 
+                    static_cast<size>(owner.Size) : owner.Anchor_Size.evaluate_constraints();
+            }
+            dimension em_size() const final
+            {
+                return surrogate.em_size();
+            }
+        };
+        mutable std::optional<device_metrics_proxy> iDeviceMetrics;
         widget_list iChildren;
         widget_map iChildMap;
         bool iAddingChild;

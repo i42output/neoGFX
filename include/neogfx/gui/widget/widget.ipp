@@ -143,7 +143,7 @@ namespace neogfx
         {
             if (widget::has_root() && widget::root().has_native_window())
             {
-                iDeviceMetrics = &widget::surface();
+                iDeviceMetrics.emplace(*this);
                 DeviceMetricsUpdated.trigger(*this);
             }
         }
@@ -154,7 +154,7 @@ namespace neogfx
     inline const i_device_metrics& widget<Interface>::device_metrics() const
     {
         if (widget::device_metrics_available())
-            return **iDeviceMetrics;
+            return *iDeviceMetrics;
         return service<i_surface_manager>().display().metrics();
     }
 
@@ -222,7 +222,15 @@ namespace neogfx
     template <WidgetInterface Interface>
     inline void widget<Interface>::set_root(i_window& aRoot)
     {
-        iRoot = &aRoot;
+        if (iRoot != &aRoot)
+        {
+            iRoot = &aRoot;
+            if (widget::root().has_native_window())
+            {
+                iDeviceMetrics.emplace(*this);
+                DeviceMetricsUpdated.trigger(*this);
+            }
+        }
     }
 
     template <WidgetInterface Interface>

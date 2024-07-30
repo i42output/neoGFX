@@ -224,6 +224,11 @@ namespace neogfx
             iValue{ aValue }, iUnits{ aUnits }
         {
         }
+        template <typename U>
+        basic_length(basic_length<U> const& aOther) :
+            iValue{ aOther.unconverted_value() }, iUnits{aOther.units() }
+        {
+        }
     public:
         bool operator==(const basic_length& aRhs) const
         {
@@ -309,7 +314,8 @@ namespace neogfx
                 { "mm", neogfx::units::Millimetres },
                 { "cm", neogfx::units::Centimetres },
                 { "in", neogfx::units::Inches },
-                { "pct", neogfx::units::Percentage }
+                { "pct", neogfx::units::Percentage },
+                { "%", neogfx::units::Percentage }
             };
             if (aValue == "max")
                 return basic_length{ 0.0, neogfx::units::NoUnitsAsMaximumLength };
@@ -372,7 +378,7 @@ namespace neogfx
         rect from_device_units(const size& aExtents, const rect& aValue) const;
     public:
         template <typename T, std::uint32_t D>
-        basic_vector<T, D> to_device_units(const basic_vector<T, D>& aValue)
+        basic_vector<T, D> to_device_units(const basic_vector<T, D>& aValue) const
         {
             basic_vector<T, D> result;
             for (std::uint32_t i = 0; i < D; ++i)
@@ -380,7 +386,7 @@ namespace neogfx
             return result;
         }
         template <typename T, std::uint32_t D>
-        basic_vector<T, D> to_device_units(const size& aExtents, const basic_vector<T, D>& aValue)
+        basic_vector<T, D> to_device_units(const size& aExtents, const basic_vector<T, D>& aValue) const
         {
             basic_vector<T, D> result;
             for (std::uint32_t i = 0; i < D; ++i)
@@ -388,7 +394,7 @@ namespace neogfx
             return result;
         }
         template <typename T, std::uint32_t D>
-        basic_vector<T, D> from_device_units(const basic_vector<T, D>& aValue)
+        basic_vector<T, D> from_device_units(const basic_vector<T, D>& aValue) const
         {
             basic_vector<T, D> result;
             for (std::uint32_t i = 0; i < D; ++i)
@@ -396,7 +402,7 @@ namespace neogfx
             return result;
         }
         template <typename T, std::uint32_t D>
-        basic_vector<T, D> from_device_units(const size& aExtents, const basic_vector<T, D>& aValue)
+        basic_vector<T, D> from_device_units(const size& aExtents, const basic_vector<T, D>& aValue) const
         {
             basic_vector<T, D> result;
             for (std::uint32_t i = 0; i < D; ++i)
