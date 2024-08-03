@@ -3,7 +3,7 @@
 // Copyright © 2019 Inigo Quilez
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the Software), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float dy = function1.y - function1.w;
     float dx = function1.x - function1.z;
@@ -48,7 +48,7 @@ float bezier_udBezier(vec2 p0, vec2 p1, vec2 p2, in vec2 p3, vec2 pos)
     return sqrt(res);
 }
 
-void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = bezier_udBezier(function1.xy, function1.zw, function2.xy, function2.zw, Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5)));
     color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
@@ -68,7 +68,7 @@ float sdTriangle(in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2)
     return -sqrt(d.x) * sign(d.y);
 }
 
-void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdTriangle(Coord.xy, function1.xy, function1.zw, function2.xy);
     if (function3.w == 0.0)
@@ -85,7 +85,7 @@ float sdBox( in vec2 p, in vec2 b )
     return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
 
-void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdBox(Coord.xy - function1.xy, function1.zw * 0.5);
     if (function3.w == 0.0)
@@ -101,7 +101,7 @@ float sdCircle(vec2 p, float r)
     return length(p) - r;
 }
 
-void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdCircle(Coord.xy - function1.xy, function1.z);
     if (function3.w == 0.0)
@@ -149,7 +149,7 @@ float sdEllipse(in vec2 p, in vec2 ab)
     return length(r - p) * sign(p.y - r.y);
 }
 
-void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdEllipse(Coord.xy - function1.xy, function1.zw);
     if (function3.w == 0.0)
@@ -168,7 +168,7 @@ float sdPie(in vec2 p, in vec2 c, in float r)
     return max(l,m * sign(c.y * p.x - c.x * p.y));
 }
 
-void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float a0 = PI * 0.5 + function2.x * 0.5;
     vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
@@ -189,7 +189,7 @@ float sdArc(in vec2 p, in vec2 c, in float r)
     return max(-l,m * sign(c.y * p.x - c.x * p.y));
 }
 
-void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float a0 = PI * 0.5 + function2.x * 0.5;
     vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
@@ -216,7 +216,7 @@ float sdRoundedBox(in vec2 p, in vec2 b, in vec4 r)
     return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
                 
-void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3)
+void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdRoundedBox(Coord.xy - function1.xy, function1.zw * 0.5, function2);
     if (function3.w == 0.0)
@@ -261,52 +261,52 @@ float sdEllipseBox(in vec2 f, in vec2 c, in vec2 b, in vec4 rx, in vec4 ry)
     return max(d1, max(d2, max(d3, d4)));
 }
                 
-void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
+void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
-    float d0 = sdEllipseBox(Coord.xy, function1.xy, function1.zw * 0.5, function2, function3);
-    if (function4.w == 0.0)
+    float d0 = sdEllipseBox(Coord.xy, function1.xy, function1.zw * 0.5, function2, function4);
+    if (function3.w == 0.0)
         color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function4.y == 0.0 && abs(d0) > function4.w / 2.0)
+    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
         discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function4.w / 2.0, function4.w / 2.0 + function4.y, abs(d0))));
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
 }
 
-void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
+void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
     if (uShapeEnabled)
     {
         switch(uShape)
         {
         case SHAPE_Line:
-            draw_line(color, function1, function2, function3);
+            draw_line(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_CubicBezier:
-            draw_cubic_bezier(color, function1, function2, function3);
+            draw_cubic_bezier(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_Triangle:
-            draw_triangle(color, function1, function2, function3);
+            draw_triangle(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_Rect:
-            draw_rect(color, function1, function2, function3);
+            draw_rect(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_Circle:
-            draw_circle(color, function1, function2, function3);
+            draw_circle(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_Ellipse:
-            draw_ellipse(color, function1, function2, function3);
+            draw_ellipse(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_Pie:
-            draw_pie(color, function1, function2, function3);
+            draw_pie(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_Arc:
-            draw_arc(color, function1, function2, function3);
+            draw_arc(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_RoundedRect:
-            draw_rounded_rect(color, function1, function2, function3);
+            draw_rounded_rect(color, function1, function2, function3, function4, function5);
             break;
         case SHAPE_EllipseRect:
-            draw_ellipse_rect(color, function1, function2, function3, function4);
+            draw_ellipse_rect(color, function1, function2, function3, function4, function5, function6);
             break;
         }
     }

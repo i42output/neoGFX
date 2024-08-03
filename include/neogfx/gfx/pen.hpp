@@ -31,21 +31,54 @@ namespace neogfx
     public:
         // construction
     public:
-        pen() : iWidth{ 0.0 } {}
-        pen(const color& aColor, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
-        pen(const color& aColor, dimension aWidth, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
-        pen(const gradient& aColor, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
-        pen(const gradient& aColor, dimension aWidth, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
-        pen(const color_or_gradient& aColor, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased } {}
-        pen(const color_or_gradient& aColor, dimension aWidth, bool aAntiAliased = true) : iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased } {}
+        pen() :
+            iWidth{ 0.0 }, iAntiAliased{ true }
+        {}
+        pen(color const& aColor, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color const& aColor, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased }
+        {}
+        pen(gradient const& aColor, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased }
+        {}
+        pen(gradient const& aColor, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color_or_gradient const& aColor, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color_or_gradient const& aColor, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased }
+        {}
         // operations
     public:
-        const color_or_gradient& color() const { return iColor; }
-        dimension width() const { return iWidth; }
-        bool anti_aliased() const { return iAntiAliased; }
+        color_or_gradient const& color() const 
+        { 
+            return iColor; 
+        }
+        dimension width() const
+        { 
+            return iWidth; 
+        }
+        std::optional<neogfx::color> const& secondary_color() const
+        {
+            return iSecondaryColor;
+        }
+        pen& set_secondary_color(std::optional<neogfx::color> const& aColor)
+        {
+            iSecondaryColor = aColor;
+            return *this;
+        }
+        bool anti_aliased() const 
+        { 
+            return iAntiAliased; 
+        }
     private:
         color_or_gradient iColor;
         dimension iWidth;
+        std::optional<neogfx::color> iSecondaryColor;
         bool iAntiAliased;
     };
 

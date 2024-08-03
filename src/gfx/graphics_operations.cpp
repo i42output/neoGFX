@@ -128,6 +128,7 @@ namespace neogfx
 
         bool batchable(const operation& aLeft, const operation& aRight)
         {
+            // todo: use std::visit.
             auto const leftOp = static_cast<operation_type>(aLeft.index());
             auto const rightOp = static_cast<operation_type>(aRight.index());
             if (leftOp != rightOp)
@@ -140,20 +141,13 @@ namespace neogfx
             case operation_type::DrawPixel:
             case operation_type::DrawMesh:
             case operation_type::DrawGlyph:
-                return true;
             case operation_type::DrawLine:
-            {
-                auto& left = static_variant_cast<const draw_line&>(aLeft);
-                auto& right = static_variant_cast<const draw_line&>(aRight);
-                return left.pen.width() == right.pen.width() &&
-                    left.pen.anti_aliased() == right.pen.anti_aliased();
-            }
+                return true;
             case operation_type::DrawRect:
             {
                 auto& left = static_variant_cast<const draw_rect&>(aLeft);
                 auto& right = static_variant_cast<const draw_rect&>(aRight);
-                return left.pen.width() == right.pen.width() &&
-                    left.pen.anti_aliased() == right.pen.anti_aliased() &&
+                return 
                     left.fill.index() == right.fill.index() &&
                     (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }
@@ -161,19 +155,67 @@ namespace neogfx
             {
                 auto& left = static_variant_cast<const draw_checker_rect&>(aLeft);
                 auto& right = static_variant_cast<const draw_checker_rect&>(aRight);
-                return left.pen.width() == right.pen.width() &&
-                    left.pen.anti_aliased() == right.pen.anti_aliased() &&
+                return 
                     left.fill1.index() == right.fill1.index() &&
                     (std::holds_alternative<std::monostate>(left.fill1) || std::holds_alternative<color>(left.fill1)) &&
                     left.fill2.index() == right.fill2.index() &&
                     (std::holds_alternative<std::monostate>(left.fill2) || std::holds_alternative<color>(left.fill2));
             }
+            case operation_type::DrawRoundedRect:
+            {
+                auto& left = static_variant_cast<const draw_rounded_rect&>(aLeft);
+                auto& right = static_variant_cast<const draw_rounded_rect&>(aRight);
+                return
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
+            }
+            case operation_type::DrawEllipseRect:
+            {
+                auto& left = static_variant_cast<const draw_ellipse_rect&>(aLeft);
+                auto& right = static_variant_cast<const draw_ellipse_rect&>(aRight);
+                return
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
+            }
+            case operation_type::DrawCircle:
+            {
+                auto& left = static_variant_cast<const draw_circle&>(aLeft);
+                auto& right = static_variant_cast<const draw_circle&>(aRight);
+                return
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
+            }
+            case operation_type::DrawEllipse:
+            {
+                auto& left = static_variant_cast<const draw_ellipse&>(aLeft);
+                auto& right = static_variant_cast<const draw_ellipse&>(aRight);
+                return
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
+            }
+            case operation_type::DrawPie:
+            {
+                auto& left = static_variant_cast<const draw_pie&>(aLeft);
+                auto& right = static_variant_cast<const draw_pie&>(aRight);
+                return
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
+            }
+            case operation_type::DrawArc:
+            {
+                auto& left = static_variant_cast<const draw_arc&>(aLeft);
+                auto& right = static_variant_cast<const draw_arc&>(aRight);
+                return
+                    left.fill.index() == right.fill.index() &&
+                    (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
+            }
+            case operation_type::DrawCubicBezier:
+                return true;
             case operation_type::DrawShape:
             {
                 auto& left = static_variant_cast<const draw_shape&>(aLeft);
                 auto& right = static_variant_cast<const draw_shape&>(aRight);
-                return left.pen.width() == right.pen.width() &&
-                    left.pen.anti_aliased() == right.pen.anti_aliased() && 
+                return 
                     left.fill.index() == right.fill.index() &&
                     (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }
@@ -181,8 +223,7 @@ namespace neogfx
             {
                 auto& left = static_variant_cast<const draw_path&>(aLeft);
                 auto& right = static_variant_cast<const draw_path&>(aRight);
-                return left.pen.width() == right.pen.width() &&
-                    left.pen.anti_aliased() == right.pen.anti_aliased() && 
+                return 
                     left.fill.index() == right.fill.index() &&
                     (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }

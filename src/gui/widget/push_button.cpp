@@ -272,6 +272,7 @@ namespace neogfx
         color faceColor = effective_face_color();
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
+        dimension penWidth = 1.0;
 
         scoped_units su{ *this, units::Pixels };
 
@@ -290,11 +291,20 @@ namespace neogfx
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
                 vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
                 faceColor);
+            aGc.draw_ellipse_rect(
+                path_bounding_rect().deflate(penWidth),
+                vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
+                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
+                pen{ innerBorderColor, penWidth, false });
+            aGc.draw_ellipse_rect(
+                path_bounding_rect(),
+                vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
+                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
+                pen{ outerBorderColor, penWidth });
             return;
         }
 
         neogfx::path outline = path();
-        dimension penWidth = 1.0;
         switch (iStyle)
         {
         case push_button_style::Normal:

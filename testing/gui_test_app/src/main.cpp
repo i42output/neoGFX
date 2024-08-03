@@ -932,6 +932,77 @@ int main(int argc, char* argv[])
                                 font-size: 16px;
                                 })"_s);
                         break;
+                    case 12:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 13:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 14:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px 40px;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 15:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px 40px 60px;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 16:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px 40px 60px 160px;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 17:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
                     }
                 }
             }

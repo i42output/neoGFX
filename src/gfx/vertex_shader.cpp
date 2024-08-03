@@ -35,6 +35,8 @@ namespace neogfx
         auto& function2 = add_attribute<vec4f>("VertexFunction2"_s, 5u);
         auto& function3 = add_attribute<vec4f>("VertexFunction3"_s, 6u);
         auto& function4 = add_attribute<vec4f>("VertexFunction4"_s, 7u);
+        auto& function5 = add_attribute<vec4f>("VertexFunction5"_s, 8u);
+        auto& function6 = add_attribute<vec4f>("VertexFunction6"_s, 9u);
         add_out_variable<vec3f>("Coord"_s, 0u).link(coord);
         add_out_variable<vec4f>("Color"_s, 1u).link(color);
         add_out_variable<vec4f>("Function0"_s, 3u, true).link(function0);
@@ -42,6 +44,8 @@ namespace neogfx
         add_out_variable<vec4f>("Function2"_s, 5u, true).link(function2);
         add_out_variable<vec4f>("Function3"_s, 6u, true).link(function3);
         add_out_variable<vec4f>("Function4"_s, 7u, true).link(function4);
+        add_out_variable<vec4f>("Function5"_s, 8u, true).link(function5);
+        add_out_variable<vec4f>("Function6"_s, 9u, true).link(function6);
     }
 
     void standard_vertex_shader::set_projection_matrix(const optional_mat44& aProjectionMatrix)

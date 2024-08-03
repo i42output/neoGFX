@@ -64,12 +64,16 @@ namespace neogfx
             auto& fragFunction2 = add_in_variable<vec4f>("Function2"_s, 5u, true);
             auto& fragFunction3 = add_in_variable<vec4f>("Function3"_s, 6u, true);
             auto& fragFunction4 = add_in_variable<vec4f>("Function4"_s, 7u, true);
+            auto& fragFunction5 = add_in_variable<vec4f>("Function5"_s, 8u, true);
+            auto& fragFunction6 = add_in_variable<vec4f>("Function6"_s, 9u, true);
             add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
             add_out_variable<vec4f>("FragFunction0"_s, 1u).link(fragFunction0);
             add_out_variable<vec4f>("FragFunction1"_s, 2u).link(fragFunction1);
             add_out_variable<vec4f>("FragFunction2"_s, 3u).link(fragFunction2);
             add_out_variable<vec4f>("FragFunction3"_s, 4u).link(fragFunction3);
             add_out_variable<vec4f>("FragFunction4"_s, 5u).link(fragFunction4);
+            add_out_variable<vec4f>("FragFunction5"_s, 6u).link(fragFunction5);
+            add_out_variable<vec4f>("FragFunction6"_s, 7u).link(fragFunction6);
         }
     public:
         bool supports(vertex_buffer_type aBufferType) const override
@@ -81,7 +85,9 @@ namespace neogfx
                 vertex_buffer_type::Function1 | 
                 vertex_buffer_type::Function2 | 
                 vertex_buffer_type::Function3 | 
-                vertex_buffer_type::Function4 )) != vertex_buffer_type::Invalid;
+                vertex_buffer_type::Function4 |
+                vertex_buffer_type::Function5 |
+                vertex_buffer_type::Function6 )) != vertex_buffer_type::Invalid;
         }
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override
         {

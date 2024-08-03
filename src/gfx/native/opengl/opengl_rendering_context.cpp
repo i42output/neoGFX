@@ -1011,7 +1011,7 @@ namespace neogfx
                             function,
                             vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
                             vec4{ drawOp.p2.x, drawOp.p2.y }.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }
     }
@@ -1062,7 +1062,7 @@ namespace neogfx
                             function,
                             vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
                             {},
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }
     }
@@ -1114,7 +1114,7 @@ namespace neogfx
                             function,
                             vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
                             drawOp.radius.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }
     }
@@ -1155,7 +1155,10 @@ namespace neogfx
                             function,
                             vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
                             drawOp.radiusX.as<float>(),
-                            drawOp.radiusY.as<float>() });
+                            vec4{},
+                            drawOp.radiusY.as<float>(),
+                            vec4{},
+                            vec4{} });
 
                 if (drawOp.pen.width())
                     for (auto const& v : vertices)
@@ -1167,8 +1170,10 @@ namespace neogfx
                             function,
                             vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
                             drawOp.radiusX.as<float>(),
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width()}.as<float>(),
                             drawOp.radiusY.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{},
+                            vec4{} });
             }
         }
     }
@@ -1272,7 +1277,7 @@ namespace neogfx
                             function,
                             vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
                             {},
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }
     }
@@ -1322,7 +1327,7 @@ namespace neogfx
                             function,
                             vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>(),
                             {},
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width()}.as<float>()});
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width()}.as<float>()});
             }
         }
     }
@@ -1373,7 +1378,7 @@ namespace neogfx
                             function,
                             vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
                             vec4{ drawOp.endAngle }.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }
     }
@@ -1424,7 +1429,7 @@ namespace neogfx
                             function,
                             vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
                             vec4{ drawOp.endAngle }.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? 0.5 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
             }
         }
     }

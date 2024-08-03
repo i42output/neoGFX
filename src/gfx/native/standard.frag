@@ -11,6 +11,6 @@
 #define SHAPE_RoundedRect 0x09
 #define SHAPE_EllipseRect 0x0A
                         
-void standard_fragment_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4)
+void standard_fragment_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
 }
