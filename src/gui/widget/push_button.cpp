@@ -290,7 +290,7 @@ namespace neogfx
                 path_bounding_rect(),
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
                 vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
-                pen{ outerBorderColor, penWidth }.set_secondary_color(innerBorderColor),
+                pen{ outerBorderColor, penWidth * 2.0 }.set_secondary_color(innerBorderColor),
                 faceColor);
             return;
         }

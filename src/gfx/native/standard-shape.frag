@@ -1,7 +1,48 @@
+// standard-shape.frag
+/*
+  neogfx C++ App/Game Engine
+  Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
+  
+  This program is free software: you can redistribute it and / or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 // Parts hereof...
 // The MIT License
 // Copyright © 2019 Inigo Quilez
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the Software), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, float aliasThreshold, vec4 outerColor, vec4 innerColor)
+{
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (outlineCount == 1.0)
+    {
+        float a = smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, outerColor, 1.0 - a);
+        else
+            color = mix(vec4(outerColor.xyz, 0.0), outerColor, 1.0 - a);
+    }
+    else if (outlineCount == 2.0)
+    {
+        float a = smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, innerColor, 1.0 - a);
+        else 
+            color = mix(vec4(outerColor.xyz, 0.0), outerColor, 1.0 - a);           
+    }
+    return color;
+}
 
 void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
@@ -13,25 +54,20 @@ void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
     color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
 }
 
-// https://www.shadertoy.com/view/XdVBWd
-// The MIT License
-// Copyright © 2018 Inigo Quilez
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \Software\), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED \AS IS\, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-                
-float bezier_sdSegmentSq(in vec2 p, in vec2 a, in vec2 b)
+float bezier_sdSegmentSq(vec2 p, vec2 a, vec2 b)
 {
     vec2 pa = p - a, ba = b - a;
     float h = clamp(dot(pa,ba) / dot(ba,ba), 0.0, 1.0);
     return dot(pa - ba * h, pa - ba * h);
 }
                 
-float bezier_sdSegment(in vec2 p, in vec2 a, in vec2 b)
+float bezier_sdSegment(vec2 p, vec2 a, vec2 b)
 {
     return sqrt(bezier_sdSegmentSq(p,a,b));
 }
                 
 // todo: research a non-iterative approach
-float bezier_udBezier(vec2 p0, vec2 p1, vec2 p2, in vec2 p3, vec2 pos)
+float bezier_udBezier(vec2 p0, vec2 p1, vec2 p2, vec2 p3, vec2 pos)
 {
     const int kNum = 50;
     float res = 1e10;
@@ -54,7 +90,7 @@ void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 functi
     color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
 }
 
-float sdTriangle(in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2)
+float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2)
 {
     vec2 e0 = p1 - p0, e1 = p2 - p1, e2 = p0 - p2;
     vec2 v0 = p - p0, v1 = p - p1, v2 = p - p2;
@@ -74,17 +110,11 @@ void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2,
     color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-float sdBox( in vec2 p, in vec2 b )
+float sdBox(vec2 p, vec2 b)
 {
     vec2 d = abs(p)-b;
     return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
@@ -93,17 +123,10 @@ float sdBox( in vec2 p, in vec2 b )
 void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdBox(Coord.xy - function1.xy, function1.zw * 0.5);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
 float sdCircle(vec2 p, float r)
@@ -114,20 +137,13 @@ float sdCircle(vec2 p, float r)
 void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdCircle(Coord.xy - function1.xy, function1.z);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-float sdEllipse(in vec2 p, in vec2 ab)
+float sdEllipse(vec2 p, vec2 ab)
 {
     if (ab.x == ab.y)
         return sdCircle(p, ab.x);
@@ -167,20 +183,13 @@ float sdEllipse(in vec2 p, in vec2 ab)
 void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdEllipse(Coord.xy - function1.xy, function1.zw);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-float sdPie(in vec2 p, in vec2 c, in float r)
+float sdPie(vec2 p, vec2 c, in float r)
 {
     p.x = abs(p.x);
     float l = length(p) - r;
@@ -193,20 +202,13 @@ void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     float a0 = PI * 0.5 + function2.x * 0.5;
     vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
     float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-float sdArc(in vec2 p, in vec2 c, in float r)
+float sdArc(vec2 p, vec2 c, in float r)
 {
     p.x = abs(p.x);
     float l = length(p) - r;
@@ -224,15 +226,11 @@ void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (a != 1.0)
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else if (smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0)) != 1.0)
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
                 
-float sdRoundedBox(in vec2 p, in vec2 b, in vec4 r)
+float sdRoundedBox(vec2 p, vec2 b, vec4 r)
 {
     r.xy = (p.x>0.0)?r.yz : r.xw;
     r.x  = (p.y>0.0)?r.y  : r.x;
@@ -244,20 +242,13 @@ float sdRoundedBox(in vec2 p, in vec2 b, in vec4 r)
 void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdRoundedBox(Coord.xy - function1.xy, function1.zw * 0.5, function2);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-float sdEllipseBox(in vec2 f, in vec2 c, in vec2 b, in vec4 rx, in vec4 ry)
+float sdEllipseBox(vec2 f, vec2 c, vec2 b, vec4 rx, vec4 ry)
 {
     vec2 p = f - c;
     if (rx.x + rx.y > b.x * 2.0)
@@ -290,21 +281,14 @@ float sdEllipseBox(in vec2 f, in vec2 c, in vec2 b, in vec4 rx, in vec4 ry)
     float d4 = (f.x < bl.x && f.y > bl.y) ? sdEllipse(f - bl, vec2(rx.w, ry.w)) : sdBox(p, b);
     return max(d1, max(d2, max(d3, d4)));
 }
-                
+
 void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
     float d0 = sdEllipseBox(Coord.xy, function1.xy, function1.zw * 0.5, function2, function6);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
-    {
-        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, function4, 1.0 - a);
-        else
-            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
-    }
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
