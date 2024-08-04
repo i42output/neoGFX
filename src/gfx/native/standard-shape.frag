@@ -35,11 +35,8 @@ vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, f
     }
     else if (outlineCount == 2.0)
     {
-        float a = smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0));
-        if (d0 < 0.0)
-            color = mix(color, innerColor, 1.0 - a);
-        else 
-            color = mix(vec4(outerColor.xyz, 0.0), outerColor, 1.0 - a);           
+        float a = smoothstep(-(outlineWidth / 2.0 + aliasThreshold), outlineWidth / 2.0 + aliasThreshold, d0);
+        color = mix4(vec4(outerColor.xyz, 0.0), outerColor, innerColor, color, 1.0 - a);           
     }
     return color;
 }
