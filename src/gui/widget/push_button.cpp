@@ -286,21 +286,12 @@ namespace neogfx
                 basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
                 return vec2{ lx.value().x, ly.value().y };
             };
-            aGc.fill_ellipse_rect(
-                path_bounding_rect(), 
-                vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
-                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
-                faceColor);
-            aGc.draw_ellipse_rect(
-                path_bounding_rect().deflate(penWidth),
-                vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
-                vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
-                pen{ innerBorderColor, penWidth, false });
             aGc.draw_ellipse_rect(
                 path_bounding_rect(),
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
                 vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
-                pen{ outerBorderColor, penWidth });
+                pen{ outerBorderColor, penWidth }.set_secondary_color(innerBorderColor),
+                faceColor);
             return;
         }
 

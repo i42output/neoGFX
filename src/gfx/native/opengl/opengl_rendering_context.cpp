@@ -990,28 +990,30 @@ namespace neogfx
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
-                            vec4{ drawOp.p2.x, drawOp.p2.y }.as<float>() });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
-                            vec4{ drawOp.p2.x, drawOp.p2.y }.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
+                        vec4{ drawOp.p2.x, drawOp.p2.y }.as<float>(),
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1042,27 +1044,30 @@ namespace neogfx
                 auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>() });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
-                            {},
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                    std::holds_alternative<color>(drawOp.fill) ?
+                        static_variant_cast<color>(drawOp.fill).as<float>() :
+                        std::holds_alternative<std::monostate>(drawOp.fill) ?
+                            vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
+                        vec4{},
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1093,28 +1098,30 @@ namespace neogfx
                 auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
-                            drawOp.radius.as<float>() });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
-                            drawOp.radius.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
+                        drawOp.radius.as<float>(),
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1145,35 +1152,31 @@ namespace neogfx
                 auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
-                            drawOp.radiusX.as<float>(),
-                            vec4{},
-                            drawOp.radiusY.as<float>(),
-                            vec4{},
-                            vec4{} });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
-                            drawOp.radiusX.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width()}.as<float>(),
-                            drawOp.radiusY.as<float>(),
-                            vec4{},
-                            vec4{} });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
+                        drawOp.radiusX.as<float>(),
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{},
+                        drawOp.radiusY.as<float>() });
             }
         }
     }
@@ -1257,27 +1260,30 @@ namespace neogfx
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>() });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
-                            {},
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
+                        {},
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ?
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ?
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1307,27 +1313,30 @@ namespace neogfx
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>() });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>(),
-                            {},
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width()}.as<float>()});
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>(),
+                        {},
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1357,28 +1366,30 @@ namespace neogfx
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
-                            vec4{ drawOp.endAngle }.as<float>() });
-
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v, 
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
-                            vec4{ drawOp.endAngle }.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ drawOp.endAngle }.as<float>(),
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1408,28 +1419,30 @@ namespace neogfx
                 auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
-                if (!std::holds_alternative<std::monostate>(drawOp.fill))
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v,
-                            std::holds_alternative<color>(drawOp.fill) ?
-                                static_variant_cast<color>(drawOp.fill).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
-                            vec4{ drawOp.endAngle }.as<float>() });
-                
-                if (drawOp.pen.width())
-                    for (auto const& v : vertices)
-                        vertexArrays.push_back({ v, 
-                            std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
-                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            {},
-                            function,
-                            vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
-                            vec4{ drawOp.endAngle }.as<float>(),
-                            vec4{ 0.0, !logical_operation_active() ? drawOp.pen.anti_aliased() ? 0.5 : 0.0 : 0.0, std::holds_alternative<color>(drawOp.pen.color()) ? 1.0 : 0.0, drawOp.pen.width() }.as<float>() });
+                for (auto const& v : vertices)
+                    vertexArrays.push_back({ v,
+                        std::holds_alternative<color>(drawOp.fill) ?
+                            static_variant_cast<color>(drawOp.fill).as<float>() :
+                            std::holds_alternative<std::monostate>(drawOp.fill) ?
+                                vec4f{} : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
+                        {},
+                        function,
+                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ drawOp.endAngle }.as<float>(),
+                        vec4{
+                            drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                            !logical_operation_active() ?
+                                drawOp.pen.anti_aliased() ? 
+                                    0.5 : 0.0 :
+                                0.0,
+                            0.0,
+                            drawOp.pen.width() }.as<float>(),
+                        std::holds_alternative<color>(drawOp.pen.color()) ?
+                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                        drawOp.pen.secondary_color().has_value() ? 
+                            drawOp.pen.secondary_color().value().as<float>() :
+                            vec4f{} });
             }
         }
     }
@@ -1462,7 +1475,7 @@ namespace neogfx
                         function,
                         vec4{ aP0.x, aP0.y, aP1.x, aP1.y }.as<float>(),
                         vec4{ aP2.x, aP2.y, aP3.x, aP3.y }.as<float>(),
-                        vec4{ 0.0, 0.0, !std::holds_alternative<color>(aPen.color()) ? 1.0 : 0.0, aPen.width() }.as<float>(), });
+                        vec4{ 0.0, 0.0, 0.0, aPen.width() }.as<float>(), });
         }
     }
 

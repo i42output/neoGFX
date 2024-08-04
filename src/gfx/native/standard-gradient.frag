@@ -171,9 +171,6 @@ void standard_gradient_shader(inout vec4 color, inout vec4 function0, inout vec4
 {
     if (uGradientEnabled)
     {
-        if (uShapeEnabled && function3.w != 0.0 && function3.z == 1.0)
-            return;
-
         int d = uGradientFilterSize / 2;
         if (texelFetch(uGradientFilter, ivec2(d, d)).r == 1.0)
         {

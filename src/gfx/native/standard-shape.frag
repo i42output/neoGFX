@@ -71,12 +71,17 @@ float sdTriangle(in vec2 p, in vec2 p0, in vec2 p1, in vec2 p2)
 void draw_triangle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdTriangle(Coord.xy, function1.xy, function1.zw, function2.xy);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 float sdBox( in vec2 p, in vec2 b )
@@ -88,12 +93,17 @@ float sdBox( in vec2 p, in vec2 b )
 void draw_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdBox(Coord.xy - function1.xy, function1.zw * 0.5);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 float sdCircle(vec2 p, float r)
@@ -104,12 +114,17 @@ float sdCircle(vec2 p, float r)
 void draw_circle(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdCircle(Coord.xy - function1.xy, function1.z);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 float sdEllipse(in vec2 p, in vec2 ab)
@@ -152,12 +167,17 @@ float sdEllipse(in vec2 p, in vec2 ab)
 void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdEllipse(Coord.xy - function1.xy, function1.zw);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 float sdPie(in vec2 p, in vec2 c, in float r)
@@ -173,12 +193,17 @@ void draw_pie(inout vec4 color, inout vec4 function1, inout vec4 function2, inou
     float a0 = PI * 0.5 + function2.x * 0.5;
     vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
     float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 float sdArc(in vec2 p, in vec2 c, in float r)
@@ -191,19 +216,19 @@ float sdArc(in vec2 p, in vec2 c, in float r)
 
 void draw_arc(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
+    vec4 noOutline = vec4(0.0);
+    draw_pie(color, function1, function2, noOutline, function4, function5);
+
     float a0 = PI * 0.5 + function2.x * 0.5;
     vec2 p0 = (Coord.xy - function1.xy) * mat2(cos(a0), -sin(a0), sin(a0), cos(a0));
-    if (function3.w == 0.0)
+    float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+        discard;
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
     {
-        float d0 = sdPie(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    }
-    else
-    {
-        float d0 = sdArc(p0, vec2(sin((function2.x - function1.w) * 0.5), cos((function2.x - function1.w) * 0.5)), function1.z);
-        if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
-            discard;
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (a != 1.0)
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
     }
 }
                 
@@ -219,12 +244,17 @@ float sdRoundedBox(in vec2 p, in vec2 b, in vec4 r)
 void draw_rounded_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     float d0 = sdRoundedBox(Coord.xy - function1.xy, function1.zw * 0.5, function2);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 float sdEllipseBox(in vec2 f, in vec2 c, in vec2 b, in vec4 rx, in vec4 ry)
@@ -263,13 +293,18 @@ float sdEllipseBox(in vec2 f, in vec2 c, in vec2 b, in vec4 rx, in vec4 ry)
                 
 void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
-    float d0 = sdEllipseBox(Coord.xy, function1.xy, function1.zw * 0.5, function2, function4);
-    if (function3.w == 0.0)
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
-    else if (function3.y == 0.0 && abs(d0) > function3.w / 2.0)
+    float d0 = sdEllipseBox(Coord.xy, function1.xy, function1.zw * 0.5, function2, function6);
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
-    else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0))));
+    else if (function3.x == 1.0 || /* todo */ function3.x == 2.0)
+    {
+        float a = smoothstep(function3.w / 2.0, function3.w / 2.0 + function3.y, abs(d0));
+        if (d0 < 0.0)
+            color = mix(color, function4, 1.0 - a);
+        else
+            color = mix(vec4(function4.xyz, 0.0), function4, 1.0 - a);
+    }
 }
 
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
