@@ -270,6 +270,8 @@ namespace neogfx
         // todo: move to default skin
 
         color faceColor = effective_face_color();
+        color colorStart = faceColor.lighter(0x0A);
+        color colorEnd = faceColor;
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
         dimension penWidth = 1.0;
@@ -291,7 +293,9 @@ namespace neogfx
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
                 vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
                 pen{ outerBorderColor, penWidth * 2.0 }.set_secondary_color(innerBorderColor),
-                faceColor);
+                !spot_color() ? 
+                    brush{ gradient{ colorStart, colorEnd } } :
+                    brush{ faceColor });
             return;
         }
 
@@ -309,8 +313,6 @@ namespace neogfx
             outline.deflate(penWidth, penWidth);
             break;
         }
-        color colorStart = faceColor.lighter(0x0A);
-        color colorEnd = faceColor;
         switch(iStyle)
         {
         case push_button_style::Toolbar:
