@@ -1236,6 +1236,9 @@
     <ClInclude Include="..\..\..\src\app\native\windows_accessibility.hpp">
       <Filter>Source Files\native\windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\core\style.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">

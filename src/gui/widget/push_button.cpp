@@ -274,12 +274,26 @@ namespace neogfx
         color colorEnd = faceColor;
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
-        dimension penWidth = 1.0;
+        std::optional<dimension> penWidth;
 
         scoped_units su{ *this, units::Pixels };
 
+        neogfx::path outlinePath = path();
+
         auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
+        auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
+
+        if (std::get<0>(border).has_value())
+        {
+            outerBorderColor = std::get<0>(border).value();
+            innerBorderColor = outerBorderColor;
+        }
         
+        if (std::get<1>(border).has_value())
+            penWidth = std::get<1>(border).value();
+        else if (borderRadii.has_value())
+            penWidth = 2.0;
+
         if (borderRadii.has_value())
         {
             auto to_vec2 = [&](std::array<length, 2u> const& l)
@@ -288,55 +302,60 @@ namespace neogfx
                 basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
                 return vec2{ lx.value().x, ly.value().y };
             };
+            pen outline{ outerBorderColor, penWidth.value() };
+            if (outerBorderColor != innerBorderColor)
+                outline.set_secondary_color(innerBorderColor);
             aGc.draw_ellipse_rect(
                 path_bounding_rect(),
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
                 vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
-                pen{ outerBorderColor, penWidth * 2.0 }.set_secondary_color(innerBorderColor),
+                outline,
                 !spot_color() ? 
                     brush{ gradient{ colorStart, colorEnd } } :
                     brush{ faceColor });
-            return;
         }
-
-        neogfx::path outline = path();
-        switch (iStyle)
+        else
         {
-        case push_button_style::Normal:
-        case push_button_style::ButtonBox:
-        case push_button_style::Tab:
-        case push_button_style::DropList:
-        case push_button_style::SpinBox:
-            aGc.fill_path(outline, outerBorderColor);
-            outline.deflate(penWidth, penWidth);
-            aGc.fill_path(outline, innerBorderColor);
-            outline.deflate(penWidth, penWidth);
-            break;
-        }
-        switch(iStyle)
-        {
-        case push_button_style::Toolbar:
-        case push_button_style::TitleBar:
-            if (!spot_color())
-                aGc.fill_path(outline, gradient{ colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1), colorEnd });
-            else
-                aGc.fill_path(outline, faceColor);
-            break;
-        case push_button_style::Normal:
-        case push_button_style::ButtonBox:
-        case push_button_style::ItemViewHeader:
-        case push_button_style::Tab:
-        case push_button_style::DropList:
-        case push_button_style::SpinBox:
-            if (!spot_color())
-                aGc.fill_path(outline, gradient{ colorStart, colorEnd });
-            else
-                aGc.fill_path(outline, faceColor);
-            break;
+            switch (iStyle)
+            {
+            case push_button_style::Normal:
+            case push_button_style::ButtonBox:
+            case push_button_style::Tab:
+            case push_button_style::DropList:
+            case push_button_style::SpinBox:
+                if (!penWidth.has_value())
+                    penWidth = 2.0;
+                aGc.fill_path(outlinePath, outerBorderColor);
+                outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
+                aGc.fill_path(outlinePath, innerBorderColor);
+                outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
+                break;
+            }
+            switch (iStyle)
+            {
+            case push_button_style::Toolbar:
+            case push_button_style::TitleBar:
+                if (!spot_color())
+                    aGc.fill_path(outlinePath, gradient{ colorStart.with_lightness(colorStart.to_hsl().lightness() + 0.1), colorEnd });
+                else
+                    aGc.fill_path(outlinePath, faceColor);
+                break;
+            case push_button_style::Normal:
+            case push_button_style::ButtonBox:
+            case push_button_style::ItemViewHeader:
+            case push_button_style::Tab:
+            case push_button_style::DropList:
+            case push_button_style::SpinBox:
+                if (!spot_color())
+                    aGc.fill_path(outlinePath, gradient{ colorStart, colorEnd });
+                else
+                    aGc.fill_path(outlinePath, faceColor);
+                break;
+            }
         }
         if (has_focus())
         {
-            rect focusRect = outline.bounding_rect();
+            rect focusRect = outlinePath.bounding_rect();
             focusRect.deflate(2.0, 2.0);
             aGc.draw_focus_rect(focusRect);
         }

@@ -259,6 +259,7 @@
     <ClInclude Include="..\..\..\include\neogfx\core\alignment.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_style_sheet.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\i_object.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\core\style.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\transition_animator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_task.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\core\async_thread.hpp" />

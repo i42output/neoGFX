@@ -62,10 +62,12 @@ namespace neogfx
     template <>
     color const* evaluate_style_sheet_value<color>(i_style_sheet_value const& aValue)
     {
+        using value_type = color;
+
         for (auto const& v : aValue)
         {
-            auto existing = value_map_find<color>(v.first().to_std_string_view(), v.second().to_std_string_view());
-            if (existing != value_map<color>().end())
+            auto existing = value_map_find<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<value_type>().end())
                 return &existing->second;
 
             if (v.first() == "nss.color")
@@ -73,7 +75,7 @@ namespace neogfx
                 if (v.second().empty())
                     continue;
                 if (v.second()[0] == '#')
-                    return &(value_map_entry<color>(v.first().to_std_string_view(), v.second().to_std_string_view()) = v.second().to_std_string());
+                    return &(value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view()) = v.second().to_std_string());
             }
         }
 
@@ -83,19 +85,21 @@ namespace neogfx
     template <>
     std::vector<length> const* evaluate_style_sheet_value<std::vector<length>>(i_style_sheet_value const& aValue)
     {
-        std::vector<length>* result = nullptr;
+        using value_type = std::vector<length>;
+
+        value_type* result = nullptr;
 
         for (auto const& v : aValue)
         {
-            auto existing = value_map_find<std::vector<length>>(v.first().to_std_string_view(), v.second().to_std_string_view());
-            if (existing != value_map<std::vector<length>>().end())
+            auto existing = value_map_find<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<value_type>().end())
                 return &existing->second;
 
             if (v.first() == "nss.value")
             {
                 if (v.second().empty())
                     continue;
-                auto& lengths = value_map_entry<std::vector<length>>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                auto& lengths = value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
                 result = &lengths;
             }
             else if (v.first() == "nss.length" && result)
@@ -110,24 +114,64 @@ namespace neogfx
     }
 
     template <>
-    std::optional<std::array<std::array<length, 2u>, 4u>> const* evaluate_style_sheet_value<std::optional<std::array<std::array<length, 2u>, 4u>>>(i_style_sheet_value const& aValue)
+    std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>> const* evaluate_style_sheet_value<std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>>(i_style_sheet_value const& aValue)
     {
-        std::optional<std::array<std::array<length, 2u>, 4u>>* result = nullptr;
+        using value_type = std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>;
+
+        value_type* result = nullptr;
+
+        for (auto const& v : aValue)
+        {
+            auto existing = value_map_find<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<value_type>().end())
+                return &existing->second;
+
+            if (v.second().empty())
+                continue;
+
+            if (v.first() == "nss.value")
+            {
+                auto& lengths = value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                result = &lengths;
+            }
+            else if (v.first() == "nss.length" && result)
+            {
+                std::get<1>(*result) = length::from_string(v.second());
+            }
+            else if (v.first() == "nss.color" && result)
+            {
+                std::get<0>(*result) = v.second().to_std_string();
+            }
+            else if (v.first() == "nss.border_style" && result)
+            {
+                std::get<2>(*result) = neolib::string_to_enum<border_style>(v.second().to_std_string());
+            }
+        }
+
+        return result;
+    }
+
+    template <>
+    std::optional<std::array<std::array<length, 2u>, 4u>> const* evaluate_style_sheet_value<std::optional<std::array<std::array<length, 2u>, 4u>>>(i_style_sheet_value const& aValue)
+    {    
+        using value_type = std::optional<std::array<std::array<length, 2u>, 4u>>;
+
+        value_type* result = nullptr;
 
         std::pair<std::vector<length>, std::vector<length>> partialResult;
         bool secondPair = false;
 
         for (auto const& v : aValue)
         {
-            auto existing = value_map_find<std::optional<std::array<std::array<length, 2u>, 4u>>>(v.first().to_std_string_view(), v.second().to_std_string_view());
-            if (existing != value_map<std::optional<std::array<std::array<length, 2u>, 4u>>>().end())
+            auto existing = value_map_find<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<value_type>().end())
                 return &existing->second;
 
             if (v.first() == "nss.value" || v.first() == "nss.paired_values")
             {
                 if (v.second().empty())
                     continue;
-                auto& lengths = value_map_entry<std::optional<std::array<std::array<length, 2u>, 4u>>>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                auto& lengths = value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
                 result = &lengths;
             }
             else if (v.first() == "nss.pair_separator" && result)
@@ -309,7 +353,8 @@ namespace neogfx
             Hex6,
             Hex8,
             HexDigit,
-            Length
+            Length,
+            BorderStyle
         };
     }
 }
@@ -342,6 +387,7 @@ declare_symbol(neogfx::nss::symbol, Hex6)
 declare_symbol(neogfx::nss::symbol, Hex8)
 declare_symbol(neogfx::nss::symbol, HexDigit)
 declare_symbol(neogfx::nss::symbol, Length)
+declare_symbol(neogfx::nss::symbol, BorderStyle)
 end_declare_symbols(neogfx::nss::symbol)
 
 namespace neogfx
@@ -376,7 +422,9 @@ namespace neogfx
             ( symbol::ValuePart >> (('#'_ , symbol::Hex4) <=> "nss.color"_concept) ),
             ( symbol::ValuePart >> (('#'_ , symbol::Hex6) <=> "nss.color"_concept) ),
             ( symbol::ValuePart >> (('#'_ , symbol::Hex8) <=> "nss.color"_concept) ),
+            ( symbol::ValuePart >> (symbol::BorderStyle <=> "nss.border_style"_concept) ),
             ( symbol::Length >> sequence(symbol::Integer, choice("cm"_ | "mm"_ | "in"_ | "px"_ | "pt"_ | "pc"_ | "em"_ | "ex"_ | "ch"_ | "rem"_ | "vw"_ | "vh"_ | "vmin"_ | "vmax"_ | "%"_ )) ),
+            ( symbol::BorderStyle >> choice("dotted"_ | "dashed"_ | "solid"_ | "double"_ | "groove"_ | "ridge"_ | "inset"_ | "outset"_ | "none"_ | "hidden"_ ) ),
             ( symbol::Integer >> +repeat(symbol::Digit) ),
             ( symbol::Digit >> range('0', '9') ),
             ( symbol::Hex3 >> sequence(symbol::HexDigit, symbol::HexDigit, symbol::HexDigit) ),
@@ -432,7 +480,6 @@ namespace neogfx
     void style_sheet::parse()
     {
         neolib::parser<nss::symbol> parser{ nss::sRules };
-        parser.set_debug_output(std::cout);
         parser.parse(nss::symbol::Sheet, sheet().to_std_string_view());
         parser.create_ast();
         create_values(iSelectors, parser.ast());
