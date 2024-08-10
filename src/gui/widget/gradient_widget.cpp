@@ -217,19 +217,17 @@ namespace neogfx
         if (iCurrentColorStop != std::nullopt)
         {
             auto const r = color_stop_rect(**iCurrentColorStop);
-            aGc.line_stipple_on(1.0_dip, 0x5555, 0.0);
             aGc.push_logical_operation(neogfx::logical_operation::Xor);
-            aGc.draw_line(point{ std::floor(r.center().x), r.top() }, point{ std::floor(r.center().x), contents_rect().top() }, color::White);
-            aGc.line_stipple_off();
+            aGc.draw_line(point{ std::floor(r.center().x), r.top() }, point{ std::floor(r.center().x), contents_rect().top() }, 
+                pen{ color::White, line_dash{ 0x5555, 1.0_dip } });
             aGc.pop_logical_operation();
         }
         else if (iCurrentAlphaStop != std::nullopt)
         {
             auto const r = alpha_stop_rect(**iCurrentAlphaStop);
-            aGc.line_stipple_on(1.0_dip, 0x5555, 0.0);
             aGc.push_logical_operation(neogfx::logical_operation::Xor);
-            aGc.draw_line(point{ std::floor(r.center().x), r.bottom() }, point{ std::floor(r.center().x), contents_rect().bottom() }, color::White);
-            aGc.line_stipple_off();
+            aGc.draw_line(point{ std::floor(r.center().x), r.bottom() }, point{ std::floor(r.center().x), contents_rect().bottom() }, 
+                pen{ color::White, line_dash{ 0x5555, 1.0_dip } });
             aGc.pop_logical_operation();
         }
         for (gradient::color_stop_list::const_iterator i = iSelection.color_stops().begin(); i != iSelection.color_stops().end(); ++i)

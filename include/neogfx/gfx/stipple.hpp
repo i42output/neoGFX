@@ -1,7 +1,7 @@
-// spin_box.cpp
+// stipple.hpp
 /*
-  neogfx C++ App/Game Engine
-  Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
+  neogfx C++ GUI Library
+  Copyright (c) 2024 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -17,21 +17,16 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <neogfx/neogfx.hpp>
+#pragma once
 
-#include <neogfx/gui/widget/spin_box.ipp>
+#include <neogfx/neogfx.hpp>
 
 namespace neogfx
 {
-    template class basic_spin_box<std::int8_t>;
-    template class basic_spin_box<std::uint8_t>;
-    template class basic_spin_box<int16_t>;
-    template class basic_spin_box<std::uint16_t>;
-    template class basic_spin_box<std::int32_t>;
-    template class basic_spin_box<std::uint32_t>;
-    template class basic_spin_box<std::int64_t>;
-    template class basic_spin_box<std::uint64_t>;
-    template class basic_spin_box<float>;
-    template class basic_spin_box<double>;
+    struct stipple
+    {
+        std::uint16_t pattern = 0xFFFFu;
+        scalar factor = 1.0;
+        scalar position = 0.0;
+    };
 }
-

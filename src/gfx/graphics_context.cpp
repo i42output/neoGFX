@@ -383,61 +383,97 @@ namespace neogfx
 
     void graphics_context::draw_line(point const& aFrom, point const& aTo, pen const& aPen) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen });
     }
 
     void graphics_context::draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen, aFill });
     }
 
     void graphics_context::draw_rect(rect const& aRect, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen, aFill });
     }
 
     void graphics_context::draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
     }
 
     void graphics_context::draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect) + iOrigin, aRadiusX, aRadiusY, aPen, aFill });
     }
 
     void graphics_context::draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
     }
 
     void graphics_context::draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aFill });
     }
 
     void graphics_context::draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen, aFill });
     }
 
     void graphics_context::draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
     void graphics_context::draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
     void graphics_context::draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         native_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, to_device_units(aP3) + iOrigin, aPen });
     }
 
     void graphics_context::draw_path(path const& aPath, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         path path = to_device_units(aPath);
         path.set_position(path.position() + iOrigin);
         native_context().enqueue(graphics_operation::draw_path{ path, aPen, aFill });
@@ -445,6 +481,9 @@ namespace neogfx
 
     void graphics_context::draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill) const
     {
+        std::optional<scoped_stipple> st;
+        if (aPen.style() == line_style::CustomDash)
+            st.emplace(*this, aPen.custom_dash());
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_shape{
@@ -479,9 +518,7 @@ namespace neogfx
         scoped_snap_to_pixel sntp{ *this, true };
 
         push_logical_operation(neogfx::logical_operation::Xor);
-        line_stipple_on(1.0, 0x5555);
-        draw_rect(aRect, pen{ color::White });
-        line_stipple_off();
+        draw_rect(aRect, pen{ color::White, line_dash{ 0x5555 } });
         pop_logical_operation();
     }
 
@@ -903,13 +940,20 @@ namespace neogfx
         native_context().enqueue(graphics_operation::pop_logical_operation{});
     }
 
-    void graphics_context::line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition) const
+    std::optional<stipple> const& graphics_context::line_stipple() const
     {
-        native_context().enqueue(graphics_operation::line_stipple_on{ aFactor, aPattern, aPosition });
+        return iLineStipple;
+    }
+
+    void graphics_context::line_stipple_on(std::uint16_t aPattern, scalar aFactor, scalar aPosition) const
+    {
+        iLineStipple = { aPattern, aFactor, aPosition };
+        native_context().enqueue(graphics_operation::line_stipple_on{ iLineStipple.value() });
     }
 
     void graphics_context::line_stipple_off() const
     {
+        iLineStipple = std::nullopt;
         native_context().enqueue(graphics_operation::line_stipple_off{});
     }
 

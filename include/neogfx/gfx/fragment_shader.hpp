@@ -198,7 +198,7 @@ namespace neogfx
     public:
         bool stipple_active() const final;
         void clear_stipple() final;
-        void set_stipple(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) final;
+        void set_stipple(std::uint16_t aPattern, scalar aFactor = 1.0, scalar aPosition = 0.0) final;
         void start(const i_rendering_context& aContext, const vec3& aFrom) final;
         void next(const i_rendering_context& aContext, const vec3& aFrom, scalar aPositionOffset) final;
     private:

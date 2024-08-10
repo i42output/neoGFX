@@ -112,7 +112,7 @@ namespace neogfx
     extern template class basic_spin_box<std::int8_t>;
     extern template class basic_spin_box<std::uint8_t>;
     extern template class basic_spin_box<int16_t>;
-    extern template class basic_spin_box<uint16_t>;
+    extern template class basic_spin_box<std::uint16_t>;
     extern template class basic_spin_box<std::int32_t>;
     extern template class basic_spin_box<std::uint32_t>;
     extern template class basic_spin_box<std::int64_t>;
@@ -123,7 +123,7 @@ namespace neogfx
     typedef basic_spin_box<std::int8_t> int8_spin_box;
     typedef basic_spin_box<std::uint8_t> uint8_spin_box;
     typedef basic_spin_box<int16_t> int16_spin_box;
-    typedef basic_spin_box<uint16_t> uint16_spin_box;
+    typedef basic_spin_box<std::uint16_t> uint16_spin_box;
     typedef basic_spin_box<std::int32_t> int32_spin_box;
     typedef basic_spin_box<std::uint32_t> uint32_spin_box;
     typedef basic_spin_box<std::int64_t> int64_spin_box;

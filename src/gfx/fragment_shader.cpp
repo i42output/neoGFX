@@ -243,7 +243,7 @@ namespace neogfx
         uStippleEnabled = false;
     }
 
-    void standard_stipple_shader::set_stipple(scalar aFactor, uint16_t aPattern, scalar aPosition)
+    void standard_stipple_shader::set_stipple(std::uint16_t aPattern, scalar aFactor, scalar aPosition)
     {
         enable();
         iPosition = aPosition;

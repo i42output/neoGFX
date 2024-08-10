@@ -590,7 +590,7 @@ namespace neogfx
         KeyCode_AUDIOFASTFORWARD = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_AUDIOFASTFORWARD)
     };
 
-    enum key_modifiers_e : uint16_t
+    enum key_modifiers_e : std::uint16_t
     {
         KeyModifier_NONE        = 0x0000,
         KeyModifier_LSHIFT      = 0x0001,

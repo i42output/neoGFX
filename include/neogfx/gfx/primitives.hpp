@@ -22,18 +22,12 @@
 #include <neogfx/neogfx.hpp>
 
 #include <memory>
-#ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable: 4459 ) // declaration of 'name' hides global declaration
-#endif
-#ifdef _WIN32
-#pragma warning( pop )
-#endif
 #include <optional>
 
 #include <neolib/core/vecarray.hpp>
 
 #include <neogfx/core/primitives.hpp>
+#include <neogfx/gfx/stipple.hpp>
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/sub_texture.hpp>
@@ -41,26 +35,26 @@
 
 namespace neogfx
 {
-    enum class blending_mode
+    enum class blending_mode : std::uint32_t
     {
         None,
         Default, // todo
         Blit
     };
 
-    enum class smoothing_mode
+    enum class smoothing_mode : std::uint32_t
     {
         None,
         AntiAlias
     };
 
-    enum class logical_operation
+    enum class logical_operation : std::uint32_t
     {
         None,
         Xor
     };
 
-    enum class shader_effect
+    enum class shader_effect : std::uint32_t
     {
         None            = 0,
         Colorize        = 1,
@@ -73,13 +67,13 @@ namespace neogfx
         Ignore          = 99
     };
 
-    enum class shader_filter
+    enum class shader_filter : std::uint32_t
     {
         None            = 0,
         GaussianBlur    = 1
     };
 
-    enum class shader_shape
+    enum class shader_shape : std::uint32_t
     {
         None        = 0x00,
         Line        = 0x01,
@@ -94,7 +88,7 @@ namespace neogfx
         EllipseRect = 0x0A
     };
 
-    enum class blurring_algorithm
+    enum class blurring_algorithm : std::uint32_t
     {
         None,
         Gaussian

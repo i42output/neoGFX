@@ -38,7 +38,7 @@ namespace neogfx
                 aGuid.Data1,
                 aGuid.Data2,
                 aGuid.Data3,
-                static_cast<uint16_t>(aGuid.Data4[0] * 0x100 + aGuid.Data4[1]),
+                static_cast<std::uint16_t>(aGuid.Data4[0] * 0x100 + aGuid.Data4[1]),
                 { aGuid.Data4[2], aGuid.Data4[3], aGuid.Data4[4], aGuid.Data4[5], aGuid.Data4[6], aGuid.Data4[7] }
             };
         }

@@ -149,7 +149,7 @@ namespace neogfx
                     result = create_slider_box<std::uint8_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Uint16:
-                    result = create_slider_box<uint16_t>{}(aSetting, aLayout, aSink);
+                    result = create_slider_box<std::uint16_t>{}(aSetting, aLayout, aSink);
                     break;
                 case neolib::setting_type::Uint32:
                     result = create_slider_box<std::uint32_t>{}(aSetting, aLayout, aSink);

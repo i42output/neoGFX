@@ -60,7 +60,7 @@ namespace neogfx
     {
         if (auto existing = pending(aWidget))
             (**existing).validated = true;
-        else if (existing = processing(aWidget))
+        else if ((existing = processing(aWidget)))
             (**existing).validated = true;
     }
 
@@ -68,7 +68,7 @@ namespace neogfx
     {
         if (auto existing = pending(aWidget))
             (**existing).validated = false;
-        else if (existing = processing(aWidget))
+        else if ((existing = processing(aWidget)))
             (**existing).validated = false;
     }
 

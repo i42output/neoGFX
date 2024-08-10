@@ -193,7 +193,8 @@ namespace neogfx
     public:
         virtual void push_logical_operation(logical_operation aLogicalOperation) const = 0;
         virtual void pop_logical_operation() const = 0;
-        virtual void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) const = 0;
+        virtual std::optional<stipple> const& line_stipple() const = 0;
+        virtual void line_stipple_on(std::uint16_t aPattern, scalar aFactor = 1.0, scalar aPosition = 0.0) const = 0;
         virtual void line_stipple_off() const = 0;
         virtual bool is_subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_on() const = 0;
@@ -532,6 +533,29 @@ namespace neogfx
         }
     private:
         i_graphics_context const& iGc;
+    };
+
+    class scoped_stipple
+    {
+    public:
+        scoped_stipple(i_graphics_context const& aGc, std::optional<stipple> const& aStipple) :
+            iGc{ aGc }, iPreviousStipple{ aGc.line_stipple() }
+        {
+            if (aStipple.has_value())
+                iGc.line_stipple_on(aStipple.value().pattern, aStipple.value().factor, aStipple.value().position );
+            else
+                iGc.line_stipple_off();
+        }
+        ~scoped_stipple()
+        {
+            if (iPreviousStipple.has_value())
+                iGc.line_stipple_on(iPreviousStipple.value().pattern, iPreviousStipple.value().factor, iPreviousStipple.value().position);
+            else
+                iGc.line_stipple_off();
+        }
+    private:
+        i_graphics_context const& iGc;
+        std::optional<stipple> iPreviousStipple;
     };
 
     inline void draw_alpha_background(i_graphics_context& aGc, rect const& aRect, dimension aAlphaPatternSize = 4.0_dip)

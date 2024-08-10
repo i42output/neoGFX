@@ -545,7 +545,7 @@ namespace neogfx
             case graphics_operation::operation_type::LineStippleOn:
                 {
                     auto const& lso = static_variant_cast<const graphics_operation::line_stipple_on&>(*(std::prev(opBatch.cend())));
-                    line_stipple_on(lso.factor, lso.pattern, lso.position);
+                    line_stipple_on(lso.stipple.pattern, lso.stipple.factor, lso.stipple.position);
                 }
                 break;
             case graphics_operation::operation_type::LineStippleOff:
@@ -833,9 +833,9 @@ namespace neogfx
         }    
     }
 
-    void opengl_rendering_context::line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition)
+    void opengl_rendering_context::line_stipple_on(std::uint16_t aPattern, scalar aFactor, scalar aPosition)
     {
-        rendering_engine().default_shader_program().stipple_shader().set_stipple(aFactor, aPattern, aPosition);
+        rendering_engine().default_shader_program().stipple_shader().set_stipple(aPattern, aFactor, aPosition);
     }
 
     void opengl_rendering_context::line_stipple_off()

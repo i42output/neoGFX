@@ -117,7 +117,7 @@ namespace neogfx
     extern template basic_slider<std::int8_t>;
     extern template basic_slider<std::uint8_t>;
     extern template basic_slider<int16_t>;
-    extern template basic_slider<uint16_t>;
+    extern template basic_slider<std::uint16_t>;
     extern template basic_slider<std::int32_t>;
     extern template basic_slider<std::uint32_t>;
     extern template basic_slider<std::int64_t>;

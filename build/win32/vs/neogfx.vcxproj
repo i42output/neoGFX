@@ -360,6 +360,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_provider.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_vertex_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_view.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\line.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\path.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\pen.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\primitives.hpp" />
@@ -369,6 +370,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\shapes.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\standard_shader_program.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\stipple.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\texture_atlas.hpp" />

@@ -21,6 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/gfx/line.hpp>
 #include <neogfx/gfx/color.hpp>
 #include <neogfx/gfx/gradient.hpp>
 
@@ -32,25 +33,61 @@ namespace neogfx
         // construction
     public:
         pen() :
-            iWidth{ 0.0 }, iAntiAliased{ true }
+            iWidth{ 0.0 }, iStyle{ line_style::None }, iCustomDash{}, iAntiAliased { true }
         {}
         pen(color const& aColor, bool aAntiAliased = true) :
-            iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased }
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ line_style::Solid }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color const& aColor, line_style aStyle, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ aStyle }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color const& aColor, line_dash const& aCustomDash, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ line_style::CustomDash }, iCustomDash{ aCustomDash }, iAntiAliased{ aAntiAliased }
         {}
         pen(color const& aColor, dimension aWidth, bool aAntiAliased = true) :
-            iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased }
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ line_style::Solid }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color const& aColor, dimension aWidth, line_style aStyle, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ aStyle }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color const& aColor, dimension aWidth, line_dash const& aCustomDash, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ line_style::CustomDash }, iCustomDash{ aCustomDash }, iAntiAliased{ aAntiAliased }
         {}
         pen(gradient const& aColor, bool aAntiAliased = true) :
-            iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased }
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ line_style::Solid }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(gradient const& aColor, line_style aStyle, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ aStyle }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(gradient const& aColor, line_dash const& aCustomDash, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ line_style::CustomDash }, iCustomDash{ aCustomDash }, iAntiAliased{ aAntiAliased }
         {}
         pen(gradient const& aColor, dimension aWidth, bool aAntiAliased = true) :
-            iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased }
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ line_style::Solid }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(gradient const& aColor, line_style aStyle, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ aStyle }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(gradient const& aColor, line_dash const& aCustomDash, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ line_style::CustomDash }, iCustomDash{ aCustomDash }, iAntiAliased{ aAntiAliased }
         {}
         pen(color_or_gradient const& aColor, bool aAntiAliased = true) :
-            iColor{ aColor }, iWidth{ 1.0 }, iAntiAliased{ aAntiAliased }
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ line_style::Solid }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color_or_gradient const& aColor, line_style aStyle, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ aStyle }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color_or_gradient const& aColor, line_dash const& aCustomDash, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ 1.0 }, iStyle{ line_style::CustomDash }, iCustomDash{ aCustomDash }, iAntiAliased{ aAntiAliased }
         {}
         pen(color_or_gradient const& aColor, dimension aWidth, bool aAntiAliased = true) :
-            iColor{ aColor }, iWidth{ aWidth }, iAntiAliased{ aAntiAliased }
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ line_style::Solid }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color_or_gradient const& aColor, line_style aStyle, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ aStyle }, iCustomDash{}, iAntiAliased{ aAntiAliased }
+        {}
+        pen(color_or_gradient const& aColor, line_dash const& aCustomDash, dimension aWidth, bool aAntiAliased = true) :
+            iColor{ aColor }, iWidth{ aWidth }, iStyle{ line_style::CustomDash }, iCustomDash{ aCustomDash }, iAntiAliased{ aAntiAliased }
         {}
         // operations
     public:
@@ -58,9 +95,37 @@ namespace neogfx
         { 
             return iColor; 
         }
+        pen& set_color(color_or_gradient const& aColor)
+        {
+            iColor = aColor;
+            return *this;
+        }
         dimension width() const
         { 
             return iWidth; 
+        }
+        pen& set_width(dimension aWidth)
+        {
+            iWidth = aWidth;
+            return *this;
+        }
+        line_style style() const
+        {
+            return iStyle;
+        }
+        pen& set_style(line_style aStyle)
+        {
+            iStyle = aStyle;
+            return *this;
+        }
+        line_dash const& custom_dash() const
+        {
+            return iCustomDash;
+        }
+        pen& set_custom_dash(line_dash const& aCustomDash)
+        {
+            iCustomDash = aCustomDash;
+            return *this;
         }
         std::optional<neogfx::color> const& secondary_color() const
         {
@@ -75,9 +140,16 @@ namespace neogfx
         { 
             return iAntiAliased; 
         }
+        pen& set_anti_aliased(bool aAntiAliased)
+        {
+            iAntiAliased = aAntiAliased;
+            return *this;
+        }
     private:
         color_or_gradient iColor;
         dimension iWidth;
+        line_style iStyle;
+        line_dash iCustomDash;
         std::optional<neogfx::color> iSecondaryColor;
         bool iAntiAliased;
     };

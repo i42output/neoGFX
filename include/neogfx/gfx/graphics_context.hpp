@@ -111,7 +111,8 @@ namespace neogfx
     public:
         void push_logical_operation(logical_operation aLogicalOperation) const final;
         void pop_logical_operation() const final;
-        void line_stipple_on(scalar aFactor, uint16_t aPattern, scalar aPosition = 0.0) const final;
+        std::optional<stipple> const& line_stipple() const final;
+        void line_stipple_on(std::uint16_t aPattern, scalar aFactor = 1.0, scalar aPosition = 0.0) const final;
         void line_stipple_off() const final;
         bool is_subpixel_rendering_on() const final;
         void subpixel_rendering_on() const final;
@@ -277,6 +278,7 @@ namespace neogfx
         mutable neogfx::blending_mode iBlendingMode;
         mutable neogfx::smoothing_mode iSmoothingMode;
         mutable bool iSubpixelRendering;
+        mutable std::optional<stipple> iLineStipple;
         mutable std::optional<neogfx::tab_stops> iTabStops;
         mutable std::optional<std::pair<bool, char>> iMnemonic;
         mutable std::optional<std::string> iPassword;
