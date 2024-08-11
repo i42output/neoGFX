@@ -243,12 +243,17 @@ namespace neogfx
         uStippleEnabled = false;
     }
 
-    void standard_stipple_shader::set_stipple(std::uint16_t aPattern, scalar aFactor, scalar aPosition)
+    void standard_stipple_shader::set_stipple(stipple const& aStipple)
     {
         enable();
-        iPosition = aPosition;
-        uStippleFactor = static_cast<float>(aFactor);
-        uStipplePattern = aPattern;
+        iPosition = aStipple.position;
+        thread_local shader_float_array pattern;
+        pattern.resize(16);
+        std::transform(aStipple.pattern.begin(), aStipple.pattern.end(), pattern.begin(),
+            [](scalar value) { return static_cast<float>(value); });
+        uStipplePattern = pattern;
+        uStipplePatternSize = aStipple.pattern.size();
+        uStipplePatternLength = static_cast<float>(std::accumulate(aStipple.pattern.begin(), aStipple.pattern.end(), 0.0));
         uStipplePosition = static_cast<float>(iPosition);
         uStippleVertex = vec3f{};
         uStippleEnabled = true;

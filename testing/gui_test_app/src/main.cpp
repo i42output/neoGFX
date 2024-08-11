@@ -1080,6 +1080,83 @@ int main(int argc, char* argv[])
                                 font-size: 16px;
                                 })"_s);
                         break;
+                    case 24:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border: #0000FF 8px dotted;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 25:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px;
+                                border: #0000FF 8px dotted;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 26:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px 40px;
+                                border: #0000FF 8px dotted;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 27:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px 40px 60px;
+                                border: #0000FF 8px dotted;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 28:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 20px 40px 60px 160px;
+                                border: #0000FF 8px dotted;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
+                    case 29:
+                        button.set_style_sheet(
+                            R"(
+                            .button {
+                                border-radius: 70% 30% 30% 70% / 60% 40% 60% 40%;
+                                border: #0000FF 8px dotted;
+                                padding: 50px;
+                                text-align: center;
+                                text-decoration: none;
+                                display: inline-block;
+                                font-size: 16px;
+                                })"_s);
+                        break;
                     }
                 }
             }

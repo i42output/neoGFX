@@ -154,5 +154,47 @@ namespace neogfx
         bool iAntiAliased;
     };
 
+    inline bool has_stipple(pen const& aPen)
+    {
+        switch (aPen.style())
+        {
+        case line_style::None:
+            return false;
+        case line_style::Solid:
+            return false;
+        case line_style::Dash:
+        case line_style::Dot:
+        case line_style::DashDot:
+        case line_style::DashDotDot:
+        case line_style::CustomDash:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    inline stipple to_stipple(pen const& aPen)
+    {
+        switch (aPen.style())
+        {
+        case line_style::None:
+            return stipple{ 0u, 0.0 };
+        case line_style::Solid:
+            return stipple{};
+        case line_style::Dash:
+            return stipple{ { 2.0, 1.0 }, aPen.width()};
+        case line_style::Dot:
+            return stipple{ 0x5555u, aPen.width() };
+        case line_style::DashDot:
+            return stipple{ { 2.0, 1.0, 1.0, 1.0 }, aPen.width() };
+        case line_style::DashDotDot:
+            return stipple{ { 2.0, 1.0, 1.0, 1.0, 1.0, 1.0 }, aPen.width() };
+        case line_style::CustomDash:
+            return aPen.custom_dash();
+        default:
+            return stipple{ 0u, 0.0 };
+        }
+    }
+
     typedef std::optional<pen> optional_pen;
 }

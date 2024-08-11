@@ -21,12 +21,44 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <bit>
+
 namespace neogfx
 {
+    /// @todo i_stipple
     struct stipple
     {
-        std::uint16_t pattern = 0xFFFFu;
-        scalar factor = 1.0;
+        stipple()
+        {
+        }
+        template <typename T, typename = std::enable_if_t<std::is_same_v<T, double>, void>>
+        stipple(std::initializer_list<T> aPattern, scalar aFactor = 1.0, scalar aPosition = 0.0) :
+            pattern{ aPattern }, position{ aPosition }
+        {
+            std::transform(pattern.cbegin(), pattern.cend(), pattern.begin(), [&](scalar x) { return x * aFactor; });
+        }
+        template <std::integral T>
+        stipple(T aPattern, scalar aFactor = 1.0, scalar aPosition = 0.0) :
+            pattern{}, position{ aPosition }
+        {
+            auto bits = static_cast<std::uint16_t>(aPattern);
+            int left = 16;
+            while (left)
+            {
+                int const countOne = std::countr_one(bits);
+                pattern.push_back(countOne * aFactor);
+                bits >>= countOne;
+                left -= countOne;
+                int const countZero = std::min(left, std::countr_zero(bits));
+                pattern.push_back(countZero * aFactor);
+                bits >>= countZero;
+                left -= countZero;
+            }
+            if (pattern.empty())
+                pattern = { aFactor, 0.0 };
+        }
+
+        neolib::static_vector<scalar, 16> pattern = { 1.0, 0.0 };
         scalar position = 0.0;
     };
 }

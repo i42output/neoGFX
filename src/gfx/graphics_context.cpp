@@ -518,7 +518,7 @@ namespace neogfx
         scoped_snap_to_pixel sntp{ *this, true };
 
         push_logical_operation(neogfx::logical_operation::Xor);
-        draw_rect(aRect, pen{ color::White, line_dash{ 0x5555 } });
+        draw_rect(aRect, pen{ color::White, line_dash{ 0x5555u } });
         pop_logical_operation();
     }
 
@@ -945,9 +945,9 @@ namespace neogfx
         return iLineStipple;
     }
 
-    void graphics_context::line_stipple_on(std::uint16_t aPattern, scalar aFactor, scalar aPosition) const
+    void graphics_context::line_stipple_on(stipple const& aStipple) const
     {
-        iLineStipple = { aPattern, aFactor, aPosition };
+        iLineStipple = aStipple;
         native_context().enqueue(graphics_operation::line_stipple_on{ iLineStipple.value() });
     }
 

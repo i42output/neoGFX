@@ -296,7 +296,7 @@ namespace neogfx
         bool logical_operation_active() const;
         void push_logical_operation(logical_operation aLogicalOperation);
         void pop_logical_operation();
-        void line_stipple_on(std::uint16_t aPattern, scalar aFactor, scalar aPosition);
+        void line_stipple_on(stipple const& aStipple);
         void line_stipple_off();
         void set_gradient(const gradient& aGradient);
         void clear_gradient();

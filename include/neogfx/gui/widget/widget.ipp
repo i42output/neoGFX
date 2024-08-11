@@ -1409,11 +1409,11 @@ namespace neogfx
             }
             rect const nonClientRect = to_client_coordinates(non_client_rect());
             aGc.draw_rect(nonClientRect, pen{ color::White, 3.0 });
-            aGc.draw_rect(nonClientRect, pen{ color::Green, 3.0, line_dash{ 0x5555 } });
+            aGc.draw_rect(nonClientRect, pen{ color::Green, 3.0, line_dash{ 0x5555u } });
             if (nonClientRect != client_rect(false))
             {
                 aGc.draw_rect(client_rect(false), pen{ color::White, 1.0 });
-                aGc.draw_rect(client_rect(false), pen{ color::Red, 1.0, line_dash{ 0x5555 } });
+                aGc.draw_rect(client_rect(false), pen{ color::Red, 1.0, line_dash{ 0x5555u } });
             }
             if (debug::layoutItem != nullptr && (debug::layoutItem != this || has_layout()))
             {
@@ -1446,11 +1446,11 @@ namespace neogfx
                     }
                     rect const itemRect{ item.position(), item.extents() };
                     aGc.draw_rect(itemRect, color::White.with_alpha(0.5));
-                    aGc.draw_rect(itemRect, pen{ color::Black.with_alpha(0.5), line_dash{ 0x5555 } });
+                    aGc.draw_rect(itemRect, pen{ color::Black.with_alpha(0.5), line_dash{ 0x5555u } });
                 }
                 rect const layoutRect{ debugLayout.position(), debugLayout.extents() };
                 aGc.draw_rect(layoutRect, color::White);
-                aGc.draw_rect(layoutRect, pen{ debug::layoutItem == &layout() ? color::Blue : color::Purple, line_dash{ 0x5555 } });
+                aGc.draw_rect(layoutRect, pen{ debug::layoutItem == &layout() ? color::Blue : color::Purple, line_dash{ 0x5555u } });
             }
         }
 #endif // NEOGFX_DEBUG

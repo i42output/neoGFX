@@ -151,8 +151,8 @@ namespace neogfx
     struct invalid_shader_variable_type : std::logic_error { invalid_shader_variable_type() : std::logic_error{ "neogfx::invalid_shader_variable_type" } {} };
     struct unsupported_shader_language : std::logic_error { unsupported_shader_language() : std::logic_error{ "neogfx::unsupported_shader_language" } {} };
 
-    typedef neolib::vector<float> shader_float_array;
-    typedef neolib::vector<double> shader_double_array;
+    using shader_float_array = neolib::vector<float>;
+    using shader_double_array = neolib::vector<double>;
 
     template <shader_data_type HandleType>
     struct shader_handle
@@ -163,17 +163,17 @@ namespace neogfx
         bool operator==(const self_type& aRhs) const { return handle == aRhs.handle; }
     };
 
-    typedef shader_handle<shader_data_type::Sampler2D> sampler2D;
-    typedef shader_handle<shader_data_type::Sampler2DMS> sampler2DMS;
-    typedef shader_handle<shader_data_type::Sampler2DRect> sampler2DRect;
+    using sampler2D = shader_handle<shader_data_type::Sampler2D>;
+    using sampler2DMS = shader_handle<shader_data_type::Sampler2DMS>;
+    using sampler2DRect = shader_handle<shader_data_type::Sampler2DRect>;
 
-    typedef neolib::plugin_variant<shader_data_type, bool, float, double, std::int32_t, std::uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect> shader_value_type;
+    using shader_value_type = neolib::plugin_variant<shader_data_type, bool, float, double, std::int32_t, std::uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect>;
 
-    typedef std::uint32_t shader_variable_location;
-    typedef void* shader_uniform_storage;
-    typedef std::int32_t shader_uniform_location;
+    using shader_variable_location = std::uint32_t;
+    using shader_uniform_storage = void*;
+    using shader_uniform_location = std::int32_t;
 
-    typedef neolib::cookie shader_uniform_id;
+    using shader_uniform_id = neolib::cookie;
     constexpr shader_uniform_id no_uniform = shader_uniform_id{};
 
     class i_shader_uniform

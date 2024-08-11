@@ -31,8 +31,19 @@ void standard_stipple_shader(inout vec4 color, inout vec4 function0, inout vec4 
                 d = (atan(y, x) + PI) * function1.z;
             }
         }
-        uint patternBit = uint((d + uStipplePosition) / uStippleFactor) % 16;
-        if ((uStipplePattern & (1 << patternBit)) == 0)
-            discard;
+        d = mod(d + uStipplePosition, uStipplePatternLength);
+        bool draw = true;
+        float offset = 0.0;
+        for (uint i = 0; i != uStipplePatternSize; ++i)
+        {
+            if (d < offset + uStipplePattern[i])
+            {
+                if (!draw)
+                    discard;
+                break;
+            }
+            offset += uStipplePattern[i];
+            draw = !draw;
+        }
     }
 }

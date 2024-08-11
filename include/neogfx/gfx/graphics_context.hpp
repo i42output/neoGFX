@@ -112,7 +112,7 @@ namespace neogfx
         void push_logical_operation(logical_operation aLogicalOperation) const final;
         void pop_logical_operation() const final;
         std::optional<stipple> const& line_stipple() const final;
-        void line_stipple_on(std::uint16_t aPattern, scalar aFactor = 1.0, scalar aPosition = 0.0) const final;
+        void line_stipple_on(stipple const& aStipple) const final;
         void line_stipple_off() const final;
         bool is_subpixel_rendering_on() const final;
         void subpixel_rendering_on() const final;

@@ -508,7 +508,7 @@ namespace neogfx
             auto const circumference = 2.0 * math::pi<double>() * radius;
             aGc.draw_circle(center, radius, pen{ color::White, dip(CURSOR_THICKNESS) });
             aGc.draw_circle(center, radius, pen{ color::Black, dip(CURSOR_THICKNESS), 
-                line_dash{ 0x5555, circumference / 6.0, circumference * neolib::thread::program_elapsed_ms() / 1000.0 } });
+                line_dash{ 0x5555u, circumference / 6.0, circumference * neolib::thread::program_elapsed_ms() / 1000.0 } });
         });
     }
 
