@@ -275,6 +275,7 @@ namespace neogfx
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
         std::optional<dimension> penWidth;
+        std::optional<line_style> lineStyle;
 
         scoped_units su{ *this, units::Pixels };
 
@@ -294,6 +295,9 @@ namespace neogfx
         else if (borderRadii.has_value())
             penWidth = 2.0;
 
+        if (std::get<2>(border).has_value())
+            lineStyle = to_line_style(std::get<2>(border).value());
+
         if (borderRadii.has_value())
         {
             auto to_vec2 = [&](std::array<length, 2u> const& l)
@@ -302,7 +306,7 @@ namespace neogfx
                 basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
                 return vec2{ lx.value().x, ly.value().y };
             };
-            pen outline{ outerBorderColor, penWidth.value() };
+            pen outline{ outerBorderColor, penWidth.value(), lineStyle.value_or(line_style::Solid) };
             if (outerBorderColor != innerBorderColor)
                 outline.set_secondary_color(innerBorderColor);
             aGc.draw_ellipse_rect(
@@ -325,10 +329,18 @@ namespace neogfx
             case push_button_style::SpinBox:
                 if (!penWidth.has_value())
                     penWidth = 2.0;
-                aGc.fill_path(outlinePath, outerBorderColor);
-                outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
-                aGc.fill_path(outlinePath, innerBorderColor);
-                outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
+                if (outerBorderColor != innerBorderColor)
+                {
+                    aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
+                    outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
+                    aGc.draw_path(outlinePath, pen{ innerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
+                    outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
+                }
+                else
+                {
+                    aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value(), lineStyle.value_or(line_style::Solid) });
+                    outlinePath.deflate(penWidth.value(), penWidth.value());
+                }
                 break;
             }
             switch (iStyle)

@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gfx/stipple.hpp>
+#include <neogfx/core/style.hpp>
 
 namespace neogfx
 {
@@ -37,4 +38,31 @@ namespace neogfx
     };
 
     using line_dash = stipple;
+
+    inline line_style to_line_style(border_style aBorderStyle)
+    {
+        switch (aBorderStyle)
+        {
+        case border_style::Dotted:
+            return line_style::Dot;
+        case border_style::Dashed:
+            return line_style::Dash;
+        case border_style::Solid:
+            return line_style::Solid;
+        case border_style::Double:
+            return line_style::Solid;
+        case border_style::Groove:
+            return line_style::Solid;
+        case border_style::Ridge:
+            return line_style::Solid;
+        case border_style::Inset:
+            return line_style::Solid;
+        case border_style::Outset:
+            return line_style::Solid;
+        case border_style::None:
+        case border_style::Hidden:
+        default:
+            return line_style::None;
+        }
+    }
 }

@@ -146,12 +146,17 @@ namespace neogfx
             aGc.fill_rect(cr, iOwner.gradient());
             if (iOwner.gradient().direction() == gradient_direction::Radial && iOwner.gradient().center() != optional_point{})
             {
-                point const center{ cr.center().x + cr.width() / 2.0 * iOwner.gradient().center()->x, cr.center().y + cr.height() / 2.0 * iOwner.gradient().center()->y };
+                point const center{ 
+                    cr.center().x + cr.width() / 2.0 * iOwner.gradient().center()->x, 
+                    cr.center().y + cr.height() / 2.0 * iOwner.gradient().center()->y };
                 auto const radius = dip(CURSOR_RADIUS);
                 auto const circumference = 2.0 * math::pi<double>() * radius;
                 aGc.draw_circle(center, radius, pen{ color::White, dip(CURSOR_THICKNESS) });
                 aGc.draw_circle(center, radius, 
-                    pen{ color::Black, dip(CURSOR_THICKNESS), line_dash{ 0x5555u, circumference / 6.0, circumference * neolib::thread::program_elapsed_ms() / 1000.0 } });
+                    pen{ 
+                        color::Black, 
+                        dip(CURSOR_THICKNESS), 
+                        line_dash{ 0x5555u, circumference / 6.0, circumference * neolib::thread::program_elapsed_ms() / 1000.0 } });
             }
         }
     public:
