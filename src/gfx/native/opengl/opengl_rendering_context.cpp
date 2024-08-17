@@ -1056,7 +1056,7 @@ namespace neogfx
                         vec4{},
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
-                            !logical_operation_active() ?
+                            !logical_operation_active() && !snap_to_pixel() ?
                                 drawOp.pen.anti_aliased() ? 
                                     0.5 : 0.0 :
                                 0.0,
@@ -1110,7 +1110,7 @@ namespace neogfx
                         drawOp.radius.as<float>(),
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
-                            !logical_operation_active() ?
+                            !logical_operation_active() && !snap_to_pixel() ?
                                 drawOp.pen.anti_aliased() ? 
                                     0.5 : 0.0 :
                                 0.0,

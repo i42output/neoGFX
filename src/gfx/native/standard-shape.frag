@@ -190,6 +190,7 @@ float sdEllipse(vec2 p, vec2 ab)
 void draw_ellipse(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+
     float d0 = sdEllipse(fragPos.xy - function1.xy, function1.zw);
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
