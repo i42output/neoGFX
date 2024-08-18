@@ -1309,9 +1309,7 @@ int main(int argc, char* argv[])
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 500, 500 }, ng::size{ 200, 200 } }, 10.0, ng::pen{ ng::color::Black, 1.0 },
                 window.gradientWidget.gradient().with_direction(ng::gradient_direction::Radial));
             for (int x = 0; x < 3; ++x)
-            {
                 aGc.draw_rect(ng::rect{ ng::point{ 600.0 + x * 17, 600.0 }, ng::size{ 16, 16 } }, ng::pen{ ng::color::White, 1.0 }, ng::color::Green);
-            }
 
             for (int x = 0; x < 10; ++x)
                 for (int y = 0; y < 10; ++y)
@@ -1336,6 +1334,32 @@ int main(int argc, char* argv[])
             test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_dip, texColor[1], "Render\nTo\nScreen");
             test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_dip, texColor[2], "Render\nTo\nScreen");
             test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_dip, texColor[3], "Render\nTo\nScreen");
+
+            {
+                ng::scoped_snap_to_pixel sntp{ aGc, false };
+                aGc.draw_line(ng::point{ 850.0, 850.0 }, ng::point{ 860.0, 850.0 }, ng::pen{ ng::color::White });
+                aGc.draw_line(ng::point{ 850.5, 860.5 }, ng::point{ 860.5, 860.5 }, ng::pen{ ng::color::Yellow });
+            }
+
+            ng::path path;
+            ng::size const pixel = ng::units_converter{ window.pageDrawing }.from_device_units(ng::size(1.0, 1.0));
+            ng::size const pathSize{ 32.0, 32.0 };
+            ng::box_areas const pathBox{ 0.0, 0.0, pathSize.cx - pixel.cx, pathSize.cy - pixel.cy };
+            path.move_to(pathBox.left + pixel.cx, pathBox.top, 12);
+            path.line_to(pathBox.right - pixel.cx, pathBox.top);
+            path.line_to(pathBox.right - pixel.cx, pathBox.top + pixel.cy);
+            path.line_to(pathBox.right, pathBox.top + pixel.cy);
+            path.line_to(pathBox.right, pathBox.bottom - pixel.cy);
+            path.line_to(pathBox.right - pixel.cx, pathBox.bottom - pixel.cy);
+            path.line_to(pathBox.right - pixel.cx, pathBox.bottom);
+            path.line_to(pathBox.left + pixel.cx, pathBox.bottom);
+            path.line_to(pathBox.left + pixel.cx, pathBox.bottom - pixel.cy);
+            path.line_to(pathBox.left, pathBox.bottom - pixel.cy);
+            path.line_to(pathBox.left, pathBox.top + pixel.cy);
+            path.line_to(pathBox.left + pixel.cx, pathBox.top + pixel.cy);
+            path.line_to(pathBox.left + pixel.cx, pathBox.top);
+            path.set_position(ng::point{ 800.0, 800.0 });
+            aGc.draw_path(path, ng::pen{ ng::color::White });
         });
 
         window.buttonStyle1.clicked([&window]()

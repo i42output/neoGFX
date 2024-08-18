@@ -41,16 +41,19 @@ vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, f
     return color;
 }
 
+float sdSegment( in vec2 p, in vec2 a, in vec2 b )
+{
+    vec2 pa = p-a, ba = b-a;
+    float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+    return length( pa - ba*h );
+}
+
 void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
-    float dy = function1.y - function1.w;
-    float dx = function1.x - function1.z;
-    float m = dy / dx; // GLSL allows divide-by-zero, we won't use the Inf
-    float c = function1.y - m * function1.x;
-    float d0 = dx != 0.0 ? (abs(m) < 1.0 ? distance(vec2(fragPos.x, m * fragPos.x + c), fragPos.xy) : distance(vec2((fragPos.y - c) / m, fragPos.y), fragPos.xy)) : abs(fragPos.x - function1.x);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+    float d0 = sdSegment(fragPos, function1.xy, function1.zw);
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0))));
 }
 
 float bezier_sdSegmentSq(vec2 p, vec2 a, vec2 b)
@@ -88,7 +91,7 @@ void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 functi
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = bezier_udBezier(function1.xy, function1.zw, function2.xy, function2.zw, fragPos.xy);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.w / 2.0, function3.w / 2.0 + 0.5, abs(d0))));
+    color = vec4(color.xyz, color.a * (1.0 - smoothstep(0.0, function3.w / 2.0, abs(d0))));
 }
 
 float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2)

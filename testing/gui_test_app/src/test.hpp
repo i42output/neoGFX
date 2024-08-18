@@ -175,9 +175,7 @@ public:
             {
                 ng::point pos{ x + 4.0, ng::ease(easingFunction, x / (d - 8.0)) * (d - 8.0) + 4.0 };
                 if (lastPos != std::nullopt)
-                {
                     gc.draw_line(*lastPos, pos, pen);
-                }
                 lastPos = pos;
             }
             iterTexture = iTextures.emplace(easingFunction, newTexture).first;

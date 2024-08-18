@@ -331,6 +331,9 @@ namespace neogfx
                     penWidth = 2.0;
                 if (outerBorderColor != innerBorderColor)
                 {
+                    scoped_snap_to_pixel snap{ aGc };
+                    if (penWidth.value() > 2.0)
+                        outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
                     aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
                     outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
                     aGc.draw_path(outlinePath, pen{ innerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
@@ -338,8 +341,11 @@ namespace neogfx
                 }
                 else
                 {
+                    scoped_snap_to_pixel snap{ aGc };
+                    if (penWidth.value() > 2.0)
+                        outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
                     aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value(), lineStyle.value_or(line_style::Solid) });
-                    outlinePath.deflate(penWidth.value(), penWidth.value());
+                    outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
                 }
                 break;
             }
@@ -411,8 +417,9 @@ namespace neogfx
     path push_button::path() const
     {
         neogfx::path ret;
-        size pixel = units_converter{ *this }.from_device_units(size(1.0, 1.0));
-        size currentSize = path_bounding_rect().extents();
+        size const pixel = units_converter{ *this }.from_device_units(size(1.0, 1.0));
+        size const pathSize = path_bounding_rect().extents();
+        box_areas const pathBox{ 0.0, 0.0, pathSize.cx - pixel.cx, pathSize.cy - pixel.cy };
         switch (iStyle)
         {
         case push_button_style::Normal:
@@ -420,26 +427,26 @@ namespace neogfx
         case push_button_style::Tab:
         case push_button_style::DropList:
         case push_button_style::SpinBox:
-            ret.move_to(pixel.cx, 0, 12);
-            ret.line_to(currentSize.cx - pixel.cx, 0);
-            ret.line_to(currentSize.cx - pixel.cx, pixel.cy);
-            ret.line_to(currentSize.cx - 0, pixel.cy);
-            ret.line_to(currentSize.cx - 0, currentSize.cy - pixel.cy);
-            ret.line_to(currentSize.cx - pixel.cx, currentSize.cy - pixel.cy);
-            ret.line_to(currentSize.cx - pixel.cx, currentSize.cy - 0);
-            ret.line_to(pixel.cx, currentSize.cy - 0);
-            ret.line_to(pixel.cx, currentSize.cy - pixel.cy);
-            ret.line_to(0, currentSize.cy - pixel.cy);
-            ret.line_to(0, pixel.cy);
-            ret.line_to(pixel.cx, pixel.cy);
-            ret.line_to(pixel.cx, 0);
+            ret.move_to(pathBox.left + pixel.cx, pathBox.top, 12);
+            ret.line_to(pathBox.right - pixel.cx, pathBox.top);
+            ret.line_to(pathBox.right - pixel.cx, pathBox.top + pixel.cy);
+            ret.line_to(pathBox.right, pathBox.top + pixel.cy);
+            ret.line_to(pathBox.right, pathBox.bottom - pixel.cy);
+            ret.line_to(pathBox.right - pixel.cx, pathBox.bottom - pixel.cy);
+            ret.line_to(pathBox.right - pixel.cx, pathBox.bottom);
+            ret.line_to(pathBox.left + pixel.cx, pathBox.bottom);
+            ret.line_to(pathBox.left + pixel.cx, pathBox.bottom - pixel.cy);
+            ret.line_to(pathBox.left, pathBox.bottom - pixel.cy);
+            ret.line_to(pathBox.left, pathBox.top + pixel.cy);
+            ret.line_to(pathBox.left + pixel.cx, pathBox.top + pixel.cy);
+            ret.line_to(pathBox.left + pixel.cx, pathBox.top);
             break;
         case push_button_style::ItemViewHeader:
-            ret.move_to(0, 0, 4);
-            ret.line_to(currentSize.cx, 0);
-            ret.line_to(currentSize.cx, currentSize.cy);
-            ret.line_to(0, currentSize.cy);
-            ret.line_to(0, 0);
+            ret.move_to(pathBox.left, pathBox.top, 4);
+            ret.line_to(pathBox.right, pathBox.top);
+            ret.line_to(pathBox.right, pathBox.bottom);
+            ret.line_to(pathBox.left, pathBox.bottom);
+            ret.line_to(pathBox.left, pathBox.top);
             break;
         }
         ret.set_position(path_bounding_rect().top_left());

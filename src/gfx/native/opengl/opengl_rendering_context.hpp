@@ -310,6 +310,7 @@ namespace neogfx
         void draw_pixel(const point& aPoint, const color& aColor);
         void draw_pixels(const graphics_operation::batch& aFillRectOps);
         void draw_line(const point& aFrom, const point& aTo, const pen& aPen);
+        void draw_lines(const graphics_operation::batch& aDrawLineOps);
         void draw_triangles(const graphics_operation::batch& aDrawTriangleOps);
         void draw_rects(const graphics_operation::batch& aDrawRectOps);
         void draw_rounded_rects(const graphics_operation::batch& aDrawRoundedRectOps);
