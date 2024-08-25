@@ -443,6 +443,7 @@ namespace neogfx
             {
                 image_widget().set_padding(neogfx::padding{});
                 text_widget().set_padding(neogfx::padding{});
+                image_widget().set_dpi_auto_scale(false);
             }
         public:
             void accept(i_drop_list_input_widget::i_visitor& aVisitor) override
@@ -463,19 +464,19 @@ namespace neogfx
             {
                 return false;
             }
-            const i_widget& image_widget() const override
+            const neogfx::image_widget& image_widget() const override
             {
                 return push_button::image_widget();
             }
-            i_widget& image_widget() override
+            neogfx::image_widget& image_widget() override
             {
                 return push_button::image_widget();
             }
-            const i_widget& text_widget() const override
+            const neogfx::text_widget& text_widget() const override
             {
                 return push_button::text_widget();
             }
-            i_widget& text_widget() override
+            neogfx::text_widget& text_widget() override
             {
                 return push_button::text_widget();
             }

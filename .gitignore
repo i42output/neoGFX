@@ -363,3 +363,4 @@ Debug
 /tools/src2string.exe
 /build/win32/vs/neoGFX.tlog
 /build/win32/vs/neoGFX/neoGFX.tlog
+/build/win32/vs/neoGFX/x64/Tools
