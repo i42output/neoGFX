@@ -214,10 +214,9 @@ namespace neogfx
         boxRect.deflate(3.0_dip, 3.0_dip);
         if (aCheckedState != std::nullopt && *aCheckedState == true)
         {
-            scoped_snap_to_pixel snap{ aGc, false };
             /* todo: draw tick image eye candy */
-            aGc.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip));
-            aGc.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip));
+            aGc.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 4.0_dip));
+            aGc.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 4.0_dip));
         }
         else if (aCheckedState == std::nullopt)
             aGc.fill_rect(boxRect, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));
