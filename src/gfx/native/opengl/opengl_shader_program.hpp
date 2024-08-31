@@ -34,7 +34,7 @@ namespace neogfx
     public:
         using typename base_type::value_type;
     public:
-        opengl_ssbo();
+        opengl_ssbo(i_shader_uniform& aSizeUniform);
     };
 
     // todo: this should adapt a generic (non-rendering API specific) shader program object

@@ -35,9 +35,10 @@ namespace neogfx
     public:
         using value_type = T;
     public:
-        ssbo(ssbo_id aId) :
-            iId{ aId }
+        ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform) :
+            iId{ aId }, iSizeUniform{ aSizeUniform }
         {
+            iSizeUniform.set_value<std::uint32_t>(0u);
         }
     public:
         ssbo_id id() const final
@@ -79,7 +80,7 @@ namespace neogfx
     public:
         void clear() final
         {
-            // todo
+            iSizeUniform.set_value<std::uint32_t>(0u);
             iSize = 0u;
         }
         void* push_back(shader_data_type aDataType, void const* aValue) final
@@ -99,6 +100,7 @@ namespace neogfx
         }
     private:
         ssbo_id iId;
+        i_shader_uniform& iSizeUniform;
         std::size_t iCapacity = 0u;
         std::size_t iSize = 0u;
     };
