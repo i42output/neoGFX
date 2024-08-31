@@ -29,6 +29,80 @@
 
 namespace neogfx
 {
+    template <typename T>
+    class ssbo : public i_ssbo
+    {
+    public:
+        using value_type = T;
+    public:
+        ssbo(ssbo_id aId) :
+            iId{ aId }
+        {
+        }
+    public:
+        ssbo_id id() const final
+        {
+            return iId;
+        }
+        shader_data_type data_type() const final
+        {
+            return shader_data_type_v<T>;
+        }
+    public:
+        void reserve(std::size_t aCapacity) override
+        {
+            iCapacity = std::max(aCapacity, iCapacity);
+        }
+        std::size_t capacity() const final
+        {
+            return iCapacity;
+        }
+        bool empty() const final
+        {
+            return iSize == 0u;
+        }
+        std::size_t size() const final
+        {
+            return iSize;
+        }
+    public:
+        void const* at(shader_data_type aDataType, std::size_t aIndex) const final
+        {
+            // todo
+            return nullptr;
+        }
+        void* at(shader_data_type aDataType, std::size_t aIndex) final
+        {
+            // todo
+            return nullptr;
+        }
+    public:
+        void clear() final
+        {
+            // todo
+            iSize = 0u;
+        }
+        void* push_back(shader_data_type aDataType, void const* aValue) final
+        {
+            // todo
+            return nullptr;
+        }
+        void* insert(shader_data_type aDataType, std::size_t aPos, void const* aValueStart, void const* aValueEnd) final
+        {
+            // todo
+            return nullptr;
+        }
+        void* erase(void const* aValueStart, void const* aValueEnd) final
+        {
+            // todo
+            return nullptr;
+        }
+    private:
+        ssbo_id iId;
+        std::size_t iCapacity = 0u;
+        std::size_t iSize = 0u;
+    };
+
     template <typename Base = i_shader_stage>
     class shader_stage : public reference_counted<Base>
     {

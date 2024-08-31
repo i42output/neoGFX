@@ -95,60 +95,6 @@ namespace neogfx
         }
     };
 
-    template <typename T>
-    class ssbo : public i_ssbo
-    {
-    public:
-        using value_type = T;
-    public:
-        ssbo(ssbo_id aId) :
-            iId{ aId }
-        {
-        }
-    public:
-        ssbo_id id() const final
-        {
-        }
-        shader_data_type data_type() const final
-        {
-        }
-    public:
-        void reserve(std::size_t aCapacity) final
-        {
-        }
-        std::size_t capacity() const final
-        {
-        }
-        bool empty() const final
-        {
-        }
-        std::size_t size() const final
-        {
-        }
-    public:
-        void const* at(shader_data_type aDataType, std::size_t aIndex) const final
-        {
-        }
-        void* at(shader_data_type aDataType, std::size_t aIndex) final
-        {
-        }
-    public:
-        void clear() final
-        {
-        }
-        void* push_back(shader_data_type aDataType, void const* aValue) final
-        {
-        }
-        void* insert(shader_data_type aDataType, std::size_t aPos, void const* aValueStart, void const* aValueEnd) final
-        {
-        }
-        void* erase(void const* aValueStart, void const* aValueEnd) final
-        {
-        }
-    private:
-        ssbo_id iId;
-    };
-
     enum class shader_program_type : std::uint32_t
     {
         Standard,

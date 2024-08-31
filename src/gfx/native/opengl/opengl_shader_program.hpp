@@ -27,6 +27,16 @@
 
 namespace neogfx
 {
+    template <typename T>
+    class opengl_ssbo : public ssbo<T>
+    {
+        using base_type = ssbo<T>;
+    public:
+        using typename base_type::value_type;
+    public:
+        opengl_ssbo();
+    };
+
     // todo: this should adapt a generic (non-rendering API specific) shader program object
     class opengl_shader_program : public standard_shader_program
     {

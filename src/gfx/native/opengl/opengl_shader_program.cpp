@@ -25,6 +25,13 @@
 
 namespace neogfx
 {
+    template <typename T>
+    opengl_ssbo<T>::opengl_ssbo() : ssbo<T>{ neolib::cookie{} } // todo
+    {
+    }
+
+    template class opengl_ssbo<vec4>;
+
     opengl_shader_program::opengl_shader_program(std::string const& aName) : 
         standard_shader_program{ aName }
     {
@@ -285,10 +292,13 @@ namespace neogfx
 
     i_ssbo& opengl_shader_program::create_ssbo(shader_data_type aDataType)
     {
+        // todo
+        throw std::logic_error("not yet implemented");
     }
 
     void opengl_shader_program::destroy_ssbo(i_ssbo& aSsbo)
     {
+        // todo
     }
 
     void opengl_shader_program::deactivate()
