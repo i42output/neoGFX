@@ -283,6 +283,14 @@ namespace neogfx
         }
     }
 
+    i_ssbo& opengl_shader_program::create_ssbo(shader_data_type aDataType)
+    {
+    }
+
+    void opengl_shader_program::destroy_ssbo(i_ssbo& aSsbo)
+    {
+    }
+
     void opengl_shader_program::deactivate()
     {
         if (active())

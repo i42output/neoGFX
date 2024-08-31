@@ -43,6 +43,112 @@ namespace neogfx
     struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(std::string const& aReason) : std::runtime_error("neogfx::failed_to_create_shader_program: " + aReason) {} };
     struct shader_program_error : std::runtime_error { shader_program_error(std::string const& aError) : std::runtime_error("neogfx::shader_program_error: " + aError) {} };
 
+    using ssbo_id = neolib::cookie;
+    constexpr ssbo_id no_sbbo = ssbo_id{};
+
+    class i_ssbo
+    {
+    public:
+        virtual ~i_ssbo() = default;
+    public:
+        virtual ssbo_id id() const = 0;
+        virtual shader_data_type data_type() const = 0;
+    public:
+        virtual void reserve(std::size_t aCapacity) = 0;
+        virtual std::size_t capacity() const = 0;
+        virtual bool empty() const = 0;
+        virtual std::size_t size() const = 0;
+    public:
+        virtual void const* at(shader_data_type aDataType, std::size_t aIndex) const = 0;
+        virtual void* at(shader_data_type aDataType, std::size_t aIndex) = 0;
+    public:
+        virtual void clear() = 0;
+        virtual void* push_back(shader_data_type aDataType, void const* aValue) = 0;
+        virtual void* insert(shader_data_type aDataType, std::size_t aPos, void const* aValueStart, void const* aValueEnd) = 0;
+        virtual void* erase(void const* aValueStart, void const* aValueEnd) = 0;
+    public:
+        template <typename T>
+        T const& at(std::size_t aIndex) const
+        {
+            return *static_cast<T const*>(at(shader_data_type_v<T>, aIndex));
+        }
+        template <typename T>
+        T& at(std::size_t aIndex)
+        {
+            return *static_cast<T*>(at(shader_data_type_v<T>, aIndex));
+        }
+    public:
+        template <typename T>
+        T& push_back(T const& aValue)
+        {
+            return *static_cast<T*>(push_back(shader_data_type_v<T>, &aValue));
+        }
+        template <typename T>
+        T* insert(std::size_t aPos, T const* aValueStart, T const* aValueEnd)
+        {
+            return static_cast<T*>(insert(shader_data_type_v<T>, aPos, aValueStart, aValueEnd));
+        }
+        template <typename T>
+        T* erase(T const* aValueStart, T const* aValueEnd)
+        {
+            return static_cast<T*>(erase(shader_data_type_v<T>, aValueStart, aValueEnd));
+        }
+    };
+
+    template <typename T>
+    class ssbo : public i_ssbo
+    {
+    public:
+        using value_type = T;
+    public:
+        ssbo(ssbo_id aId) :
+            iId{ aId }
+        {
+        }
+    public:
+        ssbo_id id() const final
+        {
+        }
+        shader_data_type data_type() const final
+        {
+        }
+    public:
+        void reserve(std::size_t aCapacity) final
+        {
+        }
+        std::size_t capacity() const final
+        {
+        }
+        bool empty() const final
+        {
+        }
+        std::size_t size() const final
+        {
+        }
+    public:
+        void const* at(shader_data_type aDataType, std::size_t aIndex) const final
+        {
+        }
+        void* at(shader_data_type aDataType, std::size_t aIndex) final
+        {
+        }
+    public:
+        void clear() final
+        {
+        }
+        void* push_back(shader_data_type aDataType, void const* aValue) final
+        {
+        }
+        void* insert(shader_data_type aDataType, std::size_t aPos, void const* aValueStart, void const* aValueEnd) final
+        {
+        }
+        void* erase(void const* aValueStart, void const* aValueEnd) final
+        {
+        }
+    private:
+        ssbo_id iId;
+    };
+
     enum class shader_program_type : std::uint32_t
     {
         Standard,
@@ -112,6 +218,8 @@ namespace neogfx
         virtual void update_uniform_locations() = 0;
         virtual bool uniforms_changed() const = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
+        virtual i_ssbo& create_ssbo(shader_data_type aDataType) = 0;
+        virtual void destroy_ssbo(i_ssbo& aSsbo) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;
         virtual void deactivate() = 0;
@@ -148,6 +256,12 @@ namespace neogfx
         bool stage_dirty(shader_type aStage) const
         {
             return !stage_clean(aStage);
+        }
+    public:
+        template <typename T>
+        i_ssbo& create_ssbo()
+        {
+            return create_ssbo(shader_data_type_v<T>);
         }
     };
 }

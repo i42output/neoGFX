@@ -169,6 +169,9 @@ namespace neogfx
 
     using shader_value_type = neolib::plugin_variant<shader_data_type, bool, float, double, std::int32_t, std::uint32_t, vec2f, vec2, vec2i32, vec2u32, vec3f, vec3, vec3i32, vec3u32, vec4f, vec4, vec4i32, vec4u32, mat4f, mat4, shader_float_array, shader_double_array, sampler2D, sampler2DMS, sampler2DRect>;
 
+    template <typename T>
+    constexpr shader_data_type shader_data_type_v = static_cast<shader_data_type>(neolib::variant_index_of<T, shader_value_type>());
+
     using shader_variable_location = std::uint32_t;
     using shader_uniform_storage = void*;
     using shader_uniform_location = std::int32_t;

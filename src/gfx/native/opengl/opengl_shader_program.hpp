@@ -41,6 +41,8 @@ namespace neogfx
         void update_uniform_storage() override;
         void update_uniform_locations() override;
         void update_uniforms(const i_rendering_context& aContext) override;
+        i_ssbo& create_ssbo(shader_data_type aDataType) override;
+        void destroy_ssbo(i_ssbo& aSsbo) override;
         void deactivate() override;
     private:
         GLuint gl_handle() const;
