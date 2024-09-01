@@ -24,7 +24,8 @@
 namespace neogfx
 {
     template <typename T>
-    opengl_ssbo<T>::opengl_ssbo(i_shader_uniform& aSizeUniform) : ssbo<T>{ neolib::cookie{}, aSizeUniform } // todo
+    opengl_ssbo<T>::opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform) : 
+        ssbo<T>{ aId, aSizeUniform } // todo
     {
     }
 

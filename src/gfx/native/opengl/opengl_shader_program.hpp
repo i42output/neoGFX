@@ -34,7 +34,7 @@ namespace neogfx
     public:
         using typename base_type::value_type;
     public:
-        opengl_ssbo(i_shader_uniform& aSizeUniform);
+        opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform);
     };
 
     template <typename Base = shader_program<>>
@@ -64,7 +64,7 @@ namespace neogfx
             ubo_block_buffer_t uniformBlockBuffer;
             mutable std::optional<GLuint> uboHandle;
         } iUbos[static_cast<std::size_t>(shader_type::COUNT)];
-        std::vector<std::unique_ptr<i_ssbo>> iSsbos;
+        neolib::std_vector_jar<std::unique_ptr<i_ssbo>> iSsbos;
     };
 
     using opengl_shader_program = basic_opengl_shader_program<>;
