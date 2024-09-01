@@ -55,7 +55,8 @@ namespace neogfx
             if (existingCapacity != 0u)
             {
                 std::byte const* ptr = nullptr;
-                glCheck(ptr = static_cast<std::byte const*>(glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * existingCapacity, GL_MAP_READ_BIT)));
+                glCheck(ptr = static_cast<std::byte const*>(glMapBufferRange(
+                    GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * existingCapacity, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)));
                 if (ptr)
                 {
                     std::copy(ptr, ptr + sizeof(T) * existingCapacity, existingData.data());
@@ -111,7 +112,10 @@ namespace neogfx
     {
         if (++iMappedCount == 1u)
         {
-            // todo
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, iHandle));
+            glCheck(iMapped = static_cast<value_type*>(glMapBufferRange(
+                GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * this->capacity(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)));
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
         }
     }
 
@@ -120,7 +124,10 @@ namespace neogfx
     {
         if (--iMappedCount == 0u)
         {
-            // todo
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, iHandle));
+            glCheck(glUnmapBuffer(GL_SHADER_STORAGE_BUFFER));
+            iMapped = nullptr;
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
         }
     }
 
