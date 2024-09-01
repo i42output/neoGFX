@@ -29,9 +29,9 @@ namespace neogfx
     class standard_shader_program : public shader_program<i_standard_shader_program>
     {
     public:
-        standard_shader_program(std::string const& aName = "standard_shader_program");
+        standard_shader_program(std::string const& aName);
     public:
-        void create_standard_shaders();
+        void create_standard_shaders() final;
     public:
         shader_program_type type() const final;
         const i_standard_vertex_shader& standard_vertex_shader() const final;

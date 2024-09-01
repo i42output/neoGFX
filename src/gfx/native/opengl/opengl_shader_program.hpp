@@ -37,13 +37,14 @@ namespace neogfx
         opengl_ssbo(i_shader_uniform& aSizeUniform);
     };
 
-    // todo: this should adapt a generic (non-rendering API specific) shader program object
-    class opengl_shader_program : public standard_shader_program
+    template <typename Base = shader_program<>>
+    class basic_opengl_shader_program : public Base
     {
+        using base_type = Base;
     private:
         typedef std::vector<GLubyte> ubo_block_buffer_t;
     public:
-        opengl_shader_program(std::string const& aName = "standard_shader_program");
+        basic_opengl_shader_program(std::string const& aName);
     public:
         void compile() override;
         void link() override;
@@ -64,5 +65,17 @@ namespace neogfx
             mutable std::optional<GLuint> uboHandle;
         } iUbos[static_cast<std::size_t>(shader_type::COUNT)];
         std::vector<std::unique_ptr<i_ssbo>> iSsbos;
+    };
+
+    using opengl_shader_program = basic_opengl_shader_program<>;
+
+    class opengl_standard_shader_program : public basic_opengl_shader_program<standard_shader_program>
+    {
+        using base_type = basic_opengl_shader_program<standard_shader_program>;
+    public:
+        opengl_standard_shader_program() :
+            base_type{ "standard_shader_program" }
+        {
+        }
     };
 }

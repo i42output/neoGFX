@@ -37,6 +37,8 @@ namespace neogfx
     {
     public:
         typedef i_standard_shader_program abstract_type;
+    public:
+        virtual void create_standard_shaders() = 0;
         // operations
     public:
         virtual const i_standard_vertex_shader& standard_vertex_shader() const = 0;

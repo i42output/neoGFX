@@ -571,6 +571,7 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_renderer.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_rendering_context.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.hpp" />
+    <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.ipp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_surface.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture.hpp" />
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_texture_manager.hpp" />

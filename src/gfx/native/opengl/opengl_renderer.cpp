@@ -106,7 +106,7 @@ namespace neogfx
         service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL version: " << reinterpret_cast<const char*>(glGetString(GL_VERSION)) << std::endl;
         service<debug::logger>() << neolib::logger::severity::Debug << "OpenGL shading language version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << std::endl;
 
-        iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_shader_program>().as<i_shader_program>()).as<i_standard_shader_program>();
+        iDefaultShaderProgram = add_shader_program(neolib::make_ref<opengl_standard_shader_program>().as<i_shader_program>()).as<i_standard_shader_program>();
     }
 
     void opengl_renderer::cleanup()
