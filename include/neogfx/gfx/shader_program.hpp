@@ -69,23 +69,35 @@ namespace neogfx
     public:
         void const* back(shader_data_type aDataType) const final
         {
-            // todo
-            return nullptr;
+            if (aDataType != this->data_type())
+                throw std::logic_error("neogfx::ssbo::back: invalid data type");
+            if (empty())
+                throw std::logic_error("neogfx::ssbo::back: empty");
+            return static_cast<value_type const*>(cdata()) + (size() - 1);
         }
         void* back(shader_data_type aDataType) final
         {
-            // todo
-            return nullptr;
+            if (aDataType != this->data_type())
+                throw std::logic_error("neogfx::ssbo::back: invalid data type");
+            if (empty())
+                throw std::logic_error("neogfx::ssbo::back: empty");
+            return static_cast<value_type*>(data()) + (size() - 1);
         }
         void const* at(shader_data_type aDataType, std::size_t aIndex) const final
         {
-            // todo
-            return nullptr;
+            if (aDataType != this->data_type())
+                throw std::logic_error("neogfx::ssbo::at: invalid data type");
+            if (aIndex >= size())
+                throw std::logic_error("neogfx::ssbo::at: out of range");
+            return static_cast<value_type const*>(cdata()) + aIndex;
         }
         void* at(shader_data_type aDataType, std::size_t aIndex) final
         {
-            // todo
-            return nullptr;
+            if (aDataType != this->data_type())
+                throw std::logic_error("neogfx::ssbo::at: invalid data type");
+            if (aIndex >= size())
+                throw std::logic_error("neogfx::ssbo::at: out of range");
+            return static_cast<value_type*>(data()) + aIndex;
         }
     public:
         void clear() final
@@ -102,7 +114,11 @@ namespace neogfx
         void push_back(shader_data_type aDataType, void const* aValue) final
         {
             resize(size() + 1);
-            // todo
+            scoped_ssbo_map ssm{ *this };
+            std::copy(
+                static_cast<value_type const*>(aValue),
+                static_cast<value_type const*>(aValue) + 1,
+                static_cast<value_type*>(data()) + size() - 1);
         }
         void* insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) final
         {
