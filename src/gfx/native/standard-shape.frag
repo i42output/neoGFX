@@ -53,7 +53,10 @@ void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = sdSegment(fragPos, function1.xy, function1.zw);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0))));
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+        discard;
+    else
+        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0))));
 }
 
 float bezier_sdSegmentSq(vec2 p, vec2 a, vec2 b)
