@@ -97,6 +97,11 @@ namespace neogfx
                 service<i_rendering_engine>().destroy_shader_object(*iHandle);
         }
     public:
+        void init(i_shader_program& aShaderProgram) override
+        {
+            // default does nothing
+        }
+    public:
         shader_type type() const final
         {
             return iType;

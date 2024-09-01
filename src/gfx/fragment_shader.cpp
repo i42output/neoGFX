@@ -273,9 +273,15 @@ namespace neogfx
     standard_shape_shader::standard_shape_shader(std::string const& aName) :
         standard_fragment_shader<i_shape_shader>{ aName }
     {
-        uShape = shader_shape::None;
         uShapeEnabled = false;
+        uShape = shader_shape::None;
+        uShapeVertexCount = std::uint32_t{ 0u };
         disable();
+    }
+
+    void standard_shape_shader::init(i_shader_program& aShaderProgram)
+    {
+        iShapeVertices = &aShaderProgram.create_ssbo<vec4f>(uShapeVertexCount.uniform());
     }
 
     void standard_shape_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const

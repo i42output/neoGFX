@@ -164,7 +164,7 @@ namespace neogfx
         virtual void update_uniform_locations() = 0;
         virtual bool uniforms_changed() const = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
-        virtual i_ssbo& create_ssbo(shader_data_type aDataType) = 0;
+        virtual i_ssbo& create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform) = 0;
         virtual void destroy_ssbo(i_ssbo& aSsbo) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;
@@ -205,9 +205,9 @@ namespace neogfx
         }
     public:
         template <typename T>
-        i_ssbo& create_ssbo()
+        i_ssbo& create_ssbo(i_shader_uniform& aSizeUniform)
         {
-            return create_ssbo(shader_data_type_v<T>);
+            return create_ssbo(shader_data_type_v<T>, aSizeUniform);
         }
     };
 }

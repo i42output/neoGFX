@@ -226,6 +226,7 @@ namespace neogfx
         {
             stage(aShader->type())->shaders().push_back(aShader);
             iShaderIndex.emplace(string{ aShader->name() }, aShader);
+            aShader->init(*this);
             return *aShader;
         }
         throw shader_name_exists();

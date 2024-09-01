@@ -507,6 +507,8 @@ namespace neogfx
     public:
         virtual ~i_shader() = default;
     public:
+        virtual void init(i_shader_program& aShaderProgram) = 0;
+    public:
         virtual shader_type type() const = 0;
         virtual const i_string& name() const = 0;
         virtual bool supports(vertex_buffer_type aBufferType) const = 0;

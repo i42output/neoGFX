@@ -30,11 +30,11 @@ namespace neogfx
     {
     }
 
-    template class opengl_ssbo<vec4>;
-
-    opengl_shader_program::opengl_shader_program(std::string const& aName) : 
+    opengl_shader_program::opengl_shader_program(std::string const& aName) :
         standard_shader_program{ aName }
     {
+        if (name() == "standard_shader_program")
+            create_standard_shaders();
     }
 
     void opengl_shader_program::compile()
@@ -290,10 +290,76 @@ namespace neogfx
         }
     }
 
-    i_ssbo& opengl_shader_program::create_ssbo(shader_data_type aDataType)
+    i_ssbo& opengl_shader_program::create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform)
     {
-        // todo
-        throw std::logic_error("not yet implemented");
+        switch(aDataType)
+        {
+        case shader_data_type::Boolean:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<bool>>(aSizeUniform));
+            break;
+        case shader_data_type::Float:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<float>>(aSizeUniform));
+            break;
+        case shader_data_type::Double:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<double>>(aSizeUniform));
+            break;
+        case shader_data_type::Int:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<std::int32_t>>(aSizeUniform));
+            break;
+        case shader_data_type::Uint:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<std::uint32_t>>(aSizeUniform));
+            break;
+        case shader_data_type::Vec2:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec2f>>(aSizeUniform));
+            break;
+        case shader_data_type::DVec2:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec2>>(aSizeUniform));
+            break;
+        case shader_data_type::IVec2:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec2i32>>(aSizeUniform));
+            break;
+        case shader_data_type::UVec2:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec2u32>>(aSizeUniform));
+            break;
+        case shader_data_type::Vec3:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec3f>>(aSizeUniform));
+            break;
+        case shader_data_type::DVec3:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec3>>(aSizeUniform));
+            break;
+        case shader_data_type::IVec3:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec3i32>>(aSizeUniform));
+            break;
+        case shader_data_type::UVec3:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec3u32>>(aSizeUniform));
+            break;
+        case shader_data_type::Vec4:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec4f>>(aSizeUniform));
+            break;
+        case shader_data_type::DVec4:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec4>>(aSizeUniform));
+            break;
+        case shader_data_type::IVec4:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec4i32>>(aSizeUniform));
+            break;
+        case shader_data_type::UVec4:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<vec4u32>>(aSizeUniform));
+            break;
+        case shader_data_type::Mat4:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<mat4f>>(aSizeUniform));
+            break;
+        case shader_data_type::DMat4:
+            iSsbos.push_back(std::make_unique<opengl_ssbo<mat4>>(aSizeUniform));
+            break;
+        case shader_data_type::FloatArray:
+        case shader_data_type::DoubleArray:
+        case shader_data_type::Sampler2D:
+        case shader_data_type::Sampler2DMS:
+        case shader_data_type::Sampler2DRect:
+        default:
+            throw std::logic_error("not supported");
+        }
+        return *iSsbos.back();
     }
 
     void opengl_shader_program::destroy_ssbo(i_ssbo& aSsbo)

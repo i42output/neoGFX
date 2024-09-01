@@ -217,13 +217,17 @@ namespace neogfx
     public:
         standard_shape_shader(std::string const& aName = "standard_shape_shader");
     public:
+        void init(i_shader_program& aShaderProgram) override;
+    public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:
         bool shape_active() const final;
         void clear_shape() final;
         void set_shape(shader_shape aShape) final;
     private:
+        i_ssbo* iShapeVertices;
         cache_shared_uniform(uShapeEnabled)
         cache_shared_uniform(uShape)
+        cache_shared_uniform(uShapeVertexCount)
     };
 }
