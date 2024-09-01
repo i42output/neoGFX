@@ -54,16 +54,12 @@ namespace neogfx
             existingData.resize(sizeof(T) * aCapacity);
             if (existingCapacity != 0u)
             {
-                std::byte const* ptr = nullptr;
-                glCheck(ptr = static_cast<std::byte const*>(glMapBufferRange(
-                    GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * existingCapacity, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)));
-                if (ptr)
-                {
-                    std::copy(ptr, ptr + sizeof(T) * existingCapacity, existingData.data());
-                    glCheck(glUnmapBuffer(GL_SHADER_STORAGE_BUFFER));
-                }
+                scoped_ssbo_map ssm{ *this };
+                std::copy(
+                    static_cast<std::byte const*>(cdata()), 
+                    static_cast<std::byte const*>(cdata()) + sizeof(T) * existingCapacity, 
+                    existingData.data());
             }
-
             glCheck(glBufferData(GL_SHADER_STORAGE_BUFFER, aCapacity * sizeof(T), existingData.data(), GL_STATIC_DRAW));
         }
         catch (...)
@@ -75,6 +71,22 @@ namespace neogfx
         glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
 
         ssbo<T>::reserve(aCapacity);
+
+        if (mapped())
+        {
+            auto const mappedCount = iMappedCount;
+            try
+            {
+                iMappedCount = 0u;
+                map();
+                iMappedCount = mappedCount;
+            }
+            catch (...)
+            {
+                iMappedCount = mappedCount;
+                throw;
+            }
+        }
     }
 
     template <typename T>
