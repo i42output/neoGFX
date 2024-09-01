@@ -27,6 +27,53 @@ namespace neogfx
     opengl_ssbo<T>::opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform) : 
         ssbo<T>{ aId, aSizeUniform } // todo
     {
+        glCheck(glGenBuffers(1, &iHandle));
+        glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, id(), iHandle));
+    }
+
+    template <typename T>
+    opengl_ssbo<T>::~opengl_ssbo()
+    {
+        glCheck(glDeleteBuffers(1, &iHandle));
+    }
+
+    template <typename T>
+    void opengl_ssbo<T>::reserve(std::size_t aCapacity)
+    {
+        if (aCapacity <= this->capacity())
+            return;
+
+        auto const existingCapacity = this->capacity();
+
+        glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, iHandle));
+
+        try
+        {
+            thread_local std::vector<std::byte> existingData;
+            existingData.clear();
+            existingData.resize(sizeof(T) * aCapacity);
+            if (existingCapacity != 0u)
+            {
+                std::byte const* ptr = nullptr;
+                glCheck(ptr = static_cast<std::byte const*>(glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * existingCapacity, GL_MAP_READ_BIT)));
+                if (ptr)
+                {
+                    std::copy(ptr, ptr + sizeof(T) * existingCapacity, existingData.data());
+                    glCheck(glUnmapBuffer(GL_SHADER_STORAGE_BUFFER));
+                }
+            }
+
+            glCheck(glBufferData(GL_SHADER_STORAGE_BUFFER, aCapacity * sizeof(T), existingData.data(), GL_STATIC_DRAW));
+        }
+        catch (...)
+        {
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+            throw;
+        }
+        
+        glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+
+        ssbo<T>::reserve(aCapacity);
     }
 
     template class opengl_ssbo<bool>;

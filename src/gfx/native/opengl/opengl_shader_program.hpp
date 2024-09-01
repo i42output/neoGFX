@@ -35,6 +35,11 @@ namespace neogfx
         using typename base_type::value_type;
     public:
         opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform);
+        ~opengl_ssbo();
+    public:
+        void reserve(std::size_t aCapacity) final;
+    private:
+        GLuint iHandle = {};
     };
 
     template <typename Base = shader_program<>>

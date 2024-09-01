@@ -63,9 +63,10 @@ namespace neogfx
         virtual void* at(shader_data_type aDataType, std::size_t aIndex) = 0;
     public:
         virtual void clear() = 0;
-        virtual void* push_back(shader_data_type aDataType, void const* aValue) = 0;
-        virtual void* insert(shader_data_type aDataType, std::size_t aPos, void const* aValueStart, void const* aValueEnd) = 0;
-        virtual void* erase(void const* aValueStart, void const* aValueEnd) = 0;
+        virtual void resize(std::size_t aSize) = 0;
+        virtual void push_back(shader_data_type aDataType, void const* aValue) = 0;
+        virtual void insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) = 0;
+        virtual void erase(void const* aFirst, void const* aLast) = 0;
     public:
         template <typename T>
         T const& at(std::size_t aIndex) const
@@ -84,14 +85,14 @@ namespace neogfx
             return *static_cast<T*>(push_back(shader_data_type_v<T>, &aValue));
         }
         template <typename T>
-        T* insert(std::size_t aPos, T const* aValueStart, T const* aValueEnd)
+        T* insert(std::size_t aPos, T const* aFirst, T const* aLast)
         {
-            return static_cast<T*>(insert(shader_data_type_v<T>, aPos, aValueStart, aValueEnd));
+            return static_cast<T*>(insert(shader_data_type_v<T>, aPos, aFirst, aLast));
         }
         template <typename T>
-        T* erase(T const* aValueStart, T const* aValueEnd)
+        T* erase(T const* aFirst, T const* aLast)
         {
-            return static_cast<T*>(erase(shader_data_type_v<T>, aValueStart, aValueEnd));
+            return static_cast<T*>(erase(shader_data_type_v<T>, aFirst, aLast));
         }
     };
 

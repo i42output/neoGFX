@@ -80,23 +80,37 @@ namespace neogfx
     public:
         void clear() final
         {
-            iSizeUniform.set_value<std::uint32_t>(0u);
-            iSize = 0u;
+            resize(0);
         }
-        void* push_back(shader_data_type aDataType, void const* aValue) final
+        void resize(std::size_t aSize)
         {
-            // todo
-            return nullptr;
+            if (aSize > capacity())
+                need(aSize - capacity());
+            iSizeUniform.set_value(static_cast<std::uint32_t>(aSize));
+            iSize = aSize;
         }
-        void* insert(shader_data_type aDataType, std::size_t aPos, void const* aValueStart, void const* aValueEnd) final
+        void push_back(shader_data_type aDataType, void const* aValue) final
         {
+            resize(size() + 1);
             // todo
-            return nullptr;
         }
-        void* erase(void const* aValueStart, void const* aValueEnd) final
+        void insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) final
         {
+            auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
+            resize(size() + count);
             // todo
-            return nullptr;
+        }
+        void erase(void const* aFirst, void const* aLast) final
+        {
+            auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
+            // todo
+            resize(size() - count);
+        }
+    private:
+        void need(std::size_t aExtra)
+        {
+            if (size() + aExtra > capacity())
+                reserve(static_cast<std::size_t>(capacity() * 1.5 + aExtra));
         }
     private:
         ssbo_id iId;
