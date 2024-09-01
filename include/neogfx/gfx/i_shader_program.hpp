@@ -49,6 +49,8 @@ namespace neogfx
     class i_ssbo
     {
     public:
+        struct not_mapped : std::logic_error { not_mapped() : std::logic_error("neogfx::i_sbbo::not_mapped") {} };
+    public:
         virtual ~i_ssbo() = default;
     public:
         virtual ssbo_id id() const = 0;
@@ -59,15 +61,34 @@ namespace neogfx
         virtual bool empty() const = 0;
         virtual std::size_t size() const = 0;
     public:
+        virtual void const* data() const = 0;
+        virtual void const* cdata() const = 0;
+        virtual void* data() = 0;
+        virtual bool mapped() const = 0;
+        virtual void map() const = 0;
+        virtual void unmap() const = 0;
+    public:
+        virtual void const* back(shader_data_type aDataType) const = 0;
+        virtual void* back(shader_data_type aDataType) = 0;
         virtual void const* at(shader_data_type aDataType, std::size_t aIndex) const = 0;
         virtual void* at(shader_data_type aDataType, std::size_t aIndex) = 0;
     public:
         virtual void clear() = 0;
         virtual void resize(std::size_t aSize) = 0;
         virtual void push_back(shader_data_type aDataType, void const* aValue) = 0;
-        virtual void insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) = 0;
-        virtual void erase(void const* aFirst, void const* aLast) = 0;
+        virtual void* insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) = 0;
+        virtual void* erase(void const* aFirst, void const* aLast) = 0;
     public:
+        template <typename T>
+        T const* back() const
+        {
+            return *static_cast<T const*>(back(shader_data_type_v<T>));
+        }
+        template <typename T>
+        T* back()
+        {
+            return *static_cast<T*>(back(shader_data_type_v<T>));
+        }
         template <typename T>
         T const& at(std::size_t aIndex) const
         {
@@ -80,9 +101,9 @@ namespace neogfx
         }
     public:
         template <typename T>
-        T& push_back(T const& aValue)
+        void push_back(T const& aValue)
         {
-            return *static_cast<T*>(push_back(shader_data_type_v<T>, &aValue));
+            push_back(shader_data_type_v<T>, &aValue);
         }
         template <typename T>
         T* insert(std::size_t aPos, T const* aFirst, T const* aLast)
@@ -94,6 +115,21 @@ namespace neogfx
         {
             return static_cast<T*>(erase(shader_data_type_v<T>, aFirst, aLast));
         }
+    };
+
+    class scoped_ssbo_map
+    {
+    public:
+        scoped_ssbo_map(i_ssbo const& aSsbo) : iSsbo{ aSsbo }
+        {
+            iSsbo.map();
+        }
+        ~scoped_ssbo_map()
+        {
+            iSsbo.unmap();
+        }
+    private:
+        i_ssbo const& iSsbo;
     };
 
     enum class shader_program_type : std::uint32_t

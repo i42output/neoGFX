@@ -76,6 +76,54 @@ namespace neogfx
         ssbo<T>::reserve(aCapacity);
     }
 
+    template <typename T>
+    void const* opengl_ssbo<T>::data() const
+    {
+        if (mapped())
+            return iMapped;
+        throw not_mapped();
+    }
+
+    template <typename T>
+    void const* opengl_ssbo<T>::cdata() const
+    {
+        if (mapped())
+            return iMapped;
+        throw not_mapped();
+    }
+
+    template <typename T>
+    void* opengl_ssbo<T>::data()
+    {
+        if (mapped())
+            return iMapped;
+        throw not_mapped();
+    }
+
+    template <typename T>
+    bool opengl_ssbo<T>::mapped() const
+    {
+        return iMapped != nullptr;
+    }
+
+    template <typename T>
+    void opengl_ssbo<T>::map() const
+    {
+        if (++iMappedCount == 1u)
+        {
+            // todo
+        }
+    }
+
+    template <typename T>
+    void opengl_ssbo<T>::unmap() const
+    {
+        if (--iMappedCount == 0u)
+        {
+            // todo
+        }
+    }
+
     template class opengl_ssbo<bool>;
     template class opengl_ssbo<float>;
     template class opengl_ssbo<double>;

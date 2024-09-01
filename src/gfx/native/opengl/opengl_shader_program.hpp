@@ -32,14 +32,24 @@ namespace neogfx
     {
         using base_type = ssbo<T>;
     public:
+        using typename base_type::not_mapped;
         using typename base_type::value_type;
     public:
         opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform);
         ~opengl_ssbo();
     public:
         void reserve(std::size_t aCapacity) final;
+    public:
+        void const* data() const final;
+        void const* cdata() const final;
+        void* data() final;
+        bool mapped() const final;
+        void map() const final;
+        void unmap() const final;
     private:
         GLuint iHandle = {};
+        mutable value_type* iMapped = nullptr;
+        mutable std::uint32_t iMappedCount = 0u;
     };
 
     template <typename Base = shader_program<>>

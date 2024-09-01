@@ -67,6 +67,16 @@ namespace neogfx
             return iSize;
         }
     public:
+        void const* back(shader_data_type aDataType) const final
+        {
+            // todo
+            return nullptr;
+        }
+        void* back(shader_data_type aDataType) final
+        {
+            // todo
+            return nullptr;
+        }
         void const* at(shader_data_type aDataType, std::size_t aIndex) const final
         {
             // todo
@@ -94,17 +104,23 @@ namespace neogfx
             resize(size() + 1);
             // todo
         }
-        void insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) final
+        void* insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) final
         {
             auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
             resize(size() + count);
             // todo
+            if (!mapped())
+                return nullptr;
+            return nullptr;
         }
-        void erase(void const* aFirst, void const* aLast) final
+        void* erase(void const* aFirst, void const* aLast) final
         {
             auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
             // todo
             resize(size() - count);
+            if (!mapped())
+                return nullptr;
+            return nullptr;
         }
     private:
         void need(std::size_t aExtra)
