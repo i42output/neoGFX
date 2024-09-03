@@ -80,12 +80,12 @@ namespace neogfx
         virtual void* erase(void const* aFirst, void const* aLast) = 0;
     public:
         template <typename T>
-        T const* back() const
+        T const& back() const
         {
             return *static_cast<T const*>(back(shader_data_type_v<T>));
         }
         template <typename T>
-        T* back()
+        T& back()
         {
             return *static_cast<T*>(back(shader_data_type_v<T>));
         }

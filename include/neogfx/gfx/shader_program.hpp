@@ -113,6 +113,8 @@ namespace neogfx
         }
         void push_back(shader_data_type aDataType, void const* aValue) final
         {
+            if (aDataType != this->data_type())
+                throw std::logic_error("neogfx::ssbo::push_back: invalid data type");
             resize(size() + 1);
             scoped_ssbo_map ssm{ *this };
             std::copy(
@@ -122,21 +124,43 @@ namespace neogfx
         }
         void* insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) final
         {
-            auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
-            resize(size() + count);
-            // todo
-            if (!mapped())
-                return nullptr;
-            return nullptr;
+            if (aDataType != this->data_type())
+                throw std::logic_error("neogfx::ssbo::insert: invalid data type");
+            auto const first = static_cast<value_type const*>(aFirst);
+            auto const last = static_cast<value_type const*>(aLast);
+            auto const count = (last - first);
+            if (count != 0)
+            {
+                resize(size() + count);
+                {
+                    scoped_ssbo_map ssm{ *this };
+                    auto const where = static_cast<value_type*>(data()) + aPos;
+                    std::copy_backward(
+                        where,
+                        static_cast<value_type*>(data()) + size() - count,
+                        static_cast<value_type*>(data()) + size());
+                    std::copy(
+                        static_cast<value_type const*>(first),
+                        static_cast<value_type const*>(last),
+                        where);
+                }
+            }
+            return mapped() ? static_cast<value_type*>(data()) + aPos : nullptr;
         }
         void* erase(void const* aFirst, void const* aLast) final
         {
+            auto const where = static_cast<value_type*>(data()) +
+                (static_cast<value_type const*>(aFirst) - static_cast<value_type const*>(cdata()));
             auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
-            // todo
-            resize(size() - count);
-            if (!mapped())
-                return nullptr;
-            return nullptr;
+            if (count != 0)
+            {
+                std::copy(
+                    static_cast<value_type const*>(aLast),
+                    static_cast<value_type const*>(cdata()) + size(),
+                    where);
+                resize(size() - count);
+            }
+            return where;
         }
     private:
         void need(std::size_t aExtra)
