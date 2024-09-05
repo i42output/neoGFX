@@ -30,7 +30,7 @@
 namespace neogfx
 {
     template <typename T>
-    class ssbo : public i_ssbo
+    class ssbo : public reference_counted<i_ssbo>
     {
     public:
         using value_type = T;

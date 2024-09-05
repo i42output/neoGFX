@@ -46,8 +46,10 @@ namespace neogfx
     using ssbo_id = neolib::cookie;
     constexpr ssbo_id no_sbbo = ssbo_id{};
 
-    class i_ssbo
+    class i_ssbo : public i_reference_counted
     {
+    public:
+        using abstract_type = i_ssbo;
     public:
         struct not_mapped : std::logic_error { not_mapped() : std::logic_error("neogfx::i_sbbo::not_mapped") {} };
     public:
@@ -201,8 +203,7 @@ namespace neogfx
         virtual void update_uniform_locations() = 0;
         virtual bool uniforms_changed() const = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
-        virtual i_ssbo& create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform) = 0;
-        virtual void destroy_ssbo(i_ssbo& aSsbo) = 0;
+        virtual void create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;
         virtual void deactivate() = 0;
@@ -242,9 +243,11 @@ namespace neogfx
         }
     public:
         template <typename T>
-        i_ssbo& create_ssbo(i_shader_uniform& aSizeUniform)
+        ref_ptr<i_ssbo> create_ssbo(i_shader_uniform& aSizeUniform)
         {
-            return create_ssbo(shader_data_type_v<T>, aSizeUniform);
+            ref_ptr<i_ssbo> result;
+            create_ssbo(shader_data_type_v<T>, aSizeUniform, result);
+            return result;
         }
     };
 }

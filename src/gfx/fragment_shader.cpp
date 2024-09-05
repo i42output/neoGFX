@@ -281,7 +281,7 @@ namespace neogfx
 
     void standard_shape_shader::init(i_shader_program& aShaderProgram)
     {
-        iShapeVertices = &aShaderProgram.create_ssbo<vec4f>(uShapeVertexCount.uniform());
+        iShapeVertices = aShaderProgram.create_ssbo<vec4f>(uShapeVertexCount.uniform());
     }
 
     void standard_shape_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const
@@ -309,5 +309,10 @@ namespace neogfx
         enable();
         uShape = aShape;
         uShapeEnabled = true;
+    }
+
+    i_ssbo& standard_shape_shader::shape_vertices()
+    {
+        return *iShapeVertices;
     }
 }

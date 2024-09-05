@@ -60,6 +60,7 @@ namespace neogfx
         typedef std::vector<GLubyte> ubo_block_buffer_t;
     public:
         basic_opengl_shader_program(std::string const& aName);
+        ~basic_opengl_shader_program();
     public:
         void compile() override;
         void link() override;
@@ -67,8 +68,7 @@ namespace neogfx
         void update_uniform_storage() override;
         void update_uniform_locations() override;
         void update_uniforms(const i_rendering_context& aContext) override;
-        i_ssbo& create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform) override;
-        void destroy_ssbo(i_ssbo& aSsbo) override;
+        void create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) override;
         void deactivate() override;
     private:
         GLuint gl_handle() const;
@@ -79,7 +79,7 @@ namespace neogfx
             ubo_block_buffer_t uniformBlockBuffer;
             mutable std::optional<GLuint> uboHandle;
         } iUbos[static_cast<std::size_t>(shader_type::COUNT)];
-        neolib::std_vector_jar<std::unique_ptr<i_ssbo>> iSsbos;
+        neolib::std_vector_jar<weak_ref_ptr<i_ssbo>> iSsbos;
     };
 
     using opengl_shader_program = basic_opengl_shader_program<>;

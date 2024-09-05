@@ -10,6 +10,7 @@
 #define SHAPE_Arc 0x08
 #define SHAPE_RoundedRect 0x09
 #define SHAPE_EllipseRect 0x0A
+#define SHAPE_Polygon 0x0B
 
 vec4 mix3(vec4 a, vec4 b, vec4 c, float t)
 {

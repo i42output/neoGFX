@@ -224,8 +224,9 @@ namespace neogfx
         bool shape_active() const final;
         void clear_shape() final;
         void set_shape(shader_shape aShape) final;
+        i_ssbo& shape_vertices() final;
     private:
-        i_ssbo* iShapeVertices;
+        ref_ptr<i_ssbo> iShapeVertices;
         cache_shared_uniform(uShapeEnabled)
         cache_shared_uniform(uShape)
         cache_shared_uniform(uShapeVertexCount)

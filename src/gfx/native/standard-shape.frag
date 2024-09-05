@@ -350,6 +350,9 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
         case SHAPE_EllipseRect:
             draw_ellipse_rect(color, function1, function2, function3, function4, function5, function6);
             break;
+        case SHAPE_Polygon:
+            // todo
+            break;
         }
     }
 }

@@ -36,6 +36,12 @@ namespace neogfx
     }
 
     template <typename Base>
+    basic_opengl_shader_program<Base>::~basic_opengl_shader_program()
+    {
+        this->stages().clear();
+    }
+
+    template <typename Base>
     inline void basic_opengl_shader_program<Base>::compile()
     {
         if (!this->dirty())
@@ -295,67 +301,67 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline i_ssbo& basic_opengl_shader_program<Base>::create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform)
+    inline void basic_opengl_shader_program<Base>::create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo)
     {
         ssbo_id const ssboId = iSsbos.next_cookie();
         switch(aDataType)
         {
         case shader_data_type::Boolean:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<bool>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<bool>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Float:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<float>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<float>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Double:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<double>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<double>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Int:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<std::int32_t>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<std::int32_t>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Uint:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<std::uint32_t>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<std::uint32_t>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Vec2:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec2f>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec2f>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::DVec2:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec2>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec2>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::IVec2:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec2i32>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec2i32>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::UVec2:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec2u32>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec2u32>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Vec3:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec3f>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec3f>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::DVec3:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec3>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec3>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::IVec3:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec3i32>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec3i32>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::UVec3:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec3u32>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec3u32>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Vec4:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec4f>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec4f>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::DVec4:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec4>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec4>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::IVec4:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec4i32>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec4i32>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::UVec4:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<vec4u32>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<vec4u32>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::Mat4:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<mat4f>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<mat4f>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::DMat4:
-            iSsbos.add(ssboId, std::make_unique<opengl_ssbo<mat4>>(ssboId, aSizeUniform));
+            iSsbos.add(ssboId, aSsbo = make_ref<opengl_ssbo<mat4>>(ssboId, aSizeUniform));
             break;
         case shader_data_type::FloatArray:
         case shader_data_type::DoubleArray:
@@ -365,13 +371,6 @@ namespace neogfx
         default:
             throw std::logic_error("not supported");
         }
-        return *iSsbos[ssboId];
-    }
-
-    template <typename Base>
-    inline void basic_opengl_shader_program<Base>::destroy_ssbo(i_ssbo& aSsbo)
-    {
-        // todo
     }
 
     template <typename Base>

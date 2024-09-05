@@ -34,6 +34,7 @@ namespace neogfx
     struct no_stipple_vertex : std::logic_error { no_stipple_vertex() : std::logic_error{ "neogfx::no_stipple_vertex" } {} };
 
     class i_rendering_context;
+    class i_ssbo;
 
     class i_fragment_shader : public i_shader
     {
@@ -99,5 +100,6 @@ namespace neogfx
         virtual bool shape_active() const = 0;
         virtual void clear_shape() = 0;
         virtual void set_shape(shader_shape aShape) = 0;
+        virtual i_ssbo& shape_vertices() = 0;
     };
 }
