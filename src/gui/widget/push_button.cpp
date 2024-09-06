@@ -331,7 +331,6 @@ namespace neogfx
                     penWidth = 2.0;
                 if (outerBorderColor != innerBorderColor)
                 {
-                    scoped_snap_to_pixel snap{ aGc };
                     if (penWidth.value() > 2.0)
                         outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
                     aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
@@ -341,7 +340,6 @@ namespace neogfx
                 }
                 else
                 {
-                    scoped_snap_to_pixel snap{ aGc };
                     if (penWidth.value() > 2.0)
                         outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
                     aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value(), lineStyle.value_or(line_style::Solid) });

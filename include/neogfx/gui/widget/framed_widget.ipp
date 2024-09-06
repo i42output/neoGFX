@@ -57,7 +57,7 @@ namespace neogfx
         case frame_style::SolidFrame:
         case frame_style::WindowFrame:
             if (!has_frame_radius())
-                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }, pen{ frame_color(), effective_frame_width() });
+                aGc.draw_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }, pen{ frame_color(), effective_frame_width(), false });
             else
                 aGc.draw_rounded_rect(rect{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() }, frame_radius(), pen{ frame_color(), effective_frame_width() },
                     base_type::as_widget().has_background_color() || !base_type::as_widget().background_is_transparent() ?
@@ -67,9 +67,9 @@ namespace neogfx
             {
                 rect rectBorder{ point{ 0.0, 0.0 }, base_type::as_widget().non_client_rect().extents() };
                 rectBorder.deflate(line_width(), line_width());
-                aGc.draw_rect(rectBorder, pen(inner_frame_color(), line_width()));
+                aGc.draw_rect(rectBorder, pen{ inner_frame_color(), line_width(), false });
                 rectBorder.inflate(line_width(), line_width());
-                aGc.draw_rect(rectBorder, pen(frame_color(), line_width()));
+                aGc.draw_rect(rectBorder, pen{ frame_color(), line_width(), false });
             }
             break;
         case frame_style::DoubleFrame:

@@ -515,8 +515,6 @@ namespace neogfx
 
     void graphics_context::draw_focus_rect(rect const& aRect) const
     {
-        scoped_snap_to_pixel sntp{ *this, true };
-
         push_logical_operation(neogfx::logical_operation::Xor);
         draw_rect(aRect, pen{ color::White, line_dash{ 0x5555u } });
         pop_logical_operation();

@@ -1300,6 +1300,7 @@ int main(int argc, char* argv[])
             aGc.draw_rect(ng::rect{ ng::point{ 5, 5 }, ng::size{ 2, 2 } }, ng::color::White);
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
+            aGc.draw_rect(ng::rect{ ng::point{ 8, 28 }, ng::size{ 16, 16 } }, ng::color::Cyan);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 28, 8 }, ng::size{ (ng::scalar)((int)(t / 100000) % 200), 17 } });
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::color::Goldenrod);
             aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));

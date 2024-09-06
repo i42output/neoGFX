@@ -22,21 +22,29 @@
 // Copyright © 2019 Inigo Quilez
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the Software), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED AS IS, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+float spot_alpha(float a, float aliasThreshold)
+{
+    if (a != 0.0 && aliasThreshold == 0.0)
+        a = 1.0;
+    return a;
+}
+
 vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, float aliasThreshold, vec4 outerColor, vec4 innerColor)
 {
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(-0.5, 0.5, d0)));
+    float a = spot_alpha(1.0 - smoothstep(-0.5, 0.5, d0), aliasThreshold);
+    color = vec4(color.xyz, color.a * a);
     if (outlineCount == 1.0)
     {
-        float a = smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0));
+        float a = spot_alpha(1.0 - smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0)), aliasThreshold);
         if (d0 < 0.0)
-            color = mix(color, outerColor, 1.0 - a);
+            color = mix(color, outerColor, a);
         else
-            color = mix(vec4(outerColor.xyz, 0.0), outerColor, 1.0 - a);
+            color = mix(vec4(outerColor.xyz, 0.0), outerColor, a);
     }
     else if (outlineCount == 2.0)
     {
-        float a = smoothstep(-(outlineWidth / 2.0 + aliasThreshold), outlineWidth / 2.0 + aliasThreshold, d0);
-        color = mix4(vec4(outerColor.xyz, 0.0), outerColor, innerColor, color, 1.0 - a);           
+        float a = spot_alpha(1.0 - smoothstep(-(outlineWidth / 2.0 + aliasThreshold), outlineWidth / 2.0 + aliasThreshold, d0), aliasThreshold);
+        color = mix4(vec4(outerColor.xyz, 0.0), outerColor, innerColor, color, a);           
     }
     return color;
 }
@@ -56,7 +64,10 @@ void draw_line(inout vec4 color, inout vec4 function1, inout vec4 function2, ino
     if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
         discard;
     else
-        color = vec4(color.xyz, color.a * (1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0))));
+    {
+        float a = spot_alpha(1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0)), function3.y);
+        color = vec4(color.xyz, color.a * a);
+    }
 }
 
 float bezier_sdSegmentSq(vec2 p, vec2 a, vec2 b)
@@ -94,7 +105,8 @@ void draw_cubic_bezier(inout vec4 color, inout vec4 function1, inout vec4 functi
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
     float d0 = bezier_udBezier(function1.xy, function1.zw, function2.xy, function2.zw, fragPos.xy);
-    color = vec4(color.xyz, color.a * (1.0 - smoothstep(0.0, function3.w / 2.0, abs(d0))));
+    float a = spot_alpha(1.0 - smoothstep(function3.y == 0.0 ? 0.5 : 0.0, function3.w / 2.0, abs(d0)), function3.y);
+    color = vec4(color.xyz, color.a * a);
 }
 
 float sdTriangle(vec2 p, vec2 p0, vec2 p1, vec2 p2)
