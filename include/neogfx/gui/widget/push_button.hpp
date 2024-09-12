@@ -89,6 +89,7 @@ namespace neogfx
         virtual color animation_color(std::uint32_t aAnimationFrame) const;
     private:
         void init();
+        scalar pen_width() const;
     private:
         widget_timer iAnimator;
         std::uint32_t iAnimationFrame;

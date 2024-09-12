@@ -35,7 +35,7 @@ namespace neogfx
         using typename base_type::not_mapped;
         using typename base_type::value_type;
     public:
-        opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform);
+        opengl_ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aSizeUniform, bool aPersistent = false);
         ~opengl_ssbo();
     public:
         void reserve(std::size_t aCapacity) final;
@@ -46,7 +46,9 @@ namespace neogfx
         bool mapped() const final;
         void map() const final;
         void unmap() const final;
+        void sync() const final;
     private:
+        bool iPersistent;
         GLuint iHandle = {};
         mutable value_type* iMapped = nullptr;
         mutable std::uint32_t iMappedCount = 0u;
@@ -62,14 +64,16 @@ namespace neogfx
         basic_opengl_shader_program(std::string const& aName);
         ~basic_opengl_shader_program();
     public:
-        void compile() override;
-        void link() override;
-        void use() override;
-        void update_uniform_storage() override;
-        void update_uniform_locations() override;
-        void update_uniforms(const i_rendering_context& aContext) override;
-        void create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) override;
-        void deactivate() override;
+        void compile() final;
+        void link() final;
+        void use() final;
+        void update_uniform_storage() final;
+        void update_uniform_locations() final;
+        void update_uniforms(const i_rendering_context& aContext) final;
+        std::size_t ssbo_count() const final;
+        i_ssbo const& ssbo(std::size_t aIndex) const final;
+        void create_ssbo(i_string const& aName, shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) final;
+        void deactivate() final;
     private:
         GLuint gl_handle() const;
         ubo_block_buffer_t& ubo_block_buffer(shader_type aShaderType);

@@ -123,18 +123,13 @@ namespace neogfx
         { 
             return iSubPaths; 
         }
-        vertices to_vertices(const typename sub_paths_type::value_type& aPath) const
+        template <typename VertexContainer>
+        VertexContainer& to_vertices(const typename sub_path_type& aPath, VertexContainer& aResult) const
         {
-            vertices result;
-            result.reserve((aPath.size() + 1) * (iShape == path_shape::Quads ? 6 : 1));
+            aResult.clear();
+            aResult.reserve((aPath.size()) * (iShape == path_shape::Quads ? 6 : 1));
             if (aPath.size() >= 2)
             {
-                if (iShape == path_shape::ConvexPolygon)
-                {
-                    auto const& boundingRect = bounding_rect(false);
-                    auto const& center = boundingRect.center();
-                    result.push_back(xyz{ center.x + position().x, center.y + position().y });
-                }
                 for (auto vi = aPath.begin(); vi != aPath.end(); ++vi)
                 {
                     switch (iShape)
@@ -142,28 +137,24 @@ namespace neogfx
                     case path_shape::Quads:
                         if (vi + 1 != aPath.end())
                         {
-                            result.push_back(xyz{ vi->x + position().x, vi->y + position().y });
-                            result.push_back(xyz{ (vi + 1)->x + position().x, (vi + 1)->y + position().y });
-                            result.push_back(xyz{ vi->x + position().x, vi->y + position().y });
-                            result.push_back(xyz{ (vi + 1)->x + position().x, (vi + 1)->y + position().y });
+                            aResult.push_back(xyz{ vi->x + position().x, vi->y + position().y });
+                            aResult.push_back(xyz{ (vi + 1)->x + position().x, (vi + 1)->y + position().y });
+                            aResult.push_back(xyz{ vi->x + position().x, vi->y + position().y });
+                            aResult.push_back(xyz{ (vi + 1)->x + position().x, (vi + 1)->y + position().y });
                         }
                         break;
                     case path_shape::ConvexPolygon:
+                    case path_shape::LineLoop:
+                        if (vi != std::prev(aPath.end()) || aPath[0] != aPath[aPath.size() - 1])
+                            aResult.push_back(xyz{ vi->x + position().x, vi->y + position().y });
+                        break;
                     default:
-                        result.push_back(xyz{ vi->x + position().x, vi->y + position().y });
+                        aResult.push_back(xyz{ vi->x + position().x, vi->y + position().y });
                         break;
                     }
                 }
-                if (iShape == path_shape::LineLoop && aPath[0] == aPath[aPath.size() - 1])
-                {
-                    result.pop_back();
-                }
-                else if (iShape == path_shape::ConvexPolygon && aPath[0] != aPath[aPath.size() - 1])
-                {
-                    result.push_back(xyz{ aPath[0].x, aPath[0].y });
-                }
             }
-            return result;
+            return aResult;
         }
         void move_to(const point_type& aPoint, sub_paths_size_type aLineCountHint = 0)
         {

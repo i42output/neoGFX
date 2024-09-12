@@ -299,6 +299,7 @@ namespace neogfx
                     std::map<string, string> uniformDefinitions;
                     std::map<string, string> singularUniformDefinitions;
                     std::map<std::pair<shader_variable_qualifier, shader_variable_location>, string> variableDefinitions;
+                    std::map<string, string> ssboDefinitions;
                     for (auto const& s : aProgram.stage(type())->shaders())
                     {
                         for (auto const& u : s->uniforms())
@@ -353,6 +354,15 @@ namespace neogfx
                             variableDefinitions[std::make_pair(v.qualifier().value<shader_variable_qualifier>(), v.location())] = variableDefinition;
                         };                        
                     }
+                    for (std::size_t i = 0u; i < aProgram.ssbo_count(); ++i)
+                    {
+                        auto const& ssbo = aProgram.ssbo(i);
+                        string ssboDefinition = "layout(std430, binding = %B%) buffer SSBO_%N% { %T% %N%[]; };\n"_s;
+                        ssboDefinition.replace_all("%B%"_s, to_string(ssbo.id()));
+                        ssboDefinition.replace_all("%T%"_s, enum_to_string<shader_data_type>(ssbo.data_type()));
+                        ssboDefinition.replace_all("%N%"_s, ssbo.name());
+                        ssboDefinitions[ssbo.name()] = ssboDefinition;
+                    }
                     string udefs;
                     for (auto const& udef : uniformDefinitions)
                         udefs += udef.second;
@@ -362,11 +372,15 @@ namespace neogfx
                     string vdefs;
                     for (auto const& vdef : variableDefinitions)
                         vdefs += vdef.second;
+                    string bdefs;
+                    for (auto const& bdef : ssboDefinitions)
+                        bdefs += bdef.second;
                     aOutput.replace_all("%UNIFORM_BLOCK_INDEX%"_s, neolib::string{ std::to_string(static_cast<std::uint32_t>(type())) });
                     aOutput.replace_all("%UNIFORM_BLOCK_NAME%"_s, enum_to_string(type()) + "Uniforms");
                     aOutput.replace_all("%UNIFORMS%"_s, udefs);
                     aOutput.replace_all("%SINGULAR_UNIFORMS%"_s, sudefs);
                     aOutput.replace_all("%VARIABLES%"_s, vdefs);
+                    aOutput.replace_all("%SSBOS%"_s, bdefs);
                 }
                 else
                     throw unsupported_shader_language();

@@ -1,4 +1,4 @@
-#version 420
+#version 430
 precision mediump float;
 
 layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME%
@@ -7,3 +7,4 @@ layout (binding = %UNIFORM_BLOCK_INDEX%) uniform %UNIFORM_BLOCK_NAME%
 };
 %SINGULAR_UNIFORMS%
 %VARIABLES%
+%SSBOS%

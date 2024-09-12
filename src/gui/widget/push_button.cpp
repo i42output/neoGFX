@@ -274,7 +274,6 @@ namespace neogfx
         color colorEnd = faceColor;
         color outerBorderColor = background_color().darker(0x10);
         color innerBorderColor = border_color();
-        std::optional<dimension> penWidth;
         std::optional<line_style> lineStyle;
 
         scoped_units su{ *this, units::Pixels };
@@ -290,11 +289,6 @@ namespace neogfx
             innerBorderColor = outerBorderColor;
         }
         
-        if (std::get<1>(border).has_value())
-            penWidth = std::get<1>(border).value();
-        else if (borderRadii.has_value())
-            penWidth = 2.0;
-
         if (std::get<2>(border).has_value())
             lineStyle = to_line_style(std::get<2>(border).value());
 
@@ -306,11 +300,11 @@ namespace neogfx
                 basic_length<vec2> ly{ vec2{ 0.0, l[1].unconverted_value(), }, l[1].units() };
                 return vec2{ lx.value().x, ly.value().y };
             };
-            pen outline{ outerBorderColor, penWidth.value(), lineStyle.value_or(line_style::Solid) };
+            pen outline{ outerBorderColor, pen_width(), lineStyle.value_or(line_style::Solid) };
             if (outerBorderColor != innerBorderColor)
                 outline.set_secondary_color(innerBorderColor);
             aGc.draw_ellipse_rect(
-                path_bounding_rect(),
+                path_bounding_rect().inflate(pen_width() / 2.0),
                 vec4{ to_vec2(borderRadii.value()[0]).x, to_vec2(borderRadii.value()[1]).x, to_vec2(borderRadii.value()[2]).x, to_vec2(borderRadii.value()[3]).x },
                 vec4{ to_vec2(borderRadii.value()[0]).y, to_vec2(borderRadii.value()[1]).y, to_vec2(borderRadii.value()[2]).y, to_vec2(borderRadii.value()[3]).y },
                 outline,
@@ -327,24 +321,16 @@ namespace neogfx
             case push_button_style::Tab:
             case push_button_style::DropList:
             case push_button_style::SpinBox:
-                if (!penWidth.has_value())
-                    penWidth = 2.0;
                 if (outerBorderColor != innerBorderColor)
-                {
-                    if (penWidth.value() > 2.0)
-                        outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
-                    aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
-                    outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
-                    aGc.draw_path(outlinePath, pen{ innerBorderColor, penWidth.value() / 2.0, lineStyle.value_or(line_style::Solid) });
-                    outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
-                }
+                    aGc.draw_path(
+                        outlinePath, 
+                        pen{ outerBorderColor, pen_width(), lineStyle.value_or(line_style::Solid), false }.set_secondary_color(innerBorderColor),
+                        !spot_color() ? brush{ gradient{ colorStart, colorEnd } } : brush{ faceColor });
                 else
-                {
-                    if (penWidth.value() > 2.0)
-                        outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
-                    aGc.draw_path(outlinePath, pen{ outerBorderColor, penWidth.value(), lineStyle.value_or(line_style::Solid) });
-                    outlinePath.deflate(penWidth.value() / 2.0, penWidth.value() / 2.0);
-                }
+                    aGc.draw_path(
+                        outlinePath, 
+                        pen{ outerBorderColor, pen_width(), lineStyle.value_or(line_style::Solid), false },
+                        !spot_color() ? brush{ gradient{ colorStart, colorEnd } } : brush{ faceColor });
                 break;
             }
             switch (iStyle)
@@ -356,12 +342,7 @@ namespace neogfx
                 else
                     aGc.fill_path(outlinePath, faceColor);
                 break;
-            case push_button_style::Normal:
-            case push_button_style::ButtonBox:
             case push_button_style::ItemViewHeader:
-            case push_button_style::Tab:
-            case push_button_style::DropList:
-            case push_button_style::SpinBox:
                 if (!spot_color())
                     aGc.fill_path(outlinePath, gradient{ colorStart, colorEnd });
                 else
@@ -409,7 +390,9 @@ namespace neogfx
 
     rect push_button::path_bounding_rect() const
     {
-        return client_rect();
+        auto result = client_rect();
+        result.deflate(pen_width() / 2.0, pen_width() / 2.0);
+        return result;
     }
 
     path push_button::path() const
@@ -417,7 +400,7 @@ namespace neogfx
         neogfx::path ret;
         size const pixel = units_converter{ *this }.from_device_units(size(1.0, 1.0));
         size const pathSize = path_bounding_rect().extents();
-        box_areas const pathBox{ 0.0, 0.0, pathSize.cx - pixel.cx, pathSize.cy - pixel.cy };
+        box_areas const pathBox{ 0.0, 0.0, pathSize.cx, pathSize.cy };
         switch (iStyle)
         {
         case push_button_style::Normal:
@@ -581,6 +564,37 @@ namespace neogfx
         default:
             break;
         }
+    }
+
+    scalar push_button::pen_width() const
+    {
+        std::optional<dimension> penWidth;
+        switch (iStyle)
+        {
+        case push_button_style::Normal:
+        case push_button_style::ButtonBox:
+        case push_button_style::Tab:
+        case push_button_style::DropList:
+        case push_button_style::SpinBox:
+            {
+                color outerBorderColor = background_color().darker(0x10);
+                color innerBorderColor = border_color();
+                auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
+                auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
+                if (std::get<0>(border).has_value())
+                {
+                    outerBorderColor = std::get<0>(border).value();
+                    innerBorderColor = outerBorderColor;
+                }
+                if (std::get<1>(border).has_value())
+                    penWidth = std::get<1>(border).value();
+                else if (borderRadii.has_value())
+                    penWidth = 2.0;
+                if (!penWidth.has_value())
+                    penWidth = (outerBorderColor != innerBorderColor ? 2.0 : 1.0);
+            }
+        }
+        return penWidth.value_or(0.0);
     }
 }
 

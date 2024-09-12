@@ -215,8 +215,9 @@ namespace neogfx
         if (aCheckedState != std::nullopt && *aCheckedState == true)
         {
             /* todo: draw tick image eye candy */
-            aGc.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip, false));
-            aGc.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen(service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip, false));
+            scoped_snap_to_pixel snap{ aGc, false };
+            aGc.draw_line(boxRect.top_left(), boxRect.bottom_right(), pen{ service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip, false });
+            aGc.draw_line(boxRect.bottom_left(), boxRect.top_right(), pen{ service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient), 2.0_dip, false });
         }
         else if (aCheckedState == std::nullopt)
             aGc.fill_rect(boxRect, service<i_app>().current_style().palette().color(color_role::PrimaryAccent).with_combined_alpha(enabledAlphaCoefficient));

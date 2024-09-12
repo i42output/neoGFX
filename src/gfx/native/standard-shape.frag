@@ -35,16 +35,38 @@ vec4 shape_color(float d0, vec4 color, float outlineCount, float outlineWidth, f
     color = vec4(color.xyz, color.a * a);
     if (outlineCount == 1.0)
     {
-        float a = spot_alpha(1.0 - smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0)), aliasThreshold);
-        if (d0 < 0.0)
-            color = mix(color, outerColor, a);
+        if (aliasThreshold != 0.0)
+        {
+            float a = spot_alpha(1.0 - smoothstep(outlineWidth / 2.0, outlineWidth / 2.0 + aliasThreshold, abs(d0)), aliasThreshold);
+            if (d0 < 0.0)
+                color = mix(color, outerColor, a);
+            else
+                color = mix(vec4(outerColor.xyz, 0.0), outerColor, a);
+        }
         else
-            color = mix(vec4(outerColor.xyz, 0.0), outerColor, a);
+        {
+            if (d0 >= -outlineWidth / 2.0 && d0 <= outlineWidth / 2.0)
+                color = outerColor;
+            else if (d0 > outlineWidth / 2.0)
+                discard;
+        }
     }
     else if (outlineCount == 2.0)
     {
-        float a = spot_alpha(1.0 - smoothstep(-(outlineWidth / 2.0 + aliasThreshold), outlineWidth / 2.0 + aliasThreshold, d0), aliasThreshold);
-        color = mix4(vec4(outerColor.xyz, 0.0), outerColor, innerColor, color, a);           
+        if (aliasThreshold != 0.0)
+        {
+            float a = spot_alpha(1.0 - smoothstep(-(outlineWidth / 2.0 + aliasThreshold), outlineWidth / 2.0 + aliasThreshold, d0), aliasThreshold);
+            color = mix4(vec4(outerColor.xyz, 0.0), outerColor, innerColor, color, a);           
+        }
+        else
+        {
+            if (d0 < 0.0 && d0 >= -outlineWidth / 2.0)
+                color = innerColor;
+            else if (d0 >= 0.0 && d0 <= outlineWidth / 2.0)
+                color = outerColor;
+            else if (d0 > outlineWidth / 2.0)
+                discard;
+        }
     }
     return color;
 }
@@ -326,6 +348,40 @@ void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
         color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
+float sdPolygon(in vec2 p)
+{
+    const uint num = uShapeVertexCount;
+    float d = dot(p-bShapeVertices[0].xy,p-bShapeVertices[0].xy);
+    float s = 1.0;
+    for( uint i=0, j=num-1; i<num; j=i, i++ )
+    {
+        // distance
+        vec2 e = bShapeVertices[j].xy - bShapeVertices[i].xy;
+        vec2 w =    p - bShapeVertices[i].xy;
+        vec2 b = w - e*clamp( dot(w,e)/dot(e,e), 0.0, 1.0 );
+        d = min( d, dot(b,b) );
+
+        // winding number from http://geomalgorithms.com/a03-_inclusion.html
+        bvec3 cond = bvec3( p.y>=bShapeVertices[i].y, 
+                            p.y <bShapeVertices[j].y, 
+                            e.x*w.y>e.y*w.x );
+        if( all(cond) || all(not(cond)) ) s=-s;  
+    }
+    
+    return s*sqrt(d);
+}
+
+void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
+{
+    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+
+    float d0 = sdPolygon(fragPos);
+//    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+  //      discard;
+    //else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+}
+
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
     if (uShapeEnabled)
@@ -363,7 +419,7 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
             draw_ellipse_rect(color, function1, function2, function3, function4, function5, function6);
             break;
         case SHAPE_Polygon:
-            // todo
+            draw_polygon(color, function1, function2, function3, function4, function5);
             break;
         }
     }

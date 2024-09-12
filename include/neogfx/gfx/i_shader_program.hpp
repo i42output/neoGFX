@@ -55,6 +55,7 @@ namespace neogfx
     public:
         virtual ~i_ssbo() = default;
     public:
+        virtual i_string const& name() const = 0;
         virtual ssbo_id id() const = 0;
         virtual shader_data_type data_type() const = 0;
     public:
@@ -69,6 +70,7 @@ namespace neogfx
         virtual bool mapped() const = 0;
         virtual void map() const = 0;
         virtual void unmap() const = 0;
+        virtual void sync() const = 0;
     public:
         virtual void const* back(shader_data_type aDataType) const = 0;
         virtual void* back(shader_data_type aDataType) = 0;
@@ -203,7 +205,9 @@ namespace neogfx
         virtual void update_uniform_locations() = 0;
         virtual bool uniforms_changed() const = 0;
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
-        virtual void create_ssbo(shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) = 0;
+        virtual std::size_t ssbo_count() const = 0;
+        virtual i_ssbo const& ssbo(std::size_t aIndex) const = 0;
+        virtual void create_ssbo(i_string const& aName, shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;
         virtual void deactivate() = 0;
@@ -243,10 +247,10 @@ namespace neogfx
         }
     public:
         template <typename T>
-        ref_ptr<i_ssbo> create_ssbo(i_shader_uniform& aSizeUniform)
+        ref_ptr<i_ssbo> create_ssbo(i_string const& aName, i_shader_uniform& aSizeUniform)
         {
             ref_ptr<i_ssbo> result;
-            create_ssbo(shader_data_type_v<T>, aSizeUniform, result);
+            create_ssbo(aName, shader_data_type_v<T>, aSizeUniform, result);
             return result;
         }
     };

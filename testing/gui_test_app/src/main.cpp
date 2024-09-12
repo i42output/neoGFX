@@ -1301,7 +1301,15 @@ int main(int argc, char* argv[])
             aGc.draw_pixel(ng::point{ 7, 7 }, ng::color::Blue);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
             aGc.draw_rect(ng::rect{ ng::point{ 8, 28 }, ng::size{ 16, 16 } }, ng::color::Cyan);
+            aGc.draw_rect(ng::rect{ ng::point{ 8.0, 44.0 }, ng::size{ 16, 16 } }, ng::pen{ window.frame_color(), window.effective_frame_width(), false });
             aGc.draw_focus_rect(ng::rect{ ng::point{ 28, 8 }, ng::size{ (ng::scalar)((int)(t / 100000) % 200), 17 } });
+            ng::path path2;
+            path2.move_to(ng::point{ 8.0, 60.0 });
+            path2.line_to(ng::point{ 18.0, 60.0 });
+            path2.line_to(ng::point{ 18.0, 70.0 });
+            path2.line_to(ng::point{ 8.0, 70.0 });
+            path2.line_to(ng::point{ 8.0, 60.0 });
+            aGc.draw_path(path2, ng::color::Brown);
             aGc.fill_rounded_rect(ng::rect{ ng::point{ 100, 100 }, ng::size{ 100, 100 } }, 10.0, ng::color::Goldenrod);
             aGc.fill_rect(ng::rect{ ng::point{ 300, 250 }, ng::size{ 200, 100 } }, window.gradientWidget.gradient().with_direction(ng::gradient_direction::Horizontal));
             aGc.draw_rounded_rect(ng::rect{ ng::point{ 300, 400 }, ng::size{ 200, 100 } }, 10.0, ng::pen{ ng::color::Blue4, 2.0 }, 

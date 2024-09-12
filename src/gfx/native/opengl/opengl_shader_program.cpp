@@ -24,11 +24,13 @@
 namespace neogfx
 {
     template <typename T>
-    opengl_ssbo<T>::opengl_ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform) : 
-        ssbo<T>{ aId, aSizeUniform } // todo
+    opengl_ssbo<T>::opengl_ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aSizeUniform, bool aPersistent) :
+        ssbo<T>{ aName, aId, aSizeUniform }, iPersistent{ aPersistent }
     {
+        if (iPersistent)
+            throw std::logic_error("neogfx::opengl_ssbo: persistent not yet supported");
         glCheck(glGenBuffers(1, &iHandle));
-        glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, id(), iHandle));
+        glCheck(glBindBufferBase(GL_SHADER_STORAGE_BUFFER, this->id(), iHandle));
     }
 
     template <typename T>
@@ -42,6 +44,8 @@ namespace neogfx
     {
         if (aCapacity <= this->capacity())
             return;
+
+        auto const mappedCount = iMappedCount;
 
         auto const existingCapacity = this->capacity();
 
@@ -60,7 +64,19 @@ namespace neogfx
                     static_cast<std::byte const*>(cdata()) + sizeof(T) * existingCapacity, 
                     existingData.data());
             }
-            glCheck(glBufferData(GL_SHADER_STORAGE_BUFFER, aCapacity * sizeof(T), existingData.data(), GL_STATIC_DRAW));
+            if (mapped())
+            {
+                iMappedCount = 1u;
+                unmap();
+            }
+            glCheck(glBufferStorage(GL_SHADER_STORAGE_BUFFER, aCapacity * sizeof(T), existingData.data(), 
+                GL_DYNAMIC_STORAGE_BIT | GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | 
+                (iPersistent ? (GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT) : 0)));
+            if (mappedCount)
+            {
+                map();
+                iMappedCount = mappedCount;
+            }
         }
         catch (...)
         {
@@ -71,29 +87,16 @@ namespace neogfx
         glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
 
         ssbo<T>::reserve(aCapacity);
-
-        if (mapped())
-        {
-            auto const mappedCount = iMappedCount;
-            try
-            {
-                iMappedCount = 0u;
-                map();
-                iMappedCount = mappedCount;
-            }
-            catch (...)
-            {
-                iMappedCount = mappedCount;
-                throw;
-            }
-        }
     }
 
     template <typename T>
     void const* opengl_ssbo<T>::data() const
     {
         if (mapped())
+        {
+            sync();
             return iMapped;
+        }
         throw not_mapped();
     }
 
@@ -101,7 +104,10 @@ namespace neogfx
     void const* opengl_ssbo<T>::cdata() const
     {
         if (mapped())
+        {
+            sync();
             return iMapped;
+        }
         throw not_mapped();
     }
 
@@ -109,14 +115,17 @@ namespace neogfx
     void* opengl_ssbo<T>::data()
     {
         if (mapped())
+        {
+            sync();
             return iMapped;
+        }
         throw not_mapped();
     }
 
     template <typename T>
     bool opengl_ssbo<T>::mapped() const
     {
-        return iMapped != nullptr;
+        return iMappedCount != 0u;
     }
 
     template <typename T>
@@ -124,9 +133,13 @@ namespace neogfx
     {
         if (++iMappedCount == 1u)
         {
+            if (iPersistent)
+                ++iMappedCount;
             glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, iHandle));
-            glCheck(iMapped = static_cast<value_type*>(glMapBufferRange(
-                GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * this->capacity(), GL_MAP_READ_BIT | GL_MAP_WRITE_BIT)));
+            glCheck(iMapped = static_cast<T*>(glMapBufferRange(
+                GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * this->capacity(), 
+                GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT |
+                (iPersistent ? (GL_MAP_FLUSH_EXPLICIT_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT) : 0))));
             glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
         }
     }
@@ -134,11 +147,23 @@ namespace neogfx
     template <typename T>
     void opengl_ssbo<T>::unmap() const
     {
+        sync();
         if (--iMappedCount == 0u)
         {
             glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, iHandle));
             glCheck(glUnmapBuffer(GL_SHADER_STORAGE_BUFFER));
             iMapped = nullptr;
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
+        }
+    }
+
+    template <typename T>
+    void opengl_ssbo<T>::sync() const
+    {
+        if (iPersistent)
+        {
+            glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, iHandle));
+            glCheck(glFlushMappedBufferRange(GL_SHADER_STORAGE_BUFFER, 0, sizeof(T) * this->size()));
             glCheck(glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0));
         }
     }

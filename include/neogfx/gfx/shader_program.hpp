@@ -35,12 +35,16 @@ namespace neogfx
     public:
         using value_type = T;
     public:
-        ssbo(ssbo_id aId, i_shader_uniform& aSizeUniform) :
-            iId{ aId }, iSizeUniform{ aSizeUniform }
+        ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aSizeUniform) :
+            iName{ aName }, iId{ aId }, iSizeUniform{ aSizeUniform }
         {
             iSizeUniform.set_value<std::uint32_t>(0u);
         }
     public:
+        i_string const& name() const final
+        {
+            return iName;
+        }
         ssbo_id id() const final
         {
             return iId;
@@ -169,6 +173,7 @@ namespace neogfx
                 reserve(static_cast<std::size_t>(capacity() * 1.5 + aExtra));
         }
     private:
+        string iName;
         ssbo_id iId;
         i_shader_uniform& iSizeUniform;
         std::size_t iCapacity = 0u;

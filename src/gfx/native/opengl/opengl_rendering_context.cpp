@@ -187,7 +187,8 @@ namespace neogfx
         inline vertices path_vertices(const path& aPath, const path::sub_path_type& aSubPath, double aLineWidth, GLenum& aMode)
         {
             aMode = path_shape_to_gl_mode(aPath.shape());
-            neogfx::vertices vertices = aPath.to_vertices(aSubPath);
+            thread_local neogfx::vertices vertices;
+            aPath.to_vertices(aSubPath, vertices);
             if (aMode == GL_LINE_LOOP)
             {
                 aMode = GL_LINES;
@@ -1458,22 +1459,19 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
-        neolib::scoped_flag snap{ iSnapToPixel, false };
+        neolib::scoped_flag snap{ iSnapToPixelUsesOffset, false };
 
         switch (aPath.shape())
         {
         case path_shape::ConvexPolygon:
-        case path_shape::Lines:
             for (auto const& subPath : aPath.sub_paths())
             {
                 std::optional<point> previousPoint;
                 auto& ssbo = rendering_engine().default_shader_program().shape_shader().shape_vertices();
                 thread_local std::vector<vec4f> vertices;
-                vertices.clear();
-                for (auto& v : subPath)
-                    vertices.push_back(vec4f{ v.to_vec3().as<float>() });
+                aPath.to_vertices(subPath, vertices);
                 ssbo.clear();
-                ssbo.insert(ssbo.size(), &*vertices.begin(), &*vertices.end());
+                ssbo.insert(ssbo.size(), std::to_address(vertices.begin()), std::to_address(vertices.end()));
 
                 if (std::holds_alternative<gradient>(aFill))
                     rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
@@ -1483,13 +1481,13 @@ namespace neogfx
                 rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
 
                 {
-                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
+                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u), true };
 
-                    auto boundingRect = aPath.bounding_rect().inflated(aPen.width() / 2.0);
-                    auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                    auto boundingRect = aPath.bounding_rect().inflated(aPen.width() * 2.0);
+                    auto boundingRectVertices = rect_vertices(boundingRect, mesh_type::Triangles);
                     auto const function = to_function(aPen.color(), boundingRect);
 
-                    for (auto const& v : vertices)
+                    for (auto const& v : boundingRectVertices)
                         vertexArrays.push_back({ v,
                             std::holds_alternative<color>(aFill) ?
                                 static_variant_cast<color>(aFill).as<float>() :
