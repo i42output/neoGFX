@@ -275,13 +275,13 @@ namespace neogfx
     {
         uShapeEnabled = false;
         uShape = shader_shape::None;
-        uShapeVertexCount = std::uint32_t{ 0u };
+        uShapeVerticesMeta = vec2u32{};
         disable();
     }
 
     void standard_shape_shader::init(i_shader_program& aShaderProgram)
     {
-        iShapeVertices = aShaderProgram.create_ssbo<vec4f>("bShapeVertices"_s, uShapeVertexCount.uniform());
+        iShapeVertices = aShaderProgram.create_ssbo<vec4f>("bShapeVertices"_s, uShapeVerticesMeta.uniform());
     }
 
     void standard_shape_shader::generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const

@@ -35,7 +35,7 @@ namespace neogfx
         using typename base_type::not_mapped;
         using typename base_type::value_type;
     public:
-        opengl_ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aSizeUniform, bool aPersistent = false);
+        opengl_ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aMetaUniform, bool aTripleBuffer = true);
         ~opengl_ssbo();
     public:
         void reserve(std::size_t aCapacity) final;
@@ -48,9 +48,8 @@ namespace neogfx
         void unmap() const final;
         void sync() const final;
     private:
-        bool iPersistent;
         GLuint iHandle = {};
-        mutable value_type* iMapped = nullptr;
+        mutable value_type* iMappedPtr = nullptr;
         mutable std::uint32_t iMappedCount = 0u;
     };
 

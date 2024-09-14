@@ -35,10 +35,12 @@ namespace neogfx
     public:
         using value_type = T;
     public:
-        ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aSizeUniform) :
-            iName{ aName }, iId{ aId }, iSizeUniform{ aSizeUniform }
+        ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aMetaUniform, bool aTripleBuffer) :
+            iName{ aName }, iId{ aId }, iMetaUniform{ aMetaUniform }
         {
-            iSizeUniform.set_value<std::uint32_t>(0u);
+            if (aTripleBuffer)
+                iTripleBufferFrame = 0u;
+            iMetaUniform.set_value<vec2u32>({});
         }
     public:
         i_string const& name() const final
@@ -54,6 +56,14 @@ namespace neogfx
             return shader_data_type_v<T>;
         }
     public:
+        bool triple_buffer() const final
+        {
+            return iTripleBufferFrame.has_value();
+        }
+        std::uint32_t triple_buffer_frame() const final
+        {
+            return iTripleBufferFrame.value_or(0u);
+        }
         void reserve(std::size_t aCapacity) override
         {
             iCapacity = std::max(aCapacity, iCapacity);
@@ -69,6 +79,12 @@ namespace neogfx
         std::size_t size() const final
         {
             return iSize;
+        }
+    public:
+        void sync() const override
+        {
+            if (triple_buffer())
+                iTripleBufferFrame = (iTripleBufferFrame.value() + 1u) % 3u;
         }
     public:
         void const* back(shader_data_type aDataType) const final
@@ -112,7 +128,7 @@ namespace neogfx
         {
             if (aSize > capacity())
                 need(aSize - capacity());
-            iSizeUniform.set_value(static_cast<std::uint32_t>(aSize));
+            iMetaUniform.set_value<vec2u32>({ static_cast<std::uint32_t>(aSize), triple_buffer_frame() });
             iSize = aSize;
         }
         void push_back(shader_data_type aDataType, void const* aValue) final
@@ -175,7 +191,8 @@ namespace neogfx
     private:
         string iName;
         ssbo_id iId;
-        i_shader_uniform& iSizeUniform;
+        i_shader_uniform& iMetaUniform;
+        mutable std::optional<std::uint32_t> iTripleBufferFrame;
         std::size_t iCapacity = 0u;
         std::size_t iSize = 0u;
     };

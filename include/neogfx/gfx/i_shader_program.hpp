@@ -59,6 +59,8 @@ namespace neogfx
         virtual ssbo_id id() const = 0;
         virtual shader_data_type data_type() const = 0;
     public:
+        virtual bool triple_buffer() const = 0;
+        virtual std::uint32_t triple_buffer_frame() const = 0;
         virtual void reserve(std::size_t aCapacity) = 0;
         virtual std::size_t capacity() const = 0;
         virtual bool empty() const = 0;

@@ -1509,6 +1509,8 @@ namespace neogfx
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
                             aPen.secondary_color().value_or(vec4{}).as<float>() });
                 }
+
+                ssbo.sync();
             }
             break;
         default:

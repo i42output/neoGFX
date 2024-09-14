@@ -350,20 +350,21 @@ void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
 
 float sdPolygon(in vec2 p)
 {
-    const uint num = uShapeVertexCount;
-    float d = dot(p-bShapeVertices[0].xy,p-bShapeVertices[0].xy);
+    const uint num = uShapeVerticesMeta.x;
+    const uint offset = num * uShapeVerticesMeta.y;
+    float d = dot(p-bShapeVertices[0 + offset].xy,p-bShapeVertices[0 + offset].xy);
     float s = 1.0;
     for( uint i=0, j=num-1; i<num; j=i, i++ )
     {
         // distance
-        vec2 e = bShapeVertices[j].xy - bShapeVertices[i].xy;
-        vec2 w =    p - bShapeVertices[i].xy;
+        vec2 e = bShapeVertices[j + offset].xy - bShapeVertices[i + offset].xy;
+        vec2 w =    p - bShapeVertices[i + offset].xy;
         vec2 b = w - e*clamp( dot(w,e)/dot(e,e), 0.0, 1.0 );
         d = min( d, dot(b,b) );
 
         // winding number from http://geomalgorithms.com/a03-_inclusion.html
-        bvec3 cond = bvec3( p.y>=bShapeVertices[i].y, 
-                            p.y <bShapeVertices[j].y, 
+        bvec3 cond = bvec3( p.y>=bShapeVertices[i + offset].y, 
+                            p.y <bShapeVertices[j + offset].y, 
                             e.x*w.y>e.y*w.x );
         if( all(cond) || all(not(cond)) ) s=-s;  
     }
