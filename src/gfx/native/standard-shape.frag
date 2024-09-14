@@ -351,7 +351,7 @@ void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
 float sdPolygon(in vec2 p)
 {
     const uint num = uShapeVerticesMeta.x;
-    const uint offset = num * uShapeVerticesMeta.y;
+    const uint offset = uShapeVerticesMeta.y;
     float d = dot(p-bShapeVertices[0 + offset].xy,p-bShapeVertices[0 + offset].xy);
     float s = 1.0;
     for( uint i=0, j=num-1; i<num; j=i, i++ )

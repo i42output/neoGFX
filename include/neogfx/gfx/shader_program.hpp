@@ -128,7 +128,8 @@ namespace neogfx
         {
             if (aSize > capacity())
                 need(aSize - capacity());
-            iMetaUniform.set_value<vec2u32>({ static_cast<std::uint32_t>(aSize), triple_buffer_frame() });
+            iMetaUniform.set_value<vec2u32>(
+                { static_cast<std::uint32_t>(aSize), static_cast<std::uint32_t>(capacity() * triple_buffer_frame()) });
             iSize = aSize;
         }
         void push_back(shader_data_type aDataType, void const* aValue) final
