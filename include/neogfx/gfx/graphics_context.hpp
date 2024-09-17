@@ -138,6 +138,7 @@ namespace neogfx
         void draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const final;
         void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) const final;
+        void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) const final;
         void draw_focus_rect(rect const& aRect) const final;
@@ -283,5 +284,6 @@ namespace neogfx
         mutable std::optional<std::pair<bool, char>> iMnemonic;
         mutable std::optional<std::string> iPassword;
         mutable std::optional<size> iPreviousPingPongBufferSize;
+        mutable std::vector<ssbo_range> iSsboRanges;
     };
 }

@@ -31,6 +31,7 @@
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
 #include <neogfx/gfx/text/font.hpp>
+#include <neogfx/gfx/i_ssbo.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
 #include <neogfx/game/filter.hpp>
@@ -253,7 +254,9 @@ namespace neogfx
 
         struct draw_path
         {
-            path path;
+            ssbo_range path;
+            path_shape shape;
+            rect boundingRect;
             pen pen;
             brush fill;
         };

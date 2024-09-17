@@ -1,7 +1,7 @@
 // i_shader_program.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2019, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2019, 2020, 2024 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_vertex_shader.hpp>
 #include <neogfx/gfx/i_fragment_shader.hpp>
+#include <neogfx/gfx/i_ssbo.hpp>
 
 namespace neogfx
 {
@@ -38,105 +39,10 @@ namespace neogfx
     struct no_vertex_shader : std::logic_error { no_vertex_shader() : std::logic_error{ "neogfx::no_vertex_shader" } {} };
     struct no_fragment_shader : std::logic_error { no_fragment_shader() : std::logic_error{ "neogfx::no_fragment_shader" } {} };
     struct shader_last_in_stage : std::logic_error { shader_last_in_stage() : std::logic_error{ "neogfx::shader_last_in_stage" } {} };
-    struct shader_program_dirty : std::logic_error { shader_program_dirty() : std::logic_error("neogfx::shader_program_dirty") {} };
-    struct failed_to_create_shader : std::runtime_error { failed_to_create_shader() : std::runtime_error("neogfx::failed_to_create_shader") {} };
-    struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(std::string const& aReason) : std::runtime_error("neogfx::failed_to_create_shader_program: " + aReason) {} };
-    struct shader_program_error : std::runtime_error { shader_program_error(std::string const& aError) : std::runtime_error("neogfx::shader_program_error: " + aError) {} };
-
-    using ssbo_id = neolib::cookie;
-    constexpr ssbo_id no_sbbo = ssbo_id{};
-
-    class i_ssbo : public i_reference_counted
-    {
-    public:
-        using abstract_type = i_ssbo;
-    public:
-        struct not_mapped : std::logic_error { not_mapped() : std::logic_error("neogfx::i_sbbo::not_mapped") {} };
-    public:
-        virtual ~i_ssbo() = default;
-    public:
-        virtual i_string const& name() const = 0;
-        virtual ssbo_id id() const = 0;
-        virtual shader_data_type data_type() const = 0;
-    public:
-        virtual bool triple_buffer() const = 0;
-        virtual std::uint32_t triple_buffer_frame() const = 0;
-        virtual void reserve(std::size_t aCapacity) = 0;
-        virtual std::size_t capacity() const = 0;
-        virtual bool empty() const = 0;
-        virtual std::size_t size() const = 0;
-    public:
-        virtual void const* data() const = 0;
-        virtual void const* cdata() const = 0;
-        virtual void* data() = 0;
-        virtual bool mapped() const = 0;
-        virtual void map() const = 0;
-        virtual void unmap() const = 0;
-        virtual void sync() const = 0;
-    public:
-        virtual void const* back(shader_data_type aDataType) const = 0;
-        virtual void* back(shader_data_type aDataType) = 0;
-        virtual void const* at(shader_data_type aDataType, std::size_t aIndex) const = 0;
-        virtual void* at(shader_data_type aDataType, std::size_t aIndex) = 0;
-    public:
-        virtual void clear() = 0;
-        virtual void resize(std::size_t aSize) = 0;
-        virtual void push_back(shader_data_type aDataType, void const* aValue) = 0;
-        virtual void* insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) = 0;
-        virtual void* erase(void const* aFirst, void const* aLast) = 0;
-    public:
-        template <typename T>
-        T const& back() const
-        {
-            return *static_cast<T const*>(back(shader_data_type_v<T>));
-        }
-        template <typename T>
-        T& back()
-        {
-            return *static_cast<T*>(back(shader_data_type_v<T>));
-        }
-        template <typename T>
-        T const& at(std::size_t aIndex) const
-        {
-            return *static_cast<T const*>(at(shader_data_type_v<T>, aIndex));
-        }
-        template <typename T>
-        T& at(std::size_t aIndex)
-        {
-            return *static_cast<T*>(at(shader_data_type_v<T>, aIndex));
-        }
-    public:
-        template <typename T>
-        void push_back(T const& aValue)
-        {
-            push_back(shader_data_type_v<T>, &aValue);
-        }
-        template <typename T>
-        T* insert(std::size_t aPos, T const* aFirst, T const* aLast)
-        {
-            return static_cast<T*>(insert(shader_data_type_v<T>, aPos, aFirst, aLast));
-        }
-        template <typename T>
-        T* erase(T const* aFirst, T const* aLast)
-        {
-            return static_cast<T*>(erase(shader_data_type_v<T>, aFirst, aLast));
-        }
-    };
-
-    class scoped_ssbo_map
-    {
-    public:
-        scoped_ssbo_map(i_ssbo const& aSsbo) : iSsbo{ aSsbo }
-        {
-            iSsbo.map();
-        }
-        ~scoped_ssbo_map()
-        {
-            iSsbo.unmap();
-        }
-    private:
-        i_ssbo const& iSsbo;
-    };
+    struct shader_program_dirty : std::logic_error { shader_program_dirty() : std::logic_error{ "neogfx::shader_program_dirty" } {} };
+    struct failed_to_create_shader : std::runtime_error { failed_to_create_shader() : std::runtime_error{ "neogfx::failed_to_create_shader" } {} };
+    struct failed_to_create_shader_program : std::runtime_error { failed_to_create_shader_program(std::string const& aReason) : std::runtime_error{ "neogfx::failed_to_create_shader_program: " + aReason } {} };
+    struct shader_program_error : std::runtime_error { shader_program_error(std::string const& aError) : std::runtime_error{ "neogfx::shader_program_error: " + aError } {} };
 
     enum class shader_program_type : std::uint32_t
     {
@@ -209,7 +115,7 @@ namespace neogfx
         virtual void update_uniforms(const i_rendering_context& aContext) = 0;
         virtual std::size_t ssbo_count() const = 0;
         virtual i_ssbo const& ssbo(std::size_t aIndex) const = 0;
-        virtual void create_ssbo(i_string const& aName, shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) = 0;
+        virtual void create_ssbo(i_string const& aName, shader_data_type aDataType, i_ref_ptr<i_ssbo>& aSsbo) = 0;
         virtual bool active() const = 0;
         virtual void activate(const i_rendering_context& aContext) = 0;
         virtual void deactivate() = 0;
@@ -234,7 +140,7 @@ namespace neogfx
             if (!have_stage(aStage))
                 return true;
             const i_shader* shader = &first_in_stage(aStage);
-            for(;;)
+            for (;;)
             {
                 if (shader->dirty())
                     return false;
@@ -249,10 +155,10 @@ namespace neogfx
         }
     public:
         template <typename T>
-        ref_ptr<i_ssbo> create_ssbo(i_string const& aName, i_shader_uniform& aSizeUniform)
+        ref_ptr<i_ssbo> create_ssbo(i_string const& aName)
         {
             ref_ptr<i_ssbo> result;
-            create_ssbo(aName, shader_data_type_v<T>, aSizeUniform, result);
+            create_ssbo(aName, shader_data_type_v<T>, result);
             return result;
         }
     };

@@ -32,25 +32,23 @@ namespace neogfx
     {
         using base_type = ssbo<T>;
     public:
-        using typename base_type::not_mapped;
         using typename base_type::value_type;
     public:
-        opengl_ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aMetaUniform, bool aTripleBuffer = true);
+        opengl_ssbo(i_string const& aName, ssbo_id aId);
         ~opengl_ssbo();
     public:
         void reserve(std::size_t aCapacity) final;
     public:
-        void const* data() const final;
-        void const* cdata() const final;
-        void* data() final;
-        bool mapped() const final;
-        void map() const final;
-        void unmap() const final;
-        void sync() const final;
+        void* lock(ssbo_range aRange) final;
+        void unlock(ssbo_range aRange) final;
+    private:
+        bool mapped() const;
+        void map() const;
+        void unmap() const;
     private:
         GLuint iHandle = {};
         mutable value_type* iMappedPtr = nullptr;
-        mutable std::uint32_t iMappedCount = 0u;
+        std::uint32_t iLockCount = 0u;
     };
 
     template <typename Base = shader_program<>>
@@ -71,7 +69,7 @@ namespace neogfx
         void update_uniforms(const i_rendering_context& aContext) final;
         std::size_t ssbo_count() const final;
         i_ssbo const& ssbo(std::size_t aIndex) const final;
-        void create_ssbo(i_string const& aName, shader_data_type aDataType, i_shader_uniform& aSizeUniform, i_ref_ptr<i_ssbo>& aSsbo) final;
+        void create_ssbo(i_string const& aName, shader_data_type aDataType, i_ref_ptr<i_ssbo>& aSsbo) final;
         void deactivate() final;
     private:
         GLuint gl_handle() const;

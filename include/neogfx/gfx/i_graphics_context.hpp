@@ -226,6 +226,7 @@ namespace neogfx
         virtual void draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const = 0;
         virtual void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) const = 0;
+        virtual void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) const = 0;
         virtual void draw_focus_rect(rect const& aRect) const = 0;
@@ -387,6 +388,8 @@ namespace neogfx
         }
     };
 
+    ssbo_range path_to_vertices(path const& aPath, path::sub_path_type const& aSubPath);
+    
     template <typename Iter>
     inline void draw_glyph_text(i_graphics_context const& aGc, vec3 const& aPoint, glyph_text const& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, text_format const& aTextFormat)
     {

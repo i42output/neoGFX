@@ -1248,6 +1248,9 @@
     <ClInclude Include="..\..\..\src\gfx\native\opengl\opengl_shader_program.ipp">
       <Filter>Source Files\native\opengl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_ssbo.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">

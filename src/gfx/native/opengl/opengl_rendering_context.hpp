@@ -321,7 +321,7 @@ namespace neogfx
         void draw_pies(const graphics_operation::batch& aDrawPieOps);
         void draw_arcs(const graphics_operation::batch& aDrawArcOps);
         void draw_cubic_bezier(const point& aP0, const point& aP1, const point& aP2, const point& aP3, const pen& aPen);
-        void draw_path(const path& aPath, const pen& aPen, const brush& aFill);
+        void draw_path(const ssbo_range& aPath, path_shape aPathShape, const rect aBoundingRect, const pen& aPen, const brush& aFill);
         void draw_shapes(const graphics_operation::batch& aDrawShapeOps);
         void draw_shape(const game::mesh& aMesh, const vec3& aPosition, const pen& aPen);
         void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer, const mat44& aTransformation);

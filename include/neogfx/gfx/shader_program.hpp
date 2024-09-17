@@ -1,7 +1,7 @@
 // shader_program.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2019, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2019, 2020, 2024 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -35,12 +35,9 @@ namespace neogfx
     public:
         using value_type = T;
     public:
-        ssbo(i_string const& aName, ssbo_id aId, i_shader_uniform& aMetaUniform, bool aTripleBuffer) :
-            iName{ aName }, iId{ aId }, iMetaUniform{ aMetaUniform }
+        ssbo(i_string const& aName, ssbo_id aId) :
+            iName{ aName }, iId{ aId }
         {
-            if (aTripleBuffer)
-                iTripleBufferFrame = 0u;
-            iMetaUniform.set_value<vec2u32>({});
         }
     public:
         i_string const& name() const final
@@ -56,146 +53,62 @@ namespace neogfx
             return shader_data_type_v<T>;
         }
     public:
-        bool triple_buffer() const final
+        ssbo_range alloc(std::uint32_t aSize) final
         {
-            return iTripleBufferFrame.has_value();
+            if (!iFreeList[aSize].empty())
+            {
+                auto const result = iFreeList[aSize].back();
+                iFreeList[aSize].pop_back();
+                return result;
+            }
+            resize(size() + aSize);
+            return { static_cast<std::uint32_t>(size()) - aSize, static_cast<std::uint32_t>(size()) };
         }
-        std::uint32_t triple_buffer_frame() const final
+        void free(ssbo_range aRange) final
         {
-            return iTripleBufferFrame.value_or(0u);
+            iFreeList[aRange.last - aRange.first].push_back(aRange);
         }
-        void reserve(std::size_t aCapacity) override
+    public:
+        virtual void reserve(std::size_t aCapacity)
         {
             iCapacity = std::max(aCapacity, iCapacity);
         }
-        std::size_t capacity() const final
+        std::size_t capacity() const
         {
             return iCapacity;
         }
-        bool empty() const final
+        bool empty() const
         {
             return iSize == 0u;
         }
-        std::size_t size() const final
+        std::size_t size() const
         {
             return iSize;
         }
     public:
-        void sync() const override
-        {
-            if (triple_buffer())
-                iTripleBufferFrame = (iTripleBufferFrame.value() + 1u) % 3u;
-        }
-    public:
-        void const* back(shader_data_type aDataType) const final
-        {
-            if (aDataType != this->data_type())
-                throw std::logic_error("neogfx::ssbo::back: invalid data type");
-            if (empty())
-                throw std::logic_error("neogfx::ssbo::back: empty");
-            return static_cast<value_type const*>(cdata()) + (size() - 1);
-        }
-        void* back(shader_data_type aDataType) final
-        {
-            if (aDataType != this->data_type())
-                throw std::logic_error("neogfx::ssbo::back: invalid data type");
-            if (empty())
-                throw std::logic_error("neogfx::ssbo::back: empty");
-            return static_cast<value_type*>(data()) + (size() - 1);
-        }
-        void const* at(shader_data_type aDataType, std::size_t aIndex) const final
-        {
-            if (aDataType != this->data_type())
-                throw std::logic_error("neogfx::ssbo::at: invalid data type");
-            if (aIndex >= size())
-                throw std::logic_error("neogfx::ssbo::at: out of range");
-            return static_cast<value_type const*>(cdata()) + aIndex;
-        }
-        void* at(shader_data_type aDataType, std::size_t aIndex) final
-        {
-            if (aDataType != this->data_type())
-                throw std::logic_error("neogfx::ssbo::at: invalid data type");
-            if (aIndex >= size())
-                throw std::logic_error("neogfx::ssbo::at: out of range");
-            return static_cast<value_type*>(data()) + aIndex;
-        }
-    public:
-        void clear() final
+        void clear()
         {
             resize(0);
+            for (auto& bucket : iFreeList)
+                bucket.second.clear();
         }
         void resize(std::size_t aSize)
         {
             if (aSize > capacity())
                 need(aSize - capacity());
-            iMetaUniform.set_value<vec2u32>(
-                { static_cast<std::uint32_t>(aSize), static_cast<std::uint32_t>(capacity() * triple_buffer_frame()) });
             iSize = aSize;
-        }
-        void push_back(shader_data_type aDataType, void const* aValue) final
-        {
-            if (aDataType != this->data_type())
-                throw std::logic_error("neogfx::ssbo::push_back: invalid data type");
-            resize(size() + 1);
-            scoped_ssbo_map ssm{ *this };
-            std::copy(
-                static_cast<value_type const*>(aValue),
-                static_cast<value_type const*>(aValue) + 1,
-                static_cast<value_type*>(data()) + size() - 1);
-        }
-        void* insert(shader_data_type aDataType, std::size_t aPos, void const* aFirst, void const* aLast) final
-        {
-            if (aDataType != this->data_type())
-                throw std::logic_error("neogfx::ssbo::insert: invalid data type");
-            auto const first = static_cast<value_type const*>(aFirst);
-            auto const last = static_cast<value_type const*>(aLast);
-            auto const count = (last - first);
-            if (count != 0)
-            {
-                resize(size() + count);
-                {
-                    scoped_ssbo_map ssm{ *this };
-                    auto const where = static_cast<value_type*>(data()) + aPos;
-                    std::copy_backward(
-                        where,
-                        static_cast<value_type*>(data()) + size() - count,
-                        static_cast<value_type*>(data()) + size());
-                    std::copy(
-                        static_cast<value_type const*>(first),
-                        static_cast<value_type const*>(last),
-                        where);
-                }
-            }
-            return mapped() ? static_cast<value_type*>(data()) + aPos : nullptr;
-        }
-        void* erase(void const* aFirst, void const* aLast) final
-        {
-            auto const where = static_cast<value_type*>(data()) +
-                (static_cast<value_type const*>(aFirst) - static_cast<value_type const*>(cdata()));
-            auto const count = (static_cast<T const*>(aLast) - static_cast<T const*>(aFirst));
-            if (count != 0)
-            {
-                std::copy(
-                    static_cast<value_type const*>(aLast),
-                    static_cast<value_type const*>(cdata()) + size(),
-                    where);
-                resize(size() - count);
-            }
-            return where;
         }
     private:
         void need(std::size_t aExtra)
         {
-            if (size() + aExtra > capacity())
-                reserve(static_cast<std::size_t>(capacity() * 1.5 + aExtra));
+            reserve(static_cast<std::size_t>(capacity() * 1.5 + aExtra));
         }
     private:
         string iName;
         ssbo_id iId;
-        i_shader_uniform& iMetaUniform;
-        mutable std::optional<std::uint32_t> iTripleBufferFrame;
         std::size_t iCapacity = 0u;
         std::size_t iSize = 0u;
+        std::unordered_map<std::size_t, std::vector<ssbo_range>> iFreeList;
     };
 
     template <typename Base = i_shader_stage>

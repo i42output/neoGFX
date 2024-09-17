@@ -623,7 +623,7 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_path&>(*op);
-                    draw_path(args.path, args.pen, args.fill);
+                    draw_path(args.path, args.shape, args.boundingRect, args.pen, args.fill);
                 }
                 break;
             case graphics_operation::operation_type::DrawShape:
@@ -1455,23 +1455,17 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_path(const path& aPath, const pen& aPen, const brush& aFill)
+    void opengl_rendering_context::draw_path(const ssbo_range& aPath, path_shape aPathShape, const rect aBoundingRect, const pen& aPen, const brush& aFill)
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
 
         neolib::scoped_flag snap{ iSnapToPixelUsesOffset, false };
 
-        switch (aPath.shape())
+        switch (aPathShape)
         {
         case path_shape::ConvexPolygon:
-            for (auto const& subPath : aPath.sub_paths())
             {
                 std::optional<point> previousPoint;
-                auto& ssbo = rendering_engine().default_shader_program().shape_shader().shape_vertices();
-                thread_local std::vector<vec4f> vertices;
-                aPath.to_vertices(subPath, vertices);
-                ssbo.clear();
-                ssbo.insert(ssbo.size(), std::to_address(vertices.begin()), std::to_address(vertices.end()));
 
                 if (std::holds_alternative<gradient>(aFill))
                     rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
@@ -1481,9 +1475,9 @@ namespace neogfx
                 rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
 
                 {
-                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u), true };
+                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
 
-                    auto boundingRect = aPath.bounding_rect().inflated(aPen.width() * 2.0);
+                    auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0);
                     auto boundingRectVertices = rect_vertices(boundingRect, mesh_type::Triangles);
                     auto const function = to_function(aPen.color(), boundingRect);
 
@@ -1494,7 +1488,7 @@ namespace neogfx
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aFill) ? 0.0f : 1.0f },
                             {},
                             function,
-                            vec4f{},
+                            vec4u32{ aPath.first, aPath.last }.as<float>(),
                             vec4f{},
                             vec4{
                                 aPen.width() ? aPen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
@@ -1509,8 +1503,6 @@ namespace neogfx
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
                             aPen.secondary_color().value_or(vec4{}).as<float>() });
                 }
-
-                ssbo.sync();
             }
             break;
         default:

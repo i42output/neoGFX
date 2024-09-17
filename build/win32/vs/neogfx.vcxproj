@@ -351,6 +351,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader_array.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_shader_program.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_ssbo.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_standard_shader_program.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_sub_texture.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_texture.hpp" />

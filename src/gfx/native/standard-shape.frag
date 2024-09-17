@@ -348,10 +348,10 @@ void draw_ellipse_rect(inout vec4 color, inout vec4 function1, inout vec4 functi
         color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-float sdPolygon(in vec2 p)
+float sdPolygon(in vec2 p, in vec2 meta)
 {
-    const uint num = uShapeVerticesMeta.x;
-    const uint offset = uShapeVerticesMeta.y;
+    const uint num = uint(meta.y) - uint(meta.x);
+    const uint offset = uint(meta.x);
     float d = dot(p-bShapeVertices[0 + offset].xy,p-bShapeVertices[0 + offset].xy);
     float s = 1.0;
     for( uint i=0, j=num-1; i<num; j=i, i++ )
@@ -376,10 +376,10 @@ void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, 
 {
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
 
-    float d0 = sdPolygon(fragPos);
-//    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
-  //      discard;
-    //else
+    float d0 = sdPolygon(fragPos, function1.xy);
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+        discard;
+    else
         color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 

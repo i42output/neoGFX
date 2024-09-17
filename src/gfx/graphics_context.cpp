@@ -70,6 +70,16 @@ namespace neogfx
         return ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
     }
 
+    ssbo_range path_to_vertices(path const& aPath, path::sub_path_type const& aSubPath)
+    {
+        thread_local std::vector<vec4f> vertices;
+        aPath.to_vertices(aSubPath, vertices);
+        auto& ssbo = service<i_rendering_engine>().default_shader_program().shape_shader().shape_vertices();
+        scoped_lock_ssbo<vec4f> slb{ ssbo, static_cast<std::uint32_t>(vertices.size()) };
+        std::copy(vertices.begin(), vertices.end(), slb.data());
+        return slb.range();
+    }
+
     graphics_context::graphics_context(i_surface const& aSurface, type aType) :
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
@@ -154,6 +164,9 @@ namespace neogfx
     graphics_context::~graphics_context()
     {
         flush();
+        auto& ssbo = service<i_rendering_engine>().default_shader_program().shape_shader().shape_vertices();
+        for (auto const& range : iSsboRanges)
+            ssbo.free(range);
     }
 
     std::unique_ptr<i_rendering_context> graphics_context::clone() const
@@ -476,7 +489,17 @@ namespace neogfx
             st.emplace(*this, aPen.custom_dash());
         path path = to_device_units(aPath);
         path.set_position(path.position() + iOrigin);
-        native_context().enqueue(graphics_operation::draw_path{ path, aPen, aFill });
+        for (auto const& subPath : aPath.sub_paths())
+        {
+            ssbo_range vertices = path_to_vertices(path, subPath);
+            iSsboRanges.push_back(vertices);
+            draw_path(vertices, path.shape(), path.bounding_rect(), aPen, aFill);
+        }
+    }
+
+    void graphics_context::draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill) const
+    {
+        native_context().enqueue(graphics_operation::draw_path{ aPathVertices, aPathShape, aBoundingRect, aPen, aFill });
     }
 
     void graphics_context::draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill) const

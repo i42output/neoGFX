@@ -1235,10 +1235,10 @@ int main(int argc, char* argv[])
 
         std::array<ng::texture, 4> tex = 
         {
-            ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
-            ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
-            ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample },
-            ng::texture{ ng::size{64.0, 64.0}, 1.0, ng::texture_sampling::Multisample }
+            ng::texture{ ng::size{64.0_dip, 64.0_dip}, 1.0, ng::texture_sampling::Multisample },
+            ng::texture{ ng::size{64.0_dip, 64.0_dip}, 1.0, ng::texture_sampling::Multisample },
+            ng::texture{ ng::size{64.0_dip, 64.0_dip}, 1.0, ng::texture_sampling::Multisample },
+            ng::texture{ ng::size{64.0_dip, 64.0_dip}, 1.0, ng::texture_sampling::Multisample }
         };
         std::array<ng::color, 4> texColor =
         {
@@ -1248,16 +1248,16 @@ int main(int argc, char* argv[])
             ng::color::White
         };
         ng::font renderToTextureFont{ "Exo 2", ng::font_style::Bold, 11.0 };
-        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, double aDpiScale, const ng::color& aColor, std::string const& aText)
+        auto test_pattern = [renderToTextureFont](ng::i_graphics_context& aGc, const ng::point& aOrigin, const ng::color& aColor, std::string const& aText)
         {
-            aGc.draw_circle(aOrigin + ng::point{ 32.0, 32.0 }, 32.0, ng::pen{ aColor, aDpiScale * 2.0 });
-            aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0, 0.0 }, ng::size{ 64.0, 64.0 } }, ng::pen{ aColor, 1.0 });
-            aGc.draw_line(aOrigin + ng::point{ 0.0, 0.0 }, aOrigin + ng::point{ 64.0, 64.0 }, ng::pen{ aColor, aDpiScale * 4.0 });
-            aGc.draw_line(aOrigin + ng::point{ 64.0, 0.0 }, aOrigin + ng::point{ 0.0, 64.0 }, ng::pen{ aColor, aDpiScale * 4.0 });
-            aGc.draw_multiline_text(aOrigin + ng::point{ 4.0, 4.0 }, aText, renderToTextureFont, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
-            aGc.draw_pixel(aOrigin + ng::point{ 2.0, 2.0 }, ng::color{ 0xFF, 0x01, 0x01, 0xFF });
-            aGc.draw_pixel(aOrigin + ng::point{ 3.0, 2.0 }, ng::color{ 0x02, 0xFF, 0x02, 0xFF });
-            aGc.draw_pixel(aOrigin + ng::point{ 4.0, 2.0 }, ng::color{ 0x03, 0x03, 0xFF, 0xFF });
+            aGc.draw_circle(aOrigin + ng::point{ 32.0_dip, 32.0_dip }, 32.0_dip, ng::pen{ aColor, 2.0_dip });
+            aGc.draw_rect(ng::rect{ aOrigin + ng::point{ 0.0_dip, 0.0_dip }, ng::size{ 64.0_dip, 64.0_dip } }, ng::pen{ aColor, 1.0_dip });
+            aGc.draw_line(aOrigin + ng::point{ 0.0_dip, 0.0_dip }, aOrigin + ng::point{ 64.0_dip, 64.0_dip }, ng::pen{ aColor, 4.0_dip });
+            aGc.draw_line(aOrigin + ng::point{ 64.0_dip, 0.0_dip }, aOrigin + ng::point{ 0.0_dip, 64.0_dip }, ng::pen{ aColor, 4.0_dip });
+            aGc.draw_multiline_text(aOrigin + ng::point{ 4.0_dip, 4.0_dip }, aText, renderToTextureFont, ng::text_format{ ng::color::White, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
+            aGc.draw_pixel(aOrigin + ng::point{ 2.0_dip, 2.0_dip }, ng::color{ 0xFF, 0x01, 0x01, 0xFF });
+            aGc.draw_pixel(aOrigin + ng::point{ 3.0_dip, 2.0_dip }, ng::color{ 0x02, 0xFF, 0x02, 0xFF });
+            aGc.draw_pixel(aOrigin + ng::point{ 4.0_dip, 2.0_dip }, ng::color{ 0x03, 0x03, 0xFF, 0xFF });
         };
 
         // render to texture demo
@@ -1265,7 +1265,7 @@ int main(int argc, char* argv[])
         {
             ng::graphics_context texGc{ tex[i] };
             ng::scoped_snap_to_pixel snap{ texGc };
-            test_pattern(texGc, ng::point{}, 1.0, texColor[i], "Render\nTo\nTexture");
+            test_pattern(texGc, ng::point{}, texColor[i], "Render\nTo\nTexture");
         }
 
         window.pageDrawing.painting([&](ng::i_graphics_context& aGc)
@@ -1332,17 +1332,17 @@ int main(int argc, char* argv[])
             auto const x = ng::ease(easingItemModel.item(window.dropListEasing.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
             aGc.draw_texture(ng::point{ x, (window.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
-            auto texLocation = ng::point{ (window.pageDrawing.extents().cx - 64.0) / 2.0, (window.pageDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
-            aGc.draw_texture(texLocation + ng::point{ 0.0, 0.0 }, tex[0]);
-            aGc.draw_texture(texLocation + ng::point{ 0.0, 65.0 }, tex[1]);
-            aGc.draw_texture(texLocation + ng::point{ 65.0, 0.0 }, tex[2]);
-            aGc.draw_texture(texLocation + ng::point{ 65.0, 65.0 }, tex[3]);
+            auto texLocation = ng::point{ (window.pageDrawing.extents().cx - 64.0_dip) / 2.0, (window.pageDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();
+            aGc.draw_texture(texLocation + ng::point{ 0.0_dip, 0.0_dip }, tex[0]);
+            aGc.draw_texture(texLocation + ng::point{ 0.0_dip, 65.0_dip }, tex[1]);
+            aGc.draw_texture(texLocation + ng::point{ 65.0_dip, 0.0_dip }, tex[2]);
+            aGc.draw_texture(texLocation + ng::point{ 65.0_dip, 65.0_dip }, tex[3]);
 
-            texLocation.x += 140.0;
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 0.0 }, 1.0_dip, texColor[0], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 0.0, 65.0 }, 1.0_dip, texColor[1], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 0.0 }, 1.0_dip, texColor[2], "Render\nTo\nScreen");
-            test_pattern(aGc, texLocation + ng::point{ 65.0, 65.0 }, 1.0_dip, texColor[3], "Render\nTo\nScreen");
+            texLocation.x += 140.0_dip;
+            test_pattern(aGc, texLocation + ng::point{ 0.0_dip, 0.0_dip }, texColor[0], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 0.0_dip, 65.0_dip }, texColor[1], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0_dip, 0.0_dip }, texColor[2], "Render\nTo\nScreen");
+            test_pattern(aGc, texLocation + ng::point{ 65.0_dip, 65.0_dip }, texColor[3], "Render\nTo\nScreen");
 
             {
                 ng::scoped_snap_to_pixel sntp{ aGc, false };

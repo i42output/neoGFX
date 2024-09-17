@@ -229,6 +229,5 @@ namespace neogfx
         ref_ptr<i_ssbo> iShapeVertices;
         cache_shared_uniform(uShapeEnabled)
         cache_shared_uniform(uShape)
-        cache_shared_uniform(uShapeVerticesMeta)
     };
 }
