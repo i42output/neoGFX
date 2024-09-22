@@ -282,6 +282,7 @@ namespace neogfx
 
         auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
         auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
+        auto const& borderStyle = style_sheet_value("." + class_name(), "border-style", std::optional<border_style>{});
 
         if (std::get<0>(border).has_value())
         {
@@ -289,6 +290,9 @@ namespace neogfx
             innerBorderColor = outerBorderColor;
         }
         
+        if (borderStyle.has_value())
+            lineStyle = to_line_style(borderStyle.value());
+
         if (std::get<2>(border).has_value())
             lineStyle = to_line_style(std::get<2>(border).value());
 

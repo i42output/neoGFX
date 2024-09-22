@@ -156,6 +156,8 @@ namespace neogfx
 
     inline bool has_stipple(pen const& aPen)
     {
+        if (aPen.width() == 0.0)
+            return false;
         switch (aPen.style())
         {
         case line_style::None:

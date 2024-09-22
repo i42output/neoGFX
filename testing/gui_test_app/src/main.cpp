@@ -833,7 +833,11 @@ int main(int argc, char* argv[])
 
         auto add_lots = [&]()
         {
+#ifdef NDEBUG
             for (int i = 0; i < 200; ++i)
+#else
+            for (int i = 0; i < 20; ++i)
+#endif
             {
                 auto& layout = window.layoutLots.emplace<ng::horizontal_layout>();
                 layout.set_padding(ng::padding{});
@@ -1007,7 +1011,8 @@ int main(int argc, char* argv[])
                         button.set_style_sheet(
                             R"(
                             .button {
-                                border: #FFFF00 8px solid;
+                                border: #FFFF00 1px dotted;
+                                border-style: solid;
                                 padding: 50px;
                                 text-align: center;
                                 text-decoration: none;

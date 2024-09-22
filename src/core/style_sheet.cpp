@@ -131,8 +131,8 @@ namespace neogfx
 
             if (v.first() == "nss.value")
             {
-                auto& lengths = value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
-                result = &lengths;
+                auto& args = value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                result = &args;
             }
             else if (v.first() == "nss.length" && result)
             {
@@ -145,6 +145,35 @@ namespace neogfx
             else if (v.first() == "nss.border_style" && result)
             {
                 std::get<2>(*result) = neolib::string_to_enum<border_style>(v.second().to_std_string());
+            }
+        }
+
+        return result;
+    }
+
+    template <>
+    std::optional<border_style> const* evaluate_style_sheet_value<std::optional<border_style>>(i_style_sheet_value const& aValue)
+    {
+        using value_type = std::optional<border_style>;
+
+        value_type* result = nullptr;
+
+        for (auto const& v : aValue)
+        {
+            auto existing = value_map_find<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+            if (existing != value_map<value_type>().end())
+                return &existing->second;
+
+            if (v.second().empty())
+                continue;
+
+            // todo: four cardinal borders
+
+            if (v.first() == "nss.value")
+            {
+                auto& borderStyle = value_map_entry<value_type>(v.first().to_std_string_view(), v.second().to_std_string_view());
+                result = &borderStyle;
+                *result = neolib::string_to_enum<border_style>(v.second().to_std_string());
             }
         }
 
@@ -415,14 +444,14 @@ namespace neogfx
             ( symbol::Value >> +repeat(symbol::ValuePart) ),
             ( symbol::PairedValues >> sequence( +repeat(symbol::ValuePart), symbol::PairSeparator <=> "nss.pair_separator"_concept, +repeat(symbol::ValuePart))),
             ( symbol::PairSeparator >> '/'_ ),
-            ( symbol::ValuePart >> symbol::Identifier ),
+            ( symbol::ValuePart >> (symbol::BorderStyle <=> "nss.border_style"_concept) ),
             ( symbol::ValuePart >> (symbol::Length <=> "nss.length"_concept) ),
             ( symbol::ValuePart >> (symbol::Integer <=> "nss.integer"_concept) ),
             ( symbol::ValuePart >> (('#'_ , symbol::Hex3) <=> "nss.color"_concept) ),
             ( symbol::ValuePart >> (('#'_ , symbol::Hex4) <=> "nss.color"_concept) ),
             ( symbol::ValuePart >> (('#'_ , symbol::Hex6) <=> "nss.color"_concept) ),
             ( symbol::ValuePart >> (('#'_ , symbol::Hex8) <=> "nss.color"_concept) ),
-            ( symbol::ValuePart >> (symbol::BorderStyle <=> "nss.border_style"_concept) ),
+            ( symbol::ValuePart >> symbol::Identifier ),
             ( symbol::Length >> sequence(symbol::Integer, choice("cm"_ | "mm"_ | "in"_ | "px"_ | "pt"_ | "pc"_ | "em"_ | "ex"_ | "ch"_ | "rem"_ | "vw"_ | "vh"_ | "vmin"_ | "vmax"_ | "%"_ )) ),
             ( symbol::BorderStyle >> choice("dotted"_ | "dashed"_ | "solid"_ | "double"_ | "groove"_ | "ridge"_ | "inset"_ | "outset"_ | "none"_ | "hidden"_ ) ),
             ( symbol::Integer >> +repeat(symbol::Digit) ),
@@ -438,7 +467,6 @@ namespace neogfx
             ( symbol::Comment >> sequence("/*"_ , repeat(range('\0', '\xFF')) , "*/"_) ),
             ( symbol::Sheet >> discard(optional(symbol::Whitespace)) , symbol::Sheet , discard(optional(symbol::Whitespace)) ),
             ( symbol::Rule >> discard(optional(symbol::Whitespace)) , symbol::Rule , discard(optional(symbol::Whitespace)) ),
-            ( symbol::Identifier >> discard(optional(symbol::Whitespace)) , symbol::Identifier , discard(optional(symbol::Whitespace)) ),
             ( symbol::Selector >> discard(optional(symbol::Whitespace)) , symbol::Selector , discard(optional(symbol::Whitespace)) ),
             ( symbol::DeclarationBlock >> discard(optional(symbol::Whitespace)) , symbol::DeclarationBlock , discard(optional(symbol::Whitespace)) ),
             ( symbol::BeginDeclarationBlock >> discard(optional(symbol::Whitespace)) , symbol::BeginDeclarationBlock , discard(optional(symbol::Whitespace)) ),
@@ -451,7 +479,8 @@ namespace neogfx
             ( symbol::Value >> discard(optional(symbol::Whitespace)) , symbol::Value , discard(optional(symbol::Whitespace)) ),
             ( symbol::PairedValues >> discard(optional(symbol::Whitespace)) , symbol::PairedValues , discard(optional(symbol::Whitespace))),
             ( symbol::PairSeparator >> discard(optional(symbol::Whitespace)) , symbol::PairSeparator, discard(optional(symbol::Whitespace))),
-            ( symbol::ValuePart >> discard(optional(symbol::Whitespace)) , symbol::ValuePart , discard(optional(symbol::Whitespace)) )
+            ( symbol::ValuePart >> discard(optional(symbol::Whitespace)) , symbol::ValuePart , discard(optional(symbol::Whitespace)) ),
+            ( symbol::Identifier >> discard(optional(symbol::Whitespace)) , symbol::Identifier , discard(optional(symbol::Whitespace)) )
         };
     }
 
@@ -481,6 +510,7 @@ namespace neogfx
     {
         neolib::parser<nss::symbol> parser{ nss::sRules };
         parser.parse(nss::symbol::Sheet, sheet().to_std_string_view());
+        parser.set_debug_output(std::cout);
         parser.create_ast();
         create_values(iSelectors, parser.ast());
     }
