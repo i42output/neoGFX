@@ -154,6 +154,14 @@ namespace neogfx
             return !stage_clean(aStage);
         }
     public:
+        template <typename ShaderT>
+        i_shader& add_shader()
+        {
+            if constexpr (std::is_constructible_v<ShaderT, decltype(*this)>)
+                return add_shader(make_ref<ShaderT>(*this).as<i_shader>());
+            else
+                return add_shader(make_ref<ShaderT>().as<i_shader>());
+        }
         template <typename T>
         ref_ptr<i_ssbo> create_ssbo(i_string const& aName)
         {

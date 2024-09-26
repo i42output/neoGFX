@@ -215,9 +215,7 @@ namespace neogfx
     class standard_shape_shader : public standard_fragment_shader<i_shape_shader>
     {
     public:
-        standard_shape_shader(std::string const& aName = "standard_shape_shader");
-    public:
-        void init(i_shader_program& aShaderProgram) override;
+        standard_shape_shader(i_shader_program& aShaderProgram, std::string const& aName = "standard_shape_shader");
     public:
         void generate_code(const i_shader_program& aProgram, shader_language aLanguage, i_string& aOutput) const override;
     public:

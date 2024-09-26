@@ -31,14 +31,14 @@ namespace neogfx
 
     void standard_shader_program::create_standard_shaders()
     {
-        add_shader(neolib::make_ref<standard_texture_vertex_shader>().as<i_shader>());
-        iDefaultShader = static_cast<i_fragment_shader&>(add_shader(neolib::make_ref<standard_fragment_shader<>>().as<i_shader>()));
-        iGradientShader = static_cast<i_gradient_shader&>(add_shader(neolib::make_ref<standard_gradient_shader>().as<i_shader>()));
-        iTextureShader = static_cast<i_texture_shader&>(add_shader(neolib::make_ref<standard_texture_shader>().as<i_shader>()));
-        iFilterShader = static_cast<i_filter_shader&>(add_shader(neolib::make_ref<standard_filter_shader>().as<i_shader>()));
-        iGlyphShader = static_cast<i_glyph_shader&>(add_shader(neolib::make_ref<standard_glyph_shader>().as<i_shader>()));
-        iShapeShader = static_cast<i_shape_shader&>(add_shader(neolib::make_ref<standard_shape_shader>().as<i_shader>()));
-        iStippleShader = static_cast<i_stipple_shader&>(add_shader(neolib::make_ref<standard_stipple_shader>().as<i_shader>()));
+        add_shader<standard_texture_vertex_shader>();
+        iDefaultShader = static_cast<i_fragment_shader&>(add_shader<standard_fragment_shader<>>());
+        iGradientShader = static_cast<i_gradient_shader&>(add_shader<standard_gradient_shader>());
+        iTextureShader = static_cast<i_texture_shader&>(add_shader<standard_texture_shader>());
+        iFilterShader = static_cast<i_filter_shader&>(add_shader<standard_filter_shader>());
+        iGlyphShader = static_cast<i_glyph_shader&>(add_shader<standard_glyph_shader>());
+        iShapeShader = static_cast<i_shape_shader&>(add_shader<standard_shape_shader>());
+        iStippleShader = static_cast<i_stipple_shader&>(add_shader<standard_stipple_shader>());
     }
 
     shader_program_type standard_shader_program::type() const

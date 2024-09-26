@@ -181,6 +181,8 @@ namespace neogfx
         bool active() const override;
         void activate(const i_rendering_context& aContext) override;
         void instantiate(const i_rendering_context& aContext) override;
+    public:
+        using i_shader_program::add_shader;
     protected:
         bool need_full_uniform_update() const;
         void set_active();
