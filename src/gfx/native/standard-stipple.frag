@@ -63,6 +63,7 @@ void standard_stipple_shader(inout vec4 color, inout vec4 function0, inout vec4 
                     d += distance(bShapeVertices[closest - 1 + offset].xy, pixelPos);
                 else
                     d += distance(bShapeVertices[closest + offset].xy, pixelPos);
+                d = floor(d);
             }
         }
         d = mod(d + uStipplePosition, uStipplePatternLength);

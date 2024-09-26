@@ -80,7 +80,7 @@ namespace neogfx
         return slb.range();
     }
 
-    void inline apply_stipple(graphics_context const& aGc, pen const& aPen, std::optional<scoped_stipple>& aScopedStipple)
+    inline void apply_stipple(graphics_context const& aGc, pen const& aPen, std::optional<scoped_stipple>& aScopedStipple)
     {
         switch (aPen.style())
         {
