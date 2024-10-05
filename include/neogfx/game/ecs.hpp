@@ -38,13 +38,13 @@ namespace neogfx
             ecs(ecs_flags aCreationFlags = ecs_flags::Default);
             ~ecs();
         public:
-            bool run_threaded(const system_id& aSystemId) const override;
+            bool run_threaded(const system_id& aSystemId) const final;
         public:
-            void destroy_entity(entity_id aEntityId, bool aNotify = true) override;
+            void destroy_entity(entity_id aEntityId, bool aNotify = true) final;
         public:
-            bool cacheable() const override;
-            const game::component<game::mesh_render_cache>& cache() const override;
-            game::component<game::mesh_render_cache>& cache() override;
+            bool cacheable() const final;
+            const game::component<game::mesh_render_cache>& cache() const final;
+            game::component<game::mesh_render_cache>& cache() final;
         };
 
         template <typename... Systems>

@@ -1015,27 +1015,69 @@ namespace neogfx
         }
     }
 
+    namespace
+    {
+    }
+
     void opengl_rendering_context::draw_rects(const graphics_operation::batch& aDrawRectOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
-
-        neolib::scoped_flag snap{ iSnapToPixelUsesOffset, false };
-
-        auto& firstOp = static_variant_cast<const graphics_operation::draw_rect&>(*aDrawRectOps.cbegin());
-
-        if (std::holds_alternative<gradient>(firstOp.fill))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
-        else if (std::holds_alternative<gradient>(firstOp.pen.color()))
-            rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
-
-        rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Rect);
+        std::optional<use_shader_program> usp;
+        std::optional<neolib::scoped_flag> snap;
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())) };
+            std::optional<use_vertex_arrays> maybeVertexArrays;
 
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(*op);
+
+                if (drawOp.rect.top_left().z == 0.0 && drawOp.rect.bottom_right().z == 0.0 &&
+                    ((std::holds_alternative<color>(drawOp.fill) && 
+                        static_variant_cast<color>(drawOp.fill).alpha() == 0xFF) ||
+                        std::holds_alternative<std::monostate>(drawOp.fill)))
+                {
+                    bool optimise = false;
+                    auto const penWidth = drawOp.pen.width();
+                    if (penWidth == 0.0)
+                        optimise = true;
+                    else if (scissor_rect() != std::nullopt)
+                    {
+                        auto const& tl = scissor_rect().value().top_left() - drawOp.rect.top_left();
+                        auto const& br = drawOp.rect.bottom_right() - scissor_rect().value().bottom_right();
+                        if (tl.x > penWidth && tl.y > penWidth && br.x > penWidth && br.y > penWidth)
+                            optimise = true;
+                    }
+                    if (optimise)
+                    {
+                        if (std::holds_alternative<color>(drawOp.fill))
+                        {
+                            scissor_on(drawOp.rect);
+                            clear(static_variant_cast<color>(drawOp.fill));
+                            scissor_off();
+                        }
+                        continue;
+                    }
+                }
+
+                if (usp == std::nullopt)
+                {
+                    usp.emplace(*this, rendering_engine().default_shader_program(), iOpacity);
+                    snap.emplace(iSnapToPixelUsesOffset, false);
+
+                    auto& firstOp = static_variant_cast<const graphics_operation::draw_rect&>(*aDrawRectOps.cbegin());
+
+                    if (std::holds_alternative<gradient>(firstOp.fill))
+                        rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.fill));
+                    else if (std::holds_alternative<gradient>(firstOp.pen.color()))
+                        rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(firstOp.pen.color()));
+
+                    rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Rect);
+
+                    maybeVertexArrays.emplace(as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
+                }
+
+                auto& vertexArrays = maybeVertexArrays.value();
+
                 auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
                 auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);

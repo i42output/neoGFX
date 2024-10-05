@@ -39,10 +39,10 @@ namespace neogfx::game
         animator(i_ecs& aEcs);
         ~animator();
     public:
-        const system_id& id() const override;
-        const i_string& name() const override;
+        const system_id& id() const final;
+        const i_string& name() const final;
     public:
-        bool apply() override;
+        bool apply() final;
     public:
         void update_animations();
     public:
