@@ -1417,6 +1417,10 @@ int main(int argc, char* argv[])
         window.checkThreadPool.Checked([&]() { useThreadPool = true; });
         window.checkThreadPool.Unchecked([&]() { useThreadPool = false; });
 
+        std::atomic<bool> pauseTransformations = false;
+        window.checkPauseTransformations.Checked([&]() { pauseTransformations = true; });
+        window.checkPauseTransformations.Unchecked([&]() { pauseTransformations = false; });
+
 #ifdef USE_AVX_DYNAMIC
         neolib::use_simd() = false;
         window.checkUseSimd.Checked([&]() { neolib::use_simd() = true; });
@@ -1427,24 +1431,27 @@ int main(int argc, char* argv[])
 
         auto update_ecs_entities = [&](ng::game::step_time aPhysicsStepTime)
         {
-            auto& cache = ecs->component<ng::game::mesh_render_cache>();
-            auto update_function = [&](ng::game::component<ng::game::mesh_filter>& aComponent, ng::game::mesh_filter& aFilter)
+            if (!pauseTransformations)
             {
-                entity_transformation(aComponent, cache, aFilter);
-            };
-            instancingRect = window.pageInstancing.client_rect();
-            if (useThreadPool)
-                ecs->component<ng::game::mesh_filter>().parallel_apply(update_function);
-            else
-                ecs->component<ng::game::mesh_filter>().apply(update_function);
+                auto& cache = ecs->component<ng::game::mesh_render_cache>();
+                auto update_function = [&](ng::game::component<ng::game::mesh_filter>& aComponent, ng::game::mesh_filter& aFilter)
+                    {
+                        entity_transformation(aComponent, cache, aFilter);
+                    };
+                instancingRect = window.pageInstancing.client_rect();
+                if (useThreadPool)
+                    ecs->component<ng::game::mesh_filter>().parallel_apply(update_function);
+                else
+                    ecs->component<ng::game::mesh_filter>().apply(update_function);
+            }
         };
 
         auto configure_ecs = [&]()
         {
-            sink.clear();
             bool needEcs = window.radioEcsBatching.is_checked() || window.radioEcsInstancing.is_checked();
             if (!needEcs)
             {
+                sink.clear();
                 window.canvasInstancing.set_ecs({});
                 ecs = std::nullopt;
             }

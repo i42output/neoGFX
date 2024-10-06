@@ -1077,6 +1077,10 @@
                                                 text: "Pause Animation"
                                             }
                                             check_box: {
+                                                id: checkPauseTransformations
+                                                text: "Pause Transformations"
+                                            }
+                                            check_box: {
                                                 id: checkUseSimd
                                                 text: "Use SIMD"
                                             }
