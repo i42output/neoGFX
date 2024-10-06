@@ -249,7 +249,10 @@ namespace neogfx
             return;
         iRenderingSurfaces = true;
         for (auto s = iSurfaces.rbegin(); s != iSurfaces.rend(); ++s)
-            (**s).render_surface();
+        {
+            auto& surface = **s;
+            surface.render_surface();
+        }
         iRenderingSurfaces = false;
     }
 

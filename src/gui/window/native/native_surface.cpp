@@ -253,7 +253,9 @@ namespace neogfx
 
     bool native_surface::can_render() const
     {
-        return !iPaused && surface_window().as_window().ready_to_render();
+        return !iPaused && 
+            surface_window().as_window().visible() && 
+            surface_window().as_window().ready_to_render();
     }
 
     void native_surface::pause()
