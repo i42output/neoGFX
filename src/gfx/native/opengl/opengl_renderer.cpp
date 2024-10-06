@@ -358,7 +358,7 @@ namespace neogfx
     bool opengl_renderer::process_events()
     {
         bool didSome = false;
-        auto lastRenderTime = neolib::thread::program_elapsed_ms();
+        auto lastRenderTime = neolib::this_process::elapsed_ms();
         bool finished = false;
         while (!finished)
         {    
@@ -373,9 +373,9 @@ namespace neogfx
                     finished = false;
                 }
             }
-            if (neolib::thread::program_elapsed_ms() - lastRenderTime > 10)
+            if (neolib::this_process::elapsed_ms() - lastRenderTime > 10)
             {
-                lastRenderTime = neolib::thread::program_elapsed_ms();
+                lastRenderTime = neolib::this_process::elapsed_ms();
                 render_now();
             }
         }

@@ -534,7 +534,7 @@ namespace neogfx
         iUpdatingDocument{ false },
         iHandlingKeyPress{ false },
         iColumns{ 1 },
-        iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
+        iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
         iTabStopHint{ "0000" },
         iAnimator{ *this, [this](widget_timer&)
         {
@@ -557,7 +557,7 @@ namespace neogfx
         iUpdatingDocument{ false },
         iHandlingKeyPress{ false },
         iColumns{ 1 },
-        iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
+        iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
         iTabStopHint{ "0000" },
         iAnimator{ *this, [this](widget_timer&)
         {
@@ -580,7 +580,7 @@ namespace neogfx
         iUpdatingDocument{ false },
         iHandlingKeyPress{ false },
         iColumns{ 1 },
-        iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
+        iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
         iTabStopHint{ "0000" },
         iAnimator{ *this, [this](widget_timer&)
         {
@@ -765,7 +765,7 @@ namespace neogfx
 
         service<i_clipboard>().activate(*this);
 
-        iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
+        iCursorAnimationStartTime = neolib::this_process::elapsed_ms();
 
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine && aFocusReason == focus_reason::Tab)
         {
@@ -2283,7 +2283,7 @@ namespace neogfx
             if (neolib::service<i_keyboard>().layout().ime_active(*this))
                 neolib::service<i_keyboard>().layout().update_ime_position(cursor_rect().bottom_left());
             iNextStyle = std::nullopt;
-            iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
+            iCursorAnimationStartTime = neolib::this_process::elapsed_ms();
             make_cursor_visible();
             update();
         });
@@ -3160,7 +3160,7 @@ namespace neogfx
 
     void text_edit::draw_cursor(i_graphics_context const& aGc) const
     {
-        auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
+        auto elapsedTime_ms = (neolib::this_process::elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
         auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);

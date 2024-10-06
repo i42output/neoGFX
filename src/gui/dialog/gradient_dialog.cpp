@@ -156,7 +156,7 @@ namespace neogfx
                     pen{ 
                         color::Black, 
                         dip(CURSOR_THICKNESS), 
-                        line_dash{ 0x5555u, circumference / 6.0, circumference * neolib::thread::program_elapsed_ms() / 1000.0 } });
+                        line_dash{ 0x5555u, circumference / 6.0, circumference * neolib::this_process::elapsed_ms() / 1000.0 } });
             }
         }
     public:

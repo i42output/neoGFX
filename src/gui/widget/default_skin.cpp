@@ -267,7 +267,7 @@ namespace neogfx
         aGc.draw_rounded_rect(barRect, 5.0_dip, pen{ color1.shaded(0x10), 2.0_dip }, color1);
         auto const doneRect = barRect.deflated(delta{ 2.0_dip }).with_cx(barRect.deflated(delta{ 2.0_dip }).cx * ((aProgressBar.value() - aProgressBar.minimum()) / (aProgressBar.maximum() - aProgressBar.minimum())));
         aGc.fill_rounded_rect(doneRect, 5.0_dip, gradient{ gradient::color_stop_list{ { 0.0, color::LightGreen }, { 0.5, color::LightGreen }, { 1.0, color::DarkGreen } }, gradient_direction::Vertical });
-        scalar frame = static_cast<scalar>(neolib::thread::program_elapsed_ms() % 1000) / 1000.0;
+        scalar frame = static_cast<scalar>(neolib::this_process::elapsed_ms() % 1000) / 1000.0;
         auto const w = 0.75_cm;
         auto const h = barRect.cy / 1.5;
         auto const frameRect = rect{ point{ barRect.x - w + (barRect.cx + w * 2.0) * frame, barRect.y - h * 0.25 }, size{ w, h } };

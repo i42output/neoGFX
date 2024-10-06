@@ -568,8 +568,8 @@ int main(int argc, char* argv[])
             if (colorCycle)
             {
                 const double PI = 2.0 * std::acos(0.0);
-                double brightness = ::sin((app.thread().program_elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
-                neolib::random prng{ app.thread().program_elapsed_ms() / 5000 };
+                double brightness = ::sin((neolib::this_process::elapsed_ms() / 16 % 360) * (PI / 180.0)) / 2.0 + 0.5;
+                neolib::random prng{ neolib::this_process::elapsed_ms() / 5000 };
                 ng::color randomColor = ng::color{ prng(255), prng(255), prng(255) };
                 randomColor = randomColor.to_hsv().with_brightness(brightness).to_rgb<ng::color>();
                 window.button6.set_base_color(randomColor);
@@ -1275,7 +1275,7 @@ int main(int argc, char* argv[])
 
         window.pageDrawing.painting([&](ng::i_graphics_context& aGc)
         {
-            ng::scalar t = static_cast<ng::scalar>(app.thread().program_elapsed_us());
+            ng::scalar t = static_cast<ng::scalar>(neolib::this_process::elapsed_us());
                 
             aGc.draw_arc(ng::point{ 20, 70 }, 50, ng::to_rad(0 + 90.0 * 0), ng::to_rad(45.0 + 90.0 * 0), ng::pen{ ng::color::White, 3.0 }, ng::color::Chocolate);
             aGc.draw_arc(ng::point{ 20, 70 }, 40, ng::to_rad(5.0 + 90.0 * 0), ng::to_rad(50.0 + 90.0 * 0), ng::pen{ ng::color::Yellow, 3.0 });

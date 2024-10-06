@@ -390,9 +390,9 @@ namespace neogfx
                 if (!process_events(iAppContext))
                 {
                     if (neolib::service<neolib::i_power>().turbo_mode_active())
-                        thread().yield();
+                        neolib::this_thread::relax();
                     else
-                        thread().sleep(std::chrono::milliseconds{ 1 });
+                        neolib::this_thread::sleep_for(std::chrono::milliseconds{ 1 });
                 }
             }
             return *iQuitResultCode;

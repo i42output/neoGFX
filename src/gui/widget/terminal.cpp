@@ -34,7 +34,7 @@ namespace neogfx
     terminal::terminal() : 
         iTerminalSize{ 80, 25 },
         iBufferSize{ 80, 250 },
-        iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
+        iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -48,7 +48,7 @@ namespace neogfx
         base_type{ aParent, scrollbar_style::Normal, frame_style::NoFrame },
         iTerminalSize{ 80, 25 },
         iBufferSize{ 80, 250 },
-        iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
+        iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -62,7 +62,7 @@ namespace neogfx
         base_type{ aLayout, scrollbar_style::Normal, frame_style::NoFrame },
         iTerminalSize{ 80, 25 },
         iBufferSize{ 80, 250 },
-        iCursorAnimationStartTime{ neolib::thread::program_elapsed_ms() },
+        iCursorAnimationStartTime{ neolib::this_process::elapsed_ms() },
         iAnimator{ *this, [this](widget_timer&)
         {
             iAnimator.again();
@@ -254,7 +254,7 @@ namespace neogfx
     {
         base_type::focus_gained(aFocusReason);
         neolib::service<neolib::i_power>().register_activity();
-        iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
+        iCursorAnimationStartTime = neolib::this_process::elapsed_ms();
         update();
     }
 
@@ -1132,7 +1132,7 @@ namespace neogfx
             });
         iSink += cursor().PositionChanged([this]()
             {
-                iCursorAnimationStartTime = neolib::thread::program_elapsed_ms();
+                iCursorAnimationStartTime = neolib::this_process::elapsed_ms();
                 update();
             });
         iSink += cursor().AnchorChanged([this]()
@@ -1433,7 +1433,7 @@ namespace neogfx
     {
         if (cursor().hidden())
             return;
-        auto elapsedTime_ms = (neolib::thread::program_elapsed_ms() - iCursorAnimationStartTime);
+        auto elapsedTime_ms = (neolib::this_process::elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
         auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
