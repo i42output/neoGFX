@@ -67,7 +67,7 @@ namespace neogfx
     {
         auto newController = iControllers.insert(iControllers.end(), ref_ptr<i_game_controller>{ aController });
         service<i_hid_devices>().add_device(aController);
-        ControllerConnected.trigger(aController);
+        ControllerConnected(aController);
         return newController;
     }
 
@@ -78,7 +78,7 @@ namespace neogfx
         if (existing != iControllers.end())
         {
             auto next = iControllers.erase(existing);
-            ControllerDisconnected.trigger(*detached);
+            ControllerDisconnected(*detached);
             service<i_hid_devices>().remove_device(*detached);
             return next;
         }

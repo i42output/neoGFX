@@ -58,7 +58,7 @@ namespace neogfx
     void skin_manager::register_skin(i_skin& aSkin)
     {
         iSkins.insert(&aSkin);
-        SkinRegistered.trigger(aSkin);
+        SkinRegistered(aSkin);
     }
 
     void skin_manager::unregister_skin(i_skin& aSkin)
@@ -69,7 +69,7 @@ namespace neogfx
             iSkins.erase(existing);
             if (&aSkin == iActiveSkin)
                 iActiveSkin = nullptr;
-            SkinUnregistered.trigger(aSkin);
+            SkinUnregistered(aSkin);
             return;
         }
         throw skin_not_found();

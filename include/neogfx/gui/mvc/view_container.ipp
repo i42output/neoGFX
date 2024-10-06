@@ -123,16 +123,16 @@ namespace neogfx::mvc
     inline void view_container<Base>::add_controller(i_controller& aController)
     {
         iControllers.push_back(std::shared_ptr<i_controller>(std::shared_ptr<i_controller>(), &aController));
-        aController.view_added([this](i_view& aView) { ViewAdded.trigger(aView); });
-        aController.view_removed([this](i_view& aView) { ViewRemoved.trigger(aView); });
+        aController.view_added([this](i_view& aView) { ViewAdded(aView); });
+        aController.view_removed([this](i_view& aView) { ViewRemoved(aView); });
     }
 
     template <typename Base>
     inline void view_container<Base>::add_controller(std::shared_ptr<i_controller> aController)
     {
         iControllers.push_back(aController);
-        aController->view_added([this](i_view& aView) { ViewAdded.trigger(aView); });
-        aController->view_removed([this](i_view& aView) { ViewRemoved.trigger(aView); });
+        aController->view_added([this](i_view& aView) { ViewAdded(aView); });
+        aController->view_removed([this](i_view& aView) { ViewRemoved(aView); });
     }
 
     template <typename Base>

@@ -178,15 +178,15 @@ namespace neogfx
             auto const keyboardState = service<i_keyboard>().modifiers();
             if (aIsPressed)
             {
-                RawButtonPressed.trigger(aButtonOrdinal, keyboardState);
+                RawButtonPressed(aButtonOrdinal, keyboardState);
                 if (button_mapped(aButtonOrdinal))
-                    ButtonPressed.trigger(button_ordinal_to_button(aButtonOrdinal), keyboardState);
+                    ButtonPressed(button_ordinal_to_button(aButtonOrdinal), keyboardState);
             }
             else
             {
-                RawButtonReleased.trigger(aButtonOrdinal, keyboardState);
+                RawButtonReleased(aButtonOrdinal, keyboardState);
                 if (button_mapped(aButtonOrdinal))
-                    ButtonReleased.trigger(button_ordinal_to_button(aButtonOrdinal), keyboardState);
+                    ButtonReleased(button_ordinal_to_button(aButtonOrdinal), keyboardState);
             }
         }
     }
@@ -201,7 +201,7 @@ namespace neogfx
         if (iLeftTriggerPosition != aPosition)
         {
             iLeftTriggerPosition = aPosition;
-            LeftTriggerMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+            LeftTriggerMoved(aPosition, service<i_keyboard>().modifiers());
         }
     }
 
@@ -210,7 +210,7 @@ namespace neogfx
         if (iRightTriggerPosition != aPosition)
         {
             iRightTriggerPosition = aPosition;
-            RightTriggerMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+            RightTriggerMoved(aPosition, service<i_keyboard>().modifiers());
         }
     }
 
@@ -219,7 +219,7 @@ namespace neogfx
         if (iLeftThumbPosition != aPosition)
         {
             iLeftThumbPosition = aPosition;
-            LeftThumbMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+            LeftThumbMoved(aPosition, service<i_keyboard>().modifiers());
         }
     }
 
@@ -228,7 +228,7 @@ namespace neogfx
         if (iRightThumbPosition != aPosition)
         {
             iRightThumbPosition = aPosition;
-            RightThumbMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+            RightThumbMoved(aPosition, service<i_keyboard>().modifiers());
         }
     }
 
@@ -237,7 +237,7 @@ namespace neogfx
         if (iPovPosition[aPov - 1u] != aPosition)
         {
             iPovPosition[aPov - 1u] = aPosition;
-            PovMoved.trigger(aPov, aPosition, service<i_keyboard>().modifiers());
+            PovMoved(aPov, aPosition, service<i_keyboard>().modifiers());
         }
     }
 
@@ -246,7 +246,7 @@ namespace neogfx
         if (iStickPosition != aPosition)
         {
             iStickPosition = aPosition;
-            StickMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+            StickMoved(aPosition, service<i_keyboard>().modifiers());
         }
     }
 
@@ -255,7 +255,7 @@ namespace neogfx
         if (iStickRotation != aRotation)
         {
             iStickRotation = aRotation;
-            StickRotated.trigger(aRotation, service<i_keyboard>().modifiers());
+            StickRotated(aRotation, service<i_keyboard>().modifiers());
         }
     }
 
@@ -264,7 +264,7 @@ namespace neogfx
         if (iSliderPosition != aPosition)
         {
             iSliderPosition = aPosition;
-            SliderMoved.trigger(aPosition, service<i_keyboard>().modifiers());
+            SliderMoved(aPosition, service<i_keyboard>().modifiers());
         }
     }
 }

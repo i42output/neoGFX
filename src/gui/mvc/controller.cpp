@@ -42,13 +42,13 @@ namespace neogfx::mvc
     void controller::add_view(i_view& aView)
     {
         iViews.push_back(std::shared_ptr<i_view>(std::shared_ptr<i_view>(), &aView));
-        ViewAdded.trigger(aView);
+        ViewAdded(aView);
     }
 
     void controller::add_view(std::shared_ptr<i_view> aView)
     {
         iViews.push_back(aView);
-        ViewAdded.trigger(*aView);
+        ViewAdded(*aView);
     }
 
     void controller::remove_view(i_view& aView)
@@ -57,7 +57,7 @@ namespace neogfx::mvc
         {
             if (&**v == &aView)
             {
-                ViewRemoved.trigger(aView);
+                ViewRemoved(aView);
                 iViews.erase(v);
                 return;
             }

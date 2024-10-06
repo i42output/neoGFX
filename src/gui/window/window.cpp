@@ -510,7 +510,7 @@ namespace neogfx
         if (destroyed)
             return;
         iClosed = true;
-        Closed.trigger();
+        Closed();
     }
 
     color window::frame_color() const
@@ -626,7 +626,7 @@ namespace neogfx
         aGc.set_extents(extents());
         aGc.set_origin(origin());
         base_type::render(aGc);
-        PaintOverlay.trigger(aGc);
+        PaintOverlay(aGc);
     }
 
     void window::paint(i_graphics_context& aGc) const
@@ -1194,7 +1194,7 @@ namespace neogfx
 
     void window::dismiss_children(const i_widget* aClickedWidget)
     {
-        DismissingChildren.trigger(aClickedWidget);
+        DismissingChildren(aClickedWidget);
         neolib::scoped_flag sf{ iDismissingChildren };
         if ((iStyle & window_style::RequiresOwnerFocus) != window_style::RequiresOwnerFocus)
         {

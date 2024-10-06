@@ -494,7 +494,7 @@ namespace neogfx
         }
         if (has_parent_widget())
             parent_widget().layout_items_completed();
-        LayoutCompleted.trigger();
+        LayoutCompleted();
     }
 
     const grid_layout::cell_coordinates& grid_layout::cursor() const

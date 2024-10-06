@@ -72,7 +72,7 @@ namespace neogfx
         {
             iStyle = aStyle;
             update_placement();
-            StyleChanged.trigger();
+            StyleChanged();
         }
     }
 

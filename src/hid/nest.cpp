@@ -84,7 +84,7 @@ namespace neogfx
                 aNestedWindow.surface_window().as_widget().resize(widget().client_rect(false).extents());
             });
         }
-        aNestedWindow.ev_added_to_nest().trigger();
+        aNestedWindow.ev_added_to_nest()();
     }
 
     void nest::remove(i_native_window& aNestedWindow)

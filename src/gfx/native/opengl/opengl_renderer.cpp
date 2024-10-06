@@ -322,7 +322,7 @@ namespace neogfx
         if (!iSubpixelRendering)
         {
             iSubpixelRendering = true;
-            SubpixelRenderingChanged.trigger();
+            SubpixelRenderingChanged();
         }
     }
 
@@ -331,7 +331,7 @@ namespace neogfx
         if (iSubpixelRendering)
         {
             iSubpixelRendering = false;
-            SubpixelRenderingChanged.trigger();
+            SubpixelRenderingChanged();
         }
     }
 

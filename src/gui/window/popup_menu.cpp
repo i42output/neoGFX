@@ -257,7 +257,7 @@ namespace neogfx
                 {
                     auto& subMenu = menu().item_at(menu().selected_item()).sub_menu();
                     if (!subMenu.is_open())
-                        menu().open_sub_menu().trigger(subMenu);
+                        menu().open_sub_menu()(subMenu);
                     if (subMenu.has_available_items())
                         subMenu.select_item_at(subMenu.first_available_item(), false);
                 }
@@ -298,7 +298,7 @@ namespace neogfx
                         menuToClose->parent().clear_selection();
                 }
                 else if (selectedItem.type() == menu_item_type::SubMenu && !selectedItem.sub_menu().is_open())
-                    menu().open_sub_menu().trigger(selectedItem.sub_menu());
+                    menu().open_sub_menu()(selectedItem.sub_menu());
             }
             break;
         case ScanCode_ESCAPE:

@@ -427,7 +427,7 @@ namespace chess::gui
         });
 
         iUndoneMoves.clear();
-        Changed.trigger();
+        Changed();
 
         play();
     }
@@ -435,7 +435,7 @@ namespace chess::gui
     void board::setup(chess::mailbox_position const& aPosition)
     {
         iPosition = aPosition;
-        Changed.trigger();
+        Changed();
     }
 
     bool board::play(chess::move const& aMove)
@@ -488,7 +488,7 @@ namespace chess::gui
         }
         else
             edit(aMove);
-        Changed.trigger();
+        Changed();
         return true;
     }
 
@@ -506,7 +506,7 @@ namespace chess::gui
         current_player().setup(iPosition);
         next_player().setup(iPosition);
         display_eval();
-        Changed.trigger();
+        Changed();
         update();
     }
 
@@ -522,7 +522,7 @@ namespace chess::gui
             iUndoneMoves.push_back(*unmake(iPosition));
             current_player().undo();
             next_player().undo();
-            Changed.trigger();
+            Changed();
             update();
         }
     }
@@ -543,7 +543,7 @@ namespace chess::gui
                 white_player().play(redoMove);
             else
                 black_player().play(redoMove);
-            Changed.trigger();
+            Changed();
             update();
         }
     }
@@ -558,7 +558,7 @@ namespace chess::gui
         if (!current_player().playing())
         {
             current_player().play();
-            Changed.trigger();
+            Changed();
         }
     }
 
@@ -572,7 +572,7 @@ namespace chess::gui
         if (current_player().playing())
         {
             current_player().stop();
-            Changed.trigger();
+            Changed();
         }
     }
 

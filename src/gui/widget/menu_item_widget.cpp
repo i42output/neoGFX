@@ -399,7 +399,7 @@ namespace neogfx
                     {
                         destroyed_flag destroyed{ *this };
                         if (!menu_item().sub_menu().is_open())
-                            menu().open_sub_menu().trigger(menu_item().sub_menu());
+                            menu().open_sub_menu()(menu_item().sub_menu());
                         if (!destroyed)
                             update();
                         iSubMenuOpener.reset();
@@ -428,7 +428,7 @@ namespace neogfx
             update();
             auto& item = menu_item();
             close_menu();
-            item.action().triggered().trigger();
+            item.action().triggered()();
             if (item.action().is_checkable())
                 item.action().toggle();
         }
@@ -439,7 +439,7 @@ namespace neogfx
                 menu().select_item_at(menu().find(menu_item()), aOpenAnySubMenu);
                 if (destroyed)
                     return;
-                menu().open_sub_menu().trigger(menu_item().sub_menu());
+                menu().open_sub_menu()(menu_item().sub_menu());
                 if (destroyed)
                     return;
                 update();

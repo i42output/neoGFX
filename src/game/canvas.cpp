@@ -191,7 +191,7 @@ namespace neogfx::game
             ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
             auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
             if (hit)
-                EntityClicked.trigger(*hit);
+                EntityClicked(*hit);
         }
     }
 
@@ -205,9 +205,9 @@ namespace neogfx::game
             if (hit)
             {
                 if (EntityDoubleClicked.has_slots())
-                    EntityDoubleClicked.trigger(*hit);
+                    EntityDoubleClicked(*hit);
                 else
-                    EntityClicked.trigger(*hit);
+                    EntityClicked(*hit);
             }
         }
     }
@@ -237,9 +237,9 @@ namespace neogfx::game
             {
                 aGc.clear_depth_buffer();
                 scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
-                RenderingEntities.trigger(aGc, 0);
+                RenderingEntities(aGc, 0);
                 aGc.draw_entities(ecs());
-                EntitiesRendered.trigger(aGc, 0);
+                EntitiesRendered(aGc, 0);
             }
         });
 
@@ -252,9 +252,9 @@ namespace neogfx::game
                 {
                     if (!layer_visible(layer))
                         continue;
-                    RenderingEntities.trigger(aGc, layer);
+                    RenderingEntities(aGc, layer);
                     aGc.draw_entities(ecs(), layer);
-                    EntitiesRendered.trigger(aGc, layer);
+                    EntitiesRendered(aGc, layer);
                 }
             }
         });

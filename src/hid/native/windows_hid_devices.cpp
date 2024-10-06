@@ -79,7 +79,7 @@ namespace neogfx
                 }
                 return TRUE;
             case WM_CLIPBOARDUPDATE:
-                service<i_clipboard>().updated().trigger();
+                service<i_clipboard>().updated()();
                 break;
             }
             return DefWindowProc(hwnd, message, wParam, lParam);

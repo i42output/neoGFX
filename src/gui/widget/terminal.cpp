@@ -132,7 +132,7 @@ namespace neogfx
             update_cursor();
 
         if (terminal_size() != oldTerminalSize)
-            TerminalResized.trigger(terminal_size());
+            TerminalResized(terminal_size());
 
         set_ideal_size(padding().size() + character_extents() * size { terminal_size() } +
             size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
@@ -308,65 +308,65 @@ namespace neogfx
 
         if (aScanCode >= ScanCode_A && aScanCode <= ScanCode_Z && (aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
         {
-            Input.trigger(string{ 1, static_cast<char>(aScanCode - ScanCode_A + '\x01') });
+            Input(string{ 1, static_cast<char>(aScanCode - ScanCode_A + '\x01') });
             handled = true;
         }
 
         switch (aScanCode)
         {
         case ScanCode_ESCAPE:
-            Input.trigger("\x1B"_s);
+            Input("\x1B"_s);
             break;
         case ScanCode_LEFT:
             if (active_buffer().ansiMode)
             {
                 if (!active_buffer().cursorKeysMode)
-                    Input.trigger("\x1B[D"_s);
+                    Input("\x1B[D"_s);
                 else
-                    Input.trigger("\x1BOD"_s);
+                    Input("\x1BOD"_s);
             }
             else
-                Input.trigger("\x1B""D"_s);
+                Input("\x1B""D"_s);
             handled = true;
             break;
         case ScanCode_RIGHT:
             if (active_buffer().ansiMode)
             {
                 if (!active_buffer().cursorKeysMode)
-                    Input.trigger("\x1B[C"_s);
+                    Input("\x1B[C"_s);
                 else
-                    Input.trigger("\x1BOC"_s);
+                    Input("\x1BOC"_s);
             }
             else
-                Input.trigger("\x1B""C"_s);
+                Input("\x1B""C"_s);
             handled = true;
             break;
         case ScanCode_UP:
             if (active_buffer().ansiMode)
             {
                 if (!active_buffer().cursorKeysMode)
-                    Input.trigger("\x1B[A"_s);
+                    Input("\x1B[A"_s);
                 else
-                    Input.trigger("\x1BOA"_s);
+                    Input("\x1BOA"_s);
             }
             else
-                Input.trigger("\x1B""A"_s);
+                Input("\x1B""A"_s);
             handled = true;
             break;
         case ScanCode_DOWN:
             if (active_buffer().ansiMode)
             {
                 if (!active_buffer().cursorKeysMode)
-                    Input.trigger("\x1B[B"_s);
+                    Input("\x1B[B"_s);
                 else
-                    Input.trigger("\x1BOB"_s);
+                    Input("\x1BOB"_s);
             }
             else
-                Input.trigger("\x1B""B"_s);
+                Input("\x1B""B"_s);
             handled = true;
             break;
         case ScanCode_BACKSPACE:
-            Input.trigger("\x7F"_s);
+            Input("\x7F"_s);
             handled = true;
             break;
         default:
@@ -385,9 +385,9 @@ namespace neogfx
 
     bool terminal::text_input(i_string const& aText)
     {
-        Input.trigger(aText);
+        Input(aText);
         if (aText == "\r"_s)
-            Input.trigger("\n"_s);
+            Input("\n"_s);
         return true;
     }
 
@@ -742,7 +742,7 @@ namespace neogfx
                                     int code = 0;
                                     try { code = std::stoi(params[0].substr(1)); } catch (...) {}
                                     if (code == 0)
-                                        Input.trigger("\x1B[>0;0;0c"_s);
+                                        Input("\x1B[>0;0;0c"_s);
                                 }
                             }
                             break;
@@ -794,7 +794,7 @@ namespace neogfx
                                 {
                                     std::ostringstream oss;
                                     oss << "\x1B[" << cursor_pos().y + 1 << ";" << cursor_pos().x + 1 << "R";
-                                    Input.trigger(string{oss.str()});
+                                    Input(string{oss.str()});
                                 }
                             }
                             break;

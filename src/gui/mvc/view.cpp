@@ -63,7 +63,7 @@ namespace neogfx::mvc
         if (!iActive)
         {
             iActive = true;
-            Activated.trigger();
+            Activated();
         }
     }
     
@@ -72,7 +72,7 @@ namespace neogfx::mvc
         if (iActive)
         {
             iActive = false;
-            Deactivated.trigger();
+            Deactivated();
         }
     }
 }

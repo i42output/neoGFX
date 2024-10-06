@@ -43,7 +43,7 @@ namespace neogfx::DesignStudio
     public:
         void start() final
         {
-            output().trigger(iName + ">");
+            output()(iName + ">");
         }
         void resize_window(std::uint16_t aWidth, std::uint16_t aHeight) final
         {
@@ -54,13 +54,13 @@ namespace neogfx::DesignStudio
 
             if (aText == "\x7F")
             {
-                output().trigger("\b\x1B[K");
+                output()("\b\x1B[K");
                 if (!iBuffer.empty())
                     iBuffer.pop_back();
                 return;
             }
 
-            output().trigger(aText);
+            output()(aText);
             iBuffer += aText;
             std::size_t next;
             while (!destroyed && (next = iBuffer.find("\r\n")) != std::string::npos)
@@ -68,9 +68,9 @@ namespace neogfx::DesignStudio
                 auto const nextCommand = iBuffer.substr(0, next);
                 iBuffer = iBuffer.substr(next + 2);
                 if (!nextCommand.empty())
-                    command().trigger(nextCommand);
+                    command()(nextCommand);
                 if (!destroyed)
-                    output().trigger(iName + ">");
+                    output()(iName + ">");
             }
         }
     private:

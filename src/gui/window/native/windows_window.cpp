@@ -622,14 +622,14 @@ namespace neogfx
             ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
             iActive = true;
-            surface_window().as_window().activated().trigger();
+            surface_window().as_window().activated()();
             surface_window().as_widget().update(true);
         }
 
         void window::deactivate()
         {
             iActive = false;
-            surface_window().as_window().deactivated().trigger();
+            surface_window().as_window().deactivated()();
             surface_window().as_widget().update(true);
         }
 
@@ -930,7 +930,7 @@ namespace neogfx
                 result = 0;
                 break;
             case WM_INPUTLANGCHANGE:
-                service<i_keyboard>().input_language_changed().trigger();
+                service<i_keyboard>().input_language_changed()();
                 break;
             case WM_IME_NOTIFY:
                 break;
@@ -1456,7 +1456,7 @@ namespace neogfx
                 result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             case WM_SETTINGCHANGE:
-                service<i_accessibility>().settings_changed().trigger();
+                service<i_accessibility>().settings_changed()();
                 result = wndproc(hwnd, msg, wparam, lparam);
                 break;
             default:

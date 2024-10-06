@@ -470,7 +470,7 @@ namespace neogfx
                 bool notify = (iOwner.iWantedToNotifyTextChanged > 0u);
                 iOwner.iWantedToNotifyTextChanged = 0u;
                 if (notify)
-                    iOwner.TextChanged.trigger();
+                    iOwner.TextChanged();
             }
         }
     private:
@@ -862,7 +862,7 @@ namespace neogfx
         else if (aButton == mouse_button::Right)
         {
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
-            ContextMenu.trigger(iMenu->menu());
+            ContextMenu(iMenu->menu());
             if (!read_only())
             {
                 iMenu->menu().add_action(service<i_app>().action_undo());
@@ -984,10 +984,10 @@ namespace neogfx
                 if ((aKeyModifiers & KeyModifier_CTRL) == KeyModifier_NONE)
                 {
                     bool canAccept = false;
-                    CanAcceptText.trigger(text(), canAccept);
+                    CanAcceptText(text(), canAccept);
                     if (canAccept)
                     {
-                        AcceptText.trigger(text());
+                        AcceptText(text());
                         break;
                     }
                     else if ((iCaps & text_edit_caps::OnlyAccept) == text_edit_caps::OnlyAccept)
@@ -1627,7 +1627,7 @@ namespace neogfx
             refresh_paragraph(iText.begin(), 0);
         }
         iPersistDefaultStyle = aPersist;
-        DefaultStyleChanged.trigger();
+        DefaultStyleChanged();
         update();
     }
 
@@ -1651,7 +1651,7 @@ namespace neogfx
         if (alignment() != aAlignment)
         {
             iDefaultStyle.paragraph().set_alignment(aAlignment);
-            DefaultStyleChanged.trigger();
+            DefaultStyleChanged();
             update();
         }
     }
@@ -2324,7 +2324,7 @@ namespace neogfx
     std::size_t text_edit::do_insert_text(position_type aPosition, i_string const& aText, format const& aFormat, bool aMoveCursor, bool aClearFirst)
     {
         bool accept = true;
-        TextFilter.trigger(aText, accept);
+        TextFilter(aText, accept);
         if (!accept)
             return 0;
 
@@ -2477,7 +2477,7 @@ namespace neogfx
     void text_edit::notify_text_changed()
     {
         if (!iSuppressTextChangedNotification)
-            TextChanged.trigger();
+            TextChanged();
         else
             ++iWantedToNotifyTextChanged;
     }

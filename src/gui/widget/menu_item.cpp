@@ -122,7 +122,7 @@ namespace neogfx
     void menu_item::select(bool aOpenAnySubMenu)
     {
         neolib::scoped_flag sf{ iOpenAnySubMenu, aOpenAnySubMenu };
-        Selected.trigger();
+        Selected();
     }
 
     bool menu_item::open_any_sub_menu() const

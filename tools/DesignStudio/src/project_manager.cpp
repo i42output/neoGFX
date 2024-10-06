@@ -65,9 +65,9 @@ namespace neogfx::DesignStudio
         {
             auto previouslyActive = iActiveProject;
             iActiveProject = *find_project(aProject);
-            ProjectActivated.trigger(*iActiveProject);
+            ProjectActivated(*iActiveProject);
             if (previouslyActive)
-                ProjectDeactivated.trigger(*previouslyActive);
+                ProjectDeactivated(*previouslyActive);
         }
     }
 
@@ -77,7 +77,7 @@ namespace neogfx::DesignStudio
         {
             auto previouslyActive = iActiveProject;
             iActiveProject = nullptr;
-            ProjectDeactivated.trigger(*previouslyActive);
+            ProjectDeactivated(*previouslyActive);
         }
         else
             throw no_active_project();
@@ -88,7 +88,7 @@ namespace neogfx::DesignStudio
         auto newProject = ng::make_ref<project>(*this);
         newProject->open(aProjectFile);
         iProjects.push_back(newProject);
-        ProjectAdded.trigger(*newProject);
+        ProjectAdded(*newProject);
         activate_project(*newProject);
         return *newProject;
     }
@@ -98,7 +98,7 @@ namespace neogfx::DesignStudio
         auto newProject = ng::make_ref<project>(*this);
         newProject->create(aProjectName, aProjectNamespace);
         iProjects.push_back(newProject);
-        ProjectAdded.trigger(*newProject);
+        ProjectAdded(*newProject);
         activate_project(*newProject);
         return *newProject;
     }
@@ -115,7 +115,7 @@ namespace neogfx::DesignStudio
             else
                 deactivate_project();
         }
-        ProjectRemoved.trigger(*removingRef);
+        ProjectRemoved(*removingRef);
     }
 
     i_element_library& project_manager::library(const ng::i_string& aElementType) const

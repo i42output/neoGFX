@@ -354,7 +354,7 @@ namespace neogfx
         {
             as_widget().update();
             iPressed = true;
-            Pressed.trigger();
+            Pressed();
         }
     }
 
@@ -365,7 +365,7 @@ namespace neogfx
         if (aButton == mouse_button::Left)
         {
             as_widget().update();
-            DoubleClicked.trigger();
+            DoubleClicked();
         }
     }
 
@@ -384,13 +384,13 @@ namespace neogfx
                 if (as_widget().client_rect().contains(aPosition))
                     handle_clicked();
                 if (!destroyed)
-                    Released.trigger();
+                    Released();
             }
         }
         else if (aButton == mouse_button::Right)
         {
             if (wasCapturing && as_widget().client_rect().contains(aPosition))
-                RightClicked.trigger();
+                RightClicked();
         }
     }
 
@@ -409,7 +409,7 @@ namespace neogfx
     inline void button<ButtonInterface>::handle_clicked()
     {
         destroyed_flag destroyed{ *this };
-        Clicked.trigger();
+        Clicked();
         if (!destroyed && iCheckable != button_checkable::NotCheckable)
             toggle();
     }
@@ -435,13 +435,13 @@ namespace neogfx
             throw not_tri_state_checkable();
         iCheckedState = aCheckedState;
         as_widget().update();
-        Toggled.trigger();
+        Toggled();
         if (is_checked())
-            Checked.trigger();
+            Checked();
         else if (is_unchecked())
-            Unchecked.trigger();
+            Unchecked();
         else if (is_indeterminate())
-            Indeterminate.trigger();
+            Indeterminate();
         return true;
     }
 

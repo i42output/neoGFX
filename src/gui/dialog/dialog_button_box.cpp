@@ -113,14 +113,14 @@ namespace neogfx
         {
         case button_role::Accept:
         case button_role::Yes:
-            newButton->second->clicked([this, newButton]() { Clicked.trigger(newButton->first.first); Accepted.trigger(); });
+            newButton->second->clicked([this, newButton]() { Clicked(newButton->first.first); Accepted(); });
             break;
         case button_role::Reject:
         case button_role::No:
-            newButton->second->clicked([this, newButton]() { Clicked.trigger(newButton->first.first); Rejected.trigger(); });
+            newButton->second->clicked([this, newButton]() { Clicked(newButton->first.first); Rejected(); });
             break;
         default:
-            newButton->second->clicked([this, newButton]() { Clicked.trigger(newButton->first.first); });
+            newButton->second->clicked([this, newButton]() { Clicked(newButton->first.first); });
             break;
         }
         iStandardButtonLayout.remove_all();
@@ -216,9 +216,9 @@ namespace neogfx
                         (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeReturnKey)
                     {
                         if (!iDefaultButton || similar_role(role_of_button(*iDefaultButton), button_role::Accept))
-                            Accepted.trigger();
+                            Accepted();
                         else if (similar_role(role_of_button(*iDefaultButton), button_role::Reject))
-                            Rejected.trigger();
+                            Rejected();
                     }
                     break;
                 case ScanCode_ESCAPE:
@@ -226,7 +226,7 @@ namespace neogfx
                         (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeEscapeKey)
                     {
                         if (can_reject())
-                            Rejected.trigger();
+                            Rejected();
                     }
                     break;
                 default:

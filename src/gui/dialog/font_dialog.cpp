@@ -494,7 +494,7 @@ namespace neogfx
             iSelectedFont = neogfx::font{ desiredFontInfo };
         iSample.set_font(iSelectedFont);
         if (iSelectedFont != oldFont)
-            SelectionChanged.trigger();
+            SelectionChanged();
     }
 
     void font_dialog::update_selected_format(i_widget const& aUpdatingWidget)
@@ -681,7 +681,7 @@ namespace neogfx
         iSample.set_text_format(iSelectedTextFormat);
         
         if (iSelectedTextFormat != oldSelectedTextFormat)
-            SelectionChanged.trigger();
+            SelectionChanged();
 
         update_widgets();
     }

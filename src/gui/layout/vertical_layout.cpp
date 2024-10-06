@@ -94,6 +94,6 @@ namespace neogfx
         layout::do_layout_items<layout::column_major<vertical_layout>>(aPosition, aSize);
         if (has_parent_widget())
             parent_widget().layout_items_completed();
-        LayoutCompleted.trigger();
+        LayoutCompleted();
     }
 }

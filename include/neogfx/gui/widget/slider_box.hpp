@@ -75,7 +75,7 @@ namespace neogfx
             neolib::scoped_flag sf{ iSettingParameter };
             iSlider.set_minimum(aMinimum);
             iSpinBox.set_minimum(aMinimum);
-            ConstraintsChanged.trigger();
+            ConstraintsChanged();
         }
         value_type maximum() const
         {
@@ -88,7 +88,7 @@ namespace neogfx
             neolib::scoped_flag sf{ iSettingParameter };
             iSlider.set_maximum(aMaximum);
             iSpinBox.set_maximum(aMaximum);
-            ConstraintsChanged.trigger();
+            ConstraintsChanged();
         }
         value_type step() const
         {
@@ -101,7 +101,7 @@ namespace neogfx
             neolib::scoped_flag sf{ iSettingParameter };
             iSlider.set_step(aStep);
             iSpinBox.set_step(aStep);
-            ConstraintsChanged.trigger();
+            ConstraintsChanged();
         }
         value_type value() const
         {
@@ -114,7 +114,7 @@ namespace neogfx
             neolib::scoped_flag sf{ iSettingParameter };
             iSlider.set_value(aValue);
             iSpinBox.set_value(aValue);
-            ValueChanged.trigger();
+            ValueChanged();
         }
     public:
         const basic_slider<value_type>& slider() const
@@ -142,7 +142,7 @@ namespace neogfx
                     return;
                 neolib::scoped_flag sf{ iSettingParameter };
                 iSpinBox.set_value(iSlider.value());
-                ValueChanged.trigger();
+                ValueChanged();
             });
             iSpinBox.ValueChanged([&]()
             {
@@ -150,7 +150,7 @@ namespace neogfx
                     return;
                 neolib::scoped_flag sf{ iSettingParameter };
                 iSlider.set_value(iSpinBox.value());
-                ValueChanged.trigger();
+                ValueChanged();
             });
             iSlider.ConstraintsChanged([&]()
             {
@@ -160,7 +160,7 @@ namespace neogfx
                 iSpinBox.set_minimum(iSlider.minimum());
                 iSpinBox.set_maximum(iSlider.maximum());
                 iSpinBox.set_step(iSlider.step());
-                ConstraintsChanged.trigger();
+                ConstraintsChanged();
             });
             iSpinBox.ConstraintsChanged([&]()
             {
@@ -170,7 +170,7 @@ namespace neogfx
                 iSlider.set_minimum(iSpinBox.minimum());
                 iSlider.set_maximum(iSpinBox.maximum());
                 iSlider.set_step(iSpinBox.step());
-                ConstraintsChanged.trigger();
+                ConstraintsChanged();
             });
         }
     private:

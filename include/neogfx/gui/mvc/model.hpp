@@ -51,7 +51,7 @@ namespace neogfx::mvc
             if (!iDirty)
             {
                 iDirty = true;
-                Modified.trigger();
+                Modified();
             }
         }
         void set_clean() override
@@ -61,12 +61,12 @@ namespace neogfx::mvc
         }
         void add_controller(i_controller& aController) override
         {
-            ControllerAdded.trigger(aController);
+            ControllerAdded(aController);
             // todo
         }
         void remove_controller(i_controller& aController) override
         {
-            ControllerRemoved.trigger(aController);
+            ControllerRemoved(aController);
             // todo
         }
     private:

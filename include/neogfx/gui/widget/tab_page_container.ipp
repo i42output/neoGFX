@@ -105,7 +105,7 @@ namespace neogfx
         {
             iTabBar.set_tab_container_style(aStyle);
             update_tab_bar_placement();
-            StyleChanged.trigger();
+            StyleChanged();
         }
     }
 
@@ -323,7 +323,7 @@ namespace neogfx
         }
         else
             existingTab->second->as_widget().hide();
-        TabPageAdded.trigger(*aWidget);
+        TabPageAdded(*aWidget);
         return *existingTab->second;
     }
 
@@ -369,7 +369,7 @@ namespace neogfx
             throw tab_not_found();
         auto temp = existingTab->second;
         iTabs.erase(existingTab);
-        TabPageRemoved.trigger(*temp);
+        TabPageRemoved(*temp);
     }
 
     template <typename Base>

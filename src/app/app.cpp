@@ -373,7 +373,7 @@ namespace neogfx
     void app::set_name(std::string const& aName)
     {
         iName = aName;
-        NameChanged.trigger();
+        NameChanged();
     }
     
     int app::exec(bool aQuitWhenLastWindowClosed)
@@ -384,7 +384,7 @@ namespace neogfx
             service<i_surface_manager>().layout_surfaces();
             service<i_surface_manager>().invalidate_surfaces();
             iQuitWhenLastWindowClosed = aQuitWhenLastWindowClosed;
-            ExecutionStarted.trigger();
+            ExecutionStarted();
             while (iQuitResultCode == std::nullopt)
             {
                 if (!process_events(iAppContext))
@@ -470,7 +470,7 @@ namespace neogfx
         if (iCurrentStyle != existingStyle)
         {
             iCurrentStyle = existingStyle;
-            CurrentStyleChanged.trigger(style_aspect::Style);
+            CurrentStyleChanged(style_aspect::Style);
             service<i_surface_manager>().layout_surfaces();
             service<i_surface_manager>().invalidate_surfaces();
         }
@@ -754,7 +754,7 @@ namespace neogfx
         void activate(const i_help_source& aSource) override
         {
             iActiveSources.push_back(&aSource);
-            HelpActivated.trigger(aSource);
+            HelpActivated(aSource);
         }
         void deactivate(const i_help_source& aSource) override
         {
@@ -762,7 +762,7 @@ namespace neogfx
             if (existing == iActiveSources.rend())
                 throw invalid_help_source();
             iActiveSources.erase(existing.base() - 1);
-            HelpDeactivated.trigger(aSource);
+            HelpDeactivated(aSource);
         }
     private:
         std::vector<const i_help_source*> iActiveSources;
@@ -867,7 +867,7 @@ namespace neogfx
                     iKeySequence.clear();
                     if (service<i_keyboard>().is_front_grabber(*this))
                     {
-                        a.second()->triggered().trigger();
+                        a.second()->triggered()();
                         if (a.second()->is_checkable())
                             a.second()->toggle();
                         return true;

@@ -255,7 +255,7 @@ namespace neogfx
                         else
                         {
                             controller.clear_port();
-                            ControllerCalibrationRequired.trigger(controller);
+                            ControllerCalibrationRequired(controller);
                         }
                     }
                     else

@@ -166,7 +166,7 @@ namespace neogfx::DesignStudio
         void add_input(i_node_input_pin& aPin) override
         {
             iInputs.emplace_back(aPin);
-            InputAdded.trigger(*iInputs.back());
+            InputAdded(*iInputs.back());
         }
         void remove_input(i_node_input_pin& aPin) override
         {
@@ -175,13 +175,13 @@ namespace neogfx::DesignStudio
             {
                 ref_ptr<i_node_input_pin> temp = *existing;
                 iInputs.erase(existing);
-                InputRemoved.trigger(*temp);
+                InputRemoved(*temp);
             }
         }
         void add_output(i_node_output_pin& aPin) override
         {
             iOutputs.emplace_back(aPin);
-            OutputAdded.trigger(*iOutputs.back());
+            OutputAdded(*iOutputs.back());
         }
         void remove_output(i_node_output_pin& aPin) override
         {
@@ -190,13 +190,13 @@ namespace neogfx::DesignStudio
             {
                 ref_ptr<i_node_output_pin> temp = *existing;
                 iOutputs.erase(existing);
-                OutputRemoved.trigger(*temp);
+                OutputRemoved(*temp);
             }
         }
         void add_connection(i_node_pin& aSource, i_node_pin& aDestination) override
         {
             iConnections.push_back(make_ref<node_connection>(aSource, aDestination));
-            ConnectionAdded.trigger(*iConnections.back());
+            ConnectionAdded(*iConnections.back());
         }
         void remove_connection(i_node_pin& aSource, i_node_pin& aDestination) override
         {
@@ -205,7 +205,7 @@ namespace neogfx::DesignStudio
             {
                 ref_ptr<node_connection> temp = *existing;
                 iConnections.erase(existing);
-                ConnectionRemoved.trigger(*temp);
+                ConnectionRemoved(*temp);
             }
         }
     private:

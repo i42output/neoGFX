@@ -108,19 +108,19 @@ namespace neogfx
         {
             bool canRender = false;
             size renderExtents;
-            presentation_model().dragging_item_render_info().trigger(*this, canRender, renderExtents);
+            presentation_model().dragging_item_render_info()(*this, canRender, renderExtents);
             return canRender;
         }
         size render_extents() const final
         {
             bool canRender = false;
             size renderExtents;
-            presentation_model().dragging_item_render_info().trigger(*this, canRender, renderExtents);
+            presentation_model().dragging_item_render_info()(*this, canRender, renderExtents);
             return renderExtents;
         }
         void render(i_graphics_context& aGc, point const& aPosition = {}) const final
         {
-            presentation_model().dragging_item_render().trigger(*this, aGc, aPosition);
+            presentation_model().dragging_item_render()(*this, aGc, aPosition);
         }
     private:
         i_item_presentation_model const& iPresentationModel;
@@ -211,7 +211,7 @@ namespace neogfx
             if (drag_drop_active())
                 throw drag_drop_already_active();
             iObject = &aObject;
-            DraggingObject.trigger(*iObject);
+            DraggingObject(*iObject);
         }
         void cancel_drag_drop() final
         {
@@ -219,7 +219,7 @@ namespace neogfx
                 throw drag_drop_not_active();
             auto object = iObject;
             iObject = nullptr;
-            DraggingCancelled.trigger(*object);
+            DraggingCancelled(*object);
             iWidget = nullptr;
             iWidgetOffset = std::nullopt;
         }
@@ -229,7 +229,7 @@ namespace neogfx
                 throw drag_drop_not_active();
             auto object = iObject;
             iObject = nullptr;
-            ObjectDroppedOnTarget.trigger(*object, aTarget);
+            ObjectDroppedOnTarget(*object, aTarget);
             iWidget = nullptr;
             iWidgetOffset = std::nullopt;
         }
@@ -413,14 +413,14 @@ namespace neogfx
         drop_operation accepted_as(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) const final
         {
             drop_operation acceptableAs = drop_operation::None;
-            ObjectAcceptable.trigger(aObject, aDropPosition, acceptableAs);
+            ObjectAcceptable(aObject, aDropPosition, acceptableAs);
             return acceptableAs;
         }
         bool accept(i_drag_drop_object const& aObject, optional_point const& aDropPosition = {}) final
         {
             if (can_accept(aObject, aDropPosition))
             {
-                ObjectDropped.trigger(aObject, aDropPosition);
+                ObjectDropped(aObject, aDropPosition);
                 return true;
             }
             return false;

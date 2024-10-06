@@ -279,7 +279,7 @@ namespace neogfx
             return;
 
         iActive = true;
-        surface_window().as_window().activated().trigger();
+        surface_window().as_window().activated()();
         parentWindow.surface_window().as_widget().update(true);
         surface_window().as_widget().update(true);
     }
@@ -287,7 +287,7 @@ namespace neogfx
     void virtual_window::deactivate()
     {
         iActive = false;
-        surface_window().as_window().deactivated().trigger();
+        surface_window().as_window().deactivated()();
         parent().surface_window().as_widget().update(true);
         surface_window().as_widget().update(true);
     }

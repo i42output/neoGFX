@@ -199,7 +199,7 @@ namespace neogfx::game
             scoped_component_lock<entity_info, box_collider> lock{ ecs() };
             iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
             {
-                Collision.trigger(e1, e2);
+                Collision(e1, e2);
             });
         }
 
@@ -209,7 +209,7 @@ namespace neogfx::game
             iBroadphase2dTree.full_update();
             iBroadphase2dTree.collisions([this](entity_id e1, entity_id e2)
             {
-                Collision.trigger(e1, e2);
+                Collision(e1, e2);
             });
         }
 

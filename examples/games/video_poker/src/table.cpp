@@ -303,7 +303,7 @@ namespace video_poker
         if (iState != aNewState)
         {
             iState = aNewState;
-            state_changed.trigger(iState);
+            state_changed(iState);
             update_widgets();
             switch (iState)
             {

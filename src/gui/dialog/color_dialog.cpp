@@ -1090,7 +1090,7 @@ namespace neogfx
         if (iColorSpace != aColorSpace)
         {
             iColorSpace = aColorSpace;
-            ColorSpaceChanged.trigger();
+            ColorSpaceChanged();
             {
                 neolib::scoped_flag sf{ iUpdatingWidgets };
                 switch (*iColorSpace)
@@ -1133,7 +1133,7 @@ namespace neogfx
         if (iCurrentChannel != aChannel)
         {
             iCurrentChannel = aChannel;
-            SelectionChanged.trigger();
+            SelectionChanged();
             update();
         }
     }
@@ -1159,7 +1159,7 @@ namespace neogfx
         {
             iSelectedColor = aColor;
             update_widgets(aUpdatingWidget);
-            SelectionChanged.trigger();
+            SelectionChanged();
         }
     }
 

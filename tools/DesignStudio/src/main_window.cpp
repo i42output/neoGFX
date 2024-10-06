@@ -471,7 +471,7 @@ namespace neogfx::DesignStudio
                         {
                             aProject.create_element(aProject.root(), "file"_s, ng::string{ file });
                         });
-                        aApp.action_file_new().triggered().trigger();
+                        aApp.action_file_new().triggered()();
                     }
                 }
             }

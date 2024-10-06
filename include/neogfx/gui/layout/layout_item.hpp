@@ -82,18 +82,18 @@ namespace neogfx
         void clear_style_sheet() final
         {
             iStyleSheet = std::nullopt;
-            StyleSheetChanged.trigger(iStyleSheet);
+            StyleSheetChanged(iStyleSheet);
         }
         using i_layout_item::set_style_sheet;
         void set_style_sheet(i_style_sheet const& aStyleSheet) final
         {
             iStyleSheet = aStyleSheet;
-            StyleSheetChanged.trigger(iStyleSheet);
+            StyleSheetChanged(iStyleSheet);
         }
         void set_style_sheet(i_string_view const& aStyleSheet) final
         {
             iStyleSheet = aStyleSheet.to_std_string_view();
-            StyleSheetChanged.trigger(iStyleSheet);
+            StyleSheetChanged(iStyleSheet);
         }
     public:
         bool is_layout() const final
@@ -688,7 +688,7 @@ namespace neogfx
         i_anchor& anchor_to(i_anchorable& aRhs, i_string const& aLhsAnchor, anchor_constraint_function aLhsFunction, i_string const& aRhsAnchor, anchor_constraint_function aRhsFunction) override
         {
             auto& lhsAnchor = base_type::anchor_to(aRhs, aLhsAnchor, aLhsFunction, aRhsAnchor, aRhsFunction);
-            AnchorUpdated.trigger(lhsAnchor);
+            AnchorUpdated(lhsAnchor);
             update_layout(true, true);
             return lhsAnchor;
         }

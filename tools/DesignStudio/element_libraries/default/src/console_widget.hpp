@@ -107,7 +107,7 @@ namespace neogfx::DesignStudio
                 iSink += newConsole.command([&](std::string const& aCommand)
                     {
                         ref_ptr<i_console_client> newConsole;
-                        iClientManager->start_console_client_session().trigger(iTerminal, string{ aCommand }, newConsole);
+                        iClientManager->start_console_client_session()(iTerminal, string{ aCommand }, newConsole);
                         if (newConsole)
                             attach_console(newConsole);
                     });

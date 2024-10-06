@@ -67,9 +67,9 @@ namespace neogfx
         if (aMoveAnchor)
             iAnchor = aPosition;
         if (iPosition != oldPosition)
-            PositionChanged.trigger();
+            PositionChanged();
         if (iAnchor != oldAnchor)
-            AnchorChanged.trigger();
+            AnchorChanged();
     }
 
     cursor::position_type cursor::anchor() const
@@ -82,7 +82,7 @@ namespace neogfx
         if (iAnchor != aAnchor)
         {
             iAnchor = aAnchor;
-            AnchorChanged.trigger();
+            AnchorChanged();
         }
     }
 
@@ -102,7 +102,7 @@ namespace neogfx
         if (iColor != aColor)
         {
             iColor = aColor;
-            AppearanceChanged.trigger();
+            AppearanceChanged();
         }
     }
 
@@ -128,7 +128,7 @@ namespace neogfx
         if (iWidth != aWidth)
         {
             iWidth = aWidth;
-            AppearanceChanged.trigger();
+            AppearanceChanged();
         }
     }
 
@@ -137,7 +137,7 @@ namespace neogfx
         if (iWidth != std::nullopt)
         {
             iWidth = std::nullopt;
-            AppearanceChanged.trigger();
+            AppearanceChanged();
         }
     }
 
@@ -176,7 +176,7 @@ namespace neogfx
         iSink = service<i_accessibility>().settings_changed([&]()
         {
             if (!iWidth.has_value())
-                AppearanceChanged.trigger();
+                AppearanceChanged();
         });
     }
 }

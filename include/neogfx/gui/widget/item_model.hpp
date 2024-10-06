@@ -277,7 +277,7 @@ namespace neogfx
             if (iColumns.size() < aColumnIndex + 1u)
                 iColumns.resize(aColumnIndex + 1u);
             iColumns[aColumnIndex].name = aName;
-            ColumnInfoChanged.trigger(aColumnIndex);
+            ColumnInfoChanged(aColumnIndex);
         }
         item_data_type column_data_type(item_model_index::column_type aColumnIndex) const override
         {
@@ -286,7 +286,7 @@ namespace neogfx
         void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) override
         {
             default_cell_info(aColumnIndex).dataType = aType;
-            ColumnInfoChanged.trigger(aColumnIndex);
+            ColumnInfoChanged(aColumnIndex);
         }
         item_cell_data const& column_min_value(item_model_index::column_type aColumnIndex) const override
         {
@@ -295,7 +295,7 @@ namespace neogfx
         void set_column_min_value(item_model_index::column_type aColumnIndex, item_cell_data const& aValue) override
         {
             default_cell_info(aColumnIndex).dataMin = aValue;
-            ColumnInfoChanged.trigger(aColumnIndex);
+            ColumnInfoChanged(aColumnIndex);
         }
         item_cell_data const& column_max_value(item_model_index::column_type aColumnIndex) const override
         {
@@ -304,7 +304,7 @@ namespace neogfx
         void set_column_max_value(item_model_index::column_type aColumnIndex, item_cell_data const& aValue) override
         {
             default_cell_info(aColumnIndex).dataMax = aValue;
-            ColumnInfoChanged.trigger(aColumnIndex);
+            ColumnInfoChanged(aColumnIndex);
         }
         item_cell_data const& column_step_value(item_model_index::column_type aColumnIndex) const override
         {
@@ -313,7 +313,7 @@ namespace neogfx
         void set_column_step_value(item_model_index::column_type aColumnIndex, item_cell_data const& aValue) override
         {
             default_cell_info(aColumnIndex).dataStep = aValue;
-            ColumnInfoChanged.trigger(aColumnIndex);
+            ColumnInfoChanged(aColumnIndex);
         }
     public:
         i_item_model::iterator index_to_iterator(item_model_index const& aIndex) override
@@ -483,15 +483,15 @@ namespace neogfx
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, value_type const& aValue) override
         {
             auto result = base_iterator{ iItems.insert(aPosition.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type{ aValue, row_cell_array{} }) };
-            ItemAdded.trigger(iterator_to_index(result));
+            ItemAdded(iterator_to_index(result));
             return result;
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, value_type const& aValue, item_cell_data const& aCellData) override
         {
             auto result = base_iterator{ iItems.insert(aPosition.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>(), row_type{ aValue, row_cell_array{} }) };
             do_insert_cell_data(result, 0, aCellData);
-            ItemAdded.trigger(iterator_to_index(result));
-            ItemChanged.trigger(iterator_to_index(result));
+            ItemAdded(iterator_to_index(result));
+            ItemChanged(iterator_to_index(result));
             return result;
         }
         i_item_model::iterator insert_item(i_item_model::const_iterator aPosition, item_cell_data const& aCellData) override
@@ -523,7 +523,7 @@ namespace neogfx
             if constexpr (container_traits::is_tree)
             {
                 auto result = base_iterator{ iItems.insert(aParent.get<const_sibling_iterator, const_iterator, iterator, const_sibling_iterator, sibling_iterator>().end(), row_type{ aValue, row_cell_array{} }) };
-                ItemAdded.trigger(iterator_to_index(result));
+                ItemAdded(iterator_to_index(result));
                 return result;
             }
             else
@@ -554,7 +554,7 @@ namespace neogfx
         void clear() override
         {
             iItems.clear();
-            Cleared.trigger();
+            Cleared();
         }
         i_item_model::iterator erase(i_item_model::const_iterator aPosition) override
         {
@@ -563,9 +563,9 @@ namespace neogfx
                 while (containerIterator.rbegin() != containerIterator.rend())
                     erase(const_base_iterator{ --containerIterator.rbegin().base() });
             auto const index = iterator_to_index(aPosition);
-            ItemRemoving.trigger(index);
+            ItemRemoving(index);
             auto result = base_iterator{ iItems.erase(containerIterator) };
-            ItemRemoved.trigger(index);
+            ItemRemoved(index);
             return result;
         }
         i_item_model::iterator erase(item_model_index const& aIndex) override
@@ -578,7 +578,7 @@ namespace neogfx
             {
                 item_model_index index = iterator_to_index(aItem);
                 index.set_column(aColumnIndex);
-                ItemChanged.trigger(index);
+                ItemChanged(index);
             }
         }
         void insert_cell_data(item_model_index const& aIndex, item_cell_data const& aCellData) override
@@ -603,7 +603,7 @@ namespace neogfx
             row(aIndex).cells[aIndex.column()] = aCellData;
             if (default_cell_info(aIndex.column()).dataType == item_data_type::Unknown)
                 default_cell_info(aIndex.column()).dataType = static_cast<item_data_type>(aCellData.index());
-            ItemChanged.trigger(aIndex);
+            ItemChanged(aIndex);
         }
     public:
         using base_type::item;
@@ -646,7 +646,7 @@ namespace neogfx
             if (iColumns.size() < aColumnIndex + 1)
             {
                 iColumns.resize(aColumnIndex + 1);
-                ColumnInfoChanged.trigger(aColumnIndex);
+                ColumnInfoChanged(aColumnIndex);
             }
             if (iColumns[aColumnIndex].defaultDataInfo == std::nullopt)
                 iColumns[aColumnIndex].defaultDataInfo = item_cell_info{};
@@ -666,7 +666,7 @@ namespace neogfx
             if (iColumns.size() < aColumnIndex + 1)
             {
                 iColumns.resize(aColumnIndex + 1);
-                ColumnInfoChanged.trigger(aColumnIndex);
+                ColumnInfoChanged(aColumnIndex);
                 changed = true;
             }
             if (default_cell_info(aColumnIndex).dataType == item_data_type::Unknown)

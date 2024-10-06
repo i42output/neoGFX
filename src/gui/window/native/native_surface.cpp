@@ -119,12 +119,12 @@ namespace neogfx
         bool alreadyActive = target_active();
         if (!alreadyActive)
         {
-            TargetActivating.trigger();
+            TargetActivating();
             rendering_engine().activate_context(*this);
         }
         do_activate_target();
         if (!alreadyActive)
-            TargetActivated.trigger();
+            TargetActivated();
     }
 
     bool native_surface::target_active() const
@@ -136,9 +136,9 @@ namespace neogfx
     {
         if (target_active())
         {
-            TargetDeactivating.trigger();
+            TargetDeactivating();
             rendering_engine().deactivate_context();
-            TargetDeactivated.trigger();
+            TargetDeactivated();
             return;
         }
 //        throw not_active();
@@ -322,7 +322,7 @@ namespace neogfx
         iRendering = true;
         iLastFrameTime = now;
 
-        surface_window().rendering().trigger();
+        surface_window().rendering()();
 
         scoped_render_target srt{ *this };
 
@@ -333,7 +333,7 @@ namespace neogfx
         iRendering = false;
         validate();
 
-        surface_window().rendering_finished().trigger();
+        surface_window().rendering_finished()();
 
         iFpsData.push_back(frame_times{ *iLastFrameTime, std::chrono::high_resolution_clock::now() });
         if (iFpsData.size() > 100)

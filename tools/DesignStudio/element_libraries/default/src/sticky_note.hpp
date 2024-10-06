@@ -122,7 +122,7 @@ namespace neogfx::DesignStudio
             });
             iSink += iDefaultItem->ContextMenu([&](i_menu& aMenu)
             {
-                aElement.context_menu().trigger(aMenu);
+                aElement.context_menu()(aMenu);
                 auto fontFormat = make_ref<action>("Font..."_t);
                 auto paragraphFormat = make_ref<action>("Paragraph..."_t);
                 fontFormat->Triggered([&]()

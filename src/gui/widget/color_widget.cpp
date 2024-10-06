@@ -52,7 +52,7 @@ namespace neogfx
         if (iColor != aColor)
         {
             iColor = aColor;
-            ColorChanged.trigger();
+            ColorChanged();
             update();
         }
     }

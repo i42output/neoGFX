@@ -145,7 +145,7 @@ namespace neogfx::DesignStudio
     i_element& project::create_element(i_element& aParent, const i_string& aType, const i_string& aElementId)
     {
         auto result = manager().library(aType).create_element(aParent, aType, aElementId);
-        ElementAdded.trigger(*result);
+        ElementAdded(*result);
         result->create_default_children();
         return *result;
     }
@@ -154,6 +154,6 @@ namespace neogfx::DesignStudio
     {
         ref_ptr<i_element> temp = aElement;
         aElement.parent().remove_child(aElement);
-        ElementRemoved.trigger(*temp);
+        ElementRemoved(*temp);
     }
 }

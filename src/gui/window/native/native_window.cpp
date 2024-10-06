@@ -189,7 +189,7 @@ namespace neogfx
     {
         destroyed_flag destroyed{ *this };
         neolib::scoped_counter<std::uint32_t> sc{ iProcessingEvent };
-        if (event_consumed(Filter.trigger(current_event())))
+        if (event_consumed(Filter(current_event())))
         {
             if (destroyed)
                 sc.ignore();
@@ -198,7 +198,7 @@ namespace neogfx
         if (std::holds_alternative<window_event>(current_event()))
         {
             auto& windowEvent = static_variant_cast<window_event&>(current_event());
-            if (event_consumed(surface_window().as_window().window_event().trigger(windowEvent)))
+            if (event_consumed(surface_window().as_window().window_event()(windowEvent)))
                 return;
             switch (windowEvent.type())
             {
@@ -383,7 +383,7 @@ namespace neogfx
                 keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
-                    keyboard.key_pressed().trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
+                    keyboard.key_pressed()(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                     surface_window().native_window_key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                 }
                 keyboard.clear_event_modifiers();
@@ -392,7 +392,7 @@ namespace neogfx
                 keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
-                    keyboard.key_released().trigger(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
+                    keyboard.key_released()(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                     surface_window().native_window_key_released(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers());
                 }
                 keyboard.clear_event_modifiers();
@@ -401,7 +401,7 @@ namespace neogfx
                 keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().text_input(string{ keyboardEvent.text() }))
                 {
-                    keyboard.text_input().trigger(keyboardEvent.text());
+                    keyboard.text_input()(keyboardEvent.text());
                     surface_window().native_window_text_input(string{ keyboardEvent.text() });
                 }
                 keyboard.clear_event_modifiers();
@@ -410,7 +410,7 @@ namespace neogfx
                 keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().sys_text_input(string{ keyboardEvent.text() }))
                 {
-                    keyboard.sys_text_input().trigger(keyboardEvent.text());
+                    keyboard.sys_text_input()(keyboardEvent.text());
                     surface_window().native_window_sys_text_input(string{ keyboardEvent.text() });
                 }
                 keyboard.clear_event_modifiers();
@@ -476,7 +476,7 @@ namespace neogfx
         surface_manager().display(surface_window()).update_dpi();
         iPixelDensityDpi = std::nullopt;
         surface_window().handle_dpi_changed();
-        surface_manager().dpi_changed().trigger(surface_window());
+        surface_manager().dpi_changed()(surface_window());
     }
 
     bool native_window::internal_window_activation() const

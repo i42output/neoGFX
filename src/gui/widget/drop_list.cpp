@@ -1070,7 +1070,7 @@ namespace neogfx
             {
                 neolib::scoped_flag sf{ iHandlingTextChange };
                 iSavedSelection = std::nullopt;
-                aInputWidget.text_changed().trigger();
+                aInputWidget.text_changed()();
                 if (aTextWidget.has_focus() && (!view_created() || !changing_text()))
                 {
                     if (!aTextWidget.text().empty())

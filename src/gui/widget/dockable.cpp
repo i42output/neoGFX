@@ -74,7 +74,7 @@ namespace neogfx
         if (has_layout_manager())
             layout_manager().layout_items();
         iDock = &aDock;
-        Docked.trigger(aDock);
+        Docked(aDock);
     }
 
     void dockable::undock()
@@ -84,7 +84,7 @@ namespace neogfx
         auto& dock = *iDock;
         dock.remove(ref_ptr{ static_cast<i_dockable&>(*this) });
         iDock = nullptr;
-        Undocked.trigger(dock);
+        Undocked(dock);
     }
 
     const i_widget& dockable::docked_widget() const

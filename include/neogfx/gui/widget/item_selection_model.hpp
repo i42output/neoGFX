@@ -171,13 +171,13 @@ namespace neogfx
                 iCurrentIndex = std::nullopt;
                 iSavedModelIndex = std::nullopt;
                 iSelection = {};
-                PresentationModelRemoved.trigger(*oldModel);
+                PresentationModelRemoved(*oldModel);
             });
 
             if (oldModel == nullptr)
-                PresentationModelAdded.trigger(presentation_model());
+                PresentationModelAdded(presentation_model());
             else
-                PresentationModelChanged.trigger(presentation_model(), *oldModel);
+                PresentationModelChanged(presentation_model(), *oldModel);
         }
     public:
         item_selection_mode mode() const override
@@ -189,7 +189,7 @@ namespace neogfx
             if (iMode == aMode)
                 return;
             iMode = aMode;
-            ModeChanged.trigger(mode());
+            ModeChanged(mode());
             clear(item_presentation_model_index{});
         }
     public:
@@ -352,7 +352,7 @@ namespace neogfx
                     presentation_model().cell_meta(item_presentation_model_index{ row, column }).selection &= ~item_cell_selection_flags::Selected;
             iPreviousSelection = iSelection;
             iSelection.clear();
-            SelectionChanged.trigger(iSelection, iPreviousSelection);
+            SelectionChanged(iSelection, iPreviousSelection);
             iPreviousSelection.clear();
         }
         void select(item_presentation_model_index const& aIndex, item_selection_operation aOperation) override
@@ -486,7 +486,7 @@ namespace neogfx
             if ((aOperation & item_selection_operation::Internal) != item_selection_operation::Internal)
             {
                 neolib::scoped_flag sf{ iNotifying };
-                SelectionChanged.trigger(iSelection, iPreviousSelection);
+                SelectionChanged(iSelection, iPreviousSelection);
             }
             update(iPreviousSelection, false);
             if ((aOperation & item_selection_operation::Internal) != item_selection_operation::Internal)
@@ -526,7 +526,7 @@ namespace neogfx
                 if (iCurrentIndex != std::nullopt)
                     presentation_model().cell_meta(*iCurrentIndex).selection = 
                         presentation_model().cell_meta(*iCurrentIndex).selection | item_cell_selection_flags::Current;
-                CurrentIndexChanged.trigger(iCurrentIndex, previousIndex);
+                CurrentIndexChanged(iCurrentIndex, previousIndex);
             }
         }
         void reindex()

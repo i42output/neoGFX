@@ -46,7 +46,7 @@ namespace neogfx
     void hid_devices::add_device(i_hid_device& aDevice)
     {
         auto newDevice = iDevices.insert(iDevices.end(), ref_ptr<i_hid_device>(aDevice));
-        DeviceConnected.trigger(aDevice);
+        DeviceConnected(aDevice);
     }
 
     void hid_devices::remove_device(i_hid_device& aDevice)
@@ -56,7 +56,7 @@ namespace neogfx
         if (existing != iDevices.end())
         {
             auto next = iDevices.erase(existing);
-            DeviceDisconnected.trigger(*detached);
+            DeviceDisconnected(*detached);
         }
     }
 

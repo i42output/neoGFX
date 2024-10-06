@@ -146,7 +146,7 @@ namespace chess
     {
         std::unique_lock lk{ iMutex };
         make(iPosition, aMove);
-        Moved.trigger(aMove);
+        Moved(aMove);
         return true;
     }
 
@@ -172,7 +172,7 @@ namespace chess
                 auto bestMove = execute();
                 iPlaying = false;
                 if (bestMove)
-                    Decided.trigger(*bestMove->move);
+                    Decided(*bestMove->move);
             }
         }
 

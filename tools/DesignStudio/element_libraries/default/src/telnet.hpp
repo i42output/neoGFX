@@ -98,11 +98,11 @@ namespace neogfx::DesignStudio
             });
             connection().ConnectionFailure([&](const boost::system::error_code& aError)
             {
-                ConnectionFailure.trigger(aError);
+                ConnectionFailure(aError);
             });
             connection().ConnectionClosed([&]()
             {
-                Disconnected.trigger();
+                Disconnected();
             });
         }
     private:
@@ -254,7 +254,7 @@ namespace neogfx::DesignStudio
             if (!temp.empty())
                 iBuffer = temp;
             if (!someText.empty())
-                Output.trigger(someText);
+                Output(someText);
         }
     private:
         std::optional<neolib::tcp_binary_packet_stream> iConnection;

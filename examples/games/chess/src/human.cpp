@@ -54,7 +54,7 @@ namespace chess
     bool human::play(move const& aMove)
     {
         iLastMove = aMove;
-        Moved.trigger(aMove);
+        Moved(aMove);
         return true;
     }
 

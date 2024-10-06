@@ -118,10 +118,10 @@ namespace neogfx
         size oldSize = minimum_size();
         size oldTextureSize = image().extents();
         iTexture = aTexture;
-        ImageChanged.trigger();
+        ImageChanged();
         if (oldSize != minimum_size() || oldTextureSize != image().extents())
         {
-            ImageGeometryChanged.trigger();
+            ImageGeometryChanged();
             if (visible() || effective_size_policy().ignore_visibility())
                 update_layout(true, true);
         }

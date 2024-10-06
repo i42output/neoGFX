@@ -144,7 +144,7 @@ namespace neogfx
             if (widget::has_root() && widget::root().has_native_window())
             {
                 iDeviceMetrics.emplace(*this);
-                DeviceMetricsUpdated.trigger(*this);
+                DeviceMetricsUpdated(*this);
             }
         }
         return iDeviceMetrics != std::nullopt;
@@ -228,7 +228,7 @@ namespace neogfx
             if (widget::root().has_native_window())
             {
                 iDeviceMetrics.emplace(*this);
-                DeviceMetricsUpdated.trigger(*this);
+                DeviceMetricsUpdated(*this);
             }
         }
     }
@@ -352,7 +352,7 @@ namespace neogfx
         child->set_singular(false);
         if (widget::has_root())
             widget::root().widget_added(*child);
-        ChildAdded.trigger(*child);
+        ChildAdded(*child);
         return *child;
     }
 
@@ -385,7 +385,7 @@ namespace neogfx
             widget::root().widget_removed(aChild);
         if (childDestroyed)
             return;
-        ChildRemoved.trigger(*keep);
+        ChildRemoved(*keep);
         aChildRef = keep;
     }
 
@@ -840,7 +840,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
         if (--iLayoutInProgress == 0)
         {
-            LayoutCompleted.trigger();
+            LayoutCompleted();
             update();
         }
     }
@@ -898,7 +898,7 @@ namespace neogfx
         }
         if (widget::is_root())
             widget::root().surface().move_surface(self.position());
-        PositionChanged.trigger();
+        PositionChanged();
     }
 
     template <WidgetInterface Interface>
@@ -909,7 +909,7 @@ namespace neogfx
         self.reset_origin();
         for (auto& child : iChildren)
             child->parent_moved();
-        ParentPositionChanged.trigger();
+        ParentPositionChanged();
     }
     
     template <WidgetInterface Interface>
@@ -947,7 +947,7 @@ namespace neogfx
 
         update(true);
         
-        SizeChanged.trigger();
+        SizeChanged();
         
         neolib::scoped_optional_if soi{ layout_reason(), neogfx::layout_reason::Resize };
 
@@ -1307,13 +1307,13 @@ namespace neogfx
 
             scoped_coordinate_system scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
-            Painting.trigger(aGc);
+            Painting(aGc);
 
             paint(aGc);
 
             scoped_coordinate_system scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
-            PaintingChildren.trigger(aGc);
+            PaintingChildren(aGc);
 
             typedef std::map<std::int32_t, std::vector<i_widget const*>> widget_layers_t;
             shared_thread_local(std::vector<std::unique_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
@@ -1353,7 +1353,7 @@ namespace neogfx
 
             scoped_coordinate_system scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
-            Painted.trigger(aGc);
+            Painted(aGc);
         }
 
         aGc.set_extents(self.extents());
@@ -1659,7 +1659,7 @@ namespace neogfx
                 else
                     mouse_left();
             }
-            VisibilityChanged.trigger();
+            VisibilityChanged();
             if (effectively_hidden())
                 release_focus();
             self.update_layout(true, true);
@@ -1888,14 +1888,14 @@ namespace neogfx
     inline void widget<Interface>::focus_gained(focus_reason aReason)
     {
         update(true);
-        Focus.trigger(focus_event::FocusGained, aReason);
+        Focus(focus_event::FocusGained, aReason);
     }
 
     template <WidgetInterface Interface>
     inline void widget<Interface>::focus_lost(focus_reason aReason)
     {
         update(true);
-        Focus.trigger(focus_event::FocusLost, aReason);
+        Focus(focus_event::FocusLost, aReason);
     }
 
     template <WidgetInterface Interface>
@@ -2068,7 +2068,7 @@ namespace neogfx
             mouseCursor = parent().mouse_cursor();
         if (!mouseCursor)
             mouseCursor = mouse_system_cursor::Arrow;
-        QueryMouseCursor.trigger(*mouseCursor);
+        QueryMouseCursor(*mouseCursor);
         return mouseCursor.value();
     }
 

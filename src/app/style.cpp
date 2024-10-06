@@ -294,7 +294,7 @@ namespace neogfx
 
     void style::handle_change(style_aspect aAspect)
     {
-        Changed.trigger(aAspect);
+        Changed(aAspect);
         if (&service<i_app>().current_style() == this)
             service<i_app>().current_style_changed().async_trigger(aAspect);
     }

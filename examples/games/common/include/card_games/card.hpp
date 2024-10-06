@@ -81,7 +81,7 @@ namespace neogames
             }
             ~basic_card()
             {
-                destroyed.trigger(*this);
+                destroyed(*this);
             }
             self_type& operator=(const self_type& aOther)
             {
@@ -131,12 +131,12 @@ namespace neogames
             void discard()
             {
                 iDiscarded = true;
-                changed.trigger(*this);
+                changed(*this);
             }
             void undiscard()
             {
                 iDiscarded = false;
-                changed.trigger(*this);
+                changed(*this);
             }
         public:
             std::string to_string() const

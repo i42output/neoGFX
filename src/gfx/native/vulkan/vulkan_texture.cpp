@@ -616,14 +616,14 @@ namespace neogfx
         bool alreadyActive = target_active();
         if (!alreadyActive)
         {
-            TargetActivating.trigger();
+            TargetActivating();
             service<i_rendering_engine>().activate_context(*this);
         }
         TODO;
         set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<std::int32_t>() });
         TODO;
         if (!alreadyActive)
-            TargetActivated.trigger();
+            TargetActivated();
     }
 
     template <typename T>
@@ -637,9 +637,9 @@ namespace neogfx
     {
         if (target_active())
         {
-            TargetDeactivating.trigger();
+            TargetDeactivating();
             service<i_rendering_engine>().deactivate_context();
-            TargetDeactivated.trigger();
+            TargetDeactivated();
             return;
         }
         throw not_active();

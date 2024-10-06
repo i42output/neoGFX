@@ -688,7 +688,7 @@ namespace neogfx
         bool alreadyActive = target_active();
         if (!alreadyActive)
         {
-            TargetActivating.trigger();
+            TargetActivating();
             service<i_rendering_engine>().activate_context(*this);
         }
         bind(10);
@@ -744,7 +744,7 @@ namespace neogfx
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         if (!alreadyActive)
-            TargetActivated.trigger();
+            TargetActivated();
     }
 
     template <typename T>
@@ -758,9 +758,9 @@ namespace neogfx
     {
         if (target_active())
         {
-            TargetDeactivating.trigger();
+            TargetDeactivating();
             service<i_rendering_engine>().deactivate_context();
-            TargetDeactivated.trigger();
+            TargetDeactivated();
             return;
         }
         throw not_active();

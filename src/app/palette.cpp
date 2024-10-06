@@ -91,7 +91,7 @@ namespace neogfx
             iPrimaryAccentColor = aOther.maybe_color(color_role::PrimaryAccent);
             iSecondaryAccentColor = aOther.maybe_color(color_role::SecondaryAccent);
             iVoidColor = aOther.maybe_color(color_role::Void);
-            Changed.trigger();
+            Changed();
         }
         return *this;
     }
@@ -362,7 +362,7 @@ namespace neogfx
             break;
         }
         if (maybe_color(aRole) != oldColor)
-            Changed.trigger();
+            Changed();
     }
 
     color palette::default_text_color_for_widget(const i_widget& aWidget) const

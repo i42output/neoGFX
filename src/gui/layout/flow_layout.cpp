@@ -125,6 +125,6 @@ namespace neogfx
             do_layout_items<layout::column_major<flow_layout>>(aPosition, aSize);
         if (has_parent_widget())
             parent_widget().layout_items_completed();
-        LayoutCompleted.trigger();
+        LayoutCompleted();
     }
 }

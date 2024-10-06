@@ -71,7 +71,7 @@ namespace neogfx::game
     {
         auto now = ecs().system<game::time>().world_time();
 
-        Animate.trigger(now);
+        Animate(now);
 
         std::scoped_lock<decltype(iLock)> lock{ iLock };
 

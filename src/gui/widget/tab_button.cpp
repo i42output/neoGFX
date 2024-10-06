@@ -395,9 +395,9 @@ namespace neogfx
             update_layout();
             update();
             if (is_selected())
-                Selected.trigger();
+                Selected();
             else if (is_deselected())
-                Deselected.trigger();
+                Deselected();
         }
     }
 

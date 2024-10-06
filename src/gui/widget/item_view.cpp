@@ -519,7 +519,7 @@ namespace neogfx
                 if (model().is_tree() && !actioned)
                     actioned = presentation_model().toggle_expanded(*item);
                 if (!actioned)
-                    CellAction.trigger(*item);
+                    CellAction(*item);
             }
         }
     }
@@ -549,7 +549,7 @@ namespace neogfx
         {
             auto item = item_at(aPosition);
             if (item != std::nullopt)
-                CellContextMenu.trigger(*item);
+                CellContextMenu(*item);
         }
     }
 
@@ -1150,7 +1150,7 @@ namespace neogfx
                     if (debug::item == this)
                         service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging object." << std::endl;
 #endif
-                    presentation_model().dragging_item().trigger(*iDragDropItem);
+                    presentation_model().dragging_item()(*iDragDropItem);
                 });
                 iDragDropSink += DraggingCancelled([&](i_drag_drop_object const&)
                 {
@@ -1158,7 +1158,7 @@ namespace neogfx
                     if (debug::item == this)
                         service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": dragging cancelled." << std::endl;
 #endif
-                    presentation_model().dragging_item_cancelled().trigger(*iDragDropItem);
+                    presentation_model().dragging_item_cancelled()(*iDragDropItem);
                     iDragDropItem = std::nullopt;
                 });
                 iDragDropSink += ObjectDroppedOnTarget([&](i_drag_drop_object const&, i_drag_drop_target& aTarget)
@@ -1167,7 +1167,7 @@ namespace neogfx
                     if (debug::item == this)
                         service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": object dropped." << std::endl;
 #endif
-                    presentation_model().item_dropped().trigger(*iDragDropItem, aTarget);
+                    presentation_model().item_dropped()(*iDragDropItem, aTarget);
                     iDragDropItem = std::nullopt;
                 });
             }

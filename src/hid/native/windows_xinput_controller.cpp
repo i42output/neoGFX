@@ -90,7 +90,7 @@ namespace neogfx
                 {
                     set_button_state(existing->second, key.Flags & XINPUT_KEYSTROKE_KEYDOWN);
                     if (key.Flags & XINPUT_KEYSTROKE_REPEAT)
-                        ButtonRepeat.trigger(existing->second, service<i_keyboard>().modifiers());
+                        ButtonRepeat(existing->second, service<i_keyboard>().modifiers());
                 }
             }
             XINPUT_STATE state = {};

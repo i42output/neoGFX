@@ -100,7 +100,7 @@ namespace neogfx
     void menu::set_title(i_string const& aTitle)
     {
         iTitle = aTitle;
-        MenuChanged.trigger();
+        MenuChanged();
     }
 
     const i_texture& menu::image() const
@@ -111,19 +111,19 @@ namespace neogfx
     void menu::set_image(i_string const& aUri)
     {
         iImage = neogfx::image{aUri};
-        MenuChanged.trigger();
+        MenuChanged();
     }
 
     void menu::set_image(const i_image& aImage)
     {
         iImage = aImage;
-        MenuChanged.trigger();
+        MenuChanged();
     }
 
     void menu::set_image(const i_texture& aTexture)
     {
         iImage = aTexture;
-        MenuChanged.trigger();
+        MenuChanged();
     }
 
     std::uint32_t menu::count() const
@@ -187,7 +187,7 @@ namespace neogfx
         auto& newItem = **iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aSubMenu));
         newItem.sub_menu().set_parent(*this);
         aItemIndex = update_grouping_separators(aItemIndex);
-        ItemAdded.trigger(aItemIndex);
+        ItemAdded(aItemIndex);
     }
 
     i_menu& menu::insert_sub_menu_at(item_index aItemIndex, i_string const& aSubMenuTitle, uuid const& aGroup)
@@ -196,7 +196,7 @@ namespace neogfx
         newItem.sub_menu().set_parent(*this);
         newItem.sub_menu().set_group(aGroup);
         aItemIndex = update_grouping_separators(aItemIndex);
-        ItemAdded.trigger(aItemIndex);
+        ItemAdded(aItemIndex);
         return newItem.sub_menu();
     }
 
@@ -209,14 +209,14 @@ namespace neogfx
     {
         iItems.insert(iItems.begin() + aItemIndex, std::make_unique<menu_item>(aAction));
         aItemIndex = update_grouping_separators(aItemIndex);
-        ItemAdded.trigger(aItemIndex);
+        ItemAdded(aItemIndex);
         auto insertedAction = ref_ptr<i_action>{ aAction };
         aAction->changed([this, insertedAction]()
         {
             for (item_index i = 0; i < iItems.size(); ++i)
                 if (iItems[i]->type() == menu_item_type::Action && &(iItems[i]->action()) == &*insertedAction)
                 {
-                    ItemChanged.trigger(i);
+                    ItemChanged(i);
                     return;
                 }
         });
@@ -233,7 +233,7 @@ namespace neogfx
         if (aItemIndex >= count())
             throw bad_item_index();
         iItems.erase(iItems.begin() + aItemIndex);
-        ItemRemoved.trigger(aItemIndex);
+        ItemRemoved(aItemIndex);
     }
 
     menu::item_index menu::find_sub_menu(uuid const& aGroup) const
@@ -282,10 +282,10 @@ namespace neogfx
         {
             auto selection = selected_item();
             iSelection = std::nullopt;
-            item_at(selection).deselected().trigger();
+            item_at(selection).deselected()();
         }
         iSelection = aItemIndex;
-        ItemSelected.trigger(item_at(aItemIndex));
+        ItemSelected(item_at(aItemIndex));
         item_at(aItemIndex).select(aOpenAnySubMenu);
     }
 
@@ -295,8 +295,8 @@ namespace neogfx
         {
             auto selection = selected_item();
             iSelection = std::nullopt;
-            item_at(selection).deselected().trigger();
-            SelectionCleared.trigger();
+            item_at(selection).deselected()();
+            SelectionCleared();
         }
     }
 
@@ -364,7 +364,7 @@ namespace neogfx
     {
         if (++iOpenCount == 1)
         {
-            Opened.trigger();
+            Opened();
         }
     }
 
@@ -376,7 +376,7 @@ namespace neogfx
         {
             if (has_selected_item())
                 clear_selection();
-            Closed.trigger();
+            Closed();
         }
     }
 

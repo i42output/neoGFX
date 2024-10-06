@@ -126,7 +126,7 @@ namespace neogfx
         //iSample.set_paragraph_format(iSelectedParagraphFormat);
         
         if (iSelectedParagraphFormat != oldSelectedParagraphFormat)
-            SelectionChanged.trigger();
+            SelectionChanged();
 
         update_widgets();
     }

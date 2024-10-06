@@ -445,10 +445,10 @@ namespace neogfx
                 iSizePicker->selection_model().clear_current_index();
 
             if (iSelectedFont != oldFont)
-                SelectionChanged.trigger();
+                SelectionChanged();
         }
         else
-            SelectionChanged.trigger();
+            SelectionChanged();
     }
 
     void font_widget::update_selected_format(const i_widget& aUpdatingWidget)
@@ -457,6 +457,6 @@ namespace neogfx
             return;
         neolib::scoped_flag sf{ iUpdating };
 
-        SelectionChanged.trigger();
+        SelectionChanged();
     }
 }

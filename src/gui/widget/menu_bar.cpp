@@ -113,7 +113,7 @@ namespace neogfx
                 if (selectedItem.type() == menu_item_type::SubMenu)
                 {
                     if (!selectedItem.sub_menu().is_open())
-                        OpenSubMenu.trigger(selectedItem.sub_menu());
+                        OpenSubMenu(selectedItem.sub_menu());
                     if (selectedItem.sub_menu().has_available_items())
                         selectedItem.sub_menu().select_item_at(selectedItem.sub_menu().first_available_item(), false);
                 }
@@ -131,7 +131,7 @@ namespace neogfx
                     clear_selection();
                 }
                 else if (selectedItem.type() == menu_item_type::SubMenu && !selectedItem.sub_menu().is_open())
-                    OpenSubMenu.trigger(selectedItem.sub_menu());
+                    OpenSubMenu(selectedItem.sub_menu());
             }
             break;
         case ScanCode_ESCAPE:
@@ -192,7 +192,7 @@ namespace neogfx
                 {
                     close_sub_menu(false);
                     if (aMenuItem.type() == menu_item_type::SubMenu)
-                        OpenSubMenu.trigger(aMenuItem.sub_menu());
+                        OpenSubMenu(aMenuItem.sub_menu());
                 }
             }
             update();

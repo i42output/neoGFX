@@ -313,7 +313,7 @@ namespace neogfx::DesignStudio
                             aElement.set_mode(element_mode::None);
                     });
                 }
-                ModeChanged.trigger();
+                ModeChanged();
             }
         }
         bool is_selected() const override
@@ -325,7 +325,7 @@ namespace neogfx::DesignStudio
             if (iSelected != aSelected)
             {
                 iSelected = aSelected;
-                SelectionChanged.trigger();
+                SelectionChanged();
             }
             if (aDeselectRest)
             {

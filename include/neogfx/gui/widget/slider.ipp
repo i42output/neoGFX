@@ -52,7 +52,7 @@ namespace neogfx
     inline void basic_slider<T>::set_minimum(value_type aMinimum)
     {
         iMinimum = aMinimum;
-        ConstraintsChanged.trigger();
+        ConstraintsChanged();
         if (iValue < minimum())
             set_value(minimum());
     }
@@ -67,7 +67,7 @@ namespace neogfx
     inline void basic_slider<T>::set_maximum(value_type aMaximum)
     {
         iMaximum = aMaximum;
-        ConstraintsChanged.trigger();
+        ConstraintsChanged();
         if (iValue > maximum())
             set_value(maximum());
     }
@@ -82,7 +82,7 @@ namespace neogfx
     inline void basic_slider<T>::set_step(value_type aStep)
     {
         iStep = aStep;
-        ConstraintsChanged.trigger();
+        ConstraintsChanged();
     }
 
     template <typename T>
@@ -102,7 +102,7 @@ namespace neogfx
             if (!handling_event())
                 ValueChanged.sync_trigger();
             else
-                ValueChanged.trigger();
+                ValueChanged();
         }
     }
 

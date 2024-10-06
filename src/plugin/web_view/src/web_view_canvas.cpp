@@ -387,7 +387,7 @@ namespace neogfx
         if (frame->IsMain())
         {
             std::string const url = frame->GetURL();
-            NavigatedTo.trigger(string{ url });
+            NavigatedTo(string{ url });
         }
     }
 

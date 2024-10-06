@@ -79,7 +79,7 @@ namespace neogfx
             if (!iEnabled)
             {
                 iEnabled = true;
-                Enabled.trigger();
+                Enabled();
             }
         }
         void disable() override
@@ -87,7 +87,7 @@ namespace neogfx
             if (iEnabled)
             {
                 iEnabled = false;
-                Disabled.trigger();
+                Disabled();
             }
         }
     public:

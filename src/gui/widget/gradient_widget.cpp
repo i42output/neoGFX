@@ -138,7 +138,7 @@ namespace neogfx
             set_current_color_stop(std::nullopt);
             set_current_alpha_stop(std::nullopt);
             update();
-            GradientChanged.trigger();
+            GradientChanged();
         }
     }
 
@@ -273,21 +273,21 @@ namespace neogfx
                     else if (iCurrentAlphaStop != std::nullopt)
                         (**iCurrentAlphaStop).second() = iSelection.alpha_at(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);
                     update();
-                    GradientChanged.trigger();
+                    GradientChanged();
                 }
                 else if (aPosition.y < contents_rect().top())
                 {
                     set_current_alpha_stop(iSelection.insert_alpha_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
                     set_current_color_stop(std::nullopt);
                     update();
-                    GradientChanged.trigger();
+                    GradientChanged();
                 }
                 else if (aPosition.y >= contents_rect().bottom())
                 {
                     set_current_color_stop(iSelection.insert_color_stop(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0));
                     set_current_alpha_stop(std::nullopt);
                     update();
-                    GradientChanged.trigger();
+                    GradientChanged();
                 }
             }
         }
@@ -319,7 +319,7 @@ namespace neogfx
                         as->second() = color.alpha();
                     }
                     update();
-                    GradientChanged.trigger();
+                    GradientChanged();
                 };
                 cd.SelectionChanged([&]()
                 {
@@ -339,7 +339,7 @@ namespace neogfx
                 {
                     stop.second() = ad.selected_alpha();
                     update();
-                    GradientChanged.trigger();
+                    GradientChanged();
                 }
             }
         }
@@ -395,7 +395,7 @@ namespace neogfx
                                 as->second() = color.alpha();
                             }
                             update();
-                            GradientChanged.trigger();
+                            GradientChanged();
                         };
                         cd.SelectionChanged([&]()
                         {
@@ -427,7 +427,7 @@ namespace neogfx
                         if (iter != next)
                             iSelection.insert_color_stop(p2)->second() = c;
                         update();
-                        GradientChanged.trigger();
+                        GradientChanged();
                     });
                     auto deleteStopAction = make_ref<action>("Delete stop"_t);
                     deleteStopAction->Triggered([this, iter]()
@@ -435,7 +435,7 @@ namespace neogfx
                         set_current_color_stop(std::nullopt);
                         iSelection.color_stops().erase(iter);
                         update();
-                        GradientChanged.trigger();
+                        GradientChanged();
                     });
                     if (iSelection.color_stops().size() <= 2)
                         deleteStopAction->disable();
@@ -460,7 +460,7 @@ namespace neogfx
                         {
                             stop.second() = ad.selected_alpha();
                             update();
-                            GradientChanged.trigger();
+                            GradientChanged();
                         }
                     });
                     auto splitStopAction = make_ref<action>("Split stop"_t);
@@ -483,7 +483,7 @@ namespace neogfx
                         if (iter != next)
                             iSelection.insert_alpha_stop(p2)->second() = a;
                         update();
-                        GradientChanged.trigger();
+                        GradientChanged();
                     });
                     auto deleteStopAction = make_ref<action>("Delete stop");
                     deleteStopAction->Triggered([this, stopIter]()
@@ -492,7 +492,7 @@ namespace neogfx
                             set_current_alpha_stop(std::nullopt);
                         iSelection.alpha_stops().erase(static_variant_cast<gradient::alpha_stop_list::iterator>(stopIter));
                         update();
-                        GradientChanged.trigger();
+                        GradientChanged();
                     });
                     if (iSelection.alpha_stops().size() <= 2)
                         deleteStopAction->disable();
@@ -539,7 +539,7 @@ namespace neogfx
                         leftStop == *iCurrentColorStop ? 0.0 : leftStop->first() + min),
                         rightStop == *iCurrentColorStop ? 1.0 : rightStop->first() - min);
                 update();
-                GradientChanged.trigger();
+                GradientChanged();
             }
             else if (iCurrentAlphaStop != std::nullopt)
             {
@@ -554,7 +554,7 @@ namespace neogfx
                         leftStop == *iCurrentAlphaStop ? 0.0 : leftStop->first() + min),
                         rightStop == *iCurrentAlphaStop ? 1.0 : rightStop->first() - min);
                 update();
-                GradientChanged.trigger();
+                GradientChanged();
             }
         }
     }
@@ -622,9 +622,9 @@ namespace neogfx
         {
             iCurrentColorStop = aStop;
             if (iCurrentColorStop)
-                ColorStopSelected.trigger();
+                ColorStopSelected();
             else
-                ColorStopDeselected.trigger();
+                ColorStopDeselected();
         }
     }
 
@@ -634,9 +634,9 @@ namespace neogfx
         {
             iCurrentAlphaStop = aStop;
             if (iCurrentAlphaStop)
-                AlphaStopSelected.trigger();
+                AlphaStopSelected();
             else
-                AlphaStopDeselected.trigger();
+                AlphaStopDeselected();
         }
     }
 

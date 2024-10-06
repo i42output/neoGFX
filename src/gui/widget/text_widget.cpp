@@ -158,10 +158,10 @@ namespace neogfx
             size oldSize = minimum_size();
             iText = aText;
             reset_cache();
-            TextChanged.trigger();
+            TextChanged();
             if (oldSize != minimum_size())
             {
-                TextGeometryChanged.trigger();
+                TextGeometryChanged();
                 if (visible() || effective_size_policy().ignore_visibility())
                     update_layout(true, true);
             }

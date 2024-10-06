@@ -179,8 +179,8 @@ namespace neogfx::DesignStudio
             {
                 cerr << "Unknown error" << std::endl;
             }
-            output().trigger(boost::replace_all_copy(cout.str(), "\n", "\r\n"));
-            output().trigger(boost::replace_all_copy(cerr.str(), "\n", "\r\n"));
+            output()(boost::replace_all_copy(cout.str(), "\n", "\r\n"));
+            output()(boost::replace_all_copy(cerr.str(), "\n", "\r\n"));
             cout.str({});
             cerr.str({});
             std::filesystem::current_path(previousCurrentPath);

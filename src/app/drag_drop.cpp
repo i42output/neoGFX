@@ -34,7 +34,7 @@ namespace neogfx
         if (existing == iSources.end())
         {
             iSources.push_back(sources_t::value_type{ sources_t::value_type{}, &aSource });
-            SourceRegistered.trigger(aSource);
+            SourceRegistered(aSource);
         }
     }
 
@@ -49,7 +49,7 @@ namespace neogfx
         if (existing != iSources.end())
         {
             iSources.erase(existing);
-            SourceUnregistered.trigger(aSource);
+            SourceUnregistered(aSource);
         }
     }
 
@@ -59,7 +59,7 @@ namespace neogfx
         if (existing == iTargets.end())
         {
             iTargets.push_back(&aTarget);
-            TargetRegistered.trigger(aTarget);
+            TargetRegistered(aTarget);
         }
     }
 
@@ -69,7 +69,7 @@ namespace neogfx
         if (existing != iTargets.end())
         {
             iTargets.erase(existing);
-            TargetUnregistered.trigger(aTarget);
+            TargetUnregistered(aTarget);
         }
     }
 

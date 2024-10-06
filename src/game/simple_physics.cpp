@@ -89,7 +89,7 @@ namespace neogfx::game
             }
             start_update(1);
             didWork = true;
-            ecs().system<game_world>().ApplyingPhysics.trigger(worldClock.time);
+            ecs().system<game_world>().ApplyingPhysics(worldClock.time);
             start_update(2);
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
@@ -137,7 +137,7 @@ namespace neogfx::game
             if (ecs().system_instantiated<animator>() && ecs().system<animator>().can_apply())
                 ecs().system<animator>().apply();
             ecs().system<game::time>().apply();
-            ecs().system<game_world>().PhysicsApplied.trigger(worldClock.time);
+            ecs().system<game_world>().PhysicsApplied(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ ecs() };
             worldClock.time = nextTime;
             currentTimestep = std::min(static_cast<i64>(currentTimestep * worldClock.timestepGrowth), std::max(worldClock.timestep, worldClock.maximumTimestep));
