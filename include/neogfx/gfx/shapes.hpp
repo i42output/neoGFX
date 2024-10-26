@@ -34,10 +34,10 @@ namespace neogfx
 
     struct unsupported_mesh_type : std::logic_error { unsupported_mesh_type() : std::logic_error("neogfx::unsupported_mesh_type") {} };
 
-    template <std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline void calc_rect_vertices(vec3_array<VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44& aTransformation = {})
+    template <typename Vertex, std::size_t VertexCount, typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline void calc_rect_vertices(neolib::static_vector<Vertex, VertexCount>& aResult, const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44f& aTransformation = {})
     {
-        auto const& transformableRect = aTransformation ? aRect.with_centered_origin() : aRect;
+        auto const& transformableRect = (aTransformation ? aRect.with_centered_origin() : aRect).as<typename Vertex::value_type>();
         aResult.clear();
         switch(aType)
         {
@@ -68,19 +68,23 @@ namespace neogfx
             aResult.push_back(transformableRect.top_left().to_vec3());
             break;
         }
+        auto const center = aRect.center().to_vec3().as<typename Vertex::value_type>();
         if (aTransformation)
             for (auto& v : aResult)
-                v = *aTransformation * v + aRect.center().to_vec3();
+                v = *aTransformation * v + center;
     }
 
-    template <typename CoordinateType, logical_coordinate_system CoordinateSystem>
-    inline vec3_array<8> const& rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44& aTransformation = {})
+    template <typename Vertex, typename CoordinateType, logical_coordinate_system CoordinateSystem>
+    inline neolib::static_vector<Vertex, 8> const& rect_vertices(const basic_rect<CoordinateType, CoordinateSystem>& aRect, mesh_type aType, const optional_mat44f& aTransformation = {})
     {
-        thread_local vec3_array<8> result;
+        thread_local neolib::static_vector<Vertex, 8> result;
         calc_rect_vertices(result, aRect, aType, aTransformation);
         return result;
     };
-    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, std::uint32_t aArcSegments = 0);
-    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, std::uint32_t aArcSegments = 0);
-    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, std::uint32_t aArcSegments = 0);
+    template <typename Vertex>
+    std::vector<Vertex> arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, std::uint32_t aArcSegments = 0);
+    template <typename Vertex>
+    std::vector<Vertex> circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, std::uint32_t aArcSegments = 0);
+    template <typename Vertex>
+    std::vector<Vertex> rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, std::uint32_t aArcSegments = 0);
 }

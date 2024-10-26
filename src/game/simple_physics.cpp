@@ -39,7 +39,7 @@ namespace neogfx::game
         if (!ecs().shared_component_registered<physics>())
             ecs().register_shared_component<physics>();
         if (ecs().shared_component<physics>().component_data().empty())
-            ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11 });
+            ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11f });
         start_thread_if();
     }
 
@@ -72,7 +72,7 @@ namespace neogfx::game
         auto& worldClock = ecs().shared_component<game::clock>()[0];
         auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
-            *physicalConstants.uniformGravity : vec3{};
+            *physicalConstants.uniformGravity : vec3f{};
         auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
         auto currentTimestep = worldClock.timestep;
@@ -103,7 +103,7 @@ namespace neogfx::game
                 auto const& entity1Info = ecs().component<entity_info>().entity_record(entity1);
                 if (entity1Info.destroyed)
                     continue; // todo: add support for skip iterators
-                vec3 totalForce = rigidBody1.mass * uniformGravity;
+                vec3f totalForce = rigidBody1.mass * uniformGravity;
                 if (useUniversalGravitation)
                 {
                     for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
@@ -113,9 +113,9 @@ namespace neogfx::game
                         auto const& entity2Info = ecs().component<entity_info>().entity_record(entity2);
                         if (entity2Info.destroyed)
                             continue; // todo: add support for skip iterators
-                        vec3 distance = rigidBody1.position - rigidBody2.position;
-                        if (distance.magnitude() > 0.0) // avoid division by zero or rigidBody1 == rigidBody2
-                            totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0);
+                        vec3f distance = rigidBody1.position - rigidBody2.position;
+                        if (distance.magnitude() > 0.0f) // avoid division by zero or rigidBody1 == rigidBody2
+                            totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0f);
                     }
                 }
                 // GCSE-level physics (Newtonian) going on here... :)
@@ -124,10 +124,10 @@ namespace neogfx::game
                 auto v0 = rigidBody1.velocity;
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
-                auto elapsedTime = from_step_time(nextTime - worldClock.time);
-                rigidBody1.velocity = v0 + ((rigidBody1.mass == 0 ? vec3{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3{ elapsedTime, elapsedTime, elapsedTime });
-                rigidBody1.position = rigidBody1.position + vec3{ 1.0, 1.0, 1.0 }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0);
-                rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0 * boost::math::constants::pi<scalar>());
+                auto elapsedTime = static_cast<float>(from_step_time(nextTime - worldClock.time));
+                rigidBody1.velocity = v0 + ((rigidBody1.mass == 0.0f ? vec3f{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3f{ elapsedTime, elapsedTime, elapsedTime });
+                rigidBody1.position = rigidBody1.position + vec3f{ 1.0f, 1.0f, 1.0f }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0f);
+                rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0f * boost::math::constants::pi<float>());
                 if (p0 != rigidBody1.position || a0 != rigidBody1.angle)
                     set_render_cache_dirty(ecs(), entity1);
             }

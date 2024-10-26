@@ -42,7 +42,7 @@ namespace neogfx::game
                     { to_ecs_component(aTextFormat.ink()) },
                     aTextFormat.effect() ? aTextFormat.effect()->type() : text_effect_type::None,
                     { aTextFormat.effect() ? to_ecs_component(aTextFormat.effect()->color()) : game::material{} },
-                    aTextFormat.effect() ? aTextFormat.effect()->width() : 0.0
+                    aTextFormat.effect() ? static_cast<float>(aTextFormat.effect()->width()) : 0.0f
                 });
             game::text_mesh::meta::update(textMesh, aEcs, aGc, id());
         }

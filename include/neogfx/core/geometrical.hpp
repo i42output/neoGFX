@@ -792,6 +792,7 @@ namespace neogfx
         explicit basic_rect(const size_type& dimensions) : point_type{}, size_type{ dimensions } {}
         basic_rect(coordinate_type x0, coordinate_type y0, coordinate_type x1, coordinate_type y1) : point_type{ x0, y0 }, size_type{ x1 - x0, y1 - y0 } {}
         basic_rect(const aabb_2d& aBoundingBox) : basic_rect{ aBoundingBox.min.x, aBoundingBox.min.y, aBoundingBox.max.x, aBoundingBox.max.y } {}
+        basic_rect(const aabb_2df& aBoundingBox) : basic_rect{ aBoundingBox.min.x, aBoundingBox.min.y, aBoundingBox.max.x, aBoundingBox.max.y } {}
         basic_rect(const basic_box_areas<coordinate_type>& aBoxAreas) : basic_rect{ aBoxAreas.top_left(), aBoxAreas.bottom_right() } {}
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
@@ -996,6 +997,13 @@ namespace neogfx
             else
                 return aabb_2d{ bottom_left().to_vec2(), top_right().to_vec2() };
         }
+        aabb_2df to_aabb_2df() const
+        {
+            if constexpr (gui)
+                return aabb_2df{ top_left().to_vec2().as<float>(), bottom_right().to_vec2().as<float>() };
+            else
+                return aabb_2df{ bottom_left().to_vec2().as<float>(), top_right().to_vec2().as<float>() };
+        }
         basic_vector<coordinate_type, 4> to_vec4() const
         {
             return basic_vector<coordinate_type, 4>{ top_left().x, top_left().y, bottom_right().x, bottom_right().y };
@@ -1003,6 +1011,10 @@ namespace neogfx
         quad to_quad() const
         {
             return quad{ top_left().to_vec3(), top_right().to_vec3(), bottom_right().to_vec3(), bottom_left().to_vec3() };
+        }
+        quadf to_quadf() const
+        {
+            return quadf{ top_left().to_vec3().as<float>(), top_right().to_vec3().as<float>(), bottom_right().to_vec3().as<float>(), bottom_left().to_vec3().as<float>() };
         }
     public:
         template <typename T>
@@ -1241,6 +1253,11 @@ namespace neogfx
     };
 
     using line      = basic_line<coordinate>;
+
+    using size_f32 = basic_size<float>;
+    using delta_f32 = basic_delta<float>;
+    using point_f32 = basic_point<float>;
+    using rect_f32 = basic_rect<float>;
 
     using size_i32  = basic_size<std::int32_t>;
     using delta_i32 = basic_delta<std::int32_t>;

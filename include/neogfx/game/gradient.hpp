@@ -29,7 +29,7 @@ namespace neogfx::game
     struct gradient
     {
         neolib::cookie_ref_ptr id;
-        std::optional<aabb_2d> boundingBox;
+        std::optional<aabb_2df> boundingBox;
 
         struct meta : i_component_data::meta
         {
@@ -54,7 +54,7 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Id;
                 case 1:
-                    return component_data_field_type::Aabb2d | component_data_field_type::Optional;
+                    return component_data_field_type::Aabb2df | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

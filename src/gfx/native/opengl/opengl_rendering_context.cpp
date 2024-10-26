@@ -108,9 +108,9 @@ namespace neogfx
             std::size_t iPass;
         };
 
-        inline vertices line_loop_to_lines(const vertices& aLineLoop, bool aClosed = true)
+        inline verticesf line_loop_to_lines(const verticesf& aLineLoop, bool aClosed = true)
         {
-            vertices result;
+            verticesf result;
             result.reserve(aLineLoop.size() * 2);
             for (auto v = aLineLoop.begin(); v != aLineLoop.end(); ++v)
             {
@@ -123,30 +123,30 @@ namespace neogfx
             return result;
         }
 
-        inline vertices line_strip_to_lines(const vertices& aLineStrip, bool aClosed = true)
+        inline verticesf line_strip_to_lines(const verticesf& aLineStrip, bool aClosed = true)
         {
             return line_loop_to_lines(aLineStrip, false);
         }
 
-        inline quad line_to_quad(const vec3& aStart, const vec3& aEnd, double aLineWidth)
+        inline quadf line_to_quad(const vec3f& aStart, const vec3f& aEnd, float aLineWidth)
         {
             auto const vecLine = aEnd - aStart;
             auto const length = vecLine.magnitude();
-            auto const halfWidth = aLineWidth / 2.0;
-            auto const v1 = vec3{ -halfWidth, -halfWidth, 0.0 };
-            auto const v2 = vec3{ -halfWidth, halfWidth, 0.0 };
-            auto const v3 = vec3{ length + halfWidth, halfWidth, 0.0 };
-            auto const v4 = vec3{ length + halfWidth, -halfWidth, 0.0 };
-            auto const r = rotation_matrix(vec3{ 1.0, 0.0, 0.0 }, vecLine);
-            return quad{ aStart + r * v1, aStart + r * v2, aStart + r * v3, aStart + r * v4 };
+            auto const halfWidth = aLineWidth / 2.0f;
+            auto const v1 = vec3f{ -halfWidth, -halfWidth, 0.0f };
+            auto const v2 = vec3f{ -halfWidth, halfWidth, 0.0f };
+            auto const v3 = vec3f{ length + halfWidth, halfWidth, 0.0f };
+            auto const v4 = vec3f{ length + halfWidth, -halfWidth, 0.0f };
+            auto const r = rotation_matrix(vec3f{ 1.0f, 0.0f, 0.0f }, vecLine);
+            return quadf{ aStart + r * v1, aStart + r * v2, aStart + r * v3, aStart + r * v4 };
         }
 
         template <typename VerticesIn, typename VerticesOut>
-        inline void lines_to_quads(const VerticesIn& aLines, double aLineWidth, VerticesOut& aQuads)
+        inline void lines_to_quads(const VerticesIn& aLines, float aLineWidth, VerticesOut& aQuads)
         {
             for (auto v = aLines.begin(); v != aLines.end(); v += 2)
             {
-                quad const q = line_to_quad(v[0], v[1], aLineWidth);
+                quadf const q = line_to_quad(v[0], v[1], aLineWidth);
                 aQuads.insert(aQuads.end(), q.begin(), q.end());
             }
         }
@@ -184,10 +184,10 @@ namespace neogfx
             }
         }
 
-        inline vertices path_vertices(const path& aPath, const path::sub_path_type& aSubPath, double aLineWidth, GLenum& aMode)
+        inline verticesf path_vertices(const path& aPath, const path::sub_path_type& aSubPath, float aLineWidth, GLenum& aMode)
         {
             aMode = path_shape_to_gl_mode(aPath.shape());
-            thread_local neogfx::vertices vertices;
+            thread_local neogfx::verticesf vertices;
             aPath.to_vertices(aSubPath, vertices);
             if (aMode == GL_LINE_LOOP)
             {
@@ -202,12 +202,12 @@ namespace neogfx
             if (aMode == GL_LINES)
             {
                 aMode = GL_QUADS;
-                lines_to_quads(neogfx::vertices{ std::move(vertices) }, aLineWidth, vertices);
+                lines_to_quads(neogfx::verticesf{ std::move(vertices) }, aLineWidth, vertices);
             }
             if (aMode == GL_QUADS)
             {
                 aMode = GL_TRIANGLES;
-                quads_to_triangles(neogfx::vertices{ std::move(vertices) }, vertices);
+                quads_to_triangles(neogfx::verticesf{ std::move(vertices) }, vertices);
             }
             return vertices;
         }
@@ -910,7 +910,7 @@ namespace neogfx
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(*op);
-                auto rectVertices = rect_vertices(rect{ drawOp.point, size{1.0, 1.0} }, mesh_type::Triangles);
+                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point, size{1.0, 1.0} }, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
                             vec4f{{
@@ -941,7 +941,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(*op);
                 auto boundingRect = rect{ drawOp.from.min(drawOp.to), drawOp.from.max(drawOp.to) }.inflated(drawOp.pen.width());
-                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
@@ -987,7 +987,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(*op);
                 auto boundingRect = rect{ drawOp.p0.min(drawOp.p1.min(drawOp.p2)), drawOp.p0.max(drawOp.p1.max(drawOp.p2)) }.inflated(drawOp.pen.width());
-                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
@@ -1080,7 +1080,7 @@ namespace neogfx
 
                 auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
                 auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
-                auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
@@ -1131,7 +1131,7 @@ namespace neogfx
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
                 auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
                 auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
-                auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
@@ -1182,7 +1182,7 @@ namespace neogfx
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(*op);
                 auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
                 auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
-                auto const vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
@@ -1250,7 +1250,7 @@ namespace neogfx
                                 auto const square = rect{ drawOp.rect.top_left() + point{ x, y }, drawOp.squareSize };
                                 auto const& fill = (step == 0 ? drawOp.fill1 : drawOp.fill2);
                                 auto const function = to_function(fill, square);
-                                auto rectVertices = rect_vertices(square, mesh_type::Triangles);
+                                auto rectVertices = rect_vertices<vec3f>(square, mesh_type::Triangles);
                                 for (auto const& v : rectVertices)
                                     vertexArrays.push_back({ v,
                                         std::holds_alternative<color>(fill) ? static_variant_cast<color>(fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
@@ -1287,7 +1287,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*op);
                 auto boundingRect = rect{ drawOp.center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
-                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
@@ -1337,7 +1337,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(*op);
                 auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
-                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
@@ -1387,7 +1387,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(*op);
                 auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
-                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
@@ -1437,7 +1437,7 @@ namespace neogfx
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(*op);
                 auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
-                auto vertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                 auto const function = to_function(drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
@@ -1482,7 +1482,7 @@ namespace neogfx
 
             auto r = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
             auto const function = to_function(aPen.color(), r);
-            auto rectVertices = rect_vertices(r, mesh_type::Triangles);
+            auto rectVertices = rect_vertices<vec3f>(r, mesh_type::Triangles);
             if (aPen.width())
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
@@ -1520,7 +1520,7 @@ namespace neogfx
                     use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
 
                     auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0);
-                    auto boundingRectVertices = rect_vertices(boundingRect, mesh_type::Triangles);
+                    auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
                     auto const function = to_function(aPen.color(), boundingRect);
 
                     for (auto const& v : boundingRectVertices)
@@ -1575,10 +1575,10 @@ namespace neogfx
         auto const& vertices = aMesh.vertices;
 
         auto lines = line_loop_to_lines(vertices);
-        thread_local vec3_list quads;
+        thread_local vec3f_list quads;
         quads.clear();
-        lines_to_quads(lines, aPen.width(), quads);
-        thread_local vec3_list triangles;
+        lines_to_quads(lines, static_cast<float>(aPen.width()), quads);
+        thread_local vec3f_list triangles;
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
@@ -1587,7 +1587,7 @@ namespace neogfx
         auto const function = to_function(aPen.color(), bounding_rect(aMesh));
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v + aPosition, 
+            vertexArrays.push_back({ v + aPosition.as<float>(),
                 std::holds_alternative<color>(aPen.color()) ? 
                     static_variant_cast<color>(aPen.color()).as<float>() : 
                     vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
@@ -1638,16 +1638,16 @@ namespace neogfx
                 drawables[meshRenderer.layer].emplace_back(
                     meshFilter,
                     meshRenderer,
-                    optional_mat44{},
+                    optional_mat44f{},
                     entity);
                 if (!game::is_render_cache_clean_no_lock(cache, entity))
                 {
                     auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
-                        to_transformation_matrix(rigidBodies.entity_record_no_lock(entity)) : mat44::identity());
+                        to_transformation_matrix(rigidBodies.entity_record_no_lock(entity)) : mat44f::identity());
                     auto const& meshFilterTransformation = (meshFilter.transformation ?
-                        *meshFilter.transformation : mat44::identity());
+                        *meshFilter.transformation : mat44f::identity());
                     auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record_no_lock(entity) ?
-                        to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44::identity());
+                        to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44f::identity());
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                     drawables[meshRenderer.layer].back().transformation = transformation;
                 }
@@ -1681,17 +1681,17 @@ namespace neogfx
 
             auto const& vertices = aMesh.vertices;
             auto const& uv = aMesh.uv;
-            vec3 min, max;
+            vec3f min, max;
             if (std::holds_alternative<gradient>(aFill))
             {
                 min = vertices[0].xyz;
                 max = min;
                 for (auto const& v : vertices)
                 {
-                    min.x = std::min(min.x, v.x + aPosition.x);
-                    max.x = std::max(max.x, v.x + aPosition.x);
-                    min.y = std::min(min.y, v.y + aPosition.y);
-                    max.y = std::max(max.y, v.y + aPosition.y);
+                    min.x = std::min(min.x, v.x + aPosition.as<float>().x);
+                    max.x = std::max(max.x, v.x + aPosition.as<float>().x);
+                    min.y = std::min(min.y, v.y + aPosition.as<float>().y);
+                    max.y = std::max(max.y, v.y + aPosition.as<float>().y);
                 }
             }
             auto const function = to_function(aFill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
@@ -1703,7 +1703,7 @@ namespace neogfx
                 {
                     auto const& v = vertices[vi];
                     vertexArrays.push_back({
-                        v + aPosition,
+                        v + aPosition.as<float>(),
                         std::holds_alternative<color>(aFill) ? 
                             static_variant_cast<color>(aFill).as<float>() : 
                             vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
@@ -1877,7 +1877,7 @@ namespace neogfx
                         
                     if (drawOp.appearance->paper() != std::nullopt && !drawOp.appearance->being_filtered())
                     {
-                        auto const& mesh = to_ecs_component(drawOp.point + quad{ glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3] }, mesh_type::Triangles);
+                        auto const& mesh = to_ecs_component(drawOp.point.as<float>() + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
 
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
                         meshRenderers.push_back(
@@ -1916,7 +1916,7 @@ namespace neogfx
                             filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width() });
 
                         filter->front_buffer().draw_glyph(
-                            drawOp.point + drawOp.appearance->effect()->offset(),
+                            drawOp.point.as<scalar>() + drawOp.appearance->effect()->offset(),
                             glyphText,
                             glyphChar,
                             drawOp.appearance->as_being_filtered());
@@ -1931,11 +1931,11 @@ namespace neogfx
                     if (is_whitespace(glyphChar) || !is_emoji(glyphChar))
                         continue;
 
-                    auto const& glyphQuad = quad{
+                    auto const& glyphQuad = quadf_2d{
                         (glyphChar.cell[0] + glyphChar.shape[0]).round(),
                         (glyphChar.cell[0] + glyphChar.shape[1]).round(),
                         (glyphChar.cell[0] + glyphChar.shape[2]).round(),
-                        (glyphChar.cell[0] + glyphChar.shape[3]).round() } + drawOp.point;
+                        (glyphChar.cell[0] + glyphChar.shape[3]).round() } + ~drawOp.point.as<float>().xy;
 
                     auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
 
@@ -1950,7 +1950,7 @@ namespace neogfx
                             game::material
                             {
                                 std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
+                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) })) : std::optional<game::gradient>{},
                                 {}, 
                                 to_ecs_component(emojiTexture),
                                 !drawOp.appearance->being_filtered() ?
@@ -1992,11 +1992,11 @@ namespace neogfx
                             {
                                 auto const& shapeQuad = shape_quad(glyphFont, glyphChar, true);
 
-                                auto const& glyphQuad = quad{
+                                auto const& glyphQuad = quadf_2d{
                                     (glyphChar.cell[0] + shapeQuad[0]).round(),
                                     (glyphChar.cell[0] + shapeQuad[1]).round(),
                                     (glyphChar.cell[0] + shapeQuad[2]).round(),
-                                    (glyphChar.cell[0] + shapeQuad[3]).round() } + drawOp.point;
+                                    (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                                 auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
                                 meshFilters.push_back(game::mesh_filter{ {}, mesh });
@@ -2005,7 +2005,7 @@ namespace neogfx
                                     game::mesh_renderer{
                                         game::material{
                                             std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                            std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
+                                            std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                             {},
                                             to_ecs_component(theGlyph.outline_texture()),
                                             shader_effect::Ignore
@@ -2019,11 +2019,11 @@ namespace neogfx
 
                         auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
 
-                        auto const& glyphQuad = quad{
+                        auto const& glyphQuad = quadf_2d{
                             (glyphChar.cell[0] + shapeQuad[0]).round(),
                             (glyphChar.cell[0] + shapeQuad[1]).round(),
                             (glyphChar.cell[0] + shapeQuad[2]).round(),
-                            (glyphChar.cell[0] + shapeQuad[3]).round() } + drawOp.point;
+                            (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                         auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
                         meshFilters.push_back(game::mesh_filter{ {}, mesh });
@@ -2033,7 +2033,7 @@ namespace neogfx
                             game::mesh_renderer{
                                 game::material{
                                     std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
-                                    std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
+                                    std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(theGlyph.texture()),
                                     shader_effect::Ignore
@@ -2050,6 +2050,7 @@ namespace neogfx
                     {
                         auto& glyphText = *drawOp.glyphText;
                         auto& glyphChar = *drawOp.glyphChar;
+                        auto const baseline = static_cast<float>(glyphText.baseline());
 
                         if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                         {
@@ -2060,8 +2061,8 @@ namespace neogfx
                             auto const& shapeQuad = shape_quad(glyphFont, glyphChar);
 
                             auto const& majorFont = glyphText.major_font();
-                            auto const yUnderline = std::round(majorFont.native_font_face().underline_position());
-                            auto const cyUnderline = std::ceil(majorFont.native_font_face().underline_thickness());
+                            auto const yUnderline = static_cast<float>(std::round(majorFont.native_font_face().underline_position()));
+                            auto const cyUnderline = static_cast<float>(std::ceil(majorFont.native_font_face().underline_thickness()));
 
                             if (drawOp.appearance->smart_underline() &&
                                 !is_whitespace(glyphChar) && !is_emoji(glyphChar) &&
@@ -2071,8 +2072,8 @@ namespace neogfx
                                 auto const& theGlyph = glyphText.glyph(glyphChar);
 
                                 auto const& testLine = texture_line_segment{
-                                    { -shapeQuad[0].x, shapeQuad[0].y - (glyphText.baseline() - yUnderline) },
-                                    { -shapeQuad[0].x + glyphChar.cell[1].x - glyphChar.cell[0].x, shapeQuad[0].y - (glyphText.baseline() - yUnderline)}};
+                                    { -shapeQuad[0].x, shapeQuad[0].y - (baseline - yUnderline) },
+                                    { -shapeQuad[0].x + glyphChar.cell[1].x - glyphChar.cell[0].x, shapeQuad[0].y - (baseline - yUnderline)}};
 
                                 thread_local vector<texture_line_segment> lineSegments;
                                 lineSegments = theGlyph.texture().intersection(testLine, rect{ point{}, theGlyph.texture().extents() },
@@ -2085,24 +2086,24 @@ namespace neogfx
                                 }
                                 if (lineSegments.empty())
                                     draw_line(
-                                        drawOp.point + vec3{ glyphChar.cell[0].x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
-                                        drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                        drawOp.point + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
+                                        drawOp.point + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                         pen{ ink, cyUnderline });
                                 else
                                 {
                                     auto lineSegment = lineSegments.begin();
-                                    for (scalar x = glyphChar.cell[0].x; lineSegment != lineSegments.end() && x < glyphChar.cell[1].x;)
+                                    for (float x = glyphChar.cell[0].x; lineSegment != lineSegments.end() && x < glyphChar.cell[1].x;)
                                     {
                                         draw_line(
-                                            drawOp.point + vec3{ x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
-                                            drawOp.point + vec3{ lineSegment->v1.x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                            drawOp.point + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
+                                            drawOp.point + vec3f{ static_cast<float>(lineSegment->v1.x), glyphChar.cell[1].y + baseline - yUnderline },
                                             pen{ ink, cyUnderline });
-                                        x = lineSegment->v2.x;
+                                        x = static_cast<float>(lineSegment->v2.x);
                                         if (++lineSegment == lineSegments.end())
                                         {
                                             draw_line(
-                                                drawOp.point + vec3{ x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
-                                                drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                                drawOp.point + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
+                                                drawOp.point + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                                 pen{ ink, cyUnderline });
                                         }
                                     }
@@ -2111,8 +2112,8 @@ namespace neogfx
                             else
                             {
                                 draw_line(
-                                    drawOp.point + vec3{ glyphChar.cell[0].x, glyphChar.cell[0].y + glyphText.baseline() - yUnderline },
-                                    drawOp.point + vec3{ glyphChar.cell[1].x, glyphChar.cell[1].y + glyphText.baseline() - yUnderline },
+                                    drawOp.point + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
+                                    drawOp.point + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                     pen{ ink, cyUnderline });
                             }
                         }
@@ -2198,20 +2199,20 @@ namespace neogfx
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
-            vec2 textureStorageExtents;
-            vec2 uvFixupCoefficient;
-            vec2 uvFixupOffset;
+            vec2f textureStorageExtents;
+            vec2f uvFixupCoefficient;
+            vec2f uvFixupOffset;
             std::optional<neolib::cookie> textureId;
             auto add_item = [&](vec2u32& cacheIndices, auto const& mesh, auto const& material, auto const& faces)
             {
                 auto const function = material.gradient != std::nullopt && material.gradient->boundingBox ?
-                    vec4{
+                    vec4f{
                         material.gradient->boundingBox->min.x, material.gradient->boundingBox->min.y,
-                        material.gradient->boundingBox->max.x, material.gradient->boundingBox->max.y }.as<float>() :
+                        material.gradient->boundingBox->max.x, material.gradient->boundingBox->max.y } :
                     meshRenderer.filter != std::nullopt && meshRenderer.filter->boundingBox ?
-                        vec4{
+                        vec4f{
                             meshRenderer.filter->boundingBox->min.x, meshRenderer.filter->boundingBox->min.y,
-                            meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y }.as<float>() :
+                            meshRenderer.filter->boundingBox->max.x, meshRenderer.filter->boundingBox->max.y } :
                         vec4f{};
                 if (meshRenderCache.state != game::cache_state::Clean)
                 {
@@ -2227,13 +2228,13 @@ namespace neogfx
                             textureStorageExtents = texture.storage_extents().to_vec2();
                             uvFixupCoefficient = materialTexture.extents;
                             if (materialTexture.type == texture_type::Texture)
-                                uvFixupOffset = vec2{ 1.0, 1.0 };
+                                uvFixupOffset = vec2f{ 1.0f, 1.0f };
                             else if (materialTexture.subTexture == std::nullopt)
-                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2() + vec2{ 1.0, 1.0 };
+                                uvFixupOffset = texture.as_sub_texture().atlas_location().top_left().to_vec2().as<float>() + vec2f{1.0f, 1.0f};
                             else
-                                uvFixupOffset = materialTexture.subTexture->min + vec2{ 1.0, 1.0 };
+                                uvFixupOffset = materialTexture.subTexture->min + vec2f{ 1.0f, 1.0f };
                             if (texture.is_render_target() && texture.as_render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                                uvGui = static_cast<float>(texture.extents().to_vec2().y / textureStorageExtents.y);
+                                uvGui = static_cast<float>(texture.extents().to_vec2().as<float>().y / textureStorageExtents.y);
                         }
                     }
                     // todo: check vertex count is same as in cache
@@ -2246,7 +2247,7 @@ namespace neogfx
                             auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
                             auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
                             auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
-                                (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0 / textureStorageExtents) : vec2{});
+                                (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0f / textureStorageExtents) : vec2f{});
                             auto const& xyzw = function;
                             if (nextIndex == vertices.size())
                                 vertices.emplace_back(xyz, rgba, uv, xyzw );
@@ -2292,6 +2293,8 @@ namespace neogfx
     {
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
         neolib::scoped_flag snap{ iSnapToPixel, false };
+
+        auto const transformation = aTransformation.as<float>();
 
         std::optional<use_vertex_arrays> vertexArrayUsage;
 
@@ -2386,7 +2389,7 @@ namespace neogfx
                     enable_sample_shading(1.0);
 
                 if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
-                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, with_textures, 0, batchRenderer.barrier);
+                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, transformation, with_textures, 0, batchRenderer.barrier);
 
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
@@ -2401,7 +2404,7 @@ namespace neogfx
                 rendering_engine().default_shader_program().texture_shader().clear_texture();
 
                 if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
-                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, aTransformation, 0, batchRenderer.barrier);
+                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, transformation, 0, batchRenderer.barrier);
 
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
@@ -2425,7 +2428,7 @@ namespace neogfx
     {
         auto mesh = to_ecs_component(aRect);
         for (auto& uv : mesh.uv)
-            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2());
+            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2().as<float>() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2().as<float>());
         draw_mesh(
             mesh,
             game::material

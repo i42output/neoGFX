@@ -3155,7 +3155,11 @@ namespace neogfx
             textAppearance = nextTextAppearance;
         }
         if (segmentStart != lineGlyphs.cend())
+        {
+            aGc.flush();
             aGc.draw_glyph_text(textPos, lineGlyphs, segmentStart, lineGlyphs.cend(), textAppearance.value());
+            aGc.flush();
+        }
     }
 
     void text_edit::draw_cursor(i_graphics_context const& aGc) const

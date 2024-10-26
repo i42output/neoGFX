@@ -118,9 +118,9 @@ namespace neogames
             static const ng::game::sprite_2d_archetype cardArchetype{ "Card" };
 
             // Card background shape...
-            auto cardBackgroundVertices = ng::rounded_rect_vertices(ng::rect{ ng::point{}, ng::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centered_origin(), 0.1, ng::mesh_type::Triangles, 20);
+            auto cardBackgroundVertices = ng::rounded_rect_vertices<ng::vec3f>(ng::rect{ ng::point{}, ng::size{1.0, kBridgeCardSize.cy / kBridgeCardSize.cx } }.with_centered_origin(), 0.1, ng::mesh_type::Triangles, 20);
 
-            ng::game::mesh mesh{ cardBackgroundVertices, ng::vertices_2d{cardBackgroundVertices.size(), ng::vec2{} }, ng::game::default_faces(cardBackgroundVertices) };
+            ng::game::mesh mesh{ cardBackgroundVertices, ng::game::vertices_2d{cardBackgroundVertices.size(), ng::vec2f{} }, ng::game::default_faces(cardBackgroundVertices) };
             ng::game::mesh_renderer meshRenderer{ ng::game::material{ ng::to_ecs_component( ng::color::White) } };
 
             auto aabb = ng::game::bounding_rect(mesh);

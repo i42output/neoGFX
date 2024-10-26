@@ -80,7 +80,8 @@ namespace neogfx
         {
             return (aBufferType & (
                 vertex_buffer_type::Vertices | 
-                vertex_buffer_type::Color | 
+                vertex_buffer_type::UV |
+                vertex_buffer_type::Color |
                 vertex_buffer_type::Function0 | 
                 vertex_buffer_type::Function1 | 
                 vertex_buffer_type::Function2 | 

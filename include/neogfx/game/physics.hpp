@@ -30,8 +30,8 @@ namespace neogfx::game
 {
     struct physics
     {
-        scalar gravitationalConstant;
-        std::optional<vec3> uniformGravity;
+        float gravitationalConstant;
+        std::optional<vec3f> uniformGravity;
 
         struct meta : i_component_data::meta
         {
@@ -54,9 +54,9 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Scalar;
+                    return component_data_field_type::Float32;
                 case 1:
-                    return component_data_field_type::Vec3 | component_data_field_type::Optional;
+                    return component_data_field_type::Vec3f | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

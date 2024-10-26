@@ -788,8 +788,8 @@ namespace neogfx
             if (line.begin == line.end)
                 continue;
             auto const glyphs = std::ranges::subrange(aText.glyphText.begin() + line.begin, aText.glyphText.begin() + line.end);
-            auto const adjust = line.bbox[0] - vec3{ glyphs.begin()->cell[0] };
-            draw_glyph_text(aPoint + adjust, aText.glyphText, glyphs.begin(), glyphs.end(), aTextFormat);
+            auto const adjust = line.bbox[0] - vec3f{ glyphs.begin()->cell[0] };
+            draw_glyph_text(aPoint + adjust.as<scalar>(), aText.glyphText, glyphs.begin(), glyphs.end(), aTextFormat);
         }
     }
 
@@ -1035,7 +1035,7 @@ namespace neogfx
             to_ecs_component(aDestinationRect) : to_ecs_component(game_rect{ aDestinationRect });
         auto const& source = aSource.render_target();
         for (auto& uv : mesh.uv)
-            uv = (aSourceRect.top_left() / source.extents()).to_vec2() + uv.scale((aSourceRect.extents() / source.extents()).to_vec2());
+            uv = (aSourceRect.top_left() / source.extents()).to_vec2().as<float>() + uv.scale((aSourceRect.extents() / source.extents()).to_vec2().as<float>());
         aDestination.draw_mesh(
             mesh,
             game::material
@@ -1276,12 +1276,12 @@ namespace neogfx
             if ((aAlignment == alignment::Left && textDirection == text_direction::RTL) || (aAlignment == alignment::Right && textDirection == text_direction::LTR))
             {
                 auto const adjust = maxLineWidth - from_device_units(size{ line.bbox[1].x - line.bbox[0].x, 0.0 }).cx;
-                line.bbox += vec3{ adjust, 0.0 };
+                line.bbox += vec3{ adjust, 0.0 }.as<float>();
             }
             else if (aAlignment == alignment::Center)
             {
                 auto const adjust = (maxLineWidth - from_device_units(size{ line.bbox[1].x - line.bbox[0].x, 0.0 }).cx) / 2;
-                line.bbox += vec3{ adjust, 0.0 };
+                line.bbox += vec3{ adjust, 0.0 }.as<float>();
             }
         }
 
@@ -1414,7 +1414,7 @@ namespace neogfx
     {
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)
-            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2());
+            uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2().as<float>() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2().as<float>());
         draw_texture(adjustedMesh, aTexture, aColor, aShaderEffect);
     }
 

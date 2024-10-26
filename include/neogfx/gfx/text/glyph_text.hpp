@@ -552,10 +552,10 @@ namespace neogfx
     struct multiline_glyph_text
     {
         glyph_text glyphText;
-        quad bbox;
+        quadf bbox;
         struct line
         {
-            quad bbox;
+            quadf bbox;
             glyph_text::difference_type begin;
             glyph_text::difference_type end;
         };

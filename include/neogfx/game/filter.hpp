@@ -32,11 +32,11 @@ namespace neogfx::game
     struct filter
     {
         shader_filter type;
-        scalar arg1;
-        scalar arg2;
-        scalar arg3;
-        scalar arg4;
-        std::optional<aabb_2d> boundingBox;
+        float arg1;
+        float arg2;
+        float arg3;
+        float arg4;
+        std::optional<aabb_2df> boundingBox;
 
         struct meta : i_component_data::meta
         {
@@ -64,9 +64,9 @@ namespace neogfx::game
                 case 2:
                 case 3:
                 case 4:
-                    return component_data_field_type::Scalar;
+                    return component_data_field_type::Float32;
                 case 5:
-                    return component_data_field_type::Aabb2d | component_data_field_type::Optional;
+                    return component_data_field_type::Aabb2df | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

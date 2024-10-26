@@ -169,7 +169,7 @@ namespace neogfx
         };
         struct draw_glyph
         {
-            vec3 point;
+            vec3f point;
             i_glyph_text* glyphText;
             glyph_char const* glyphChar;
             text_format const* appearance;
@@ -179,12 +179,12 @@ namespace neogfx
         {
             game::mesh_filter const* filter;
             game::mesh_renderer const* renderer;
-            optional_mat44 transformation;
+            optional_mat44f transformation;
             game::entity_id entity;
             mesh_drawable(
                 game::mesh_filter const& filter, 
                 game::mesh_renderer const& renderer,
-                optional_mat44 const& transformation = {},
+                optional_mat44f const& transformation = {},
                 game::entity_id entity = game::null_entity
                 ) :
                 filter{ &filter },

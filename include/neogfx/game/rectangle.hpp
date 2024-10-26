@@ -35,8 +35,8 @@ namespace neogfx::game
 {
     struct rectangle
     {
-        vec3 position;
-        vec2 extents;
+        vec3f position;
+        vec2f extents;
         material material;
 
         struct meta : i_component_data::meta
@@ -60,9 +60,9 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Vec3;
+                    return component_data_field_type::Vec3f;
                 case 1:
-                    return component_data_field_type::Vec2;
+                    return component_data_field_type::Vec2f;
                 case 2:
                     return component_data_field_type::ComponentData | component_data_field_type::Optional;
                 default:
@@ -84,7 +84,7 @@ namespace neogfx::game
             {
                 using neogfx::game::material;
                 thread_local game::mesh rectMesh;
-                aEcs.component<mesh>().populate(aEntity, to_ecs_component(rectMesh, rect{ point{ ~aData.position.xy - aData.extents / 2.0 }, size{aData.extents} }));
+                aEcs.component<mesh>().populate(aEntity, to_ecs_component(rectMesh, rect{ point{ ~aData.position.xy - aData.extents / 2.0f }, size{aData.extents} }));
                 aEcs.component<material>().populate(aEntity, aData.material);
             }
         };

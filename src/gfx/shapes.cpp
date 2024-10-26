@@ -25,9 +25,10 @@
 
 namespace neogfx
 {
-    vertices arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, std::uint32_t aArcSegments)
+    template <typename Vertex>
+    std::vector<Vertex> arc_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, const point& aOrigin, mesh_type aType, std::uint32_t aArcSegments)
     {
-        vertices result;
+        std::vector<Vertex> result;
         angle arc = (aEndAngle != aStartAngle ? aEndAngle - aStartAngle : boost::math::constants::two_pi<angle>());
         std::uint32_t arcSegments = aArcSegments;
         if (arcSegments == 0)
@@ -69,36 +70,38 @@ namespace neogfx
         return result;
     }
 
-    vertices circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, std::uint32_t aArcSegments)
+    template <typename Vertex>
+    std::vector<Vertex> circle_vertices(const point& aCenter, dimension aRadius, angle aStartAngle, mesh_type aType, std::uint32_t aArcSegments)
     {
-        return arc_vertices(aCenter, aRadius, aStartAngle, aStartAngle, aCenter, aType, aArcSegments);
+        return arc_vertices<Vertex>(aCenter, aRadius, aStartAngle, aStartAngle, aCenter, aType, aArcSegments);
     }
 
-    vertices rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, std::uint32_t aArcSegments)
+    template <typename Vertex>
+    std::vector<Vertex> rounded_rect_vertices(const rect& aRect, dimension aRadius, mesh_type aType, std::uint32_t aArcSegments)
     {
-        vertices result;
-        auto const topLeft = arc_vertices(
+        std::vector<Vertex> result;
+        auto const topLeft = arc_vertices<Vertex>(
             aRect.top_left() + point{ aRadius, aRadius },
             aRadius,
             boost::math::constants::pi<coordinate>(),
             boost::math::constants::pi<coordinate>() * 1.5,
             aRect.center(),
             aType, aArcSegments);
-        auto const topRight = arc_vertices(
+        auto const topRight = arc_vertices<Vertex>(
             aRect.top_right() + point{ -aRadius, aRadius },
             aRadius,
             boost::math::constants::pi<coordinate>() * 1.5,
             boost::math::constants::pi<coordinate>() * 2.0,
             aRect.center(),
             aType, aArcSegments);
-        auto const bottomRight = arc_vertices(
+        auto const bottomRight = arc_vertices<Vertex>(
             aRect.bottom_right() + point{ -aRadius, -aRadius },
             aRadius,
             0.0,
             boost::math::constants::pi<coordinate>() * 0.5,
             aRect.center(),
             aType, aArcSegments);
-        auto const bottomLeft = arc_vertices(
+        auto const bottomLeft = arc_vertices<Vertex>(
             aRect.bottom_left() + point{ aRadius, -aRadius },
             aRadius,
             boost::math::constants::pi<coordinate>() * 0.5,
@@ -154,4 +157,12 @@ namespace neogfx
         }
         return result;
     }
+
+    template std::vector<vec3> arc_vertices<vec3>(const point&, dimension, angle, angle, const point&, mesh_type, std::uint32_t);
+    template std::vector<vec3> circle_vertices<vec3>(const point&, dimension, angle, mesh_type, std::uint32_t);
+    template std::vector<vec3> rounded_rect_vertices<vec3>(const rect&, dimension, mesh_type, std::uint32_t);
+
+    template std::vector<vec3f> arc_vertices<vec3f>(const point&, dimension, angle, angle, const point&, mesh_type, std::uint32_t);
+    template std::vector<vec3f> circle_vertices<vec3f>(const point&, dimension, angle, mesh_type, std::uint32_t);
+    template std::vector<vec3f> rounded_rect_vertices<vec3f>(const rect&, dimension, mesh_type, std::uint32_t);
 }

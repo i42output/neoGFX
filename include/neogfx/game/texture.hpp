@@ -40,8 +40,8 @@ namespace neogfx::game
         texture_type type;
         std::optional<texture_sampling> sampling;
         scalar dpiScalingFactor;
-        vec2 extents;
-        optional_aabb_2d subTexture;
+        vec2f extents;
+        optional_aabb_2df subTexture;
 
         struct meta : i_component_data::meta
         {
@@ -72,9 +72,9 @@ namespace neogfx::game
                 case 3:
                     return component_data_field_type::Scalar;
                 case 4:
-                    return component_data_field_type::Vec2;
+                    return component_data_field_type::Vec2f;
                 case 5:
-                    return component_data_field_type::Aabb2d | component_data_field_type::Optional;
+                    return component_data_field_type::Aabb2df | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

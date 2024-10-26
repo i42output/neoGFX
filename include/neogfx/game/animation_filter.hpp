@@ -32,7 +32,7 @@ namespace neogfx::game
     {
         shared<animation> sharedAnimation;
         std::optional<animation> animation;
-        std::optional<mat44> transformation;
+        std::optional<mat44f> transformation;
         u32 currentFrame;
         bool autoDestroy;
         std::optional<i64> currentFrameStartTime; // ECS internal
@@ -62,7 +62,7 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Optional;
                 case 2:
-                    return component_data_field_type::Mat44 | component_data_field_type::Optional;
+                    return component_data_field_type::Mat44f | component_data_field_type::Optional;
                 case 3:
                     return component_data_field_type::Uint32;
                 case 4:
@@ -112,8 +112,8 @@ namespace neogfx::game
             aAnimationFilter.sharedAnimation.ptr->frames[aAnimationFilter.currentFrame].filter;
     }
 
-    inline mat44 const& to_transformation_matrix(animation_filter const& aAnimationFilter)
+    inline mat44f const& to_transformation_matrix(animation_filter const& aAnimationFilter)
     {
-        return aAnimationFilter.transformation ? *aAnimationFilter.transformation : mat44::identity();
+        return aAnimationFilter.transformation ? *aAnimationFilter.transformation : mat44f::identity();
     }
 }

@@ -34,6 +34,9 @@ namespace neogfx
     using namespace boost::math::constants;
     using namespace neolib::math;
 
+    using scalar = primitives::scalar;
+    using angle = primitives::angle;
+
     using neolib::math::operators::operator~;
     using neolib::math::operators::operator+;
     using neolib::math::operators::operator-;

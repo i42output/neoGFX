@@ -31,9 +31,9 @@ namespace neogfx::game
     struct box_collider
     {
         std::uint64_t mask;
-        std::optional<aabb> untransformedAabb;
-        std::optional<aabb> previousAabb;
-        std::optional<aabb> currentAabb;
+        std::optional<aabbf> untransformedAabb;
+        std::optional<aabbf> previousAabb;
+        std::optional<aabbf> currentAabb;
         std::uint32_t collisionEventId;
 
         struct meta : i_component_data::meta
@@ -61,7 +61,7 @@ namespace neogfx::game
                 case 1:
                 case 2:
                 case 3:
-                    return component_data_field_type::Aabb | component_data_field_type::Optional | component_data_field_type::Internal;
+                    return component_data_field_type::Aabbf | component_data_field_type::Optional | component_data_field_type::Internal;
                 case 4:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:
@@ -86,9 +86,9 @@ namespace neogfx::game
     struct box_collider_2d
     {
         std::uint64_t mask;
-        std::optional<aabb_2d> untransformedAabb;
-        std::optional<aabb_2d> previousAabb;
-        std::optional<aabb_2d> currentAabb;
+        std::optional<aabb_2df> untransformedAabb;
+        std::optional<aabb_2df> previousAabb;
+        std::optional<aabb_2df> currentAabb;
         std::uint32_t collisionEventId;
 
         struct meta : i_component_data::meta
@@ -116,7 +116,7 @@ namespace neogfx::game
                 case 1:
                 case 2:
                 case 3:
-                    return component_data_field_type::Aabb2d | component_data_field_type::Optional | component_data_field_type::Internal;
+                    return component_data_field_type::Aabb2df | component_data_field_type::Optional | component_data_field_type::Internal;
                 case 4:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:

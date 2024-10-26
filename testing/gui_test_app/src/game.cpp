@@ -54,7 +54,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 
     struct game_state
     {
-        neolib::basic_random<ng::scalar> prng;
+        neolib::basic_random<float> prng;
         std::uint32_t score = 0u;
         bool autoFire = false;
         bool showAabbGrid = false;
@@ -68,9 +68,9 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         ng::game::shape::rectangle
     {
         ecs,
-        { gameState->prng(800), gameState->prng(800), -1.0 + 0.5 * (gameState->prng(32) / 32.0) },
-        { gameState->prng(64), gameState->prng(64) },
-        ng::color{ ng::vec4{ gameState->prng(0.25), gameState->prng(0.25), gameState->prng(0.25), 1.0 } }
+        { gameState->prng(800.0f), gameState->prng(800.0f), -1.0f + 0.5f * (gameState->prng(32.0f) / 32.0f) },
+        { gameState->prng(64.0f), gameState->prng(64.0f) },
+        ng::color{ ng::vec4f{ gameState->prng(0.25f), gameState->prng(0.25f), gameState->prng(0.25f), 1.0f } }
     }.detach();
 
     // Spaceship...
@@ -114,7 +114,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         },
         ng::game::rigid_body
         {
-            { 400.0, 18.0, 0.0 }, 1.0
+            { 400.0f, 18.0f, 0.0f }, 1.0f
         },
         ng::game::box_collider_2d{ 0x1ull });
 
@@ -133,29 +133,29 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 
     auto make_asteroid = [&ecs, gameState, spaceship, make_asteroid_mesh]()
     {
-        ng::vec3 position;
-        ng::scalar size;
+        ng::vec3f position;
+        float size;
         do
         {
-            position = ng::vec3{ gameState->prng(800), gameState->prng(800), 0.0 };
-            size = gameState->prng(20.0) + 10.0;
+            position = ng::vec3f{ gameState->prng(800.0f), gameState->prng(800.0f), 0.0f };
+            size = gameState->prng(20.0f) + 10.0f;
         } while (ng::aabb_intersects(
             ng::to_aabb(position, size),
-            ng::to_aabb(ecs.component<ng::game::rigid_body>().entity_record(spaceship).position, 36.0 * 3.0)));
+            ng::to_aabb(ecs.component<ng::game::rigid_body>().entity_record(spaceship).position, 36.0f * 3.0f)));
         ecs.async_create_entity(
             archetypes::asteroid,
             ng::game::mesh_renderer
             {
-                ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(gameState->prng(360), 1.0, 0.75)) }, {}, 1
+                ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(gameState->prng(360.0f), 1.0f, 0.75f)) }, {}, 1
             },
             make_asteroid_mesh(size),
             ng::game::rigid_body
             {
-                position, 1.0,
-                ng::rotation_matrix(ng::vec3{ 0.0, 0.0, ng::to_rad(gameState->prng(360.0)) }) * ng::vec3{ gameState->prng(20.0), 0.0, 0.0 },
+                position, 1.0f,
+                ng::rotation_matrix(ng::vec3f{ 0.0f, 0.0f, ng::to_rad(gameState->prng(360.0f)) }) * ng::vec3f{ gameState->prng(20.0f), 0.0f, 0.0f },
                 {},
                 {},
-                { 0.0, 0.0, ng::to_rad(gameState->prng(90.0) + 45.0) * (std::rand() % 2 == 0 ? 1.0 : -1.0) }
+                { 0.0f, 0.0f, ng::to_rad(gameState->prng(90.0f) + 45.0f) * (std::rand() % 2 == 0 ? 1.0f : -1.0f) }
             },
             ng::game::box_collider_2d{ 0x2ull });
     };
@@ -166,7 +166,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     auto const explosionAnimation = ng::regular_sprite_sheet_to_renderable_animation(
         ecs, "explosion", ":/test/resources/explosion.png", { 4u, 4u }, 0.05);
 
-    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2d& target, const ng::vec3& velocity = {}, const ng::optional_color& color = {})
+    auto make_explosion = [&ecs, explosionAnimation](const ng::aabb_2df& target, const ng::vec3f& velocity = {}, const ng::optional_color& color = {})
     {
         auto material = explosionAnimation.material;
         if (color)
@@ -175,14 +175,14 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
             material.shaderEffect = ng::shader_effect::Colorize;
         }
         auto filter = explosionAnimation.filter;
-        filter.transformation = ng::mat44::identity();
+        filter.transformation = ng::mat44f::identity();
         filter.autoDestroy = true;
-        ng::apply_scaling(*filter.transformation, ng::aabb_extents(target).max(ng::vec2{ 16.0, 16.0 }));
+        ng::apply_scaling(*filter.transformation, ng::aabb_extents(target).max(ng::vec2f{ 16.0f, 16.0f }));
         ecs.async_create_entity(
             color ? archetypes::missileExplosion : archetypes::explosion,
             material,  
             filter,
-            ng::game::rigid_body{ ng::aabb_origin(target), 1.0, velocity },
+            ng::game::rigid_body{ ng::aabb_origin(target), 1.0f, velocity },
             ng::game::box_collider_2d{ color ? 0x1ull : 0x2ull });
     };
 
@@ -215,7 +215,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         {
             if (gameState->showAabbGrid)
             {
-                ecs.system<ng::game::collision_detector>().visit_aabbs_2d([&gc](const ng::aabb_2d& aabb)
+                ecs.system<ng::game::collision_detector>().visit_aabbs_2d([&gc](const ng::aabb_2df& aabb)
                 {
                     gc.draw_rect(ng::rect{ ng::point{ aabb.min }, ng::point{ aabb.max } }, ng::pen{ ng::color::Blue });
                 });
@@ -338,23 +338,23 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         spaceshipPhysics.spin.z = 0.0;
 
         if (keyboard.is_key_pressed(ng::ScanCode_Z))
-            spaceshipPhysics.spin.z = ng::to_rad(30.0);
+            spaceshipPhysics.spin.z = ng::to_rad(30.0f);
         else if (keyboard.is_key_pressed(ng::ScanCode_X))
-            spaceshipPhysics.spin.z = ng::to_rad(-30.0);
+            spaceshipPhysics.spin.z = ng::to_rad(-30.0f);
 
         bool fireButtonPressed = false;
         if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
         {
             auto const& controller = ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One);
             fireButtonPressed = controller.is_button_pressed(ng::game_controller_button::A);
-            spaceshipPhysics.acceleration += ng::vec3{ 16.0, 16.0, 0.0 }.hadamard_product(ng::vec3{ controller.left_thumb_position() });
-            spaceshipPhysics.acceleration += ng::vec3{ 0.0,
-                controller.is_button_pressed(ng::game_controller_button::DirectionalPadUp) ? 16.0 :
-                    controller.is_button_pressed(ng::game_controller_button::DirectionalPadDown) ? -16.0 : 0.0 };
+            spaceshipPhysics.acceleration += ng::vec3f{ 16.0f, 16.0f, 0.0f }.hadamard_product(ng::vec3f{ controller.left_thumb_position() });
+            spaceshipPhysics.acceleration += ng::vec3f{ 0.0f,
+                controller.is_button_pressed(ng::game_controller_button::DirectionalPadUp) ? 16.0f :
+                    controller.is_button_pressed(ng::game_controller_button::DirectionalPadDown) ? -16.0f : 0.0f };
             if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadLeft))
-                spaceshipPhysics.spin.z = ng::to_rad(30.0);
+                spaceshipPhysics.spin.z = ng::to_rad(30.0f);
             else if (controller.is_button_pressed(ng::game_controller_button::DirectionalPadRight))
-                spaceshipPhysics.spin.z = ng::to_rad(-30.0);
+                spaceshipPhysics.spin.z = ng::to_rad(-30.0f);
         }
 
         static bool sExtraFire = false;
@@ -369,7 +369,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                 if (sinceLastTime_ms / 10 % 2 == 0)
                 {
                     sExtraFire = false;
-                    auto make_missile = [&](double angle)
+                    auto make_missile = [&](float angle)
                     {
                         auto tm = ng::game::to_transformation_matrix(spaceshipPhysics, false);
                         auto missile = ecs.create_entity(
@@ -378,16 +378,16 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                             ng::game::material{ ng::to_ecs_component(ng::color{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 }), {}, {}, {} },
                             ng::game::rigid_body
                             {
-                                spaceshipPhysics.position + ~(tm * ng::vec4{ 0.0, 18.0, 0.0, 1.0 }).xyz,
-                                0.016,
-                                ~(tm * ng::affine_rotation_matrix(ng::vec3{0.0, 0.0, ng::to_rad(angle)}) * ng::vec4{ 0.0, 360.0, 0.0, 0.0 }).xyz + spaceshipPhysics.velocity,
+                                spaceshipPhysics.position + ~(tm * ng::vec4f{ 0.0f, 18.0f, 0.0f, 1.0f }).xyz,
+                                0.016f,
+                                ~(tm * ng::affine_rotation_matrix(ng::vec3f{0.0f, 0.0f, ng::to_rad(angle)}) * ng::vec4f{ 0.0f, 360.0f, 0.0f, 0.0f }).xyz + spaceshipPhysics.velocity,
                                 {},
-                                spaceshipPhysics.angle + ng::vec3{ 0.0, 0.0, ng::to_rad(angle) }
+                                spaceshipPhysics.angle + ng::vec3f{ 0.0f, 0.0f, ng::to_rad(angle) }
                             },
                             ng::game::box_collider_2d{ 0x1ull },
                             ng::game::entity_life_span{ ng::game::to_step_time(ecs, 4.0) });
                     };
-                    for (double angle = -30.0; angle <= 30.0; angle += 10.0)
+                    for (float angle = -30.0f; angle <= 30.0f; angle += 10.0f)
                         make_missile(angle);
                 }
             }

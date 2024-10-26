@@ -1401,15 +1401,15 @@ int main(int argc, char* argv[])
         std::optional<ng::game::ecs> ecs;
         ng::sink sink;
 
-        ng::rect instancingRect;
+        ng::rect_f32 instancingRect;
 
         auto entity_transformation = [&](ng::game::component<ng::game::mesh_filter>& aComponent, ng::game::component<ng::game::mesh_render_cache>& aCache, ng::game::mesh_filter& aFilter)
         {
             thread_local auto seed = ( neolib::simd_srand(std::this_thread::get_id()), 42);
             if (!aFilter.transformation)
                 aFilter.transformation = ng::mat44::identity();
-            (*aFilter.transformation)[3][0] = neolib::simd_rand(instancingRect.cx - 1);
-            (*aFilter.transformation)[3][1] = neolib::simd_rand(instancingRect.cy - 1);
+            (*aFilter.transformation)[3][0] = neolib::simd_rand(instancingRect.cx - 1.0f);
+            (*aFilter.transformation)[3][1] = neolib::simd_rand(instancingRect.cy - 1.0f);
             ng::game::set_render_cache_dirty_no_lock(aCache, aComponent.entity(aFilter));
         };
 
@@ -1438,7 +1438,7 @@ int main(int argc, char* argv[])
                     {
                         entity_transformation(aComponent, cache, aFilter);
                     };
-                instancingRect = window.pageInstancing.client_rect();
+                instancingRect = window.pageInstancing.client_rect().as<float>();
                 if (useThreadPool)
                     ecs->component<ng::game::mesh_filter>().parallel_apply(update_function);
                 else
@@ -1479,17 +1479,17 @@ int main(int argc, char* argv[])
                 ng::game::scoped_component_lock<ng::game::mesh_filter> lock{ *ecs };
                 auto& meshFilterComponent = ecs->component<ng::game::mesh_filter>();
                 auto& meshFilters = meshFilterComponent.component_data();
-                auto const& instancingRect = window.pageInstancing.client_rect();
+                auto const& instancingRect = window.pageInstancing.client_rect().as<float>();
                 while (meshFilters.size() != meshesWanted)
                 {
                     if (meshFilters.size() < meshesWanted)
                     {
-                        auto r = ng::rect{ ng::point{ neolib::simd_rand(instancingRect.cx - 1), neolib::simd_rand(instancingRect.cy - 1) }, ng::size_i32{ window.sliderShapeSize.value() } };
+                        auto r = ng::basic_rect<float>{ ng::point_f32{ neolib::simd_rand(instancingRect.cx - 1.0f), neolib::simd_rand(instancingRect.cy - 1.0f) }, ng::size_i32{ window.sliderShapeSize.value() } };
                         ng::game::shape::rectangle
                         {
                             *ecs,
-                            ng::vec3{},
-                            ng::vec2{ r.cx, r.cy },
+                            ng::vec3f{},
+                            ng::vec2f{ r.cx, r.cy },
                             random_color().with_alpha(random_color().red())
                         }.detach();
                     }

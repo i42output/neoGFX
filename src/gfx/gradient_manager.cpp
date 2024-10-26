@@ -355,7 +355,7 @@ namespace neogfx
                 --right;
             aPos = std::min(std::max(left->first(), aPos), right->first());
             double na = (left != right ? (aPos - left->first()) / (right->first() - left->first()) : 0.0);
-            sRGB_color::view_component alpha = static_cast<sRGB_color::view_component>((lerp(left->second(), right->second(), na) / 255.0) * 255.0);
+            sRGB_color::view_component alpha = static_cast<sRGB_color::view_component>((lerp<scalar>(left->second(), right->second(), na) / 255.0) * 255.0);
             return alpha;
         }
         sRGB_color::view_component alpha_at(scalar aPos, scalar aStart, scalar aEnd) const override

@@ -36,7 +36,7 @@ namespace neogfx::game
     {
         shared<game::mesh> sharedMesh;
         std::optional<game::mesh> mesh;
-        std::optional<mat44> transformation;
+        std::optional<mat44f> transformation;
 
         struct meta : i_component_data::meta
         {
@@ -63,7 +63,7 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Optional;
                 case 2:
-                    return component_data_field_type::Mat44 | component_data_field_type::Optional;
+                    return component_data_field_type::Mat44f | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

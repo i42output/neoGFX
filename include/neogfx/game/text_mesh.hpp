@@ -37,15 +37,15 @@ namespace neogfx::game
     struct text_mesh
     {
         string text;
-        vec2 extents;
-        scalar border;
-        vec4 padding;
+        vec2f extents;
+        float border;
+        vec4f padding;
         neogfx::alignment alignment;
         shared<font> font;
         material ink;
         text_effect_type textEffect;
         material textEffectMaterial;
-        scalar textEffectWidth;
+        float textEffectWidth;
 
         struct meta : i_component_data::meta
         {
@@ -70,11 +70,11 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::String;
                 case 1:
-                    return component_data_field_type::Vec2;
+                    return component_data_field_type::Vec2f;
                 case 2:
-                    return component_data_field_type::Scalar;
+                    return component_data_field_type::Float32;
                 case 3:
-                    return component_data_field_type::Vec4;
+                    return component_data_field_type::Vec4f;
                 case 4:
                     return component_data_field_type::Enum | component_data_field_type::Uint32;
                 case 5:
@@ -86,7 +86,7 @@ namespace neogfx::game
                 case 8:
                     return component_data_field_type::ComponentData;
                 case 9:
-                    return component_data_field_type::Scalar;
+                    return component_data_field_type::Float32;
                 default:
                     throw invalid_field_index();
                 }
@@ -143,16 +143,16 @@ namespace neogfx::game
                 auto multilineGlyphText = aGc.to_multiline_glyph_text(aData.text, service<i_font_manager>().font_from_id(aData.font.ptr->id.cookie()), aData.extents.x, aData.alignment);
                 for (auto const& line : multilineGlyphText.lines)
                 {
-                    auto mesh_line = [&](const vec3& aOffset, const material& aMaterial) 
+                    auto mesh_line = [&](const vec3f& aOffset, const material& aMaterial) 
                     {
                         auto const glyphs = std::ranges::subrange(std::next(multilineGlyphText.glyphText.cbegin(), line.begin), std::next(multilineGlyphText.glyphText.cbegin(), line.end));
-                        auto const pos = aOffset + line.bbox[0] - vec3{ glyphs.begin()->cell[0] };
+                        auto const pos = aOffset + line.bbox[0] - vec3f{ glyphs.begin()->cell[0] };
                         for (auto const& glyphChar : glyphs)
                         {
                             if (!is_whitespace(glyphChar))
                             {
                                 auto const& glyphTexture = multilineGlyphText.glyphText.glyph(glyphChar);
-                                add_patch(*mf.mesh, mr, pos + vec3{ glyphChar.cell[0] } + quad{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
+                                add_patch(*mf.mesh, mr, pos + vec3f{ glyphChar.cell[0] } + quadf{ glyphChar.shape[0], glyphChar.shape[1], glyphChar.shape[2], glyphChar.shape[3] }, glyphTexture.texture());
                                 mr.patches.back().material = material{ aMaterial.color, aMaterial.gradient, aMaterial.sharedTexture, mr.patches.back().material.texture, aMaterial.shaderEffect };
                             }
                         }
@@ -160,15 +160,15 @@ namespace neogfx::game
                     switch(aData.textEffect)
                     {
                     case text_effect_type::Outline:
-                        for (scalar oy = -aData.textEffectWidth; oy <= aData.textEffectWidth; ++oy)
-                            for (scalar ox = -aData.textEffectWidth; ox <= aData.textEffectWidth; ++ox)
-                                mesh_line(vec2{ ox, oy }, aData.textEffectMaterial);
+                        for (float oy = -aData.textEffectWidth; oy <= aData.textEffectWidth; ++oy)
+                            for (float ox = -aData.textEffectWidth; ox <= aData.textEffectWidth; ++ox)
+                                mesh_line(vec2f{ ox, oy }, aData.textEffectMaterial);
                         break;
                     default:
                         // todo
                         break;
                     }
-                    mesh_line(vec2{}, aData.ink);
+                    mesh_line(vec2f{}, aData.ink);
                 }
             }
         };

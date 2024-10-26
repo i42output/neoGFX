@@ -50,19 +50,19 @@ namespace neogfx::game
         {
         private:
             typedef neolib::vecarray<entity_id, BucketSize, -1> entity_list;
-            typedef std::array<std::array<std::array<aabb, 2>, 2>, 2> octants;
-            typedef std::array<std::array<std::array<aabb_2d, 2>, 2>, 2> octants_2d;
+            typedef std::array<std::array<std::array<aabbf, 2>, 2>, 2> octants;
+            typedef std::array<std::array<std::array<aabb_2df, 2>, 2>, 2> octants_2d;
             typedef std::array<std::array<std::array<node*, 2>, 2>, 2> children;
         private:
             struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::aabb_octree::node::no_parent" } {} };
             struct no_children : std::logic_error { no_children() : std::logic_error{ "neogfx::aabb_octree::node::no_children" } {} };
         public:
-            node(aabb_octree& aTree, const aabb& aAabb) : iTree{ aTree }, iParent{ nullptr }, iDepth{ 1 }, iAabb{ aAabb }, iChildren {}
+            node(aabb_octree& aTree, const aabbf& aAabb) : iTree{ aTree }, iParent{ nullptr }, iDepth{ 1 }, iAabb{ aAabb }, iChildren {}
             {
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
                 populate_octants();
             }
-            node(const node& aParent, const aabb& aAabb) : iTree{ aParent.iTree }, iParent{ &aParent }, iDepth{ aParent.iDepth + 1 }, iAabb { aAabb }, iChildren{}
+            node(const node& aParent, const aabbf& aAabb) : iTree{ aParent.iTree }, iParent{ &aParent }, iDepth{ aParent.iDepth + 1 }, iAabb { aAabb }, iChildren{}
             {
                 iTree.iDepth = std::max(iTree.iDepth, iDepth);
                 populate_octants();
@@ -108,7 +108,7 @@ namespace neogfx::game
             {
                 return iDepth;
             }
-            const neogfx::aabb& aabb() const
+            const neogfx::aabbf& aabb() const
             {
                 return iAabb;
             }
@@ -146,7 +146,7 @@ namespace neogfx::game
                 if (aCollider.previousAabb && aCollider.currentAabb)
                     remove_entity(aEntity, aCollider, aabb_union(*aCollider.previousAabb, *aCollider.currentAabb));
             }
-            void remove_entity(entity_id aEntity, const collider_type& aCollider, const aabb_2d& aAabb)
+            void remove_entity(entity_id aEntity, const collider_type& aCollider, const neogfx::aabbf& aAabb)
             {
                 if (!aabb_intersects(aCollider.currentAabb, iAabb))
                 {
@@ -217,17 +217,17 @@ namespace neogfx::game
                     visit(*aCandidate.currentAabb, aVisitor);
             }
             template <typename Visitor>
-            void visit(const vec3& aPoint, const Visitor& aVisitor) const
+            void visit(const vec3f& aPoint, const Visitor& aVisitor) const
             {
-                visit(neogfx::aabb{ aPoint, aPoint }, aVisitor);
+                visit(neogfx::aabbf{ aPoint, aPoint }, aVisitor);
             }
             template <typename Visitor>
-            void visit(const vec2& aPoint, const Visitor& aVisitor) const
+            void visit(const vec2f& aPoint, const Visitor& aVisitor) const
             {
-                visit(neogfx::aabb_2d{ aPoint, aPoint }, aVisitor);
+                visit(neogfx::aabb_2df{ aPoint, aPoint }, aVisitor);
             }
             template <typename Visitor>
-            void visit(const neogfx::aabb& aAabb, const Visitor& aVisitor) const
+            void visit(const neogfx::aabbf& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
                     if (aabb_intersects(aAabb, iTree.iEcs.component<collider_type>().entity_record(e).currentAabb))
@@ -250,11 +250,11 @@ namespace neogfx::game
                     child<1, 1, 1>().visit(aAabb, aVisitor);
             }
             template <typename Visitor>
-            void visit(const neogfx::aabb_2d& aAabb, const Visitor& aVisitor) const
+            void visit(const neogfx::aabb_2df& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
                     if (iTree.iEcs.component<collider_type>().entity_record(e).currentAabb &&
-                        aabb_intersects(aAabb, aabb_2d{ *iTree.iEcs.component<collider_type>().entity_record(e).currentAabb }))
+                        aabb_intersects(aAabb, aabb_2df{ *iTree.iEcs.component<collider_type>().entity_record(e).currentAabb }))
                         aVisitor(e);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants2d[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
@@ -321,23 +321,23 @@ namespace neogfx::game
             {
                 auto const& min = iAabb.min;
                 auto const& max = iAabb.max;
-                auto const& center = (min + max) / 2.0;
-                iOctants[0][0][0] = neogfx::aabb{ min, center };
-                iOctants[0][1][0] = neogfx::aabb{ vec3{ min.x, center.y, min.z }, vec3{ center.x, max.y, center.z } };
-                iOctants[1][0][0] = neogfx::aabb{ vec3{ center.x, min.y, min.z }, vec3{ max.x, center.y, center.z } };
-                iOctants[1][1][0] = neogfx::aabb{ vec3{ center.x, center.y, min.z }, vec3{ max.x, max.y, center.z } };
-                iOctants[0][0][1] = neogfx::aabb{ vec3{ min.x, min.y, center.z }, vec3{ center.x, center.y, max.z } };
-                iOctants[0][1][1] = neogfx::aabb{ vec3{ min.x, center.y, center.z }, vec3{ center.x, max.y, max.z } };
-                iOctants[1][0][1] = neogfx::aabb{ vec3{ center.x, min.y, center.z }, vec3{ max.x, center.y, max.z } };
-                iOctants[1][1][1] = neogfx::aabb{ vec3{ center.x, center.y, center.z }, vec3{ max.x, max.y, max.z } };
-                iOctants2d[0][0][0] = aabb_2d{ ~min.xy, ~center.xy };
-                iOctants2d[0][1][0] = aabb_2d{ vec2{ min.x, center.y }, vec2{ center.x, max.y } };
-                iOctants2d[1][0][0] = aabb_2d{ vec2{ center.x, min.y }, vec2{ max.x, center.y } };
-                iOctants2d[1][1][0] = aabb_2d{ ~center.xy, ~max.xy };
-                iOctants2d[0][0][1] = aabb_2d{ ~min.xy, ~center.xy};
-                iOctants2d[0][1][1] = aabb_2d{ vec2{ min.x, center.y }, vec2{ center.x, max.y } };
-                iOctants2d[1][0][1] = aabb_2d{ vec2{ center.x, min.y }, vec2{ max.x, center.y } };
-                iOctants2d[1][1][1] = aabb_2d{ ~center.xy, ~max.xy };
+                auto const& center = (min + max) / 2.0f;
+                iOctants[0][0][0] = neogfx::aabbf{ min, center };
+                iOctants[0][1][0] = neogfx::aabbf{ vec3f{ min.x, center.y, min.z }, vec3f{ center.x, max.y, center.z } };
+                iOctants[1][0][0] = neogfx::aabbf{ vec3f{ center.x, min.y, min.z }, vec3f{ max.x, center.y, center.z } };
+                iOctants[1][1][0] = neogfx::aabbf{ vec3f{ center.x, center.y, min.z }, vec3f{ max.x, max.y, center.z } };
+                iOctants[0][0][1] = neogfx::aabbf{ vec3f{ min.x, min.y, center.z }, vec3f{ center.x, center.y, max.z } };
+                iOctants[0][1][1] = neogfx::aabbf{ vec3f{ min.x, center.y, center.z }, vec3f{ center.x, max.y, max.z } };
+                iOctants[1][0][1] = neogfx::aabbf{ vec3f{ center.x, min.y, center.z }, vec3f{ max.x, center.y, max.z } };
+                iOctants[1][1][1] = neogfx::aabbf{ vec3f{ center.x, center.y, center.z }, vec3f{ max.x, max.y, max.z } };
+                iOctants2d[0][0][0] = aabb_2df{ ~min.xy, ~center.xy };
+                iOctants2d[0][1][0] = aabb_2df{ vec2f{ min.x, center.y }, vec2f{ center.x, max.y } };
+                iOctants2d[1][0][0] = aabb_2df{ vec2f{ center.x, min.y }, vec2f{ max.x, center.y } };
+                iOctants2d[1][1][0] = aabb_2df{ ~center.xy, ~max.xy };
+                iOctants2d[0][0][1] = aabb_2df{ ~min.xy, ~center.xy};
+                iOctants2d[0][1][1] = aabb_2df{ vec2f{ min.x, center.y }, vec2f{ center.x, max.y } };
+                iOctants2d[1][0][1] = aabb_2df{ vec2f{ center.x, min.y }, vec2f{ max.x, center.y } };
+                iOctants2d[1][1][1] = aabb_2df{ ~center.xy, ~max.xy };
             }
             template <std::size_t X, std::size_t Y, std::size_t Z>
             node& child() const
@@ -427,7 +427,7 @@ namespace neogfx::game
             aabb_octree& iTree;
             const node* iParent;
             std::uint32_t iDepth;
-            neogfx::aabb iAabb;
+            neogfx::aabbf iAabb;
             octants iOctants;
             octants_2d iOctants2d;
             entity_list iEntities;
@@ -435,7 +435,7 @@ namespace neogfx::game
         };
         typedef typename allocator_type::template rebind<node>::other node_allocator;
     public:
-        aabb_octree(i_ecs& iEcs, const aabb& aRootAabb = aabb{ vec3{-4096.0, -4096.0, -4096.0}, vec3{4096.0, 4096.0, 4096.0} }, scalar aMinimumOctantSize = 16.0, const allocator_type& aAllocator = allocator_type{}) :
+        aabb_octree(i_ecs& iEcs, const aabbf& aRootAabb = aabbf{ vec3{-4096.0f, -4096.0f, -4096.0f}, vec3{4096.0f, 4096.0f, 4096.0f} }, float aMinimumOctantSize = 16.0f, const allocator_type& aAllocator = allocator_type{}) :
             iAllocator{ aAllocator },
             iEcs{ iEcs },
             iRootAabb{ aRootAabb },
@@ -447,7 +447,7 @@ namespace neogfx::game
         {
         }
     public:
-        scalar minimum_octant_size() const
+        float minimum_octant_size() const
         {
             return iMinimumOctantSize;
         }
@@ -502,7 +502,7 @@ namespace neogfx::game
             }
         }
         template <typename ResultContainer>
-        void pick(const vec3& aPoint, ResultContainer& aResult, std::function<bool(entity_id aMatch, const vec3& aPoint)> aColliderPredicate = [](entity_id, const vec3&) { return true; }) const
+        void pick(const vec3f& aPoint, ResultContainer& aResult, std::function<bool(entity_id aMatch, const vec3& aPoint)> aColliderPredicate = [](entity_id, const vec3f&) { return true; }) const
         {
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {
@@ -512,7 +512,7 @@ namespace neogfx::game
             });
         }
         template <typename ResultContainer>
-        void pick(const vec2& aPoint, ResultContainer& aResult, std::function<bool(entity_id aMatch, const vec2& aPoint)> aColliderPredicate = [](entity_id, const vec2&) { return true; }) const
+        void pick(const vec2f& aPoint, ResultContainer& aResult, std::function<bool(entity_id aMatch, const vec2& aPoint)> aColliderPredicate = [](entity_id, const vec2f&) { return true; }) const
         {
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {
@@ -550,7 +550,7 @@ namespace neogfx::game
             return iRootNode;
         }
     private:
-        node* create_node(const node& aParent, const aabb& aAabb)
+        node* create_node(const node& aParent, const aabbf& aAabb)
         {
             ++iCount;
             node* newNode = iAllocator.allocate(1);
@@ -569,8 +569,8 @@ namespace neogfx::game
     private:
         node_allocator iAllocator;
         i_ecs& iEcs;
-        aabb iRootAabb;
-        scalar iMinimumOctantSize;
+        aabbf iRootAabb;
+        float iMinimumOctantSize;
         std::uint32_t iCount;
         mutable std::uint32_t iDepth;
         node iRootNode;

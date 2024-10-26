@@ -30,6 +30,9 @@
 
 namespace neogfx::game
 {
+    using vertices = std::vector<vec3f>;
+    using vertices_2d = std::vector<vec2f>;
+
     struct mesh
     {
         vertices vertices; // todo: neolib::vector not std::vector (modify neolib::vector copy ctor to make plugin compatible; use ref_ptr<i_vector> here?)
@@ -79,12 +82,12 @@ namespace neogfx::game
         };
     };
 
-    inline mesh operator*(const mat44& aLhs, const mesh& aRhs)
+    inline mesh operator*(const mat44f& aLhs, const mesh& aRhs)
     {
         return mesh{ aLhs * aRhs.vertices, aRhs.uv, aRhs.faces };
     }
 
-    inline rect bounding_rect(const vertices& aVertices, const mat44& aTransformation = mat44::identity())
+    inline rect bounding_rect(const vertices& aVertices, const mat44f& aTransformation = mat44f::identity())
     {
         if (aVertices.empty())
             return rect{};
@@ -121,7 +124,7 @@ namespace neogfx::game
         return rect{ topLeft, bottomRight };
     }
 
-    inline rect bounding_rect(const vertices& aVertices, const faces& aFaces, const mat44& aTransformation = mat44::identity(), vertices::size_type aOffset = 0)
+    inline rect bounding_rect(const vertices& aVertices, const faces& aFaces, const mat44f& aTransformation = mat44f::identity(), vertices::size_type aOffset = 0)
     {
         if (aVertices.empty())
             return rect{};
@@ -175,7 +178,8 @@ namespace neogfx::game
         return faces;
     }
 
-    inline faces default_faces(const vertices& aVertices, std::uint32_t aOffset = 0u)
+    template <typename T>
+    inline faces default_faces(const std::vector<T>& aVertices, std::uint32_t aOffset = 0u)
     {
         return default_faces(static_cast<std::uint32_t>(aVertices.size()), aOffset);
     }

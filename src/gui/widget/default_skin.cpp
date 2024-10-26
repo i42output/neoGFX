@@ -247,13 +247,13 @@ namespace neogfx
     {
         auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
         auto const expanderColor = aItem.is_widget() && aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Text);
-        thread_local neogfx::game::mesh mesh{ {}, neogfx::vertices_2d{ 3, neogfx::vec2{} }, neogfx::game::default_faces(3) };
-        auto const d1 = 3.0_dip;
-        auto const d2 = 1.0_dip;
+        thread_local neogfx::game::mesh mesh{ {}, neogfx::vertices_2df{ 3, neogfx::vec2f{} }, neogfx::game::default_faces(3) };
+        auto const d1 = static_cast<float>(3.0_dip);
+        auto const d2 = static_cast<float>(1.0_dip);
         if (!aExpandedState)
-            mesh.vertices = { vec3{ -d1 + d2, -d1 - d2 }, vec3{ d1 - d2, 0.0 }, vec3{ -d1 + d2, d1 + d2 } };
+            mesh.vertices = { vec3f{ -d1 + d2, -d1 - d2 }, vec3f{ d1 - d2, 0.0f }, vec3f{ -d1 + d2, d1 + d2 } };
         else
-            mesh.vertices = { vec3{ -d1, d1 }, vec3{ d1, -d1 }, vec3{ d1, d1 } };
+            mesh.vertices = { vec3f{ -d1, d1 }, vec3f{ d1, -d1 }, vec3f{ d1, d1 } };
         if (!aExpandedState)
             aGc.draw_shape(mesh, expanderRect.center().to_vec3(), expanderColor);
         else

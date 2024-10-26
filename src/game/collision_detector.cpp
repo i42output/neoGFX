@@ -131,11 +131,11 @@ namespace neogfx::game
                     collider.untransformedAabb = to_aabb(untransformed.vertices);
                 collider.currentAabb = aabb_transform(*collider.untransformedAabb,
                     (animatedMeshFilters.has_entity_record(entity) ?
-                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity()),
+                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44f::identity()),
                     (meshFilter.transformation ?
-                        *meshFilter.transformation : mat44::identity()),
+                        *meshFilter.transformation : mat44f::identity()),
                     (rigidBodies.has_entity_record(entity) ?
-                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity()));
+                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44f::identity()));
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
@@ -164,11 +164,11 @@ namespace neogfx::game
                     collider.untransformedAabb = to_aabb_2d(untransformed.vertices);
                 collider.currentAabb = aabb_transform(*collider.untransformedAabb, 
                     (animatedMeshFilters.has_entity_record(entity) ?
-                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44::identity()),
+                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44f::identity()),
                     (meshFilter.transformation ?
-                        *meshFilter.transformation : mat44::identity()),
+                        *meshFilter.transformation : mat44f::identity()),
                     (rigidBodies.has_entity_record(entity) ?
-                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44::identity()));
+                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44f::identity()));
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
