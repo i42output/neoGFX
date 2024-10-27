@@ -30,7 +30,7 @@ namespace neogfx::game
 {
     struct color
     {
-        vec4 rgba;
+        vec4f rgba;
 
         struct meta : i_component_data::meta
         {
@@ -53,7 +53,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Vec4;
+                    return component_data_field_type::Vec4f;
                 default:
                     throw invalid_field_index();
                 }

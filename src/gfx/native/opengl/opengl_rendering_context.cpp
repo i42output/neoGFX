@@ -2202,6 +2202,7 @@ namespace neogfx
             vec2f textureStorageExtents;
             vec2f uvFixupCoefficient;
             vec2f uvFixupOffset;
+            vec4f const defaultColor{ 1.0f, 1.0f, 1.0f, 1.0f };
             std::optional<neolib::cookie> textureId;
             auto add_item = [&](vec2u32& cacheIndices, auto const& mesh, auto const& material, auto const& faces)
             {
@@ -2245,12 +2246,12 @@ namespace neogfx
                         for (auto faceVertexIndex : face)
                         {
                             auto const& xyz = (transformation? *transformation * mesh.vertices[faceVertexIndex] : mesh.vertices[faceVertexIndex]);
-                            auto const& rgba = (material.color != std::nullopt ? material.color->rgba.as<float>() : vec4f{ 1.0f, 1.0f, 1.0f, 1.0f });
+                            auto const& rgba = (material.color != std::nullopt ? material.color->rgba : defaultColor);
                             auto const& uv = (patch_drawable::has_texture(meshRenderer, material) ?
                                 (mesh.uv[faceVertexIndex].scale(uvFixupCoefficient) + uvFixupOffset).scale(1.0f / textureStorageExtents) : vec2f{});
                             auto const& xyzw = function;
                             if (nextIndex == vertices.size())
-                                vertices.emplace_back(xyz, rgba, uv, xyzw );
+                                vertices.emplace_back(xyz, rgba, uv, xyzw);
                             else
                             {
                                 auto& vertex = vertices[nextIndex];
