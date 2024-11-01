@@ -86,7 +86,8 @@ namespace neogfx
         Arc         = 0x08,
         RoundedRect = 0x09,
         EllipseRect = 0x0A,
-        Polygon     = 0x0B
+        Polygon     = 0x0B,
+        CheckerRect = 0x0C
     };
 
     enum class blurring_algorithm : std::uint32_t

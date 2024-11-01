@@ -1213,53 +1213,62 @@ namespace neogfx
 
     void opengl_rendering_context::draw_checker_rects(const graphics_operation::batch& aDrawCheckerRectOps)
     {
-        use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
+        std::optional<use_shader_program> usp;
+        std::optional<neolib::scoped_flag> snap;
 
-        neolib::scoped_flag snap{ iSnapToPixel, false };
-        scoped_anti_alias saa{ *this, smoothing_mode::None };
-        disable_multisample disableMultisample{ *this };
-
-        // todo: add a shader-based primitive for this operation
-
-        for (std::int32_t step = 0; step <= 1; ++step)
         {
-            auto& firstOp = static_variant_cast<const graphics_operation::draw_checker_rect&>(*aDrawCheckerRectOps.cbegin());
+            std::optional<use_vertex_arrays> maybeVertexArrays;
 
-            if (std::holds_alternative<gradient>(step == 0 ? firstOp.fill1 : firstOp.fill2))
-                rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(step == 0 ? firstOp.fill1 : firstOp.fill2));
-
+            for (auto op = aDrawCheckerRectOps.cbegin(); op != aDrawCheckerRectOps.cend(); ++op)
             {
-                for (auto op = aDrawCheckerRectOps.cbegin(); op != aDrawCheckerRectOps.cend(); ++op)
+                for (std::uint32_t pass = 0u; pass <= 1u; ++pass)
                 {
+                    usp.emplace(*this, rendering_engine().default_shader_program(), iOpacity);
+                    snap.emplace(iSnapToPixelUsesOffset, false);
+
                     auto& drawOp = static_variant_cast<const graphics_operation::draw_checker_rect&>(*op);
-                    if (std::holds_alternative<std::monostate>(drawOp.fill1) || std::holds_alternative<std::monostate>(drawOp.fill2))
-                        continue;
+                    auto& fill = (pass == 0u ? drawOp.fill1 : drawOp.fill2);
 
-                    auto const squareCount = static_cast<std::uint32_t>(
-                        std::ceil(std::ceil(drawOp.rect.extents().cx / drawOp.squareSize.cx) * std::ceil(std::ceil(drawOp.rect.extents().cy / drawOp.squareSize.cy)) / 2.0));
-                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * squareCount) };
+                    if (std::holds_alternative<gradient>(fill))
+                        rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(fill));
+                    else if (std::holds_alternative<gradient>(drawOp.pen.color()))
+                        rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(drawOp.pen.color()));
 
-                    for (coordinate x = 0; x < drawOp.rect.cx; x += drawOp.squareSize.cx)
-                    {
-                        bool alt = ((static_cast<std::int32_t>(x / drawOp.squareSize.cx) % 2) == step);
+                    rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::CheckerRect);
 
-                        for (coordinate y = 0; y < drawOp.rect.cy; y += drawOp.squareSize.cy)
-                        {
-                            if (alt)
-                            {
-                                auto const square = rect{ drawOp.rect.top_left() + point{ x, y }, drawOp.squareSize };
-                                auto const& fill = (step == 0 ? drawOp.fill1 : drawOp.fill2);
-                                auto const function = to_function(fill, square);
-                                auto rectVertices = rect_vertices<vec3f>(square, mesh_type::Triangles);
-                                for (auto const& v : rectVertices)
-                                    vertexArrays.push_back({ v,
-                                        std::holds_alternative<color>(fill) ? static_variant_cast<color>(fill).as<float>() : vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
-                                        {},
-                                        function });
-                            }
-                            alt = !alt;
-                        }
-                    }
+                    maybeVertexArrays.emplace(as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u));
+
+                    auto& vertexArrays = maybeVertexArrays.value();
+
+                    auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
+                    auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
+                    auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
+                    auto const function = to_function(fill, boundingRect);
+
+                    for (auto const& v : vertices)
+                        vertexArrays.push_back({ v,
+                            std::holds_alternative<color>(fill) ?
+                                static_variant_cast<color>(fill).as<float>() :
+                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(fill) ? 0.0f : 1.0f },
+                            {},
+                            function,
+                            vec4{ sdfRect.center().x, sdfRect.center().y, sdfRect.width(), sdfRect.height() }.as<float>(),
+                            vec4{ drawOp.squareSize.cx, drawOp.squareSize.cy, static_cast<double>(pass) }.as<float>(),
+                            vec4{
+                                drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
+                                !logical_operation_active() && !snap_to_pixel() ?
+                                    drawOp.pen.anti_aliased() ?
+                                        0.5 : 0.0 :
+                                    0.0,
+                                0.0,
+                                drawOp.pen.width() }.as<float>(),
+                            std::holds_alternative<color>(drawOp.pen.color()) ?
+                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                                vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
+                            drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+
+                    maybeVertexArrays = std::nullopt;
+                    usp = std::nullopt;
                 }
             }
         }
@@ -2187,6 +2196,12 @@ namespace neogfx
             }
         }
 
+        std::optional<neolib::cookie> textureId;
+        std::optional<float> uvGui;
+        vec2f textureStorageExtents;
+        vec2f uvFixupCoefficient;
+        vec2f uvFixupOffset;
+
         for (auto md = aFirst; md != aLast; ++md)
         {
             auto& meshDrawable = *md;
@@ -2199,11 +2214,7 @@ namespace neogfx
             auto const& transformation = meshDrawable.transformation;
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
-            vec2f textureStorageExtents;
-            vec2f uvFixupCoefficient;
-            vec2f uvFixupOffset;
             vec4f const defaultColor{ 1.0f, 1.0f, 1.0f, 1.0f };
-            std::optional<neolib::cookie> textureId;
             auto add_item = [&](vec2u32& cacheIndices, auto const& mesh, auto const& material, auto const& faces)
             {
                 auto const function = material.gradient != std::nullopt && material.gradient->boundingBox ?
@@ -2217,7 +2228,6 @@ namespace neogfx
                         vec4f{};
                 if (meshRenderCache.state != game::cache_state::Clean)
                 {
-                    std::optional<float> uvGui;
                     if (patch_drawable::has_texture(meshRenderer, material))
                     {
                         auto const& materialTexture = patch_drawable::texture(meshRenderer, material);

@@ -383,6 +383,29 @@ void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, 
         color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
+void draw_checker_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
+{
+    vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
+    vec2 shapePos = fragPos.xy - function1.xy;
+    
+    float d0 = sdBox(shapePos, function1.zw * 0.5);
+
+    if (d0 < function3.w / 2.0)
+    {
+        ivec2 checkerPos = ivec2(shapePos) + ivec2(function1.zw * 0.5);
+        ivec2 checkerSize = ivec2(function2.xy);
+        int row = checkerPos.y / checkerSize.y;
+        int col = checkerPos.x / checkerSize.x;
+        if ((row + col + 1) % 2 == int(function2.z))
+            discard;
+    }
+
+    if (function3.y == 0.0 && function3.w != 0.0 && (d0 > function3.w / 2.0 || (color.a == 0.0 && abs(d0) > function3.w / 2.0)))
+        discard;
+    else
+        color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
+}
+
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
     if (uShapeEnabled)
@@ -421,6 +444,9 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
             break;
         case SHAPE_Polygon:
             draw_polygon(color, function1, function2, function3, function4, function5);
+            break;
+        case SHAPE_CheckerRect:
+            draw_checker_rect(color, function1, function2, function3, function4, function5);
             break;
         }
     }
