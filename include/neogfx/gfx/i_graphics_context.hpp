@@ -219,7 +219,7 @@ namespace neogfx
         virtual void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const = 0;
+        virtual void draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const = 0;
         virtual void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) const = 0;
         virtual void draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const = 0;
@@ -354,9 +354,9 @@ namespace neogfx
         {
             draw_ellipse_rect(aRect, aRadiusX, aRadiusY, pen{}, aFill);
         }
-        void fill_checker_rect(rect const& aRect, const size& aSquareSize, brush const& aFill1, brush const& aFill2) const
+        void fill_checkerboard(rect const& aRect, const size& aSquareSize, brush const& aFill1, brush const& aFill2) const
         {
-            draw_checker_rect(aRect, aSquareSize, pen{}, aFill1, aFill2);
+            draw_checkerboard(aRect, aSquareSize, pen{}, aFill1, aFill2);
         }
         void fill_circle(point const& aCenter, dimension aRadius, brush const& aFill) const
         {
@@ -564,7 +564,7 @@ namespace neogfx
     inline void draw_alpha_background(i_graphics_context& aGc, rect const& aRect, dimension aAlphaPatternSize = 4.0_dip)
     {
         scoped_scissor scissor(aGc, aRect);
-        aGc.fill_checker_rect(aRect, size{ aAlphaPatternSize }, color{ 160, 160, 160 }, color{ 255, 255, 255 });
+        aGc.fill_checkerboard(aRect, size{ aAlphaPatternSize }, color{ 160, 160, 160 }, color{ 255, 255, 255 });
     }
 
     struct blur_filter

@@ -444,11 +444,11 @@ namespace neogfx
         native_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect) + iOrigin, aRadiusX, aRadiusY, aPen, aFill });
     }
 
-    void graphics_context::draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const
+    void graphics_context::draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_checker_rect{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
+        native_context().enqueue(graphics_operation::draw_checkerboard{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
     }
 
     void graphics_context::draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill) const

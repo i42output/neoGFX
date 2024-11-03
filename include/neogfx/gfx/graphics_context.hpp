@@ -131,7 +131,7 @@ namespace neogfx
         void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_checker_rect(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const final;
+        void draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const final;
         void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) const final;
         void draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const final;

@@ -55,7 +55,7 @@ namespace neogfx
             case DrawLine: return "DrawLine";
             case DrawRect: return "DrawRect";
             case DrawRoundedRect: return "DrawRoundedRect";
-            case DrawCheckerRect: return "DrawCheckerRect";
+            case DrawCheckerboard: return "DrawCheckerboard";
             case DrawCircle: return "DrawCircle";
             case DrawArc: return "DrawArc";
             case DrawPath: return "DrawPath";
@@ -151,10 +151,10 @@ namespace neogfx
                     left.fill.index() == right.fill.index() &&
                     (std::holds_alternative<std::monostate>(left.fill) || std::holds_alternative<color>(left.fill));
             }
-            case operation_type::DrawCheckerRect:
+            case operation_type::DrawCheckerboard:
             {
-                auto& left = static_variant_cast<const draw_checker_rect&>(aLeft);
-                auto& right = static_variant_cast<const draw_checker_rect&>(aRight);
+                auto& left = static_variant_cast<const draw_checkerboard&>(aLeft);
+                auto& right = static_variant_cast<const draw_checkerboard&>(aRight);
                 return 
                     left.fill1.index() == right.fill1.index() &&
                     (std::holds_alternative<std::monostate>(left.fill1) || std::holds_alternative<color>(left.fill1)) &&

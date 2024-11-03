@@ -75,19 +75,19 @@ namespace neogfx
 
     enum class shader_shape : std::uint32_t
     {
-        None        = 0x00,
-        Line        = 0x01,
-        CubicBezier = 0x02,
-        Triangle    = 0x03,
-        Rect        = 0x04,
-        Circle      = 0x05,
-        Ellipse     = 0x06,
-        Pie         = 0x07,
-        Arc         = 0x08,
-        RoundedRect = 0x09,
-        EllipseRect = 0x0A,
-        Polygon     = 0x0B,
-        CheckerRect = 0x0C
+        None         = 0x00,
+        Line         = 0x01,
+        CubicBezier  = 0x02,
+        Triangle     = 0x03,
+        Rect         = 0x04,
+        Circle       = 0x05,
+        Ellipse      = 0x06,
+        Pie          = 0x07,
+        Arc          = 0x08,
+        RoundedRect  = 0x09,
+        EllipseRect  = 0x0A,
+        Polygon      = 0x0B,
+        Checkerboard = 0x0C
     };
 
     enum class blurring_algorithm : std::uint32_t

@@ -3121,6 +3121,8 @@ namespace neogfx
         glyph_text lineGlyphs{ font(), lineStart, lineEnd };
         lineGlyphs.content().align_baselines();
 
+        auto const columnRect = column_rect(aColumn.index());
+        auto const clientRect = client_rect();
         optional_text_format textAppearance;
         point const lineOrigin = lineStart->cell[0];
         point const textPos = aPosition - lineOrigin;
@@ -3136,9 +3138,9 @@ namespace neogfx
             auto const& style = glyph_style(documentGlyph, iColumns[aColumn.index()]);
             auto const& glyphColor = with_bounding_box(style.character().glyph_color() == neolib::none ?
                 style.character().text_color() != neolib::none ?
-                    with_bounding_box(style.character().text_color(), column_rect(aColumn.index())) :
+                    with_bounding_box(style.character().text_color(), columnRect) :
                     default_text_color() : 
-                style.character().glyph_color(), client_rect(), true);
+                style.character().glyph_color(), clientRect, true);
             auto const& nextTextAppearance = !selected ?
                 text_format{
                     glyphColor,

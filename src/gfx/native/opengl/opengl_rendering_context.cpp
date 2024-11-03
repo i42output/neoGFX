@@ -597,8 +597,8 @@ namespace neogfx
             case graphics_operation::operation_type::DrawEllipseRect:
                 draw_ellipse_rects(opBatch);
                 break;
-            case graphics_operation::operation_type::DrawCheckerRect:
-                draw_checker_rects(opBatch);
+            case graphics_operation::operation_type::DrawCheckerboard:
+                draw_checkerboards(opBatch);
                 break;
             case graphics_operation::operation_type::DrawCircle:
                 draw_circles(opBatch);
@@ -1211,7 +1211,7 @@ namespace neogfx
         }
     }
 
-    void opengl_rendering_context::draw_checker_rects(const graphics_operation::batch& aDrawCheckerRectOps)
+    void opengl_rendering_context::draw_checkerboards(const graphics_operation::batch& aDrawCheckerboardOps)
     {
         std::optional<use_shader_program> usp;
         std::optional<neolib::scoped_flag> snap;
@@ -1219,14 +1219,14 @@ namespace neogfx
         {
             std::optional<use_vertex_arrays> maybeVertexArrays;
 
-            for (auto op = aDrawCheckerRectOps.cbegin(); op != aDrawCheckerRectOps.cend(); ++op)
+            for (auto op = aDrawCheckerboardOps.cbegin(); op != aDrawCheckerboardOps.cend(); ++op)
             {
                 for (std::uint32_t pass = 0u; pass <= 1u; ++pass)
                 {
                     usp.emplace(*this, rendering_engine().default_shader_program(), iOpacity);
                     snap.emplace(iSnapToPixelUsesOffset, false);
 
-                    auto& drawOp = static_variant_cast<const graphics_operation::draw_checker_rect&>(*op);
+                    auto& drawOp = static_variant_cast<const graphics_operation::draw_checkerboard&>(*op);
                     auto& fill = (pass == 0u ? drawOp.fill1 : drawOp.fill2);
 
                     if (std::holds_alternative<gradient>(fill))
@@ -1234,7 +1234,7 @@ namespace neogfx
                     else if (std::holds_alternative<gradient>(drawOp.pen.color()))
                         rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(drawOp.pen.color()));
 
-                    rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::CheckerRect);
+                    rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Checkerboard);
 
                     maybeVertexArrays.emplace(as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u));
 

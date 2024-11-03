@@ -11,7 +11,7 @@
 #define SHAPE_RoundedRect 0x09
 #define SHAPE_EllipseRect 0x0A
 #define SHAPE_Polygon 0x0B
-#define SHAPE_CheckerRect 0x0C
+#define SHAPE_Checkerboard 0x0C
 
 vec4 mix3(vec4 a, vec4 b, vec4 c, float t)
 {

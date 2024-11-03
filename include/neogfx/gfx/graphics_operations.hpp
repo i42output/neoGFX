@@ -197,7 +197,7 @@ namespace neogfx
             brush fill;
         };
 
-        struct draw_checker_rect
+        struct draw_checkerboard
         {
             rect rect;
             size squareSize;
@@ -325,7 +325,7 @@ namespace neogfx
             draw_rect,
             draw_rounded_rect,
             draw_ellipse_rect,
-            draw_checker_rect,
+            draw_checkerboard,
             draw_circle,
             draw_ellipse,
             draw_pie,
@@ -371,7 +371,7 @@ namespace neogfx
             DrawRect,
             DrawRoundedRect,
             DrawEllipseRect,
-            DrawCheckerRect,
+            DrawCheckerboard,
             DrawCircle,
             DrawEllipse,
             DrawPie,

@@ -383,7 +383,7 @@ void draw_polygon(inout vec4 color, inout vec4 function1, inout vec4 function2, 
         color = shape_color(d0, color, function3.x, function3.w, function3.y, function4, function5);
 }
 
-void draw_checker_rect(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
+void draw_checkerboard(inout vec4 color, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5)
 {
     vec2 fragPos = Coord.xy + (gl_SamplePosition - vec2(0.5, 0.5));
     vec2 shapePos = fragPos.xy - function1.xy;
@@ -445,8 +445,8 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
         case SHAPE_Polygon:
             draw_polygon(color, function1, function2, function3, function4, function5);
             break;
-        case SHAPE_CheckerRect:
-            draw_checker_rect(color, function1, function2, function3, function4, function5);
+        case SHAPE_Checkerboard:
+            draw_checkerboard(color, function1, function2, function3, function4, function5);
             break;
         }
     }
