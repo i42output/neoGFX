@@ -108,9 +108,9 @@ namespace neogfx
             std::size_t iPass;
         };
 
-        inline verticesf line_loop_to_lines(const verticesf& aLineLoop, bool aClosed = true)
+        inline game::vertices line_loop_to_lines(const game::vertices& aLineLoop, bool aClosed = true)
         {
-            verticesf result;
+            game::vertices result;
             result.reserve(aLineLoop.size() * 2);
             for (auto v = aLineLoop.begin(); v != aLineLoop.end(); ++v)
             {
@@ -123,7 +123,7 @@ namespace neogfx
             return result;
         }
 
-        inline verticesf line_strip_to_lines(const verticesf& aLineStrip, bool aClosed = true)
+        inline game::vertices line_strip_to_lines(const game::vertices& aLineStrip, bool aClosed = true)
         {
             return line_loop_to_lines(aLineStrip, false);
         }
@@ -184,10 +184,10 @@ namespace neogfx
             }
         }
 
-        inline verticesf path_vertices(const path& aPath, const path::sub_path_type& aSubPath, float aLineWidth, GLenum& aMode)
+        inline game::vertices path_vertices(const path& aPath, const path::sub_path_type& aSubPath, float aLineWidth, GLenum& aMode)
         {
             aMode = path_shape_to_gl_mode(aPath.shape());
-            thread_local neogfx::verticesf vertices;
+            thread_local neogfx::game::vertices vertices;
             aPath.to_vertices(aSubPath, vertices);
             if (aMode == GL_LINE_LOOP)
             {
@@ -202,12 +202,12 @@ namespace neogfx
             if (aMode == GL_LINES)
             {
                 aMode = GL_QUADS;
-                lines_to_quads(neogfx::verticesf{ std::move(vertices) }, aLineWidth, vertices);
+                lines_to_quads(neogfx::game::vertices{ std::move(vertices) }, aLineWidth, vertices);
             }
             if (aMode == GL_QUADS)
             {
                 aMode = GL_TRIANGLES;
-                quads_to_triangles(neogfx::verticesf{ std::move(vertices) }, vertices);
+                quads_to_triangles(neogfx::game::vertices{ std::move(vertices) }, vertices);
             }
             return vertices;
         }

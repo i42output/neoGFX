@@ -21,8 +21,7 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include <vector>
-
+#include <neolib/core/small_vector.hpp>
 #include <neolib/core/numerical.hpp>
 #include <neolib/ecs/i_ecs.hpp>
 
@@ -35,7 +34,7 @@ namespace neogfx
         using namespace neolib::ecs; // todo: deprecated scope
 
         using face = vec3u32;
-        using faces = std::vector<face>;
+        using faces = neolib::small_vector<face, 6u>;
 
         using scene_layer = std::int32_t;
    }

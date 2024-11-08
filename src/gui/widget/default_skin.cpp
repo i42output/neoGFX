@@ -247,7 +247,7 @@ namespace neogfx
     {
         auto const expanderRect = aItem.element_rect(skin_element::TreeExpander);
         auto const expanderColor = aItem.is_widget() && aItem.as_widget().has_base_color() ? aItem.as_widget().base_color() : service<i_app>().current_style().palette().color(color_role::Text);
-        thread_local neogfx::game::mesh mesh{ {}, neogfx::vertices_2df{ 3, neogfx::vec2f{} }, neogfx::game::default_faces(3) };
+        thread_local neogfx::game::mesh mesh{ {}, neogfx::game::vertices_2d{ 3, neogfx::vec2f{} }, neogfx::game::default_faces(3) };
         auto const d1 = static_cast<float>(3.0_dip);
         auto const d2 = static_cast<float>(1.0_dip);
         if (!aExpandedState)

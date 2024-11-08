@@ -364,3 +364,4 @@ Debug
 /build/win32/vs/neoGFX.tlog
 /build/win32/vs/neoGFX/neoGFX.tlog
 /build/win32/vs/neoGFX/x64/Tools
+/testing/gui_test_app/build/win32/vs
