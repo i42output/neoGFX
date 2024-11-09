@@ -291,12 +291,13 @@ namespace neogfx
         if (!has_presentation_model())
             return 0.0;
         dimension result = 0.0;
+        auto const separatorWidth = separator_width();
         for (std::uint32_t col = 0; col < presentation_model().columns(); ++col)
         {
             if (col != 0)
-                result += separator_width();
+                result += separatorWidth;
             else
-                result += separator_width() / 2.0;
+                result += separatorWidth / 2.0;
             result += section_width(col);
         }
         return result;
@@ -361,6 +362,7 @@ namespace neogfx
             layout().add(make_ref<header_button>(*this));
         if (iButtonSinks.size() < layout().count())
             iButtonSinks.resize(layout().count());
+        auto const separatorWidth = separator_width();
         for (std::uint32_t i = 0u; i < layout().count(); ++i)
         {
             header_button& button = layout().get_widget_at<header_button>(i);
@@ -368,7 +370,7 @@ namespace neogfx
             if (i == 0u)
             {
                 auto m = button.padding();
-                m.left = separator_width() / 2.0 + 1.0;
+                m.left = separatorWidth / 2.0 + 1.0;
                 button.set_padding(m);
             }
             if (i < presentation_model().columns())
