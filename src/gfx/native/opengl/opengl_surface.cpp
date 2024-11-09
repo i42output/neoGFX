@@ -37,7 +37,7 @@
 namespace neogfx
 {
     opengl_surface::opengl_surface(i_rendering_engine& aRenderingEngine, i_surface_window& aWindow) :
-        native_surface{ aRenderingEngine, aWindow }
+        native_surface{ aRenderingEngine, aWindow }, iIdealGraphicsOperationQueueCapacity{ 0u }
     {
     }
 
@@ -177,6 +177,16 @@ namespace neogfx
     std::unique_ptr<i_rendering_context> opengl_surface::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
         return std::make_unique<opengl_rendering_context>(*this, aWidget, aBlendingMode);
+    }
+
+    std::size_t opengl_surface::ideal_graphics_operation_queue_capacity() const
+    {
+        return iIdealGraphicsOperationQueueCapacity;
+    }
+
+    void opengl_surface::new_graphics_operation_queue_capacity(std::size_t aCapacity) const
+    {
+        iIdealGraphicsOperationQueueCapacity = aCapacity;
     }
 
     void opengl_surface::set_destroying()

@@ -544,6 +544,19 @@ namespace neogfx
     }
 
     template <typename T>
+    std::size_t opengl_texture<T>::ideal_graphics_operation_queue_capacity() const
+    {
+        /// @todo
+        return 0u;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::new_graphics_operation_queue_capacity(std::size_t aCapacity) const
+    {
+        /// @todo
+    }
+
+    template <typename T>
     void opengl_texture<T>::bind(std::uint32_t aTextureUnit) const
     {
         if (iBoundTextureUnit.has_value())

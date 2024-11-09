@@ -273,7 +273,8 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        queue().reserve(512u);
+        queue().reserve(aTarget.ideal_graphics_operation_queue_capacity());
+        iTarget.new_graphics_operation_queue_capacity(0u);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]() 
@@ -300,7 +301,8 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        queue().reserve(512u);
+        queue().reserve(aTarget.ideal_graphics_operation_queue_capacity());
+        iTarget.new_graphics_operation_queue_capacity(0u);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]()
@@ -328,7 +330,8 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        queue().reserve(512u);
+        queue().reserve(aOther.iTarget.ideal_graphics_operation_queue_capacity());
+        iTarget.new_graphics_operation_queue_capacity(0u);
         set_blending_mode(aOther.blending_mode());
         set_smoothing_mode(aOther.smoothing_mode());
         iSink += render_target().target_deactivating([&]()
@@ -473,6 +476,9 @@ namespace neogfx
 
         if (queue().empty())
             return;
+
+        iTarget.new_graphics_operation_queue_capacity(
+            std::max(queue().size(), iTarget.ideal_graphics_operation_queue_capacity()));
 
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());

@@ -84,6 +84,8 @@ namespace neogfx
         dimension em_size() const final;
     public:
         std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const final;
+        std::size_t ideal_graphics_operation_queue_capacity() const final;
+        void new_graphics_operation_queue_capacity(std::size_t aCapacity) const final;
     public:
         void bind(std::uint32_t aTextureUnit) const final;
         void unbind() const final;

@@ -57,6 +57,8 @@ namespace neogfx
     public:
         std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode) const override;
         std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const override;
+        std::size_t ideal_graphics_operation_queue_capacity() const final;
+        void new_graphics_operation_queue_capacity(std::size_t aCapacity) const final;
     protected:
         void set_destroying() override;
         void set_destroyed() override;
@@ -65,5 +67,6 @@ namespace neogfx
         mutable optional_texture iFrameBufferTexture;
         GLuint iDepthStencilBuffer;
         size iFrameBufferExtents;
+        mutable std::size_t iIdealGraphicsOperationQueueCapacity;
     };
 }
