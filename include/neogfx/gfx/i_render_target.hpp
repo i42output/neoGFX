@@ -23,6 +23,7 @@
 
 #include <neogfx/core/device_metrics.hpp>
 #include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gfx/graphics_operations.hpp>
 
 namespace neogfx
 {
@@ -74,8 +75,7 @@ namespace neogfx
         virtual color read_pixel(const point& aPosition) const = 0;
     public:
         virtual std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0; // todo: use ref_ptr
-        virtual std::size_t ideal_graphics_operation_queue_capacity() const = 0;
-        virtual void new_graphics_operation_queue_capacity(std::size_t aCapacity) const = 0;
+        virtual graphics_operation::i_queue& graphics_operation_queue() const = 0;
     };
 
     class scoped_render_target

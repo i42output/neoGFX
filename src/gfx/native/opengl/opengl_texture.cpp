@@ -544,16 +544,11 @@ namespace neogfx
     }
 
     template <typename T>
-    std::size_t opengl_texture<T>::ideal_graphics_operation_queue_capacity() const
+    graphics_operation::i_queue& opengl_texture<T>::graphics_operation_queue() const
     {
-        /// @todo
-        return 0u;
-    }
-
-    template <typename T>
-    void opengl_texture<T>::new_graphics_operation_queue_capacity(std::size_t aCapacity) const
-    {
-        /// @todo
+        if (iQueue == nullptr)
+            iQueue = std::make_unique<graphics_operation::queue>();
+        return *iQueue;
     }
 
     template <typename T>

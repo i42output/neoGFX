@@ -492,16 +492,9 @@ namespace neogfx
     }
 
     template <typename T>
-    std::size_t vulkan_texture<T>::ideal_graphics_operation_queue_capacity() const
+    graphics_operation::i_queue& vulkan_texture<T>::graphics_operation_queue() const
     {
-        /// @todo
-        return 0u;
-    }
-
-    template <typename T>
-    void vulkan_texture<T>::new_graphics_operation_queue_capacity(std::size_t aCapacity) const
-    {
-        /// @todo
+        TODO;
     }
 
     template <typename T>

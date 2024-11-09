@@ -203,12 +203,7 @@ namespace neogfx
         return native_context().rendering_area(aConsiderScissor);
     }
 
-    const graphics_operation::queue& graphics_context::queue() const
-    {
-        return native_context().queue();
-    }
-
-    graphics_operation::queue& graphics_context::queue()
+    graphics_operation::queue& graphics_context::queue() const
     {
         return native_context().queue();
     }

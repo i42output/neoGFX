@@ -264,8 +264,7 @@ namespace neogfx
         const i_render_target& render_target() const override;
         rect rendering_area(bool aConsiderScissor = true) const override;
     public:
-        const graphics_operation::queue& queue() const override;
-        graphics_operation::queue& queue() override;
+        graphics_operation::queue& queue() const override;
         void enqueue(const graphics_operation::operation& aOperation) override;
         void flush() override;
     public:
@@ -342,7 +341,6 @@ namespace neogfx
         i_rendering_engine& iRenderingEngine;
         const i_render_target& iTarget;
         const i_widget* iWidget;
-        graphics_operation::queue iQueue;
         bool iInFlush;
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;

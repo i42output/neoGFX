@@ -48,8 +48,7 @@ namespace neogfx
         i_rendering_engine& rendering_engine() const final;
         i_render_target const& render_target() const final;
         rect rendering_area(bool aConsiderScissor = true) const final;
-        graphics_operation::queue const& queue() const final;
-        graphics_operation::queue& queue() final;
+        graphics_operation::queue& queue() const final;
         void enqueue(graphics_operation::operation const& aOperation) final;
         void flush() final;
         // i_rendering_context

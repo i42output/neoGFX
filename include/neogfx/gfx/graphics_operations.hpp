@@ -390,7 +390,18 @@ namespace neogfx
         bool batchable(text_format const& aLeft, text_format const& aRight);
         bool batchable(i_glyph_text const& lhsText, i_glyph_text const& rhsText, glyph_char const& lhs, glyph_char const& rhs);
 
-        typedef std::vector<operation> queue;
-        typedef std::ranges::subrange<operation const*> batch;
+        class i_queue
+        {
+        public:
+            virtual ~i_queue() = default;
+        };
+
+        class queue : public i_queue, public std::vector<operation>
+        {
+        public:
+            using vector<operation>::vector;
+        };
+
+        using batch = std::ranges::subrange<operation const*>;
     }
 }

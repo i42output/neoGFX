@@ -43,8 +43,7 @@ namespace neogfx
         virtual i_rendering_engine& rendering_engine() const = 0;
         virtual const i_render_target& render_target() const = 0;
         virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
-        virtual const graphics_operation::queue& queue() const = 0;
-        virtual graphics_operation::queue& queue() = 0;
+        virtual graphics_operation::queue& queue() const = 0;
         virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
         virtual void flush() = 0;
     public:

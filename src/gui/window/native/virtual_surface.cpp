@@ -201,14 +201,9 @@ namespace neogfx
         return parent().create_graphics_context(aWidget, aBlendingMode);
     }
 
-    std::size_t virtual_surface::ideal_graphics_operation_queue_capacity() const
+    graphics_operation::i_queue& virtual_surface::graphics_operation_queue() const
     {
-        return parent().ideal_graphics_operation_queue_capacity();
-    }
-
-    void virtual_surface::new_graphics_operation_queue_capacity(std::size_t aCapacity) const
-    {
-        parent().new_graphics_operation_queue_capacity(aCapacity);
+        return parent().graphics_operation_queue();
     }
 
     std::uint64_t virtual_surface::frame_counter() const

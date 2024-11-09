@@ -273,8 +273,6 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        queue().reserve(aTarget.ideal_graphics_operation_queue_capacity());
-        iTarget.new_graphics_operation_queue_capacity(0u);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]() 
@@ -301,8 +299,6 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        queue().reserve(aTarget.ideal_graphics_operation_queue_capacity());
-        iTarget.new_graphics_operation_queue_capacity(0u);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]()
@@ -330,8 +326,6 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
-        queue().reserve(aOther.iTarget.ideal_graphics_operation_queue_capacity());
-        iTarget.new_graphics_operation_queue_capacity(0u);
         set_blending_mode(aOther.blending_mode());
         set_smoothing_mode(aOther.smoothing_mode());
         iSink += render_target().target_deactivating([&]()
@@ -452,14 +446,9 @@ namespace neogfx
         iSnapToPixel = aSnapToPixel;
     }
 
-    const graphics_operation::queue& opengl_rendering_context::queue() const
+    graphics_operation::queue& opengl_rendering_context::queue() const
     {
-        return iQueue;
-    }
-
-    graphics_operation::queue& opengl_rendering_context::queue()
-    {
-        return iQueue;
+        return static_cast<graphics_operation::queue&>(iTarget.graphics_operation_queue());
     }
 
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
@@ -476,9 +465,6 @@ namespace neogfx
 
         if (queue().empty())
             return;
-
-        iTarget.new_graphics_operation_queue_capacity(
-            std::max(queue().size(), iTarget.ideal_graphics_operation_queue_capacity()));
 
         scoped_render_target srt{ render_target() };
         set_blending_mode(blending_mode());
