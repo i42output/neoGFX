@@ -273,6 +273,7 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
+        queue().reserve(512u);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]() 
@@ -299,6 +300,7 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
+        queue().reserve(512u);
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]()
@@ -326,6 +328,7 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
+        queue().reserve(512u);
         set_blending_mode(aOther.blending_mode());
         set_smoothing_mode(aOther.smoothing_mode());
         iSink += render_target().target_deactivating([&]()
@@ -453,7 +456,7 @@ namespace neogfx
 
     graphics_operation::queue& opengl_rendering_context::queue()
     {
-        return const_cast<graphics_operation::queue&>(to_const(*this).queue());
+        return iQueue;
     }
 
     void opengl_rendering_context::enqueue(const graphics_operation::operation& aOperation)
