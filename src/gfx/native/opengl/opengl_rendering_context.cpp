@@ -755,10 +755,12 @@ namespace neogfx
                 break;
             case neogfx::blending_mode::Blit:
                 glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             case neogfx::blending_mode::Default:
                 glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             }
@@ -808,17 +810,27 @@ namespace neogfx
 
     void opengl_rendering_context::apply_logical_operation()
     {
+        auto const currentBlendingMode = iBlendingMode;
+
         if (!logical_operation_active())
         {
-            glCheck(glDisable(GL_COLOR_LOGIC_OP));
+            iBlendingMode = std::nullopt;
+            if (currentBlendingMode != std::nullopt)
+                set_blending_mode(currentBlendingMode.value());
         }
         else
         {
-            glCheck(glEnable(GL_COLOR_LOGIC_OP));
             switch (iLogicalOperationStack.back())
             {
             case logical_operation::Xor:
-                glCheck(glLogicOp(GL_XOR));
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
+                glCheck(glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR));
+                break;
+            default:
+                iBlendingMode = std::nullopt;
+                if (currentBlendingMode != std::nullopt)
+                    set_blending_mode(currentBlendingMode.value());
                 break;
             }
         }    
@@ -1032,15 +1044,18 @@ namespace neogfx
                         std::holds_alternative<std::monostate>(drawOp.fill)))
                 {
                     bool optimise = false;
-                    auto const penWidth = drawOp.pen.width();
-                    if (penWidth == 0.0)
-                        optimise = true;
-                    else if (scissor_rect() != std::nullopt)
+                    if (!logical_operation_active())
                     {
-                        auto const& tl = scissor_rect().value().top_left() - drawOp.rect.top_left();
-                        auto const& br = drawOp.rect.bottom_right() - scissor_rect().value().bottom_right();
-                        if (tl.x > penWidth && tl.y > penWidth && br.x > penWidth && br.y > penWidth)
+                        auto const penWidth = drawOp.pen.width();
+                        if (penWidth == 0.0)
                             optimise = true;
+                        else if (scissor_rect() != std::nullopt)
+                        {
+                            auto const& tl = scissor_rect().value().top_left() - drawOp.rect.top_left();
+                            auto const& br = drawOp.rect.bottom_right() - scissor_rect().value().bottom_right();
+                            if (tl.x > penWidth && tl.y > penWidth && br.x > penWidth && br.y > penWidth)
+                                optimise = true;
+                        }
                     }
                     if (optimise)
                     {

@@ -87,7 +87,8 @@ namespace neogfx
         void set_color(const color_or_gradient& aColor);
         cursor_style style() const;
         void set_style(cursor_style aStyle);
-        dimension width() const;
+        void clear_style();
+        dimension width(i_units_context const& aContext, std::optional<scalar> const& aGlyphWidth = {}) const;
         void set_width(dimension aWidth);
         void clear_wdith();
         std::chrono::milliseconds flash_interval() const;
@@ -103,7 +104,7 @@ namespace neogfx
         position_type iPosition;
         position_type iAnchor;
         color_or_gradient iColor;
-        cursor_style iStyle;
+        std::optional<cursor_style> iStyle;
         optional_dimension iWidth;
         std::chrono::milliseconds iFlashInterval;
         bool iVisible = true;

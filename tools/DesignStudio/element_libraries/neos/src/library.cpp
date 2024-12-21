@@ -161,11 +161,6 @@ namespace neogfx::DesignStudio
                 else
                     throw std::runtime_error("unknown command '" + command + "'");
             }
-            catch (const neos::language::schema::unresolved_references& e)
-            {
-                for (auto const& r : e.references)
-                    cerr << "Error: " << iContext.schema_source().to_error_text(*r.node, "unresolved schema reference '" + r.symbol + "'") << std::endl;
-            }
             catch (const neos::context::warning& e)
             {
                 output_compilation_time();

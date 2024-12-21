@@ -1128,7 +1128,19 @@ namespace neogfx
         if (!read_only())
         {
             multiple_text_changes mtc{ *this };
-            delete_any_selection();
+            if (cursor().position() == cursor().anchor() &&
+                (service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
+            {
+                if (cursor().position() < glyphs().size())
+                {
+                    auto const from = cursor().position();
+                    auto const to = cursor().position() + 1;
+                    delete_text(from, to);
+                    make_cursor_visible(true);
+                }
+            }
+            else
+                delete_any_selection();
             insert_text(aText, next_style(), true);
         }
         return true;
@@ -3190,6 +3202,7 @@ namespace neogfx
         auto cursorGlyphIndex = cursor_glyph_position();
         auto cursorPos = glyph_position(cursorGlyphIndex, true);
         dimension yHeight = 0.0;
+        std::optional<scalar> xWidth;
         scalar yOffset = 0.0;
         if (cursorPos.glyph && cursorPos.glyph.value() != glyphs().end())
         {
@@ -3197,6 +3210,7 @@ namespace neogfx
             auto const& glyph = *iterGlyph;
             yHeight = cursorPos.line.value()->extents.cy;
             yOffset = glyph.cell[0].as<scalar>().y;
+            xWidth = cursorPos.glyph.value()->cell_extents().as<scalar>().x;
         }
         else if (cursorPos.lineStart && cursorPos.lineStart.value() != cursorPos.lineEnd.value())
             yHeight = cursorPos.line.value()->extents.cy;
@@ -3206,7 +3220,7 @@ namespace neogfx
         rect cursorRect{ 
             point{ cursorPos.pos - 
                 point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } } + columnRectSansPadding.top_left() + point{ 0.0, yOffset },
-            size{ dpi_scale(static_cast<scalar>(cursor().width())), yHeight } };
+            size{ static_cast<scalar>(cursor().width(*this, xWidth)), yHeight } };
         if (cursorRect.right() > columnRectSansPadding.right())
             cursorRect.x += (columnRectSansPadding.right() - cursorRect.right());
         return cursorRect;

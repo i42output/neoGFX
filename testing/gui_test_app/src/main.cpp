@@ -1307,6 +1307,11 @@ int main(int argc, char* argv[])
             aGc.draw_focus_rect(ng::rect{ ng::point{ 8, 8 }, ng::size{ 16, 16 } });
             aGc.draw_rect(ng::rect{ ng::point{ 8, 28 }, ng::size{ 16, 16 } }, ng::color::Cyan);
             aGc.draw_rect(ng::rect{ ng::point{ 8.0, 44.0 }, ng::size{ 16, 16 } }, ng::pen{ window.frame_color(), window.effective_frame_width(), false });
+            aGc.fill_rect(ng::rect{ ng::point{ 8.0, 60.0 }, ng::size{ 16, 16 } }, ng::color::White);
+            aGc.push_logical_operation(ng::logical_operation::Xor);
+            aGc.fill_rect(ng::rect{ ng::point{ 6.0, 62.0 }, ng::size{ 20, 12 } }, ng::color::Red);
+            aGc.pop_logical_operation();
+            aGc.fill_rect(ng::rect{ ng::point{ 38, 8.0 }, ng::size{ 20, 17 } }, ng::color::Red);
             aGc.draw_focus_rect(ng::rect{ ng::point{ 28, 8 }, ng::size{ (ng::scalar)((int)(t / 100000) % 200), 17 } });
             ng::path path2;
             path2.move_to(ng::point{ 8.0, 60.0 });

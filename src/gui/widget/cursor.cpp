@@ -20,19 +20,20 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/app/i_accessibility.hpp>
+#include <neogfx/hid/i_keyboard.hpp>
 #include <neogfx/gui/widget/cursor.hpp>
 #include <neogfx/gui/widget/i_document.hpp>
 
 namespace neogfx
 {
     cursor::cursor() :
-        iDocument{}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iFlashInterval{ 1000 }
+        iDocument{}, iPosition{}, iAnchor{}, iFlashInterval{ 1000 }
     {
         init();
     }
 
     cursor::cursor(i_document& aDocument) :
-        iDocument{&aDocument}, iPosition{}, iAnchor{}, iStyle{ cursor_style::Standard }, iFlashInterval{ 1000 }
+        iDocument{&aDocument}, iPosition{}, iAnchor{}, iFlashInterval{ 1000 }
     {
         init();
     }
@@ -108,19 +109,44 @@ namespace neogfx
 
     cursor_style cursor::style() const
     {
-        return iStyle;
+        if (iStyle.has_value())
+            return iStyle.value();
+        if ((service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
+            return cursor_style::Xor;
+        return cursor_style::Standard;
     }
 
     void cursor::set_style(cursor_style aStyle)
     {
-        iStyle = aStyle;
+        if (iStyle != aStyle)
+        {
+            iStyle = aStyle;
+            AppearanceChanged();
+        }
     }
 
-    dimension cursor::width() const
+    void cursor::clear_style()
+    {
+        if (iStyle != std::nullopt)
+        {
+            iStyle = std::nullopt;
+            AppearanceChanged();
+        }
+    }
+
+    dimension cursor::width(i_units_context const& aContext, std::optional<scalar> const& aGlyphWidth) const
     {
         if (iWidth.has_value())
             return iWidth.value();
-        return service<i_accessibility>().text_cursor_width();
+        auto const defaultWidth = aContext.dpi_scale(static_cast<dimension>(service<i_accessibility>().text_cursor_width()));
+        if ((service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
+        {
+            if (aGlyphWidth.has_value())
+                return std::max(aGlyphWidth.value(), defaultWidth);
+            else
+                return defaultWidth * 2;
+        }
+        return defaultWidth;
     }
 
     void cursor::set_width(dimension aWidth)
