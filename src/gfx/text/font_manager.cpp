@@ -216,7 +216,11 @@ namespace neogfx
                 hb_buffer_set_cluster_level(iBuf, HB_BUFFER_CLUSTER_LEVEL_CHARACTERS);
                 hb_buffer_add_utf32(iBuf, reinterpret_cast<const std::uint32_t*>(aGlyphRun.start), static_cast<int>(aGlyphRun.end - aGlyphRun.start), 0, static_cast<int>(aGlyphRun.end - aGlyphRun.start));
                 scoped_kerning sk{ aFont.kerning() };
-                hb_shape(iFont, iBuf, NULL, 0);
+                /// @todo add ligature support to neogfx::font...
+                hb_feature_t features[2];
+                hb_feature_from_string("liga=0", -1, &features[0]);
+                hb_feature_from_string("dlig=0", -1, &features[1]);
+                hb_shape(iFont, iBuf, features, 2);
                 unsigned int glyphCount = 0;
                 auto glyphInfo = hb_buffer_get_glyph_infos(iBuf, &glyphCount);
                 iGlyphInfo.assign(glyphInfo, glyphInfo + glyphCount);
