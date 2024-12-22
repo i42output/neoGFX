@@ -1011,33 +1011,39 @@ namespace neogfx
                 handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
             break;
         case ScanCode_BACKSPACE:
-            if (!read_only() && cursor().position() == cursor().anchor())
+            if (!read_only())
             {
-                if (cursor().position() > 0)
+                if (cursor().position() == cursor().anchor())
                 {
-                    auto const from = cursor().position() - 1;
-                    auto const to = cursor().position();
-                    cursor().set_position(cursor().position() - 1);
-                    delete_text(from, to);
-                    make_cursor_visible(true);
+                    if (cursor().position() > 0)
+                    {
+                        auto const from = cursor().position() - 1;
+                        auto const to = cursor().position();
+                        cursor().set_position(cursor().position() - 1);
+                        delete_text(from, to);
+                        make_cursor_visible(true);
+                    }
                 }
+                else
+                    delete_any_selection();
             }
-            else
-                delete_any_selection();
             break;
         case ScanCode_DELETE:
-            if (!read_only() && cursor().position() == cursor().anchor())
+            if (!read_only())
             {
-                if (cursor().position() < glyphs().size())
+                if (cursor().position() == cursor().anchor())
                 {
-                    auto const from = cursor().position();
-                    auto const to = cursor().position() + 1;
-                    delete_text(from, to);
-                    make_cursor_visible(true);
+                    if (cursor().position() < glyphs().size())
+                    {
+                        auto const from = cursor().position();
+                        auto const to = cursor().position() + 1;
+                        delete_text(from, to);
+                        make_cursor_visible(true);
+                    }
                 }
+                else
+                    delete_any_selection();
             }
-            else
-                delete_any_selection();
             break;
         case ScanCode_UP:
             if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
