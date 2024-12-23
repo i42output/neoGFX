@@ -325,6 +325,7 @@
                                 id: layoutEdit
                                 text_edit: {
                                     id: textEdit
+                                    caps: [ OverwriteMode ]
                                     focus_policy: [ Default ConsumeTabKey ]
                                     tab_stop_hint: "00000000"
                                     drag_drop: true

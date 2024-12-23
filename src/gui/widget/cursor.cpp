@@ -111,7 +111,8 @@ namespace neogfx
     {
         if (iStyle.has_value())
             return iStyle.value();
-        if ((service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
+        if ((service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock &&
+            has_document() && document().overwrite_cursor_available())
             return cursor_style::Xor;
         return cursor_style::Standard;
     }
@@ -139,7 +140,8 @@ namespace neogfx
         if (iWidth.has_value())
             return iWidth.value();
         auto const defaultWidth = aContext.dpi_scale(static_cast<dimension>(service<i_accessibility>().text_cursor_width()));
-        if ((service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
+        if ((service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock &&
+            has_document() && document().overwrite_cursor_available())
         {
             if (aGlyphWidth.has_value())
                 return std::max(aGlyphWidth.value(), defaultWidth);

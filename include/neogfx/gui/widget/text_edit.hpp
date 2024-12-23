@@ -46,6 +46,8 @@ namespace neogfx
         MultiLine       = 0x00000002,
         GrowLines       = SingleLine | MultiLine,
 
+        OverwriteMode   = 0x00000010,
+
         Password        = 0x00000100,
         ShowPassword    = 0x00000200,
 
@@ -86,7 +88,9 @@ namespace neogfx
 begin_declare_enum(neogfx::text_edit_caps)
 declare_enum_string(neogfx::text_edit_caps, SingleLine)
 declare_enum_string(neogfx::text_edit_caps, MultiLine)
-declare_enum_string(neogfx::text_edit_caps, Password)  
+declare_enum_string(neogfx::text_edit_caps, GrowLines)
+declare_enum_string(neogfx::text_edit_caps, OverwriteMode)
+declare_enum_string(neogfx::text_edit_caps, Password)
 declare_enum_string(neogfx::text_edit_caps, ShowPassword)
 declare_enum_string(neogfx::text_edit_caps, ParseURIs)
 declare_enum_string(neogfx::text_edit_caps, OnlyAccept)
@@ -550,6 +554,7 @@ namespace neogfx
     public:
         std::size_t document_length() const override;
         void move_cursor(cursor::move_operation_e aMoveOperation, bool aMoveAnchor = true) override;
+        bool overwrite_cursor_available() const override;
     public:
         i_string const& plain_text() const override;
         bool set_plain_text(i_string const& aPlainText) override;

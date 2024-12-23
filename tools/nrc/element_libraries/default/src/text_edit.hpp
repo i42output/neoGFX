@@ -86,7 +86,7 @@ namespace neogfx::nrc
                 if (!iCaps)
                     emit("  %1% %2%;\n", type_name(), id());
                 else
-                    emit("  %1% %2%{ %3 };\n", type_name(), id(), enum_to_string("text_edit_caps", *iCaps));
+                    emit("  %1% %2%{ %3% };\n", type_name(), id(), enum_to_string("text_edit_caps", *iCaps));
             }
             ui_element<>::emit_preamble();
         }

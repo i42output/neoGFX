@@ -1135,6 +1135,7 @@ namespace neogfx
         {
             multiple_text_changes mtc{ *this };
             if (cursor().position() == cursor().anchor() &&
+                overwrite_cursor_available() &&
                 (service<i_keyboard>().locks() & keyboard_locks::InsertLock) != keyboard_locks::InsertLock)
             {
                 if (cursor().position() < glyphs().size())
@@ -1513,6 +1514,11 @@ namespace neogfx
         default:
             break;
         }
+    }
+
+    bool text_edit::overwrite_cursor_available() const
+    {
+        return (iCaps & text_edit_caps::OverwriteMode) == text_edit_caps::OverwriteMode;
     }
 
     i_string const& text_edit::plain_text() const
