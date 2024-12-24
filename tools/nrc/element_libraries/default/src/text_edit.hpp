@@ -81,18 +81,19 @@ namespace neogfx::nrc
         }
         void emit_preamble() const override
         {
-            if (type() == ui_element_type::TextEdit)
+            if (!is_member_element())
             {
-                if (!iCaps)
-                    emit("  %1% %2%;\n", type_name(), id());
-                else
-                    emit("  %1% %2%{ %3% };\n", type_name(), id(), enum_to_string("text_edit_caps", *iCaps));
+                emit("  %1% %2%;\n", type_name(), id());
             }
             ui_element<>::emit_preamble();
         }
         void emit_ctor() const override
         {
-            ui_element<>::emit_generic_ctor();
+            if (iCaps)
+                ui_element<>::emit_generic_ctor("text_edit_caps", *iCaps | 
+                    (type() == ui_element_type::TextEdit ? text_edit_caps::MultiLine : text_edit_caps::SingleLine ));
+            else
+                ui_element<>::emit_generic_ctor();
             ui_element<>::emit_ctor();
         }
         void emit_body() const override
