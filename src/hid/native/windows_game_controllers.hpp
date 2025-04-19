@@ -55,9 +55,9 @@ namespace neogfx
             game_controllers();
             ~game_controllers();
         public:
-            void enumerate_controllers() override;
+            void enumerate_controllers() final;
         public:
-            const i_string& product_name(const hid_device_uuid& aProductId) const override;
+            const i_string& product_name(const hid_device_uuid& aProductId) const final;
         private:
             void do_enumerate_controllers();
             bool is_xinput_controller(const GUID& aProductId) const;

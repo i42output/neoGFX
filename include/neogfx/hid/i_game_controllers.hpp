@@ -44,6 +44,7 @@ namespace neogfx
     public:
         virtual void enumerate_controllers() = 0;
         virtual const controller_list& controllers() const = 0;
+        virtual void auto_assign_controllers(bool aAutoAssign) = 0;
         virtual bool have_controller_for(game_player aPlayer) const = 0;
         virtual i_game_controller& controller_for(game_player aPlayer) const = 0;
     public:

@@ -41,6 +41,11 @@ namespace neogfx
         return iControllers;
     }
 
+    void game_controllers::auto_assign_controllers(bool aAutoAssign)
+    {
+        iAutoAssign = aAutoAssign;
+    }
+
     bool game_controllers::have_controller_for(game_player aPlayer) const
     {
         for (auto const& controller : controllers())
@@ -65,8 +70,20 @@ namespace neogfx
 
     abstract_t<game_controllers::controller_list>::iterator game_controllers::add_device(i_game_controller& aController)
     {
+        std::optional<game_player> newPlayer;
+        if (iAutoAssign)
+        {
+            newPlayer = game_player::One;
+            for (auto const& controller : iControllers)
+            {
+                if (controller->player_assigned() && controller->player() == newPlayer.value())
+                    newPlayer = static_cast<game_player>(static_cast<std::underlying_type_t<game_player>>(newPlayer.value()) + 1u);
+            }
+        }
         auto newController = iControllers.insert(iControllers.end(), ref_ptr<i_game_controller>{ aController });
         service<i_hid_devices>().add_device(aController);
+        if (newPlayer)
+            (**newController).assign_player(newPlayer.value());
         ControllerConnected(aController);
         return newController;
     }

@@ -43,18 +43,20 @@ namespace neogfx
     public:
         game_controllers();
     public:
-        const controller_list& controllers() const override;
-        bool have_controller_for(game_player aPlayer) const override;
-        i_game_controller& controller_for(game_player aPlayer) const override;
+        const controller_list& controllers() const final;
+        void auto_assign_controllers(bool aAutoAssign) final;
+        bool have_controller_for(game_player aPlayer) const final;
+        i_game_controller& controller_for(game_player aPlayer) const final;
     public:
-        const button_map_type& button_map(const hid_device_uuid& aProductId) const override;
+        const button_map_type& button_map(const hid_device_uuid& aProductId) const final;
     public:
-        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator add_device(i_game_controller& aController) override;
-        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator remove_device(i_game_controller& aController) override;
+        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator add_device(i_game_controller& aController) final;
+        abstract_t<neolib::vector<ref_ptr<i_game_controller>>>::iterator remove_device(i_game_controller& aController) final;
     private:
         void load_database();
     private:
         controller_list iControllers;
+        bool iAutoAssign = true;
         mutable std::map<hid_device_uuid, button_map_type> iButtonMaps;
     };
 }
