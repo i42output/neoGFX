@@ -31,6 +31,8 @@ namespace neogfx
     class sub_texture : public reference_counted<i_sub_texture>
     {
         // types
+    public:
+        using abstract_type = i_sub_texture;
     private:
         using base_type = reference_counted<i_sub_texture>;
         // construction

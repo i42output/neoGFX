@@ -93,11 +93,11 @@ namespace neogfx
         radio_button iInkColor;
         radio_button iInkGradient;
         check_box iInkEmoji;
-        neolib::variant<color_widget, gradient_widget> iInk;
+        std::variant<std::monostate, color_widget, gradient_widget> iInk;
         group_box iPaperBox;
         radio_button iPaperColor;
         radio_button iPaperGradient;
-        neolib::variant<color_widget, gradient_widget> iPaper;
+        std::variant<std::monostate, color_widget, gradient_widget> iPaper;
         group_box iAdvancedEffectsBox;
         group_box iAdvancedEffectsTypeBox;
         radio_button iAdvancedEffectsOutline;
@@ -107,7 +107,7 @@ namespace neogfx
         radio_button iAdvancedEffectsColor;
         radio_button iAdvancedEffectsGradient;
         check_box iAdvancedEffectsEmoji;
-        neolib::variant<color_widget, gradient_widget> iAdvancedEffectsInk;
+        std::variant<std::monostate, color_widget, gradient_widget> iAdvancedEffectsInk;
         struct text_effect_width
         {
             group_box box;

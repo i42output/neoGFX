@@ -634,6 +634,8 @@ namespace neogfx
     public:
         neogfx::cursor& cursor() const;
         void set_cursor_position(const point& aPosition, bool aMoveAnchor = true, bool aEnableDragger = false);
+    public:
+        void cancel_object_selection();
     protected:
         rect column_rect(std::size_t aColumnIndex, bool aExtendIntoPadding = false) const;
         std::size_t column_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;

@@ -96,7 +96,7 @@ namespace neogfx
         Gaussian
     };
 
-    typedef neolib::variant<color, gradient, texture, std::pair<texture, rect>, sub_texture, std::pair<sub_texture, rect>> brush;
+    typedef neolib::variant<color, gradient, texture, neolib::pair<texture, rect>, sub_texture, neolib::pair<sub_texture, rect>> brush;
 
     inline brush to_brush(const color_or_gradient& aEffectColor)
     {

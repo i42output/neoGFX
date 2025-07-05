@@ -809,10 +809,7 @@ namespace neogfx
                 utf32word.clear();
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
                 if (utf32word.find(U"://") != std::u32string::npos)
-                {
                     iSelectedUri = wordSpan;
-                    return;
-                }
             }
             set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
         }
@@ -842,7 +839,8 @@ namespace neogfx
         iDragger = nullptr;
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
-            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && iSelectedUri)
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && 
+                cursor().position() == cursor().anchor() && iSelectedUri)
             {
                 auto wordSpan = word_at(document_hit_test(aPosition), true);
                 if (iSelectedUri == wordSpan)
@@ -854,7 +852,6 @@ namespace neogfx
                     {
                         if (!service<i_basic_services>().open_uri(neolib::utf32_to_utf8(utf32word)))
                             service<i_basic_services>().system_beep();
-                        return;
                     }
                 }
             }
@@ -1740,6 +1737,11 @@ namespace neogfx
                 set_capture();
             iDragger = std::make_unique<dragger>(*this);
         }
+    }
+
+    void text_edit::cancel_object_selection()
+    {
+        iSelectedUri = std::nullopt;
     }
 
     rect text_edit::column_rect(std::size_t aColumnIndex, bool aExtendIntoPadding) const
