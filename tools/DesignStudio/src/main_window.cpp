@@ -453,8 +453,6 @@ namespace neogfx::DesignStudio
 
         aApp.action_file_open().triggered([&]()
         {
-            ng::service<ng::i_window_manager>().save_mouse_cursor();
-            ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
             auto files = ng::open_file_dialog(mainWindow, ng::file_dialog_spec{ "Open Project", {}, { "*.nrc" }, "Project Files" });
             if (files)
             {
@@ -475,7 +473,6 @@ namespace neogfx::DesignStudio
                     }
                 }
             }
-            ng::service<ng::i_window_manager>().restore_mouse_cursor(mainWindow);
         });
 
         aApp.action_file_new().triggered([&]()

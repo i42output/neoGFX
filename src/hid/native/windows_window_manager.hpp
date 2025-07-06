@@ -58,16 +58,21 @@ namespace neogfx
             window_manager();
             ~window_manager();
         public:
-            i_window* window_from_position(const point& aPosition) const override;
-            i_window* window_from_position(const point& aPosition, i_widget const& aIgnore) const override;
+            i_window* window_from_position(const point& aPosition) const final;
+            i_window* window_from_position(const point& aPosition, i_widget const& aIgnore) const final;
         public:
-            void save_mouse_cursor() override;
-            void set_mouse_cursor(mouse_system_cursor aSystemCursor) override;
-            void restore_mouse_cursor(const i_window& aWindow) override;
-            void update_mouse_cursor(const i_window& aWindow) override;
+            void save_mouse_cursor() final;
+            void set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride = false) final;
+            void restore_mouse_cursor(const i_window& aWindow) final;
+            void update_mouse_cursor(const i_window& aWindow) final;
         private:
-            cursor_pointer iCurrentCursor;
-            std::vector<cursor_pointer> iSavedCursors;
+            struct cursor_setting
+            {
+                cursor_pointer cursor;
+                bool override = false;
+            };
+            std::optional<cursor_setting> iCurrentCursor;
+            std::vector<cursor_setting> iSavedCursors;
         };
     }
 }

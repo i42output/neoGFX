@@ -225,6 +225,8 @@ namespace neogfx
         std::int32_t iCountedEnable;
         i_widget* iEnteredWidget;
         i_widget* iFocusedWidget;
+        bool iHandlingMouseEntered;
+        bool iHandlingMouseLeft;
         bool iDismissingChildren;
         std::optional<destroyed_flag> iSurfaceDestroyed;
     };

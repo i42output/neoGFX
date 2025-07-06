@@ -69,12 +69,15 @@ int main(int argc, char* argv[])
 
         app.actionFileOpen.triggered([&]()
         {
+            ng::service<ng::i_window_manager>().save_mouse_cursor();
+            ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::WaitArrow, true);
             auto textFile = ng::open_file_dialog(window, ng::file_dialog_spec{ "Edit Text File", {}, { "*.txt" }, "Text Files" });
             if (textFile)
             {
                 std::ifstream file{ (*textFile)[0] };
                 window.textEdit.set_plain_text(ng::string{ std::istreambuf_iterator<char>{file}, {} });
             }
+            ng::service<ng::i_window_manager>().restore_mouse_cursor(window);
         });
 
         app.actionShowStatusBar.set_checked(true);
@@ -213,6 +216,15 @@ int main(int argc, char* argv[])
             else 
                 window.buttonChina.set_maximum_size(ng::size{ 128_dip, 64_dip });
         });
+
+        std::optional<ng::scoped_mouse_cursor> smc;
+        window.buttonChina.Clicked([&]() 
+            { 
+                if (smc == std::nullopt)
+                    smc.emplace(window, ng::mouse_system_cursor::WaitArrow);
+                else
+                    smc = std::nullopt;
+            });
 
         for (std::int32_t i = 1; i <= 100; ++i)
             window.dropList3.model().insert_item(window.dropList3.model().end(), "Example_"_t + boost::lexical_cast<std::string>(i));
@@ -612,7 +624,7 @@ int main(int argc, char* argv[])
         // Item Views
 
         ng::service<ng::i_window_manager>().save_mouse_cursor();
-        ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait);
+        ng::service<ng::i_window_manager>().set_mouse_cursor(ng::mouse_system_cursor::Wait, true);
 
         ng::table_view& tableView1 = window.tableView1;
         ng::table_view& tableView2 = window.tableView2;

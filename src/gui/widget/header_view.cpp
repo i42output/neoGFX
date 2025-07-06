@@ -393,7 +393,7 @@ namespace neogfx
                         if (presentation_model().sortable())
                         {
                             root().window_manager().save_mouse_cursor();
-                            root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait);
+                            root().window_manager().set_mouse_cursor(mouse_system_cursor::Wait, true);
                             presentation_model().sort_by(i);
                             root().window_manager().restore_mouse_cursor(root());
                         }

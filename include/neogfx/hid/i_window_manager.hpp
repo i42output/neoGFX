@@ -64,10 +64,27 @@ namespace neogfx
         virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;
     public:
         virtual void save_mouse_cursor() = 0;
-        virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor) = 0;
+        virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride) = 0;
         virtual void restore_mouse_cursor(const i_window& aWindow) = 0;
         virtual void update_mouse_cursor(const i_window& aWindow) = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x6246e0a9, 0x85d7, 0x4feb, 0xa273, { 0x7d, 0xb1, 0x4d, 0xed, 0x12, 0x12 } }; return sIid; }
+    };
+
+    class scoped_mouse_cursor
+    {
+    public:
+        scoped_mouse_cursor(const i_window& aWindow, mouse_system_cursor aSystemCursor) :
+            iWindow{ aWindow }
+        {
+            service<i_window_manager>().save_mouse_cursor();
+            service<i_window_manager>().set_mouse_cursor(aSystemCursor, true);
+        }
+        ~scoped_mouse_cursor()
+        {
+            service<i_window_manager>().restore_mouse_cursor(iWindow);
+        }
+    private:
+        const i_window& iWindow;
     };
 }

@@ -222,6 +222,8 @@ namespace neogfx
         iTitleText{ aWindowTitle ? *aWindowTitle : service<i_app>().name() },
         iStyle{ aStyle },
         iCountedEnable{ 0 },
+        iHandlingMouseEntered{ false },
+        iHandlingMouseLeft{ false },
         iEnteredWidget{ nullptr },
         iFocusedWidget{ nullptr },
         iDismissingChildren{ false }
@@ -1170,25 +1172,36 @@ namespace neogfx
 
     void window::mouse_entered(const point& aPosition)
     {
+        if (iHandlingMouseEntered)
+            return;
+        neolib::scoped_flag sf{ iHandlingMouseEntered };
         i_widget& widgetUnderMouse = (!surface().has_capturing_widget() ? widget_for_mouse_event(aPosition) : surface().capturing_widget());
         i_widget* newEnteredWidget = &widgetUnderMouse;
         i_widget* oldEnteredWidget = iEnteredWidget;
         if (newEnteredWidget != oldEnteredWidget)
         {
             if (oldEnteredWidget != nullptr)
-                oldEnteredWidget->mouse_left();
+            {
+                if (!event_consumed(oldEnteredWidget->mouse_left_event()()))
+                    oldEnteredWidget->mouse_left();
+            }
             iEnteredWidget = newEnteredWidget;
-            iEnteredWidget->mouse_entered(aPosition);
+            if (!event_consumed(iEnteredWidget->mouse_entered_event()(aPosition)))
+                iEnteredWidget->mouse_entered(aPosition);
         }
     }
 
     void window::mouse_left()
     {
+        if (iHandlingMouseLeft)
+            return;
+        neolib::scoped_flag sf{ iHandlingMouseLeft };
         i_widget* oldEnteredWidget = iEnteredWidget;
         if (oldEnteredWidget != nullptr)
         {
             iEnteredWidget = nullptr;
-            oldEnteredWidget->mouse_left();
+            if (!event_consumed(oldEnteredWidget->mouse_left_event()()))
+                oldEnteredWidget->mouse_left();
         }
     }
 

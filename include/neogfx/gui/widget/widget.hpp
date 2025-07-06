@@ -59,6 +59,8 @@ namespace neogfx
         define_declared_event(Painted, painted, i_graphics_context&)
         define_declared_event(Mouse, mouse_event, const neogfx::mouse_event&)
         define_declared_event(NonClientMouse, non_client_mouse_event, const neogfx::non_client_mouse_event&)
+        define_declared_event(MouseEntered, mouse_entered_event, const point&)
+        define_declared_event(MouseLeft, mouse_left_event)
         define_declared_event(QueryMouseCursor, query_mouse_cursor, neogfx::mouse_cursor&)
         define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
         define_declared_event(Focus, focus_event, neogfx::focus_event, focus_reason)

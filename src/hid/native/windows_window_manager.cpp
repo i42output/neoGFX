@@ -67,10 +67,13 @@ namespace neogfx
 
         void window_manager::save_mouse_cursor()
         {
-            iSavedCursors.push_back(std::make_shared<cursor>(::GetCursor()));
+            if (iCurrentCursor)
+                iSavedCursors.push_back(iCurrentCursor.value());
+            else
+                iSavedCursors.push_back(cursor_setting{ std::make_shared<cursor>(::GetCursor()) });
         }
 
-        void window_manager::set_mouse_cursor(mouse_system_cursor aSystemCursor)
+        void window_manager::set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride)
         {
             auto cursorResource = IDC_ARROW;
             switch (aSystemCursor)
@@ -112,8 +115,8 @@ namespace neogfx
                 cursorResource = IDC_HAND;
                 break;
             }
-            iCurrentCursor = std::make_shared<cursor>(::LoadCursor(NULL, cursorResource));
-            ::SetCursor(iCurrentCursor->handle());
+            iCurrentCursor.emplace(std::make_shared<cursor>(::LoadCursor(NULL, cursorResource)), aOverride);
+            ::SetCursor(iCurrentCursor.value().cursor->handle());
         }
 
         void window_manager::restore_mouse_cursor(const i_window& aWindow)
@@ -122,13 +125,14 @@ namespace neogfx
                 throw no_cursors_saved();
             iCurrentCursor = iSavedCursors.back();
             iSavedCursors.pop_back();
-            ::SetCursor(iCurrentCursor->handle());
             update_mouse_cursor(aWindow);
         }
 
         void window_manager::update_mouse_cursor(const i_window& aWindow)
         {
-            if (iSavedCursors.empty())
+            if (iCurrentCursor && iCurrentCursor.value().override)
+                ::SetCursor(iCurrentCursor.value().cursor->handle());
+            else
             {
                 auto const mousePosition = mouse_position();
                 auto w = window_from_position(mousePosition);
