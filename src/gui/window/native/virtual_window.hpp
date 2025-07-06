@@ -86,6 +86,7 @@ namespace neogfx
         bool is_capturing() const final;
         void set_capture() final;
         void release_capture() final;
+        bool is_non_client_capturing() const final;
         void non_client_set_capture() final;
         void non_client_release_capture() final;
         void set_title_text(i_string const& aTitleText) final;

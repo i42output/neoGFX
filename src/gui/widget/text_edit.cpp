@@ -942,7 +942,8 @@ namespace neogfx
         auto const clientRect = client_rect(false);
         if (clientRect.contains(mousePosition) || iDragger != nullptr)
         {
-            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() &&
+                cursor().position() == cursor().anchor())
             {
                 auto wordSpan = word_at(document_hit_test(mousePosition), true);
                 thread_local std::u32string utf32word;

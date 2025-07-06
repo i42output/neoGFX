@@ -388,6 +388,11 @@ namespace neogfx
         }
     }
 
+    bool virtual_window::is_non_client_capturing() const
+    {
+        return iNonClientCapturing;
+    }
+
     void virtual_window::non_client_set_capture()
     {
         if (!iCapturingMouse)

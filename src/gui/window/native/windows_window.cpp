@@ -717,6 +717,11 @@ namespace neogfx
             }
         }
 
+        bool window::is_non_client_capturing() const
+        {
+            return iNonClientCapturing;
+        }
+
         void window::non_client_set_capture()
         {
             if (!iCapturingMouse)
@@ -1007,7 +1012,7 @@ namespace neogfx
                             ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
                         static_cast<native_scan_code_e>(lparam),
                         static_cast<native_key_code_e>(wparam) });
-                if (!self.iNonClientCapturing)
+                if (!self.is_non_client_capturing())
                     service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                 break;
             case WM_SYSKEYUP:
@@ -1022,11 +1027,11 @@ namespace neogfx
                             ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
                         static_cast<native_scan_code_e>(lparam),
                         static_cast<native_key_code_e>(wparam) });
-                if (!self.iNonClientCapturing)
+                if (!self.is_non_client_capturing())
                     service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                 break;
             case WM_SETCURSOR:
-                if (!self.iNonClientCapturing && LOWORD(lparam) == HTCLIENT)
+                if (!self.is_non_client_capturing() && LOWORD(lparam) == HTCLIENT)
                 {
                     service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                     result = TRUE;

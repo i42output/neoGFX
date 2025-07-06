@@ -110,6 +110,7 @@ namespace neogfx
         virtual bool is_capturing() const = 0;
         virtual void set_capture() = 0;
         virtual void release_capture() = 0;
+        virtual bool is_non_client_capturing() const = 0;
         virtual void non_client_set_capture() = 0;
         virtual void non_client_release_capture() = 0;
         virtual i_string const& title_text() const = 0;

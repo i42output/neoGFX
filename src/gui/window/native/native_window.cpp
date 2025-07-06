@@ -310,6 +310,8 @@ namespace neogfx
             case mouse_event_type::Moved:
                 mouse_entered(surfaceWindow);
                 surfaceWindow.native_window_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
+                if (is_capturing() && !is_non_client_capturing())
+                    service<i_window_manager>().update_mouse_cursor(surface_window().as_window());
                 break;
             default:
                 /* do nothing */
@@ -356,6 +358,8 @@ namespace neogfx
             case mouse_event_type::Moved:
                 mouse_entered(surfaceWindow);
                 surfaceWindow.native_window_non_client_mouse_moved(mouseEvent.position(), mouseEvent.key_modifiers());
+                if (is_capturing() && !is_non_client_capturing())
+                    service<i_window_manager>().update_mouse_cursor(surface_window().as_window());
                 break;
             default:
                 /* do nothing */
