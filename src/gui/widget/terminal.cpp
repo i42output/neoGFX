@@ -247,7 +247,7 @@ namespace neogfx
 
     focus_policy terminal::focus_policy() const
     {
-        return neogfx::focus_policy::StrongFocus | focus_policy::ConsumeTabKey;
+        return neogfx::focus_policy::StrongFocus | focus_policy::ConsumeTabKey | focus_policy::ConsumeReturnKey;
     }
 
     void terminal::focus_gained(focus_reason aFocusReason)
