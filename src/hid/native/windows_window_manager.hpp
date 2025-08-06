@@ -65,6 +65,9 @@ namespace neogfx
             void set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride = false) final;
             void restore_mouse_cursor(const i_window& aWindow) final;
             void update_mouse_cursor(const i_window& aWindow) final;
+            bool cursor_locked() const final;
+            void lock_mouse_cursor(i_window& aWindow) final;
+            void unlock_mouse_cursor() final;
         private:
             struct cursor_setting
             {
@@ -73,6 +76,7 @@ namespace neogfx
             };
             std::optional<cursor_setting> iCurrentCursor;
             std::vector<cursor_setting> iSavedCursors;
+            neolib::weak_ref_ptr<i_window> iCursorLock;
         };
     }
 }

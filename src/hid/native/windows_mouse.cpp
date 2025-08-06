@@ -22,6 +22,7 @@
 #include <neogfx/hid/i_surface.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
+#include <neogfx/hid/i_window_manager.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
 #include "windows_mouse.hpp"
 
@@ -82,6 +83,7 @@ namespace neogfx
             ::SetCapture(static_cast<HWND>(aTarget.as_surface_window().native_window().native_handle()));
             iCaptureTarget = &aTarget;
             iCaptureType = mouse_capture_type::Normal;
+            service<i_window_manager>().lock_mouse_cursor(aTarget.as_surface_window().as_window());
         }
 
         void mouse::capture_raw(i_surface& aTarget)
@@ -92,6 +94,7 @@ namespace neogfx
             ::RegisterRawInputDevices(&rawMouse, 1, sizeof(RAWINPUTDEVICE));
             iCaptureTarget = &aTarget;
             iCaptureType = mouse_capture_type::Raw;
+            service<i_window_manager>().lock_mouse_cursor(aTarget.as_surface_window().as_window());
         }
 
         void mouse::release_capture()
@@ -107,6 +110,7 @@ namespace neogfx
             }
             iCaptureTarget = nullptr;
             iCaptureType = mouse_capture_type::None;
+            service<i_window_manager>().unlock_mouse_cursor();
         }
  
         mouse_button mouse::convert_button(virtual_key_code_t aVirtualKeyCode)

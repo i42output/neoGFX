@@ -116,7 +116,8 @@ namespace neogfx
                 break;
             }
             iCurrentCursor.emplace(std::make_shared<cursor>(::LoadCursor(NULL, cursorResource)), aOverride);
-            ::SetCursor(iCurrentCursor.value().cursor->handle());
+            if (!cursor_locked())
+                ::SetCursor(iCurrentCursor.value().cursor->handle());
         }
 
         void window_manager::restore_mouse_cursor(const i_window& aWindow)
@@ -131,7 +132,10 @@ namespace neogfx
         void window_manager::update_mouse_cursor(const i_window& aWindow)
         {
             if (iCurrentCursor && iCurrentCursor.value().override)
-                ::SetCursor(iCurrentCursor.value().cursor->handle());
+            {
+                if (!cursor_locked())
+                    ::SetCursor(iCurrentCursor.value().cursor->handle());
+            }
             else
             {
                 auto const mousePosition = mouse_position();
@@ -141,6 +145,21 @@ namespace neogfx
                 else
                     set_mouse_cursor(aWindow.surface().as_surface_window().native_window_mouse_cursor().system_cursor());
             }
+        }
+
+        bool window_manager::cursor_locked() const
+        {
+            return iCursorLock.valid();
+        }
+
+        void window_manager::lock_mouse_cursor(i_window& aWindow)
+        {
+            iCursorLock = &aWindow;
+        }
+
+        void window_manager::unlock_mouse_cursor()
+        {
+            iCursorLock = nullptr;
         }
     }
 }

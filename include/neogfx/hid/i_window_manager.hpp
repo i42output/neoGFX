@@ -67,6 +67,9 @@ namespace neogfx
         virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride) = 0;
         virtual void restore_mouse_cursor(const i_window& aWindow) = 0;
         virtual void update_mouse_cursor(const i_window& aWindow) = 0;
+        virtual bool cursor_locked() const = 0;
+        virtual void lock_mouse_cursor(i_window& aWindow) = 0;
+        virtual void unlock_mouse_cursor() = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x6246e0a9, 0x85d7, 0x4feb, 0xa273, { 0x7d, 0xb1, 0x4d, 0xed, 0x12, 0x12 } }; return sIid; }
     };

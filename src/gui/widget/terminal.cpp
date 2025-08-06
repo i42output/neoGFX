@@ -198,11 +198,26 @@ namespace neogfx
                     if (iTextFormat)
                     {
                         effect = iTextFormat->effect();
-                        if (effect && effect->type() == text_effect_type::Glow)
+                        if (effect && effect->type() == text_effect_type::Glow && 
+                            std::holds_alternative<color>(iTextFormat->ink()) &&
+                            std::holds_alternative<color>(effect->color()))
                         {
-                            if (std::holds_alternative<color>(effect->color()))
-                                effect->set_color(ink.to_hsv().with_saturation(ink.to_hsv().saturation() * 0.7).to_rgb<color>());
-                            ink = ink.to_hsv().with_saturation(ink.to_hsv().saturation() * 0.4).to_rgb<color>();
+                            auto const& hsv = ink.to_hsv();
+                            auto const& innerHsv = std::get<color>(iTextFormat->ink()).to_hsv();
+                            auto const& outerHsv = std::get<color>(effect->color()).to_hsv();
+                            if (hsv.saturation() >= 0.1)
+                            {
+                                auto const lighterSaturation = hsv.saturation() - (innerHsv.value() - outerHsv.value());
+                                auto const darkerSaturation = hsv.saturation();
+                                ink = hsv_color{ 
+                                    hsv.hue(), 
+                                    lighterSaturation,
+                                    hsv.value() }.to_rgb<color>();
+                                effect->set_color(hsv_color{ 
+                                    hsv.hue(), 
+                                    darkerSaturation,
+                                    hsv.value()}.to_rgb<color>());
+                            }
                         }
                     }
                     attributes.add(g.clusters.first, ink, paper, effect);

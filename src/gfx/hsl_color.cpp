@@ -31,7 +31,10 @@ namespace neogfx
     }
 
     hsl_color::hsl_color(double aHue, double aSaturation, double aLightness, double aAlpha) :
-        iHue{aHue}, iSaturation{aSaturation}, iLightness{aLightness}, iAlpha{aAlpha}
+        iHue{aHue}, 
+        iSaturation{ std::min(std::max(aSaturation, 0.0), 1.0) }, 
+        iLightness{ std::min(std::max(aLightness, 0.0), 1.0) }, 
+        iAlpha{aAlpha}
     {
         if (iHue != undefined_hue())
             iHue = std::fmod(iHue, 360.0);
