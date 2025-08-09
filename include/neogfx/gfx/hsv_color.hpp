@@ -60,10 +60,10 @@ namespace neogfx
             vec4 components;
             to_rgb(components.x, components.y, components.z, components[3]);
             typename RgbColor::return_type result;
-            result.set_red<scalar>(components.x);
-            result.set_green<scalar>(components.y);
-            result.set_blue<scalar>(components.z);
-            result.set_alpha<scalar>(components[3]);
+            result.template set_red<scalar>(components.x);
+            result.template set_green<scalar>(components.y);
+            result.template set_blue<scalar>(components.z);
+            result.template set_alpha<scalar>(components[3]);
             return result;
         }
         static hsv_color from_rgb(scalar aRed, scalar aGreen, scalar aBlue, scalar aAlpha = 1.0);

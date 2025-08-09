@@ -56,24 +56,24 @@ namespace neogfx
         standard_fragment_shader(std::string const& aName = "standard_fragment_shader") :
             fragment_shader<Base>{ aName }
         {
-            add_in_variable<vec3f>("Coord"_s, 0u);
-            auto& fragColor = add_in_variable<vec4f>("Color"_s, 1u);
-            add_in_variable<vec2f>("TexCoord"_s, 2u);
-            auto& fragFunction0 = add_in_variable<vec4f>("Function0"_s, 3u, true);
-            auto& fragFunction1 = add_in_variable<vec4f>("Function1"_s, 4u, true);
-            auto& fragFunction2 = add_in_variable<vec4f>("Function2"_s, 5u, true);
-            auto& fragFunction3 = add_in_variable<vec4f>("Function3"_s, 6u, true);
-            auto& fragFunction4 = add_in_variable<vec4f>("Function4"_s, 7u, true);
-            auto& fragFunction5 = add_in_variable<vec4f>("Function5"_s, 8u, true);
-            auto& fragFunction6 = add_in_variable<vec4f>("Function6"_s, 9u, true);
-            add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
-            add_out_variable<vec4f>("FragFunction0"_s, 1u).link(fragFunction0);
-            add_out_variable<vec4f>("FragFunction1"_s, 2u).link(fragFunction1);
-            add_out_variable<vec4f>("FragFunction2"_s, 3u).link(fragFunction2);
-            add_out_variable<vec4f>("FragFunction3"_s, 4u).link(fragFunction3);
-            add_out_variable<vec4f>("FragFunction4"_s, 5u).link(fragFunction4);
-            add_out_variable<vec4f>("FragFunction5"_s, 6u).link(fragFunction5);
-            add_out_variable<vec4f>("FragFunction6"_s, 7u).link(fragFunction6);
+            this->template add_in_variable<vec3f>("Coord"_s, 0u);
+            auto& fragColor = this->template add_in_variable<vec4f>("Color"_s, 1u);
+            this->template add_in_variable<vec2f>("TexCoord"_s, 2u);
+            auto& fragFunction0 = this->template add_in_variable<vec4f>("Function0"_s, 3u, true);
+            auto& fragFunction1 = this->template add_in_variable<vec4f>("Function1"_s, 4u, true);
+            auto& fragFunction2 = this->template add_in_variable<vec4f>("Function2"_s, 5u, true);
+            auto& fragFunction3 = this->template add_in_variable<vec4f>("Function3"_s, 6u, true);
+            auto& fragFunction4 = this->template add_in_variable<vec4f>("Function4"_s, 7u, true);
+            auto& fragFunction5 = this->template add_in_variable<vec4f>("Function5"_s, 8u, true);
+            auto& fragFunction6 = this->template add_in_variable<vec4f>("Function6"_s, 9u, true);
+            this->template add_out_variable<vec4f>("FragColor"_s, 0u).link(fragColor);
+            this->template add_out_variable<vec4f>("FragFunction0"_s, 1u).link(fragFunction0);
+            this->template add_out_variable<vec4f>("FragFunction1"_s, 2u).link(fragFunction1);
+            this->template add_out_variable<vec4f>("FragFunction2"_s, 3u).link(fragFunction2);
+            this->template add_out_variable<vec4f>("FragFunction3"_s, 4u).link(fragFunction3);
+            this->template add_out_variable<vec4f>("FragFunction4"_s, 5u).link(fragFunction4);
+            this->template add_out_variable<vec4f>("FragFunction5"_s, 6u).link(fragFunction5);
+            this->template add_out_variable<vec4f>("FragFunction6"_s, 7u).link(fragFunction6);
         }
     public:
         bool supports(vertex_buffer_type aBufferType) const override

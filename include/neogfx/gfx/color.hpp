@@ -203,14 +203,14 @@ namespace neogfx
         explicit basic_rgb_color(const vec4& aBase) :
             base_type{ aBase } {}
         basic_rgb_color(view_component aRed, view_component aGreen, view_component aBlue, view_component aAlpha = 0xFF) :
-            base_type{ convert<base_component>(aRed), convert<base_component>(aGreen), convert<base_component>(aBlue), convert<base_component>(aAlpha) } {}
+            base_type{ this->template convert<base_component>(aRed), this->template convert<base_component>(aGreen), this->template convert<base_component>(aBlue), this->template convert<base_component>(aAlpha) } {}
         basic_rgb_color(std::int32_t aRed, std::int32_t aGreen, std::int32_t aBlue, std::int32_t aAlpha = 0xFF) :
             basic_rgb_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
         basic_rgb_color(std::uint32_t aRed, std::uint32_t aGreen, std::uint32_t aBlue, std::uint32_t aAlpha = 0xFF) :
             basic_rgb_color{ static_cast<view_component>(aRed), static_cast<view_component>(aGreen), static_cast<view_component>(aBlue), static_cast<view_component>(aAlpha) } {}
         template <typename T>
         basic_rgb_color(T aRed, T aGreen, T aBlue, T aAlpha = 1.0, std::enable_if_t<std::is_scalar_v<T> && !std::is_same_v<view_component, T>, sfinae> = {}) :
-            basic_rgb_color{ convert<view_component>(aRed), convert<view_component>(aGreen), convert<view_component>(aBlue), convert<view_component>(aAlpha) } {}
+            basic_rgb_color{ this->template convert<view_component>(aRed), this->template convert<view_component>(aGreen), this->template convert<view_component>(aBlue), this->template convert<view_component>(aAlpha) } {}
         explicit basic_rgb_color(argb aValue) :
             base_type{ from_argb(aValue) } {}
         // assignment
@@ -258,49 +258,49 @@ namespace neogfx
         template <typename T>
         T red() const
         {
-            return convert<T>(base_type::operator[](0));
+            return this->template convert<T>(base_type::operator[](0));
         }
         template <typename T>
         T green() const
         {
-            return convert<T>(base_type::operator[](1));
+            return this->template convert<T>(base_type::operator[](1));
         }
         template <typename T>
         T blue() const
         {
-            return convert<T>(base_type::operator[](2));
+            return this->template convert<T>(base_type::operator[](2));
         }
         return_type& set_red(view_component aRed)
         {
-            base_type::operator[](0) = convert<base_component>(aRed);
+            base_type::operator[](0) = this->template convert<base_component>(aRed);
             return static_cast<return_type&>(*this);
         }
         return_type& set_green(view_component aGreen)
         {
-            base_type::operator[](1) = convert<base_component>(aGreen);
+            base_type::operator[](1) = this->template convert<base_component>(aGreen);
             return static_cast<return_type&>(*this);
         }
         return_type& set_blue(view_component aBlue)
         {
-            base_type::operator[](2) = convert<base_component>(aBlue);
+            base_type::operator[](2) = this->template convert<base_component>(aBlue);
             return static_cast<return_type&>(*this);
         }
         template <typename T>
         return_type& set_red(T aRed)
         {
-            base_type::operator[](0) = convert<base_component>(aRed);
+            base_type::operator[](0) = this->template convert<base_component>(aRed);
             return static_cast<return_type&>(*this);
         }
         template <typename T>
         return_type& set_green(T aGreen)
         {
-            base_type::operator[](1) = convert<base_component>(aGreen);
+            base_type::operator[](1) = this->template convert<base_component>(aGreen);
             return static_cast<return_type&>(*this);
         }
         template <typename T>
         return_type& set_blue(T aBlue)
         {
-            base_type::operator[](2) = convert<base_component>(aBlue);
+            base_type::operator[](2) = this->template convert<base_component>(aBlue);
             return static_cast<return_type&>(*this);
         }
         return_type with_red(view_component aRed) const
