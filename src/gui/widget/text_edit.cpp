@@ -977,6 +977,7 @@ namespace neogfx
             }
             break;
         case ScanCode_RETURN:
+        case ScanCode_KEYPAD_ENTER:
             if (!read_only())
             {
                 if ((aKeyModifiers & KeyModifier_CTRL) == KeyModifier_NONE)

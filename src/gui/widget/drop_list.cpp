@@ -95,6 +95,7 @@ namespace neogfx
             handled = true;
             break;
         case ScanCode_RETURN:
+        case ScanCode_KEYPAD_ENTER:
             if (selection_model().has_current_index())
                 iDropList.accept_selection();
             else
@@ -1383,6 +1384,7 @@ namespace neogfx
                 }
                 break;
             case ScanCode_RETURN:
+            case ScanCode_KEYPAD_ENTER:
                 if (view_created())
                 {
                     accept_selection();

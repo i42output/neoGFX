@@ -79,7 +79,7 @@ namespace neogfx
             case VK_F23: return ScanCode_F23;
             case VK_F24: return ScanCode_F24;
 
-            case VK_OEM_NEC_EQUAL: return ScanCode_KP_EQUALS;
+            case VK_OEM_NEC_EQUAL: return ScanCode_KEYPAD_EQUALS;
             case VK_BROWSER_BACK: return ScanCode_AC_BACK;
             case VK_BROWSER_FORWARD: return ScanCode_AC_FORWARD;
             case VK_BROWSER_REFRESH: return ScanCode_AC_REFRESH;
@@ -123,7 +123,7 @@ namespace neogfx
             ScanCode_B,              ScanCode_N,              ScanCode_M,           ScanCode_COMMA,          ScanCode_PERIOD,  ScanCode_SLASH,          ScanCode_RSHIFT,         ScanCode_PRINTSCREEN,
             ScanCode_LALT,           ScanCode_SPACE,          ScanCode_CAPSLOCK,    ScanCode_F1,             ScanCode_F2,      ScanCode_F3,             ScanCode_F4,             ScanCode_F5,
             ScanCode_F6,             ScanCode_F7,             ScanCode_F8,          ScanCode_F9,             ScanCode_F10,     ScanCode_NUMLOCKCLEAR,   ScanCode_SCROLLLOCK,     ScanCode_HOME,
-            ScanCode_UP,             ScanCode_PAGEUP,         ScanCode_KP_MINUS,    ScanCode_LEFT,           ScanCode_KP_5,    ScanCode_RIGHT,          ScanCode_KP_PLUS,        ScanCode_END,
+            ScanCode_UP,             ScanCode_PAGEUP,         ScanCode_KEYPAD_MINUS,    ScanCode_LEFT,           ScanCode_KEYPAD_5,    ScanCode_RIGHT,          ScanCode_KEYPAD_PLUS,        ScanCode_END,
             ScanCode_DOWN,           ScanCode_PAGEDOWN,       ScanCode_INSERT,      ScanCode_DELETE,         ScanCode_UNKNOWN, ScanCode_UNKNOWN,        ScanCode_NONUSBACKSLASH, ScanCode_F11,
             ScanCode_F12,            ScanCode_PAUSE,          ScanCode_UNKNOWN,     ScanCode_LGUI,           ScanCode_RGUI,    ScanCode_APPLICATION,    ScanCode_UNKNOWN,        ScanCode_UNKNOWN,
             ScanCode_UNKNOWN,        ScanCode_UNKNOWN,        ScanCode_UNKNOWN,     ScanCode_UNKNOWN,        ScanCode_F13,     ScanCode_F14,            ScanCode_F15,            ScanCode_F16,
@@ -145,7 +145,7 @@ namespace neogfx
                     switch (scanCode)
                     {
                     case ScanCode_RETURN:
-                        scanCode = ScanCode_KP_ENTER;
+                        scanCode = ScanCode_KEYPAD_ENTER;
                         break;
                     case ScanCode_LALT:
                         scanCode = ScanCode_RALT;
@@ -154,10 +154,10 @@ namespace neogfx
                         scanCode = ScanCode_RCTRL;
                         break;
                     case ScanCode_SLASH:
-                        scanCode = ScanCode_KP_DIVIDE;
+                        scanCode = ScanCode_KEYPAD_DIVIDE;
                         break;
                     case ScanCode_CAPSLOCK:
-                        scanCode = ScanCode_KP_PLUS;
+                        scanCode = ScanCode_KEYPAD_PLUS;
                         break;
                     default:
                         break;
@@ -168,37 +168,37 @@ namespace neogfx
                     switch (scanCode)
                     {
                     case ScanCode_HOME:
-                        scanCode = ScanCode_KP_7;
+                        scanCode = ScanCode_KEYPAD_7;
                         break;
                     case ScanCode_UP:
-                        scanCode = ScanCode_KP_8;
+                        scanCode = ScanCode_KEYPAD_8;
                         break;
                     case ScanCode_PAGEUP:
-                        scanCode = ScanCode_KP_9;
+                        scanCode = ScanCode_KEYPAD_9;
                         break;
                     case ScanCode_LEFT:
-                        scanCode = ScanCode_KP_4;
+                        scanCode = ScanCode_KEYPAD_4;
                         break;
                     case ScanCode_RIGHT:
-                        scanCode = ScanCode_KP_6;
+                        scanCode = ScanCode_KEYPAD_6;
                         break;
                     case ScanCode_END:
-                        scanCode = ScanCode_KP_1;
+                        scanCode = ScanCode_KEYPAD_1;
                         break;
                     case ScanCode_DOWN:
-                        scanCode = ScanCode_KP_2;
+                        scanCode = ScanCode_KEYPAD_2;
                         break;
                     case ScanCode_PAGEDOWN:
-                        scanCode = ScanCode_KP_3;
+                        scanCode = ScanCode_KEYPAD_3;
                         break;
                     case ScanCode_INSERT:
-                        scanCode = ScanCode_KP_0;
+                        scanCode = ScanCode_KEYPAD_0;
                         break;
                     case ScanCode_DELETE:
-                        scanCode = ScanCode_KP_PERIOD;
+                        scanCode = ScanCode_KEYPAD_PERIOD;
                         break;
                     case ScanCode_PRINTSCREEN:
-                        scanCode = ScanCode_KP_MULTIPLY;
+                        scanCode = ScanCode_KEYPAD_MULTIPLY;
                         break;
                     default:
                         break;

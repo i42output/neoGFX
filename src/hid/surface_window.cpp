@@ -704,7 +704,7 @@ namespace neogfx
             {
                 if (aScanCode == ScanCode_TAB)
                     return (aWidget.focus_policy() & focus_policy::ConsumeTabKey) == focus_policy::ConsumeTabKey;
-                else if (aScanCode == ScanCode_RETURN)
+                else if (aScanCode == ScanCode_RETURN || aScanCode == ScanCode_KEYPAD_ENTER)
                     return (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) == focus_policy::ConsumeReturnKey;
                 else
                     return true;
@@ -764,7 +764,7 @@ namespace neogfx
         {
             if (aScanCode == ScanCode_TAB)
                 return (aWidget.focus_policy() & focus_policy::ConsumeTabKey) == focus_policy::ConsumeTabKey;
-            else if (aScanCode == ScanCode_RETURN)
+            else if (aScanCode == ScanCode_RETURN || aScanCode == ScanCode_KEYPAD_ENTER)
                 return (aWidget.focus_policy() & focus_policy::ConsumeReturnKey) == focus_policy::ConsumeReturnKey;
             else
                 return true;

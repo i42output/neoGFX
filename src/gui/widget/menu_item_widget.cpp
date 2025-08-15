@@ -233,7 +233,7 @@ namespace neogfx
 
     bool menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
     {
-        if (aScanCode == ScanCode_RETURN)
+        if (aScanCode == ScanCode_RETURN || aScanCode == ScanCode_KEYPAD_ENTER)
         {
             select_item(true);
             return true;

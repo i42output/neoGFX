@@ -193,6 +193,7 @@ namespace neogfx
                     switch (aScanCode)
                     {
                     case ScanCode_RETURN:
+                    case ScanCode_KEYPAD_ENTER:
                         if (!root().has_focused_widget() ||
                             (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeReturnKey)
                         {
@@ -201,7 +202,7 @@ namespace neogfx
                         break;
                     case ScanCode_ESCAPE:
                         if (!root().has_focused_widget() ||
-                            (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeEscapeKey)
+                            (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeEscapeKey) != neogfx::focus_policy::ConsumeEscapeKey)
                         {
                             if ((style() & window_style::Close) == window_style::Close)
                                 reject();

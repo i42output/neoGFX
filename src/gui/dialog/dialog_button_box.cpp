@@ -212,6 +212,7 @@ namespace neogfx
                 switch (aScanCode)
                 {
                 case ScanCode_RETURN:
+                case ScanCode_KEYPAD_ENTER:
                     if (!root().has_focused_widget() ||
                         (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeReturnKey)
                     {

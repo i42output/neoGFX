@@ -609,7 +609,7 @@ namespace neogfx
                 }
                 break;
             case ScanCode_RETURN:
-            case ScanCode_KP_ENTER:
+            case ScanCode_KEYPAD_ENTER:
                 if (editing())
                 {
                     end_edit(true);

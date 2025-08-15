@@ -120,6 +120,7 @@ namespace neogfx
             }
             break;
         case ScanCode_RETURN:
+        case ScanCode_KEYPAD_ENTER:
             if (has_selected_item() && item_at(selected_item()).available())
             {
                 auto& selectedItem = item_at(selected_item());
