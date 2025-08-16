@@ -51,12 +51,12 @@ namespace neogfx
 
     void resource_manager::add_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources.insert(aUri, decltype(iResources)::mapped_type{ ref_ptr<i_resource>{ make_ref<resource>(*this, aUri, aResourceData, aResourceSize) } });
+        iResources.insert(aUri, decltype(iResources)::mapped_type{ make_ref<resource, i_resource>(*this, aUri, aResourceData, aResourceSize) });
     }
 
     void resource_manager::add_module_resource(i_string const& aUri, const void* aResourceData, std::size_t aResourceSize)
     {
-        iResources.insert(aUri, decltype(iResources)::mapped_type{ ref_ptr<i_resource>{ make_ref<resource>(*this, aUri, aResourceData, aResourceSize) } });
+        iResources.insert(aUri, decltype(iResources)::mapped_type{ make_ref<resource, i_resource>(*this, aUri, aResourceData, aResourceSize) });
     }
 
     void resource_manager::load_resource(i_string const& aUri, i_ref_ptr<i_resource>& aResult)

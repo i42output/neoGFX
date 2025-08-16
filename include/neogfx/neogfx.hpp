@@ -72,6 +72,7 @@ namespace neogfx
     using neolib::i_weak_ref_ptr;
     using neolib::weak_ref_ptr;
     using neolib::make_ref;
+    using neolib::make_abstract_ref;
     using neolib::static_pointer_cast;
     using neolib::const_pointer_cast;
     using neolib::reinterpret_pointer_cast;

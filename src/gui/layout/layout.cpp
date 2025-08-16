@@ -245,7 +245,7 @@ namespace neogfx
         while (aPosition > items().size())
             add_spacer_at(0);
         auto i = items().insert(std::next(items().begin(), aPosition), aItem->is_cache() ?
-            dynamic_pointer_cast<i_layout_item_cache>(aItem) : ref_ptr<i_layout_item_cache>{ make_ref<layout_item_cache>(aItem) });
+            dynamic_pointer_cast<i_layout_item_cache>(aItem) : make_abstract_ref<layout_item_cache>(aItem));
         (**i).set_parent_layout(this);
         if (has_parent_widget())
             (**i).set_parent_widget(&parent_widget());
