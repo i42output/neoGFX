@@ -1167,8 +1167,8 @@ namespace neogfx
     rect text_edit::scroll_area() const
     {
         auto const& internalPadding = padding();
-        auto const& colulmnPadding = column(0).padding; ///< todo: other columns?
-        auto const& totalPadding = internalPadding + colulmnPadding;
+        auto const& columnPadding = column(0).padding; ///< todo: other columns?
+        auto const& totalPadding = internalPadding + columnPadding;
         return rect{ point{}, iTextExtents.value_or(size{}) + totalPadding.size() };
     }
 

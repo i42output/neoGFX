@@ -143,7 +143,7 @@ namespace neogfx
         auto scrollAreaExtents = size{ iBufferSize.with_cy(static_cast<dimension_type>(active_buffer().lines.size())) };
         if (scrollAreaExtents.cy < iTerminalSize.cy + buffer_origin().y && buffer_origin().y > 0)
             scrollAreaExtents.cy = iTerminalSize.cy + buffer_origin().y;
-        return rect{ point{}, scrollAreaExtents * character_extents() };
+        return rect{ point{}, scrollAreaExtents * character_extents() + padding().size() };
     }
 
     bool terminal::use_scrollbar_container_updater() const
