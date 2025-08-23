@@ -48,7 +48,6 @@ namespace neogfx
     class scrollable_widget : public Base, private i_scrollbar_container
     {
         meta_object(Base)
-        typedef scrollable_widget<Base> self_type;
     protected:
         enum usv_stage_e
         {
@@ -61,7 +60,7 @@ namespace neogfx
         class suppress_scrollbar_visibility_updates : neolib::scoped_flag
         {
         public:
-            suppress_scrollbar_visibility_updates(self_type& aParent) :
+            suppress_scrollbar_visibility_updates(scrollable_widget& aParent) :
                 neolib::scoped_flag{ aParent.iSuppressScrollbarVisibilityUpdates }
             {}
         };

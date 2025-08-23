@@ -44,7 +44,6 @@ namespace neogfx
     template <typename ItemModel>
     class basic_item_presentation_model : public object<reference_counted<i_item_presentation_model>>
     {
-        typedef basic_item_presentation_model<ItemModel> self_type;
         typedef object<reference_counted<i_item_presentation_model>> base_type;
     public:
         define_declared_event(VisualAppearanceChanged, visual_appearance_changed)
@@ -1269,7 +1268,7 @@ namespace neogfx
             {
                 iRowMap.resize(item_model().rows());
                 for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
-                    iRowMap[self_type::row(row).value] = row;
+                    iRowMap[basic_item_presentation_model::row(row).value] = row;
             }
             return iRowMap;
         }

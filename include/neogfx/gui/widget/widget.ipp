@@ -871,8 +871,10 @@ namespace neogfx
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
+        auto const currentPosition = self.position();
         if (debug::layoutItem == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::move(" << aPosition << ")" << std::endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::move(" << aPosition << ")" << 
+            " (from " << currentPosition << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         self.set_position(aPosition);
     }

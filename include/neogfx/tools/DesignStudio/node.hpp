@@ -119,7 +119,6 @@ namespace neogfx::DesignStudio
 
     class node : public i_node
     {
-        typedef node self_type;
         typedef i_node base_type;
     public:
         define_declared_event(InputAdded, input_added, i_node_input_pin&)

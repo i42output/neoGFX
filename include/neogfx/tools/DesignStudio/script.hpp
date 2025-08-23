@@ -26,7 +26,6 @@ namespace neogfx::DesignStudio
 {
     class script : public i_script
     {
-        typedef script self_type;
         typedef i_script base_type;
     public:
         typedef base_type abstract_type;

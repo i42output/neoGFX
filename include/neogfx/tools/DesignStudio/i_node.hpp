@@ -47,9 +47,8 @@ namespace neogfx::DesignStudio
 
     class i_node_pin : public ng::i_reference_counted
     {
-        typedef i_node_pin self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_node_pin abstract_type;
     public:
         virtual pin_type type() const = 0;
         virtual i_node& get() const = 0;
@@ -63,23 +62,20 @@ namespace neogfx::DesignStudio
 
     class i_node_input_pin : public i_node_pin
     {
-        typedef i_node_input_pin self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_node_input_pin abstract_type;
     };
 
     class i_node_output_pin : public i_node_pin
     {
-        typedef i_node_output_pin self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_node_output_pin abstract_type;
     };
 
     class i_node_connection : public ng::i_reference_counted
     {
-        typedef i_node_connection self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_node_connection abstract_type;
     public:
         virtual i_node_pin const& source() const = 0;
         virtual i_node_pin& source() = 0;
@@ -89,7 +85,6 @@ namespace neogfx::DesignStudio
 
     class i_node : public i_element
     {
-        typedef i_node self_type;
     public:
         declare_event(input_added, i_node_input_pin&)
         declare_event(input_removed, i_node_input_pin&)

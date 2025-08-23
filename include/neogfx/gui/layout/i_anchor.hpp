@@ -266,9 +266,8 @@ namespace neogfx
     template <typename T, typename PVT, typename... CalculatorArgs>
     class i_calculating_anchor : public i_anchor
     {
-        typedef i_calculating_anchor<T, PVT, CalculatorArgs...> self_type;
     public:
-        typedef self_type abstract_type;
+        typedef i_calculating_anchor abstract_type;
         typedef T value_type;
         typedef PVT property_value_type;
         typedef anchor_constraint<value_type> constraint;

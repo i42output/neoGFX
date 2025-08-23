@@ -26,9 +26,8 @@ namespace neogfx::DesignStudio
 {
     class i_script : public i_element
     {
-        typedef i_script self_type;
     public:
-        typedef i_element abstract_type;
+        typedef i_script abstract_type;
     public:
         virtual i_string const& text() const = 0;
         virtual void set_text(i_string const& aText) = 0;

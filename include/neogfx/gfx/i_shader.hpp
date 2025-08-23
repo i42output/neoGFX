@@ -158,9 +158,8 @@ namespace neogfx
     struct shader_handle
     {
         int handle;
-        typedef shader_handle<HandleType> self_type;
-        typedef self_type abstract_type;
-        bool operator==(const self_type& aRhs) const { return handle == aRhs.handle; }
+        typedef shader_handle abstract_type;
+        bool operator==(const shader_handle& aRhs) const { return handle == aRhs.handle; }
     };
 
     using sampler2D = shader_handle<shader_data_type::Sampler2D>;

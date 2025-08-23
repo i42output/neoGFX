@@ -42,7 +42,6 @@ namespace neogfx::nrc
     template <typename Base = i_ui_element>
     class ui_element : public neolib::reference_counted<Base>
     {
-        typedef ui_element<Base> self_type;
         typedef neolib::reference_counted<Base> base_type;
     public:
         using i_ui_element::no_parent;

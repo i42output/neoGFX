@@ -136,7 +136,6 @@ namespace neogfx
     template <typename T, typename Category, class Context, typename Calculator = T(*)()>
     class property : public i_property, public neolib::lifetime<>
     {
-        typedef property<T, Category, Context, Calculator> self_type;
         template <typename, typename, class, typename>
         friend class property_transition;
     public:
@@ -351,7 +350,7 @@ namespace neogfx
                 return transition().to();
         }
         template <typename T2>
-        self_type& assign(T2&& aValue, bool aOwnerNotify = true, bool aDiscardPreviousValue = false)
+        property& assign(T2&& aValue, bool aOwnerNotify = true, bool aDiscardPreviousValue = false)
         {
             typedef std::decay_t<decltype(aValue)> try_type;
             if constexpr (std::is_same_v<try_type, value_type> || std::is_same_v<neolib::optional<try_type>, value_type>)
@@ -371,7 +370,7 @@ namespace neogfx
             }
         }
         template <typename T2>
-        self_type& operator=(T2&& aValue)
+        property& operator=(T2&& aValue)
         {
             return assign(std::forward<T2>(aValue));
         }
@@ -379,25 +378,25 @@ namespace neogfx
         {
             return value();
         }
-        template <typename SFINAE = optional_proxy<const self_type>>
+        template <typename SFINAE = optional_proxy<const property>>
         const typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator*() const
         {
-            return optional_proxy<const self_type>{ *this };
+            return optional_proxy<const property>{ *this };
         }
-        template <typename SFINAE = optional_proxy<self_type>>
+        template <typename SFINAE = optional_proxy<property>>
         typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator*()
         {
-            return optional_proxy<self_type>{ *this };
+            return optional_proxy<property>{ *this };
         }
-        template <typename SFINAE = optional_proxy<const self_type>>
+        template <typename SFINAE = optional_proxy<const property>>
         const typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator->() const
         {
-            return optional_proxy<const self_type>{ *this };
+            return optional_proxy<const property>{ *this };
         }
-        template <typename SFINAE = optional_proxy<self_type>>
+        template <typename SFINAE = optional_proxy<property>>
         typename std::enable_if<neolib::is_optional_v<T>, SFINAE>::type operator->()
         {
-            return optional_proxy<self_type>{ *this };
+            return optional_proxy<property>{ *this };
         }
         template <typename T>
         bool operator==(const T& aRhs) const
@@ -447,7 +446,7 @@ namespace neogfx
             return const_cast<value_type&>(to_const(*this).value());
         }
         template <typename T2>
-        self_type& do_assign(T2&& aValue, bool aOwnerNotify = true, bool aDiscardPreviousValue = false)
+        property& do_assign(T2&& aValue, bool aOwnerNotify = true, bool aDiscardPreviousValue = false)
         {
             if (read_only())
                 return *this;

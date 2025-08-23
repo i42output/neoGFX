@@ -28,7 +28,6 @@ namespace neogfx
     template <typename Base>
     class anchorable : public Base
     {
-        typedef anchorable<Base> self_type;
         typedef Base base_type;
         // types
     public:

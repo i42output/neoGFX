@@ -30,9 +30,8 @@ namespace neogfx
     class item_index
     {
         typedef ModelIndexType index_type;
-        typedef item_index<index_type> self_type;
     public:
-        typedef self_type abstract_type; // todo: create abstract interface
+        typedef item_index abstract_type; // todo: create abstract interface
     public:
         typedef std::uint32_t value_type;
         typedef value_type row_type;

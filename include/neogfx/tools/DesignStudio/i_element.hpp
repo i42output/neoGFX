@@ -80,7 +80,7 @@ namespace neogfx::DesignStudio
     public:
         typedef i_element abstract_type;
     public:
-        typedef neolib::i_vector<i_ref_ptr<i_element>> children_t;
+        typedef neolib::i_vector<i_ref_ptr<i_element>> i_children_t;
     public:
         struct no_parent : std::logic_error { no_parent() : std::logic_error{ "neogfx::DesignStudio::i_element::no_parent" } {} };
         struct no_layout_item : std::logic_error { no_layout_item() : std::logic_error{ "neogfx::DesignStudio::i_element::no_layout_item" } {} };
@@ -98,8 +98,8 @@ namespace neogfx::DesignStudio
         virtual i_element const& parent() const = 0;
         virtual i_element& parent() = 0;
         virtual void set_parent(i_element& aParent) = 0;
-        virtual children_t const& children() const = 0;
-        virtual children_t& children() = 0;
+        virtual i_children_t const& children() const = 0;
+        virtual i_children_t& children() = 0;
         virtual void add_child(i_element& aChild) = 0;
         virtual void remove_child(i_element& aChild) = 0;
     public:
@@ -118,10 +118,10 @@ namespace neogfx::DesignStudio
         virtual bool is_selected() const = 0;
         virtual void select(bool aSelected = true, bool aDeselectRest = true) = 0;
     public:
-        children_t::const_iterator begin() const { return children().begin(); }
-        children_t::iterator begin() { return children().begin(); }
-        children_t::const_iterator end() const { return children().end(); }
-        children_t::iterator end() { return children().end(); }
+        i_children_t::const_iterator begin() const { return children().begin(); }
+        i_children_t::iterator begin() { return children().begin(); }
+        i_children_t::const_iterator end() const { return children().end(); }
+        i_children_t::iterator end() { return children().end(); }
     public:
         bool is_root() const
         {

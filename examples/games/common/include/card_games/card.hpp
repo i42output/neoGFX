@@ -29,7 +29,6 @@ namespace neogames
         template <typename GameTraits>
         class basic_card
         {
-            typedef basic_card<GameTraits> self_type;
         public:
             ng::event<basic_card&> changed;
             ng::event<basic_card&> destroyed;
@@ -75,7 +74,7 @@ namespace neogames
                 iValue{ aValue }, iSuit{ aSuit }, iDiscarded{ false }
             {
             }
-            basic_card(const self_type& aOther) :
+            basic_card(const basic_card& aOther) :
                 iValue{ aOther.iValue }, iSuit{ aOther.iSuit }, iDiscarded{ aOther.iDiscarded }
             {
             }
@@ -83,7 +82,7 @@ namespace neogames
             {
                 destroyed(*this);
             }
-            self_type& operator=(const self_type& aOther)
+            basic_card& operator=(const basic_card& aOther)
             {
                 iValue = aOther.iValue;
                 iSuit = aOther.iSuit;
@@ -91,7 +90,7 @@ namespace neogames
                 return *this;
             }
         public:
-            void swap(self_type& aOther)
+            void swap(basic_card& aOther)
             {
                 std::swap(iValue, aOther.iValue);
                 std::swap(iSuit, aOther.iSuit);

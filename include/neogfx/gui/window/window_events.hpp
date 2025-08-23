@@ -121,9 +121,8 @@ namespace neogfx
     template <mouse_event_location Location>
     class basic_mouse_event
     {
-        typedef basic_mouse_event<Location> self_type;
     public:
-        typedef self_type abstract_type; // todo
+        typedef basic_mouse_event abstract_type; // todo
     public:
         typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifiers_e> parameter_type;
     public:
@@ -145,9 +144,9 @@ namespace neogfx
         {
             return static_variant_cast<neogfx::point>(iParameter1);
         }
-        self_type with_position(neogfx::point const& aPosition) const
+        basic_mouse_event with_position(neogfx::point const& aPosition) const
         {
-            return self_type{ iType, aPosition, iParameter2, iParameter3, iParameter4 };
+            return basic_mouse_event{ iType, aPosition, iParameter2, iParameter3, iParameter4 };
         }
         neogfx::mouse_button mouse_button() const
         {

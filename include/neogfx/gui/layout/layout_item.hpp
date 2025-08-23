@@ -34,7 +34,6 @@ namespace neogfx
     class layout_item : public anchorable<reference_counted<Base>>
     {
         meta_object(anchorable<reference_counted<Base>>)
-        typedef layout_item<Base> self_type;
         // events
     public:
         define_declared_event(StyleSheetChanged, style_sheet_changed, i_optional_style_sheet const&)
@@ -43,7 +42,7 @@ namespace neogfx
     public:
         typedef i_layout_item abstract_type;
     private:
-        typedef self_type property_context_type;
+        typedef layout_item property_context_type;
         // construction
     public:
         layout_item()
@@ -98,54 +97,54 @@ namespace neogfx
     public:
         bool is_layout() const final
         {
-            return std::is_base_of_v<i_layout, self_type>;
+            return std::is_base_of_v<i_layout, layout_item>;
         }
         const i_layout& as_layout() const final
         {
-            if constexpr (std::is_base_of_v<i_layout, self_type>)
+            if constexpr (std::is_base_of_v<i_layout, layout_item>)
                 return static_cast<const i_layout&>(*this);
             else
                 throw not_a_layout();
         }
         i_layout& as_layout() final
         {
-            if constexpr (std::is_base_of_v<i_layout, self_type>)
+            if constexpr (std::is_base_of_v<i_layout, layout_item>)
                 return static_cast<i_layout&>(*this);
             else
                 throw not_a_layout();
         }
         bool is_spacer() const final
         {
-            return std::is_base_of_v<i_spacer, self_type>;
+            return std::is_base_of_v<i_spacer, layout_item>;
         }
         const i_spacer& as_spacer() const final
         {
-            if constexpr (std::is_base_of_v<i_spacer, self_type>)
+            if constexpr (std::is_base_of_v<i_spacer, layout_item>)
                 return static_cast<const i_spacer&>(*this);
             else
                 throw not_a_spacer();
         }
         i_spacer& as_spacer() final
         {
-            if constexpr (std::is_base_of_v<i_spacer, self_type>)
+            if constexpr (std::is_base_of_v<i_spacer, layout_item>)
                 return static_cast<i_spacer&>(*this);
             else
                 throw not_a_spacer();
         }
         bool is_widget() const override
         {
-            return std::is_base_of_v<i_widget, self_type>;
+            return std::is_base_of_v<i_widget, layout_item>;
         }
         const i_widget& as_widget() const override
         {
-            if constexpr (std::is_base_of_v<i_widget, self_type>)
+            if constexpr (std::is_base_of_v<i_widget, layout_item>)
                 return static_cast<const i_widget&>(*this);
             else
                 throw not_a_widget();
         }
         i_widget& as_widget() override
         {
-            if constexpr (std::is_base_of_v<i_widget, self_type>)
+            if constexpr (std::is_base_of_v<i_widget, layout_item>)
                 return static_cast<i_widget&>(*this);
             else
                 throw not_a_widget();

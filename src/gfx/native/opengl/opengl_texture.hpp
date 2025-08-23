@@ -34,7 +34,6 @@ namespace neogfx
     template <typename T>
     class opengl_texture : public native_texture
     {
-        typedef opengl_texture<T> self_type;
     public:
         define_declared_event(TargetActivating, target_activating)
         define_declared_event(TargetActivated, target_activated)

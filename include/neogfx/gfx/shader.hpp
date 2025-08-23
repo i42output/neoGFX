@@ -37,7 +37,6 @@ namespace neogfx
     template <typename Base>
     class shader : public reference_counted<Base>
     {
-        typedef shader<Base> self_type;
         typedef reference_counted<Base> base_type;
     public:
         using typename base_type::abstract_type;

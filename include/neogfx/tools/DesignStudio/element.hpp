@@ -76,7 +76,6 @@ namespace neogfx::DesignStudio
     template <typename Type, typename Base = typename element_traits<Type>::base>
     class element : public neolib::reference_counted<Base>
     {
-        typedef element<Base> self_type;
         typedef neolib::reference_counted<Base> base_type;
     public:
         define_declared_event(ModeChanged, mode_changed)
@@ -87,8 +86,8 @@ namespace neogfx::DesignStudio
         using typename i_element::no_layout_item;
         using typename i_element::no_caddy;
     public:
-        typedef abstract_t<Base> abstract_type;
-        typedef neolib::vector<ref_ptr<abstract_type>> children_t;
+        typedef abstract_t<base_type> abstract_type;
+        typedef neolib::vector<ref_ptr<i_element>> children_t;
     public:
         element(i_element_library const& aLibrary, i_project& aProject, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
