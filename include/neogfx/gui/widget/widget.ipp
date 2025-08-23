@@ -870,12 +870,16 @@ namespace neogfx
     {
         auto& self = *this;
 
+        if (base_type::Position == units_converter{ *this }.to_device_units(aPosition))
+            return;
+
 #ifdef NEOGFX_DEBUG
         auto const currentPosition = self.position();
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::move(" << aPosition << ")" << 
-            " (from " << currentPosition << ")" << std::endl;
+                " (from " << currentPosition << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
         self.set_position(aPosition);
     }
 
@@ -925,6 +929,9 @@ namespace neogfx
     {
         auto& self = *this;
 
+        if (base_type::Size == units_converter{ *this }.to_device_units(aSize))
+            return;
+
         neolib::scoped_flag sf{ iResizing };
 
 #ifdef NEOGFX_DEBUG
@@ -932,11 +939,8 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::resize(" << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
-        if (base_type::Size != units_converter{ *this }.to_device_units(aSize))
-        {
-            update(true);
-            self.set_extents(aSize);
-        }
+        update(true);
+        self.set_extents(aSize);
     }
 
     template <WidgetInterface Interface>

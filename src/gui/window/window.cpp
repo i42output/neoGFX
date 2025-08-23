@@ -538,9 +538,14 @@ namespace neogfx
     void window::resized()
     {
         base_type::resized();
-        if (has_native_window() && !native_window().event_cause_external() && !native_window().resizing_or_moving() &&
-            (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered)
-            center_on_parent((style() & window_style::Resize) != window_style::Resize);
+        if (has_native_window())
+        {
+            bool const initiallyCentered = (style() & window_style::InitiallyCentered) == window_style::InitiallyCentered;
+            bool const eventCauseExternal = native_window().event_cause_external();
+            bool const resizingOrMoving = native_window().resizing_or_moving();
+            if (initiallyCentered && !eventCauseExternal && !resizingOrMoving)
+                center_on_parent((style() & window_style::Resize) != window_style::Resize);
+        }
     }
 
     bool window::is_managing_layout() const
@@ -1088,6 +1093,11 @@ namespace neogfx
             return native_surface().potential_fps();
         else
             return 0.0;
+    }
+
+    bool window::tracking_mouse() const
+    {
+        return is_tracking();
     }
 
     point window::mouse_position() const

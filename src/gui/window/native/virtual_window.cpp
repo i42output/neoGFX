@@ -179,8 +179,7 @@ namespace neogfx
 
     bool virtual_window::resizing_or_moving() const
     {
-        // todo
-        return false;
+        return surface_window().as_window().tracking_mouse();
     }
 
     bool virtual_window::can_render() const

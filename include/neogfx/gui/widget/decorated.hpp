@@ -567,11 +567,15 @@ namespace neogfx
         {
             return const_cast<i_layout_item&>(to_const(*this).resizing_context());
         }
+        bool is_tracking() const
+        {
+            return iTracking.has_value();
+        }
         void update_tracking(const point& aPosition)
         {
             auto& self = widget_type::as_widget();
 
-            if (iTracking)
+            if (is_tracking())
             {
                 i_layout_item& resizingContext = resizing_context();
                 auto const delta = widget_type::to_window_coordinates(aPosition) - iTracking->trackFrom;

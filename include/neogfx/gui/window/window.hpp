@@ -174,6 +174,7 @@ namespace neogfx
         double fps() const override;
         double potential_fps() const override;
     public:
+        bool tracking_mouse() const override;
         point mouse_position() const override;
     public:
         neogfx::border window_border() const override;

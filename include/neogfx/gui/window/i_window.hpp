@@ -140,6 +140,7 @@ namespace neogfx
         virtual double fps() const = 0;
         virtual double potential_fps() const = 0;
     public:
+        virtual bool tracking_mouse() const = 0;
         virtual point mouse_position() const = 0;
     public:
         virtual neogfx::border window_border() const = 0;
