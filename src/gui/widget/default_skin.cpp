@@ -283,9 +283,13 @@ namespace neogfx
         auto ink2 = ink1.darker(0x30);
         for (std::uint32_t i = 1u; i < aLayout.count(); ++i) 
         {
-            if (aLayout.item_at(i - 1u).is_layout() && (!aLayout.item_at(i - 1u).as_layout().enabled() || aLayout.item_at(i - 1u).as_layout().count() == 0))
+            auto const& item1 = aLayout.item_at(i - 1u);
+            auto const& item2 = aLayout.item_at(i);
+            if (!item1.visible() || !item2.visible())
                 continue;
-            if (aLayout.item_at(i).is_layout() && (!aLayout.item_at(i).as_layout().enabled() || aLayout.item_at(i).as_layout().count() == 0))
+            if (item1.is_layout() && (!item1.as_layout().enabled() || item1.as_layout().count() == 0))
+                continue;
+            if (item2.is_layout() && (!item2.as_layout().enabled() || item2.as_layout().count() == 0))
                 continue;
             auto const sepRect = separator_rect(aLayout, { i - 1u, i });
             if (aLayout.direction() == layout_direction::Horizontal)

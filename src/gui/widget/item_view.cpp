@@ -292,12 +292,14 @@ namespace neogfx
                 rect cellBackgroundRect = cell_rect(itemIndex, aGc, cell_part::Background);
                 {
                     scoped_scissor scissor(aGc, clipRect.intersection(cellBackgroundRect));
+                    if (cellBackgroundSpecified || !selection_model().is_selected(itemIndex))
+                        cellBackgroundColor.value().set_alpha(has_background_opacity() ? background_opacity() : 1.0);
                     if (selection_model().is_selected(itemIndex) && (!currentCell || !editing()))
                         aGc.fill_rect(cellBackgroundRect,
-                            cellBackgroundColor->with_combined_alpha(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ?
+                            cellBackgroundColor.value().with_combined_alpha(selection_model().has_current_index() && selection_model().current_index().row() == itemIndex.row() ?
                                 1.0 : 0.5));
                     else
-                        aGc.fill_rect(cellBackgroundRect, *cellBackgroundColor);
+                        aGc.fill_rect(cellBackgroundRect, cellBackgroundColor.value());
                 }
                 if (model().is_tree() && col == 0u && model().has_children(presentation_model().to_item_model_index(itemIndex)))
                 {
