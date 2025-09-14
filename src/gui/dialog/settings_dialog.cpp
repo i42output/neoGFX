@@ -167,6 +167,7 @@ namespace neogfx
                     {
                         auto settingWidget = make_ref<setting_widget<line_edit>>(aSetting, aLayout);
                         settingWidget->set_text(aSetting.value().get<string>());
+                        settingWidget->cursor().set_position(0u);
                         aSink += settingWidget->TextChanged([&, settingWidget]()
                             {
                                 if (!settingWidget->updating)
@@ -181,6 +182,7 @@ namespace neogfx
                                 {
                                     neolib::scoped_flag sf{ settingWidget->updating };
                                     settingWidget->set_text(aSetting.value<string>(true));
+                                    settingWidget->cursor().set_position(0u);
                                 }
                             });
                         aSink += aSetting.changed([&, settingWidget]()
@@ -189,6 +191,7 @@ namespace neogfx
                                 {
                                     neolib::scoped_flag sf{ settingWidget->updating };
                                     settingWidget->set_text(aSetting.value<string>(true));
+                                    settingWidget->cursor().set_position(0u);
                                 }
                             });
                         if (!aFormat.empty())
