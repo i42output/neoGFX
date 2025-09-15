@@ -123,7 +123,16 @@ namespace neogfx
             return;
         iModel = aModel;
         if (has_presentation_model() && !iOwner.updating_models())
-             presentation_model().set_item_model(model());
+        {
+            try
+            {
+                presentation_model().set_item_model(model());
+            }
+            catch (i_item_presentation_model::unrelated_item_model)
+            {
+                set_presentation_model(ref_ptr<i_item_presentation_model>{});
+            }
+        }
         full_update();
         update();
     }

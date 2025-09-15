@@ -206,9 +206,12 @@ namespace neogfx
         }
         void set_item_model(i_item_model& aItemModel) final
         {
+            if (dynamic_cast<item_model_type*>(&aItemModel) == nullptr)
+                throw unrelated_item_model();
+
             if (iItemModel != &aItemModel)
             {
-                auto reset_model = [this]()
+                auto reset_model = [&]()
                 {
                     {
                         scoped_item_update siu{ *this };

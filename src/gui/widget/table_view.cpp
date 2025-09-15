@@ -98,7 +98,10 @@ namespace neogfx
 
     void table_view::presentation_model_changed()
     {
-        column_header().set_presentation_model(presentation_model());
+        if (has_presentation_model())
+            column_header().set_presentation_model(presentation_model());
+        else
+            column_header().set_presentation_model(ref_ptr<i_item_presentation_model>{});
         update_scrollbar_visibility();
     }
 

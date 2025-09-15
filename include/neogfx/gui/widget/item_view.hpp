@@ -65,11 +65,13 @@ namespace neogfx
         ~item_view();
     public:
         bool has_model() const;
+        bool is_default_model() const;
         const i_item_model& model() const;
         i_item_model& model();
         void set_model(i_item_model& aModel);
         void set_model(i_ref_ptr<i_item_model> const& aModel);
         bool has_presentation_model() const;
+        bool is_default_presentation_model() const;
         const i_item_presentation_model& presentation_model() const;
         i_item_presentation_model& presentation_model();
         void set_presentation_model(i_item_presentation_model& aPresentationModel);

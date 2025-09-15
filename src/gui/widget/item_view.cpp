@@ -28,6 +28,8 @@
 #include <neogfx/gui/widget/item_view.hpp>
 #include <neogfx/gui/widget/line_edit.hpp>
 #include <neogfx/gui/widget/spin_box.hpp>
+#include <neogfx/gui/widget/item_model.hpp>
+#include <neogfx/gui/widget/item_presentation_model.hpp>
 
 namespace neogfx
 {
@@ -61,6 +63,13 @@ namespace neogfx
             return false;
     }
 
+    bool item_view::is_default_model() const
+    {
+        return has_model() &&
+            (dynamic_cast<item_model const*>(&model()) != nullptr ||
+             dynamic_cast<item_tree_model const*>(&model()) != nullptr);
+    }
+
     const i_item_model& item_view::model() const
     {
         if (has_model())
@@ -77,7 +86,7 @@ namespace neogfx
 
     void item_view::set_model(i_item_model& aModel)
     {
-        set_model(ref_ptr<i_item_model>{ aModel });
+        set_model(ref_ptr<i_item_model>{ ref_ptr<i_item_model>{}, &aModel });
     }
 
     void item_view::set_model(i_ref_ptr<i_item_model> const& aModel)
@@ -95,7 +104,16 @@ namespace neogfx
             iModelSink += model().item_removed([this](const item_model_index& aItemIndex) { item_removed(aItemIndex); });
             iModelSink += neolib::destroying(model(), [this]() { iModel = nullptr; });
             if (has_presentation_model())
-                presentation_model().set_item_model(*aModel);
+            {
+                try
+                {
+                    presentation_model().set_item_model(*aModel);
+                }
+                catch (i_item_presentation_model::unrelated_item_model)
+                {
+                    set_presentation_model(ref_ptr<i_item_presentation_model>{});
+                }
+            }
         }
         model_changed();
         layout_items(true);
@@ -108,6 +126,13 @@ namespace neogfx
             return true;
         else
             return false;
+    }
+
+    bool item_view::is_default_presentation_model() const
+    {
+        return has_presentation_model() &&
+            (dynamic_cast<item_presentation_model const*>(&presentation_model()) != nullptr ||
+             dynamic_cast<item_tree_presentation_model const*>(&presentation_model()) != nullptr);
     }
 
     const i_item_presentation_model& item_view::presentation_model() const

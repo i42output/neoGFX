@@ -689,7 +689,16 @@ namespace neogfx
         if (has_model())
         {
             if (has_presentation_model())
-                presentation_model().set_item_model(*aModel);
+            {
+                try
+                {
+                    presentation_model().set_item_model(model());
+                }
+                catch (i_item_presentation_model::unrelated_item_model)
+                {
+                    set_presentation_model(ref_ptr<i_item_presentation_model>{});
+                }
+            }
 
             iSink += model().item_removed([&](item_model_index const& aItem)
             {

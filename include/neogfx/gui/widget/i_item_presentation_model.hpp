@@ -245,6 +245,7 @@ namespace neogfx
         typedef std::optional<filter> optional_filter;
     public:
         struct no_item_model : std::logic_error { no_item_model() : std::logic_error("neogfx::i_item_presentation_model::no_item_model") {} };
+        struct unrelated_item_model : std::logic_error { unrelated_item_model() : std::logic_error("neogfx::i_item_presentation_model::unrelated_item_model") {} };
         struct bad_index : std::logic_error { bad_index() : std::logic_error("neogfx::i_item_presentation_model::bad_index") {} };
         struct no_mapped_row : std::logic_error { no_mapped_row() : std::logic_error("neogfx::i_item_presentation_model::no_mapped_row") {} };
         struct already_attached : std::logic_error { already_attached() : std::logic_error("neogfx::i_item_presentation_model::already_attached") {} };
