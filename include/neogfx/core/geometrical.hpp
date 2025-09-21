@@ -119,8 +119,8 @@ namespace neogfx
         constexpr basic_delta(coordinate_type dx, coordinate_type dy, coordinate_type dz = {}) : dx{ dx }, dy{ dy }, dz{ dz } {}
         constexpr explicit basic_delta(coordinate_type aSquareDelta) : dx{ aSquareDelta }, dy{ aSquareDelta }, dz{} {}
         template <typename CoordinateType2>
-        constexpr basic_delta(const basic_delta<CoordinateType2>& other) :
-            dx{ static_cast<CoordinateType>(other.dx) }, dy{ static_cast<CoordinateType>(other.dy) }, dz{ static_cast<CoordinateType>(other.dz) } {}
+        constexpr basic_delta(const basic_delta<CoordinateType2>& aOther) :
+            dx{ static_cast<CoordinateType>(aOther.dx) }, dy{ static_cast<CoordinateType>(aOther.dy) }, dz{ static_cast<CoordinateType>(aOther.dz) } {}
         // operations
     public:
         basic_vector<coordinate_type, 2> to_vec2() const { return basic_vector<coordinate_type, 2>{ dx, dy }; }
@@ -130,17 +130,17 @@ namespace neogfx
         basic_delta& operator-=(coordinate_type s) { dx -=s; dy -= s; return *this; }
         basic_delta& operator*=(coordinate_type s) { dx *=s; dy *= s; return *this; }
         basic_delta& operator/=(coordinate_type s) { dx /=s; dy /= s; return *this; }
-        basic_delta& operator+=(const basic_delta& other) { dx += other.dx; dy += other.dy; dz += other.dz; return *this; }
-        basic_delta& operator-=(const basic_delta& other) { dx -= other.dx; dy -= other.dy; dz -= other.dz; return *this; }
-        basic_delta& operator*=(const basic_delta& other) { dx *= other.dx; dy *= other.dy; dz *= other.dz; return *this; }
-        basic_delta& operator/=(const basic_delta& other) { dx /= other.dx; dy /= other.dy; if (other.dz != static_cast<coordinate_type>(0.0)) dz /= other.dz; return *this; }
+        basic_delta& operator+=(const basic_delta& aOther) { dx += aOther.dx; dy += aOther.dy; dz += aOther.dz; return *this; }
+        basic_delta& operator-=(const basic_delta& aOther) { dx -= aOther.dx; dy -= aOther.dy; dz -= aOther.dz; return *this; }
+        basic_delta& operator*=(const basic_delta& aOther) { dx *= aOther.dx; dy *= aOther.dy; dz *= aOther.dz; return *this; }
+        basic_delta& operator/=(const basic_delta& aOther) { dx /= aOther.dx; dy /= aOther.dy; if (aOther.dz != static_cast<coordinate_type>(0.0)) dz /= aOther.dz; return *this; }
         basic_delta operator-() const { return basic_delta{ -dx, -dy, -dz }; }
         basic_delta abs() const { return basic_delta{ std::abs(dx), std::abs(dy), std::abs(dz) }; }
         basic_delta ceil() const { return basic_delta{ std::ceil(dx), std::ceil(dy), std::ceil(dz) }; }
         basic_delta floor() const { return basic_delta{ std::floor(dx), std::floor(dy), std::floor(dz) }; }
         basic_delta round() const { return basic_delta{ std::round(dx), std::round(dy), std::round(dz) }; }
-        basic_delta min(const basic_delta& other) const { return basic_delta{ std::min(dx, other.dx), std::min(dy, other.dy), std::min(dz, other.dz) }; }
-        basic_delta max(const basic_delta& other) const { return basic_delta{ std::max(dx, other.dx), std::max(dy, other.dy), std::max(dz, other.dz) }; }
+        basic_delta min(const basic_delta& aOther) const { return basic_delta{ std::min(dx, aOther.dx), std::min(dy, aOther.dy), std::min(dz, aOther.dz) }; }
+        basic_delta max(const basic_delta& aOther) const { return basic_delta{ std::max(dx, aOther.dx), std::max(dy, aOther.dy), std::max(dz, aOther.dz) }; }
         basic_delta with_dx(coordinate_type dx) const { return basic_delta{ dx, dy, dz }; }
         basic_delta with_dy(coordinate_type dy) const { return basic_delta{ dx, dy, dz }; }
         coordinate_type magnitude() const { return std::sqrt(dx * dx + dy * dy + dz * dz); }
@@ -245,15 +245,15 @@ namespace neogfx
     public:
         constexpr basic_size() : cx{}, cy{}, cz{} {}
         template <typename Scalar>
-        constexpr basic_size(const basic_vector<Scalar, 2>& other) : cx{ static_cast<dimension_type>(other.x) }, cy{ static_cast<dimension_type>(other.y) }, cz{} {}
+        constexpr basic_size(const basic_vector<Scalar, 2>& aOther) : cx{ static_cast<dimension_type>(aOther.x) }, cy{ static_cast<dimension_type>(aOther.y) }, cz{} {}
         template <typename Scalar>
-        constexpr basic_size(const basic_vector<Scalar, 3>& other) : cx{ static_cast<dimension_type>(other.x) }, cy{ static_cast<dimension_type>(other.y) }, cz{ static_cast<dimension_type>(other.z) } {}
+        constexpr basic_size(const basic_vector<Scalar, 3>& aOther) : cx{ static_cast<dimension_type>(aOther.x) }, cy{ static_cast<dimension_type>(aOther.y) }, cz{ static_cast<dimension_type>(aOther.z) } {}
         constexpr basic_size(dimension_type cx, dimension_type cy, dimension_type cz = {}) : cx{ cx }, cy{ cy }, cz{ cz } {}
         constexpr explicit basic_size(dimension_type aSquareDimension) : cx{ aSquareDimension }, cy{ aSquareDimension }, cz{} {}
         template <typename CoordinateType2>
-        constexpr basic_size(const basic_size<CoordinateType2>& other) :
-            cx{ static_cast<CoordinateType>(other.cx) }, cy{ static_cast<CoordinateType>(other.cy) }, cz{ static_cast<CoordinateType>(other.cz) } {}
-        constexpr basic_size(const basic_delta<CoordinateType>& other) : cx{ other.dx }, cy{ other.dy }, cz{ other.dz } {}
+        constexpr basic_size(const basic_size<CoordinateType2>& aOther) :
+            cx{ static_cast<CoordinateType>(aOther.cx) }, cy{ static_cast<CoordinateType>(aOther.cy) }, cz{ static_cast<CoordinateType>(aOther.cz) } {}
+        constexpr basic_size(const basic_delta<CoordinateType>& aOther) : cx{ aOther.dx }, cy{ aOther.dy }, cz{ aOther.dz } {}
         // operations
     public:
         basic_vector<dimension_type, 2> to_vec2() const { throw_on_bad_size(*this); return basic_vector<dimension_type, 2>{ cx, cy }; }
@@ -264,25 +264,25 @@ namespace neogfx
         bool empty() const { return cx == 0 || cy == 0; }
         auto operator<=>(const basic_size&) const = default;
         basic_size operator-() const { throw_on_bad_size(*this); return basic_size{ -cx, -cy, -cz }; }
-        basic_size& operator+=(const basic_size& other) { throw_on_bad_size(other); cx += other.cx; cy += other.cy; cz += other.cz; return *this; }
-        basic_size& operator+=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx += other.dx; cy += other.dy; cz += other.dz; return *this; }
+        basic_size& operator+=(const basic_size& aOther) { throw_on_bad_size(aOther); cx += aOther.cx; cy += aOther.cy; cz += aOther.cz; return *this; }
+        basic_size& operator+=(const basic_delta<CoordinateType>& aOther) { throw_on_bad_size(aOther); cx += aOther.dx; cy += aOther.dy; cz += aOther.dz; return *this; }
         basic_size& operator+=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx += amount; cy += amount; return *this; }
-        basic_size& operator-=(const basic_size& other) { throw_on_bad_size(other); cx -= other.cx; cy -= other.cy; cz -= other.cz; return *this; }
-        basic_size& operator-=(const basic_delta<CoordinateType>& other) { throw_on_bad_size(other); cx -= other.dx; cy -= other.dy; cz -= other.dz; return *this; }
+        basic_size& operator-=(const basic_size& aOther) { throw_on_bad_size(aOther); cx -= aOther.cx; cy -= aOther.cy; cz -= aOther.cz; return *this; }
+        basic_size& operator-=(const basic_delta<CoordinateType>& aOther) { throw_on_bad_size(aOther); cx -= aOther.dx; cy -= aOther.dy; cz -= aOther.dz; return *this; }
         basic_size& operator-=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx -= amount; cy -= amount; return *this; }
-        basic_size& operator*=(const basic_size& other) { throw_on_bad_size(other); cx *= other.cx; cy *= other.cy; cz *= other.cz; return *this; }
+        basic_size& operator*=(const basic_size& aOther) { throw_on_bad_size(aOther); cx *= aOther.cx; cy *= aOther.cy; cz *= aOther.cz; return *this; }
         basic_size& operator*=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx *= amount; cy *= amount; return *this; }
-        basic_size& operator/=(const basic_size& other) { throw_on_bad_size(other); cx /= other.cx; cy /= other.cy; if (other.cz != static_cast<dimension_type>(0.0)) cz /= other.cz; return *this; }
+        basic_size& operator/=(const basic_size& aOther) { throw_on_bad_size(aOther); cx /= aOther.cx; cy /= aOther.cy; if (aOther.cz != static_cast<dimension_type>(0.0)) cz /= aOther.cz; return *this; }
         basic_size& operator/=(dimension_type amount) { throw_on_bad_size(basic_size{ amount }); cx /= amount; cy /= amount; return *this; }
         basic_size ceil() const { return basic_size{ !cx_inf() ? std::ceil(cx) : cx, !cy_inf() ? std::ceil(cy) : cy, !cz_inf() ? std::ceil(cz) : cz }; }
         basic_size floor() const { return basic_size{ !cx_inf() ? std::floor(cx) : cx, !cy_inf() ? std::floor(cy) : cy, !cz_inf() ? std::floor(cz) : cz }; }
         basic_size round() const { return basic_size{ !cx_inf() ? std::round(cx) : cx, !cy_inf() ? std::round(cy) : cy, !cz_inf() ? std::round(cz) : cz }; }
-        basic_size min(const basic_size& other) const { return basic_size{ std::min(cx, other.cx), std::min(cy, other.cy), std::min(cz, other.cz) }; }
-        basic_size max(const basic_size& other) const { return basic_size{ std::max(cx, other.cx), std::max(cy, other.cy), std::max(cz, other.cz) }; }
-        bool less_than(const basic_size& other) const { return cx < other.cx && cy < other.cy; };
-        bool less_than_or_equal(const basic_size& other) const { return cx <= other.cx && cy <= other.cy; };
-        bool greater_than(const basic_size& other) const { return cy > other.cy && cy > other.cy; };
-        bool greater_than_or_equal(const basic_size& other) const { return cy >= other.cy && cy >= other.cy; };
+        basic_size min(const basic_size& aOther) const { return basic_size{ std::min(cx, aOther.cx), std::min(cy, aOther.cy), std::min(cz, aOther.cz) }; }
+        basic_size max(const basic_size& aOther) const { return basic_size{ std::max(cx, aOther.cx), std::max(cy, aOther.cy), std::max(cz, aOther.cz) }; }
+        bool less_than(const basic_size& aOther) const { return cx < aOther.cx && cy < aOther.cy; };
+        bool less_than_or_equal(const basic_size& aOther) const { return cx <= aOther.cx && cy <= aOther.cy; };
+        bool greater_than(const basic_size& aOther) const { return cy > aOther.cy && cy > aOther.cy; };
+        bool greater_than_or_equal(const basic_size& aOther) const { return cy >= aOther.cy && cy >= aOther.cy; };
         dimension_type magnitude() const { throw_on_bad_size(*this); return std::sqrt(cx * cx + cy * cy); }
         basic_size with_cx(dimension_type d) const { return basic_size{ d, cy, cz }; }
         basic_size with_cy(dimension_type d) const { return basic_size{ cx, d, cz }; }
@@ -397,26 +397,26 @@ namespace neogfx
     public:
         constexpr basic_point() : x{}, y{}, z{} {}
         template <typename Scalar>
-        constexpr basic_point(const basic_vector<Scalar, 2>& other) : 
-            x{ static_cast<coordinate_type>(other.x) }, 
-            y{ static_cast<coordinate_type>(other.y) },
+        constexpr basic_point(const basic_vector<Scalar, 2>& aOther) : 
+            x{ static_cast<coordinate_type>(aOther.x) }, 
+            y{ static_cast<coordinate_type>(aOther.y) },
             z{} {}
         template <typename Scalar>
-        constexpr basic_point(const basic_vector<Scalar, 3>& other) : 
-            x{ static_cast<coordinate_type>(other.x) }, 
-            y{ static_cast<coordinate_type>(other.y) },
+        constexpr basic_point(const basic_vector<Scalar, 3>& aOther) : 
+            x{ static_cast<coordinate_type>(aOther.x) }, 
+            y{ static_cast<coordinate_type>(aOther.y) },
             z{} {}
         constexpr basic_point(CoordinateType x, CoordinateType y, CoordinateType z = {}) : 
             x{ x }, y{ y }, z{ z } {}
         template <typename CoordinateType2>
-        constexpr basic_point(const basic_point<CoordinateType2>& other) :
-            x{ static_cast<CoordinateType>(other.x) }, 
-            y{ static_cast<CoordinateType>(other.y) },
-            z{ static_cast<CoordinateType>(other.z) } {}
-        constexpr basic_point(const basic_delta<CoordinateType>& other) : 
-            x{ other.dx }, y{ other.dy }, z{} {}
-        constexpr basic_point(const basic_size<CoordinateType>& other) : 
-            x{ other.cx }, y{ other.cy }, z{} {}
+        constexpr basic_point(const basic_point<CoordinateType2>& aOther) :
+            x{ static_cast<CoordinateType>(aOther.x) }, 
+            y{ static_cast<CoordinateType>(aOther.y) },
+            z{ static_cast<CoordinateType>(aOther.z) } {}
+        constexpr basic_point(const basic_delta<CoordinateType>& aOther) : 
+            x{ aOther.dx }, y{ aOther.dy }, z{} {}
+        constexpr basic_point(const basic_size<CoordinateType>& aOther) : 
+            x{ aOther.cx }, y{ aOther.cy }, z{} {}
         // operations
     public:
         basic_delta<coordinate_type> to_delta() const { return basic_delta<CoordinateType>{ x, y }; }
@@ -426,28 +426,28 @@ namespace neogfx
         explicit operator basic_delta<coordinate_type>() const { return to_delta(); }
         explicit operator basic_size<coordinate_type>() const { return to_size(); }
         auto operator<=>(const basic_point&) const = default;
-        basic_point& operator+=(const basic_point& other) { x += other.x; y += other.y; z += other.z; return *this; }
-        basic_point& operator-=(const basic_point& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
-        basic_point& operator*=(const basic_point& other) { x *= other.x; y *= other.y; z *= other.z; return *this; }
-        basic_point& operator/=(const basic_point& other) { x /= other.x; y /= other.y; if (other.z != static_cast<coordinate_type>(0.0)) z /= other.z; return *this; }
+        basic_point& operator+=(const basic_point& aOther) { x += aOther.x; y += aOther.y; z += aOther.z; return *this; }
+        basic_point& operator-=(const basic_point& aOther) { x -= aOther.x; y -= aOther.y; z -= aOther.z; return *this; }
+        basic_point& operator*=(const basic_point& aOther) { x *= aOther.x; y *= aOther.y; z *= aOther.z; return *this; }
+        basic_point& operator/=(const basic_point& aOther) { x /= aOther.x; y /= aOther.y; if (aOther.z != static_cast<coordinate_type>(0.0)) z /= aOther.z; return *this; }
         basic_point& operator+=(coordinate_type amount) { x += amount; y += amount; return *this; }
         basic_point& operator-=(coordinate_type amount) { x -= amount; y -= amount; return *this; }
         basic_point& operator*=(coordinate_type amount) { x *= amount; y *= amount; return *this; }
         basic_point& operator/=(coordinate_type amount) { x /= amount; y /= amount; return *this; }
-        basic_point& operator+=(const basic_delta<coordinate_type>& other) { x += static_cast<coordinate_type>(other.dx); y += static_cast<coordinate_type>(other.dy); z += static_cast<coordinate_type>(other.dz); return *this; }
-        basic_point& operator-=(const basic_delta<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.dx); y -= static_cast<coordinate_type>(other.dy); z -= static_cast<coordinate_type>(other.dz); return *this; }
-        basic_point& operator+=(const basic_size<coordinate_type>& other) { x += static_cast<coordinate_type>(other.cx); y += static_cast<coordinate_type>(other.cy); z += static_cast<coordinate_type>(other.cz); return *this; }
-        basic_point& operator-=(const basic_size<coordinate_type>& other) { x -= static_cast<coordinate_type>(other.cx); y -= static_cast<coordinate_type>(other.cy); z -= static_cast<coordinate_type>(other.cz); return *this; }
+        basic_point& operator+=(const basic_delta<coordinate_type>& aOther) { x += static_cast<coordinate_type>(aOther.dx); y += static_cast<coordinate_type>(aOther.dy); z += static_cast<coordinate_type>(aOther.dz); return *this; }
+        basic_point& operator-=(const basic_delta<coordinate_type>& aOther) { x -= static_cast<coordinate_type>(aOther.dx); y -= static_cast<coordinate_type>(aOther.dy); z -= static_cast<coordinate_type>(aOther.dz); return *this; }
+        basic_point& operator+=(const basic_size<coordinate_type>& aOther) { x += static_cast<coordinate_type>(aOther.cx); y += static_cast<coordinate_type>(aOther.cy); z += static_cast<coordinate_type>(aOther.cz); return *this; }
+        basic_point& operator-=(const basic_size<coordinate_type>& aOther) { x -= static_cast<coordinate_type>(aOther.cx); y -= static_cast<coordinate_type>(aOther.cy); z -= static_cast<coordinate_type>(aOther.cz); return *this; }
         basic_point operator-() const { return basic_point{ -x, -y, -z }; }
         basic_point abs() const { return basic_point{ std::abs(x), std::abs(y), std::abs(z) }; }
         basic_point ceil() const { return basic_point{ std::ceil(x), std::ceil(y), std::ceil(z) }; }
         basic_point floor() const { return basic_point{ std::floor(x), std::floor(y), std::floor(z) }; }
         basic_point round() const { return basic_point{ std::round(x), std::round(y), std::round(z) }; }
-        basic_point min(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::min(y, other.y), std::min(z, other.z) }; }
-        basic_point max(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::max(y, other.y), std::max(z, other.z) }; }
-        basic_point min_max(const basic_point& other) const { return basic_point{ std::min(x, other.x), std::max(y, other.y), other.z }; }
-        basic_point max_min(const basic_point& other) const { return basic_point{ std::max(x, other.x), std::min(y, other.y), other.z }; }
-        basic_point mid(const basic_point& other) const { return basic_point{ (x + other.x) / static_cast<coordinate_type>(2.0), (y + other.y) / static_cast<coordinate_type>(2.0), (z + other.z) / static_cast<coordinate_type>(2.0) }; }
+        basic_point min(const basic_point& aOther) const { return basic_point{ std::min(x, aOther.x), std::min(y, aOther.y), std::min(z, aOther.z) }; }
+        basic_point max(const basic_point& aOther) const { return basic_point{ std::max(x, aOther.x), std::max(y, aOther.y), std::max(z, aOther.z) }; }
+        basic_point min_max(const basic_point& aOther) const { return basic_point{ std::min(x, aOther.x), std::max(y, aOther.y), aOther.z }; }
+        basic_point max_min(const basic_point& aOther) const { return basic_point{ std::max(x, aOther.x), std::min(y, aOther.y), aOther.z }; }
+        basic_point mid(const basic_point& aOther) const { return basic_point{ (x + aOther.x) / static_cast<coordinate_type>(2.0), (y + aOther.y) / static_cast<coordinate_type>(2.0), (z + aOther.z) / static_cast<coordinate_type>(2.0) }; }
         basic_point with_x(coordinate_type x0) const { return basic_point{ x0, y, z }; }
         basic_point with_y(coordinate_type y0) const { return basic_point{ x, y0, z }; }
         basic_point with_z(coordinate_type z0) const { return basic_point{ x, y, z0 }; }
@@ -651,19 +651,19 @@ namespace neogfx
         basic_box_areas(const size_type& aDimensions) : basic_box_areas{ aDimensions.cx, aDimensions.cy } {};
         basic_box_areas(const point_type& aTopLeft, const point_type& aBottomRight) : left(aTopLeft.x), top(aTopLeft.y), right(aBottomRight.x), bottom(aBottomRight.y) {}
         template <typename DimensionType2>
-        basic_box_areas(const basic_box_areas<DimensionType2>& other) :
-            left(static_cast<dimension_type>(other.left)), top(static_cast<dimension_type>(other.top)), right(static_cast<dimension_type>(other.right)), bottom(static_cast<dimension_type>(other.bottom)) {}
+        basic_box_areas(const basic_box_areas<DimensionType2>& aOther) :
+            left(static_cast<dimension_type>(aOther.left)), top(static_cast<dimension_type>(aOther.top)), right(static_cast<dimension_type>(aOther.right)), bottom(static_cast<dimension_type>(aOther.bottom)) {}
         // operations
     public:
         auto operator<=>(const basic_box_areas&) const = default;
         basic_box_areas operator-() const { return basic_box_areas{ -left, -top, -right, -bottom }; }
-        basic_box_areas& operator+=(const basic_box_areas& other) { left += other.left; top += other.top; right += other.right; bottom += other.bottom; return *this; }
+        basic_box_areas& operator+=(const basic_box_areas& aOther) { left += aOther.left; top += aOther.top; right += aOther.right; bottom += aOther.bottom; return *this; }
         basic_box_areas& operator+=(dimension_type amount) { left += amount; top += amount; right += amount; bottom += amount; return *this; }
-        basic_box_areas& operator-=(const basic_box_areas& other) { left -= other.left; top -= other.top; right -= other.right; bottom -= other.bottom; return *this; }
+        basic_box_areas& operator-=(const basic_box_areas& aOther) { left -= aOther.left; top -= aOther.top; right -= aOther.right; bottom -= aOther.bottom; return *this; }
         basic_box_areas& operator-=(dimension_type amount) { left -= amount; top -= amount; right -= amount; bottom -= amount; return *this; }
-        basic_box_areas& operator*=(const basic_box_areas& other) { left *= other.left; top *= other.top; right *= other.right; bottom *= other.bottom; return *this; }
+        basic_box_areas& operator*=(const basic_box_areas& aOther) { left *= aOther.left; top *= aOther.top; right *= aOther.right; bottom *= aOther.bottom; return *this; }
         basic_box_areas& operator*=(dimension_type amount) { left *= amount; top *= amount; right *= amount; bottom *= amount; return *this; }
-        basic_box_areas& operator/=(const basic_box_areas& other) { left /= other.left; top /= other.top; right /= other.right; bottom /= other.bottom; return *this; }
+        basic_box_areas& operator/=(const basic_box_areas& aOther) { left /= aOther.left; top /= aOther.top; right /= aOther.right; bottom /= aOther.bottom; return *this; }
         basic_box_areas& operator/=(dimension_type amount) { left /= amount; top /= amount; right /= amount; bottom /= amount; return *this; }
     public:
         basic_box_areas with_left(dimension_type d) const { return basic_box_areas{ d, top, right, bottom }; }
@@ -796,11 +796,11 @@ namespace neogfx
         basic_rect(const basic_box_areas<coordinate_type>& aBoxAreas) : basic_rect{ aBoxAreas.top_left(), aBoxAreas.bottom_right() } {}
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
-        basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& other) : point_type{ other }, size_type{ other } {}
+        basic_rect(const basic_rect<CoordinateType2, CoordinateSystem2>& aOther) : point_type{ aOther }, size_type{ aOther } {}
         // assignment
     public:
         template <typename CoordinateType2, logical_coordinate_system CoordinateSystem2>
-        basic_rect& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& other) { static_cast<point_type&>(*this) = other; static_cast<size_type&>(*this) = other; epsilon = other.epsilon; return *this; }
+        basic_rect& operator=(const basic_rect<CoordinateType2, CoordinateSystem2>& aOther) { static_cast<point_type&>(*this) = aOther; static_cast<size_type&>(*this) = aOther; epsilon = aOther.epsilon; return *this; }
         basic_rect& operator=(const point_type& coordinates) { static_cast<point_type&>(*this) = coordinates; return *this; }
         basic_rect& operator=(const size_type& dimensions) { static_cast<size_type&>(*this) = dimensions; return *this; }
         // operations
@@ -826,23 +826,23 @@ namespace neogfx
         point_type bottom_right() const { return point_type(right(), bottom(), z); }
         dimension_type width() const { return cx; }
         dimension_type height() const { return cy; }
-        bool operator==(const basic_rect& other) const { return x == other.x && y == other.y && cx == other.cx && cy == other.cy; }
-        bool operator!=(const basic_rect& other) const { return !operator==(other); }
-        basic_rect& operator*=(const basic_rect& other) { position() *= other.position(); extents() *= other.extents(); return *this; }
+        bool operator==(const basic_rect& aOther) const { return x == aOther.x && y == aOther.y && cx == aOther.cx && cy == aOther.cy; }
+        bool operator!=(const basic_rect& aOther) const { return !operator==(aOther); }
+        basic_rect& operator*=(const basic_rect& aOther) { position() *= aOther.position(); extents() *= aOther.extents(); return *this; }
         basic_rect& operator*=(const size_type& size) { position() *= size; extents() *= size; return *this; }
         basic_rect& operator*=(dimension_type value) { position() *= value; extents() *= value; return *this; }
-        basic_rect& operator/=(const basic_rect& other) { position() /= other.position(); extents() /= other.extents(); return *this; }
+        basic_rect& operator/=(const basic_rect& aOther) { position() /= aOther.position(); extents() /= aOther.extents(); return *this; }
         basic_rect& operator/=(const size_type& size) { position() /= size; extents() /= size; return *this; }
         basic_rect& operator/=(dimension_type value) { position() /= value; extents() /= value; return *this; }
         bool contains_x(const point_type& point) const { return point.x >= left() && point.x < right(); }
         bool contains_y(const point_type& point) const { if constexpr (gui) return point.y >= top() && point.y < bottom(); else return point.y >= bottom() && point.y < top(); }
         bool contains(const point_type& point) const { return contains_x(point) && contains_y(point); }
-        bool contains(const basic_rect& other) const
+        bool contains(const basic_rect& aOther) const
         { 
             if constexpr (gui) 
-                return other.left() >= left() && other.right() <= right() && other.top() >= top() && other.bottom() <= bottom(); 
+                return aOther.left() >= left() && aOther.right() <= right() && aOther.top() >= top() && aOther.bottom() <= bottom(); 
             else
-                return other.left() >= left() && other.right() <= right() && other.bottom() >= bottom() && other.top() <= top();
+                return aOther.left() >= left() && aOther.right() <= right() && aOther.bottom() >= bottom() && aOther.top() <= top();
         }
         point_type center() const 
         { 
@@ -892,20 +892,20 @@ namespace neogfx
             result.deflate(std::forward<T>(aAmount)...);
             return result;
         }
-        basic_rect intersection(const basic_rect& other) const
+        basic_rect intersection(const basic_rect& aOther) const
         {
             if constexpr (gui)
             {
-                basic_rect candidate{ top_left().max(other.top_left()), bottom_right().min(other.bottom_right()) };
-                if (contains(candidate.center()) && other.contains(candidate.center()))
+                basic_rect candidate{ top_left().max(aOther.top_left()), bottom_right().min(aOther.bottom_right()) };
+                if (contains(candidate.center()) && aOther.contains(candidate.center()))
                     return candidate;
                 else
                     return basic_rect{};
             }
             else
             {
-                basic_rect candidate{ bottom_left().max(other.bottom_left()), top_right().min(other.top_right()) };
-                if (contains(candidate.center()) && other.contains(candidate.center()))
+                basic_rect candidate{ bottom_left().max(aOther.bottom_left()), top_right().min(aOther.top_right()) };
+                if (contains(candidate.center()) && aOther.contains(candidate.center()))
                     return candidate;
                 else
                     return basic_rect{};
@@ -916,28 +916,43 @@ namespace neogfx
             auto const& test = intersection(aOther);
             return test != basic_rect{};
         }
-        basic_rect& center_on(const basic_rect& other)
+        basic_rect& center_on(const basic_rect& aOther, bool aScaleToFit = false)
         {
-            *this = centered_on(other);
+            *this = centered_on(aOther, aScaleToFit);
             return *this;
         }
-        basic_rect centered_on(const basic_rect other) const
+        basic_rect centered_on(const basic_rect& aOther, bool aScaleToFit = false) const
         {
             auto result = *this;
-            result.position() += (other.center() - center());
+            if (aScaleToFit)
+            {
+                if (result.cx >= result.cy)
+                {
+                    scalar coefficient = aOther.cx / result.cx;
+                    result.cx *= coefficient;
+                    result.cy *= coefficient;
+                }
+                else
+                {
+                    scalar coefficient = aOther.cy / result.cy;
+                    result.cx *= coefficient;
+                    result.cy *= coefficient;
+                }
+            }
+            result.position() += (aOther.center() - result.center());
             return result;
         }
-        basic_rect& combine(const basic_rect& other)
+        basic_rect& combine(const basic_rect& aOther)
         {
-            *this = combined(other);
+            *this = combined(aOther);
             return *this;
         }
-        basic_rect combined(const basic_rect& other) const
+        basic_rect combined(const basic_rect& aOther) const
         {
             if constexpr (gui)
-                return basic_rect{ top_left().min(other.top_left()), bottom_right().max(other.bottom_right()) };
+                return basic_rect{ top_left().min(aOther.top_left()), bottom_right().max(aOther.bottom_right()) };
             else
-                return basic_rect{ bottom_left().min(other.bottom_left()), top_right().max(other.top_right()) };
+                return basic_rect{ bottom_left().min(aOther.bottom_left()), top_right().max(aOther.top_right()) };
         }
         basic_rect with_position(const point_type& p) const
         {
@@ -1180,12 +1195,12 @@ namespace neogfx
     public:
         basic_line(const point_type& a, const point_type& b) : a(a), b(b), d(b - a), m(d.dx != 0 ? d.dy / d.dx : 0), c(a.y - m * a.x) {}
         template <typename CoordinateType2>
-        basic_line(const basic_line<CoordinateType2>& other) :
-            a(static_cast<point_type>(other.a)), b(static_cast<point_type>(other.b)), d(b - a), m(d.dx != 0 ? d.dy / d.dx : 0), c(a.y - m * a.x) {}
+        basic_line(const basic_line<CoordinateType2>& aOther) :
+            a(static_cast<point_type>(aOther.a)), b(static_cast<point_type>(aOther.b)), d(b - a), m(d.dx != 0 ? d.dy / d.dx : 0), c(a.y - m * a.x) {}
         // operations
     public:
-        bool operator==(const basic_line& other) const { return (a == other.a && b == other.b) || (a == other.b & b == other.a); }
-        bool operator!=(const basic_line& other) const { return !operator==(other); }
+        bool operator==(const basic_line& aOther) const { return (a == aOther.a && b == aOther.b) || (a == aOther.b & b == aOther.a); }
+        bool operator!=(const basic_line& aOther) const { return !operator==(aOther); }
         basic_line from(const point_type& a) const 
         {
             if (a == this->a)
@@ -1201,46 +1216,46 @@ namespace neogfx
             return p.x >= std::min(a.x, b.x) && p.x <= std::max(a.x, b.x) &&
                 p.y >= std::min(a.y, b.y) && p.y <= std::max(a.y, b.y);
         }
-        bool intersection(const line& other, point& pointOfIntersection) const
+        bool intersection(const line& aOther, point& pointOfIntersection) const
         {
-            if (d.dx == 0 || other.d.dx == 0)
+            if (d.dx == 0 || aOther.d.dx == 0)
             {
-                if (d.dx == other.d.dx)
+                if (d.dx == aOther.d.dx)
                     return false;
                 else if (d.dx == 0)
                 {
                     pointOfIntersection.x = a.x;
-                    pointOfIntersection.y = other.m * a.x + other.c;
+                    pointOfIntersection.y = aOther.m * a.x + aOther.c;
                 }
-                else // (other.d.dx == 0)
+                else // (aOther.d.dx == 0)
                 {
-                    pointOfIntersection.x = other.a.x;
-                    pointOfIntersection.y = m * other.a.x + c;
+                    pointOfIntersection.x = aOther.a.x;
+                    pointOfIntersection.y = m * aOther.a.x + c;
                 }
             }
-            else if (d.dy == 0 || other.d.dy == 0)
+            else if (d.dy == 0 || aOther.d.dy == 0)
             {
-                if (d.dy == other.d.dy)
+                if (d.dy == aOther.d.dy)
                     return false;
                 else if (d.dy == 0)
                 {
                     pointOfIntersection.y = a.y;
-                    pointOfIntersection.x = (a.y - other.c) / other.m;
+                    pointOfIntersection.x = (a.y - aOther.c) / aOther.m;
                 }
-                else // (other.d.dy == 0)
+                else // (aOther.d.dy == 0)
                 {
-                    pointOfIntersection.y = other.a.y;
-                    pointOfIntersection.x = (other.a.y - c) / m;
+                    pointOfIntersection.y = aOther.a.y;
+                    pointOfIntersection.x = (aOther.a.y - c) / m;
                 }
             }
             else
             {
-                if (m == other.m)
+                if (m == aOther.m)
                     return false;
-                pointOfIntersection.x = (other.c - c) / (m - other.m);
+                pointOfIntersection.x = (aOther.c - c) / (m - aOther.m);
                 pointOfIntersection.y = pointOfIntersection.x * m + c;
             }
-            return within_bounding_rect(pointOfIntersection) && other.within_bounding_rect(pointOfIntersection);
+            return within_bounding_rect(pointOfIntersection) && aOther.within_bounding_rect(pointOfIntersection);
         }
         // attributes
     public:
