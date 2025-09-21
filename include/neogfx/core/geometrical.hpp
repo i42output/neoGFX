@@ -752,6 +752,12 @@ namespace neogfx
         return ret;
     }
 
+    enum class scale_to_fit : std::uint32_t
+    {
+        Minimum         = 0x00000001,
+        Maximum         = 0x00000002
+    };
+
     // Primarily for 2D use so 3D support limited
     template <typename CoordinateType, logical_coordinate_system CoordinateSystem = logical_coordinate_system::AutomaticGui>
     class basic_rect :
@@ -916,30 +922,44 @@ namespace neogfx
             auto const& test = intersection(aOther);
             return test != basic_rect{};
         }
-        basic_rect& center_on(const basic_rect& aOther, bool aScaleToFit = false)
+        basic_rect& center_on(const basic_rect& aOther)
         {
-            *this = centered_on(aOther, aScaleToFit);
+            *this = centered_on(aOther);
             return *this;
         }
-        basic_rect centered_on(const basic_rect& aOther, bool aScaleToFit = false) const
+        basic_rect centered_on(const basic_rect& aOther) const
         {
             auto result = *this;
-            if (aScaleToFit)
-            {
-                if (result.cx >= result.cy)
-                {
-                    scalar coefficient = aOther.cx / result.cx;
-                    result.cx *= coefficient;
-                    result.cy *= coefficient;
-                }
-                else
-                {
-                    scalar coefficient = aOther.cy / result.cy;
-                    result.cx *= coefficient;
-                    result.cy *= coefficient;
-                }
-            }
             result.position() += (aOther.center() - result.center());
+            return result;
+        }
+        basic_rect& scale_to_fit(const basic_rect& aOther, neogfx::scale_to_fit aScaleToFit = neogfx::scale_to_fit::Minimum)
+        {
+            *this = scaled_to_fit(aOther, aScaleToFit);
+            return *this;
+        }
+        basic_rect scaled_to_fit(const basic_rect& aOther, neogfx::scale_to_fit aScaleToFit = neogfx::scale_to_fit::Minimum) const
+        {
+            auto result = *this;
+            scalar coefficient = 1.0;
+            switch (aScaleToFit)
+            {
+            case neogfx::scale_to_fit::Minimum:
+                if (result.cx >= result.cy)
+                    coefficient = aOther.cx / result.cx;
+                else
+                    coefficient = aOther.cy / result.cy;
+                break;
+            case neogfx::scale_to_fit::Maximum:
+                coefficient = std::max(aOther.cx / result.cx, aOther.cy / result.cy);
+                break;
+            default:
+                // do nothing
+                break;
+            }
+            result.cx *= coefficient;
+            result.cy *= coefficient;
+            result.center_on(aOther);
             return result;
         }
         basic_rect& combine(const basic_rect& aOther)
