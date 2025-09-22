@@ -951,7 +951,7 @@ namespace neogfx
                     coefficient = aOther.cy / result.cy;
                 break;
             case neogfx::scale_to_fit::Maximum:
-                coefficient = std::max(aOther.cx / result.cx, aOther.cy / result.cy);
+                coefficient = std::max(1.0, std::max(aOther.cx / result.cx, aOther.cy / result.cy));
                 break;
             default:
                 // do nothing
