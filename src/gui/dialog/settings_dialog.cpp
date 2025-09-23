@@ -207,6 +207,8 @@ namespace neogfx
                         for (auto& ee : e.enumerators())
                             enumModel->insert_item(enumModel->end(), ee.first(), iSettings.friendly_text(aSetting, ee.second()));
                         settingWidget->set_model(enumModel);
+                        auto enumPresentationModel = make_ref<basic_item_presentation_model<basic_item_model<neolib::i_enum::underlying_type>>>();
+                        settingWidget->set_presentation_model(enumPresentationModel);
                         aSink += settingWidget->selection_changed([&, settingWidget, enumModel](const optional_item_model_index& aCurrentIndex)
                         {
                             if (!settingWidget->updating)
