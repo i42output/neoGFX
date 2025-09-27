@@ -1284,6 +1284,9 @@ namespace neogfx
 
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
+
+            PaintingNonClient(aGc);
+
             paint_non_client(aGc);
 
             for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
@@ -1296,6 +1299,8 @@ namespace neogfx
                     continue;
                 childWidget.render(aGc);
             }
+
+            PaintedNonClient(aGc);
         }
 
         {
