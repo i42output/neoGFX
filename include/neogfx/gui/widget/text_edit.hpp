@@ -40,22 +40,23 @@ namespace neogfx
 {
     enum class text_edit_caps : std::uint32_t
     {
-        None            = 0x00000000,
+        None                    = 0x00000000,
 
-        SingleLine      = 0x00000001,
-        MultiLine       = 0x00000002,
-        GrowLines       = SingleLine | MultiLine,
+        SingleLine              = 0x00000001,
+        MultiLine               = 0x00000002,
+        GrowLines               = SingleLine | MultiLine,
 
-        OverwriteMode   = 0x00000010,
+        OverwriteMode           = 0x00000010,
 
-        Password        = 0x00000100,
-        ShowPassword    = 0x00000200,
+        Password                = 0x00000100,
+        ShowPassword            = 0x00000200,
 
-        ParseURIs       = 0x00001000,
+        NonPrintableWhitespace  = 0x00001000,
+        ParseURIs               = 0x00002000,
 
-        OnlyAccept      = 0x00010000,
+        OnlyAccept              = 0x00010000,
 
-        LINES_MASK      = SingleLine | MultiLine
+        LINES_MASK              = SingleLine | MultiLine
     };
 
     enum class text_edit_line_ending : std::uint32_t
@@ -395,7 +396,7 @@ namespace neogfx
             std::size_t paragraphIndex;
             std::size_t columnIndex;
             document_span span;
-            coordinate yoffset;
+            point offset;
             size extents;
             font_id majorFont;
             scalar baseline;
@@ -451,9 +452,13 @@ namespace neogfx
                     ++result.lineSpan.glyphsLast;
                 return result;
             }
+            coordinate xpos() const
+            {
+                return offset.x;
+            }
             coordinate ypos() const
             {
-                return yoffset + paragraph().ypos;
+                return offset.y + paragraph().ypos;
             }
         };
         using glyph_lines = neolib::vecarray<glyph_line, 8, -1>;

@@ -693,7 +693,6 @@ namespace neogfx
             auto const& columnRectSansPadding = column_rect(columnIndex);
 
             auto const& glyphColumn = iGlyphColumns[columnIndex];
-            auto const& documentColumn = iColumns[columnIndex];
 
             auto columnClipRect = clipRect.intersection(column_rect(columnIndex, true));
             columnClipRect.inflate(size{ std::max(calc_padding_adjust(column_style(columnIndex)), padding_adjust()) });
@@ -713,14 +712,7 @@ namespace neogfx
                     continue;
                 if (linePos.y > columnRectSansPadding.bottom() || linePos.y > update_rect().bottom())
                     break;
-                auto textDirection = glyph_text_direction(paintLine->glyph_begin(), paintLine->glyph_end());
-                auto const& paragraphStyle = glyph_style(paintLine->glyph_begin(), documentColumn);
-                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
-                if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
-                    ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
-                    linePos.x += aGc.from_device_units(size{ columnRectSansPadding.width() - paintLine->extents.cx, 0.0 }).cx;
-                else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                    linePos.x += std::ceil((aGc.from_device_units(size{ columnRectSansPadding.width() - paintLine->extents.cx, 0.0 }).cx) / 2.0);
+                linePos.x += paintLine->xpos();
                 draw_glyphs(aGc, linePos, glyphColumn, paintLine);
             }
             x += glyphColumn.width;
@@ -1888,7 +1880,6 @@ namespace neogfx
         if (iGlyphParagraphs.empty())
             return 0;
         auto const columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
-        auto const& documentColumn = iColumns.at(columnIndex);
         auto const& columnRectSansPadding = column_rect(columnIndex);
         point adjustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansPadding.top_left();
         adjustedPosition = adjustedPosition.max(point{});
@@ -1911,22 +1902,12 @@ namespace neogfx
         {
             if (line != lines.begin() && adjustedPosition.y < line->ypos())
                 --line;
-            delta alignmentAdjust;
-            auto const textDirection = glyph_text_direction(lines.back().glyph_begin(), lines.back().glyph_end());
-            auto const& paragraphStyle = glyph_style(lines.back().glyph_begin(), documentColumn);
-            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
-            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
-                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
-                alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
-            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
-                alignmentAdjust.dx = (columnRectSansPadding.cx - line->extents.cx) / 2.0;
-            adjustedPosition.x -= alignmentAdjust.dx;
-            adjustedPosition = adjustedPosition.max(point{});
-            auto const lineStart = (line != lines.end() ? line->glyph_begin_index() : glyphs().size());
-            auto const lineEnd = (line != lines.end() ? line->glyph_end_index() : glyphs().size());
+            adjustedPosition.x -= line->xpos();
+            auto const lineStart = line->glyph_begin_index();
+            auto const lineEnd = line->glyph_end_index();
             auto const lineStartX = line->glyph_begin()->cell[0].x;
             auto const lineEndX = (lineEnd != lineStart ? std::prev(line->glyph_end())->cell[1].x : lineStartX);
-            if (adjustedPosition.x >= lineEndX - lineStartX)
+            if (adjustedPosition.x >= lineEndX)
             {
                 if (lineEnd > lineStart && is_line_breaking_whitespace(glyphs()[lineEnd - 1]))
                     return lineEnd - 1;
@@ -1982,21 +1963,24 @@ namespace neogfx
 
     std::pair<text_edit::position_type, text_edit::position_type> text_edit::word_at(position_type aTextPosition, bool aWordBreakIsWhitespace) const
     {
-        auto is_space = [](char32_t ch)
-        {
-            switch (ch)
+        auto is_space =
+            [&](char32_t ch)
             {
-            case U'\r':
-            case U'\n':
-            case U'\t':
-            case U'\f':
-            case U'\v':
-            case U' ':
-                return true;
-            default:
-                return false;
-            }
-        };
+                switch (ch)
+                {
+                case U'\r':
+                case U'\n':
+                case U'\t':
+                case U'\f':
+                case U'\v':
+                case U' ':
+                    return true;
+                default:
+                    if ((iCaps & text_edit_caps::NonPrintableWhitespace) == text_edit_caps::NonPrintableWhitespace)
+                        return ch < U' ' || ch == U'\x7F';
+                    return false;
+                }
+            };
         auto start = aTextPosition;
         auto end = aTextPosition;
         if (aWordBreakIsWhitespace && (start == static_cast<position_type>(iText.size()) || is_space(iText[start])))
@@ -2811,15 +2795,28 @@ namespace neogfx
                                 lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
                                 lineEnd - glyphs().begin() - paragraph.span.glyphsFirst };
 
+                            size const lineExtents{
+                                    lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
+                                    alignBaselinesResult.yExtent };
+
+                            dimension xLine = 0.0;
+
+                            auto textDirection = glyph_text_direction(lineStart, lineEnd);
+                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+
+                            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
+                                xLine += (availableWidth - lineExtents.cx);
+                            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
+                                xLine += std::ceil((availableWidth - lineExtents.cx, 0.0) / 2.0);
+
                             lines.emplace_back(
                                 this,
                                 std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                 column.index(),
                                 span,
-                                yLine,
-                                size{ 
-                                    lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f, 
-                                    alignBaselinesResult.yExtent },
+                                point{ xLine, yLine },
+                                lineExtents,
                                 alignBaselinesResult.majorFont,
                                 alignBaselinesResult.baseline);
 
@@ -2854,15 +2851,28 @@ namespace neogfx
                                     first - glyphs().begin() - paragraph.span.glyphsFirst,
                                     last - glyphs().begin() - paragraph.span.glyphsFirst };
 
+                                size const lineExtents{
+                                    last != first ? (last - 1)->cell[1].x - (first)->cell[0].x : 0.0f,
+                                    alignBaselinesResult.yExtent };
+
+                                dimension xLine = 0.0;
+
+                                auto textDirection = glyph_text_direction(first, last);
+                                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+
+                                if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                                    ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
+                                    xLine += (availableWidth - lineExtents.cx);
+                                else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
+                                    xLine += std::ceil((availableWidth - lineExtents.cx, 0.0) / 2.0);
+
                                 lines.emplace_back(
                                     this,
                                     std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                     column.index(),
                                     span,
-                                    yLine,
-                                    size{
-                                        last != first ? (last - 1)->cell[1].x - (first)->cell[0].x : 0.0f,
-                                        alignBaselinesResult.yExtent },
+                                    point{ xLine, yLine },
+                                    lineExtents,
                                     alignBaselinesResult.majorFont,
                                     alignBaselinesResult.baseline);
 
@@ -2979,15 +2989,28 @@ namespace neogfx
                                 lineStart - glyphs().begin() - paragraph.span.glyphsFirst,
                                 lineEnd - glyphs().begin() - paragraph.span.glyphsFirst };
 
+                            size const lineExtents{
+                                    lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
+                                    alignBaselinesResult.yExtent };
+
+                            dimension xLine = 0.0;
+
+                            auto textDirection = glyph_text_direction(lineStart, lineEnd);
+                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+
+                            if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
+                                ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
+                                xLine += (availableWidth - lineExtents.cx);
+                            else if ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Center)
+                                xLine += std::ceil((availableWidth - lineExtents.cx, 0.0) / 2.0);
+
                             lines.emplace_back(
                                 this,
                                 std::distance(iGlyphParagraphs.begin(), iterParagraph),
                                 column.index(),
                                 span,
-                                yLine,
-                                size{
-                                    lineEnd != lineStart ? (lineEnd - 1)->cell[1].x - (lineStart)->cell[0].x : 0.0f,
-                                    alignBaselinesResult.yExtent },
+                                point{ xLine, yLine },
+                                lineExtents,
                                 alignBaselinesResult.majorFont,
                                 alignBaselinesResult.baseline);
                             
