@@ -71,6 +71,7 @@ namespace neogfx
     {
     public:
         declare_event(execution_started)
+        declare_event(quit_requested, int)
         declare_event(name_changed)
         declare_event(current_style_changed, style_aspect)
     public:
@@ -83,6 +84,7 @@ namespace neogfx
         virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
         virtual bool in_exec() const = 0;
         virtual void quit(int aResultCode) = 0;
+        virtual void cancel_quit() = 0;
     public:
         virtual dimension x2_dpi_scale_factor() const = 0;
         virtual dimension xn_dpi_scale_factor() const = 0;

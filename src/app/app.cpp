@@ -420,7 +420,16 @@ namespace neogfx
 
     void app::quit(int aResultCode)
     {
-        iQuitResultCode = aResultCode;
+        if (iQuitResultCode == std::nullopt)
+        {
+            iQuitResultCode = aResultCode;
+            QuitRequested.trigger(aResultCode);
+        }
+    }
+
+    void app::cancel_quit()
+    {
+        iQuitResultCode = std::nullopt;
     }
 
     dimension app::x2_dpi_scale_factor() const
@@ -793,16 +802,15 @@ namespace neogfx
                 return didSome;
 
             bool hadStrongSurfaces = service<i_surface_manager>().any_strong_surfaces();
+
             didSome = (thread().do_work(neolib::yield_type::NoYield) || didSome);
             didSome = (do_process_events() || didSome);
+
             bool lastWindowClosed = hadStrongSurfaces && !service<i_surface_manager>().any_strong_surfaces();
             if (!in_exec() && lastWindowClosed)
                 throw main_window_closed_prematurely();
             if (lastWindowClosed && iQuitWhenLastWindowClosed)
-            {
-                if (iQuitResultCode == std::nullopt)
-                    iQuitResultCode = 0;
-            }
+                quit(0);
 
             service<i_rendering_engine>().render_now();
         }

@@ -75,6 +75,7 @@ namespace neogfx
         meta_object(neolib::application<object<i_app>>)
     public:
         define_declared_event(ExecutionStarted, execution_started)
+        define_declared_event(QuitRequested, quit_requested, int)
         define_declared_event(NameChanged, name_changed)
         define_declared_event(CurrentStyleChanged, current_style_changed, style_aspect)
     private:
@@ -112,6 +113,7 @@ namespace neogfx
         int exec(bool aQuitWhenLastWindowClosed = true) override;
         bool in_exec() const override;
         void quit(int aResultCode = 0) override;
+        void cancel_quit() override;
     public:
         dimension x2_dpi_scale_factor() const override;
         dimension xn_dpi_scale_factor() const override;
