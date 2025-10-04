@@ -85,6 +85,7 @@ namespace neogfx
 
     using neolib::optional;
     using neolib::i_optional;
+    using neolib::make_optional;
 
     using neolib::pair;
     using neolib::i_pair;
