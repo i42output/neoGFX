@@ -179,8 +179,8 @@ namespace neogfx
 
     app::loader::~loader()
     {
-        iApp.plugin_manager().unload_plugins();
         iApp.iThread.reset();
+        iApp.plugin_manager().unload_plugins();
         teardown_service<i_animator>();
         teardown_service<i_gradient_manager>();
         teardown_service<i_rendering_engine>();
