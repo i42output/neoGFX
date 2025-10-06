@@ -179,8 +179,9 @@ namespace neogfx
 
     app::loader::~loader()
     {
-        iApp.iThread.reset();
+        iApp.iThread->async_task::cancel();
         iApp.plugin_manager().unload_plugins();
+        iApp.iThread.reset();
         teardown_service<i_animator>();
         teardown_service<i_gradient_manager>();
         teardown_service<i_rendering_engine>();
@@ -262,8 +263,8 @@ namespace neogfx
         actionDelete{ "Delete"_t },
         actionSelectAll{ "Select All"_t }
     {
-        base_type::add_ref();
-        thread().add_ref();
+        base_type::pin();
+        thread().pin();
             
         neolib::event_mutex().set_multi_threaded_spinlock();
 

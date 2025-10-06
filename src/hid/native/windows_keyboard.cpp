@@ -274,6 +274,9 @@ namespace neogfx
             if (!ime_open())
                 return;
 
+            if (aInputWidget.surface().as_surface_window().is_closed())
+                return;
+
             auto inputWidget = &aInputWidget;
             auto position = inputWidget->to_window_coordinates(aPosition ?
                 aPosition.value() : inputWidget->client_rect(false).bottom_left());
