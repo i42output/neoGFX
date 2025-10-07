@@ -276,6 +276,122 @@ namespace neogfx
 
         using document_columns = neolib::vecarray<document_column, 4, -1>;
 
+        using tag_cookie = neolib::cookie;
+
+        class i_tag
+        {
+        public:
+            declare_event(mouse_event, const neogfx::mouse_event&)
+            declare_event(mouse_entered_event, const point&)
+            declare_event(mouse_left_event)
+            declare_event(query_mouse_cursor, neogfx::mouse_cursor&)
+            declare_event(keyboard_event, const neogfx::keyboard_event&)
+        public:
+            virtual ~i_tag() = default;
+        public:
+            virtual bool has_cookie() const = 0;
+            virtual style_cookie cookie() const = 0;
+            virtual void set_cookie(style_cookie aCookie) = 0;
+        public:
+            virtual void add_ref() const = 0;
+            virtual void release() const = 0;
+        public:
+            virtual bool less(i_tag const& aRhs) const = 0;
+        public:
+            virtual uuid const& ttid() const = 0;
+            virtual bool event_origin_is_tag() const = 0;
+            virtual i_ref_ptr<i_texture> const& image() const = 0;
+        public:
+            bool operator<(i_tag const& aRhs) const
+            {
+                if (ttid() != aRhs.ttid())
+                    return ttid() < aRhs.ttid();
+                return less(aRhs);
+            }
+        };
+
+        struct default_tag_traits
+        {
+            static bool constexpr EventOriginIsTag = false;
+            static uuid constexpr TagTypeId = { 0x00000000, 0x0000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+        };
+
+        template <typename Traits = default_tag_traits>
+        struct tag_traits
+        {
+            static constexpr bool event_origin_is_tag() { return Traits::EventOriginIsTag; };
+            static constexpr uuid const& ttid() { return Traits::TagTypeId; };
+        };
+
+        template<typename Traits = tag_traits<>>
+        class tag : public i_tag
+        {
+        public:
+            define_declared_event(Mouse, mouse_event, const neogfx::mouse_event&)
+            define_declared_event(MouseEntered, mouse_entered_event, const point&)
+            define_declared_event(MouseLeft, mouse_left_event)
+            define_declared_event(QueryMouseCursor, query_mouse_cursor, neogfx::mouse_cursor&)
+            define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
+        public:
+            using traits = Traits;
+        public:
+            tag()
+            {
+            }
+            tag(i_image const& aImage) :
+                iTexture{ make_ref<texture>(aImage) }
+            {
+            }
+            tag(text_edit& aParent, i_tag const& aOther) :
+                iParent{ &aParent }, iTexture{ aOther.image() }
+            {
+            }
+        public:
+            bool has_cookie() const final
+            {
+                return iCookie != neolib::invalid_cookie<tag_cookie>;
+            }
+            style_cookie cookie() const final
+            {
+                return iCookie;
+            }
+            void set_cookie(style_cookie aCookie) final
+            {
+                iCookie = aCookie;
+            }
+        public:
+            void add_ref() const final
+            {
+                ++iUseCount;
+            }
+            void release() const final
+            {
+                if (iParent && --iUseCount == 0)
+                {
+                    iParent->iTags.erase(iParent->iTagMap[cookie()]);
+                    iParent->iTagMap.remove(cookie());
+                }
+            }
+        public:
+            uuid const& ttid() const final
+            {
+                return traits::ttid();
+            }
+            bool event_origin_is_tag() const final
+            {
+                return traits::event_origin_is_tag();
+            }
+            i_ref_ptr<i_texture> const& image() const override
+            {
+                return iTexture;
+            }
+        private:
+            text_edit* iParent = nullptr;
+            tag_cookie iCookie = neolib::invalid_cookie<tag_cookie>;
+            mutable std::uint32_t iUseCount = 0u;
+            ref_ptr<i_texture> iTexture;
+        };
+
     private:
         using style_ptr = std::shared_ptr<style>;
         struct style_list_comparator
@@ -477,6 +593,17 @@ namespace neogfx
         using glyph_columns = neolib::vecarray<glyph_column, 4, -1>;
 
         struct position_info;
+
+        using tag_ptr = std::shared_ptr<i_tag>;
+        struct tag_list_comparator
+        {
+            bool operator()(const tag_ptr& lhs, const tag_ptr& rhs) const
+            {
+                return *lhs < *rhs;
+            }
+        };
+        using tag_list = std::set<tag_ptr, tag_list_comparator>;
+        using tag_map = neolib::std_vector_jar<tag_ptr>;
 
     private:
         class dragger;
@@ -689,6 +816,8 @@ namespace neogfx
         mutable neogfx::cursor iCursor;
         style_list iStyles;
         style_map iStyleMap;
+        tag_list iTags;
+        tag_map iTagMap;
         bool iUpdatingDocument;
         bool iHandlingKeyPress;
         document_text iPreviousText;
