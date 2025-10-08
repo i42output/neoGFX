@@ -371,7 +371,7 @@ namespace neogfx
 
     void text_edit::style::release() const
     {
-        if (iParent && &iParent->iDefaultStyle != this && --iUseCount == 0)
+        if (iParent && &iParent->iDefaultStyle != this && --iUseCount == 0u)
         {
             iParent->iStyles.erase(iParent->iStyleMap[cookie()]);
             iParent->iStyleMap.remove(cookie());

@@ -142,6 +142,10 @@ namespace neogfx
         };
 
     public:
+        using cookie = neolib::cookie;
+        enum class style_cookie : cookie {};
+        enum class tag_cookie : cookie {};
+
         typedef std::optional<string> optional_password_mask;
 
         class character_style
@@ -211,8 +215,6 @@ namespace neogfx
             optional<double> iLineSpacing;
         };
 
-        using style_cookie = neolib::cookie;
-
         class style
         {
         public:
@@ -276,8 +278,6 @@ namespace neogfx
 
         using document_columns = neolib::vecarray<document_column, 4, -1>;
 
-        using tag_cookie = neolib::cookie;
-
         class i_tag
         {
         public:
@@ -290,8 +290,8 @@ namespace neogfx
             virtual ~i_tag() = default;
         public:
             virtual bool has_cookie() const = 0;
-            virtual style_cookie cookie() const = 0;
-            virtual void set_cookie(style_cookie aCookie) = 0;
+            virtual tag_cookie cookie() const = 0;
+            virtual void set_cookie(tag_cookie aCookie) = 0;
         public:
             virtual void add_ref() const = 0;
             virtual void release() const = 0;
@@ -351,11 +351,11 @@ namespace neogfx
             {
                 return iCookie != neolib::invalid_cookie<tag_cookie>;
             }
-            style_cookie cookie() const final
+            tag_cookie cookie() const final
             {
                 return iCookie;
             }
-            void set_cookie(style_cookie aCookie) final
+            void set_cookie(tag_cookie aCookie) final
             {
                 iCookie = aCookie;
             }
@@ -366,7 +366,7 @@ namespace neogfx
             }
             void release() const final
             {
-                if (iParent && --iUseCount == 0)
+                if (iParent && --iUseCount == 0u)
                 {
                     iParent->iTags.erase(iParent->iTagMap[cookie()]);
                     iParent->iTagMap.remove(cookie());
@@ -402,7 +402,7 @@ namespace neogfx
             }
         };
         using style_list = std::set<style_ptr, style_list_comparator>;
-        using style_map = neolib::std_vector_jar<style_ptr>;
+        using style_map = neolib::basic_std_vector_jar<style_ptr, style_cookie>;
 
         class multiple_text_changes;
 
@@ -410,11 +410,20 @@ namespace neogfx
         {
             char32_t character;
             style_cookie style;
+            tag_cookie tag;
 
             operator char32_t() const { return character; }
 
-            document_char(char32_t aCharacter) : character{ aCharacter }, style{ neolib::invalid_cookie<neolib::cookie> } {}
-            document_char(char32_t aCharacter, neolib::cookie aStyle) : character{ aCharacter }, style{ aStyle } {}
+            document_char(char32_t aCharacter) : 
+                character{ aCharacter }, 
+                style{ neolib::invalid_cookie<style_cookie> },
+                tag{ neolib::invalid_cookie<tag_cookie> }
+            {}
+            document_char(char32_t aCharacter, style_cookie aStyle) : 
+                character{ aCharacter }, 
+                style{ aStyle },
+                tag{ neolib::invalid_cookie<tag_cookie> }
+            {}
         };
         using document_text = neolib::gap_vector<document_char>;
 
@@ -603,7 +612,7 @@ namespace neogfx
             }
         };
         using tag_list = std::set<tag_ptr, tag_list_comparator>;
-        using tag_map = neolib::std_vector_jar<tag_ptr>;
+        using tag_map = neolib::basic_std_vector_jar<tag_ptr, tag_cookie>;
 
     private:
         class dragger;
