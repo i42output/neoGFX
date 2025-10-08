@@ -255,9 +255,7 @@ namespace neogfx
             paragraph_style iParagraph;
         };
 
-        using style_callback = std::function<std::tuple<const style&, std::ptrdiff_t> (std::ptrdiff_t)>;
-        struct ansi {};
-        using format = std::variant<std::monostate, style, style_callback, ansi>;
+        using style_ptr = std::shared_ptr<style>;
 
         struct column_info
         {
@@ -314,6 +312,8 @@ namespace neogfx
                 return less(aRhs);
             }
         };
+
+        using tag_ptr = std::shared_ptr<i_tag>;
 
         template<typename DataT = void*>
         class tag : public i_tag
@@ -417,11 +417,21 @@ namespace neogfx
             bool iEventOriginIsTag = false;
             uuid iTtid = {};
             std::optional<data_type> iData;
-            ref_ptr<i_texture> iTexture;
+                ref_ptr<i_texture> iTexture;
+        };
+
+        using style_callback = std::function<std::tuple<const style&, std::ptrdiff_t>(std::ptrdiff_t)>;
+        struct ansi {};
+
+        using tag_ptr_callback = std::function<std::tuple<const tag_ptr&, std::ptrdiff_t>(std::ptrdiff_t)>;
+
+        struct format
+        {
+            std::variant<std::monostate, style, style_callback, ansi> style;
+            std::variant<std::monostate, tag_ptr, tag_ptr_callback> tag;
         };
 
     private:
-        using style_ptr = std::shared_ptr<style>;
         struct style_list_comparator
         {
             bool operator()(const style_ptr& lhs, const style_ptr& rhs) const
@@ -631,7 +641,6 @@ namespace neogfx
 
         struct position_info;
 
-        using tag_ptr = std::shared_ptr<i_tag>;
         struct tag_list_comparator
         {
             bool operator()(const tag_ptr& lhs, const tag_ptr& rhs) const

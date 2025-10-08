@@ -964,7 +964,7 @@ namespace neogfx
             {
                 multiple_text_changes mtc{ *this };
                 delete_any_selection();
-                insert_text(string{ "\t" }, next_style());
+                insert_text(string{ "\t" }, { next_style() });
                 cursor().set_position(cursor().position() + 1);
             }
             break;
@@ -989,9 +989,9 @@ namespace neogfx
                     multiple_text_changes mtc{ *this };
                     delete_any_selection();
                     if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
-                        insert_text(string{ "\n" }, next_style());
+                        insert_text(string{ "\n" }, { next_style() });
                     else
-                        insert_text(string{ "\r" }, next_style());
+                        insert_text(string{ "\r" }, { next_style() });
                     cursor().set_position(cursor().position() + 1);
                     iCursorHint.x = std::nullopt;
                 }
@@ -1139,7 +1139,7 @@ namespace neogfx
             }
             else
                 delete_any_selection();
-            insert_text(aText, next_style(), true);
+            insert_text(aText, { next_style() }, true);
         }
         return true;
     }
@@ -1328,7 +1328,7 @@ namespace neogfx
             multiple_text_changes mtc{ *this };
             if (cursor().position() != cursor().anchor())
                 delete_selected();
-            auto len = insert_text(aClipboard.text(), next_style());
+            auto len = insert_text(aClipboard.text(), { next_style() });
             cursor().set_position(cursor().position() + len);
         }
     }
@@ -1701,7 +1701,7 @@ namespace neogfx
         std::u32string part;
         part.assign(iText.begin() + aStart, iText.begin() + aEnd);
         delete_text(aStart, aEnd);
-        insert_text(aStart, string{ neolib::utf32_to_utf8(part) }, aStyle);
+        insert_text(aStart, string{ neolib::utf32_to_utf8(part) }, { aStyle });
     }
 
     text_edit::style text_edit::next_style() const
@@ -2415,7 +2415,7 @@ namespace neogfx
             return std::next(iText.begin(), pos);
         };
 
-        if (std::holds_alternative<std::monostate>(aFormat) || std::holds_alternative<style>(aFormat))
+        if (std::holds_alternative<std::monostate>(aFormat.style) || std::holds_alternative<style>(aFormat.style))
         {
             thread_local std::u32string text;
             text = neolib::utf8_to_utf32(aText);
@@ -2425,16 +2425,16 @@ namespace neogfx
                 if (eol != std::u32string::npos)
                     text.erase(eol);
             }
-            auto const& formatStyle = std::holds_alternative<std::monostate>(aFormat) ? default_style() : std::get<style>(aFormat);
+            auto const& formatStyle = std::holds_alternative<std::monostate>(aFormat.style) ? default_style() : std::get<style>(aFormat.style);
             insert(insertionPoint, formatStyle, text.begin(), text.end());
         }
-        else if (std::holds_alternative<style_callback>(aFormat))
+        else if (std::holds_alternative<style_callback>(aFormat.style))
         {
             std::ptrdiff_t next = 0;
             bool gotSingleLine = false;
             while (next != static_cast<std::ptrdiff_t>(aText.size()) && !gotSingleLine)
             {
-                auto const& [s, nextEnd] = std::get<style_callback>(aFormat)(next);
+                auto const& [s, nextEnd] = std::get<style_callback>(aFormat.style)(next);
                 thread_local std::u32string text;
                 text = neolib::utf8_to_utf32(std::string_view{ &aText[next], std::next(&aText[next], nextEnd - next) });
                 if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
@@ -2450,7 +2450,7 @@ namespace neogfx
                 next = nextEnd;
             }
         }
-        else if (std::holds_alternative<ansi>(aFormat))
+        else if (std::holds_alternative<ansi>(aFormat.style))
         {
             throw not_implemented();
         }
