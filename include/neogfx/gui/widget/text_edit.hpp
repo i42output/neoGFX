@@ -299,8 +299,13 @@ namespace neogfx
             virtual bool less(i_tag const& aRhs) const = 0;
         public:
             virtual uuid const& ttid() const = 0;
-            virtual bool event_origin_is_tag() const = 0;
+            virtual bool has_data() const = 0;
+            virtual void const* data() const = 0;
+            virtual void* data() = 0;
             virtual i_ref_ptr<i_texture> const& image() const = 0;
+        public:
+            virtual bool event_origin_is_tag() const = 0;
+            virtual void set_event_origin_is_tag(bool aEventOriginIsTag) = 0;
         public:
             bool operator<(i_tag const& aRhs) const
             {
@@ -310,20 +315,7 @@ namespace neogfx
             }
         };
 
-        struct default_tag_traits
-        {
-            static bool constexpr EventOriginIsTag = false;
-            static uuid constexpr TagTypeId = { 0x00000000, 0x0000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
-        };
-
-        template <typename Traits = default_tag_traits>
-        struct tag_traits
-        {
-            static constexpr bool event_origin_is_tag() { return Traits::EventOriginIsTag; };
-            static constexpr uuid const& ttid() { return Traits::TagTypeId; };
-        };
-
-        template<typename Traits = tag_traits<>>
+        template<typename DataT = void*>
         class tag : public i_tag
         {
         public:
@@ -333,18 +325,29 @@ namespace neogfx
             define_declared_event(QueryMouseCursor, query_mouse_cursor, neogfx::mouse_cursor&)
             define_declared_event(Keyboard, keyboard_event, const neogfx::keyboard_event&)
         public:
-            using traits = Traits;
+            using data_type = DataT;
         public:
-            tag()
+            tag(uuid const& aTtid = {}) :
+                iTtid{ aTtid }
             {
             }
-            tag(i_image const& aImage) :
-                iTexture{ make_ref<texture>(aImage) }
+            tag(uuid const& aTtid, data_type const& aData) :
+                iTtid{ aTtid }, iData{ aData }
+            {
+            }
+            tag(uuid const& aTtid, data_type const& aData, i_image const& aImage) :
+                iTtid{ aTtid }, iData{ aData }, iTexture{ make_ref<texture>(aImage) }
+            {
+            }
+            tag(uuid const& aTtid, i_image const& aImage) :
+                iTtid{ aTtid }, iTexture{ make_ref<texture>(aImage) }
             {
             }
             tag(text_edit& aParent, i_tag const& aOther) :
-                iParent{ &aParent }, iTexture{ aOther.image() }
+                iParent{ &aParent }, iTtid{ aOther.ttid() }, iTexture{ aOther.image() }
             {
+                if (aOther.has_data())
+                    iData = *static_cast<data_type const*>(aOther.data());
             }
         public:
             bool has_cookie() const final
@@ -373,22 +376,47 @@ namespace neogfx
                 }
             }
         public:
+            bool less(i_tag const& aRhs) const final
+            {
+                return *static_cast<data_type const*>(data()) < *static_cast<data_type const*>(aRhs.data());
+            }
+        public:
             uuid const& ttid() const final
             {
-                return traits::ttid();
+                return iTtid;
             }
-            bool event_origin_is_tag() const final
+            bool has_data() const final
             {
-                return traits::event_origin_is_tag();
+                return iData.has_value();
             }
-            i_ref_ptr<i_texture> const& image() const override
+            void const* data() const final
+            {
+                return has_data() ? &iData.value() : nullptr;
+            }
+            void* data() final
+            {
+                return has_data() ? &iData.value() : nullptr;
+            }
+            i_ref_ptr<i_texture> const& image() const final
             {
                 return iTexture;
+            }
+        public:
+            bool event_origin_is_tag() const final
+            {
+                return iEventOriginIsTag;
+            }
+            void set_event_origin_is_tag(bool aEventOriginIsTag) final
+            {
+                iEventOriginIsTag = aEventOriginIsTag;
             }
         private:
             text_edit* iParent = nullptr;
             tag_cookie iCookie = neolib::invalid_cookie<tag_cookie>;
             mutable std::uint32_t iUseCount = 0u;
+            bool iEventOriginIsTag = false;
+            uuid iTtid = {};
+            std::optional<data_type> iData;
             ref_ptr<i_texture> iTexture;
         };
 
