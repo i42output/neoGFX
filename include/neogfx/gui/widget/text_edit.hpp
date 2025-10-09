@@ -768,6 +768,20 @@ namespace neogfx
         void apply_style(position_type aStart, position_type aEnd, style const& aStyle);
         style next_style() const;
     public:
+        template <typename DataT>
+        i_tag& create_tag(uuid const& aTtid, DataT const& aData)
+        {
+            tag<DataT> key{ aTtid, aData };
+            auto existingTag = iTags.find(tag_ptr{ tag_ptr{}, &key });
+            if (existingTag == iTags.end())
+                existingTag = iTags.insert(std::make_shared<tag<DataT>>(*this, key)).first;
+            auto const& tagPtr = *existingTag;
+            auto& tag = *tagPtr;
+            if (!tag.has_cookie())
+                tag.set_cookie(iTagMap.insert(tagPtr));
+            return tag;
+        }
+    public:
         void clear();
         std::size_t paragraph_count() const;
         void delete_paragraph(std::size_t aParagraphIndex);
