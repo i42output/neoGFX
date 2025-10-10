@@ -378,7 +378,10 @@ namespace neogfx
         public:
             bool less(i_tag const& aRhs) const final
             {
-                return *static_cast<data_type const*>(data()) < *static_cast<data_type const*>(aRhs.data());
+                if constexpr (!std::is_same_v<abstract_t<data_type>, void>)
+                    return *static_cast<abstract_t<data_type> const*>(data()) < *static_cast<abstract_t<data_type> const*>(aRhs.data());
+                else
+                    return *static_cast<data_type const*>(data()) < *static_cast<data_type const*>(aRhs.data());
             }
         public:
             uuid const& ttid() const final
