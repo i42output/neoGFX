@@ -82,6 +82,7 @@ namespace neogfx
 
     using neolib::to_abstract;
     using neolib::abstract_t;
+    using neolib::have_abstract_base_v;
 
     using neolib::optional;
     using neolib::i_optional;
