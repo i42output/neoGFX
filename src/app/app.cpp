@@ -179,7 +179,10 @@ namespace neogfx
 
     app::loader::~loader()
     {
-        iApp.iThread->async_task::cancel();
+        iApp.plugin_manager().plugin_unloaded([&](auto& plugin) 
+            { 
+                iApp.iThread->cancel_io_service(plugin.module_services()); 
+            });
         iApp.plugin_manager().unload_plugins();
         iApp.iThread.reset();
         teardown_service<i_animator>();

@@ -84,7 +84,7 @@ namespace neogfx
             return iUpdatingProperty;
         }
     public:
-        bool property_transition::can_apply() const final
+        bool can_apply() const final
         {
             return !finished() && enabled() && !paused();
         }

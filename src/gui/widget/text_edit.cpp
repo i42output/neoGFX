@@ -2090,6 +2090,9 @@ namespace neogfx
             auto existingStyle = iStyleMap.find(ch.style);
             if (existingStyle != iStyleMap.end())
                 (**existingStyle).release();
+            auto existingTag = iTagMap.find(ch.tag);
+            if (existingTag != iTagMap.end())
+                (**existingTag).release();
         }
         refresh_paragraph(iText.erase(eraseBegin, eraseEnd), -eraseAmount);
 
@@ -2349,6 +2352,11 @@ namespace neogfx
         auto insertionPoint = iText.begin() + aPosition;
         std::size_t insertionSize = 0;
 
+        thread_local std::vector<std::ptrdiff_t> indexMap;
+        indexMap.clear();
+        indexMap.resize(aText.size(), -1);
+        auto readPos = 0;
+
         auto insert = [&](document_text::const_iterator aWhere, const style& aStyle, std::u32string::const_iterator begin, std::u32string::const_iterator end)
         {
             auto existingStyle = iStyles.end();
@@ -2407,9 +2415,11 @@ namespace neogfx
                 }
                 if (!discard)
                 {
+                    indexMap[readPos] = insertionSize;
                     next = std::next(iText.insert(next, document_char{ ch, style.cookie() }));
                     ++insertionSize;
                 }
+                ++readPos;
                 previousChar = ch;
             }
             return std::next(iText.begin(), pos);
@@ -2456,6 +2466,27 @@ namespace neogfx
         }
 
         insertionPoint = iText.begin() + aPosition;
+
+        if (std::holds_alternative<tag_ptr>(aFormat.tag))
+        {
+            auto const& tag = *std::get<tag_ptr>(aFormat.tag);
+            for (auto& ch : std::ranges::subrange(insertionPoint, insertionPoint + insertionSize))
+                ch.tag = tag.cookie();
+        }
+        else if (std::holds_alternative<tag_ptr_callback>(aFormat.tag))
+        {
+            std::ptrdiff_t next = 0;
+            while (next != static_cast<std::ptrdiff_t>(aText.size()))
+            {
+                auto const& [t, nextEnd] = std::get<tag_ptr_callback>(aFormat.tag)(next);
+                auto const& tag = *t;
+                for (auto index = next; index != nextEnd; ++index)
+                    if (indexMap[index] != -1)
+                        std::next(insertionPoint, indexMap[index])->tag = tag.cookie();
+                next = nextEnd;
+            }
+        }
+
         if (!aClearFirst)
             refresh_paragraph(insertionPoint, insertionSize);
         else
