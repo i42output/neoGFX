@@ -927,6 +927,7 @@ namespace neogfx
         }
         change_color_space(color_space::sRGB);
         iColorSpaceSelector.set_model(model);
+        iColorSpaceSelector.set_presentation_model(make_ref<basic_item_presentation_model<decltype(model)>>(model));
         iColorSpaceSelector.selection_model().set_current_index(static_cast<std::underlying_type_t<color_space>>(color_space::sRGB));
         iColorSpaceSelector.accept_selection();
         iSink += iColorSpaceSelector.selection_model().current_index_changed([&](const optional_item_presentation_model_index& aCurrentIndex, const optional_item_presentation_model_index& aPreviousIndex)
