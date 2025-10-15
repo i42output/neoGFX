@@ -264,6 +264,7 @@ namespace neogfx
         virtual void end_update() = 0;
         virtual bool has_item_model() const = 0;
         virtual i_item_model& item_model() const = 0;
+        virtual bool is_item_model_related(i_item_model const& aItemModel) const = 0;
         virtual void set_item_model(i_item_model& aItemModel) = 0;
         virtual item_model_index to_item_model_index(item_presentation_model_index const& aIndex) const = 0;
         virtual bool has_item_model_index(item_model_index const& aIndex) const = 0;

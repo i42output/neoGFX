@@ -204,9 +204,13 @@ namespace neogfx
                 throw no_item_model();
             return static_cast<item_model_type&>(*iItemModel);
         }
+        bool is_item_model_related(i_item_model const& aItemModel) const final
+        {
+            return dynamic_cast<item_model_type const*>(&aItemModel) != nullptr;
+        }
         void set_item_model(i_item_model& aItemModel) final
         {
-            if (dynamic_cast<item_model_type*>(&aItemModel) == nullptr)
+            if (!is_item_model_related(aItemModel))
                 throw unrelated_item_model();
 
             if (iItemModel != &aItemModel)

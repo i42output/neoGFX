@@ -105,14 +105,10 @@ namespace neogfx
             iModelSink += neolib::destroying(model(), [this]() { iModel = nullptr; });
             if (has_presentation_model())
             {
-                try
-                {
-                    presentation_model().set_item_model(*aModel);
-                }
-                catch (i_item_presentation_model::unrelated_item_model)
-                {
+                if (presentation_model().is_item_model_related(model()))
+                    presentation_model().set_item_model(model());
+                else
                     set_presentation_model(ref_ptr<i_item_presentation_model>{});
-                }
             }
         }
         model_changed();
