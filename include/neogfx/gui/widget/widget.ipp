@@ -996,7 +996,11 @@ namespace neogfx
                         hitWidget = &*child;
                 }
             if (hitWidget)
-                return hitWidget->get_widget_at(aPosition - hitWidget->position());
+            {
+                auto const hitWidgetOrigin = to_client_coordinates(hitWidget->origin());
+                auto const childWidgetPosition = aPosition - hitWidgetOrigin;
+                return hitWidget->get_widget_at(childWidgetPosition);
+            }
         }
         return *this;
     }
