@@ -86,11 +86,13 @@ namespace neogfx
         void enable_hot_tracking();
         void disable_hot_tracking();
     public:
+        bool read_only() const;
+        void set_read_only(bool aReadOnly);
         bool is_valid(item_presentation_model_index const& aItemIndex) const;
         bool is_visible(item_presentation_model_index const& aItemIndex, bool aPartiallyVisible = false) const;
         bool make_visible(item_presentation_model_index const& aItemIndex);
         const optional_item_presentation_model_index& editing() const;
-        void edit(item_presentation_model_index const& aItemIndex);
+        bool edit(item_presentation_model_index const& aItemIndex);
         void begin_edit();
         void end_edit(bool aCommit);
         bool beginning_edit() const;
@@ -190,6 +192,7 @@ namespace neogfx
         sink iPresentationModelSink;
         sink iSelectionModelSink;
         sink iDragDropSink;
+        bool iReadOnly;
         ref_ptr<i_item_model> iModel;
         ref_ptr<i_item_presentation_model> iPresentationModel;
         ref_ptr<i_item_selection_model> iSelectionModel;

@@ -34,19 +34,19 @@
 namespace neogfx
 {
     item_view::item_view(frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aScrollbarStyle, aFrameStyle }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
+        base_type{ aScrollbarStyle, aFrameStyle }, iReadOnly{ false }, iUpdatingModels { false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
 
     item_view::item_view(i_widget& aParent, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
+        base_type{ aParent, aScrollbarStyle, aFrameStyle }, iReadOnly{ false }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
 
     item_view::item_view(i_layout& aLayout, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
-        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
+        base_type{ aLayout, aScrollbarStyle, aFrameStyle }, iReadOnly{ false }, iUpdatingModels{ false }, iHotTracking{ false }, iIgnoreNextMouseMove{ false }, iBeginningEdit{ false }, iEndingEdit{ false }
     {
         init();
     }
@@ -531,18 +531,23 @@ namespace neogfx
                     select(*item, item_selection_operation::None);
                 else
                     select(*item);
-                bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
-                    (presentation_model().cell_editable_when_focused(*item) ||
-                        (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item))))
+                if (!actioned && CellAction(*item) == trigger_result::Accepted)
                 {
-                    edit(*item);
+                    selection_model().clear_current_index();
                     actioned = true;
                 }
-                if (model().is_tree() && !actioned)
+                bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
+                if (!actioned && itemIsCurrent && aKeyModifiers == KeyModifier_NONE)
+                {
+                    if (presentation_model().cell_editable_when_focused(*item) ||
+                        (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item)))
+                    {
+                        if (edit(*item))
+                            actioned = true;
+                    }
+                }
+                if (!actioned && model().is_tree())
                     actioned = presentation_model().toggle_expanded(*item);
-                if (!actioned)
-                    CellAction(*item);
             }
         }
     }
@@ -951,6 +956,16 @@ namespace neogfx
         iHotTracking = false;
     }
 
+    bool item_view::read_only() const
+    {
+        return iReadOnly;
+    }
+
+    void item_view::set_read_only(bool aReadOnly)
+    {
+        iReadOnly = aReadOnly;
+    }
+
     bool item_view::is_valid(item_presentation_model_index const& aItemIndex) const
     {
         return aItemIndex.row() < presentation_model().rows() && aItemIndex.column() < presentation_model().columns();
@@ -992,10 +1007,10 @@ namespace neogfx
         return iEditing;
     }
 
-    void item_view::edit(item_presentation_model_index const& aItemIndex)
+    bool item_view::edit(item_presentation_model_index const& aItemIndex)
     {
-        if (editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
-            return;
+        if (read_only() || editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
+            return false;
         suppress_scrollbar_visibility_updates ssvu{ *this };
         neolib::scoped_flag sf{ iBeginningEdit };
         auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
@@ -1086,6 +1101,7 @@ namespace neogfx
             });
         }
         begin_edit();
+        return true;
     }
 
     void item_view::begin_edit()
