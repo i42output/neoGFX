@@ -44,8 +44,9 @@ namespace neogfx
     class item_editor : public i_item_editor
     {
     public:
-        item_editor(item_view& aParent) :
-            iEditorWidget{ std::make_shared<EditorWidget>(aParent) } { init(); }
+        template <typename... Args>
+        item_editor(item_view& aParent, Args&&... aArgs) :
+            iEditorWidget{ std::make_shared<EditorWidget>(aParent, std::forward<Args>(aArgs)...) } { init(); }
         item_editor(EditorWidget& aEditorWidget) :
             iEditorWidget{ std::shared_ptr<i_widget>(std::shared_ptr<i_widget>(), &aEditorWidget) } { init(); }
         item_editor(std::shared_ptr<EditorWidget> aEditorWidget) :

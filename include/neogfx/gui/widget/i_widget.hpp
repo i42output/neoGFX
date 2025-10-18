@@ -52,25 +52,25 @@ namespace neogfx
     {
     public:
         declare_event(device_metrics_updated, const i_widget&)
-        declare_event(child_added, i_widget&)
-        declare_event(child_removed, i_widget&)
-        declare_event(visibility_changed)
-        declare_event(position_changed)
-        declare_event(parent_position_changed)
-        declare_event(size_changed)
-        declare_event(layout_completed)
-        declare_event(painting_non_client, i_graphics_context&)
-        declare_event(painted_non_client, i_graphics_context&)
-        declare_event(painting, i_graphics_context&)
-        declare_event(painting_children, i_graphics_context&)
-        declare_event(painted, i_graphics_context&)
-        declare_event(mouse_event, const neogfx::mouse_event&)
-        declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
-        declare_event(mouse_entered_event, const point&)
-        declare_event(mouse_left_event)
-        declare_event(query_mouse_cursor, neogfx::mouse_cursor&)
-        declare_event(keyboard_event, const neogfx::keyboard_event&)
-        declare_event(focus_event, neogfx::focus_event, focus_reason)
+            declare_event(child_added, i_widget&)
+            declare_event(child_removed, i_widget&)
+            declare_event(visibility_changed)
+            declare_event(position_changed)
+            declare_event(parent_position_changed)
+            declare_event(size_changed)
+            declare_event(layout_completed)
+            declare_event(painting_non_client, i_graphics_context&)
+            declare_event(painted_non_client, i_graphics_context&)
+            declare_event(painting, i_graphics_context&)
+            declare_event(painting_children, i_graphics_context&)
+            declare_event(painted, i_graphics_context&)
+            declare_event(mouse_event, const neogfx::mouse_event&)
+            declare_event(non_client_mouse_event, const neogfx::non_client_mouse_event&)
+            declare_event(mouse_entered_event, const point&)
+            declare_event(mouse_left_event)
+            declare_event(query_mouse_cursor, neogfx::mouse_cursor&)
+            declare_event(keyboard_event, const neogfx::keyboard_event&)
+            declare_event(focus_event, neogfx::focus_event, focus_reason)
     public:
         typedef i_widget abstract_type;
         typedef neolib::i_vector<i_ref_ptr<i_widget>> widget_list;
@@ -362,7 +362,7 @@ namespace neogfx
         {
             return enable(false);
         }
-     public:
+    public:
         double transparency() const
         {
             return 1.0 - opacity();
@@ -471,4 +471,30 @@ namespace neogfx
             return true;
         }
     };
-}
+
+    inline i_widget const* find_widget_with_focus_policy(i_widget const* aFirst, i_widget const* aLast, focus_policy aFocusPolicy)
+    {
+        for (auto w = aFirst; w != aLast; w->has_parent() ? w = &w->parent() : w = nullptr)
+        {
+            if ((w->focus_policy() & aFocusPolicy) == aFocusPolicy)
+                return w;
+        }
+        return nullptr;
+    }
+
+    inline i_widget* find_widget_with_focus_policy(i_widget* aFirst, i_widget* aLast, focus_policy aFocusPolicy)
+    {
+        return const_cast<i_widget*>(
+            find_widget_with_focus_policy(const_cast<i_widget const*>(aFirst), const_cast<i_widget const*>(aLast), aFocusPolicy));
+    }
+
+    inline i_widget const* find_widget_with_focus_policy(i_widget const& aFirst, focus_policy aFocusPolicy)
+    {
+        return find_widget_with_focus_policy(&aFirst, nullptr, aFocusPolicy);
+    }
+
+    inline i_widget* find_widget_with_focus_policy(i_widget& aFirst, focus_policy aFocusPolicy)
+    {
+        return const_cast<i_widget*>(find_widget_with_focus_policy(const_cast<i_widget const&>(aFirst), aFocusPolicy));
+    }
+ }

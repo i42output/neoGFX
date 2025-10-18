@@ -425,7 +425,7 @@ namespace neogfx
     {
         if (base_type::has_focus_policy())
             return base_type::focus_policy();
-        auto result = base_type::focus_policy();
+        auto result = base_type::focus_policy() | focus_policy::ClickTabFocus;
         if (editing())
             result |= (focus_policy::ConsumeEscapeKey | focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
         return result;
@@ -1449,8 +1449,6 @@ namespace neogfx
 
     void item_view::init()
     {
-        set_focus_policy(focus_policy::ClickTabFocus | 
-            focus_policy::ConsumeEscapeKey | focus_policy::ConsumeReturnKey | focus_policy::ConsumeTabKey);
         set_padding(neogfx::padding{});
         iSink += service<i_app>().current_style_changed([this](style_aspect aAspect)
         {

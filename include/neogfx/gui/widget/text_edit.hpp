@@ -667,9 +667,27 @@ namespace neogfx
 
         // text_edit
     public:
-        text_edit(text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
-        text_edit(i_widget& aParent, text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
-        text_edit(i_layout& aLayout, text_edit_caps aType = text_edit_caps::MultiLine, frame_style aFrameStyle = frame_style::SolidFrame);
+        text_edit() :
+            text_edit{ text_edit_caps::MultiLine, frame_style::SolidFrame } {}
+        text_edit(i_widget& aParent) :
+            text_edit{ aParent, text_edit_caps::MultiLine, frame_style::SolidFrame } {}
+        text_edit(i_layout& aLayout) :
+            text_edit{ aLayout, text_edit_caps::MultiLine, frame_style::SolidFrame } {}
+        text_edit(text_edit_caps aType) :
+            text_edit{ aType, frame_style::SolidFrame } {}
+        text_edit(i_widget& aParent, text_edit_caps aType) :
+            text_edit{ aParent, aType, frame_style::SolidFrame } {}
+        text_edit(i_layout& aLayout, text_edit_caps aType) :
+            text_edit{ aLayout, aType, frame_style::SolidFrame } {}
+        text_edit(frame_style aFrameStyle) :
+            text_edit{ text_edit_caps::MultiLine, aFrameStyle } {}
+        text_edit(i_widget& aParent, frame_style aFrameStyle) :
+            text_edit{ aParent, text_edit_caps::MultiLine, aFrameStyle } {}
+        text_edit(i_layout& aLayout, frame_style aFrameStyle) :
+            text_edit{ aLayout, text_edit_caps::MultiLine, aFrameStyle } {}
+        text_edit(text_edit_caps aType, frame_style aFrameStyle);
+        text_edit(i_widget& aParent, text_edit_caps aType, frame_style aFrameStyle);
+        text_edit(i_layout& aLayout, text_edit_caps aType, frame_style aFrameStyle);
         ~text_edit();
         // scrollable_widget
     public:

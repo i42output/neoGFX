@@ -214,7 +214,7 @@ namespace neogfx
                 case ScanCode_RETURN:
                 case ScanCode_KEYPAD_ENTER:
                     if (!root().has_focused_widget() ||
-                        (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeReturnKey)
+                        !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeReturnKey))
                     {
                         if (!iDefaultButton || similar_role(role_of_button(*iDefaultButton), button_role::Accept))
                             Accepted();
@@ -224,7 +224,7 @@ namespace neogfx
                     break;
                 case ScanCode_ESCAPE:
                     if (!root().has_focused_widget() ||
-                        (root().focused_widget().focus_policy() & neogfx::focus_policy::ConsumeReturnKey) != neogfx::focus_policy::ConsumeEscapeKey)
+                        !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeEscapeKey))
                     {
                         if (can_reject())
                             Rejected();

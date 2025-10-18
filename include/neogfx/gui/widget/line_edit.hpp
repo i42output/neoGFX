@@ -29,9 +29,27 @@ namespace neogfx
     {
         meta_object(text_edit)
     public:
-        line_edit(frame_style aFrameStyle = frame_style::SolidFrame);
-        line_edit(i_widget& aParent, frame_style aFrameStyle = frame_style::SolidFrame);
-        line_edit(i_layout& aLayout, frame_style aFrameStyle = frame_style::SolidFrame);
+        line_edit() :
+            line_edit{ text_edit_caps::SingleLine, frame_style::SolidFrame } {}
+        line_edit(i_widget& aParent) :
+            line_edit{ aParent, text_edit_caps::SingleLine, frame_style::SolidFrame } {}
+        line_edit(i_layout& aLayout) :
+            line_edit{ aLayout, text_edit_caps::SingleLine, frame_style::SolidFrame } {}
+        line_edit(text_edit_caps aType) :
+            line_edit{ aType, frame_style::SolidFrame } {}
+        line_edit(i_widget& aParent, text_edit_caps aType) :
+            line_edit{ aParent, aType, frame_style::SolidFrame } {}
+        line_edit(i_layout& aLayout, text_edit_caps aType) :
+            line_edit{ aLayout, aType, frame_style::SolidFrame } {}
+        line_edit(frame_style aFrameStyle) :
+            line_edit{ text_edit_caps::SingleLine, aFrameStyle } {}
+        line_edit(i_widget& aParent, frame_style aFrameStyle) :
+            line_edit{ aParent, text_edit_caps::SingleLine, aFrameStyle } {}
+        line_edit(i_layout& aLayout, frame_style aFrameStyle) :
+            line_edit{ aLayout, text_edit_caps::SingleLine, aFrameStyle } {}
+        line_edit(text_edit_caps aType, frame_style aFrameStyle);
+        line_edit(i_widget& aParent, text_edit_caps aType, frame_style aFrameStyle);
+        line_edit(i_layout& aLayout, text_edit_caps aType, frame_style aFrameStyle);
     protected:
         neogfx::size_policy size_policy() const override;
     };

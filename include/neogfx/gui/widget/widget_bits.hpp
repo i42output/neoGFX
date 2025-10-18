@@ -130,9 +130,9 @@ namespace neogfx
         KeepChildFocus    = 0x00010000,
         ConsumeTabKey     = 0x10000000,
         ConsumeReturnKey  = 0x20000000,
-        ConsumeEscapeKey  = 0x20000000,
+        ConsumeEscapeKey  = 0x40000000,
         ConsumeAllKeys    = ConsumeTabKey | ConsumeReturnKey | ConsumeEscapeKey,
-        IgnoreNonClient   = 0x40000000
+        IgnoreNonClient   = 0x80000000
     };
 
     typedef optional<focus_policy> optional_focus_policy;
