@@ -533,7 +533,8 @@ namespace neogfx
                     select(*item);
                 if (!actioned && CellAction(*item) == trigger_result::Accepted)
                 {
-                    selection_model().clear_current_index();
+                    if (!read_only())
+                        selection_model().clear_current_index();
                     actioned = true;
                 }
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
@@ -1011,6 +1012,7 @@ namespace neogfx
     {
         if (read_only() || editing() == aItemIndex || beginning_edit() || ending_edit() || !presentation_model().cell_editable(aItemIndex) )
             return false;
+        iClickedItem = std::nullopt;
         suppress_scrollbar_visibility_updates ssvu{ *this };
         neolib::scoped_flag sf{ iBeginningEdit };
         auto modelIndex = presentation_model().to_item_model_index(aItemIndex);
