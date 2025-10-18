@@ -457,6 +457,11 @@ namespace neogfx
                         if (presentation_model().toggle_expanded(*item))
                             return;
                     }
+                    if (editing() == item)
+                    {
+                        begin_edit();
+                        return;
+                    }
                     if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                         iClickedCheckBox = item;
                     bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
