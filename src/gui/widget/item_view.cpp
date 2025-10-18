@@ -457,9 +457,9 @@ namespace neogfx
                         if (presentation_model().toggle_expanded(*item))
                             return;
                     }
-                    if (editing() == item)
+                    if (editing() == item && !cell_rect(*item, cell_part::Text).contains(aPosition))
                     {
-                        begin_edit();
+                        end_edit(true);
                         return;
                     }
                     if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
@@ -1126,7 +1126,7 @@ namespace neogfx
 
     void item_view::end_edit(bool aCommit)
     {
-        if (editing() == std::nullopt)
+        if (!editing())
             return;
         if (aCommit && !presentation_model().cell_editable(*editing()))
             aCommit = false;
