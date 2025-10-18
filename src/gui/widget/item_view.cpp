@@ -457,11 +457,8 @@ namespace neogfx
                         if (presentation_model().toggle_expanded(*item))
                             return;
                     }
-                    if (editing() == item && !cell_rect(*item, cell_part::Text).contains(aPosition))
-                    {
+                    if (!cell_rect(*item, cell_part::Text).contains(aPosition))
                         end_edit(true);
-                        return;
-                    }
                     if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                         iClickedCheckBox = item;
                     bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
@@ -470,9 +467,11 @@ namespace neogfx
                     if (itemWasCurrent && itemIsCurrent)
                         iClickedItem = item;
                     if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
-                        (presentation_model().cell_editable_when_focused(*item)))
+                        presentation_model().cell_editable_when_focused(*item))
                         edit(*item);
                 }
+                else
+                    end_edit(true);
                 if (capturing())
                 {
                     if (!iClickedCheckBox)
@@ -499,7 +498,10 @@ namespace neogfx
                 }
             }
             else if (capturing() && client_rect().contains(aPosition))
+            {
+                end_edit(true);
                 release_capture();
+            }
         }
         else if (aButton == mouse_button::Right)
         {
