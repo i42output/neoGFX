@@ -2000,6 +2000,10 @@ namespace neogfx
         glyphs().clear();
         iGlyphParagraphs.clear();
         iUtf8TextCache = std::nullopt;
+        iStyles.clear();
+        iStyleMap.clear();
+        iTags.clear();
+        iTagMap.clear();
         refresh_columns();
         if (iPreviousText != iText)
             notify_text_changed();
