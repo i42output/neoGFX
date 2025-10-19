@@ -2479,10 +2479,13 @@ namespace neogfx
             while (next != static_cast<std::ptrdiff_t>(aText.size()))
             {
                 auto const& [t, nextEnd] = std::get<tag_ptr_callback>(aFormat.tag)(next);
-                auto const& tag = *t;
-                for (auto index = next; index != nextEnd; ++index)
-                    if (indexMap[index] != -1)
-                        std::next(insertionPoint, indexMap[index])->tag = tag.cookie();
+                if (t)
+                {
+                    auto const& tag = *t;
+                    for (auto index = next; index != nextEnd; ++index)
+                        if (indexMap[index] != -1)
+                            std::next(insertionPoint, indexMap[index])->tag = tag.cookie();
+                }
                 next = nextEnd;
             }
         }

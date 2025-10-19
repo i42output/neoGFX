@@ -426,7 +426,7 @@ namespace neogfx
         using style_callback = std::function<std::tuple<const style&, std::ptrdiff_t>(std::ptrdiff_t)>;
         struct ansi {};
 
-        using tag_ptr_callback = std::function<std::tuple<const tag_ptr&, std::ptrdiff_t>(std::ptrdiff_t)>;
+        using tag_ptr_callback = std::function<std::tuple<tag_ptr, std::ptrdiff_t>(std::ptrdiff_t)>;
 
         struct format
         {
@@ -790,17 +790,21 @@ namespace neogfx
         style next_style() const;
     public:
         template <typename DataT>
-        i_tag& create_tag(uuid const& aTtid, DataT const& aData)
+        std::pair<tag_ptr, bool> create_tag(uuid const& aTtid, DataT const& aData)
         {
+            bool created = false;
             tag<DataT> key{ aTtid, aData };
             auto existingTag = iTags.find(tag_ptr{ tag_ptr{}, &key });
             if (existingTag == iTags.end())
+            {
                 existingTag = iTags.insert(std::make_shared<tag<DataT>>(*this, key)).first;
+                created = true;
+            }
             auto const& tagPtr = *existingTag;
             auto& tag = *tagPtr;
             if (!tag.has_cookie())
                 tag.set_cookie(iTagMap.insert(tagPtr));
-            return tag;
+            return std::pair<tag_ptr, bool>{ tagPtr, created };
         }
     public:
         void clear();
