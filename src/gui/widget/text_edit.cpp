@@ -2323,7 +2323,8 @@ namespace neogfx
                         auto tagPtr = iTagMap[iText[docPos].tag];
                         auto const& tag = *tagPtr;
                         bool isCapturingTag = (tagPtr == iTagCapturing);
-                        iTagCapturing = nullptr;
+                        if (aEvent.type() != mouse_event_type::Moved)
+                            iTagCapturing = nullptr;
                         if (aEvent.type() == mouse_event_type::ButtonReleased)
                         {
                             if (!isCapturingTag)
