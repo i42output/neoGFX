@@ -846,6 +846,7 @@ namespace neogfx
         void set_tab_stops(std::optional<neogfx::tab_stops> const& aTabStops);
     public:
         position_type document_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
+        std::pair<position_type, bool> document_hit_test_ex(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         virtual bool same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const;
         virtual std::pair<position_type, position_type> word_at(position_type aTextPosition, bool aWordBreakIsWhitespace = false) const;
     public:
@@ -882,7 +883,7 @@ namespace neogfx
         void animate();
         void update_cursor();
         void make_cursor_visible(bool aForcePreviewScroll = false);
-        document_glyphs::difference_type glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
+        std::pair<document_glyphs::difference_type, bool> glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         void make_visible(position_info const& aGlyphPosition, point const& aPreview = {});
         style glyph_style(document_glyphs::const_iterator aGlyphChar, const document_column& aColumn) const;
         void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;

@@ -794,10 +794,10 @@ namespace neogfx
         framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
-            auto const docPos = document_hit_test(aPosition);
-            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
+            auto const docPos = document_hit_test_ex(aPosition);
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && docPos.second)
             {
-                auto wordSpan = word_at(docPos, true);
+                auto wordSpan = word_at(docPos.first, true);
                 thread_local std::u32string utf32word;
                 utf32word.clear();
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
@@ -832,10 +832,11 @@ namespace neogfx
         iDragger = nullptr;
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
-            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && 
+            auto const docPos = document_hit_test_ex(aPosition);
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && docPos.second &&
                 cursor().position() == cursor().anchor() && iSelectedUri)
             {
-                auto wordSpan = word_at(document_hit_test(aPosition), true);
+                auto wordSpan = word_at(docPos.first, true);
                 if (iSelectedUri == wordSpan)
                 {
                     thread_local std::u32string utf32word;
@@ -935,12 +936,12 @@ namespace neogfx
         auto const clientRect = client_rect(false);
         if (clientRect.contains(mousePosition) || iDragger != nullptr)
         {
-            auto const docPos = document_hit_test(mousePosition);
-            if (docPos >= static_cast<position_type>(iText.size()))
+            auto const docPos = document_hit_test_ex(mousePosition);
+            if (docPos.first >= static_cast<position_type>(iText.size()))
                 return mouse_system_cursor::IBeam;
-            if (iText[docPos].tag != neolib::invalid_cookie<tag_cookie>)
+            if (docPos.second && iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie>)
             {
-                auto const& tag = *iTagMap[iText[docPos].tag];
+                auto const& tag = *iTagMap[iText[docPos.first].tag];
                 if (tag.query_mouse_cursor().has_slots())
                 {
                     neogfx::mouse_cursor cursor = mouse_system_cursor::IBeam;
@@ -950,10 +951,10 @@ namespace neogfx
                 else if (tag.mouse_event().has_slots())
                     return mouse_system_cursor::Hand;
             }
-            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() &&
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && docPos.second &&
                 cursor().position() == cursor().anchor())
             {
-                auto wordSpan = word_at(docPos, true);
+                auto wordSpan = word_at(docPos.first, true);
                 thread_local std::u32string utf32word;
                 utf32word.clear();
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
@@ -1224,7 +1225,7 @@ namespace neogfx
                     make_cursor_visible();
                     break;
                 case scrollbar_zone::Middle:
-                    make_visible(glyph_position(glyph_hit_test(column_rect(0).top_left()), true));
+                    make_visible(glyph_position(glyph_hit_test(column_rect(0).top_left()).first, true));
                     break;
                 case scrollbar_zone::Bottom:
                     vertical_scrollbar().set_position(vertical_scrollbar().maximum());
@@ -1738,8 +1739,8 @@ namespace neogfx
 
     void text_edit::set_cursor_position(const point& aPosition, bool aMoveAnchor, bool aEnableDragger)
     {
-        auto const documentPosition = document_hit_test(aPosition);
-        cursor().set_position(documentPosition, aMoveAnchor);
+        auto const docPos = document_hit_test(aPosition);
+        cursor().set_position(docPos, aMoveAnchor);
         neolib::service<neolib::i_power>().register_activity();
         if (aEnableDragger)
         {
@@ -1891,10 +1892,12 @@ namespace neogfx
         cursor().set_position(from_glyph(glyphs().begin() + aGlyphPosition).first, aMoveAnchor);
     }
 
-    text_edit::document_glyphs::difference_type text_edit::glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
+    std::pair<text_edit::document_glyphs::difference_type, bool> text_edit::glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
+        if ((service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE)
+            std::cout << "foo";
         if (iGlyphParagraphs.empty())
-            return 0;
+            return std::make_pair(0, false);
         auto const columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
         auto const& columnRectSansPadding = column_rect(columnIndex);
         point adjustedPosition = (aAdjustForScrollPosition ? aPosition + point{ horizontal_scrollbar().position(), vertical_scrollbar().position() } : aPosition) - columnRectSansPadding.top_left();
@@ -1908,6 +1911,8 @@ namespace neogfx
             paragraph = std::prev(paragraph);
         if (paragraph != iGlyphParagraphs.begin() && adjustedPosition.y < paragraph->ypos)
             paragraph = std::prev(paragraph);
+        if (paragraph == iGlyphParagraphs.begin() && adjustedPosition.y < paragraph->ypos)
+            return std::make_pair(0, false);
         auto const& column = iGlyphColumns.at(columnIndex);
         auto const& lines = column.lines;
         auto line = std::lower_bound(lines.begin(), lines.end(), adjustedPosition.y,
@@ -1926,8 +1931,8 @@ namespace neogfx
             if (adjustedPosition.x >= lineEndX)
             {
                 if (lineEnd > lineStart && is_line_breaking_whitespace(glyphs()[lineEnd - 1]))
-                    return lineEnd - 1;
-                return lineEnd;
+                    return std::make_pair(lineEnd - 1, true);
+                return std::make_pair(lineEnd, true);
             }
             for (auto gi = lineStart; gi != lineEnd; ++gi)
             {
@@ -1937,33 +1942,38 @@ namespace neogfx
                 {
                     bool const inLeftHalf = adjustedPosition.x < glyph.cell[0].x - lineStartX + glyphAdvance / 2.0 || glyphAdvance == 0.0;
                     if (direction(glyph) == text_direction::LTR)
-                        return inLeftHalf ? gi : gi + 1;
+                        return std::make_pair(inLeftHalf ? gi : gi + 1, true);
                     else
-                        return inLeftHalf && gi != lineStart ? gi - 1 : (inLeftHalf ? lineEnd : gi);
+                        return std::make_pair(inLeftHalf && gi != lineStart ? gi - 1 : (inLeftHalf ? lineEnd : gi), true);
                 }
             }
             if (lineEnd > lineStart && line != std::prev(lines.end()) && !is_whitespace(glyphs()[lineEnd]))
-                return lineEnd - 1;
+                return std::make_pair(lineEnd - 1, true);
             if (lineEnd > lineStart && direction(glyphs()[lineEnd - 1]) == text_direction::RTL)
-                return lineEnd - 1;
-            return lineEnd;
+                return std::make_pair(lineEnd - 1, true);
+            return std::make_pair(lineEnd, true);
         }
         else
         {
-            return glyphs().size();
+            return std::make_pair(glyphs().size(), false);
         }
     }
 
     text_edit::position_type text_edit::document_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
+        return document_hit_test_ex(aPosition, aAdjustForScrollPosition).first;
+    }
+
+    std::pair<text_edit::position_type, bool> text_edit::document_hit_test_ex(const point& aPosition, bool aAdjustForScrollPosition) const
+    {
         auto const glyphPosition = glyph_hit_test(aPosition, aAdjustForScrollPosition);
-        if (glyphPosition < static_cast<document_glyphs::difference_type>(glyphs().size()))
+        if (glyphPosition.first < static_cast<document_glyphs::difference_type>(glyphs().size()))
         {
-            auto const glyphParagraph = glyph_to_paragraph(glyphPosition);
+            auto const glyphParagraph = glyph_to_paragraph(glyphPosition.first);
             if (glyphParagraph != iGlyphParagraphs.end())
-                return glyphParagraph->text_begin_index() + glyphs()[glyphPosition].clusters.first;
+                return std::make_pair(glyphParagraph->text_begin_index() + glyphs()[glyphPosition.first].clusters.first, glyphPosition.second);
         }
-        return iText.size();
+        return std::make_pair(iText.size(), false);
     }
 
     bool text_edit::same_word(position_type aTextPositionLeft, position_type aTextPositionRight) const
@@ -2315,24 +2325,23 @@ namespace neogfx
 
         iSink += Mouse([this](const neogfx::mouse_event& aEvent)
             {
-                auto const docPos = document_hit_test(aEvent.position() - origin());
-                if (docPos < static_cast<position_type>(iText.size()))
+                auto const docPos = document_hit_test_ex(aEvent.position() - origin());
+                if (docPos.first < static_cast<position_type>(iText.size()) && docPos.second)
                 {
-                    if (iText[docPos].tag != neolib::invalid_cookie<tag_cookie>)
+                    if (iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie>)
                     {
-                        auto tagPtr = iTagMap[iText[docPos].tag];
+                        auto tagPtr = iTagMap[iText[docPos.first].tag];
                         auto const& tag = *tagPtr;
-                        bool isCapturingTag = (tagPtr == iTagCapturing);
+                        bool const wasCapturingTag = (tagPtr == iTagCapturing);
                         if (aEvent.type() != mouse_event_type::Moved)
                             iTagCapturing = nullptr;
                         if (aEvent.type() == mouse_event_type::ButtonReleased)
                         {
-                            if (!isCapturingTag)
+                            if (!wasCapturingTag || cursor().position() != cursor().anchor())
                                 return;
-                            iDragger = nullptr;
                             if (capturing())
                                 release_capture();
-                            Mouse.accept();
+                            iDragger = nullptr;
                         }
                         if (tag.mouse_event().has_slots())
                         {

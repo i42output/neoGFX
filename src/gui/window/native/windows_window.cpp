@@ -1070,6 +1070,8 @@ namespace neogfx
                             self.handle_event(window_event{ window_event_type::Enter, pt });
                         }
                         self.push_event(mouse_event{ mouse_event_type::Moved, pt, mouse::button_from_message(wparam), mouse::modifiers_from_message(wparam) });
+                        if (self.surface_window().has_capturing_widget())
+                            service<i_window_manager>().update_mouse_cursor(self.surface_window().as_window());
                         break;
                     case WM_LBUTTONDOWN:
                         self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
