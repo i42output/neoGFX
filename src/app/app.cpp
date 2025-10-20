@@ -41,6 +41,7 @@
 #include <neogfx/app/i_clipboard.hpp>
 #include <neogfx/core/i_transition_animator.hpp>
 #include <neogfx/gui/window/i_native_window.hpp>
+#include <neogfx/gui/window/context_menu.hpp>
 
 template<> neolib::i_async_task& services::start_service<neolib::i_async_task>()
 {
@@ -286,6 +287,7 @@ namespace neogfx
         actionSelectAll.set_shortcut("Ctrl+A");
 
         service<i_basic_services>();
+        service<i_context_menu>();
         service<i_hid_devices>().enumerate_devices();
         service<i_keyboard>().grab_keyboard(*this);
 

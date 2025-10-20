@@ -26,6 +26,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+    class context_menu_service : public i_context_menu
+    {
+    public:
+        bool context_menu_active() const noexcept final
+        {
+            return iContextMenuActive;
+        }
+        void activate_context_menu() noexcept final
+        {
+            iContextMenuActive = true;
+        }
+        void deactivate_context_menu() noexcept final
+        {
+            iContextMenuActive = false;
+        }
+    private:
+        bool iContextMenuActive = false;
+    };
+}
+
+template<> neogfx::i_context_menu& services::start_service<neogfx::i_context_menu>()
+{
+    static neogfx::context_menu_service sContextMenuService{};
+    return sContextMenuService;
+}
+
+namespace neogfx
+{
     std::unique_ptr<popup_menu> context_menu::sWidget;
 
     context_menu::context_menu(const point& aPosition, window_style aStyle)
@@ -67,6 +95,7 @@ namespace neogfx
         sWidget = (iParent != nullptr ?
             std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
             std::make_unique<popup_menu>(iPosition, menu(), iStyle));
+        service<i_context_menu>().activate_context_menu();
         PopupCreated(*sWidget);
         event_processing_context epc{ service<i_async_task>(), "neogfx::context_menu" };
         while (!finished)
@@ -74,5 +103,6 @@ namespace neogfx
             service<i_app>().process_events(epc);
         }
         sWidget = nullptr;
+        service<i_context_menu>().deactivate_context_menu();
     }
 }

@@ -850,7 +850,7 @@ namespace neogfx
                 }
             }
         }
-        else if (aButton == mouse_button::Right && wasCapturing)
+        else if (aButton == mouse_button::Right)
         {
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
             ContextMenu(iMenu->menu());
@@ -1894,8 +1894,6 @@ namespace neogfx
 
     std::pair<text_edit::document_glyphs::difference_type, bool> text_edit::glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition) const
     {
-        if ((service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE)
-            std::cout << "foo";
         if (iGlyphParagraphs.empty())
             return std::make_pair(0, false);
         auto const columnIndex = column_hit_test(aPosition, aAdjustForScrollPosition);
@@ -2332,6 +2330,8 @@ namespace neogfx
                     {
                         auto tagPtr = iTagMap[iText[docPos.first].tag];
                         auto const& tag = *tagPtr;
+                        if (!tag.mouse_event().has_slots())
+                            return;
                         bool const wasCapturingTag = (tagPtr == iTagCapturing);
                         if (aEvent.type() != mouse_event_type::Moved)
                             iTagCapturing = nullptr;
@@ -2339,17 +2339,16 @@ namespace neogfx
                         {
                             if (!wasCapturingTag || cursor().position() != cursor().anchor())
                                 return;
+                            Mouse.accept();
                             if (capturing())
                                 release_capture();
                             iDragger = nullptr;
                         }
-                        if (tag.mouse_event().has_slots())
-                        {
-                            if (tag.mouse_event().trigger(aEvent) == trigger_result::Accepted)
-                                Mouse.accept();
-                            if (aEvent.type() == mouse_event_type::ButtonClicked)
-                                iTagCapturing = tagPtr;
-                        }
+                        auto const result = tag.mouse_event().trigger(aEvent);
+                        if (result == trigger_result::Accepted)
+                            Mouse.accept();
+                        else if (aEvent.type() == mouse_event_type::ButtonClicked)
+                            iTagCapturing = tagPtr;
                     }
                 }
             });

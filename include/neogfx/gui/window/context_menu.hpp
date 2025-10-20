@@ -25,6 +25,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
+    class i_context_menu : public i_service
+    {
+    public:
+        virtual bool context_menu_active() const noexcept;
+        virtual void activate_context_menu() noexcept;
+        virtual void deactivate_context_menu() noexcept;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xd60d38cb, 0x7b0d, 0x4d15, 0x8720, { 0x7d, 0x77, 0x8b, 0xb, 0x6, 0x81 } }; return sIid; }
+    };
+
     class context_menu
     {
     public:
@@ -46,4 +56,5 @@ namespace neogfx
         window_style iStyle;
         static std::unique_ptr<popup_menu> sWidget;
     };
+
 }
