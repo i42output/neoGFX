@@ -903,6 +903,7 @@ namespace neogfx
         style_map iStyleMap;
         tag_list iTags;
         tag_map iTagMap;
+        tag_ptr iTagCapturing;
         bool iUpdatingDocument;
         bool iHandlingKeyPress;
         document_text iPreviousText;

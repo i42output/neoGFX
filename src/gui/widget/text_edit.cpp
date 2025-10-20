@@ -794,9 +794,10 @@ namespace neogfx
         framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
+            auto const docPos = document_hit_test(aPosition);
             if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only())
             {
-                auto wordSpan = word_at(document_hit_test(aPosition), true);
+                auto wordSpan = word_at(docPos, true);
                 thread_local std::u32string utf32word;
                 utf32word.clear();
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
@@ -848,7 +849,7 @@ namespace neogfx
                 }
             }
         }
-        else if (aButton == mouse_button::Right)
+        else if (aButton == mouse_button::Right && wasCapturing)
         {
             iMenu = std::make_unique<neogfx::context_menu>(*this, aPosition + non_client_rect().top_left() + root().window_position());
             ContextMenu(iMenu->menu());
@@ -934,10 +935,25 @@ namespace neogfx
         auto const clientRect = client_rect(false);
         if (clientRect.contains(mousePosition) || iDragger != nullptr)
         {
+            auto const docPos = document_hit_test(mousePosition);
+            if (docPos >= static_cast<position_type>(iText.size()))
+                return mouse_system_cursor::IBeam;
+            if (iText[docPos].tag != neolib::invalid_cookie<tag_cookie>)
+            {
+                auto const& tag = *iTagMap[iText[docPos].tag];
+                if (tag.query_mouse_cursor().has_slots())
+                {
+                    neogfx::mouse_cursor cursor = mouse_system_cursor::IBeam;
+                    tag.ev_query_mouse_cursor().trigger(cursor);
+                    return cursor;
+                }
+                else if (tag.mouse_event().has_slots())
+                    return mouse_system_cursor::Hand;
+            }
             if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() &&
                 cursor().position() == cursor().anchor())
             {
-                auto wordSpan = word_at(document_hit_test(mousePosition), true);
+                auto wordSpan = word_at(docPos, true);
                 thread_local std::u32string utf32word;
                 utf32word.clear();
                 std::copy(std::next(iText.begin(), wordSpan.first), std::next(iText.begin(), wordSpan.second), std::back_inserter(utf32word));
@@ -2296,6 +2312,37 @@ namespace neogfx
         if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             focusPolicy |= neogfx::focus_policy::ConsumeReturnKey;
         set_focus_policy(focusPolicy);
+
+        iSink += Mouse([this](const neogfx::mouse_event& aEvent)
+            {
+                auto const docPos = document_hit_test(aEvent.position() - origin());
+                if (docPos < static_cast<position_type>(iText.size()))
+                {
+                    if (iText[docPos].tag != neolib::invalid_cookie<tag_cookie>)
+                    {
+                        auto tagPtr = iTagMap[iText[docPos].tag];
+                        auto const& tag = *tagPtr;
+                        bool isCapturingTag = (tagPtr == iTagCapturing);
+                        iTagCapturing = nullptr;
+                        if (aEvent.type() == mouse_event_type::ButtonReleased)
+                        {
+                            if (!isCapturingTag)
+                                return;
+                            iDragger = nullptr;
+                            if (capturing())
+                                release_capture();
+                            Mouse.accept();
+                        }
+                        if (tag.mouse_event().has_slots())
+                        {
+                            if (tag.mouse_event().trigger(aEvent) == trigger_result::Accepted)
+                                Mouse.accept();
+                            if (aEvent.type() == mouse_event_type::ButtonClicked)
+                                iTagCapturing = tagPtr;
+                        }
+                    }
+                }
+            });
         
         iSink += cursor().PositionChanged([this]()
         {
