@@ -465,6 +465,11 @@ namespace neogfx
                 style{ aStyle },
                 tag{ neolib::invalid_cookie<tag_cookie> }
             {}
+            document_char(document_char const& aOther) :
+                character{ aOther.character },
+                style{ aOther.style },
+                tag{ aOther.tag }
+            {}
         };
         using document_text = neolib::gap_vector<document_char>;
 

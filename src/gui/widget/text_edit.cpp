@@ -2061,7 +2061,8 @@ namespace neogfx
     {
         if (iUtf8TextCache == std::nullopt)
         {
-            std::u32string u32text{ iText.begin(), iText.end() };
+            thread_local std::u32string u32text;
+            u32text.assign(iText.begin(), iText.end());
             iUtf8TextCache = neolib::utf32_to_utf8(u32text);
         }
         return *iUtf8TextCache;
@@ -2332,9 +2333,10 @@ namespace neogfx
                 auto const docPos = document_hit_test_ex(aEvent.position() - origin());
                 if (docPos.second)
                 {
-                    if (iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie>)
+                    auto const& ch = iText[docPos.first];
+                    if (ch.tag != neolib::invalid_cookie<tag_cookie>)
                     {
-                        auto tagPtr = iTagMap[iText[docPos.first].tag];
+                        auto tagPtr = iTagMap[ch.tag];
                         auto const& tag = *tagPtr;
                         if (!tag.mouse_event().has_slots())
                             return;
@@ -2413,7 +2415,13 @@ namespace neogfx
         iUtf8TextCache = std::nullopt;
 
         if (aClearFirst)
+        {
             iText.clear();
+            iStyles.clear();
+            iStyleMap.clear();
+            iTags.clear();
+            iTagMap.clear();
+        }
 
         auto insertionPoint = iText.begin() + aPosition;
         std::size_t insertionSize = 0;
@@ -2550,7 +2558,10 @@ namespace neogfx
                     auto const& tag = *t;
                     for (auto index = next; index != nextEnd; ++index)
                         if (indexMap[index] != -1)
-                            std::next(insertionPoint, indexMap[index])->tag = tag.cookie();
+                        {
+                            auto& ch = *std::next(insertionPoint, indexMap[index]);
+                            ch.tag = tag.cookie();
+                        }
                 }
                 next = nextEnd;
             }
