@@ -84,7 +84,7 @@ namespace neogfx
         bool enabled() const final;
         void enable(bool aEnable) final;
         bool is_capturing() const final;
-        void set_capture() final;
+        void set_capture(bool aLockCursor = true) final;
         void release_capture() final;
         bool is_non_client_capturing() const final;
         void non_client_set_capture() final;

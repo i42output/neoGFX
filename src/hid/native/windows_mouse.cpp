@@ -76,17 +76,18 @@ namespace neogfx
             return iCaptureType;
         }
 
-        void mouse::capture(i_surface& aTarget)
+        void mouse::capture(i_surface& aTarget, bool aLockCursor)
         {
             if (iCaptureTarget != nullptr)
                 throw already_capturing();
             ::SetCapture(static_cast<HWND>(aTarget.as_surface_window().native_window().native_handle()));
             iCaptureTarget = &aTarget;
             iCaptureType = mouse_capture_type::Normal;
-            service<i_window_manager>().lock_mouse_cursor(aTarget.as_surface_window().as_window());
+            if (aLockCursor)
+                service<i_window_manager>().lock_mouse_cursor(aTarget.as_surface_window().as_window());
         }
 
-        void mouse::capture_raw(i_surface& aTarget)
+        void mouse::capture_raw(i_surface& aTarget, bool aLockCursor)
         {
             if (iCaptureTarget != nullptr)
                 throw already_capturing();
@@ -94,7 +95,8 @@ namespace neogfx
             ::RegisterRawInputDevices(&rawMouse, 1, sizeof(RAWINPUTDEVICE));
             iCaptureTarget = &aTarget;
             iCaptureType = mouse_capture_type::Raw;
-            service<i_window_manager>().lock_mouse_cursor(aTarget.as_surface_window().as_window());
+            if (aLockCursor)
+                service<i_window_manager>().lock_mouse_cursor(aTarget.as_surface_window().as_window());
         }
 
         void mouse::release_capture()
@@ -110,7 +112,8 @@ namespace neogfx
             }
             iCaptureTarget = nullptr;
             iCaptureType = mouse_capture_type::None;
-            service<i_window_manager>().unlock_mouse_cursor();
+            if (service<i_window_manager>().cursor_locked())
+                service<i_window_manager>().unlock_mouse_cursor();
         }
  
         mouse_button mouse::convert_button(virtual_key_code_t aVirtualKeyCode)

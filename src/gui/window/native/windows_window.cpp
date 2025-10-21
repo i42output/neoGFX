@@ -697,13 +697,13 @@ namespace neogfx
             return iCapturingMouse;
         }
 
-        void window::set_capture()
+        void window::set_capture(bool aLockCursor)
         {
             if (!iCapturingMouse)
             {
                 iCapturingMouse = true;
                 iNonClientCapturing = false;
-                service<i_mouse>().capture(surface_window());
+                service<i_mouse>().capture(surface_window(), aLockCursor);
             }
         }
 

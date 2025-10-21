@@ -166,8 +166,8 @@ namespace neogfx
         virtual bool capturing() const = 0;
         virtual i_surface& capture_target() const = 0;
         virtual mouse_capture_type capture_type() const = 0;
-        virtual void capture(i_surface& aTarget) = 0;
-        virtual void capture_raw(i_surface& aTarget) = 0;
+        virtual void capture(i_surface& aTarget, bool aLockCursor = true) = 0;
+        virtual void capture_raw(i_surface& aTarget, bool aLockCursor = true) = 0;
         virtual void release_capture() = 0;
     public:
         virtual bool is_mouse_grabbed() const = 0;

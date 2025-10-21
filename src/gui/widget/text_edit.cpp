@@ -746,6 +746,11 @@ namespace neogfx
         }
     }
 
+    bool text_edit::capture_locks_cursor() const
+    {
+        return false;
+    }
+
     void text_edit::focus_gained(focus_reason aFocusReason)
     {
         framed_scrollable_widget::focus_gained(aFocusReason);
@@ -939,7 +944,8 @@ namespace neogfx
             auto const docPos = document_hit_test_ex(mousePosition);
             if (docPos.first >= static_cast<position_type>(iText.size()))
                 return mouse_system_cursor::IBeam;
-            if (docPos.second && iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie>)
+            if (docPos.second && iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie> &&
+                cursor().position() == cursor().anchor())
             {
                 auto const& tag = *iTagMap[iText[docPos.first].tag];
                 if (tag.query_mouse_cursor().has_slots())
@@ -951,7 +957,7 @@ namespace neogfx
                 else if (tag.mouse_event().has_slots())
                     return mouse_system_cursor::Hand;
             }
-            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() && docPos.second &&
+            if (docPos.second && (iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() &&
                 cursor().position() == cursor().anchor())
             {
                 auto wordSpan = word_at(docPos.first, true);

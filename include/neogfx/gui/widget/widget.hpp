@@ -246,6 +246,7 @@ namespace neogfx
         bool enable(bool aEnable) override;
         bool entered(bool aChildEntered = false) const override;
         bool can_capture() const override;
+        bool capture_locks_cursor() const override;
         bool capturing() const override;
         const optional_point& capture_position() const override;
         void set_capture(capture_reason aReason = capture_reason::Other, const optional_point& aPosition = {}) override;

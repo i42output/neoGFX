@@ -42,8 +42,8 @@ namespace neogfx
             bool capturing() const override;
             i_surface& capture_target() const override;
             mouse_capture_type capture_type() const override;
-            void capture(i_surface& aTarget) override;
-            void capture_raw(i_surface& aTarget) override;
+            void capture(i_surface& aTarget, bool aLockCursor = true) override;
+            void capture_raw(i_surface& aTarget, bool aLockCursor = true) override;
             void release_capture() override;
         public:
             static mouse_button convert_button(virtual_key_code_t aVirtualKeyCode);

@@ -108,7 +108,7 @@ namespace neogfx
         virtual bool enabled() const = 0;
         virtual void enable(bool aEnable) = 0;
         virtual bool is_capturing() const = 0;
-        virtual void set_capture() = 0;
+        virtual void set_capture(bool aLockCursor = true) = 0;
         virtual void release_capture() = 0;
         virtual bool is_non_client_capturing() const = 0;
         virtual void non_client_set_capture() = 0;

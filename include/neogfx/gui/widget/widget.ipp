@@ -1740,6 +1740,12 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
+    inline bool widget<Interface>::capture_locks_cursor() const
+    {
+        return true;
+    }
+
+    template <WidgetInterface Interface>
     inline bool widget<Interface>::capturing() const
     {
         return surface().as_surface_window().has_capturing_widget() && &surface().as_surface_window().capturing_widget() == this;

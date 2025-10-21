@@ -222,6 +222,7 @@ namespace neogfx
         virtual bool enable(bool aEnable) = 0;
         virtual bool entered(bool aChildEntered = false) const = 0;
         virtual bool can_capture() const = 0;
+        virtual bool capture_locks_cursor() const = 0;
         virtual bool capturing() const = 0;
         virtual const optional_point& capture_position() const = 0;
         virtual void set_capture(capture_reason aReason = capture_reason::Other, const optional_point& aPosition = {}) = 0;

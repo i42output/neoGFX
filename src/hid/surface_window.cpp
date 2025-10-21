@@ -406,7 +406,7 @@ namespace neogfx
             if (iCapturingWidget != nullptr)
                 release_capture(*iCapturingWidget);
             iCapturingWidget = &aWidget;
-            native_window().set_capture();
+            native_window().set_capture(aWidget.capture_locks_cursor());
             aWidget.captured();
             as_widget().mouse_entered(as_window().mouse_position());
         }

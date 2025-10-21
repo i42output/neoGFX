@@ -706,6 +706,7 @@ namespace neogfx
         const neogfx::font& font() const override;
         void set_font(optional_font const& aFont) override;
     public:
+        bool capture_locks_cursor() const override;
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
     public:
