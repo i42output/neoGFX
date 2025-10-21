@@ -942,9 +942,9 @@ namespace neogfx
         if (clientRect.contains(mousePosition) || iDragger != nullptr)
         {
             auto const docPos = document_hit_test_ex(mousePosition);
-            if (docPos.first >= static_cast<position_type>(iText.size()))
+            if (!docPos.second)
                 return mouse_system_cursor::IBeam;
-            if (docPos.second && iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie> &&
+            if (iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie> &&
                 cursor().position() == cursor().anchor())
             {
                 auto const& tag = *iTagMap[iText[docPos.first].tag];
@@ -957,7 +957,7 @@ namespace neogfx
                 else if (tag.mouse_event().has_slots())
                     return mouse_system_cursor::Hand;
             }
-            if (docPos.second && (iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() &&
+            if ((iCaps & text_edit_caps::ParseURIs) == text_edit_caps::ParseURIs && read_only() &&
                 cursor().position() == cursor().anchor())
             {
                 auto wordSpan = word_at(docPos.first, true);
@@ -2330,7 +2330,7 @@ namespace neogfx
         iSink += Mouse([this](const neogfx::mouse_event& aEvent)
             {
                 auto const docPos = document_hit_test_ex(aEvent.position() - origin());
-                if (docPos.first < static_cast<position_type>(iText.size()) && docPos.second)
+                if (docPos.second)
                 {
                     if (iText[docPos.first].tag != neolib::invalid_cookie<tag_cookie>)
                     {
