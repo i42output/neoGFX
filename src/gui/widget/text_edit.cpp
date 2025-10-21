@@ -2415,13 +2415,7 @@ namespace neogfx
         iUtf8TextCache = std::nullopt;
 
         if (aClearFirst)
-        {
-            iText.clear();
-            iStyles.clear();
-            iStyleMap.clear();
-            iTags.clear();
-            iTagMap.clear();
-        }
+            clear();
 
         auto insertionPoint = iText.begin() + aPosition;
         std::size_t insertionSize = 0;
