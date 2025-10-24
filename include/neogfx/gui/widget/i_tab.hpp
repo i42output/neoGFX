@@ -49,8 +49,12 @@ namespace neogfx
         virtual i_tab& set_text(i_string const& aText) = 0;
         virtual i_tab& set_image(const i_texture& aTexture) = 0;
         virtual i_tab& set_image(const i_image& aImage) = 0;
+        virtual i_tab& set_image_color(const color_or_gradient& aColor) = 0;
     public:
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
+    public:
+        virtual void* data() const = 0;
+        virtual void set_data(void* aData) = 0;
     };
 }

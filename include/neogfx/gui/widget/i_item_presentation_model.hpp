@@ -329,6 +329,7 @@ namespace neogfx
         virtual optional_size cell_check_box_size(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
         virtual optional_size cell_tree_expander_size(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
         virtual optional_texture cell_image(item_presentation_model_index const& aIndex) const = 0;
+        virtual color_or_gradient cell_image_color(item_presentation_model_index const& aIndex) const = 0;
         virtual neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex) const = 0;
         virtual size cell_extents(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;
         virtual dimension indent(item_presentation_model_index const& aIndex, i_units_context const& aUnitsContext) const = 0;

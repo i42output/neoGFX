@@ -284,31 +284,31 @@ namespace neogfx
     }
 
     template <typename Base>
-    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_string const& aTabText)
+    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_string const& aTabText, void* aData)
     {
-        return add_tab_page(add_tab(aTabText));
+        return add_tab_page(add_tab(aTabText), aData);
     }
 
     template <typename Base>
-    inline i_tab_page& tab_page_container<Base>::insert_tab_page(tab_index aTabIndex, i_string const& aTabText)
+    inline i_tab_page& tab_page_container<Base>::insert_tab_page(tab_index aTabIndex, i_string const& aTabText, void* aData)
     {
-        return add_tab_page(insert_tab(aTabIndex, aTabText));
+        return add_tab_page(insert_tab(aTabIndex, aTabText), aData);
     }
 
     template <typename Base>
-    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab)
+    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab, void* aData)
     {
-        return add_tab_page(aTab, tab_page_pointer{ new neogfx::tab_page{ page_layout(), aTab } });
+        return add_tab_page(aTab, tab_page_pointer{ new neogfx::tab_page{ page_layout(), aTab, aData } });
     }
 
     template <typename Base>
-    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab, i_tab_page& aWidget)
+    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab, i_tab_page& aWidget, void* aData)
     {
         return add_tab_page(aTab, tab_page_pointer{ tab_page_pointer{}, &aWidget });
     }
 
     template <typename Base>
-    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget)
+    inline i_tab_page& tab_page_container<Base>::add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget, void* aData)
     {
         auto existingTab = iTabs.find(&aTab);
         if (existingTab == iTabs.end())

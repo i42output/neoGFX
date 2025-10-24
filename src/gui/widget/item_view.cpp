@@ -390,8 +390,9 @@ namespace neogfx
                         service<i_skin_manager>().active_skin().draw_check_box(aGc, skinnableItem, presentation_model().cell_meta(itemIndex).checked);
                     }
                     auto const& cellImage = presentation_model().cell_image(itemIndex);
+                    auto const& cellImageColor = presentation_model().cell_image_color(itemIndex);
                     if (cellImage != std::nullopt)
-                        aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage);
+                        aGc.draw_texture(cell_rect(itemIndex, aGc, cell_part::Image), *cellImage, cellImageColor );
                     auto cellTextRect = cell_rect(itemIndex, aGc, cell_part::Text);
                     auto const& glyphText = presentation_model().cell_glyph_text(itemIndex);
                     if (!editing() || editing() != itemIndex)

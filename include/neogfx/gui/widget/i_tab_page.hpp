@@ -42,5 +42,8 @@ namespace neogfx
         virtual i_tab& tab() = 0;
         virtual const i_widget& as_widget() const = 0;
         virtual i_widget& as_widget() = 0;
+    public:
+        virtual void* data() const = 0;
+        virtual void set_data(void* aData) = 0;
     };
 }

@@ -38,10 +38,10 @@ namespace neogfx
         define_declared_event(Selected, selected)
         define_declared_event(Deselected, deselected)
     public:
-        tab_page(i_tab_page_container& aContainer, std::string const& aTabText = {});
-        tab_page(i_tab_page_container& aContainer, i_tab& aTab);
-        tab_page(i_widget& aParent, i_tab& aTab);
-        tab_page(i_layout& aLayout, i_tab& aTab);
+        tab_page(i_tab_page_container& aContainer, std::string const& aTabText = {}, void* aData = nullptr);
+        tab_page(i_tab_page_container& aContainer, i_tab& aTab, void* aData = nullptr);
+        tab_page(i_widget& aParent, i_tab& aTab, void* aData = nullptr);
+        tab_page(i_layout& aLayout, i_tab& aTab, void* aData = nullptr);
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
@@ -57,10 +57,13 @@ namespace neogfx
         i_tab& tab() override;
         const widget<>& as_widget() const override;
         widget<>& as_widget() override;
+        void* data() const override;
+        void set_data(void* aData) override;
     private:
         void init();
     private:
         i_tab& iTab;
+        void* iData = nullptr;
         sink iSink;
     };
 }

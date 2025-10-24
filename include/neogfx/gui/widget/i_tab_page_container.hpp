@@ -48,11 +48,11 @@ namespace neogfx
         virtual i_tab_page& tab_page(tab_index aTabIndex) = 0;
         virtual const i_tab_page& selected_tab_page() const = 0;
         virtual i_tab_page& selected_tab_page() = 0;
-        virtual i_tab_page& add_tab_page(i_string const& aTabText) = 0;
-        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText) = 0;
-        virtual i_tab_page& add_tab_page(i_tab& aTab) = 0;
-        virtual i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) = 0;
-        virtual i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget) = 0;
+        virtual i_tab_page& add_tab_page(i_string const& aTabText, void* aData = nullptr) = 0;
+        virtual i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText, void* aData = nullptr) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab, void* aData = nullptr) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget, void* aData = nullptr) = 0;
+        virtual i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget, void* aData = nullptr) = 0;
         virtual void remove_tab_page(i_tab_page& aPage) = 0;
     };
 }

@@ -84,11 +84,11 @@ namespace neogfx
         void select_next_tab() override;
         void select_previous_tab() override;
     public:
-        i_tab_page& add_tab_page(i_string const& aTabText) override;
-        i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText) override;
-        i_tab_page& add_tab_page(i_tab& aTab) override;
-        i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget) override;
-        i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget) override;
+        i_tab_page& add_tab_page(i_string const& aTabText, void* aData = nullptr) override;
+        i_tab_page& insert_tab_page(tab_index aTabIndex, i_string const& aTabText, void* aData = nullptr) override;
+        i_tab_page& add_tab_page(i_tab& aTab, void* aData = nullptr) override;
+        i_tab_page& add_tab_page(i_tab& aTab, i_tab_page& aWidget, void* aData = nullptr) override;
+        i_tab_page& add_tab_page(i_tab& aTab, i_ref_ptr<i_tab_page> const& aWidget, void* aData = nullptr) override;
         void remove_tab_page(i_tab_page& aPage) override;
     public:
         void adding_tab(i_tab& aTab) override;

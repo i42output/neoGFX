@@ -279,6 +279,12 @@ namespace neogfx
         return *this;
     }
 
+    i_tab& tab_button::set_image_color(const color_or_gradient& aColor)
+    {
+        image_widget().set_image_color(aColor);
+        return *this;
+    }
+
     const i_widget& tab_button::as_widget() const
     {
         return *this;
@@ -287,6 +293,16 @@ namespace neogfx
     i_widget& tab_button::as_widget()
     {
         return *this;
+    }
+
+    void* tab_button::data() const
+    {
+        return iData;
+    }
+
+    void tab_button::set_data(void* aData)
+    {
+        iData = aData;
     }
 
     rect tab_button::path_bounding_rect() const

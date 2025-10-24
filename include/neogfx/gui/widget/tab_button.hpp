@@ -54,9 +54,13 @@ namespace neogfx
         i_tab& set_text(i_string const& aText) override;
         i_tab& set_image(const i_texture& aTexture) override;
         i_tab& set_image(const i_image& aImage) override;
+        i_tab& set_image_color(const color_or_gradient& aColor) override;
     public:
         const i_widget& as_widget() const override;
         i_widget& as_widget() override;
+    public:
+        void* data() const override;
+        void set_data(void* aData) override;
     protected:
         rect path_bounding_rect() const override;
         bool spot_color() const override;
@@ -79,6 +83,7 @@ namespace neogfx
         void update_appearance();
     private:
         i_tab_container& iContainer;
+        void* iData = nullptr;
         std::unique_ptr<close_button> iCloseButton;
         bool iStandardImageSize;
         bool iSelectedState;

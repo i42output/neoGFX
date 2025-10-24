@@ -869,6 +869,10 @@ namespace neogfx
         {
             return optional_texture{};
         }
+        color_or_gradient cell_image_color(item_presentation_model_index const& aIndex) const override
+        {
+            return color_or_gradient{};
+        }
         neogfx::glyph_text& cell_glyph_text(item_presentation_model_index const& aIndex) const override
         {
             if (cell_meta(aIndex).text != std::nullopt)
