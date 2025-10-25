@@ -2346,7 +2346,7 @@ namespace neogfx
                         bool const wasCapturingTag = (tagPtr == iTagCapturing);
                         if (aEvent.type() != mouse_event_type::Moved)
                             iTagCapturing = nullptr;
-                        if (aEvent.type() == mouse_event_type::ButtonReleased)
+                        if (aEvent.type() == mouse_event_type::ButtonClick)
                         {
                             if (!wasCapturingTag || cursor().position() != cursor().anchor())
                                 return;
