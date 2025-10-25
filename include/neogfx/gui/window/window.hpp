@@ -40,11 +40,11 @@ namespace neogfx
         meta_object(decorated<scrollable_widget<framed_widget<widget<i_window>>>>)
     public:
         define_declared_event(Window, window_event, neogfx::window_event&)
-            define_declared_event(DismissingChildren, dismissing_children, const i_widget*)
-            define_declared_event(Activated, activated)
-            define_declared_event(Deactivated, deactivated)
-            define_declared_event(Closed, closed)
-            define_declared_event(PaintOverlay, paint_overlay, i_graphics_context&)
+        define_declared_event(DismissingChildren, dismissing_children, const i_widget*)
+        define_declared_event(Activated, activated)
+        define_declared_event(Deactivated, deactivated)
+        define_declared_event(Closed, closed)
+        define_declared_event(PaintOverlay, paint_overlay, i_graphics_context&)
     private:
         class client;
         typedef std::optional<normal_title_bar> optional_title_bar;
