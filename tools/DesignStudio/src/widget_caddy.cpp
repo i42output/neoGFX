@@ -259,9 +259,9 @@ namespace neogfx::DesignStudio
             service<i_clipboard>().deactivate(*this);
     }
 
-    bool widget_caddy::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool widget_caddy::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
-        widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+        widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
         if (aScanCode == ScanCode_ESCAPE)
         {
             element().root().select(false, true);
@@ -277,12 +277,12 @@ namespace neogfx::DesignStudio
         return widget::ignore_mouse_events(aConsiderAncestors);
     }
 
-    void widget_caddy::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void widget_caddy::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
-            bool const toggleSelect = ((aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE);
+            bool const toggleSelect = ((aKeyModifier & key_modifier::CTRL) != key_modifier::None);
             auto part = toggleSelect ? cardinal::Center : resize_part_at(aPosition);
             if (!part)
                 part = cardinal::Center;
@@ -329,12 +329,12 @@ namespace neogfx::DesignStudio
         }
     }
 
-    void widget_caddy::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void widget_caddy::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_moved(aPosition, aKeyModifiers);
+        widget::mouse_moved(aPosition, aKeyModifier);
         if (capturing() && iDragInfo)
         {
-            bool const ignoreConstraints = ((aKeyModifiers & key_modifiers_e::KeyModifier_SHIFT) != key_modifiers_e::KeyModifier_NONE);
+            bool const ignoreConstraints = ((aKeyModifier & key_modifier::SHIFT) != key_modifier::None);
             if (iDragInfo->part == cardinal::Center)
             {
                 element().root().visit([&](i_element& aElement)
@@ -360,7 +360,7 @@ namespace neogfx::DesignStudio
 
     mouse_cursor widget_caddy::mouse_cursor() const
     {
-        auto const part = (service<i_keyboard>().modifiers() & key_modifiers_e::KeyModifier_CTRL) == key_modifiers_e::KeyModifier_NONE ?
+        auto const part = (service<i_keyboard>().modifiers() & key_modifier::CTRL) == key_modifier::None ?
             resize_part_at(mouse_position()) : cardinal::Center;
         if (part)
             switch (*part)

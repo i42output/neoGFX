@@ -53,7 +53,7 @@ namespace neogfx
     public:
         virtual neogfx::focus_policy focus_policy() const;
     public:
-        virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+        virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier);
         virtual void mouse_button_released(mouse_button aButton, const point& aPosition);
     protected:
         virtual void handle_clicked();

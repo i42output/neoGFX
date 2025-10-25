@@ -49,7 +49,7 @@ namespace neogfx
             static mouse_button convert_button(virtual_key_code_t aVirtualKeyCode);
             static virtual_key_code_t convert_button(mouse_button aButton);
             static mouse_button button_from_message(WPARAM aWParam);
-            static key_modifiers_e modifiers_from_message(WPARAM aWParam);
+            static key_modifier modifiers_from_message(WPARAM aWParam);
         private:
             i_surface* iCaptureTarget;
             mouse_capture_type iCaptureType;

@@ -52,11 +52,11 @@ namespace neogfx
         neogfx::logical_coordinate_system logical_coordinate_system() const final;
         void resized() final;
         void paint(i_graphics_context& aGc) const final;
-        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) final;
-        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
-        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) final;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) final;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) final;
         void mouse_button_released(mouse_button aButton, const point& aPosition) final;
-        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void mouse_moved(const point& aPosition, key_modifier aKeyModifier) final;
         void mouse_entered(const point& aPosition) final;
         void mouse_left() final;
         neogfx::mouse_cursor mouse_cursor() const final;

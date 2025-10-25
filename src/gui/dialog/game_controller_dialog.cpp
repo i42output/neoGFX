@@ -74,7 +74,7 @@ namespace neogfx
             if (aIndex)
             {
                 auto& controller = *gameControllerModel->item(*aIndex);
-                iSink1 += controller.raw_button_pressed([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
+                iSink1 += controller.raw_button_pressed([&](game_controller_button_ordinal aButtonOrdinal, key_modifier aKeyboardState)
                 {
                     if (!controller.button_mapped(aButtonOrdinal))
                     {
@@ -83,7 +83,7 @@ namespace neogfx
                         iTestOutput.append_text(oss.str(), true);
                     }
                 });
-                iSink1 += controller.raw_button_released([&](game_controller_button_ordinal aButtonOrdinal, key_modifiers_e aKeyboardState)
+                iSink1 += controller.raw_button_released([&](game_controller_button_ordinal aButtonOrdinal, key_modifier aKeyboardState)
                 {
                     if (!controller.button_mapped(aButtonOrdinal))
                     {
@@ -92,7 +92,7 @@ namespace neogfx
                         iTestOutput.append_text(oss.str(), true);
                     }
                 });
-                iSink1 += controller.pov_moved([&](game_controller_pov_ordinal aPovOrdinal, vec2 const& aPosition, key_modifiers_e aKeyboardState)
+                iSink1 += controller.pov_moved([&](game_controller_pov_ordinal aPovOrdinal, vec2 const& aPosition, key_modifier aKeyboardState)
                 {
                     std::ostringstream oss;
                     oss << "POV #" << aPovOrdinal << " moved to " << aPosition << "\n";

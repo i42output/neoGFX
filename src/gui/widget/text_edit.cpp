@@ -797,9 +797,9 @@ namespace neogfx
         update(true);
     }
 
-    void text_edit::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void text_edit::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        framed_scrollable_widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             auto const docPos = document_hit_test_ex(aPosition);
@@ -812,19 +812,19 @@ namespace neogfx
                 if (utf32word.find(U"://") != std::u32string::npos)
                     iSelectedUri = wordSpan;
             }
-            set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
+            set_cursor_position(aPosition, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None, capturing());
         }
         else if (aButton == mouse_button::Right && focus_policy() == neogfx::focus_policy::NoFocus && capture_ok(hit_test(aPosition)) && can_capture())
         {
             set_capture(capture_reason::MouseEvent, aPosition);
             if (cursor().position() == cursor().anchor())
-                set_cursor_position(aPosition, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE, capturing());
+                set_cursor_position(aPosition, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None, capturing());
         }
     }
 
-    void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void text_edit::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        framed_scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (!password() && aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             auto word = word_at(document_hit_test(aPosition));
@@ -920,9 +920,9 @@ namespace neogfx
         iSelectedUri = std::nullopt;
     }
 
-    void text_edit::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void text_edit::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifier);
         neolib::service<neolib::i_power>().register_activity();
         if (iDragger != nullptr)
             set_cursor_position(aPosition, false);
@@ -976,7 +976,7 @@ namespace neogfx
             return framed_scrollable_widget::mouse_cursor();
     }
 
-    bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool text_edit::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         neolib::service<neolib::i_power>().register_activity();
 
@@ -998,7 +998,7 @@ namespace neogfx
         case ScanCode_KEYPAD_ENTER:
             if (!read_only())
             {
-                if ((aKeyModifiers & KeyModifier_CTRL) == KeyModifier_NONE)
+                if ((aKeyModifier & key_modifier::CTRL) == key_modifier::None)
                 {
                     bool canAccept = false;
                     CanAcceptText(text(), canAccept);
@@ -1014,7 +1014,7 @@ namespace neogfx
                 {
                     multiple_text_changes mtc{ *this };
                     delete_any_selection();
-                    if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
+                    if ((aKeyModifier & key_modifier::SHIFT) == key_modifier::None)
                         insert_text(string{ "\n" }, { next_style() });
                     else
                         insert_text(string{ "\r" }, { next_style() });
@@ -1022,10 +1022,10 @@ namespace neogfx
                     iCursorHint.x = std::nullopt;
                 }
                 else
-                    handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                    handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             }
             else
-                handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             break;
         case ScanCode_BACKSPACE:
             if (!read_only())
@@ -1065,10 +1065,10 @@ namespace neogfx
         case ScanCode_UP:
             if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             {
-                if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
-                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                if ((aKeyModifier & key_modifier::CTRL) != key_modifier::None)
+                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
                 else
-                    move_cursor(cursor::Up, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    move_cursor(cursor::Up, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
             }
             else
                 handled = false;
@@ -1076,39 +1076,39 @@ namespace neogfx
         case ScanCode_DOWN:
             if ((iCaps & text_edit_caps::MultiLine) == text_edit_caps::MultiLine)
             {
-                if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
-                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                if ((aKeyModifier & key_modifier::CTRL) != key_modifier::None)
+                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
                 else
-                    move_cursor(cursor::Down, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    move_cursor(cursor::Down, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
             }
             else
                 handled = false;
             break;
         case ScanCode_LEFT:
-            move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::PreviousWord : cursor::Left, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+            move_cursor((aKeyModifier & key_modifier::CTRL) != key_modifier::None ? cursor::PreviousWord : cursor::Left, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
             break;
         case ScanCode_RIGHT:
-            move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::NextWord : cursor::Right, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+            move_cursor((aKeyModifier & key_modifier::CTRL) != key_modifier::None ? cursor::NextWord : cursor::Right, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
             break;
         case ScanCode_HOME:
-            move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::StartOfDocument : cursor::StartOfLine, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+            move_cursor((aKeyModifier & key_modifier::CTRL) != key_modifier::None ? cursor::StartOfDocument : cursor::StartOfLine, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
             break;
         case ScanCode_END:
-            move_cursor((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE ? cursor::EndOfDocument : cursor::EndOfLine, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+            move_cursor((aKeyModifier & key_modifier::CTRL) != key_modifier::None ? cursor::EndOfDocument : cursor::EndOfLine, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
             break;
         case ScanCode_PAGEUP:
         case ScanCode_PAGEDOWN:
             if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::MultiLine)
             {
                 if (aScanCode == ScanCode_PAGEUP && vertical_scrollbar().position() == vertical_scrollbar().minimum())
-                    move_cursor(cursor::StartOfDocument, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    move_cursor(cursor::StartOfDocument, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
                 else if (aScanCode == ScanCode_PAGEDOWN && vertical_scrollbar().position() == vertical_scrollbar().maximum() - vertical_scrollbar().page())
-                    move_cursor(cursor::EndOfDocument, (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    move_cursor(cursor::EndOfDocument, (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
                 else
                 {
                     auto pos = point{ glyph_position(cursor_glyph_position()).pos - point{ horizontal_scrollbar().Position.effective_value(), vertical_scrollbar().Position.effective_value()}};
-                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
-                    set_cursor_position(pos + client_rect(false).top_left(), (aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE);
+                    framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
+                    set_cursor_position(pos + client_rect(false).top_left(), (aKeyModifier & key_modifier::SHIFT) == key_modifier::None);
                 }
             }
             else
@@ -1121,13 +1121,13 @@ namespace neogfx
                 set_text(string{});
             break;
         default:
-            handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            handled = framed_scrollable_widget::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             break;
         }
         return handled;
     }
 
-    bool text_edit::key_released(scan_code_e, key_code_e, key_modifiers_e)
+    bool text_edit::key_released(scan_code_e, key_code_e, key_modifier)
     {
         return false;
     }

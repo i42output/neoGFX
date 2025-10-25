@@ -217,9 +217,9 @@ namespace neogfx
             menu().clear_selection();
     }
 
-    void menu_item_widget::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void menu_item_widget::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && menu_item().type() == menu_item_type::SubMenu)
             select_item();
     }
@@ -231,7 +231,7 @@ namespace neogfx
             select_item();
     }
 
-    bool menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+    bool menu_item_widget::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
         if (aScanCode == ScanCode_RETURN || aScanCode == ScanCode_KEYPAD_ENTER)
         {

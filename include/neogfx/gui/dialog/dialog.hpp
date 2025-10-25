@@ -73,7 +73,7 @@ namespace neogfx
         bool can_close() const override;
         void close() override;
     public:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
     public:
         using window::has_layout;   
         using window::layout;

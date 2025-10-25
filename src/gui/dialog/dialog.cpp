@@ -186,7 +186,7 @@ namespace neogfx
 
         if (!iButtonBox)
         {
-            iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifiers_e)
+            iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifier)
             {
                 if (root().is_active())
                 {
@@ -251,9 +251,9 @@ namespace neogfx
         window::close();
     }
 
-    bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
-        return window::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+        return window::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
 
     bool dialog::has_layout(standard_layout aStandardLayout) const

@@ -188,7 +188,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
 
     if (ng::service<ng::i_game_controllers>().have_controller_for(ng::game_player::One))
     {
-        ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([&ecs, gameState](ng::game_controller_button aButton, ng::key_modifiers_e)
+        ng::service<ng::i_game_controllers>().controller_for(ng::game_player::One).button_pressed([&ecs, gameState](ng::game_controller_button aButton, ng::key_modifier)
         {
             if (aButton == ng::game_controller_button::Y)
                 gameState->showAabbGrid = !gameState->showAabbGrid;

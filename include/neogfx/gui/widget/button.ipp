@@ -347,9 +347,9 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline void button<ButtonInterface>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void button<ButtonInterface>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             as_widget().update();
@@ -359,9 +359,9 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline void button<ButtonInterface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void button<ButtonInterface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             as_widget().update();
@@ -395,7 +395,7 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline bool button<ButtonInterface>::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+    inline bool button<ButtonInterface>::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
         if (aScanCode == ScanCode_SPACE)
         {

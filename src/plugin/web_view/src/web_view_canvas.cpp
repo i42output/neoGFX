@@ -68,17 +68,17 @@ namespace neogfx
 
     namespace
     {
-        std::uint32_t convert_key_modifiers(key_modifiers_e aKeyModifiers, mouse_button aMouseButton)
+        std::uint32_t convert_key_modifiers(key_modifier aKeyModifier, mouse_button aMouseButton)
         {
             cef_event_flags_t result = EVENTFLAG_NONE;
-            if (aKeyModifiers & KeyModifier_LSHIFT) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_SHIFT_DOWN);
-            if (aKeyModifiers & KeyModifier_RSHIFT) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_SHIFT_DOWN);
-            if (aKeyModifiers & KeyModifier_LCTRL) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_CONTROL_DOWN);
-            if (aKeyModifiers & KeyModifier_RCTRL) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_CONTROL_DOWN);
-            if (aKeyModifiers & KeyModifier_LALT) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_ALT_DOWN);
-            if (aKeyModifiers & KeyModifier_RALT) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_ALTGR_DOWN);
-            if (aKeyModifiers & KeyModifier_NUM) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_NUM_LOCK_ON);
-            if (aKeyModifiers & KeyModifier_CAPS) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_CAPS_LOCK_ON);
+            if ((aKeyModifier & key_modifier::LSHIFT) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_SHIFT_DOWN);
+            if ((aKeyModifier & key_modifier::RSHIFT) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_SHIFT_DOWN);
+            if ((aKeyModifier & key_modifier::LCTRL) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_CONTROL_DOWN);
+            if ((aKeyModifier & key_modifier::RCTRL) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_CONTROL_DOWN);
+            if ((aKeyModifier & key_modifier::LALT) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_ALT_DOWN);
+            if ((aKeyModifier & key_modifier::RALT) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_ALTGR_DOWN);
+            if ((aKeyModifier & key_modifier::NUM) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_NUM_LOCK_ON);
+            if ((aKeyModifier & key_modifier::CAPS) != key_modifier::None) result = static_cast<cef_event_flags_t>(result | EVENTFLAG_CAPS_LOCK_ON);
             if ((aMouseButton & mouse_button::Left) == mouse_button::Left) 
                 result = static_cast<cef_event_flags_t>(result | EVENTFLAG_LEFT_MOUSE_BUTTON);
             if ((aMouseButton & mouse_button::Middle) == mouse_button::Middle)
@@ -110,31 +110,31 @@ namespace neogfx
         }
     }
 
-    bool web_view_canvas::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool web_view_canvas::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
         auto const& mousePosition = to_cef_mouse_position(*this, aPosition);
         CefMouseEvent cefEvent{ cef_mouse_event_t{ mousePosition.x, mousePosition.y, 
-            convert_key_modifiers(aKeyModifiers, mouse_button::None) } };
+            convert_key_modifiers(aKeyModifier, mouse_button::None) } };
         iBrowser->GetHost()->SendMouseWheelEvent(cefEvent, static_cast<int>(aDelta.dx), static_cast<int>(aDelta.dy));
         return true;
     }
 
-    void web_view_canvas::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void web_view_canvas::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         auto const& mousePosition = to_cef_mouse_position(*this, aPosition);
         CefMouseEvent cefEvent{ cef_mouse_event_t{ mousePosition.x, mousePosition.y, 
-            convert_key_modifiers(aKeyModifiers, aButton) } };
+            convert_key_modifiers(aKeyModifier, aButton) } };
         iBrowser->GetHost()->SendMouseClickEvent(cefEvent, convert_mouse_button(aButton), false, 1);
         iLastClickCount = 1u;
     }
 
-    void web_view_canvas::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void web_view_canvas::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         auto const& mousePosition = to_cef_mouse_position(*this, aPosition);
         CefMouseEvent cefEvent{ cef_mouse_event_t{ mousePosition.x, mousePosition.y, 
-            convert_key_modifiers(aKeyModifiers, aButton) } };
+            convert_key_modifiers(aKeyModifier, aButton) } };
         iBrowser->GetHost()->SendMouseClickEvent(cefEvent, convert_mouse_button(aButton), false, 2);
         iLastClickCount = 2u;
     }
@@ -148,12 +148,12 @@ namespace neogfx
         iBrowser->GetHost()->SendMouseClickEvent(cefEvent, convert_mouse_button(aButton), true, static_cast<int>(iLastClickCount));
     }
 
-    void web_view_canvas::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void web_view_canvas::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_moved(aPosition, aKeyModifiers);
+        base_type::mouse_moved(aPosition, aKeyModifier);
         auto const& mousePosition = to_cef_mouse_position(*this, aPosition);
         CefMouseEvent cefEvent{ cef_mouse_event_t{ mousePosition.x, mousePosition.y, 
-            convert_key_modifiers(aKeyModifiers, service<i_mouse>().button_state()) } };
+            convert_key_modifiers(aKeyModifier, service<i_mouse>().button_state()) } };
         iBrowser->GetHost()->SendMouseMoveEvent(cefEvent, false);
     }
 
@@ -307,7 +307,7 @@ namespace neogfx
             CefKeyEvent cefEvent;
             cefEvent.windows_key_code = service<i_keyboard>().native_key_code_to_usb_hid_key_code(aEvent.native_key_code());
             cefEvent.native_key_code = aEvent.native_scan_code();
-            cefEvent.is_system_key = ((aEvent.key_modifiers() & KeyModifier_SYSTEM) == KeyModifier_SYSTEM);
+            cefEvent.is_system_key = ((aEvent.key_modifiers() & key_modifier::SYSTEM) == key_modifier::SYSTEM);
             std::optional<std::u16string> text;
             switch (aEvent.type())
             {

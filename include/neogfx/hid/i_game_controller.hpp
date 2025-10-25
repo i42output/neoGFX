@@ -125,19 +125,19 @@ namespace neogfx
     public:
         typedef i_game_controller abstract_type;
     public:
-        declare_event(raw_button_pressed, game_controller_button_ordinal, key_modifiers_e)
-        declare_event(raw_button_released, game_controller_button_ordinal, key_modifiers_e)
-        declare_event(button_pressed, game_controller_button, key_modifiers_e)
-        declare_event(button_released, game_controller_button, key_modifiers_e)
-        declare_event(button_repeat, game_controller_button, key_modifiers_e)
-        declare_event(left_trigger_moved, double, key_modifiers_e)
-        declare_event(right_trigger_moved, double, key_modifiers_e)
-        declare_event(left_thumb_moved, const vec2&, key_modifiers_e)
-        declare_event(right_thumb_moved, const vec2&, key_modifiers_e)
-        declare_event(pov_moved, game_controller_pov_ordinal , const vec2&, key_modifiers_e)
-        declare_event(stick_moved, const vec3&, key_modifiers_e)
-        declare_event(stick_rotated, const vec3&, key_modifiers_e)
-        declare_event(slider_moved, const vec2&, key_modifiers_e)
+        declare_event(raw_button_pressed, game_controller_button_ordinal, key_modifier)
+        declare_event(raw_button_released, game_controller_button_ordinal, key_modifier)
+        declare_event(button_pressed, game_controller_button, key_modifier)
+        declare_event(button_released, game_controller_button, key_modifier)
+        declare_event(button_repeat, game_controller_button, key_modifier)
+        declare_event(left_trigger_moved, double, key_modifier)
+        declare_event(right_trigger_moved, double, key_modifier)
+        declare_event(left_thumb_moved, const vec2&, key_modifier)
+        declare_event(right_thumb_moved, const vec2&, key_modifier)
+        declare_event(pov_moved, game_controller_pov_ordinal , const vec2&, key_modifier)
+        declare_event(stick_moved, const vec3&, key_modifier)
+        declare_event(stick_rotated, const vec3&, key_modifier)
+        declare_event(slider_moved, const vec2&, key_modifier)
     public:
         struct player_not_assigned : std::logic_error { player_not_assigned() : std::logic_error{ "neogfx::i_game_controller::player_not_assigned" } {} };
         struct unknown_port : std::logic_error { unknown_port() : std::logic_error{ "neogfx::i_game_controller::unknown_port" } {} };

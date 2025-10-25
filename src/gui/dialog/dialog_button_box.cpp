@@ -205,7 +205,7 @@ namespace neogfx
 
     void dialog_button_box::init()
     {
-        iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifiers_e)
+        iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifier)
         {
             if (root().is_active())
             {

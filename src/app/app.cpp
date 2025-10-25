@@ -865,13 +865,13 @@ namespace neogfx
         return didSome;
     }
 
-    bool app::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool app::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         if (aScanCode == ScanCode_LALT)
             for (auto& m : iMnemonics)
                 m->mnemonic_widget().update();
         bool partialMatches = false;
-        iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifiers));
+        iKeySequence.push_back(std::make_pair(aKeyCode, aKeyModifier));
         for (auto& a : iActions)
             if (a.second()->is_enabled() && a.second()->shortcut() != std::nullopt)
             {
@@ -900,7 +900,7 @@ namespace neogfx
         return false;
     }
 
-    bool app::key_released(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+    bool app::key_released(scan_code_e aScanCode, key_code_e, key_modifier)
     {
         if (aScanCode == ScanCode_LALT)
             for (auto& m : iMnemonics)

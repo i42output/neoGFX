@@ -66,10 +66,10 @@ namespace neogfx
     public:
         void paint(i_graphics_context& aGc) const override;
     public:
-        void mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, point const& aPosition) override;
-        void mouse_moved(point const& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(point const& aPosition, key_modifier aKeyModifier) override;
         neogfx::mouse_cursor mouse_cursor() const override;
     private:
         rect contents_rect() const;

@@ -79,13 +79,13 @@ namespace neogfx
         }
     }
 
-    bool drop_list_view::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool drop_list_view::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
-        bool result = list_view::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+        bool result = list_view::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifier);
         return result || !iDropList.list_always_visible();
     }
 
-    bool drop_list_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool drop_list_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         bool handled = false;
         switch (aScanCode)
@@ -107,7 +107,7 @@ namespace neogfx
             handled = false;
             break;
         case ScanCode_DOWN:
-            handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             if (!handled && !selection_model().has_current_index() && presentation_model().rows() > 0)
             {
                 selection_model().set_current_index(item_presentation_model_index{ 0, 0 });
@@ -115,7 +115,7 @@ namespace neogfx
             }
             break;
         default:
-            handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            handled = list_view::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             break;
         }
         return handled;
@@ -1322,7 +1322,7 @@ namespace neogfx
         {
             auto delegate_to_proxy = [this](const neogfx::keyboard_event& aEvent)
             {
-                list_view().key_pressed(aEvent.scan_code(), aEvent.key_code(), KeyModifier_NONE);
+                list_view().key_pressed(aEvent.scan_code(), aEvent.key_code(), key_modifier::None);
                 if (list_view().selection_model().has_current_index())
                     accept_selection();
             };
@@ -1331,7 +1331,7 @@ namespace neogfx
             case ScanCode_DOWN:
                 if (view_created())
                     delegate_to_proxy(aEvent);
-                else if (!view_created() && (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
+                else if (!view_created() && (aEvent.key_modifiers() & key_modifier::ALT) != key_modifier::None)
                 {
                     if (selection_model().has_current_index())
                         iSavedSelection = presentation_model().to_item_model_index(selection_model().current_index());
@@ -1376,7 +1376,7 @@ namespace neogfx
                 return true;
             case ScanCode_HOME:
             case ScanCode_END:
-                if ((iStyle & drop_list_style::Editable) != drop_list_style::Editable || (aEvent.key_modifiers() & KeyModifier_ALT) != KeyModifier_NONE)
+                if ((iStyle & drop_list_style::Editable) != drop_list_style::Editable || (aEvent.key_modifiers() & key_modifier::ALT) != key_modifier::None)
                 {
                     if (view_created())
                         delegate_to_proxy(aEvent);

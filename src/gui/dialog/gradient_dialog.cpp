@@ -160,9 +160,9 @@ namespace neogfx
             }
         }
     public:
-        virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+        virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
         {
-            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
             if (aButton == mouse_button::Left)
             {
                 select(aPosition - client_rect(false).top_left());
@@ -175,7 +175,7 @@ namespace neogfx
             if (!capturing())
                 iTracking = false;
         }
-        virtual void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+        virtual void mouse_moved(const point& aPosition, key_modifier aKeyModifier)
         {
             if (iTracking)
                 select(aPosition - client_rect(false).top_left());

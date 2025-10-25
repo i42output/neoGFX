@@ -1967,54 +1967,54 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
-    inline bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    inline bool widget<Interface>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
         auto& self = *this;
 
         if (has_parent() && same_surface(parent()))
-            return parent().mouse_wheel_scrolled(aWheel, aPosition + self.position(), aDelta, aKeyModifiers);
+            return parent().mouse_wheel_scrolled(aWheel, aPosition + self.position(), aDelta, aKeyModifier);
 
         return false;
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_clicked(aButton, aPosition + self.position(), aKeyModifiers);
+            parent().mouse_button_clicked(aButton, aPosition + self.position(), aKeyModifier);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_double_clicked(aButton, aPosition + self.position(), aKeyModifiers);
+            parent().mouse_button_double_clicked(aButton, aPosition + self.position(), aKeyModifier);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_click(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_click(aButton, aPosition + self.position(), aKeyModifiers);
+            parent().mouse_button_click(aButton, aPosition + self.position(), aKeyModifier);
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_double_click(aButton, aPosition + self.position(), aKeyModifiers);
+            parent().mouse_button_double_click(aButton, aPosition + self.position(), aKeyModifier);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
@@ -2031,7 +2031,7 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::mouse_moved(const point&, key_modifiers_e)
+    inline void widget<Interface>::mouse_moved(const point&, key_modifier)
     {
         // do nothing
     }
@@ -2114,13 +2114,13 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
-    inline bool widget<Interface>::key_pressed(scan_code_e, key_code_e, key_modifiers_e)
+    inline bool widget<Interface>::key_pressed(scan_code_e, key_code_e, key_modifier)
     {
         return false;
     }
 
     template <WidgetInterface Interface>
-    inline bool widget<Interface>::key_released(scan_code_e, key_code_e, key_modifiers_e)
+    inline bool widget<Interface>::key_released(scan_code_e, key_code_e, key_modifier)
     {
         return false;
     }

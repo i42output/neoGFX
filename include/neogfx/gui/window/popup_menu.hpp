@@ -68,8 +68,8 @@ namespace neogfx
     public:
         color frame_color() const override;
     public:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
+        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
     private:
         void init();

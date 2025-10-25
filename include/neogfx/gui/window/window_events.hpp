@@ -126,7 +126,7 @@ namespace neogfx
     public:
         typedef basic_mouse_event abstract_type; // todo
     public:
-        typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifiers_e> parameter_type;
+        typedef neolib::variant<neogfx::point, neogfx::delta, neogfx::mouse_button, neogfx::mouse_wheel, neogfx::key_modifier> parameter_type;
     public:
         basic_mouse_event(
             mouse_event_type aType, 
@@ -158,9 +158,9 @@ namespace neogfx
         {
             return static_variant_cast<neogfx::mouse_wheel>(iParameter2);
         }
-        neogfx::key_modifiers_e key_modifiers() const
+        neogfx::key_modifier key_modifiers() const
         {
-            return static_variant_cast<neogfx::key_modifiers_e>(iParameter3);
+            return static_variant_cast<neogfx::key_modifier>(iParameter3);
         }
         neogfx::delta wheel_delta() const
         {
@@ -169,7 +169,8 @@ namespace neogfx
     public:
         bool is_button(neogfx::mouse_button aButton) const
         {
-            return (mouse_button() & aButton) == aButton;
+            return std::holds_alternative<neogfx::mouse_button>(iParameter2) && 
+                (mouse_button() & aButton) == aButton;
         }
         bool is_left_button() const
         {
@@ -218,7 +219,7 @@ namespace neogfx
         using parameter_type = neolib::variant<
             scan_code_e, 
             key_code_e, 
-            key_modifiers_e, 
+            key_modifier, 
             string,
             native_scan_code_e,
             native_key_code_e>;
@@ -227,13 +228,13 @@ namespace neogfx
             keyboard_event_type aType,
             const parameter_type& aScanCodeOrText = parameter_type{},
             const parameter_type& aKeyCode = parameter_type{},
-            const parameter_type& aKeyModifiers = parameter_type{},
+            const parameter_type& aKeyModifier = parameter_type{},
             const parameter_type& aNativeScanCode = parameter_type{},
             const parameter_type& aNativeKeyCode = parameter_type{}) :
             iType{ aType },
             iScanCodeOrText{ aScanCodeOrText },
             iKeyCode{ aKeyCode },
-            iKeyModifiers{ aKeyModifiers },
+            iKeyModifiers{ aKeyModifier },
             iNativeScanCode{ aNativeScanCode },
             iNativeKeyCode{ aNativeKeyCode }
         {
@@ -251,9 +252,9 @@ namespace neogfx
         {
             return static_variant_cast<key_code_e>(iKeyCode);
         }
-        key_modifiers_e key_modifiers() const
+        key_modifier key_modifiers() const
         {
-            return static_variant_cast<key_modifiers_e>(iKeyModifiers);
+            return static_variant_cast<key_modifier>(iKeyModifiers);
         }
         std::string text() const
         {

@@ -278,14 +278,14 @@ namespace neogfx
         base_type::focus_lost(aFocusReason);
     }
 
-    void terminal::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void terminal::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
     }
 
-    void terminal::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void terminal::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
     }
 
     void terminal::mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -293,11 +293,11 @@ namespace neogfx
         base_type::mouse_button_released(aButton, aPosition);
     }
 
-    void terminal::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void terminal::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
         neolib::service<neolib::i_power>().register_activity();
 
-        base_type::mouse_moved(aPosition, aKeyModifiers);
+        base_type::mouse_moved(aPosition, aKeyModifier);
     }
 
     void terminal::mouse_entered(const point& aPosition)
@@ -315,13 +315,13 @@ namespace neogfx
         return base_type::mouse_cursor();
     }
 
-    bool terminal::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool terminal::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         neolib::service<neolib::i_power>().register_activity();
 
         bool handled = false;
 
-        if (aScanCode >= ScanCode_A && aScanCode <= ScanCode_Z && (aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+        if (aScanCode >= ScanCode_A && aScanCode <= ScanCode_Z && (aKeyModifier & key_modifier::CTRL) != key_modifier::None)
         {
             Input(string{ 1, static_cast<char>(aScanCode - ScanCode_A + '\x01') });
             handled = true;
@@ -386,16 +386,16 @@ namespace neogfx
             break;
         default:
             if (!handled)
-                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             break;
         }
 
         return handled;
     }
 
-    bool terminal::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool terminal::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
-        return base_type::key_released(aScanCode, aKeyCode, aKeyModifiers);
+        return base_type::key_released(aScanCode, aKeyCode, aKeyModifier);
     }
 
     bool terminal::text_input(i_string const& aText)

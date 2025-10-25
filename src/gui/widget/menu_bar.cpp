@@ -94,7 +94,7 @@ namespace neogfx
         return result;
     }
 
-    bool menu_bar::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+    bool menu_bar::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
         switch (aScanCode)
         {
@@ -145,7 +145,7 @@ namespace neogfx
         return true;
     }
 
-    bool menu_bar::key_released(scan_code_e, key_code_e, key_modifiers_e)
+    bool menu_bar::key_released(scan_code_e, key_code_e, key_modifier)
     {
         return true;
     }

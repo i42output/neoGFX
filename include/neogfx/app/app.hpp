@@ -168,8 +168,8 @@ namespace neogfx
     private:
         bool do_process_events();
     private:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
+        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
         bool sys_text_input(i_string const& aText) override;
     private:
@@ -187,7 +187,7 @@ namespace neogfx
         neolib::callback_timer iStandardActionManager;
         mnemonic_list iMnemonics;
         neogfx::event_processing_context iAppContext;
-        std::vector<std::pair<key_code_e, key_modifiers_e>> iKeySequence;
+        std::vector<std::pair<key_code_e, key_modifier>> iKeySequence;
         mutable std::unique_ptr<i_help> iHelp;
         std::map<std::string, std::map<std::string, std::map<std::pair<std::int64_t, std::int64_t>, string>>> iTranslations;
         // standard actions

@@ -136,14 +136,14 @@ namespace neogfx
         neogfx::focus_policy focus_policy() const override;
         void focus_gained(focus_reason aFocusReason) override;
     protected:
-        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
-        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
     protected:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
     protected:
         rect scroll_area() const override;
@@ -184,8 +184,8 @@ namespace neogfx
         void init();
         void invalidate_item(item_presentation_model_index const& aItemIndex);
         void update_hover(const optional_point& aPosition);
-        item_selection_operation to_selection_operation(key_modifiers_e aKeyModifiers) const;
-        void select(item_presentation_model_index const& aItemIndex, key_modifiers_e aKeyModifiers);
+        item_selection_operation to_selection_operation(key_modifier aKeyModifier) const;
+        void select(item_presentation_model_index const& aItemIndex, key_modifier aKeyModifier);
         void select(item_presentation_model_index const& aItemIndex, item_selection_operation aSelectionOperation = item_selection_operation::ClearAndSelect);
     private:
         sink iSink;

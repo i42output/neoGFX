@@ -79,9 +79,9 @@ namespace neogfx
     protected:
         color frame_color() const override;
     protected:
-        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) override;
     protected:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
     private:
         void do_step(step_direction aDirection, std::uint32_t aAmount = 1);
         std::optional<value_type> string_to_value(std::string const& aString) const;

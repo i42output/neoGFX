@@ -240,9 +240,9 @@ namespace neogfx
             draw_alpha_stop(aGc, **iCurrentAlphaStop);
     }
 
-    void gradient_widget::mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         iClicked = aPosition;
         if (aButton == mouse_button::Left)
         {
@@ -293,9 +293,9 @@ namespace neogfx
         }
     }
 
-    void gradient_widget::mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             auto stopIter = stop_at(aPosition);
@@ -519,9 +519,9 @@ namespace neogfx
         update();
     }
 
-    void gradient_widget::mouse_moved(point const& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_moved(point const& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_moved(aPosition, aKeyModifiers);
+        widget::mouse_moved(aPosition, aKeyModifier);
         if (iTracking)
         {
             double pos = gradient::normalized_position(aPosition.x, contents_rect().left(), contents_rect().right() - 1.0);

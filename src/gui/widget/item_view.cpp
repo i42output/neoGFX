@@ -442,9 +442,9 @@ namespace neogfx
         }
     }
 
-    void item_view::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void item_view::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             if (!drag_drop_active() && capturing() && item_display_rect(true).contains(aPosition))
@@ -463,11 +463,11 @@ namespace neogfx
                     if (presentation_model().cell_checkable(*item) && cell_rect(*item, cell_part::CheckBox).contains(aPosition))
                         iClickedCheckBox = item;
                     bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                    select(*item, aKeyModifiers);
+                    select(*item, aKeyModifier);
                     bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
                     if (itemWasCurrent && itemIsCurrent)
                         iClickedItem = item;
-                    if (aKeyModifiers == KeyModifier_NONE && !iClickedCheckBox && itemIsCurrent &&
+                    if (aKeyModifier == key_modifier::None && !iClickedCheckBox && itemIsCurrent &&
                         presentation_model().cell_editable_when_focused(*item))
                         edit(*item);
                 }
@@ -479,14 +479,14 @@ namespace neogfx
                     {
                         if (!drag_drop_source_enabled())
                         {
-                            iMouseTracker.emplace(*this, [this, aKeyModifiers](widget_timer& aTimer)
+                            iMouseTracker.emplace(*this, [this, aKeyModifier](widget_timer& aTimer)
                             {
                                 aTimer.again();
                                 auto const pos = mouse_position();
                                 auto const item = item_at(pos);
                                 if (item != std::nullopt)
                                 {
-                                    if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                                    if ((to_selection_operation(aKeyModifier) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
                                         select(*item, item_selection_operation::None);
                                     else
                                         select(*item);
@@ -510,14 +510,14 @@ namespace neogfx
             if (item != std::nullopt)
             {
                 if (!selection_model().is_selected(*item))
-                    select(*item, aKeyModifiers);
+                    select(*item, aKeyModifier);
             }
         }
     }
 
-    void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void item_view::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && item_display_rect(true).contains(aPosition))
         {
             auto item = item_at(aPosition);
@@ -535,7 +535,7 @@ namespace neogfx
                     actioned = true;
                 }
                 bool const itemWasCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                if ((to_selection_operation(aKeyModifier) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
                     select(*item, item_selection_operation::None);
                 else
                     select(*item);
@@ -546,7 +546,7 @@ namespace neogfx
                     actioned = true;
                 }
                 bool const itemIsCurrent = (selection_model().has_current_index() && selection_model().current_index() == *item);
-                if (!actioned && itemIsCurrent && aKeyModifiers == KeyModifier_NONE)
+                if (!actioned && itemIsCurrent && aKeyModifier == key_modifier::None)
                 {
                     if (presentation_model().cell_editable_when_focused(*item) ||
                         (itemWasCurrent && presentation_model().cell_editable_on_input_event(*item)))
@@ -592,9 +592,9 @@ namespace neogfx
         }
     }
 
-    void item_view::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void item_view::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_moved(aPosition, aKeyModifiers);
+        base_type::mouse_moved(aPosition, aKeyModifier);
         if (!iIgnoreNextMouseMove)
         {
             if (!drag_drop_source_enabled() && (iMouseTracker || hot_tracking()) && client_rect().contains(aPosition))
@@ -602,7 +602,7 @@ namespace neogfx
                 auto item = item_at(aPosition);
                 if (item != std::nullopt)
                 {
-                    if ((to_selection_operation(aKeyModifiers) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
+                    if ((to_selection_operation(aKeyModifier) & item_selection_operation::Toggle) == item_selection_operation::Toggle)
                         select(*item, item_selection_operation::None);
                     else
                         select(*item);
@@ -626,7 +626,7 @@ namespace neogfx
         update_hover({});
     }
 
-    bool item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool item_view::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         bool handled = true;
         if (selection_model().has_current_index())
@@ -660,7 +660,7 @@ namespace neogfx
                 {
                     end_edit(true);
                     item_presentation_model_index originalIndex = selection_model().current_index();
-                    if ((aKeyModifiers & KeyModifier_SHIFT) == KeyModifier_NONE)
+                    if ((aKeyModifier & key_modifier::SHIFT) == key_modifier::None)
                         select(selection_model().relative_to_current_index(index_location::NextCell, true, true));
                     else
                         select(selection_model().relative_to_current_index(index_location::PreviousCell, true, true));
@@ -709,23 +709,23 @@ namespace neogfx
                 }
                 break;
             case ScanCode_HOME:
-                if ((aKeyModifiers & KeyModifier_CTRL) == 0)
+                if ((aKeyModifier & key_modifier::CTRL) == key_modifier::None)
                     newIndex = selection_model().relative_to_current_index(index_location::StartOfCurrentRow);
                 else
                     newIndex = selection_model().relative_to_current_index(index_location::FirstCell);
                 break;
             case ScanCode_END:
-                if ((aKeyModifiers & KeyModifier_CTRL) == 0)
+                if ((aKeyModifier & key_modifier::CTRL) == key_modifier::None)
                     newIndex = selection_model().relative_to_current_index(index_location::EndOfCurrentRow);
                 else
                     newIndex = selection_model().relative_to_current_index(index_location::LastCell);
                 break;
             default:
-                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifier);
                 break;
             }
             if (aScanCode == ScanCode_SPACE)
-                select(newIndex, aKeyModifiers);
+                select(newIndex, aKeyModifier);
             else if (newIndex != currentIndex)
                 select(newIndex, item_selection_operation::None);
         }
@@ -747,7 +747,7 @@ namespace neogfx
                     handled = false;
                 break;
             default:
-                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+                handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifier);
                 break;
             }
         }
@@ -1482,14 +1482,14 @@ namespace neogfx
         }
     }
 
-    item_selection_operation item_view::to_selection_operation(key_modifiers_e aKeyModifiers) const
+    item_selection_operation item_view::to_selection_operation(key_modifier aKeyModifier) const
     {
         switch (selection_model().mode())
         {
         case item_selection_mode::NoSelection:
             return item_selection_operation::None;
         case item_selection_mode::SingleSelection:
-            if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+            if ((aKeyModifier & key_modifier::CTRL) != key_modifier::None)
                 return item_selection_operation::ClearAndToggle;
             else
                 return item_selection_operation::ClearAndSelect;
@@ -1498,7 +1498,7 @@ namespace neogfx
             // todo
             return item_selection_operation::None;
         case item_selection_mode::ExtendedSelection:
-            if ((aKeyModifiers & KeyModifier_CTRL) != KeyModifier_NONE)
+            if ((aKeyModifier & key_modifier::CTRL) != key_modifier::None)
                 return item_selection_operation::Toggle;
             else
                 return item_selection_operation::ClearAndSelect;
@@ -1508,9 +1508,9 @@ namespace neogfx
         }
     }
 
-    void item_view::select(item_presentation_model_index const& aItemIndex, key_modifiers_e aKeyModifiers)
+    void item_view::select(item_presentation_model_index const& aItemIndex, key_modifier aKeyModifier)
     {
-        auto const selectionOperation = to_selection_operation(aKeyModifiers);
+        auto const selectionOperation = to_selection_operation(aKeyModifier);
         select(aItemIndex, selectionOperation);
     }
 

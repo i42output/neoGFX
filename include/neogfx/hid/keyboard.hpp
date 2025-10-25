@@ -35,8 +35,8 @@ namespace neogfx
     public:
         keyboard_grabber(keyboard& aKeyboard);
     public:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
-        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
+        bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
         bool sys_text_input(i_string const& aText) override;
     private:
@@ -46,8 +46,8 @@ namespace neogfx
     class keyboard : public hid_device<i_keyboard>
     {
     public:
-        define_declared_event(KeyPressed, key_pressed, scan_code_e, key_code_e, key_modifiers_e)
-        define_declared_event(KeyReleased, key_released, scan_code_e, key_code_e, key_modifiers_e)
+        define_declared_event(KeyPressed, key_pressed, scan_code_e, key_code_e, key_modifier)
+        define_declared_event(KeyReleased, key_released, scan_code_e, key_code_e, key_modifier)
         define_declared_event(TextInput, text_input, std::string const&)
         define_declared_event(SysTextInput, sys_text_input, std::string const&)
         define_declared_event(InputLanguageChanged, input_language_changed)
@@ -56,8 +56,8 @@ namespace neogfx
     public:
         keyboard(const i_string& aName = string{ "Generic Keyboard" });
     public:
-        key_modifiers_e event_modifiers() const override;
-        void set_event_modifiers(key_modifiers_e aModifiers) override;
+        key_modifier event_modifiers() const override;
+        void set_event_modifiers(key_modifier aModifiers) override;
         void clear_event_modifiers() override;
     public:
         bool is_keyboard_grabbed() const override;
@@ -69,6 +69,6 @@ namespace neogfx
     private:
         mutable keyboard_grabber iGrabber;
         std::deque<i_keyboard_handler*> iGrabs;
-        std::optional<key_modifiers_e> iEventModifiers;
+        std::optional<key_modifier> iEventModifiers;
     };
 }

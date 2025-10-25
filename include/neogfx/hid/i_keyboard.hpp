@@ -590,35 +590,60 @@ namespace neogfx
         KeyCode_AUDIOFASTFORWARD = NEOGFX_SCANCODE_TO_KEYCODE(ScanCode_AUDIOFASTFORWARD)
     };
 
-    enum key_modifiers_e : std::uint16_t
+    enum class key_modifier : std::uint16_t
     {
-        KeyModifier_NONE        = 0x0000,
-        KeyModifier_LSHIFT      = 0x0001,
-        KeyModifier_RSHIFT      = 0x0002,
-        KeyModifier_SHIFT       = KeyModifier_LSHIFT | KeyModifier_RSHIFT,
-        KeyModifier_LCTRL       = 0x0004,
-        KeyModifier_RCTRL       = 0x0008,
-        KeyModifier_CTRL        = KeyModifier_LCTRL | KeyModifier_RCTRL,
-        KeyModifier_LALT        = 0x0010,
-        KeyModifier_RALT        = 0x0020,
-        KeyModifier_ALT         = KeyModifier_LALT | KeyModifier_RALT,
-        KeyModifier_LGUI        = 0x0040,
-        KeyModifier_RGUI        = 0x0080,
-        KeyModifier_GUI         = KeyModifier_LGUI | KeyModifier_RGUI,
-        KeyModifier_EXTENDED    = 0x0100,
-        KeyModifier_KEYPAD      = KeyModifier_EXTENDED,
-        KeyModifier_SYSTEM      = 0x0200,
-        KeyModifier_NUM         = 0x1000,
-        KeyModifier_CAPS        = 0x2000,
-        KeyModifier_SCROLL      = 0x4000,
-        KeyModifier_LOCKS       = KeyModifier_NUM | KeyModifier_CAPS | KeyModifier_SCROLL,
+        None        = 0x0000,
+        LSHIFT      = 0x0001,
+        RSHIFT      = 0x0002,
+        SHIFT       = LSHIFT | RSHIFT,
+        LCTRL       = 0x0004,
+        RCTRL       = 0x0008,
+        CTRL        = LCTRL | RCTRL,
+        LALT        = 0x0010,
+        RALT        = 0x0020,
+        ALT         = LALT | RALT,
+        LGUI        = 0x0040,
+        RGUI        = 0x0080,
+        GUI         = LGUI | RGUI,
+        EXTENDED    = 0x0100,
+        KEYPAD      = EXTENDED,
+        SYSTEM      = 0x0200,
+        NUM         = 0x1000,
+        CAPS        = 0x2000,
+        SCROLL      = 0x4000,
+        LOCKS       = NUM | CAPS | SCROLL,
     };
+
+    inline constexpr key_modifier operator~(key_modifier aValue)
+    {
+        return static_cast<key_modifier>(~static_cast<std::uint16_t>(aValue));
+    }
+
+    inline constexpr key_modifier operator|(key_modifier aLhs, key_modifier aRhs)
+    {
+        return static_cast<key_modifier>(static_cast<std::uint16_t>(aLhs) | static_cast<std::uint16_t>(aRhs));
+    }
+
+    inline constexpr key_modifier operator&(key_modifier aLhs, key_modifier aRhs)
+    {
+        return static_cast<key_modifier>(static_cast<std::uint16_t>(aLhs) & static_cast<std::uint16_t>(aRhs));
+    }
+
+    inline constexpr key_modifier& operator|=(key_modifier& aLhs, key_modifier aRhs)
+    {
+        return aLhs = static_cast<key_modifier>(static_cast<std::uint16_t>(aLhs) | static_cast<std::uint16_t>(aRhs));
+    }
+
+    inline constexpr key_modifier& operator&=(key_modifier& aLhs, key_modifier aRhs)
+    {
+        return aLhs = static_cast<key_modifier>(static_cast<std::uint16_t>(aLhs) & static_cast<std::uint16_t>(aRhs));
+    }
 
     class i_keyboard_handler
     {
     public:
-        virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
-        virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) = 0;
+        virtual bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) = 0;
+        virtual bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) = 0;
         virtual bool text_input(i_string const& aText) = 0;
         virtual bool sys_text_input(i_string const& aText) = 0;
     };
@@ -671,8 +696,8 @@ namespace neogfx
     public:
         typedef i_keyboard abstract_type;
     public:
-        declare_event(key_pressed, scan_code_e, key_code_e, key_modifiers_e)
-        declare_event(key_released, scan_code_e, key_code_e, key_modifiers_e)
+        declare_event(key_pressed, scan_code_e, key_code_e, key_modifier)
+        declare_event(key_released, scan_code_e, key_code_e, key_modifier)
         declare_event(text_input, std::string const&)
         declare_event(sys_text_input, std::string const&)
         declare_event(input_language_changed)
@@ -684,9 +709,9 @@ namespace neogfx
     public:
         virtual bool is_key_pressed(scan_code_e aScanCode) const = 0;
         virtual keyboard_locks locks() const = 0;
-        virtual key_modifiers_e modifiers() const = 0;
-        virtual key_modifiers_e event_modifiers() const = 0;
-        virtual void set_event_modifiers(key_modifiers_e aModifiers) = 0;
+        virtual key_modifier modifiers() const = 0;
+        virtual key_modifier event_modifiers() const = 0;
+        virtual void set_event_modifiers(key_modifier aModifiers) = 0;
         virtual void clear_event_modifiers() = 0;
     public:
         virtual bool is_keyboard_grabbed() const = 0;
@@ -712,7 +737,7 @@ namespace neogfx
             Full,
         };
     private:
-        typedef std::pair<key_code_e, std::set<key_modifiers_e>> combo_type;
+        typedef std::pair<key_code_e, std::set<key_modifier>> combo_type;
         typedef std::vector<combo_type> sequence_type;
     public:
         explicit key_sequence(std::string const& aSequence) : iText{ aSequence }
@@ -729,11 +754,11 @@ namespace neogfx
                     if (i < comboBits.size() - 1)
                     {
                         if (comboBits[i] == "Ctrl")
-                            nextCombo.second.insert(KeyModifier_CTRL);
+                            nextCombo.second.insert(key_modifier::CTRL);
                         else if (comboBits[i] == "Alt")
-                            nextCombo.second.insert(KeyModifier_ALT);
+                            nextCombo.second.insert(key_modifier::ALT);
                         else if (comboBits[i] == "Shift")
-                            nextCombo.second.insert(KeyModifier_SHIFT);
+                            nextCombo.second.insert(key_modifier::SHIFT);
                     }
                     else
                     {
@@ -815,7 +840,7 @@ namespace neogfx
             return !(*this == aRhs);
         }
     public:
-        template <typename Iter> // iterator to std::pair<key_code_e, key_modifiers_e>
+        template <typename Iter> // iterator to std::pair<key_code_e, key_modifier>
         match matches(Iter aFirst, Iter aLast) const
         {
             std::size_t index = 0;
@@ -824,25 +849,25 @@ namespace neogfx
                     return match::No;
             return (index == iSequence.size() ? match::Full : match::Partial);
         }
-        match matches(key_code_e aKeyCode, key_modifiers_e aKeyModifiers) const
+        match matches(key_code_e aKeyCode, key_modifier aKeyModifier) const
         {
-            return matches(0, aKeyCode, aKeyModifiers);
+            return matches(0, aKeyCode, aKeyModifier);
         }
         const i_string& as_text() const
         {
             return iText;
         }
     private:
-        match matches(std::size_t aIndex, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) const
+        match matches(std::size_t aIndex, key_code_e aKeyCode, key_modifier aKeyModifier) const
         {
             if (iSequence[aIndex].first != aKeyCode)
                 return match::No;
             for (auto m : iSequence[aIndex].second)
-                if ((aKeyModifiers & m) != 0)
-                    aKeyModifiers = static_cast<key_modifiers_e>(aKeyModifiers & ~m);
+                if ((aKeyModifier & m) != key_modifier::None)
+                    aKeyModifier = static_cast<key_modifier>(aKeyModifier & ~m);
                 else
                     return match::No;
-            if ((aKeyModifiers & ~KeyModifier_LOCKS) == 0)
+            if ((aKeyModifier & ~key_modifier::LOCKS) == key_modifier::None)
                 return (iSequence.size() == 1 ? match::Full : match::Partial);
             else
                 return match::No;

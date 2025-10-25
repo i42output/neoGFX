@@ -76,7 +76,7 @@ namespace neogfx
         public:
             bool is_key_pressed(scan_code_e aScanCode) const final;
             keyboard_locks locks() const final;
-            key_modifiers_e modifiers() const final;
+            key_modifier modifiers() const final;
         public:
             key_code_e scan_code_to_key_code(scan_code_e aScanCode) const final;
             native_key_code_e native_key_code_to_usb_hid_key_code(native_key_code_e aKeyCode) const final;

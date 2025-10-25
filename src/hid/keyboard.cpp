@@ -27,18 +27,18 @@ namespace neogfx
     {
     }
 
-    bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         for (auto& g : iKeyboard.iGrabs)
-            if (g->key_pressed(aScanCode, aKeyCode, aKeyModifiers))
+            if (g->key_pressed(aScanCode, aKeyCode, aKeyModifier))
                 return true;
         return false;
     }
 
-    bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         for (auto& g : iKeyboard.iGrabs)
-            if (g->key_released(aScanCode, aKeyCode, aKeyModifiers))
+            if (g->key_released(aScanCode, aKeyCode, aKeyModifier))
                 return true;
         return false;
     }
@@ -65,14 +65,14 @@ namespace neogfx
     {
     }
 
-    key_modifiers_e keyboard::event_modifiers() const
+    key_modifier keyboard::event_modifiers() const
     {
         if (iEventModifiers)
             return *iEventModifiers;
         return modifiers();
     }
 
-    void keyboard::set_event_modifiers(key_modifiers_e aModifiers)
+    void keyboard::set_event_modifiers(key_modifier aModifiers)
     {
         iEventModifiers = aModifiers;
     }

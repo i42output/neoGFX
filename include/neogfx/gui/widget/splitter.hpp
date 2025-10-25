@@ -59,9 +59,9 @@ namespace neogfx
     public:
         i_widget& get_widget_at(const point& aPosition) override;
     public:
-        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
+        void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
         neogfx::mouse_cursor mouse_cursor() const override;

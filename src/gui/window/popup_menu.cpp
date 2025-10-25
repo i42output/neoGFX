@@ -225,7 +225,7 @@ namespace neogfx
         return result;
     }
 
-    bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifiers_e)
+    bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
         switch (aScanCode)
         {
@@ -312,7 +312,7 @@ namespace neogfx
         return true;
     }
 
-    bool popup_menu::key_released(scan_code_e, key_code_e, key_modifiers_e)
+    bool popup_menu::key_released(scan_code_e, key_code_e, key_modifier)
     {
         return true;
     }

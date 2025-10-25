@@ -107,7 +107,7 @@ namespace neogfx
     }
 
     template <typename T>
-    inline bool basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    inline bool basic_spin_box<T>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
         if (aWheel == mouse_wheel::Vertical)
         {
@@ -115,11 +115,11 @@ namespace neogfx
             return true;
         }
         else
-            return base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            return base_type::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifier);
     }
 
     template <typename T>
-    inline bool basic_spin_box<T>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    inline bool basic_spin_box<T>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         if (aScanCode == ScanCode_UP)
         {
@@ -132,7 +132,7 @@ namespace neogfx
             return true;
         }
         else
-            return base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            return base_type::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
 
     template <typename T>

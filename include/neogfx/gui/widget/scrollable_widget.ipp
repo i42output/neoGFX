@@ -155,7 +155,7 @@ namespace neogfx
     }
 
     template <Widget Base>
-    inline bool scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    inline bool scrollable_widget<Base>::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
         scoped_property_transition_suppression sts1{ iVerticalScrollbar.Position };
         scoped_property_transition_suppression sts2{ iHorizontalScrollbar.Position };
@@ -179,13 +179,13 @@ namespace neogfx
         mouse_wheel passOn = static_cast<mouse_wheel>(
             aWheel & ((handledVertical ? ~verticalSense : verticalSense) | (handledHorizontal ? ~horizontalSense : horizontalSense)));
         if (passOn != mouse_wheel::None)
-            return base_type::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifiers);
+            return base_type::mouse_wheel_scrolled(passOn, aPosition, aDelta, aKeyModifier);
         else
             return true;
     }
 
     template <Widget Base>
-    inline void scrollable_widget<Base>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void scrollable_widget<Base>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
         if (aButton == mouse_button::Middle)
         {
@@ -203,11 +203,11 @@ namespace neogfx
             if (handled)
                 base_type::as_widget().set_capture();
             else
-                base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+                base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         }
         else
         {
-            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
             if (aButton == mouse_button::Left)
             {
                 if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
@@ -228,9 +228,9 @@ namespace neogfx
     }
 
     template <Widget Base>
-    inline void scrollable_widget<Base>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void scrollable_widget<Base>::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)
@@ -274,9 +274,9 @@ namespace neogfx
     }
 
     template <Widget Base>
-    inline void scrollable_widget<Base>::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void scrollable_widget<Base>::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_moved(aPosition, aKeyModifiers);
+        base_type::mouse_moved(aPosition, aKeyModifier);
         vertical_scrollbar().update(aPosition);
         horizontal_scrollbar().update(aPosition);
     }
@@ -298,7 +298,7 @@ namespace neogfx
     }
 
     template <Widget Base>
-    inline bool scrollable_widget<Base>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers)
+    inline bool scrollable_widget<Base>::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         bool handled = true;
         switch (aScanCode)
@@ -322,19 +322,19 @@ namespace neogfx
             vertical_scrollbar().set_position(vertical_scrollbar().Position.effective_value() + vertical_scrollbar().page());
             break;
         case ScanCode_HOME:
-            if (horizontal_scrollbar().visible() && !(aKeyModifiers & KeyModifier_CTRL))
+            if (horizontal_scrollbar().visible() && (aKeyModifier & key_modifier::CTRL) == key_modifier::None)
                 horizontal_scrollbar().set_position(horizontal_scrollbar().minimum());
             else
                 vertical_scrollbar().set_position(vertical_scrollbar().minimum());
             break;
         case ScanCode_END:
-            if (horizontal_scrollbar().visible() && !(aKeyModifiers & KeyModifier_CTRL))
+            if (horizontal_scrollbar().visible() && (aKeyModifier & key_modifier::CTRL) == key_modifier::None)
                 horizontal_scrollbar().set_position(horizontal_scrollbar().maximum());
             else
                 vertical_scrollbar().set_position(vertical_scrollbar().maximum());
             break;
         default:
-            handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            handled = base_type::key_pressed(aScanCode, aKeyCode, aKeyModifier);
             break;
         }
         return handled;

@@ -975,8 +975,8 @@ namespace neogfx
                         keyboard_event_type::SysTextInput, 
                         text, 
                         KeyCode_UNKNOWN, 
-                        static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
-                            ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED | KeyModifier_SYSTEM: KeyModifier_SYSTEM)),
+                        static_cast<key_modifier>(service<i_keyboard>().modifiers() |
+                            ((lparam >> 16) & KF_EXTENDED ? key_modifier::EXTENDED | key_modifier::SYSTEM: key_modifier::SYSTEM)),
                         static_cast<native_scan_code_e>(lparam),
                         static_cast<native_key_code_e>(wparam) });
                 }
@@ -996,8 +996,8 @@ namespace neogfx
                             keyboard_event_type::TextInput, 
                             text, 
                             KeyCode_UNKNOWN, 
-                            static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
-                                ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                            static_cast<key_modifier>(service<i_keyboard>().modifiers() |
+                                ((lparam >> 16) & KF_EXTENDED ? key_modifier::EXTENDED : key_modifier::None)),
                             static_cast<native_scan_code_e>(lparam),
                             static_cast<native_key_code_e>(wparam) });
                 }
@@ -1021,8 +1021,8 @@ namespace neogfx
                             keyboard_event_type::TextInput, 
                             text, 
                             KeyCode_UNKNOWN, 
-                            static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
-                                ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                            static_cast<key_modifier>(service<i_keyboard>().modifiers() |
+                                ((lparam >> 16) & KF_EXTENDED ? key_modifier::EXTENDED : key_modifier::None)),
                             static_cast<native_scan_code_e>(lparam),
                             static_cast<native_key_code_e>(wparam) });
                 }
@@ -1034,9 +1034,9 @@ namespace neogfx
                         keyboard_event_type::KeyPressed,
                         keyboard::scan_code_from_message(lparam, wparam),
                         service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
-                        static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
-                            (msg == WM_SYSKEYDOWN ? KeyModifier_SYSTEM : KeyModifier_NONE) |
-                            ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                        static_cast<key_modifier>(service<i_keyboard>().modifiers() |
+                            (msg == WM_SYSKEYDOWN ? key_modifier::SYSTEM : key_modifier::None) |
+                            ((lparam >> 16) & KF_EXTENDED ? key_modifier::EXTENDED : key_modifier::None)),
                         static_cast<native_scan_code_e>(lparam),
                         static_cast<native_key_code_e>(wparam) });
                 if (!self.is_non_client_capturing())
@@ -1049,9 +1049,9 @@ namespace neogfx
                         keyboard_event_type::KeyReleased,
                         keyboard::scan_code_from_message(lparam, wparam),
                         service<i_keyboard>().scan_code_to_key_code(keyboard::scan_code_from_message(lparam, wparam)),
-                        static_cast<key_modifiers_e>(service<i_keyboard>().modifiers() |
-                            (msg == WM_SYSKEYUP ? KeyModifier_SYSTEM : KeyModifier_NONE) |
-                            ((lparam >> 16) & KF_EXTENDED ? KeyModifier_EXTENDED : KeyModifier_NONE)),
+                        static_cast<key_modifier>(service<i_keyboard>().modifiers() |
+                            (msg == WM_SYSKEYUP ? key_modifier::SYSTEM : key_modifier::None) |
+                            ((lparam >> 16) & KF_EXTENDED ? key_modifier::EXTENDED : key_modifier::None)),
                         static_cast<native_scan_code_e>(lparam),
                         static_cast<native_key_code_e>(wparam) });
                 if (!self.is_non_client_capturing())

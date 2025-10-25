@@ -242,7 +242,7 @@ namespace chess::gui
         set_font(ng::service<ng::i_app>().current_style().font().with_size(11 * scale()).with_style(ng::font_style::Bold));
     }
 
-    bool board::key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifiers_e aKeyModifiers)
+    bool board::key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifier aKeyModifier)
     {
         if (aKeyCode == ng::key_code_e::KeyCode_i)
         {
@@ -264,7 +264,7 @@ namespace chess::gui
             return true;
         }
         else
-            return widget<>::key_pressed(aScanCode, aKeyCode, aKeyModifiers);
+            return widget<>::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
 
     ng::focus_policy board::focus_policy() const
@@ -272,9 +272,9 @@ namespace chess::gui
         return ng::focus_policy::StrongFocus;
     }
 
-    void board::mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
+    void board::mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier)
     {
-        widget<>::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget<>::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (!iAnimations.empty())
         {
             iAnimations.pop_front();
@@ -360,9 +360,9 @@ namespace chess::gui
         update();
     }
 
-    void board::mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
+    void board::mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier)
     {
-        widget<>::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        widget<>::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
     }
 
     void board::mouse_button_released(ng::mouse_button aButton, const ng::point& aPosition)
@@ -386,7 +386,7 @@ namespace chess::gui
         update();
     }
 
-    void board::mouse_moved(const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
+    void board::mouse_moved(const ng::point& aPosition, ng::key_modifier aKeyModifier)
     {
         auto oldCursor = iCursor;
         iCursor = at(aPosition);

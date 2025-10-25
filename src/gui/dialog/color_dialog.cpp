@@ -63,9 +63,9 @@ namespace neogfx
         }
     }
 
-    void color_dialog::color_box::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::color_box::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             if (iCustomColor == std::nullopt)
@@ -195,9 +195,9 @@ namespace neogfx
         resize(minimum_size());
     }
 
-    void color_dialog::x_picker::cursor_widget::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::x_picker::cursor_widget::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        image_widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        image_widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
             iDragOffset = point{ aPosition - client_rect().center() };
     }
@@ -209,7 +209,7 @@ namespace neogfx
             iDragOffset = std::nullopt;
     }
 
-    void color_dialog::x_picker::cursor_widget::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::x_picker::cursor_widget::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
         if (iDragOffset != std::nullopt)
         {
@@ -307,9 +307,9 @@ namespace neogfx
         }
     }
 
-    void color_dialog::x_picker::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::x_picker::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             select(aPosition - client_rect(false).top_left());
@@ -324,7 +324,7 @@ namespace neogfx
             iTracking = false;
     }
 
-    void color_dialog::x_picker::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::x_picker::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
         if (iTracking)
             select(aPosition - client_rect(false).top_left());
@@ -531,9 +531,9 @@ namespace neogfx
         update();
     }
 
-    void color_dialog::yz_picker::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::yz_picker::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        framed_scrollable_widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             select(aPosition - client_rect(false).top_left());
@@ -548,9 +548,9 @@ namespace neogfx
             iTracking = false;
     }
 
-    void color_dialog::yz_picker::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::yz_picker::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_moved(aPosition, aKeyModifier);
         if (iTracking)
             select(aPosition - client_rect(false).top_left());
     }
@@ -912,9 +912,9 @@ namespace neogfx
             iCurrentCustomColor = iCustomColors.begin();
     }
 
-    void color_dialog::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void color_dialog::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        dialog::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        dialog::mouse_button_clicked(aButton, aPosition, aKeyModifier);
     }
 
     void color_dialog::init()

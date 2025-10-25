@@ -69,12 +69,12 @@ namespace neogfx::DesignStudio
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
     protected:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
     protected:
         bool ignore_mouse_events(bool aConsiderAncestors = true) const override;
-        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
-        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_entered(const point& aPosition) override;
         void mouse_left() override;
         neogfx::mouse_cursor mouse_cursor() const override;

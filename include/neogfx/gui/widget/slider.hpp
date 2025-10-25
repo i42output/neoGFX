@@ -59,11 +59,11 @@ namespace neogfx
     public:
         void paint(i_graphics_context& aGc) const override;
     public:
-        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
-        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
-        void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) override;
+        void mouse_moved(const point& aPosition, key_modifier aKeyModifier) override;
     public:
         virtual double normalized_step_value() const = 0;
         virtual double normalized_value() const = 0;

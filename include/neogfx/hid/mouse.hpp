@@ -34,7 +34,7 @@ namespace neogfx
     public:
         mouse_grabber(mouse& aMouse);
     public:
-        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) override;
     private:
         mouse& iMouse;
     };

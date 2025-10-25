@@ -138,15 +138,15 @@ namespace neogfx
     public:
         void paint_non_client_after(i_graphics_context& aGc) const override;
     public:
-        bool mouse_wheel_scrolled(mouse_wheel aWheel, point const& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers) override;
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, point const& aPosition, delta aDelta, key_modifier aKeyModifier) override;
+        void mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(mouse_button aButton, point const& aPosition, key_modifier aKeyModifier) override;
         void mouse_button_released(mouse_button aButton, point const& aPosition) override;
-        void mouse_moved(point const& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(point const& aPosition, key_modifier aKeyModifier) override;
         void mouse_entered(point const& aPosition) override;
         void mouse_left() override;
     public:
-        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
     public:
         virtual scrollbar const& vertical_scrollbar() const;
         virtual scrollbar& vertical_scrollbar();

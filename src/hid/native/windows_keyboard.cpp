@@ -428,31 +428,31 @@ namespace neogfx
 
         // TODO: modifiers for current keyboard event
 
-        key_modifiers_e keyboard::modifiers() const
+        key_modifier keyboard::modifiers() const
         {
-            key_modifiers_e modifiers = KeyModifier_NONE;
+            key_modifier modifiers = key_modifier::None;
             if (GetAsyncKeyState(VK_LSHIFT) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LSHIFT);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::LSHIFT);
             if (GetAsyncKeyState(VK_RSHIFT) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RSHIFT);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::RSHIFT);
             if (GetAsyncKeyState(VK_LCONTROL) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LCTRL);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::LCTRL);
             if (GetAsyncKeyState(VK_RCONTROL) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RCTRL);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::RCTRL);
             if (GetAsyncKeyState(VK_LMENU) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LALT);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::LALT);
             if (GetAsyncKeyState(VK_RMENU) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RALT);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::RALT);
             if (GetAsyncKeyState(VK_LWIN) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_LGUI);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::LGUI);
             if (GetAsyncKeyState(VK_RWIN) >> 1)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_RGUI);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::RGUI);
             if ((locks() & keyboard_locks::CapsLock) == keyboard_locks::CapsLock)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_CAPS);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::CAPS);
             if ((locks() & keyboard_locks::NumLock) == keyboard_locks::NumLock)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_NUM);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::NUM);
             if ((locks() & keyboard_locks::ScrollLock) == keyboard_locks::ScrollLock)
-                modifiers = static_cast<key_modifiers_e>(modifiers | KeyModifier_SCROLL);
+                modifiers = static_cast<key_modifier>(modifiers | key_modifier::SCROLL);
             return modifiers;
         }
 

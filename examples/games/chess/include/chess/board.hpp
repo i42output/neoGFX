@@ -62,16 +62,16 @@ namespace chess::gui
     protected:
         void paint(ng::i_graphics_context& aGc) const override;
     protected:
-        bool key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifiers_e aKeyModifiers) override;
+        bool key_pressed(ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifier aKeyModifier) override;
     protected:
         void resized() override;
     protected:
         ng::focus_policy focus_policy() const override;
     protected:
-        void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
-        void mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) override;
+        void mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifier aKeyModifier) override;
         void mouse_button_released(ng::mouse_button aButton, const ng::point& aPosition) override;
-        void mouse_moved(const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
+        void mouse_moved(const ng::point& aPosition, ng::key_modifier aKeyModifier) override;
         void mouse_entered(const ng::point& aPosition) override;
         void mouse_left() override;
     public:

@@ -32,19 +32,19 @@ namespace neogfx
     class game_controller : public hid_device<i_game_controller>
     {
     public:
-        define_declared_event(RawButtonPressed, raw_button_pressed, game_controller_button_ordinal, key_modifiers_e)
-        define_declared_event(RawButtonReleased, raw_button_released, game_controller_button_ordinal, key_modifiers_e)
-        define_declared_event(ButtonPressed, button_pressed, game_controller_button, key_modifiers_e)
-        define_declared_event(ButtonReleased, button_released, game_controller_button, key_modifiers_e)
-        define_declared_event(ButtonRepeat, button_repeat, game_controller_button, key_modifiers_e)
-        define_declared_event(LeftTriggerMoved, left_trigger_moved, double, key_modifiers_e)
-        define_declared_event(RightTriggerMoved, right_trigger_moved, double, key_modifiers_e)
-        define_declared_event(LeftThumbMoved, left_thumb_moved, const vec2&, key_modifiers_e)
-        define_declared_event(RightThumbMoved, right_thumb_moved, const vec2&, key_modifiers_e)
-        define_declared_event(PovMoved, pov_moved, game_controller_pov_ordinal , const vec2&, key_modifiers_e)
-        define_declared_event(StickMoved, stick_moved, const vec3&, key_modifiers_e)
-        define_declared_event(StickRotated, stick_rotated, const vec3&, key_modifiers_e)
-        define_declared_event(SliderMoved, slider_moved, const vec2&, key_modifiers_e)
+        define_declared_event(RawButtonPressed, raw_button_pressed, game_controller_button_ordinal, key_modifier)
+        define_declared_event(RawButtonReleased, raw_button_released, game_controller_button_ordinal, key_modifier)
+        define_declared_event(ButtonPressed, button_pressed, game_controller_button, key_modifier)
+        define_declared_event(ButtonReleased, button_released, game_controller_button, key_modifier)
+        define_declared_event(ButtonRepeat, button_repeat, game_controller_button, key_modifier)
+        define_declared_event(LeftTriggerMoved, left_trigger_moved, double, key_modifier)
+        define_declared_event(RightTriggerMoved, right_trigger_moved, double, key_modifier)
+        define_declared_event(LeftThumbMoved, left_thumb_moved, const vec2&, key_modifier)
+        define_declared_event(RightThumbMoved, right_thumb_moved, const vec2&, key_modifier)
+        define_declared_event(PovMoved, pov_moved, game_controller_pov_ordinal , const vec2&, key_modifier)
+        define_declared_event(StickMoved, stick_moved, const vec3&, key_modifier)
+        define_declared_event(StickRotated, stick_rotated, const vec3&, key_modifier)
+        define_declared_event(SliderMoved, slider_moved, const vec2&, key_modifier)
     public:
         struct button_not_found : std::logic_error { button_not_found() : std::logic_error{ "neogfx::game_controller::button_not_found" } {} };
     public:

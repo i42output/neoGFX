@@ -27,10 +27,10 @@ namespace neogfx
     {
     }
 
-    bool mouse_grabber::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool mouse_grabber::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
         for (auto& g : iMouse.iGrabs)
-            if (g->mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers))
+            if (g->mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifier))
                 return true;
         return false;
     }

@@ -138,9 +138,9 @@ namespace neogfx
         aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
     }
 
-    void slider_impl::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void slider_impl::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             neolib::scoped_flag sf{ iHandlingEvent };
@@ -158,9 +158,9 @@ namespace neogfx
         }
     }
 
-    void slider_impl::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void slider_impl::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             neolib::scoped_flag sf{ iHandlingEvent };
@@ -178,7 +178,7 @@ namespace neogfx
         }
     }
 
-    bool slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers)
+    bool slider_impl::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
     {
         if (aWheel == mouse_wheel::Vertical)
         {
@@ -187,12 +187,12 @@ namespace neogfx
             return true;
         }
         else
-            return widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifiers);
+            return widget::mouse_wheel_scrolled(aWheel, aPosition, aDelta, aKeyModifier);
     }
 
-    void slider_impl::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void slider_impl::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_moved(aPosition, aKeyModifiers);
+        widget::mouse_moved(aPosition, aKeyModifier);
         if (iDragOffset != std::nullopt)
         {
             neolib::scoped_flag sf{ iHandlingEvent };

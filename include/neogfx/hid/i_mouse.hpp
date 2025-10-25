@@ -143,7 +143,7 @@ namespace neogfx
     class i_mouse_handler
     {
     public:
-        virtual bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) = 0;
+        virtual bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) = 0;
     };
 
     class i_mouse : public i_hid_device, public i_service

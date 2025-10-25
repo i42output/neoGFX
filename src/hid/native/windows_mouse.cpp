@@ -170,13 +170,13 @@ namespace neogfx
             return result;
         }
 
-        key_modifiers_e mouse::modifiers_from_message(WPARAM aWParam)
+        key_modifier mouse::modifiers_from_message(WPARAM aWParam)
         {
-            key_modifiers_e result = KeyModifier_NONE;
+            key_modifier result = key_modifier::None;
             if (aWParam & MK_CONTROL)
-                result = static_cast<key_modifiers_e>(result | KeyModifier_CTRL);
+                result = static_cast<key_modifier>(result | key_modifier::CTRL);
             if (aWParam & MK_SHIFT)
-                result = static_cast<key_modifiers_e>(result | KeyModifier_SHIFT);
+                result = static_cast<key_modifier>(result | key_modifier::SHIFT);
             return result;
         }
     }

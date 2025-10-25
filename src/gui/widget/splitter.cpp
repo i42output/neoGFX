@@ -71,9 +71,9 @@ namespace neogfx
         return widget::get_widget_at(aPosition);
     }
 
-    void splitter::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void splitter::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && capturing())
         {
             auto s = separator_at(aPosition);
@@ -90,15 +90,15 @@ namespace neogfx
         }
     }
 
-    void splitter::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void splitter::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left)
         {
             auto s = separator_at(aPosition);
             if (s != std::nullopt)
             {
-                if ((aKeyModifiers & KeyModifier_SHIFT) != KeyModifier_NONE)
+                if ((aKeyModifier & key_modifier::SHIFT) != key_modifier::None)
                     reset_pane_sizes_requested();
                 else
                     reset_pane_sizes_requested(s->first);
@@ -107,7 +107,7 @@ namespace neogfx
         }
     }
 
-    void splitter::mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers)
+    void splitter::mouse_moved(const point& aPosition, key_modifier aKeyModifier)
     {
         if (iTracking != std::nullopt)
         {

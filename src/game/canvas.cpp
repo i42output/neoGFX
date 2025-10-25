@@ -183,9 +183,9 @@ namespace neogfx::game
         return neogfx::logical_coordinate_system::AutomaticGame;
     }
 
-    void canvas::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void canvas::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && EntityClicked.has_slots())
         {
             ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
@@ -195,9 +195,9 @@ namespace neogfx::game
         }
     }
 
-    void canvas::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void canvas::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifier aKeyModifier)
     {
-        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && (EntityClicked.has_slots() || EntityDoubleClicked.has_slots()))
         {
             ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
