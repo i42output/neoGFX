@@ -170,7 +170,9 @@ namespace neogfx
     {
         auto result = std::max(minimum(),
             std::min(maximum(),
-                static_cast<value_type>(aDirection == step_direction::Up ? value() + static_cast<value_type>(aAmount * step()) : value() - static_cast<value_type>(aAmount * step()))));
+                static_cast<value_type>(aDirection == step_direction::Up ? 
+                    value() + static_cast<value_type>(aAmount * step()) : 
+                    value() - static_cast<value_type>(aAmount * step()))));
         if ((aDirection == step_direction::Up && result > value()) || (aDirection == step_direction::Down && result < value()))
             set_value(result, true);
     };
@@ -259,7 +261,7 @@ namespace neogfx
                 }, std::chrono::milliseconds{ 500 });
         };
         iSink += iStepUpButton.Pressed(step_up);
-        iSink += iStepUpButton.clicked([this]()
+        iSink += iStepUpButton.Clicked([this]()
             {
                 if (iStepper == std::nullopt) // key press?
                     do_step(step_direction::Up);
@@ -281,7 +283,7 @@ namespace neogfx
                 }, std::chrono::milliseconds{ 500 });
         };
         iSink += iStepDownButton.Pressed(step_down);
-        iSink += iStepDownButton.clicked([this]()
+        iSink += iStepDownButton.Clicked([this]()
             {
                 if (iStepper == std::nullopt) // key press?
                     do_step(step_direction::Down);
@@ -423,7 +425,7 @@ namespace neogfx
         try { text = boost::str(boost::format(iFormat) % minimum()); } catch (...) {}
         if (text_box().text().empty())
             text_box().set_text(string{ text });
-        ConstraintsChanged();
+        ConstraintsChanged.trigger();
         if (iValue < minimum())
             set_value(minimum());
         update_size_hint();
@@ -439,7 +441,7 @@ namespace neogfx
     inline void basic_spin_box<T>::set_maximum(value_type aMaximum)
     {
         iMaximum = aMaximum;
-        ConstraintsChanged();
+        ConstraintsChanged.trigger();
         if (iValue > maximum())
             set_value(maximum());
         update_size_hint();
@@ -455,7 +457,7 @@ namespace neogfx
     inline void basic_spin_box<T>::set_step(value_type aStep)
     {
         iStep = aStep;
-        ConstraintsChanged();
+        ConstraintsChanged.trigger();
         update_size_hint();
     }
 
@@ -475,7 +477,7 @@ namespace neogfx
             if (!iDontSetText)
                 iTextBox.set_text(string{ value_to_string() });
             if (aNotify && (!text().empty() || value() != minimum()))
-                ValueChanged();
+                ValueChanged.trigger();
         }
         else if (!iDontSetText && iTextBox.text().empty())
             iTextBox.set_text(string{ value_to_string() });

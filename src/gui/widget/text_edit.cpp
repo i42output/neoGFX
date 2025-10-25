@@ -531,6 +531,7 @@ namespace neogfx
         iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
+        iUpdatingContents{ false },
         iUpdatingDocument{ false },
         iHandlingKeyPress{ false },
         iColumns{ 1 },
@@ -554,6 +555,7 @@ namespace neogfx
         iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
+        iUpdatingContents{ false },
         iUpdatingDocument{ false },
         iHandlingKeyPress{ false },
         iColumns{ 1 },
@@ -577,6 +579,7 @@ namespace neogfx
         iLineEnding{ text_edit_line_ending::AutomaticLf },
         iPersistDefaultStyle{ false },
         iCursor{ *this },
+        iUpdatingContents{ false },
         iUpdatingDocument{ false },
         iHandlingKeyPress{ false },
         iColumns{ 1 },
@@ -2035,7 +2038,7 @@ namespace neogfx
         iTags.clear();
         iTagMap.clear();
         refresh_columns();
-        if (iPreviousText != iText)
+        if (iPreviousText != iText && !iUpdatingContents)
             notify_text_changed();
     }
 
@@ -2410,6 +2413,8 @@ namespace neogfx
         TextFilter(aText, accept);
         if (!accept)
             return 0;
+
+        neolib::scoped_flag sf{ iUpdatingContents };
 
         iPreviousText = iText;
         iUtf8TextCache = std::nullopt;
