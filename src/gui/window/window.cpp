@@ -520,9 +520,21 @@ namespace neogfx
         if (effectively_enabled() && !base_type::has_frame_color() && is_effectively_active())
         {
             if (!is_nested())
-                return service<i_app>().current_style().palette().color(color_role::Selection);
+            {
+                if (!has_native_window() || !native_window().alert_active())
+                    return service<i_app>().current_style().palette().color(color_role::Selection);
+                else
+                    return mix(service<i_app>().current_style().palette().color(color_role::Selection),
+                        color::Orange, native_window().alert_easing());
+            }
             else
-                return service<i_app>().current_style().palette().color(color_role::AlternateSelection);
+            {
+                if (!has_native_window() || !native_window().alert_active())
+                    return service<i_app>().current_style().palette().color(color_role::AlternateSelection);
+                else
+                    return mix(service<i_app>().current_style().palette().color(color_role::AlternateSelection),
+                        color::Yellow, native_window().alert_easing());
+            }
         }
         else
             return base_type::frame_color().with_alpha(is_effectively_active() ? 1.0 : 0.25);
@@ -773,7 +785,7 @@ namespace neogfx
     bool window::show(bool aVisible)
     {
         bool result = widget::show(aVisible);
-        if (result && has_native_surface())
+        if (result && has_native_window())
         {
             if (aVisible)
                 native_window().show();
@@ -850,6 +862,12 @@ namespace neogfx
             throw widget_not_focused();
         iFocusedWidget = nullptr;
         aWidget.focus_lost(focus_reason::Other);
+    }
+
+    void window::alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval, std::optional<std::uint32_t> const& aCount)
+    {
+        if (has_native_window())
+            native_window().alert(aAlert, aInterval, aCount);
     }
 
     void window::update_modality(bool aEnableAncestors)

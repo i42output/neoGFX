@@ -128,6 +128,7 @@ namespace neogfx
             void non_client_release_capture() final;
             void set_title_text(i_string const& aTitleText) final;
             border border_thickness() const final;
+            void alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval = {}, std::optional<std::uint32_t> const& aCount = {}) final;
         public:
             bool can_render() const final;
             void render(bool aOOBRequest = false) final;

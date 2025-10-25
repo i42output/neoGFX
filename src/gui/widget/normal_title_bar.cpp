@@ -130,11 +130,17 @@ namespace neogfx
 
     color normal_title_bar::palette_color(color_role aColorRole) const
     {
+        std::optional<color> result;
         if (has_palette_color(aColorRole) || !root().is_active())
-            return base_type::palette_color(aColorRole);
+            result = base_type::palette_color(aColorRole);
+        else if (aColorRole == color_role::Background)
+            result = palette_color(color_role::Base);
         if (aColorRole == color_role::Background)
-            return palette_color(color_role::Base);
-        return base_type::palette_color(aColorRole);
+        {
+            if (root().has_native_window() && root().native_window().alert_active())
+                result = mix(result.value(), color::Orange, root().native_window().alert_easing());
+        }
+        return result.value_or(base_type::palette_color(aColorRole));
     }
 
     void normal_title_bar::init()

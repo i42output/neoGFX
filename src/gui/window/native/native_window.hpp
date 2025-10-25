@@ -65,6 +65,9 @@ namespace neogfx
         bool event_cause_external() const final;
         i_string const& title_text() const final;
         void set_title_text(i_string const& aTitleText) override;
+        bool alert_active() const final;
+        scalar alert_easing() const final;
+        void alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval = {}, std::optional<std::uint32_t> const& aCount = {}) override;
     public:
         i_rendering_engine& rendering_engine() const;
         i_surface_manager& surface_manager() const;
@@ -108,5 +111,13 @@ namespace neogfx
         i_surface_window* iEnteredWindow;
         sink iEnteredWindowEventSink;
         ref_ptr<i_native_surface> iSurface;
+        struct alert_info
+        {
+            window_alert alert;
+            std::optional<std::chrono::milliseconds> interval;
+            std::optional<std::uint32_t> count;
+            std::chrono::steady_clock::time_point startTime;
+        };
+        std::optional<alert_info> iAlert;
     };
 }

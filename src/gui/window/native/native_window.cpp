@@ -44,6 +44,7 @@ namespace neogfx
         iUpdater{ service<i_async_task>(), *this, [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
+
             if (non_client_entered() && 
                 surface_window().native_window_hit_test(
                     surface_window().as_window().window_manager().mouse_position(surface_window().as_window())).part == widget_part::Nowhere)
@@ -53,6 +54,14 @@ namespace neogfx
                 if (e1 == iEventQueue.end() || (e2 != iEventQueue.end() && 
                     std::distance(iEventQueue.cbegin(), e1) < std::distance(iEventQueue.cbegin(), e2)))
                     push_event(window_event{ window_event_type::NonClientLeave });
+            }
+
+            if (alert_active())
+                surface_window().as_window().update(true);
+            else if (iAlert.has_value())
+            {
+                iAlert = std::nullopt;
+                surface_window().as_window().update(true);
             }
         }, std::chrono::milliseconds{ 10 } },
         iInternalWindowActivation{ false },
@@ -478,6 +487,55 @@ namespace neogfx
     void native_window::set_title_text(i_string const& aTitleText)
     {
         iTitleText = aTitleText;
+    }
+
+    namespace
+    {
+#ifdef _WIN32
+        std::chrono::milliseconds default_blink_time()
+        {
+            return std::chrono::milliseconds{ GetCaretBlinkTime() };
+        }
+#else
+        std::chrono::milliseconds default_blink_time()
+        {
+            return std::chrono::milliseconds{ 500 };
+        }
+#endif
+    }
+
+    bool native_window::alert_active() const
+    {
+        if (!iAlert.has_value())
+            return false;
+        auto const& alertInfo = iAlert.value();
+        if ((alertInfo.alert & window_alert::NoForeground) == window_alert::NoForeground && is_active())
+            return false;
+        auto const flashInterval_ms = alertInfo.interval.value_or(default_blink_time()) * 2;
+        return (!alertInfo.count.has_value() ||
+            std::chrono::steady_clock::now() >= alertInfo.startTime + flashInterval_ms * alertInfo.count.value());
+    }
+
+    scalar native_window::alert_easing() const
+    {
+        if (!iAlert.has_value())
+            return 0.0;
+        auto const& alertInfo = iAlert.value();
+        auto const since = std::chrono::steady_clock::now() - alertInfo.startTime;
+        auto const flashInterval_ms = alertInfo.interval.value_or(default_blink_time()).count() * 2;
+        auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count()) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
+        return partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
+    }
+
+    void native_window::alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval, std::optional<std::uint32_t> const& aCount)
+    {
+        if (aAlert != window_alert::None)
+            iAlert.emplace(aAlert, aInterval, aCount, std::chrono::steady_clock::now());
+        else
+        {
+            iAlert = std::nullopt;
+            surface_window().as_window().update(true);
+        }
     }
 
     i_rendering_engine& native_window::rendering_engine() const

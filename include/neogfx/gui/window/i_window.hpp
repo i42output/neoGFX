@@ -157,6 +157,8 @@ namespace neogfx
         virtual i_widget& focused_widget() const = 0;
         virtual void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) = 0;
         virtual void release_focused_widget(i_widget& aWidget) = 0;
+    public:
+        virtual void alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval = {}, std::optional<std::uint32_t> const& aCount = {}) = 0;
     protected:
         virtual void update_modality(bool aEnableAncestors) = 0;
         virtual void update_click_focus(i_widget& aCandidateWidget, const point& aClickPos) = 0;

@@ -119,6 +119,9 @@ namespace neogfx
         virtual i_string const& title_text() const = 0;
         virtual void set_title_text(i_string const& aTitleText) = 0;
         virtual border border_thickness() const = 0;
+        virtual bool alert_active() const = 0;
+        virtual scalar alert_easing() const = 0;
+        virtual void alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval = {}, std::optional<std::uint32_t> const& aCount = {}) = 0;
     public:
         virtual bool can_render() const = 0;
         virtual void render(bool aOOBRequest = false) = 0;

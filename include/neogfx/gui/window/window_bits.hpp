@@ -95,6 +95,40 @@ namespace neogfx
         Iconized    = 0x00000001,
         Maximized   = 0x00000002
     };
+
+    enum class window_alert : std::uint32_t
+    {
+        None            = 0x00000000,
+        Caption         = 0x00000001,
+        Taskbar         = 0x00000002,
+        NoForeground    = 0x00000010,
+        All             = Caption | Taskbar
+    };
+
+    inline constexpr window_alert operator~(window_alert aStyle)
+    {
+        return static_cast<window_alert>(~static_cast<std::uint32_t>(aStyle));
+    }
+
+    inline constexpr window_alert operator|(window_alert aLhs, window_alert aRhs)
+    {
+        return static_cast<window_alert>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr window_alert operator&(window_alert aLhs, window_alert aRhs)
+    {
+        return static_cast<window_alert>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr window_alert& operator|=(window_alert& aLhs, window_alert aRhs)
+    {
+        return aLhs = static_cast<window_alert>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr window_alert& operator&=(window_alert& aLhs, window_alert aRhs)
+    {
+        return aLhs = static_cast<window_alert>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
 }
 
 begin_declare_enum(neogfx::window_style)
@@ -134,6 +168,14 @@ declare_enum_string(neogfx::window_state, Normal)
 declare_enum_string(neogfx::window_state, Iconized)
 declare_enum_string(neogfx::window_state, Maximized)
 end_declare_enum(neogfx::window_state)
+
+begin_declare_enum(neogfx::window_alert)
+declare_enum_string(neogfx::window_alert, None)
+declare_enum_string(neogfx::window_alert, Caption)
+declare_enum_string(neogfx::window_alert, Taskbar)
+declare_enum_string(neogfx::window_alert, NoForeground)
+declare_enum_string(neogfx::window_alert, All)
+end_declare_enum(neogfx::window_alert)
 
 namespace neogfx
 {

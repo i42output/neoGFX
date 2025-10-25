@@ -1643,6 +1643,25 @@ namespace neogfx
             return iBorderThickness;
         }
 
+        void window::alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval, std::optional<std::uint32_t> const& aCount)
+        {
+            native_window::alert(aAlert, aInterval, aCount);
+
+            FLASHWINFO fwi;
+            fwi.cbSize = sizeof(FLASHWINFO);
+            fwi.hwnd = iHandle;
+            fwi.dwFlags =
+                (aAlert == window_alert::None ? 
+                    FLASHW_STOP :
+                    ((aAlert & window_alert::Caption) == window_alert::Caption ? FLASHW_CAPTION : 0) |
+                    ((aAlert & window_alert::Taskbar) == window_alert::Taskbar ? FLASHW_TRAY : 0) |
+                    (!aCount.has_value() ? ((aAlert & window_alert::NoForeground) == window_alert::NoForeground ? 
+                        FLASHW_TIMERNOFG : FLASHW_TIMER) : 0));
+            fwi.uCount = aCount.value_or(0);
+            fwi.dwTimeout = static_cast<DWORD>(aInterval.value_or(std::chrono::milliseconds{ 0 }).count());
+            FlashWindowEx(&fwi);
+        }
+
         void window::display()
         {
             ::SwapBuffers(static_cast<HDC>(iHdc));
