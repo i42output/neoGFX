@@ -50,6 +50,7 @@ namespace neogfx
         define_event(CellEntered, cell_entered, item_presentation_model_index const&)
         define_event(CellLeft, cell_left, item_presentation_model_index const&)
         define_event(CellContextMenu, cell_context_menu, item_presentation_model_index const&)
+        define_event(CellClick, cell_click, item_presentation_model_index const&)
         define_event(CellAction, cell_action, item_presentation_model_index const&)
     public:
         struct no_model : std::logic_error { no_model() : std::logic_error("neogfx::item_view::no_model") {} };
@@ -135,7 +136,7 @@ namespace neogfx
         neogfx::focus_policy focus_policy() const override;
         void focus_gained(focus_reason aFocusReason) override;
     protected:
-        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;

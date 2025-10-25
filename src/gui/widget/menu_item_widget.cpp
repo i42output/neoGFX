@@ -217,9 +217,9 @@ namespace neogfx
             menu().clear_selection();
     }
 
-    void menu_item_widget::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void menu_item_widget::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && menu_item().type() == menu_item_type::SubMenu)
             select_item();
     }

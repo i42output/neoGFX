@@ -278,9 +278,9 @@ namespace neogfx
         base_type::focus_lost(aFocusReason);
     }
 
-    void terminal::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void terminal::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
     }
 
     void terminal::mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)

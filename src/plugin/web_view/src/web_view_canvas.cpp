@@ -119,9 +119,9 @@ namespace neogfx
         return true;
     }
 
-    void web_view_canvas::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void web_view_canvas::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         auto const& mousePosition = to_cef_mouse_position(*this, aPosition);
         CefMouseEvent cefEvent{ cef_mouse_event_t{ mousePosition.x, mousePosition.y, 
             convert_key_modifiers(aKeyModifiers, aButton) } };

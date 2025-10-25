@@ -274,8 +274,10 @@ namespace neogfx
         void set_ignore_non_client_mouse_events(bool aIgnoreNonClientMouseEvents) override;
         neogfx::mouse_event_location mouse_event_location() const override;
         bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) override;
-        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_entered(const point& aPosition) override;

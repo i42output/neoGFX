@@ -59,6 +59,8 @@ namespace neogfx
         const native_event& current_event() const final;
         native_event& current_event() final;
         void handle_event() final;
+        const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const final;
+        i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) final;
         bool processing_event() const final;
         bool event_cause_external() const final;
         i_string const& title_text() const final;
@@ -74,6 +76,10 @@ namespace neogfx
     protected:
         bool internal_window_activation() const;
         void mouse_entered(i_surface_window& aWindow);
+        bool is_mouse_click_event(const native_event& aEvent) const;
+        bool has_previous_mouse_click_event() const;
+        const native_event& previous_mouse_click_event() const;
+        native_event& previous_mouse_click_event();
     private:
         template <typename EventCategory, typename EventType>
         event_queue::const_iterator find_event(EventType aEventType) const
@@ -93,6 +99,7 @@ namespace neogfx
         mutable optional_size iPixelDensityDpi;
         event_queue iEventQueue;
         native_event iCurrentEvent;
+        native_event iPreviousMouseClickEvent;
         std::uint32_t iProcessingEvent;
         string iTitleText;
         bool iNonClientEntered;

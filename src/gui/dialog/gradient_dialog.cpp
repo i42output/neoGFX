@@ -160,9 +160,9 @@ namespace neogfx
             }
         }
     public:
-        virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+        virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
         {
-            base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
                 select(aPosition - client_rect(false).top_left());

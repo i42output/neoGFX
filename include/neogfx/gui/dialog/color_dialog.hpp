@@ -68,7 +68,7 @@ namespace neogfx
         public:
             virtual void paint(i_graphics_context& aGc) const;
         public:
-            virtual void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
+            virtual void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers);
         private:
             color_dialog& iOwner;
             optional_color iColor;
@@ -89,7 +89,7 @@ namespace neogfx
             public:
                 cursor_widget(x_picker& aParent, type_e aType);
             public:
-                void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+                void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
                 void mouse_button_released(mouse_button aButton, const point& aPosition) override;
                 void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
             private:
@@ -109,7 +109,7 @@ namespace neogfx
         public:
             void paint(i_graphics_context& aGc) const override;
         public:
-            void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+            void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
             void mouse_button_released(mouse_button aButton, const point& aPosition) override;
             void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
         public:
@@ -139,7 +139,7 @@ namespace neogfx
             void set_image(image&& aImage);
             void clear_image();
         public:
-            void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+            void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
             void mouse_button_released(mouse_button aButton, const point& aPosition) override;
             void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;
         public:
@@ -186,7 +186,7 @@ namespace neogfx
         const custom_color_list& custom_colors() const;
         void set_custom_colors(const custom_color_list& aCustomColors);
     protected:
-        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
     private:
         void init();
         static custom_color_list& previous_custom_colors();

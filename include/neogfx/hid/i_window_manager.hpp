@@ -61,7 +61,7 @@ namespace neogfx
     public:
         virtual point mouse_position() const = 0;
         virtual point mouse_position(const i_window& aWindow) const = 0;
-        virtual bool is_mouse_button_pressed(mouse_button aButton) const = 0;
+        virtual bool is_mouse_button_clicked(mouse_button aButton) const = 0;
     public:
         virtual void save_mouse_cursor() = 0;
         virtual void set_mouse_cursor(mouse_system_cursor aSystemCursor, bool aOverride) = 0;

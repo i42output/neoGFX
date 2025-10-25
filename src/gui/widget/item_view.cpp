@@ -442,9 +442,9 @@ namespace neogfx
         }
     }
 
-    void item_view::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void item_view::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             if (!drag_drop_active() && capturing() && item_display_rect(true).contains(aPosition))
@@ -567,6 +567,8 @@ namespace neogfx
         if (iClickedItem != std::nullopt)
         {
             auto item = item_at(aPosition);
+            if (item == iClickedItem && aButton == mouse_button::Left)
+                CellClick.trigger(*item);
             bool doCheck = (item == iClickedItem && cell_rect(*item, cell_part::Text).contains(aPosition));
             iClickedItem = std::nullopt;
             if (doCheck && (presentation_model().cell_editable_on_input_event(*item)))

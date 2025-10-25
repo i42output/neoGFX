@@ -794,9 +794,9 @@ namespace neogfx
         update(true);
     }
 
-    void text_edit::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void text_edit::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        framed_scrollable_widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        framed_scrollable_widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left && client_rect().contains(aPosition))
         {
             auto const docPos = document_hit_test_ex(aPosition);

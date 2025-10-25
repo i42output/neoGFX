@@ -128,13 +128,17 @@ namespace neogfx
         void native_window_render(const rect& aInvalidatedRect) const final;
         void native_window_dismiss_children() final;
         void native_window_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) final;
-        void native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void native_window_mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
         void native_window_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void native_window_mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void native_window_mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
         void native_window_mouse_button_released(mouse_button aButton, const point& aPosition) final;
         void native_window_mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) final;
         void native_window_non_client_mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifiers_e aKeyModifiers) final;
-        void native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void native_window_non_client_mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
         void native_window_non_client_mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void native_window_non_client_mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
+        void native_window_non_client_mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) final;
         void native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition) final;
         void native_window_non_client_mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) final;
         void native_window_mouse_entered(const point& aPosition) final;
@@ -156,10 +160,10 @@ namespace neogfx
         const i_widget& as_widget() const final;
         i_widget& as_widget()  final;
     public:
-        const i_window& window_at_position(const point& aPosition, bool aForMouseEvent = false) const;
-        i_window& window_at_position(const point& aPosition, bool aForMouseEvent = false);
-        const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const;
-        i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false);
+        const i_window& window_at_position(const point& aPosition, bool aForMouseEvent = false) const final;
+        i_window& window_at_position(const point& aPosition, bool aForMouseEvent = false) final;
+        const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const final;
+        i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) final;
     private:
         std::optional<destroyed_flag> iNativeWindowDestroyed;
         i_window& iWindow;

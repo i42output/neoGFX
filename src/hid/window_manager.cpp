@@ -183,7 +183,7 @@ namespace neogfx
         }
     }
 
-    bool window_manager::is_mouse_button_pressed(mouse_button aButton) const
+    bool window_manager::is_mouse_button_clicked(mouse_button aButton) const
     {
         return (aButton & service<i_mouse>().button_state()) != mouse_button::None;
     }

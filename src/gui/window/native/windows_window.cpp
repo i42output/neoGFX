@@ -813,6 +813,9 @@ namespace neogfx
                     POINT winPt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
                     ScreenToClient(hwnd, &winPt);
                     point pt{ basic_point<LONG>{winPt.x, winPt.y} };
+                    non_client_mouse_event const* previousMouseEvent =
+                        self.has_previous_mouse_click_event() && std::holds_alternative<non_client_mouse_event>(self.previous_mouse_click_event()) ?
+                        &static_variant_cast<non_client_mouse_event>(self.previous_mouse_click_event()) : nullptr;
                     switch (msg)
                     {
                     case WM_NCMOUSEMOVE:
@@ -824,6 +827,12 @@ namespace neogfx
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCLBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(mouse_button::Left) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.handle_event(non_client_mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, mouse_button::Left, service<i_keyboard>().modifiers() });
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCLBUTTONDBLCLK:
@@ -833,6 +842,12 @@ namespace neogfx
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCRBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(mouse_button::Right) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.handle_event(non_client_mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, mouse_button::Right, service<i_keyboard>().modifiers() });
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCRBUTTONDBLCLK:
@@ -842,6 +857,12 @@ namespace neogfx
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCMBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(mouse_button::Middle) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.handle_event(non_client_mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, mouse_button::Middle, service<i_keyboard>().modifiers() });
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCMBUTTONDBLCLK:
@@ -851,6 +872,12 @@ namespace neogfx
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCXBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.handle_event(non_client_mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, service<i_keyboard>().modifiers() });
                         self.handle_event(non_client_mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, service<i_keyboard>().modifiers() });
                         break;
                     case WM_NCXBUTTONDBLCLK:
@@ -1056,6 +1083,9 @@ namespace neogfx
                 {
                     POINT winPt = { GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam) };
                     point pt{ basic_point<LONG>{winPt.x, winPt.y} };
+                    mouse_event const* previousMouseEvent =
+                        self.has_previous_mouse_click_event() && std::holds_alternative<mouse_event>(self.previous_mouse_click_event()) ?
+                            &static_variant_cast<mouse_event>(self.previous_mouse_click_event()) : nullptr;
                     switch (msg)
                     {
                     case WM_MOUSEMOVE:
@@ -1077,6 +1107,12 @@ namespace neogfx
                         self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(mouse_button::Left) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.push_event(mouse_event{ 
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Left, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_LBUTTONDBLCLK:
@@ -1086,6 +1122,12 @@ namespace neogfx
                         self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(mouse_button::Right) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.push_event(mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Right, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_RBUTTONDBLCLK:
@@ -1095,6 +1137,12 @@ namespace neogfx
                         self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(mouse_button::Middle) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.push_event(mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, mouse_button::Middle, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_MBUTTONDBLCLK:
@@ -1104,6 +1152,12 @@ namespace neogfx
                         self.push_event(mouse_event{ mouse_event_type::ButtonClicked, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONUP:
+                        if (previousMouseEvent && previousMouseEvent->is_button(HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2) &&
+                            &self.widget_for_mouse_event(previousMouseEvent->position()) == &self.widget_for_mouse_event(pt))
+                            self.push_event(mouse_event{
+                                previousMouseEvent->type() == mouse_event_type::ButtonDoubleClicked ?
+                                    mouse_event_type::ButtonDoubleClick : mouse_event_type::ButtonClick,
+                                    pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         self.push_event(mouse_event{ mouse_event_type::ButtonReleased, pt, HIWORD(wparam) == XBUTTON1 ? mouse_button::X1 : mouse_button::X2, mouse::modifiers_from_message(wparam) });
                         break;
                     case WM_XBUTTONDBLCLK:

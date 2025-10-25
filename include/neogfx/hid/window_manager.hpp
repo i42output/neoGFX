@@ -62,7 +62,7 @@ namespace neogfx
     public:
         point mouse_position() const final;
         point mouse_position(const i_window& aWindow) const final;
-        bool is_mouse_button_pressed(mouse_button aButton) const final;
+        bool is_mouse_button_clicked(mouse_button aButton) const final;
     private:
         sink iSink;
         window_list iWindows;

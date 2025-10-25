@@ -272,9 +272,9 @@ namespace chess::gui
         return ng::focus_policy::StrongFocus;
     }
 
-    void board::mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
+    void board::mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers)
     {
-        widget<>::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        widget<>::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (!iAnimations.empty())
         {
             iAnimations.pop_front();

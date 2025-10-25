@@ -68,7 +68,7 @@ namespace chess::gui
     protected:
         ng::focus_policy focus_policy() const override;
     protected:
-        void mouse_button_pressed(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(ng::mouse_button aButton, const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(ng::mouse_button aButton, const ng::point& aPosition) override;
         void mouse_moved(const ng::point& aPosition, ng::key_modifiers_e aKeyModifiers) override;

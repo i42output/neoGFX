@@ -138,9 +138,9 @@ namespace neogfx
         aGc.fill_circle(rectIndicator.center(), rectIndicator.width() / 2.0 - 1.0, indicatorColor);
     }
 
-    void slider_impl::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void slider_impl::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             neolib::scoped_flag sf{ iHandlingEvent };

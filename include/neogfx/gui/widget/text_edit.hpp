@@ -715,7 +715,7 @@ namespace neogfx
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
     public:
-        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_double_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override;
         void mouse_button_released(mouse_button aButton, const point& aPosition) override;
         void mouse_moved(const point& aPosition, key_modifiers_e aKeyModifiers) override;

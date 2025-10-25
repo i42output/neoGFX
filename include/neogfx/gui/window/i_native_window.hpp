@@ -30,6 +30,7 @@
 namespace neogfx
 {
     class i_surface_window;
+    class i_widget;
 
     class i_native_window : public i_property_owner, public i_reference_counted
     {
@@ -82,6 +83,8 @@ namespace neogfx
         virtual const native_event& current_event() const = 0;
         virtual native_event& current_event() = 0;
         virtual void handle_event() = 0;
+        virtual const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const = 0;
+        virtual i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) = 0;
         virtual bool processing_event() const = 0;
         virtual bool event_cause_external() const = 0;
         virtual bool resizing_or_moving() const = 0;

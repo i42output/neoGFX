@@ -45,7 +45,8 @@ namespace neogfx
         {
             aTimer.again();
             if (non_client_entered() && 
-                surface_window().native_window_hit_test(surface_window().as_window().window_manager().mouse_position(surface_window().as_window())).part == widget_part::Nowhere)
+                surface_window().native_window_hit_test(
+                    surface_window().as_window().window_manager().mouse_position(surface_window().as_window())).part == widget_part::Nowhere)
             {
                 auto e1 = find_event<window_event>(window_event_type::NonClientLeave);
                 auto e2 = find_event<window_event>(window_event_type::NonClientEnter);
@@ -161,7 +162,11 @@ namespace neogfx
         iCurrentEvent = aEvent;
         handle_event();
         if (!destroyed)
+        {
+            if (is_mouse_click_event(iCurrentEvent))
+                iPreviousMouseClickEvent = iCurrentEvent;
             iCurrentEvent = previousEvent;
+        }
         else
             sc.ignore();
     }
@@ -298,11 +303,17 @@ namespace neogfx
                 break;
             case mouse_event_type::ButtonClicked:
                 activate_if();
-                surfaceWindow.native_window_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                surfaceWindow.native_window_mouse_button_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonDoubleClicked:
                 activate_if();
                 surfaceWindow.native_window_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                break;
+            case mouse_event_type::ButtonClick:
+                surfaceWindow.native_window_mouse_button_click(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                break;
+            case mouse_event_type::ButtonDoubleClick:
+                surfaceWindow.native_window_mouse_button_double_click(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonReleased:
                 surfaceWindow.native_window_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
@@ -346,11 +357,17 @@ namespace neogfx
                 break;
             case mouse_event_type::ButtonClicked:
                 activate_if();
-                surfaceWindow.native_window_non_client_mouse_button_pressed(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                surfaceWindow.native_window_non_client_mouse_button_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonDoubleClicked:
                 activate_if();
                 surfaceWindow.native_window_non_client_mouse_button_double_clicked(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                break;
+            case mouse_event_type::ButtonClick:
+                surfaceWindow.native_window_non_client_mouse_button_click(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
+                break;
+            case mouse_event_type::ButtonDoubleClick:
+                surfaceWindow.native_window_non_client_mouse_button_double_click(mouseEvent.mouse_button(), mouseEvent.position(), mouseEvent.key_modifiers());
                 break;
             case mouse_event_type::ButtonReleased:
                 surfaceWindow.native_window_non_client_mouse_button_released(mouseEvent.mouse_button(), mouseEvent.position());
@@ -426,6 +443,19 @@ namespace neogfx
         }
         if (destroyed)
             sc.ignore();
+    }
+
+    const i_widget& native_window::widget_for_mouse_event(const point& aPosition, bool aForHitTest) const
+    {
+        auto& mouse = service<i_mouse>();
+        auto& surfaceWindow = mouse.capturing() ? mouse.capture_target().as_surface_window() :
+            service<i_surface_manager>().surface_at_position(surface_window(), aPosition, true).as_surface_window();
+        return surfaceWindow.widget_for_mouse_event(aPosition, aForHitTest);
+    }
+
+    i_widget& native_window::widget_for_mouse_event(const point& aPosition, bool aForHitTest)
+    {
+        return const_cast<i_widget&>(to_const(*this).widget_for_mouse_event(aPosition, aForHitTest));
     }
 
     bool native_window::processing_event() const
@@ -504,5 +534,31 @@ namespace neogfx
             iEnteredWindow = nullptr;
             iEnteredWindowEventSink.clear();
         }
+    }
+
+    bool native_window::is_mouse_click_event(const native_event& aEvent) const
+    {
+        return
+            (std::holds_alternative<mouse_event>(aEvent) &&
+                static_variant_cast<mouse_event const&>(aEvent).type() != mouse_event_type::Moved &&
+                static_variant_cast<mouse_event const&>(aEvent).type() != mouse_event_type::WheelScrolled) ||
+            (std::holds_alternative<non_client_mouse_event>(aEvent) &&
+                static_variant_cast<non_client_mouse_event const&>(aEvent).type() != mouse_event_type::Moved &&
+                static_variant_cast<non_client_mouse_event const&>(aEvent).type() != mouse_event_type::WheelScrolled);
+    }
+
+    bool native_window::has_previous_mouse_click_event() const
+    {
+        return !std::holds_alternative<std::monostate>(previous_mouse_click_event());
+    }
+
+    const native_window::native_event& native_window::previous_mouse_click_event() const
+    {
+        return iPreviousMouseClickEvent;
+    }
+
+    native_window::native_event& native_window::previous_mouse_click_event()
+    {
+        return iPreviousMouseClickEvent;
     }
 }

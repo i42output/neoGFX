@@ -240,9 +240,9 @@ namespace neogfx
             draw_alpha_stop(aGc, **iCurrentAlphaStop);
     }
 
-    void gradient_widget::mouse_button_pressed(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers)
+    void gradient_widget::mouse_button_clicked(mouse_button aButton, point const& aPosition, key_modifiers_e aKeyModifiers)
     {
-        widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         iClicked = aPosition;
         if (aButton == mouse_button::Left)
         {

@@ -185,7 +185,7 @@ namespace neogfx
     }
 
     template <Widget Base>
-    inline void scrollable_widget<Base>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void scrollable_widget<Base>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         if (aButton == mouse_button::Middle)
         {
@@ -203,11 +203,11 @@ namespace neogfx
             if (handled)
                 base_type::as_widget().set_capture();
             else
-                base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+                base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         }
         else
         {
-            base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+            base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left)
             {
                 if (vertical_scrollbar().clicked_element() == scrollbar_element::None && horizontal_scrollbar().clicked_element() == scrollbar_element::None)

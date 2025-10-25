@@ -277,9 +277,9 @@ namespace neogfx::DesignStudio
         return widget::ignore_mouse_events(aConsiderAncestors);
     }
 
-    void widget_caddy::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void widget_caddy::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        widget::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        widget::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             bool const toggleSelect = ((aKeyModifiers & key_modifiers_e::KeyModifier_CTRL) != key_modifiers_e::KeyModifier_NONE);

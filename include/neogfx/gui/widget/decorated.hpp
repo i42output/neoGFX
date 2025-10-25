@@ -467,11 +467,11 @@ namespace neogfx
             iTracking = std::nullopt;
         }
     protected:
-        void mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
+        void mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers) override
         {
             auto& self = widget_type::as_widget();
 
-            widget_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+            widget_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
             if (aButton == mouse_button::Left && self.capturing() && 
                 (!self.is_root() || self.root().is_nested()))
             {

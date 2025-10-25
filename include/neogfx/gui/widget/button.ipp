@@ -347,9 +347,9 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline void button<ButtonInterface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void button<ButtonInterface>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
-        base_type::mouse_button_pressed(aButton, aPosition, aKeyModifiers);
+        base_type::mouse_button_clicked(aButton, aPosition, aKeyModifiers);
         if (aButton == mouse_button::Left)
         {
             as_widget().update();

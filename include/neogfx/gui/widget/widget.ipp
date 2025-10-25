@@ -1978,12 +1978,12 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    inline void widget<Interface>::mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         auto& self = *this;
 
         if (aButton == mouse_button::Middle && has_parent())
-            parent().mouse_button_pressed(aButton, aPosition + self.position(), aKeyModifiers);
+            parent().mouse_button_clicked(aButton, aPosition + self.position(), aKeyModifiers);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }
@@ -1995,6 +1995,26 @@ namespace neogfx
 
         if (aButton == mouse_button::Middle && has_parent())
             parent().mouse_button_double_clicked(aButton, aPosition + self.position(), aKeyModifiers);
+        else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
+            set_capture(capture_reason::MouseEvent, aPosition);
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        auto& self = *this;
+
+        if (aButton == mouse_button::Middle && has_parent())
+            parent().mouse_button_click(aButton, aPosition + self.position(), aKeyModifiers);
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        auto& self = *this;
+
+        if (aButton == mouse_button::Middle && has_parent())
+            parent().mouse_button_double_click(aButton, aPosition + self.position(), aKeyModifiers);
         else if (aButton == mouse_button::Left && capture_ok(hit_test(aPosition)) && can_capture())
             set_capture(capture_reason::MouseEvent, aPosition);
     }

@@ -566,7 +566,7 @@ namespace neogfx
             w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
     }
 
-    void surface_window::native_window_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void surface_window::native_window_mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
         neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
@@ -574,7 +574,7 @@ namespace neogfx
         {
             w.root().dismiss_children(&w);
             w.root().update_click_focus(w, aPosition);
-            w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
+            w.mouse_button_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
         }
     }
 
@@ -588,6 +588,22 @@ namespace neogfx
             w.root().update_click_focus(w, aPosition);
             w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
         }
+    }
+
+    void surface_window::native_window_mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        i_widget& w = widget_for_mouse_event(aPosition);
+        neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
+        if (!event_consumed(w.mouse_event()(std::get<mouse_event>(native_window().current_event()))))
+            w.mouse_button_click(aButton, aPosition - w.origin(), aKeyModifiers);
+    }
+
+    void surface_window::native_window_mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        i_widget& w = widget_for_mouse_event(aPosition);
+        neolib::scoped_pointer<i_widget> sp{ iClickedWidget, &w };
+        if (!event_consumed(w.mouse_event()(std::get<mouse_event>(native_window().current_event()))))
+            w.mouse_button_double_click(aButton, aPosition - w.origin(), aKeyModifiers);
     }
 
     void surface_window::native_window_mouse_button_released(mouse_button aButton, const point& aPosition)
@@ -615,14 +631,14 @@ namespace neogfx
             w.mouse_wheel_scrolled(aWheel, aPosition - w.origin(), aDelta, aKeyModifiers);
     }
 
-    void surface_window::native_window_non_client_mouse_button_pressed(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    void surface_window::native_window_non_client_mouse_button_clicked(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
     {
         i_widget& w = widget_for_mouse_event(aPosition);
         if (!w.ignore_non_client_mouse_events() && !event_consumed(w.non_client_mouse_event()(std::get<non_client_mouse_event>(native_window().current_event()))))
         {
             w.root().dismiss_children(&w);
             w.root().update_click_focus(w, aPosition);
-            w.mouse_button_pressed(aButton, aPosition - w.origin(), aKeyModifiers);
+            w.mouse_button_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
         }
     }
 
@@ -632,6 +648,20 @@ namespace neogfx
         w.root().dismiss_children(&w);
         if (!w.ignore_non_client_mouse_events() && !event_consumed(w.non_client_mouse_event()(std::get<non_client_mouse_event>(native_window().current_event()))))
             w.mouse_button_double_clicked(aButton, aPosition - w.origin(), aKeyModifiers);
+    }
+
+    void surface_window::native_window_non_client_mouse_button_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        i_widget& w = widget_for_mouse_event(aPosition);
+        if (!w.ignore_non_client_mouse_events() && !event_consumed(w.non_client_mouse_event()(std::get<non_client_mouse_event>(native_window().current_event()))))
+            w.mouse_button_click(aButton, aPosition - w.origin(), aKeyModifiers);
+    }
+
+    void surface_window::native_window_non_client_mouse_button_double_click(mouse_button aButton, const point& aPosition, key_modifiers_e aKeyModifiers)
+    {
+        i_widget& w = widget_for_mouse_event(aPosition);
+        if (!w.ignore_non_client_mouse_events() && !event_consumed(w.non_client_mouse_event()(std::get<non_client_mouse_event>(native_window().current_event()))))
+            w.mouse_button_double_click(aButton, aPosition - w.origin(), aKeyModifiers);
     }
 
     void surface_window::native_window_non_client_mouse_button_released(mouse_button aButton, const point& aPosition)
