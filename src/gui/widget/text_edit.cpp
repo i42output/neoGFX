@@ -2343,11 +2343,10 @@ namespace neogfx
                         auto const& tag = *tagPtr;
                         if (!tag.mouse_event().has_slots())
                             return;
-                        bool const wasCapturingTag = (tagPtr == iTagCapturing);
-                        if (aEvent.type() != mouse_event_type::Moved)
-                            iTagCapturing = nullptr;
-                        if (aEvent.type() == mouse_event_type::ButtonClick)
+                        if (aEvent.type() == mouse_event_type::ButtonReleased)
                         {
+                            bool const wasCapturingTag = (tagPtr == iTagCapturing);
+                            iTagCapturing = nullptr;
                             if (!wasCapturingTag || cursor().position() != cursor().anchor())
                                 return;
                             Mouse.accept();
