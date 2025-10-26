@@ -867,7 +867,7 @@ namespace neogfx
                     aKeyModifier = static_cast<key_modifier>(aKeyModifier & ~m);
                 else
                     return match::No;
-            if ((aKeyModifier & ~key_modifier::LOCKS) == key_modifier::None)
+            if ((aKeyModifier & ~(key_modifier::LOCKS | key_modifier::SYSTEM)) == key_modifier::None)
                 return (iSequence.size() == 1 ? match::Full : match::Partial);
             else
                 return match::No;

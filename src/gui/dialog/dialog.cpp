@@ -184,37 +184,6 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::exec()" << std::endl;
 #endif
 
-        if (!iButtonBox)
-        {
-            iSink += service<i_keyboard>().key_pressed([this](scan_code_e aScanCode, key_code_e, key_modifier)
-            {
-                if (root().is_active())
-                {
-                    switch (aScanCode)
-                    {
-                    case ScanCode_RETURN:
-                    case ScanCode_KEYPAD_ENTER:
-                        if (!root().has_focused_widget() ||
-                            !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeReturnKey))
-                        {
-                            accept();
-                        }
-                        break;
-                    case ScanCode_ESCAPE:
-                        if (!root().has_focused_widget() ||
-                            !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeEscapeKey))
-                        {
-                            if ((style() & window_style::Close) == window_style::Close)
-                                reject();
-                        }
-                        break;
-                    default:
-                        break;
-                    }
-                }
-            });
-        }
-
         destroyed_flag destroyed{ surface() };
         event_processing_context epc(service<i_async_task>(), "neogfx::dialog");
         while (iResult == std::nullopt)
@@ -253,6 +222,62 @@ namespace neogfx
 
     bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
+        if (!iButtonBox)
+        {
+            if (root().is_active())
+            {
+                switch (aScanCode)
+                {
+                case ScanCode_F4:
+                    if ((style() & window_style::Close) == window_style::Close &&
+                        (aKeyModifier & key_modifier::ALT) != key_modifier::None)
+                    {
+                        reject();
+                        return true;
+                    }
+                    break;
+                case ScanCode_RETURN:
+                case ScanCode_KEYPAD_ENTER:
+                    if (!root().has_focused_widget() ||
+                        !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeReturnKey))
+                    {
+                        accept();
+                        return true;
+                    }
+                    break;
+                case ScanCode_ESCAPE:
+                    if (!root().has_focused_widget() ||
+                        !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeEscapeKey))
+                    {
+                        if ((style() & window_style::Close) == window_style::Close)
+                        {
+                            reject();
+                            return true;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+        else
+        {
+            switch (aScanCode)
+            {
+            case ScanCode_F4:
+                if ((style() & window_style::Close) == window_style::Close &&
+                    (aKeyModifier & key_modifier::ALT) != key_modifier::None)
+                {
+                    reject();
+                    return true;
+                }
+                break;
+            default:
+                break;
+            }
+        }
+
         return window::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
 
@@ -285,6 +310,19 @@ namespace neogfx
 
     void dialog::init()
     {
+        if (is_active())
+            service<i_keyboard>().grab_keyboard(*this);
+
+        Activated([&]() 
+            {
+                service<i_keyboard>().grab_keyboard(*this);
+            });
+
+        Deactivated([&]()
+            {
+                service<i_keyboard>().ungrab_keyboard(*this);
+            });
+
         iUpdater.emplace(*this, [this](widget_timer& aTimer)
         {
             aTimer.again();
