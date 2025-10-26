@@ -222,55 +222,42 @@ namespace neogfx
 
     bool dialog::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
+        switch (aScanCode)
+        {
+        case ScanCode_F4:
+            if ((style() & window_style::Close) == window_style::Close &&
+                (aKeyModifier & key_modifier::ALT) != key_modifier::None)
+            {
+                reject();
+                return true;
+            }
+            break;
+        default:
+            break;
+        }
+        
         if (!iButtonBox)
         {
-            if (root().is_active())
+            switch (aScanCode)
             {
-                switch (aScanCode)
+            case ScanCode_RETURN:
+            case ScanCode_KEYPAD_ENTER:
+                if (!root().has_focused_widget() ||
+                    !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeReturnKey))
                 {
-                case ScanCode_F4:
-                    if ((style() & window_style::Close) == window_style::Close &&
-                        (aKeyModifier & key_modifier::ALT) != key_modifier::None)
+                    accept();
+                    return true;
+                }
+                break;
+            case ScanCode_ESCAPE:
+                if (!root().has_focused_widget() ||
+                    !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeEscapeKey))
+                {
+                    if ((style() & window_style::Close) == window_style::Close)
                     {
                         reject();
                         return true;
                     }
-                    break;
-                case ScanCode_RETURN:
-                case ScanCode_KEYPAD_ENTER:
-                    if (!root().has_focused_widget() ||
-                        !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeReturnKey))
-                    {
-                        accept();
-                        return true;
-                    }
-                    break;
-                case ScanCode_ESCAPE:
-                    if (!root().has_focused_widget() ||
-                        !find_widget_with_focus_policy(root().focused_widget(), neogfx::focus_policy::ConsumeEscapeKey))
-                    {
-                        if ((style() & window_style::Close) == window_style::Close)
-                        {
-                            reject();
-                            return true;
-                        }
-                    }
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-        else
-        {
-            switch (aScanCode)
-            {
-            case ScanCode_F4:
-                if ((style() & window_style::Close) == window_style::Close &&
-                    (aKeyModifier & key_modifier::ALT) != key_modifier::None)
-                {
-                    reject();
-                    return true;
                 }
                 break;
             default:
