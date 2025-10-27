@@ -621,16 +621,22 @@ namespace neogfx
             ::SetForegroundWindow(iHandle);
             ::SetWindowPos(iHandle, 0, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
-            iActive = true;
-            surface_window().as_window().activated()();
-            surface_window().as_widget().update(true);
+            if (!iActive)
+            {
+                iActive = true;
+                surface_window().as_window().activated()();
+                surface_window().as_widget().update(true);
+            }
         }
 
         void window::deactivate()
         {
-            iActive = false;
-            surface_window().as_window().deactivated()();
-            surface_window().as_widget().update(true);
+            if (iActive)
+            {
+                iActive = false;
+                surface_window().as_window().deactivated()();
+                surface_window().as_widget().update(true);
+            }
         }
 
         bool window::is_iconic() const

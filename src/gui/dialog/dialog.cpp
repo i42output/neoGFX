@@ -109,7 +109,10 @@ namespace neogfx
             bool canAccept = true;
             TryAccept(canAccept, false);
             if (canAccept)
+            {
                 set_result(dialog_result::Accepted);
+                close();
+            }
             else
                 service<i_basic_services>().system_beep();
         }
@@ -122,7 +125,10 @@ namespace neogfx
             bool canReject = true;
             TryReject(canReject, false);
             if (canReject)
+            {
                 set_result(dialog_result::Rejected);
+                close();
+            }
             else
                 service<i_basic_services>().system_beep();
         }
@@ -184,12 +190,12 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::exec()" << std::endl;
 #endif
 
-        destroyed_flag destroyed{ surface() };
+        destroyed_flag surfaceDestroyed{ surface() };
         event_processing_context epc(service<i_async_task>(), "neogfx::dialog");
         while (iResult == std::nullopt)
         {
             service<i_app>().process_events(epc);
-            if (destroyed && result() == dialog_result::NoResult)
+            if (surfaceDestroyed && result() == dialog_result::NoResult)
                 set_result(dialog_result::Rejected);
         }
 
