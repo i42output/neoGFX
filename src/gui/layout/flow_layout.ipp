@@ -275,6 +275,7 @@ namespace neogfx
                     newRow->set_size_policy(neogfx::size_policy{ size_constraint::Expanding, size_constraint::Minimum });
                 else
                     newRow->set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
+                newRow->set_alignment(alignment());
                 rows.add(newRow);
             }
             rows.get_layout_at(rows.count() - 1).add(itemRef);

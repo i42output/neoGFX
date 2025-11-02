@@ -401,10 +401,10 @@ namespace neogfx
         switch (tab_container_style() & neogfx::tab_container_style::TabAlignmentMask)
         {
         case neogfx::tab_container_style::TabAlignmentTop:
-            layout().set_alignment(alignment::Bottom);
+            layout().set_alignment(alignment::Left | alignment::Bottom);
             break;
         case neogfx::tab_container_style::TabAlignmentBottom:
-            layout().set_alignment(alignment::Top);
+            layout().set_alignment(alignment::Left | alignment::Top);
             break;
         case neogfx::tab_container_style::TabAlignmentLeft:
             layout().set_alignment(alignment::Right);
