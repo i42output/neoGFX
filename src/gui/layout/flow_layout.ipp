@@ -64,16 +64,17 @@ namespace neogfx
             if (flow_layout_fit(AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize), AxisPolicy::cx(*availableSpaceForChildren)))
             {
                 AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
+                AxisPolicy::cy(extent) = std::max(AxisPolicy::cy(extent), AxisPolicy::cy(itemMinimumSize));
                 previousNonZeroSize = true;
             }
             else
             {
                 AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
                 AxisPolicy::y(pos) += (AxisPolicy::cy(extent) + AxisPolicy::cy(spacing()));
+                AxisPolicy::cy(extent) = AxisPolicy::cy(itemMinimumSize);
                 previousNonZeroSize = false;
             }
             AxisPolicy::cx(extent) = std::max(AxisPolicy::cx(extent), AxisPolicy::x(pos));
-            AxisPolicy::cy(extent) = std::max(AxisPolicy::cy(extent), AxisPolicy::cy(itemMinimumSize));
         }
         AxisPolicy::cx(result) = AxisPolicy::cx(extent);
         AxisPolicy::cy(result) = AxisPolicy::y(pos) + AxisPolicy::cy(extent);
