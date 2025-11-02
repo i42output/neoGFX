@@ -333,14 +333,14 @@ namespace neogfx
             return *newItem;
         }
         template <typename ItemType>
-        ItemType& replace_item_at(layout_item_index aPosition, ItemType&& aItem)
+        ItemType& replace_item_at(layout_item_index aPosition, i_ref_ptr<ItemType> const& aItem)
         {
             if (aPosition < count())
                 remove_at(aPosition);
-            return static_cast<ItemType&>(add_at(aPosition, aItem));
+            return static_cast<ItemType&>(add_at(aPosition, static_pointer_cast<i_layout_item>(aItem)));
         }
         template <typename ItemType>
-        ItemType& replace_item_at(layout_item_index aPosition, i_ref_ptr<ItemType> const& aItem)
+        ItemType& replace_item_at(layout_item_index aPosition, ref_ptr<ItemType> const& aItem)
         {
             if (aPosition < count())
                 remove_at(aPosition);

@@ -34,6 +34,7 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif
+
         if (has_minimum_size() || aAvailableSpace == std::nullopt)
             return layout::minimum_size(aAvailableSpace);
         std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
@@ -80,6 +81,12 @@ namespace neogfx
         AxisPolicy::cy(result) += AxisPolicy::cy(internal_spacing());
         AxisPolicy::cx(result) = std::max(std::min(AxisPolicy::cx(result), AxisPolicy::cx(*aAvailableSpace)), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
         AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
+
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
+
         return result;
     }
 
@@ -90,6 +97,7 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif
+
         if (has_maximum_size())
             return layout::maximum_size(aAvailableSpace);
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
@@ -97,57 +105,95 @@ namespace neogfx
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
-        std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         size result;
         coordinate extent = 0.0;
-        point pos;
+        point posTotal;
+        point posCurrentRow;
         auto const ourSizePolicy = effective_size_policy();
+        auto const lastVisibleIter = std::find_if(items().rbegin(), items().rend(), [&](auto const& item) { return item->visible(); });
+        auto const lastVisible = (lastVisibleIter != items().rend() ? &(**std::prev(lastVisibleIter.base())).identity() : nullptr);
+        bool first = true;
         for (auto const& itemRef : items())
         {
-            auto const& item = *itemRef;
+            auto const& item = (*itemRef).identity();
             if (!item.visible())
                 continue;
-            auto itemMaximumSize = item.maximum_size(availableSpaceForChildren);
+            bool const last = (&item == lastVisible);
+
+#ifdef NEOGFX_DEBUG
+            if (debug::layoutItem == this && last)
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): last item" << std::endl;
+#endif
+
+            auto const itemMaximumSize = item.maximum_size(availableSpaceForChildren);
             if (AxisPolicy::cx(itemMaximumSize) != size::max_dimension())
             {
-                if (AxisPolicy::x(pos) != size::max_dimension())
+                if (AxisPolicy::x(posTotal) != size::max_dimension())
                 {
-                    if (flow_layout_fit(AxisPolicy::x(pos) + AxisPolicy::cx(itemMaximumSize), AxisPolicy::cx(*availableSpaceForChildren)))
-                        AxisPolicy::x(pos) += (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
-                    else
+                    bool totalise = true;
+                    bool fits = false;
+                    if (flow_layout_fit(AxisPolicy::x(posCurrentRow) + AxisPolicy::cx(itemMaximumSize), AxisPolicy::cx(*availableSpaceForChildren)))
                     {
-                        AxisPolicy::x(pos) = AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing());
+                        fits = true;
+                        AxisPolicy::x(posCurrentRow) += (AxisPolicy::cx(itemMaximumSize) + AxisPolicy::cx(spacing()));
                         if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
-                        {
-                            if (AxisPolicy::y(pos) != size::max_dimension())
-                                AxisPolicy::y(pos) += (AxisPolicy::cy(itemMaximumSize) + AxisPolicy::cy(spacing()));
-                        }
+                            AxisPolicy::y(posCurrentRow) = std::max(AxisPolicy::y(posCurrentRow), AxisPolicy::cy(itemMaximumSize));
                         else
-                            AxisPolicy::y(pos) = size::max_dimension();
+                            AxisPolicy::y(posCurrentRow) = size::max_dimension();
+                        if (!last)
+                            totalise = false;
+                    }
+                    if (totalise)
+                    {
+#ifdef NEOGFX_DEBUG
+                        if (debug::layoutItem == this)
+                            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): totalise row" << std::endl;
+#endif
+
+                        if (!fits && last)
+                        {
+                            if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
+                                AxisPolicy::y(posCurrentRow) += AxisPolicy::cy(itemMaximumSize);
+                            else
+                                AxisPolicy::y(posCurrentRow) = size::max_dimension();
+                            if (!first && AxisPolicy::y(posCurrentRow) != size::max_dimension())
+                                AxisPolicy::y(posCurrentRow) += AxisPolicy::cy(spacing());
+                        }
+                        AxisPolicy::x(posTotal) = std::max(AxisPolicy::x(posTotal), AxisPolicy::x(posCurrentRow));
+                        if (AxisPolicy::y(posCurrentRow) != size::max_dimension())
+                            AxisPolicy::y(posTotal) += AxisPolicy::y(posCurrentRow);
+                        else
+                            AxisPolicy::y(posTotal) = size::max_dimension();
+                        posCurrentRow = { AxisPolicy::cx(itemMaximumSize), 0.0 };
+                        if (!last && AxisPolicy::y(posTotal) != size::max_dimension())
+                            AxisPolicy::y(posTotal) += AxisPolicy::cy(spacing());
                     }
                 }
                 else
                 {
                     if (AxisPolicy::cy(itemMaximumSize) != size::max_dimension())
                     {
-                        if (AxisPolicy::y(pos) != size::max_dimension())
-                            AxisPolicy::y(pos) += (AxisPolicy::cy(itemMaximumSize) + AxisPolicy::cy(spacing()));
+                        if (AxisPolicy::y(posTotal) != size::max_dimension())
+                        {
+                            AxisPolicy::y(posTotal) += AxisPolicy::cy(itemMaximumSize);
+                            if (!last)
+                                AxisPolicy::y(posTotal) += AxisPolicy::cy(spacing());
+                        }
                     }
                     else
-                        AxisPolicy::y(pos) = size::max_dimension();
+                        AxisPolicy::y(posTotal) = size::max_dimension();
                 }
             }
             else
-                AxisPolicy::x(pos) = size::max_dimension();
-            extent = std::max(extent, AxisPolicy::x(pos));
+                AxisPolicy::x(posTotal) = size::max_dimension();
+            extent = std::max(extent, AxisPolicy::x(posTotal));
+            first = false;
         }
         AxisPolicy::cx(result) = extent;
-        AxisPolicy::cy(result) = AxisPolicy::y(pos);
+        AxisPolicy::cy(result) = AxisPolicy::y(posTotal);
         if (AxisPolicy::cx(result) != size::max_dimension())
         {
             AxisPolicy::cx(result) += AxisPolicy::cx(internal_spacing());
-            if (itemsVisible > 1)
-                AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - 1));
             AxisPolicy::cx(result) = std::min(AxisPolicy::cx(result), AxisPolicy::cx(layout::maximum_size(aAvailableSpace)));
         }
         if (AxisPolicy::cy(result) != size::max_dimension())
@@ -163,6 +209,12 @@ namespace neogfx
             (AxisPolicy::size_policy_y(ourSizePolicy) == size_constraint::Expanding ||
                 AxisPolicy::size_policy_y(ourSizePolicy) == size_constraint::Maximum))
             AxisPolicy::cy(result) = size::max_dimension();
+
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
+
         return result;
     }
 
@@ -173,6 +225,7 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif
+
         set_position(aPosition);
         set_extents(aSize);
         size availableSpace = aSize;
@@ -180,34 +233,40 @@ namespace neogfx
         availableSpace.cy -= internal_spacing().size().cy;
         point pos;
         bool previousNonZeroSize = false;
-        typename AxisPolicy::minor_layout rows(*this);
+
+        std::optional<typename AxisPolicy::minor_layout> tempRows{ *this };
+        auto& rows = tempRows.value();
         rows.set_alignment(alignment());
-        for (auto& itemRef : *this)
+
+        for (auto itemIter = items().begin(); itemIter != items().end();)
         {
+            auto itemRef = *itemIter;
+            itemIter = std::next(itemIter);
             auto& item = *itemRef;
-            if (!item.visible())
+            if (&item.identity() == &rows)
                 continue;
-            if (&item == &*items().back())
-                continue;
-            auto itemMinimumSize = item.minimum_size(availableSpace);
-            if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
-            {
-                previousNonZeroSize = false;
-                continue;
-            }
-            if (previousNonZeroSize)
-                AxisPolicy::x(pos) += AxisPolicy::cx(spacing());
             bool addRow = (rows.count() == 0);
-            if (flow_layout_fit(AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize), AxisPolicy::cx(availableSpace)))
+            if (item.visible())
             {
-                AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
-                previousNonZeroSize = true;
-            }
-            else
-            {
-                AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
-                addRow = true;
-                previousNonZeroSize = false;
+                auto itemMinimumSize = item.minimum_size(availableSpace);
+                if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
+                {
+                    previousNonZeroSize = false;
+                    continue;
+                }
+                if (previousNonZeroSize)
+                    AxisPolicy::x(pos) += AxisPolicy::cx(spacing());
+                if (flow_layout_fit(AxisPolicy::x(pos) + AxisPolicy::cx(itemMinimumSize), AxisPolicy::cx(availableSpace)))
+                {
+                    AxisPolicy::x(pos) += AxisPolicy::cx(itemMinimumSize);
+                    previousNonZeroSize = true;
+                }
+                else
+                {
+                    AxisPolicy::x(pos) = AxisPolicy::cx(itemMinimumSize);
+                    addRow = true;
+                    previousNonZeroSize = false;
+                }
             }
             if (addRow)
             {
@@ -218,23 +277,23 @@ namespace neogfx
                     newRow->set_size_policy(neogfx::size_policy{ size_constraint::Minimum, size_constraint::Expanding });
                 rows.add(newRow);
             }
-            rows.get_layout_at(rows.count() - 1).add(item);
+            rows.get_layout_at(rows.count() - 1).add(itemRef);
         }
+        
         rows.set_padding(neogfx::padding{});
         rows.set_spacing(spacing());
+        
         for (std::uint32_t i = 0; i < rows.count(); ++i)
         {
             rows.get_layout_at(i).set_padding(neogfx::padding{});
             rows.get_layout_at(i).set_spacing(spacing());
         }
+        
         rows.layout_items(aPosition + internal_spacing().top_left(), availableSpace);
-        rows.remove_all();
-        for (auto& itemRef : *this)
-        {
-            auto& item = *itemRef;
-            item.set_parent_layout(this);
-            if (has_parent_widget())
-                item.set_parent_widget(&parent_widget());
-        }
+        for (std::uint32_t i = 0; i < rows.count(); ++i)
+            rows.get_layout_at(i).move_all_to(*this);
+
+        tempRows = std::nullopt;
+        validate();
     }
 }

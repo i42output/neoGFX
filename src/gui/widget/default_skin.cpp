@@ -76,7 +76,7 @@ namespace neogfx
 
     void default_skin::draw_scrollbar(i_graphics_context& aGc, const i_skinnable_item& aItem, const i_scrollbar& aScrollbar) const
     {
-        if (aScrollbar.auto_hidden())
+        if (!aScrollbar.visible() || aScrollbar.auto_hidden())
             return;
         scoped_units su{ aItem.as_widget(), units::Pixels };
         rect const g = aItem.element_rect(skin_element::Scrollbar);

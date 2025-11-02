@@ -50,6 +50,10 @@ namespace neogfx
     {
     }
 
+    vertical_layout::~vertical_layout()
+    {
+    }
+
     layout_direction vertical_layout::direction() const
     {
         return layout_direction::Vertical;

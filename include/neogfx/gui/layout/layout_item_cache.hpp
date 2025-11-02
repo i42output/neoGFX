@@ -50,6 +50,8 @@ namespace neogfx
         void set_id(const i_string& aId) final;
     public:
         bool is_cache() const final;
+        i_layout_item const& identity() const final;
+        i_layout_item& identity() final;
     public:
         bool has_style_sheet() const final;
         i_style_sheet const& style_sheet() const final;

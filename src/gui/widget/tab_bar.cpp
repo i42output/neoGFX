@@ -71,6 +71,16 @@ namespace neogfx
         if (iStyle != aStyle)
         {
             iStyle = aStyle;
+            if ((tab_container_style() & tab_container_style::MultiRow) == tab_container_style::MultiRow)
+            {
+                horizontal_scrollbar().set_style(scrollbar_style::None);
+                vertical_scrollbar().set_style(scrollbar_style::None);
+            }
+            else
+            {
+                horizontal_scrollbar().set_style(scrollbar_style::Scroller);
+                vertical_scrollbar().set_style(scrollbar_style::Scroller);
+            }
             update_placement();
             StyleChanged();
         }
@@ -103,6 +113,36 @@ namespace neogfx
         if (aAvailableSpace != std::nullopt)
             result = result.min(*aAvailableSpace);
         return result;
+    }
+
+    bool tab_bar::mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier)
+    {
+        switch (tab_container_style() & neogfx::tab_container_style::TabAlignmentMask)
+        {
+        case neogfx::tab_container_style::TabAlignmentTop:
+            if (aWheel == mouse_wheel::Vertical)
+            {
+                if (aDelta.dy < 0)
+                    iContainer.set_tab_container_style(iContainer.tab_container_style() | neogfx::tab_container_style::MultiRow);
+                else
+                    iContainer.set_tab_container_style(iContainer.tab_container_style() & ~neogfx::tab_container_style::MultiRow);
+                return true;
+            }
+            break;
+        case neogfx::tab_container_style::TabAlignmentBottom:
+            if (aWheel == mouse_wheel::Vertical)
+            {
+                if (aDelta.dy > 0)
+                    iContainer.set_tab_container_style(iContainer.tab_container_style() | neogfx::tab_container_style::MultiRow);
+                else
+                    iContainer.set_tab_container_style(iContainer.tab_container_style() & ~neogfx::tab_container_style::MultiRow);
+                return true;
+            }
+            break;
+        default:
+            break;
+        }
+        return false;
     }
 
     bool tab_bar::has_tabs() const noexcept
@@ -324,14 +364,27 @@ namespace neogfx
         {
         case neogfx::tab_container_style::TabAlignmentTop:
         case neogfx::tab_container_style::TabAlignmentBottom:
-            if (iHorizontalLayout == std::nullopt)
+            if ((tab_container_style() & neogfx::tab_container_style::MultiRow) != neogfx::tab_container_style::MultiRow)
             {
-                iHorizontalLayout.emplace(*this);
-                vertical_scrollbar().set_position(0.0);
-                horizontal_scrollbar().set_position(0.0);
+                if (iHorizontalLayout == std::nullopt)
+                {
+                    iHorizontalLayout.emplace(*this);
+                    vertical_scrollbar().set_position(0.0);
+                    horizontal_scrollbar().set_position(0.0);
+                }
+                iFlowLayout = std::nullopt;
             }
-            if (iVerticalLayout != std::nullopt)
-                iVerticalLayout = std::nullopt;
+            else
+            {
+                if (iFlowLayout == std::nullopt)
+                {
+                    iFlowLayout.emplace(*this);
+                    vertical_scrollbar().set_position(0.0);
+                    horizontal_scrollbar().set_position(0.0);
+                }
+                iHorizontalLayout = std::nullopt;
+            }
+            iVerticalLayout = std::nullopt;
             break;
         case neogfx::tab_container_style::TabAlignmentLeft:
         case neogfx::tab_container_style::TabAlignmentRight:
@@ -341,8 +394,8 @@ namespace neogfx
                 vertical_scrollbar().set_position(0.0);
                 horizontal_scrollbar().set_position(0.0);
             }
-            if (iHorizontalLayout != std::nullopt)
-                iHorizontalLayout = std::nullopt;
+            iHorizontalLayout = std::nullopt;
+            iFlowLayout = std::nullopt;
             break;
         }
         switch (tab_container_style() & neogfx::tab_container_style::TabAlignmentMask)

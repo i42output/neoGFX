@@ -65,10 +65,12 @@ namespace neogfx
     public:
         virtual ~i_layout_item() = default;
     public:
-        virtual const i_string& id() const = 0;
+        virtual i_string const& id() const = 0;
         virtual void set_id(const i_string& aId) = 0;
     public:
         virtual bool is_cache() const = 0;
+        virtual i_layout_item const& identity() const = 0;
+        virtual i_layout_item& identity() = 0;
     public:
         virtual bool has_style_sheet() const = 0;
         virtual i_style_sheet const& style_sheet() const = 0;

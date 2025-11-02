@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <neogfx/neogfx.hpp>
 
-#include "scrollable_widget.hpp"
-#include "tab_button.hpp"
+#include <neogfx/gui/widget/scrollable_widget.hpp>
+#include <neogfx/gui/widget/tab_button.hpp>
+#include <neogfx/gui/layout/flow_layout.hpp>
 
 namespace neogfx
 {
@@ -49,6 +50,8 @@ namespace neogfx
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+    public:
+        bool mouse_wheel_scrolled(mouse_wheel aWheel, const point& aPosition, delta aDelta, key_modifier aKeyModifier) override;
     public:
         bool has_tabs() const noexcept override;
         std::uint32_t tab_count() const noexcept override;
@@ -96,5 +99,6 @@ namespace neogfx
         tab_list iTabs;
         std::optional<horizontal_layout> iHorizontalLayout;
         std::optional<vertical_layout> iVerticalLayout;
+        std::optional<flow_layout> iFlowLayout;
     };
 }

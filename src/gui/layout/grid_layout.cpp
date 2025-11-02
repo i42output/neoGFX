@@ -115,6 +115,11 @@ namespace neogfx
 
     i_layout_item& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_ref_ptr<i_layout_item> const& aItem)
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::add_item_at_position(" << aRow << ", " << aColumn << ", ...) --> ";
+#endif // NEOGFX_DEBUG
+
         if (&*aItem == &iRowLayout)
         {
             iRowLayout.set_parent_layout(this);
@@ -129,11 +134,13 @@ namespace neogfx
         for (cell_coordinate col = 0; col < aColumn; ++col)
             if (iCells.find(cell_coordinates{ col, aRow }) == iCells.end())
                 add_spacer_at_position(aRow, col);
-        auto& proxy = *layout::find_item(layout::add(aItem));
-        iCells[cell_coordinates{ aColumn, aRow }] = proxy.ptr();
+        auto proxy = *layout::find_item(layout::add(aItem));
+        iCells[cell_coordinates{ aColumn, aRow }] = proxy;
         iDimensions.cy = std::max(iDimensions.cy, aRow + 1);
         iDimensions.cx = std::max(iDimensions.cx, aColumn + 1);
-        row_layout(aRow).replace_item_at(aColumn, *proxy);
+        auto& row = row_layout(aRow);
+        neolib::scoped_flag sf{ iReplacingItem };
+        row.replace_item_at(aColumn, proxy);
         if (cursor() == cell_coordinates{ aColumn, aRow })
             increment_cursor();
         return *aItem;
@@ -180,7 +187,7 @@ namespace neogfx
     grid_layout::cell_coordinates grid_layout::item_position(const i_layout_item& aItem) const
     {
         for (auto i = iCells.begin(); i != iCells.end(); ++i)
-            if (&static_cast<i_layout_item_cache const&>(*i->second).subject() == &aItem)
+            if (&(*i->second).identity() == &aItem.identity())
                 return cell_coordinates{ i->first.x, i->first.y };
         throw item_not_found();
     }
@@ -226,6 +233,11 @@ namespace neogfx
 
     void grid_layout::remove_all()
     {
+#ifdef NEOGFX_DEBUG
+        if (debug::layoutItem == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::remove_all() --> ";
+#endif // NEOGFX_DEBUG
+
         layout::remove_all();
         iRowLayout.remove_all();
         iRows.clear();
@@ -247,18 +259,18 @@ namespace neogfx
 
     size grid_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (items_visible() == 0)
-            return size{};
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::minimum_size(" << aAvailableSpace << ") --> ";
 #endif // NEOGFX_DEBUG
+
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
         size result;
-        std::uint32_t visibleColumns = visible_columns();
-        std::uint32_t visibleRows = visible_rows();
+        std::uint32_t const cellCount = iCells.size();
+        std::uint32_t const visibleColumns = visible_columns();
+        std::uint32_t const visibleRows = visible_rows();
         for (cell_coordinate row = 0; row < rows(); ++row)
         {
             if (!is_row_visible(row))
@@ -288,12 +300,11 @@ namespace neogfx
 
     size grid_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
-        if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
-            return size{};
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::maximum_size(" << aAvailableSpace << ") --> ";
 #endif // NEOGFX_DEBUG
+
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
@@ -376,10 +387,12 @@ namespace neogfx
     {
         if (!enabled())
             return;
+
 #ifdef NEOGFX_DEBUG
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
         if (has_parent_widget())
             parent_widget().layout_items_started();
         scoped_layout_items layoutItems;
@@ -504,25 +517,26 @@ namespace neogfx
 
     void grid_layout::remove(item_list::iterator aItem)
     {
-        auto& item = (**aItem).subject();
+        auto& item = (**aItem).identity();
         auto itemPos = item_position(item);
-        row_layout(itemPos.y).remove_at(itemPos.x);
+        if (&(**aItem).parent_layout() == &row_layout(itemPos.y))
+            row_layout(itemPos.y).remove_at(itemPos.x);
         if (itemPos.x < row_layout(itemPos.y).count())
             row_layout(itemPos.y).add_spacer_at(itemPos.x);
-        iCells.erase(itemPos);
-        iDimensions = cell_dimensions{};
-        for (auto const& cell : iCells)
+        if (!iReplacingItem)
         {
-            iDimensions.cy = std::max(iDimensions.cy, cell.first.y);
-            iDimensions.cx = std::max(iDimensions.cx, cell.first.x);
+            iCells.erase(itemPos);
+            iDimensions = cell_dimensions{};
+            for (auto const& cell : iCells)
+            {
+                iDimensions.cy = std::max(iDimensions.cy, cell.first.y);
+                iDimensions.cx = std::max(iDimensions.cx, cell.first.x);
+            }
+            iCursor = cell_coordinates{};
         }
-        iCursor = cell_coordinates{};
         layout::remove(aItem);
-        if (count() == 0)
-        {
-            auto temp = iRows.back();
-            iRows.pop_back();
-        }
+        if (iCells.size() == 0 && !iReplacingItem)
+            iRows.clear();
     }
 
     std::uint32_t grid_layout::visible_rows() const

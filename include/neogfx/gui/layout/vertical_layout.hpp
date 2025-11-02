@@ -32,6 +32,7 @@ namespace neogfx
         vertical_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
         vertical_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::Left);
         vertical_layout(vertical_layout& aParent);
+        ~vertical_layout();
     public:
         layout_direction direction() const final;
     public:

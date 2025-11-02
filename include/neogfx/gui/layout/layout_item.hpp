@@ -67,6 +67,14 @@ namespace neogfx
         {
             return false;
         }
+        i_layout_item const& identity() const final
+        {
+            return *this;
+        }
+        i_layout_item& identity() final
+        {
+            return *this;
+        }
     public:
         bool has_style_sheet() const final
         {
@@ -217,9 +225,10 @@ namespace neogfx
             auto& self = as_layout_item();
             if (self.has_parent_layout_item())
             {
+                auto& parentLayoutItem = self.parent_layout_item();
                 if (!self.is_widget() || 
                     (self.as_widget().has_parent_layout() && !self.as_widget().is_managing_layout()) || aAncestors)
-                    self.parent_layout_item().update_layout(aDeferLayout, aAncestors);
+                    parentLayoutItem.update_layout(aDeferLayout, aAncestors);
             }
 
 #ifdef NEOGFX_DEBUG

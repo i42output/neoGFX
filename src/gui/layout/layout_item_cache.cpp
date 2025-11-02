@@ -139,6 +139,16 @@ namespace neogfx
         return true;
     }
 
+    i_layout_item const& layout_item_cache::identity() const
+    {
+        return subject();
+    }
+
+    i_layout_item& layout_item_cache::identity()
+    {
+        return subject();
+    }
+
     bool layout_item_cache::has_style_sheet() const
     {
         return subject().has_style_sheet();

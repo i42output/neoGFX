@@ -34,6 +34,7 @@ namespace neogfx
         horizontal_layout(i_widget& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
         horizontal_layout(i_layout& aParent, neogfx::alignment aAlignment = neogfx::alignment::VCenter);
         horizontal_layout(horizontal_layout& aParent);
+        ~horizontal_layout();
     public:
         layout_direction direction() const final;
     public:

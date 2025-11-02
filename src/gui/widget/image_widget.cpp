@@ -66,6 +66,10 @@ namespace neogfx
         set_ignore_mouse_events(true);
     }
 
+    image_widget::~image_widget()
+    {
+    }
+
     neogfx::size_policy image_widget::size_policy() const
     {
         if (has_size_policy())

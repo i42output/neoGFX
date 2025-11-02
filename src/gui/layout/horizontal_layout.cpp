@@ -50,6 +50,10 @@ namespace neogfx
     {
     }
 
+    horizontal_layout::~horizontal_layout()
+    {
+    }
+
     layout_direction horizontal_layout::direction() const
     {
         return layout_direction::Horizontal;

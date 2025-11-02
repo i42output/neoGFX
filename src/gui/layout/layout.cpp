@@ -209,9 +209,9 @@ namespace neogfx
             iOwner = aParentWidget;
             for (auto& itemRef : items())
             {
-                auto& item = *itemRef;
-                if (!item.subject().has_parent_widget())
-                    item.subject().set_parent_widget(aParentWidget);
+                auto& item = (*itemRef).identity();
+                if (!item.has_parent_widget())
+                    item.set_parent_widget(aParentWidget);
             }
         }
     }
@@ -223,7 +223,7 @@ namespace neogfx
 
     i_layout_item& layout::add_at(layout_item_index aPosition, i_layout_item& aItem)
     {
-        return add_at(aPosition, ref_ptr<i_layout_item>{ref_ptr<i_layout_item>{}, & aItem});
+        return add_at(aPosition, ref_ptr<i_layout_item>{ref_ptr<i_layout_item>{}, &aItem});
     }
 
     i_layout_item& layout::add(i_ref_ptr<i_layout_item> const& aItem)
@@ -260,16 +260,12 @@ namespace neogfx
 
     bool layout::remove(i_layout_item& aItem)
     {
-        for (auto i = begin(); i != end(); ++i)
-        {
-            auto& cachedItem = **i;
-            if (!cachedItem.subject_destroyed() && &cachedItem.subject() == &aItem)
-            {
-                remove(i);
-                return true;
-            }
-        }
-        return false;
+        auto existing = std::find_if(begin(), end(), [&](auto const& cachedItem) 
+            { return !cachedItem->subject_destroyed() && &cachedItem->identity() == &aItem.identity(); });
+        if (existing == end())
+            return false;
+        remove(existing);
+        return true;
     }
 
     void layout::remove_all()
@@ -286,7 +282,11 @@ namespace neogfx
             auto& compatibleDestination = dynamic_cast<layout&>(aDestination); // dynamic_cast? not a fan but heh.
             compatibleDestination.items().splice(compatibleDestination.items().end(), iItems);
             for (auto& item : compatibleDestination)
+            {
                 item->set_parent_layout(&compatibleDestination);
+                if (aDestination.has_parent_widget())
+                    item->set_parent_widget(&aDestination.parent_widget());
+            }
         }
         catch (std::bad_cast)
         {
@@ -314,7 +314,7 @@ namespace neogfx
         for (auto i = items().begin(); i != items().end(); ++i)
         {
             auto const& item = **i;
-            if (&item.subject() == &aItem)
+            if (&item.identity() == &aItem.identity())
                 return static_cast<layout_item_index>(std::distance(items().begin(), i));
         }
         return optional_layout_item_index{};
@@ -333,7 +333,7 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = std::next(items().begin(), aIndex);
-        return (**item).subject();
+        return (**item).identity();
     }
 
     i_layout_item& layout::item_at(layout_item_index aIndex)
@@ -346,8 +346,8 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = *std::next(items().begin(), aIndex);
-        if (item->subject().is_widget())
-            return item->subject().as_widget();
+        if (item->identity().is_widget())
+            return item->identity().as_widget();
         throw not_a_widget();
     }
 
@@ -361,8 +361,8 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = *std::next(items().begin(), aIndex);
-        if (item->subject().is_layout())
-            return item->subject().as_layout();
+        if (item->identity().is_layout())
+            return item->identity().as_layout();
         throw not_a_layout();
     }
 
@@ -658,7 +658,7 @@ namespace neogfx
     layout::item_list::const_iterator layout::find_item(const i_layout_item& aItem) const
     {
         for (auto i = items().begin(); i != items().end(); ++i)
-            if (&**i == &aItem || &(**i).subject() == &aItem)
+            if (&**i == &aItem || &(**i).identity() == &aItem.identity())
                 return i;
         return items().end();
     }
@@ -666,7 +666,7 @@ namespace neogfx
     layout::item_list::iterator layout::find_item(i_layout_item& aItem)
     {
         for (auto i = items().begin(); i != items().end(); ++i)
-            if (&**i == &aItem || &(**i).subject() == &aItem)
+            if (&**i == &aItem || &(**i).identity() == &aItem.identity())
                 return i;
         return items().end();
     }

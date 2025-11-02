@@ -41,7 +41,7 @@ namespace neogfx
     private:
         struct row_major;
         struct column_major;
-        using cell_list = boost::unordered_flat_map<cell_coordinates, layout_item_cache*, std::hash<cell_coordinates>, std::equal_to<cell_coordinates>>;
+        using cell_list = boost::unordered_flat_map<cell_coordinates, ref_ptr<i_layout_item>, std::hash<cell_coordinates>, std::equal_to<cell_coordinates>>;
         using span_list = std::vector<std::pair<cell_coordinates, cell_coordinates>>;
     public:
         grid_layout(neogfx::alignment aAlignment = neogfx::alignment::Center | neogfx::alignment::VCenter);
@@ -131,5 +131,6 @@ namespace neogfx
         span_list iSpans;
         vertical_layout iRowLayout;
         std::vector<ref_ptr<horizontal_layout>> iRows;
+        bool iReplacingItem = false;
     };
 }
