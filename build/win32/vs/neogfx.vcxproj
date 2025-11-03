@@ -523,6 +523,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\widget_bits.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\context_menu.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\window\i_context_menu.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\i_native_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\i_window.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\window\popup_menu.hpp" />

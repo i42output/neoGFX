@@ -51,6 +51,7 @@ namespace neogfx
         typedef neolib::mutable_set<nest> nest_list;
     public:
         surface_manager(i_basic_services& aBasicServices, i_rendering_engine& aRenderingEngine);
+        ~surface_manager();
     public:
         bool initialising_surface() const override;
         void add_surface(i_surface& aSurface) override;

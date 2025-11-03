@@ -90,7 +90,9 @@ namespace neogfx
         if (debug::layoutItem == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "text_widget::paint(...)" << std::endl;
 #endif // NEOGFX_DEBUG
-        scoped_mnemonics sm(aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT));
+
+        scoped_mnemonics sm{ aGc, service<i_keyboard>().is_key_pressed(ScanCode_LALT) && has_root() && root().is_active() };
+
         size textSize = text_extent();
         point textPosition;
         switch (iAlignment & neogfx::alignment::Horizontal)

@@ -98,11 +98,12 @@ namespace neogfx
         service<i_context_menu>().activate_context_menu();
         PopupCreated(*sWidget);
         event_processing_context epc{ service<i_async_task>(), "neogfx::context_menu" };
-        while (!finished)
+        while (!finished && service<i_context_menu>().context_menu_active())
         {
             service<i_app>().process_events(epc);
         }
         sWidget = nullptr;
-        service<i_context_menu>().deactivate_context_menu();
+        if (service<i_context_menu>().context_menu_active())
+            service<i_context_menu>().deactivate_context_menu();
     }
 }

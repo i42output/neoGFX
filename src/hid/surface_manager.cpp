@@ -50,6 +50,10 @@ namespace neogfx
         });
     }
 
+    surface_manager::~surface_manager()
+    {
+    }
+
     bool surface_manager::initialising_surface() const
     {
         for (auto s : iSurfaces)
@@ -84,8 +88,10 @@ namespace neogfx
                 if (aSurface.is_owner_of(**s))
                 {
                     auto& childSurface = **s;
-                    s = iSurfaces.erase(s);
+                    iSurfaces.erase(s);
                     childSurface.close();
+                    // reset iterator as this function is re-entrant...
+                    s = iSurfaces.begin();
                 }
                 else
                     ++s;

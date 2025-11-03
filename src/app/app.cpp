@@ -949,14 +949,14 @@ namespace neogfx
         i_surface* lastWindowSurface = nullptr;
         for (auto& m : iMnemonics)
         {
-            if (lastWindowSurface == nullptr)
-            {
-                if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window)
-                    lastWindowSurface = &m->mnemonic_widget().surface();
-            }
-            else if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window && lastWindowSurface != &m->mnemonic_widget().surface())
-            {
+            if (m->mnemonic_widget().has_root() && !m->mnemonic_widget().root().is_active())
                 continue;
+            if (m->mnemonic_widget().has_surface() && m->mnemonic_widget().surface().surface_type() == surface_type::Window)
+            {
+                if (lastWindowSurface == nullptr)
+                    lastWindowSurface = &m->mnemonic_widget().surface();
+                else if (lastWindowSurface != &m->mnemonic_widget().surface())
+                    continue;
             }
             if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput.to_std_string(), loc))
             {

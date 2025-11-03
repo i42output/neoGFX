@@ -31,6 +31,7 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/window/i_window.hpp>
+#include <neogfx/gui/window/i_context_menu.hpp>
 #include "native_window.hpp"
 
 namespace neogfx
@@ -410,6 +411,11 @@ namespace neogfx
             switch (keyboardEvent.type())
             {
             case keyboard_event_type::KeyPressed:
+                if (keyboardEvent.scan_code() == ScanCode_LALT)
+                {
+                    if (service<i_context_menu>().context_menu_active())
+                        service<i_context_menu>().deactivate_context_menu();
+                }
                 keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))
                 {
