@@ -27,8 +27,14 @@ namespace neogfx
     {
     }
 
+    bool keyboard_grabber::is_processing_event() const
+    {
+        return iProcessingEvent;
+    }
+
     bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
+        neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->key_pressed(aScanCode, aKeyCode, aKeyModifier))
                 return true;
@@ -37,6 +43,7 @@ namespace neogfx
 
     bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
+        neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->key_released(aScanCode, aKeyCode, aKeyModifier))
                 return true;
@@ -45,6 +52,7 @@ namespace neogfx
 
     bool keyboard_grabber::text_input(i_string const& aText)
     {
+        neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->text_input(aText))
                 return true;
@@ -53,6 +61,7 @@ namespace neogfx
 
     bool keyboard_grabber::sys_text_input(i_string const& aText)
     {
+        neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->sys_text_input(aText))
                 return true;
@@ -114,5 +123,10 @@ namespace neogfx
     i_keyboard_handler& keyboard::grabber() const
     {
         return iGrabber;
+    }
+
+    bool keyboard::is_grabber_processing_event() const
+    {
+        return iGrabber.is_processing_event();
     }
 }

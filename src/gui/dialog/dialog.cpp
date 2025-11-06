@@ -271,6 +271,9 @@ namespace neogfx
             }
         }
 
+        if (service<i_keyboard>().is_grabber_processing_event())
+            return false;
+
         return window::key_pressed(aScanCode, aKeyCode, aKeyModifier);
     }
 

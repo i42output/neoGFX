@@ -35,12 +35,15 @@ namespace neogfx
     public:
         keyboard_grabber(keyboard& aKeyboard);
     public:
+        bool is_processing_event() const;
+    public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
         bool sys_text_input(i_string const& aText) override;
     private:
         keyboard& iKeyboard;
+        bool iProcessingEvent = false;
     };
 
     class keyboard : public hid_device<i_keyboard>
@@ -66,6 +69,7 @@ namespace neogfx
         void grab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
         void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
         i_keyboard_handler& grabber() const override;
+        bool is_grabber_processing_event() const override;
     private:
         mutable keyboard_grabber iGrabber;
         std::deque<i_keyboard_handler*> iGrabs;

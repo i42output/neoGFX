@@ -232,7 +232,7 @@ namespace neogfx
         iAnimationFlash{ iAnimationFlashingBox.with_item_layout<vertical_layout>(), "Flash"_t },
         iAnimationBlink{ iAnimationFlashingBox.item_layout(), "Blink"_t },
         iAnimationEasing{ iAnimationFlashingBox.item_layout() },
-        iAnimationFrequencyGroupBox{ iAnimationFlashingBox.item_layout(), "Frequency"_t },
+        iAnimationFrequencyGroupBox{ iAnimationFlashingBox.item_layout(), "Frequency (Hz)"_t },
         iAnimationFrequency{ iAnimationFrequencyGroupBox.with_item_layout<vertical_layout>() },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
@@ -289,7 +289,7 @@ namespace neogfx
         iAnimationFlash{ iAnimationFlashingBox.with_item_layout<vertical_layout>(), "Flash"_t },
         iAnimationBlink{ iAnimationFlashingBox.item_layout(), "Blink"_t },
         iAnimationEasing{ iAnimationFlashingBox.item_layout() },
-        iAnimationFrequencyGroupBox{ iAnimationFlashingBox.item_layout(), "Frequency"_t },
+        iAnimationFrequencyGroupBox{ iAnimationFlashingBox.item_layout(), "Frequency (Hz)"_t },
         iAnimationFrequency{ iAnimationFrequencyGroupBox.with_item_layout<vertical_layout>() },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }

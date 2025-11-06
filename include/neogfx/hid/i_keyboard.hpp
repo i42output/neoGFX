@@ -720,6 +720,7 @@ namespace neogfx
         virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
         virtual void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
         virtual i_keyboard_handler& grabber() const = 0;
+        virtual bool is_grabber_processing_event() const = 0;
     public:
         virtual key_code_e scan_code_to_key_code(scan_code_e aScanCode) const = 0;
         virtual native_key_code_e native_key_code_to_usb_hid_key_code(native_key_code_e aKeyCode) const = 0;

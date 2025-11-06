@@ -268,7 +268,6 @@ namespace neogfx
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
         size result;
-        auto const cellCount = static_cast<std::uint32_t>(iCells.size());
         auto const visibleColumns = visible_columns();
         auto const visibleRows = visible_rows();
         for (cell_coordinate row = 0; row < rows(); ++row)
