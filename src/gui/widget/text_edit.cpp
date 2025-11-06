@@ -93,7 +93,8 @@ namespace neogfx
         iPaperColor{ aOther.iPaperColor },
         iSmartUnderline{ aOther.iSmartUnderline },
         iIgnoreEmoji{ aOther.iIgnoreEmoji },
-        iTextEffect{ aOther.iTextEffect }
+        iTextEffect{ aOther.iTextEffect },
+        iTextAnimation{ aOther.iTextAnimation }
     {
     }
         
@@ -101,13 +102,15 @@ namespace neogfx
         optional_font const& aFont,
         const color_or_gradient& aTextColor,
         const color_or_gradient& aPaperColor,
-        const optional_text_effect& aTextEffect) :
+        const optional_text_effect& aTextEffect,
+        const optional_text_animation& aTextAnimation) :
         iFont{ aFont },
         iTextColor{ aTextColor },
         iPaperColor{ aPaperColor },
         iSmartUnderline{ false },
         iIgnoreEmoji{ true },
-        iTextEffect{ aTextEffect }
+        iTextEffect{ aTextEffect },
+        iTextAnimation{ aTextAnimation }
     {
     }
 
@@ -146,12 +149,18 @@ namespace neogfx
         return iTextEffect;
     }
 
+    const optional_text_animation& text_edit::character_style::text_animation() const
+    {
+        return iTextAnimation;
+    }
+
     text_format text_edit::character_style::as_text_format() const
     {
         return text_format{ 
             glyph_color() != neolib::none ? glyph_color() : text_color(), 
             paper_color() != neolib::none ? optional_text_color{ paper_color() } : optional_text_color{}, 
-            text_effect() }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
+            text_effect(),
+            text_animation() }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
     }
 
     text_edit::character_style& text_edit::character_style::set_font(optional_font const& aFont)
@@ -191,6 +200,12 @@ namespace neogfx
         return *this;
     }
 
+    text_edit::character_style& text_edit::character_style::set_text_animation(const optional_text_animation& aAnimation)
+    {
+        iTextAnimation = aAnimation;
+        return *this;
+    }
+
     text_edit::character_style& text_edit::character_style::set_from_text_format(const text_format& aTextFormat)
     {
         iGlyphColor = aTextFormat.ink();
@@ -199,6 +214,7 @@ namespace neogfx
         iSmartUnderline = aTextFormat.smart_underline();
         iIgnoreEmoji = aTextFormat.ignore_emoji();
         iTextEffect = aTextFormat.effect();
+        iTextAnimation = aTextFormat.animation();
         return *this;
     }
 
@@ -216,13 +232,15 @@ namespace neogfx
         iIgnoreEmoji = aRhs.ignore_emoji();
         if (aRhs.text_effect() != std::nullopt)
             iTextEffect = aRhs.text_effect();
+        if (aRhs.text_animation() != std::nullopt)
+            iTextAnimation = aRhs.text_animation();
         return *this;
     }
 
     bool text_edit::character_style::operator==(const character_style& aRhs) const
     {
-        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iSmartUnderline, iIgnoreEmoji, iTextEffect) == 
-            std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iSmartUnderline, aRhs.iIgnoreEmoji, aRhs.iTextEffect);
+        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iSmartUnderline, iIgnoreEmoji, iTextEffect, iTextAnimation) == 
+            std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iSmartUnderline, aRhs.iIgnoreEmoji, aRhs.iTextEffect, aRhs.iTextAnimation);
     }
 
     bool text_edit::character_style::operator!=(const character_style& aRhs) const
@@ -452,6 +470,13 @@ namespace neogfx
     {
         style newStyle = *this;
         newStyle.character().set_text_effect(aEffect);
+        return newStyle;
+    }
+
+    text_edit::style text_edit::style::with_text_animation(const optional_text_animation& aAnimation) const
+    {
+        style newStyle = *this;
+        newStyle.character().set_text_animation(aAnimation);
         return newStyle;
     }
 

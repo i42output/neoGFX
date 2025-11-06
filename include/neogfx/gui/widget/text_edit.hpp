@@ -157,7 +157,8 @@ namespace neogfx
                 optional_font const& aFont,
                 const color_or_gradient& aTextColor = color_or_gradient{},
                 const color_or_gradient& aPaperColor = color_or_gradient{},
-                const optional_text_effect& aTextEffect = optional_text_effect{});
+                const optional_text_effect& aTextEffect = optional_text_effect{},
+                const optional_text_animation& aTextAnimation = optional_text_animation{});
         public:
             optional_font const& font() const;
             const color_or_gradient& glyph_color() const;
@@ -166,6 +167,7 @@ namespace neogfx
             bool smart_underline() const;
             bool ignore_emoji() const;
             const optional_text_effect& text_effect() const;
+            const optional_text_animation& text_animation() const;
             text_format as_text_format() const;
             character_style& set_font(optional_font const& aFont = optional_font{});
             character_style& set_font_if_none(neogfx::font const& aFont);
@@ -173,6 +175,7 @@ namespace neogfx
             character_style& set_text_color(const color_or_gradient& aColor = color_or_gradient{});
             character_style& set_paper_color(const color_or_gradient& aColor = color_or_gradient{});
             character_style& set_text_effect(const optional_text_effect& aEffect = optional_text_effect{});
+            character_style& set_text_animation(const optional_text_animation& aAnimation = optional_text_animation{});
             character_style& set_from_text_format(const text_format& aTextFormat);
         public:
             character_style& merge(const character_style& aRhs);
@@ -188,6 +191,7 @@ namespace neogfx
             bool iSmartUnderline;
             bool iIgnoreEmoji;
             optional_text_effect iTextEffect;
+            optional_text_animation iTextAnimation;
         };
 
         class paragraph_style
@@ -247,6 +251,7 @@ namespace neogfx
             style with_text_color(const color_or_gradient& aColor = color_or_gradient{}) const;
             style with_paper_color(const color_or_gradient& aColor = color_or_gradient{}) const;
             style with_text_effect(const optional_text_effect& aEffect = optional_text_effect{}) const;
+            style with_text_animation(const optional_text_animation& aAnimation = optional_text_animation{}) const;
         private:
 			text_edit* iParent;
             style_cookie iCookie = neolib::invalid_cookie<style_cookie>;

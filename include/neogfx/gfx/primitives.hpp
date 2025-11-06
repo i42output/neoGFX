@@ -27,6 +27,7 @@
 #include <neolib/core/vecarray.hpp>
 
 #include <neogfx/core/primitives.hpp>
+#include <neogfx/core/easing.hpp>
 #include <neogfx/gfx/stipple.hpp>
 #include <neogfx/gfx/path.hpp>
 #include <neogfx/gfx/texture.hpp>
@@ -191,6 +192,13 @@ namespace neogfx
         Glow,
         Shadow
     };
+
+    enum class text_animation_type : std::uint32_t
+    {
+        None,
+        Flash,
+        Blink
+    };
 }
 
 begin_declare_enum(neogfx::text_effect_type)
@@ -199,6 +207,12 @@ declare_enum_string(neogfx::text_effect_type, Outline)
 declare_enum_string(neogfx::text_effect_type, Glow)
 declare_enum_string(neogfx::text_effect_type, Shadow)
 end_declare_enum(neogfx::text_effect_type)
+
+begin_declare_enum(neogfx::text_animation_type)
+declare_enum_string(neogfx::text_animation_type, None)
+declare_enum_string(neogfx::text_animation_type, Flash)
+declare_enum_string(neogfx::text_animation_type, Blink)
+end_declare_enum(neogfx::text_animation_type)
 
 namespace neogfx
 {
@@ -406,11 +420,113 @@ namespace neogfx
         return aStream;
     }
 
+    class text_animation
+    {
+    public:
+        typedef text_animation abstract_type; // todo
+    public:
+        static constexpr scalar kDefaultFrequency = 1.5625; ///< Sinclair ZX Spectrum FLASH frequency
+    public:
+        text_animation() :
+            iType{ text_animation_type::None }, iEasing{ neogfx::easing::InStep }, iFrequency{ kDefaultFrequency }
+        {
+        }
+        text_animation(text_animation_type aType, neogfx::easing aEasing = neogfx::easing::InStep, scalar aFrequency = kDefaultFrequency) :
+            iType{ aType }, iEasing{ aEasing }, iFrequency { aFrequency }
+        {
+        }
+    public:
+        text_animation& operator=(const text_animation& aOther)
+        {
+            if (&aOther == this)
+                return *this;
+            iType = aOther.iType;
+            iEasing = aOther.iEasing;
+            iFrequency = aOther.iFrequency;
+            return *this;
+        }
+    public:
+        bool operator==(const text_animation& that) const noexcept
+        {
+            return std::forward_as_tuple(iType, iEasing, iFrequency) ==
+                std::forward_as_tuple(that.iType, that.iEasing, that.iFrequency);
+        }
+        auto operator<=>(const text_animation& that) const noexcept
+        {
+            return std::forward_as_tuple(iType, iEasing, iFrequency) <=>
+                std::forward_as_tuple(that.iType, that.iEasing, that.iFrequency);
+        }
+    public:
+        text_animation_type type() const
+        {
+            return iType;
+        }
+        void set_type(text_animation_type aType)
+        {
+            iType = aType;
+        }
+        neogfx::easing easing() const
+        {
+            return iEasing;
+        }
+        void set_easing(neogfx::easing aEasing)
+        {
+            iEasing = aEasing;
+        }
+        scalar frequency() const
+        {
+            return iFrequency;
+        }
+        void set_frequency(scalar aFrequency)
+        {
+            iFrequency = aFrequency;
+        }
+    private:
+        text_animation_type iType;
+        neogfx::easing iEasing;
+        scalar iFrequency;
+    };
+
+    typedef neolib::optional<text_animation> optional_text_animation;
+
+    template <typename Elem, typename Traits>
+    inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const text_animation& aEffect)
+    {
+        aStream << '[';
+        aStream << aEffect.type();
+        aStream << ',';
+        aStream << aEffect.easing();
+        aStream << ',';
+        aStream << aEffect.frequency();
+        aStream << ']';
+        return aStream;
+    }
+
+    template <typename Elem, typename Traits>
+    inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, text_animation& aEffect)
+    {
+        auto previousImbued = aStream.getloc();
+        if (typeid(std::use_facet<std::ctype<char>>(previousImbued)) != typeid(neolib::comma_and_brackets_as_whitespace))
+            aStream.imbue(std::locale{ previousImbued, new neolib::comma_and_brackets_as_whitespace{} });
+        text_animation_type type;
+        aStream >> type;
+        aEffect.set_type(type);
+        easing easing;
+        aStream >> easing;
+        aEffect.set_easing(easing);
+        scalar frequency;
+        aStream >> frequency;
+        aEffect.set_frequency(frequency);
+        aStream.imbue(previousImbued);
+        return aStream;
+    }
+
     class text_format
     {
     public:
         struct no_paper : std::logic_error { no_paper() : std::logic_error("neogfx::text_format::no_paper") {} };
         struct no_effect : std::logic_error { no_effect() : std::logic_error("neogfx::text_format::no_effect") {} };
+        struct no_animation : std::logic_error { no_animation() : std::logic_error("neogfx::text_format::no_animation") {} };
     public:
         typedef text_format abstract_type; // todo
     public:
@@ -427,17 +543,19 @@ namespace neogfx
             iSmartUnderline{ aOther.iSmartUnderline },
             iIgnoreEmoji{ aOther.iIgnoreEmoji },
             iEffect{ aOther.iEffect },
+            iAnimation{ aOther.iAnimation },
             iOnlyCalculateEffect{ aOther.iOnlyCalculateEffect },
             iBeingFiltered{ aOther.iBeingFiltered }
         {
         }
         template <typename InkType, typename PaperType>
-        text_format(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect) :
+        text_format(InkType const& aInk, PaperType const& aPaper, optional_text_effect const& aEffect, optional_text_animation const& aAnimation = {}) :
             iInk{ aInk },
             iPaper{ aPaper },
             iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
+            iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
         {
@@ -469,6 +587,37 @@ namespace neogfx
             iSmartUnderline{ false },
             iIgnoreEmoji{ true },
             iEffect{ aEffect },
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
+        {
+        }
+        template <typename InkType, typename PaperType>
+        text_format(InkType const& aInk, PaperType const& aPaper, optional_text_animation const& aAnimation) :
+            iInk{ aInk },
+            iPaper{ aPaper },
+            iSmartUnderline{ false },
+            iIgnoreEmoji{ true },
+            iAnimation{ aAnimation },
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
+        {
+        }
+        template <typename InkType>
+        text_format(InkType const& aInk, optional_text_animation const& aAnimation) :
+            iInk{ aInk },
+            iSmartUnderline{ false },
+            iIgnoreEmoji{ true },
+            iAnimation{ aAnimation },
+            iOnlyCalculateEffect{ false },
+            iBeingFiltered{ false }
+        {
+        }
+        template <typename InkType>
+        text_format(InkType const& aInk, text_animation const& aAnimation) :
+            iInk{ aInk },
+            iSmartUnderline{ false },
+            iIgnoreEmoji{ true },
+            iAnimation{ aAnimation },
             iOnlyCalculateEffect{ false },
             iBeingFiltered{ false }
         {
@@ -548,6 +697,18 @@ namespace neogfx
         {
             iEffect = aEffect;
         }
+        optional_text_animation const& animation() const
+        {
+            return iAnimation;
+        }
+        optional_text_animation& animation()
+        {
+            return iAnimation;
+        }
+        void set_animation(optional_text_animation const& aAnimation)
+        {
+            iAnimation = aAnimation;
+        }
         bool only_calculate_effect() const
         {
             return iOnlyCalculateEffect;
@@ -580,6 +741,10 @@ namespace neogfx
         text_format with_effect(optional_text_effect const& aEffect) const
         {
             return text_format{ iInk, iPaper, aEffect }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
+        }
+        text_format with_animation(optional_text_animation const& aAnimation) const
+        {
+            return text_format{ iInk, iPaper, iEffect, aAnimation }.with_smart_underline(smart_underline()).with_emoji_ignored(ignore_emoji());
         }
         text_format with_alpha(color::component aAlpha) const
         {
@@ -621,6 +786,7 @@ namespace neogfx
         bool iSmartUnderline;
         bool iIgnoreEmoji;
         optional_text_effect iEffect;
+        optional_text_animation iAnimation;
         bool iOnlyCalculateEffect;
         bool iBeingFiltered;
     };
@@ -636,6 +802,8 @@ namespace neogfx
         aStream << aTextFormat.paper();
         aStream << ",";
         aStream << aTextFormat.effect();
+        aStream << ",";
+        aStream << aTextFormat.animation();
         aStream << ",";
         aStream << aTextFormat.smart_underline();
         aStream << ",";
@@ -659,6 +827,9 @@ namespace neogfx
         optional_text_effect textEffect;
         aStream >> textEffect;
         aTextFormat.set_effect(textEffect);
+        optional_text_animation textAnimation;
+        aStream >> textAnimation;
+        aTextFormat.set_animation(textAnimation);
         bool smartUnderline;
         aStream >> smartUnderline;
         aTextFormat.set_smart_underline(smartUnderline);

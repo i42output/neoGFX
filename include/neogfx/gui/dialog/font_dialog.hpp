@@ -113,12 +113,18 @@ namespace neogfx
             group_box box;
             slider_box slider;
             text_effect_width(font_dialog& aParent) :
-                box{ aParent.iAdvancedEffectsBox.item_layout(), "Width"_t },
+                box{ aParent.iAdvancedEffectsTypeBox.item_layout(), "Width"_t },
                 slider{ box.with_item_layout<vertical_layout>() }
             {
             }
         };
         std::optional<text_effect_width> iAdvancedEffectsWidth;
+        group_box iAnimationFlashingBox;
+        radio_button iAnimationFlash;
+        radio_button iAnimationBlink;
+        drop_list iAnimationEasing;
+        group_box iAnimationFrequencyGroupBox;
+        double_slider_box iAnimationFrequency;
         group_box iSampleBox;
         text_widget iSample;
     };

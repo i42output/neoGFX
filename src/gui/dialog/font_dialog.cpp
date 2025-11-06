@@ -137,6 +137,50 @@ namespace neogfx
             sink iSink;
             mutable std::vector<optional_font> iFonts;
         };
+
+        class easing_item_presentation_model : public default_drop_list_presentation_model<basic_item_model<easing>>
+        {
+            typedef default_drop_list_presentation_model<basic_item_model<easing>> base_type;
+        public:
+            easing_item_presentation_model(drop_list& aDropList, basic_item_model<easing>& aModel, bool aLarge = true) : base_type{ aDropList, aModel }, iLarge{ aLarge }
+            {
+                iSink += service<i_app>().current_style_changed([this](style_aspect)
+                    {
+                        iTextures.clear();
+                        VisualAppearanceChanged.async_trigger();
+                    });
+            }
+        public:
+            optional_texture cell_image(const item_presentation_model_index& aIndex) const override
+            {
+                auto easingFunction = item_model().item(to_item_model_index(aIndex));
+                auto iterTexture = iTextures.find(easingFunction);
+                if (iterTexture == iTextures.end())
+                {
+                    dimension const d = iLarge ? 48.0 : 24.0;
+                    texture newTexture{ size{d, d}, 1.0, texture_sampling::Multisample };
+                    graphics_context gc{ newTexture };
+                    scoped_snap_to_pixel snap{ gc };
+                    auto const textColor = service<i_app>().current_style().palette().color(color_role::Text);
+                    gc.draw_rect(rect{ point{}, size{d, d} }, pen{ textColor, 1.0 });
+                    optional_point lastPos;
+                    pen pen{ textColor, 2.0 };
+                    for (double x = 0.0; x <= d - 8.0; x += 2.0)
+                    {
+                        point pos{ x + 4.0, ease(easingFunction, x / (d - 8.0)) * (d - 8.0) + 4.0 };
+                        if (lastPos != std::nullopt)
+                            gc.draw_line(*lastPos, pos, pen);
+                        lastPos = pos;
+                    }
+                    iterTexture = iTextures.emplace(easingFunction, newTexture).first;
+                }
+                return iterTexture->second;
+            }
+        private:
+            bool iLarge;
+            mutable std::map<easing, texture> iTextures;
+            sink iSink;
+        };
     }
 
     font_dialog::font_dialog(const neogfx::font& aCurrentFont, optional<text_format> const& aCurrentTextFormat) :
@@ -184,6 +228,12 @@ namespace neogfx
         iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.item_layout(), "Gradient"_t },
         iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.item_layout(), "+Emoji"_t },
+        iAnimationFlashingBox{ iLayoutTextFormat, "Flash/Blink"_t },
+        iAnimationFlash{ iAnimationFlashingBox.with_item_layout<vertical_layout>(), "Flash"_t },
+        iAnimationBlink{ iAnimationFlashingBox.item_layout(), "Blink"_t },
+        iAnimationEasing{ iAnimationFlashingBox.item_layout() },
+        iAnimationFrequencyGroupBox{ iAnimationFlashingBox.item_layout(), "Frequency"_t },
+        iAnimationFrequency{ iAnimationFrequencyGroupBox.with_item_layout<vertical_layout>() },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -235,6 +285,12 @@ namespace neogfx
         iAdvancedEffectsColor{ iAdvancedEffectsInkBox.with_item_layout<vertical_layout>(), "Color"_t },
         iAdvancedEffectsGradient{ iAdvancedEffectsInkBox.item_layout(), "Gradient"_t },
         iAdvancedEffectsEmoji{ iAdvancedEffectsInkBox.item_layout(), "+Emoji"_t },
+        iAnimationFlashingBox{ iLayoutTextFormat, "Flash/Blink"_t },
+        iAnimationFlash{ iAnimationFlashingBox.with_item_layout<vertical_layout>(), "Flash"_t },
+        iAnimationBlink{ iAnimationFlashingBox.item_layout(), "Blink"_t },
+        iAnimationEasing{ iAnimationFlashingBox.item_layout() },
+        iAnimationFrequencyGroupBox{ iAnimationFlashingBox.item_layout(), "Frequency"_t },
+        iAnimationFrequency{ iAnimationFrequencyGroupBox.with_item_layout<vertical_layout>() },
         iSampleBox{ iLayout2, "Sample"_t },
         iSample{ iSampleBox.with_item_layout<horizontal_layout>(), "AaBbYyZz 123" }
     {
@@ -301,6 +357,23 @@ namespace neogfx
         iInkBox.set_checkable(true, true);
         iPaperBox.set_checkable(true, true);
         iAdvancedEffectsBox.set_checkable(true, true);
+        iAnimationFlashingBox.set_checkable(true, true);
+
+        auto easingItemModel = make_ref<basic_item_model<easing>>();
+        for (auto i = 0; i < standard_easings().size(); ++i)
+            easingItemModel->insert_item(easingItemModel->end(), standard_easings()[i], to_string(standard_easings()[i]));
+        auto easingPresentationModel = make_ref<easing_item_presentation_model>(iAnimationEasing, *easingItemModel, false);
+        iAnimationEasing.set_size_policy(size_constraint::Minimum);
+        iAnimationEasing.set_model(easingItemModel);
+        iAnimationEasing.set_presentation_model(easingPresentationModel);
+        iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ standard_easing_index(easing::InStep) });
+        iAnimationEasing.accept_selection();
+        
+        iAnimationFrequency.set_minimum(0.1);
+        iAnimationFrequency.set_maximum(10.0);
+        iAnimationFrequency.set_step(0.1);
+        iAnimationFrequency.spin_box().set_format("%.2f");
+
         iSink += iUnderline.Toggled([&]() { update_selected_font(iUnderline); });
         iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); } update_selected_font(iSuperscript); });
         iSink += iSubscript.Toggled([&]() { if (iSubscript.is_checked()) { iSuperscript.uncheck(); iBelowAscenderLine.set_text("Above baseline"_t); } update_selected_font(iSubscript); });
@@ -323,15 +396,18 @@ namespace neogfx
         iSink += iAdvancedEffectsColor.Checked([&]() { update_selected_format(iAdvancedEffectsColor); });
         iSink += iAdvancedEffectsGradient.Checked([&]() { update_selected_format(iAdvancedEffectsGradient); });
         iSink += iAdvancedEffectsEmoji.Toggled([&]() { update_selected_format(iAdvancedEffectsEmoji); });
+        iSink += iAnimationFlashingBox.check_box().Checked([&]() { update_selected_format(iAnimationFlashingBox); });
+        iSink += iAnimationFlashingBox.check_box().Unchecked([&]() { update_selected_format(iAnimationFlashingBox); });
+        iSink += iAnimationFlash.Checked([&]() { update_selected_format(iAnimationFlash); });
+        iSink += iAnimationBlink.Checked([&]() { update_selected_format(iAnimationBlink); });
+        iSink += iAnimationEasing.SelectionChanged([&](const optional_item_model_index& aIndex) { update_selected_format(iAnimationEasing); });
+        iSink += iAnimationFrequency.ValueChanged([&]() { update_selected_format(iAnimationFrequency); });
 
-        if (iSelectedTextFormat)
+        iSink += iSample.Painting([&](i_graphics_context& aGc)
         {
-            iSink += iSample.Painting([&](i_graphics_context& aGc)
-            {
-                scoped_opacity so{ aGc, 0.25 };
-                draw_alpha_background(aGc, iSample.client_rect(), dpi_scale(4.0));
-            });
-        }
+            scoped_opacity so{ aGc, 0.25 };
+            draw_alpha_background(aGc, iSample.client_rect(), dpi_scale(4.0));
+        });
 
         auto subpixelRendering = make_ref<push_button>("Subpixel Rendering..."_t);
         subpixelRendering->enable(false);
@@ -503,6 +579,7 @@ namespace neogfx
             return;
         neolib::scoped_flag sf{ iUpdating };
         auto oldSelectedTextFormat = iSelectedTextFormat;
+
         if (&aUpdatingWidget == this)
         {
             if (iSelectedTextFormat)
@@ -545,6 +622,21 @@ namespace neogfx
                     else if (std::holds_alternative<gradient>(iSelectedTextFormat->effect()->color()))
                         iAdvancedEffectsGradient.check();
                     iAdvancedEffectsEmoji.set_checked(!iSelectedTextFormat->effect()->ignore_emoji());
+                }
+                if (iSelectedTextFormat->animation())
+                {
+                    iAnimationFlashingBox.check_box().check();
+                    switch (iSelectedTextFormat->animation()->type())
+                    {
+                    case text_animation_type::Flash:
+                        iAnimationFlash.check();
+                        break;
+                    case text_animation_type::Blink:
+                        iAnimationBlink.check();
+                        break;
+                    }
+                    iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ standard_easing_index(iSelectedTextFormat->animation()->easing()) });
+                    iAnimationFrequency.set_value(iSelectedTextFormat->animation()->frequency());
                 }
             }
         }
@@ -636,8 +728,10 @@ namespace neogfx
             iAdvancedEffectsInk = neolib::none;
             iAdvancedEffectsWidth = std::nullopt;
         }
+
         if (&iSmartUnderline == &aUpdatingWidget)
             iSelectedTextFormat->set_smart_underline(iSmartUnderline.is_checked());
+
         if (std::holds_alternative<color_widget>(iInk) && &std::get<color_widget>(iInk) == &aUpdatingWidget)
         {
             if (iSelectedTextFormat->ink() != std::get<color_widget>(iInk).color())
@@ -670,13 +764,44 @@ namespace neogfx
             if (iSelectedTextFormat->effect()->color() != std::get<gradient_widget>(iAdvancedEffectsInk).gradient())
                 iSelectedTextFormat->effect()->set_color(std::get<gradient_widget>(iAdvancedEffectsInk).gradient());
         }
+        
         if (iAdvancedEffectsWidth != std::nullopt && &iAdvancedEffectsWidth->slider == &aUpdatingWidget)
         {
             if (iSelectedTextFormat->effect()->width() != iAdvancedEffectsWidth->slider.value())
                 iSelectedTextFormat->effect()->set_width(iAdvancedEffectsWidth->slider.value());
         }
+        
         if (&iAdvancedEffectsEmoji == &aUpdatingWidget)
             iSelectedTextFormat->effect()->set_ignore_emoji(iAdvancedEffectsEmoji.is_unchecked());
+
+        if (&aUpdatingWidget == this ||
+            &aUpdatingWidget == &iAnimationFlashingBox ||
+            aUpdatingWidget.is_descendent_of(iAnimationFlashingBox))
+        {
+            if (iAnimationFlashingBox.check_box().is_checked())
+            {
+                if (iSelectedTextFormat->animation() == std::nullopt)
+                {
+                    if (iAnimationFlash.is_checked())
+                        iSelectedTextFormat->animation().emplace(text_animation_type::Flash);
+                    else if (iAnimationBlink.is_checked())
+                        iSelectedTextFormat->animation().emplace(text_animation_type::Blink);
+                }
+                else
+                {
+                    if (iAnimationFlash.is_checked())
+                        iSelectedTextFormat->animation()->set_type(text_animation_type::Flash);
+                    else if (iAnimationBlink.is_checked())
+                        iSelectedTextFormat->animation()->set_type(text_animation_type::Blink);
+                    iSelectedTextFormat->animation()->set_easing(standard_easings()[iAnimationEasing.selection_model().current_index().row()]);
+                    iSelectedTextFormat->animation()->set_frequency(iAnimationFrequency.value());
+                }
+            }
+            else
+            {
+                iSelectedTextFormat->set_animation(std::nullopt);
+            }
+        }
 
         iSample.set_text_format(iSelectedTextFormat);
         
@@ -756,6 +881,7 @@ namespace neogfx
             }
             else
                 iPaperBox.check_box().uncheck();
+
             if (iSelectedTextFormat->effect() != std::nullopt)
             {
                 iAdvancedEffectsBox.check_box().check();
@@ -802,6 +928,19 @@ namespace neogfx
             }
             else
                 iAdvancedEffectsBox.check_box().uncheck();
+
+            if (iSelectedTextFormat->animation() != std::nullopt)
+            {
+                iAnimationFlashingBox.check_box().check();
+                if (iSelectedTextFormat->animation()->type() == text_animation_type::Flash)
+                    iAnimationFlash.check();
+                else
+                    iAnimationBlink.check();
+                iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ standard_easing_index(iSelectedTextFormat->animation()->easing()) });
+                iAnimationFrequency.set_value(iSelectedTextFormat->animation()->frequency());
+            }
+            else
+                iAnimationFlashingBox.check_box().uncheck();
         }
     }
 }
