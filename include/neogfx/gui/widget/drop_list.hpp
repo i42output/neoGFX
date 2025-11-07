@@ -156,6 +156,8 @@ namespace neogfx
         virtual void set_spacing(const size& aSpacing) = 0;
         virtual const i_texture& image() const = 0;
         virtual void set_image(const i_texture& aImage) = 0;
+        virtual const i_optional<size>& image_size() const = 0;
+        virtual void set_image_size(const i_optional<size>& aImageSize) = 0;
         virtual i_string const& text() const = 0;
         virtual void set_text(i_string const& aText) = 0;
     };

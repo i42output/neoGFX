@@ -141,6 +141,15 @@ namespace neogfx
             else
                 return text_color{};
         }
+        text_color with_alpha(scalar aAlpha) const
+        {
+            if (std::holds_alternative<color>(*this))
+                return std::get<color>(*this).with_alpha(aAlpha);
+            if (std::holds_alternative<gradient>(*this))
+                return std::get<gradient>(*this).with_combined_alpha(aAlpha);
+            else
+                return text_color{};
+        }
     };
 
     inline bool operator==(color_or_gradient const& lhs, color const& rhs) noexcept
@@ -644,13 +653,13 @@ namespace neogfx
     public:
         bool operator==(text_format const& aRhs) const noexcept
         {
-            return std::forward_as_tuple(ink(), paper(), smart_underline(), ignore_emoji(), effect()) ==
-                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.smart_underline(), aRhs.ignore_emoji(), aRhs.effect());
+            return std::forward_as_tuple(ink(), paper(), smart_underline(), ignore_emoji(), effect(), animation()) ==
+                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.smart_underline(), aRhs.ignore_emoji(), aRhs.effect(), aRhs.animation());
         }
         auto operator<=>(text_format const& aRhs) const noexcept
         {
-            return std::forward_as_tuple(ink(), paper(), smart_underline(), ignore_emoji(), effect()) <=>
-                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.smart_underline(), aRhs.ignore_emoji(), aRhs.effect());
+            return std::forward_as_tuple(ink(), paper(), smart_underline(), ignore_emoji(), effect(), animation()) <=>
+                std::forward_as_tuple(aRhs.ink(), aRhs.paper(), aRhs.smart_underline(), aRhs.ignore_emoji(), aRhs.effect(), aRhs.animation());
         }
     public:
         text_color const& ink() const

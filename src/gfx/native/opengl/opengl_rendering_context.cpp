@@ -1869,7 +1869,51 @@ namespace neogfx
 
         optional_rect filterRegion;
 
-        for (auto stage : { 
+        std::chrono::duration<double> since = std::chrono::steady_clock::now().time_since_epoch();
+
+        auto paper_maybe_animated = [&](draw_glyph const& aGlyph) -> std::optional<game::color>
+            {
+                if (!std::holds_alternative<color>(*aGlyph.appearance->paper()))
+                    return std::optional<game::color>{};
+                else if (!aGlyph.appearance->animation() || !std::holds_alternative<color>(aGlyph.appearance->ink()) ||
+                    aGlyph.appearance->animation()->type() != text_animation_type::Flash)
+                    return to_ecs_component(std::get<color>(*aGlyph.appearance->paper()));
+                else
+                    return to_ecs_component(
+                        mix(
+                            std::get<color>(*aGlyph.appearance->paper()), 
+                            std::get<color>(aGlyph.appearance->ink()), 
+                            partitioned_ease(aGlyph.appearance->animation()->easing(), 
+                                std::fmod(since.count() * aGlyph.appearance->animation()->frequency(), 1.0))));
+            };
+
+        auto ink_maybe_animated = [&](draw_glyph const& aGlyph, text_color const& aInk) -> std::optional<game::color>
+            {
+                if (!std::holds_alternative<color>(aInk))
+                    return std::optional<game::color>{};
+                else if (!aGlyph.appearance->animation() ||
+                    aGlyph.appearance->animation()->type() == text_animation_type::None)
+                    return to_ecs_component(std::get<color>(aInk));
+                else if (aGlyph.appearance->animation()->type() == text_animation_type::Flash &&
+                    aGlyph.appearance->paper() && std::holds_alternative<color>(*aGlyph.appearance->paper()))
+                    return to_ecs_component(
+                        mix(
+                            std::get<color>(aInk),
+                            std::get<color>(*aGlyph.appearance->paper()),
+                            partitioned_ease(aGlyph.appearance->animation()->easing(),
+                                std::fmod(since.count() * aGlyph.appearance->animation()->frequency(), 1.0))));
+                else if (aGlyph.appearance->animation()->type() == text_animation_type::Blink)
+                    return to_ecs_component(
+                        mix(
+                            std::get<color>(aGlyph.appearance->ink().with_alpha(1.0)),
+                            std::get<color>(aGlyph.appearance->ink().with_alpha(0.0)),
+                            partitioned_ease(aGlyph.appearance->animation()->easing(),
+                                std::fmod(since.count() * aGlyph.appearance->animation()->frequency(), 1.0))));
+                else
+                    return to_ecs_component(std::get<color>(aInk));
+            };
+
+        for (auto stage : {
             draw_glyphs_stage::Paper, 
             draw_glyphs_stage::SpecialEffects, 
             draw_glyphs_stage::EmojiFinal, 
@@ -1902,8 +1946,7 @@ namespace neogfx
                         meshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
-                                    std::holds_alternative<color>(*drawOp.appearance->paper()) ?
-                                        to_ecs_component(std::get<color>(*drawOp.appearance->paper())) : std::optional<game::color>{},
+                                    paper_maybe_animated(drawOp),
                                     std::holds_alternative<gradient>(*drawOp.appearance->paper()) ?
                                         to_ecs_component(std::get<gradient>(*drawOp.appearance->paper()).with_bounding_box_if_none(bounding_rect())) : std::optional<game::gradient>{} } });
                     }
@@ -1968,7 +2011,7 @@ namespace neogfx
                         {
                             game::material
                             {
-                                std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
+                                ink_maybe_animated(drawOp, ink),
                                 std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) })) : std::optional<game::gradient>{},
                                 {}, 
                                 to_ecs_component(emojiTexture),
@@ -2023,7 +2066,7 @@ namespace neogfx
                                 meshRenderers.push_back(
                                     game::mesh_renderer{
                                         game::material{
-                                            std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
+                                            ink_maybe_animated(drawOp, ink),
                                             std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                             {},
                                             to_ecs_component(theGlyph.outline_texture()),
@@ -2051,7 +2094,7 @@ namespace neogfx
                         meshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
-                                    std::holds_alternative<color>(ink) ? to_ecs_component(static_variant_cast<const color&>(ink)) : std::optional<game::color>{},
+                                    ink_maybe_animated(drawOp, ink),
                                     std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(theGlyph.texture()),

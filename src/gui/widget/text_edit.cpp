@@ -3235,7 +3235,7 @@ namespace neogfx
 
     void text_edit::animate()
     {
-        if (neolib::service<neolib::i_power>().green_mode_active())
+        if (neolib::service<neolib::i_power>().green_mode_active() && !iHasAnimations)
             return;
         if (iHasAnimations)
             update();
@@ -3341,7 +3341,8 @@ namespace neogfx
                 text_format{
                     glyphColor,
                     style.character().paper_color() != neolib::none ? optional_text_color{ neogfx::text_color{ style.character().paper_color() } } : optional_text_color{},
-                    style.character().text_effect() }.with_smart_underline(style.character().smart_underline()).with_emoji_ignored(style.character().ignore_emoji()) :
+                    style.character().text_effect(),
+                    style.character().text_animation() }.with_smart_underline(style.character().smart_underline()).with_emoji_ignored(style.character().ignore_emoji()) :
                 text_format{
                     has_focus() ? service<i_app>().current_style().palette().color(color_role::SelectedText) : glyphColor,
                     has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
@@ -3368,7 +3369,7 @@ namespace neogfx
         auto elapsedTime_ms = (neolib::this_process::elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-        auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
+        auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
         if (cursorColor == neolib::none)
             cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);

@@ -138,11 +138,56 @@ namespace neogfx
             mutable std::vector<optional_font> iFonts;
         };
 
+        typedef std::array<easing, 23> animation_easings_t;
+
+        inline const animation_easings_t& animation_easings()
+        {
+            static constexpr animation_easings_t ANIMATION_EASINGS =
+            { {
+                easing::Linear,
+                easing::InOutQuad,
+                easing::OutInQuad,
+                easing::InOutCubic,
+                easing::OutInCubic,
+                easing::InOutQuart,
+                easing::OutInQuart,
+                easing::InOutQuint,
+                easing::OutInQuint,
+                easing::InOutSine,
+                easing::OutInSine,
+                easing::InOutExpo,
+                easing::OutInExpo,
+                easing::InOutCirc,
+                easing::OutInCirc,
+                easing::InOutElastic,
+                easing::OutInElastic,
+                easing::InOutBack,
+                easing::OutInBack,
+                easing::InOutBounce,
+                easing::OutInBounce,
+                easing::InStep,
+                easing::OutStep
+            } };
+            return ANIMATION_EASINGS;
+        }
+
+        inline std::uint32_t animation_easing_index(easing aEasing)
+        {
+            // todo: optimize this; perhaps use polymorphic enum.
+            auto animationEasing = std::find(animation_easings().begin(), animation_easings().end(), aEasing);
+            if (animationEasing != animation_easings().end())
+                return static_cast<std::uint32_t>(std::distance(animation_easings().begin(), animationEasing));
+            return animation_easing_index(easing::Zero);
+        }
+
+
         class easing_item_presentation_model : public default_drop_list_presentation_model<basic_item_model<easing>>
         {
             typedef default_drop_list_presentation_model<basic_item_model<easing>> base_type;
+        private:
+            static constexpr scalar kCellImageSize = 32.0;
         public:
-            easing_item_presentation_model(drop_list& aDropList, basic_item_model<easing>& aModel, bool aLarge = true) : base_type{ aDropList, aModel }, iLarge{ aLarge }
+            easing_item_presentation_model(drop_list& aDropList, basic_item_model<easing>& aModel) : base_type{ aDropList, aModel }
             {
                 iSink += service<i_app>().current_style_changed([this](style_aspect)
                     {
@@ -151,13 +196,17 @@ namespace neogfx
                     });
             }
         public:
-            optional_texture cell_image(const item_presentation_model_index& aIndex) const override
+            optional_size cell_image_size(item_presentation_model_index const& aIndex) const final
+            {
+                return size{ kCellImageSize, kCellImageSize };
+            }
+            optional_texture cell_image(const item_presentation_model_index& aIndex) const final
             {
                 auto easingFunction = item_model().item(to_item_model_index(aIndex));
                 auto iterTexture = iTextures.find(easingFunction);
                 if (iterTexture == iTextures.end())
                 {
-                    dimension const d = iLarge ? 48.0 : 24.0;
+                    dimension const d = kCellImageSize * 2.0;
                     texture newTexture{ size{d, d}, 1.0, texture_sampling::Multisample };
                     graphics_context gc{ newTexture };
                     scoped_snap_to_pixel snap{ gc };
@@ -165,9 +214,9 @@ namespace neogfx
                     gc.draw_rect(rect{ point{}, size{d, d} }, pen{ textColor, 1.0 });
                     optional_point lastPos;
                     pen pen{ textColor, 2.0 };
-                    for (double x = 0.0; x <= d - 8.0; x += 2.0)
+                    for (double x = 0.0; x <= d - 8.0; x += 0.5)
                     {
-                        point pos{ x + 4.0, ease(easingFunction, x / (d - 8.0)) * (d - 8.0) + 4.0 };
+                        point pos{ x + 4.0, partitioned_ease(easingFunction, std::fmod(2.0 * x / (d - 8.0), 1.0)) * (d - 8.0) + 4.0 };
                         if (lastPos != std::nullopt)
                             gc.draw_line(*lastPos, pos, pen);
                         lastPos = pos;
@@ -177,7 +226,6 @@ namespace neogfx
                 return iterTexture->second;
             }
         private:
-            bool iLarge;
             mutable std::map<easing, texture> iTextures;
             sink iSink;
         };
@@ -360,13 +408,13 @@ namespace neogfx
         iAnimationFlashingBox.set_checkable(true, true);
 
         auto easingItemModel = make_ref<basic_item_model<easing>>();
-        for (auto i = 0; i < standard_easings().size(); ++i)
-            easingItemModel->insert_item(easingItemModel->end(), standard_easings()[i], to_string(standard_easings()[i]));
-        auto easingPresentationModel = make_ref<easing_item_presentation_model>(iAnimationEasing, *easingItemModel, false);
+        for (auto i = 0; i < animation_easings().size(); ++i)
+            easingItemModel->insert_item(easingItemModel->end(), animation_easings()[i], to_string(animation_easings()[i]));
+        auto easingPresentationModel = make_ref<easing_item_presentation_model>(iAnimationEasing, *easingItemModel);
         iAnimationEasing.set_size_policy(size_constraint::Minimum);
         iAnimationEasing.set_model(easingItemModel);
         iAnimationEasing.set_presentation_model(easingPresentationModel);
-        iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ standard_easing_index(easing::InStep) });
+        iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ animation_easing_index(easing::InStep) });
         iAnimationEasing.accept_selection();
         
         iAnimationFrequency.set_minimum(0.1);
@@ -635,7 +683,7 @@ namespace neogfx
                         iAnimationBlink.check();
                         break;
                     }
-                    iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ standard_easing_index(iSelectedTextFormat->animation()->easing()) });
+                    iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ animation_easing_index(iSelectedTextFormat->animation()->easing()) });
                     iAnimationFrequency.set_value(iSelectedTextFormat->animation()->frequency());
                 }
             }
@@ -793,7 +841,10 @@ namespace neogfx
                         iSelectedTextFormat->animation()->set_type(text_animation_type::Flash);
                     else if (iAnimationBlink.is_checked())
                         iSelectedTextFormat->animation()->set_type(text_animation_type::Blink);
-                    iSelectedTextFormat->animation()->set_easing(standard_easings()[iAnimationEasing.selection_model().current_index().row()]);
+                    if (iAnimationEasing.selection_model().has_current_index())
+                        iSelectedTextFormat->animation()->set_easing(animation_easings()[iAnimationEasing.selection_model().current_index().row()]);
+                    else
+                        iSelectedTextFormat->animation()->set_easing(easing::InStep);
                     iSelectedTextFormat->animation()->set_frequency(iAnimationFrequency.value());
                 }
             }
@@ -936,7 +987,7 @@ namespace neogfx
                     iAnimationFlash.check();
                 else
                     iAnimationBlink.check();
-                iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ standard_easing_index(iSelectedTextFormat->animation()->easing()) });
+                iAnimationEasing.selection_model().set_current_index(item_presentation_model_index{ animation_easing_index(iSelectedTextFormat->animation()->easing()) });
                 iAnimationFrequency.set_value(iSelectedTextFormat->animation()->frequency());
             }
             else

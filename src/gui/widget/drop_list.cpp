@@ -498,6 +498,14 @@ namespace neogfx
                 push_button::set_image(aImage);
                 push_button::image_widget().show(!aImage.is_empty());
             }
+            const i_optional<size>& image_size() const override
+            {
+                return push_button::image_widget().image_size();
+            }
+            void set_image_size(const i_optional<size>& aImageSize) override
+            {
+                push_button::image_widget().set_image_size(aImageSize);
+            }
             i_string const& text() const override
             {
                 return push_button::text();
@@ -578,6 +586,14 @@ namespace neogfx
             {
                 iImage.set_image(aImage);
                 iImage.show(!aImage.is_empty());
+            }
+            const i_optional<size>& image_size() const override
+            {
+                return iImage.image_size();
+            }
+            void set_image_size(const i_optional<size>& aImageSize) override
+            {
+                iImage.set_image_size(aImageSize);
             }
             i_string const& text() const override
             {
@@ -772,6 +788,7 @@ namespace neogfx
                 }
                 input_widget().set_spacing(presentation_model().cell_spacing(*this));
                 input_widget().set_image(image);
+                input_widget().set_image_size(presentation_model().cell_image_size(*aCurrentIndex));
                 input_widget().set_text(text);
             }
         });
@@ -1204,6 +1221,8 @@ namespace neogfx
             }
             input_widget().set_spacing(presentation_model().cell_spacing(*this));
             input_widget().set_image(image);
+            if (selection_model().has_current_index())
+                input_widget().set_image_size(presentation_model().cell_image_size(selection_model().current_index()));
             if (changed)
                 input_widget().set_text(text);
         }

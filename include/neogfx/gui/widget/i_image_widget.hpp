@@ -29,10 +29,12 @@ namespace neogfx
     {
     public:
         virtual const i_texture& image() const = 0;
+        virtual const i_optional<size>& image_size() const = 0;
         virtual const color_or_gradient& image_color() const = 0;
         virtual void set_image(i_string const& aImageUri) = 0;
         virtual void set_image(const i_image& aImage) = 0;
         virtual void set_image(const i_texture& aImage) = 0;
+        virtual void set_image_size(const i_optional<size>& aImageSize) = 0;
         virtual void set_image_color(const color_or_gradient& aImageColor) = 0;
         virtual void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) = 0;
         virtual void set_placement(cardinal aPlacement) = 0;

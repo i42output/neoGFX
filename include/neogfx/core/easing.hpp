@@ -619,6 +619,11 @@ namespace neogfx
         return static_cast<easing>(static_cast<std::uint32_t>(lhs) & static_cast<std::uint32_t>(rhs));
     }
 
+    inline constexpr easing operator^(easing lhs, easing_class rhs)
+    {
+        return static_cast<easing>(static_cast<std::uint32_t>(lhs) ^ static_cast<std::uint32_t>(rhs));
+    }
+
     typedef std::optional<easing> optional_easing;
 
     typedef std::array<easing, 47> standard_easings_t;
@@ -824,6 +829,13 @@ namespace neogfx
     inline T ease(easing e, T t, T b, T c, T d)
     {
         return ease(e, t / d) * c + b;
+    }
+
+    template <typename T>
+    inline std::enable_if_t<!std::is_same_v<T, easing>, T> partitioned_ease(easing e1, T t, double w1 = 1.0, double w2 = 1.0)
+    {
+        auto const wTotal = w1 + w2;
+        return t < w1 / wTotal ? ease(e1, t / (w1 / wTotal)) : ease(e1 ^ easing_class::Inverted, (t - (w1 / wTotal)) / (w2 / wTotal));
     }
 
     template <typename T>

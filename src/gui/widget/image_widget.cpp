@@ -84,7 +84,7 @@ namespace neogfx
     {
         if (has_minimum_size() || iTexture.is_empty() || size_policy() == size_constraint::DefaultMinimumExpanding)
             return widget::minimum_size(aAvailableSpace);
-        size result = units_converter{ *this }.from_device_units(iTexture.extents()) + internal_spacing().size();
+        size result = units_converter{ *this }.from_device_units(image_size() ? image_size().value() : iTexture.extents()) + internal_spacing().size();
         if (iDpiAutoScale)
             result *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         return to_units(*this, scoped_units::current_units(), result);
@@ -100,6 +100,11 @@ namespace neogfx
     const texture& image_widget::image() const
     {
         return iTexture;
+    }
+
+    const optional_size& image_widget::image_size() const
+    {
+        return iImageSize;
     }
 
     const color_or_gradient& image_widget::image_color() const
@@ -130,6 +135,11 @@ namespace neogfx
                 update_layout(true, true);
         }
         update();
+    }
+
+    void image_widget::set_image_size(const i_optional<size>& aImageSize)
+    {
+        iImageSize = aImageSize;
     }
 
     void image_widget::set_image_color(const color_or_gradient& aImageColor)
@@ -171,7 +181,7 @@ namespace neogfx
     rect image_widget::placement_rect() const
     {
         scoped_units su{ *this, units::Pixels };
-        auto imageExtents = iTexture.extents();
+        auto imageExtents = image_size() ? image_size().value() : iTexture.extents();
         if (iDpiAutoScale)
             imageExtents *= (dpi_scale_factor() / iTexture.dpi_scale_factor());
         rect placementRect{ point{}, imageExtents };

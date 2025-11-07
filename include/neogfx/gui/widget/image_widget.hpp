@@ -50,10 +50,12 @@ namespace neogfx
         void paint(i_graphics_context& aGc) const override;
     public:
         const texture& image() const override;
+        const optional_size& image_size() const override;
         const color_or_gradient& image_color() const override;
         void set_image(i_string const& aImageUri) override;
         void set_image(const i_image& aImage) override;
         void set_image(const i_texture& aImage) override;
+        void set_image_size(const i_optional<size>& aImageSize) override;
         void set_image_color(const color_or_gradient& aImageColor) override;
         void set_aspect_ratio(neogfx::aspect_ratio aAspectRatio) override;
         void set_placement(cardinal aPlacement) override;
@@ -62,6 +64,7 @@ namespace neogfx
         rect placement_rect() const;
     private:
         texture iTexture;
+        optional_size iImageSize;
         color_or_gradient iColor;
         neogfx::aspect_ratio iAspectRatio;
         cardinal iPlacement;
