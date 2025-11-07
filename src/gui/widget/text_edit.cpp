@@ -250,8 +250,8 @@ namespace neogfx
 
     bool text_edit::character_style::operator<(const character_style& aRhs) const
     {
-        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iSmartUnderline, iIgnoreEmoji, iTextEffect) < 
-            std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iSmartUnderline, aRhs.iIgnoreEmoji, aRhs.iTextEffect);
+        return std::forward_as_tuple(iFont, iGlyphColor, iTextColor, iPaperColor, iSmartUnderline, iIgnoreEmoji, iTextEffect, iTextAnimation) < 
+            std::forward_as_tuple(aRhs.iFont, aRhs.iGlyphColor, aRhs.iTextColor, aRhs.iPaperColor, aRhs.iSmartUnderline, aRhs.iIgnoreEmoji, aRhs.iTextEffect, aRhs.iTextAnimation);
     }
 
     text_edit::paragraph_style::paragraph_style()
@@ -714,6 +714,8 @@ namespace neogfx
             aGc.fill_rect(client_rect(), to_brush(default_style().character().paper_color()));
 
         auto const top = vertical_scrollbar().position();
+
+        iHasAnimations = false;
 
         coordinate x = 0.0;
         for (auto columnIndex = 0u; columnIndex < iGlyphColumns.size(); ++columnIndex)
@@ -1725,7 +1727,11 @@ namespace neogfx
     text_edit::style text_edit::current_style() const
     {
         if (iText.empty())
-            return style{ default_style() }.character().set_font_if_none(font());
+        {
+            style defaultStyle{ default_style() };
+            defaultStyle.character().set_font_if_none(font());
+            return defaultStyle;
+        }
         auto t = std::next(iText.begin(), cursor().anchor());
         if (t != iText.begin() && cursor().position() == cursor().anchor())
             t = std::prev(t);
@@ -3231,6 +3237,8 @@ namespace neogfx
     {
         if (neolib::service<neolib::i_power>().green_mode_active())
             return;
+        if (iHasAnimations)
+            update();
         if (has_focus())
             update_cursor();
     }
@@ -3312,6 +3320,9 @@ namespace neogfx
         point const lineOrigin = lineStart->cell[0];
         point const textPos = aPosition - lineOrigin;
         auto segmentStart = lineGlyphs.cbegin();
+
+        bool hasAnimations = false;
+
         for (auto segmentGlyph = segmentStart; segmentGlyph != lineGlyphs.cend(); ++segmentGlyph, ++documentGlyph)
         {
             bool selected = false;
@@ -3336,13 +3347,20 @@ namespace neogfx
                     has_focus() ? service<i_app>().current_style().palette().color(color_role::Selection) : service<i_app>().current_style().palette().color(color_role::Selection).with_alpha(64) };
             if (textAppearance && textAppearance.value() != nextTextAppearance)
             {
+                hasAnimations = hasAnimations || textAppearance.value().animation().has_value();
                 aGc.draw_glyph_text(textPos, lineGlyphs, segmentStart, segmentGlyph, textAppearance.value());
                 segmentStart = segmentGlyph;
             }
             textAppearance = nextTextAppearance;
         }
         if (segmentStart != lineGlyphs.cend())
+        {
+            hasAnimations = hasAnimations || textAppearance.value().animation().has_value();
             aGc.draw_glyph_text(textPos, lineGlyphs, segmentStart, lineGlyphs.cend(), textAppearance.value());
+        }
+
+        if (hasAnimations)
+            iHasAnimations = true;
     }
 
     void text_edit::draw_cursor(i_graphics_context const& aGc) const
@@ -3388,7 +3406,26 @@ namespace neogfx
         else if (cursorPos.lineStart && cursorPos.lineStart.value() != cursorPos.lineEnd.value())
             yHeight = cursorPos.line.value()->extents.cy;
         else
-            yHeight = current_style().character().font().value().height();
+        {
+            auto const& currentStyle = current_style();
+            yHeight = currentStyle.character().font().value().height();
+            if (currentStyle.paragraph().padding())
+            {
+                if (iText.empty())
+                    yOffset = currentStyle.paragraph().padding()->top;
+                else
+                {
+                    auto previousPos = glyph_position(to_glyph(std::prev(iText.begin() + cursor().position())) - glyphs().begin(), true);
+                    if (previousPos.glyph && previousPos.column)
+                    {
+                        auto const& previousStyle = glyph_style(previousPos.glyph.value(), iColumns.at(previousPos.column_index()));
+                        yOffset = previousStyle.paragraph().padding()->bottom + currentStyle.paragraph().padding()->top;
+                    }
+                    else
+                        yOffset = currentStyle.paragraph().padding()->bottom + currentStyle.paragraph().padding()->top;
+                }
+            }
+        }
         auto const columnRectSansPadding = column_rect(cursorPos.column_index());
         rect cursorRect{ 
             point{ cursorPos.pos - 

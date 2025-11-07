@@ -79,6 +79,7 @@ namespace neogfx
         text_widget_flags iFlags;
         neogfx::alignment iAlignment;
         optional_text_format iTextAppearance;
+        widget_timer iAnimator;
         sink iSink;
     };
 }

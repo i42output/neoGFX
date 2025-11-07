@@ -27,19 +27,37 @@
 namespace neogfx
 {
     text_widget::text_widget(std::string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{}, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment { neogfx::alignment::Center | neogfx::alignment::VCenter }
+        widget{}, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment { neogfx::alignment::Center | neogfx::alignment::VCenter },
+        iAnimator{ *this, [this](widget_timer&)
+        {
+            iAnimator.again();
+            if (has_text_format() && text_format().animation())
+                update();
+        }, std::chrono::milliseconds{ 16 } }
     {
         init();
     }
 
     text_widget::text_widget(i_widget& aParent, std::string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aParent }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter }
+        widget{ aParent }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter },
+        iAnimator{ *this, [this](widget_timer&)
+        {
+            iAnimator.again();
+            if (has_text_format() && text_format().animation())
+                update();
+        }, std::chrono::milliseconds{ 16 } }
     {
         init();
     }
 
     text_widget::text_widget(i_layout& aLayout, std::string const& aText, text_widget_type aType, text_widget_flags aFlags) :
-        widget{ aLayout }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter }
+        widget{ aLayout }, iText{ aText }, iType{ aType }, iFlags{ aFlags }, iAlignment{ neogfx::alignment::Center | neogfx::alignment::VCenter },
+        iAnimator{ *this, [this](widget_timer&)
+        {
+            iAnimator.again();
+            if (has_text_format() && text_format().animation())
+                update();
+        }, std::chrono::milliseconds{ 16 } }
     {
         init();
     }

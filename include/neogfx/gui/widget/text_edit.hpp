@@ -936,6 +936,7 @@ namespace neogfx
         mutable std::optional<std::pair<neogfx::font, neogfx::tab_stops>> iCalculatedTabStops;
         basic_point<std::optional<dimension>> iCursorHint;
         widget_timer iAnimator;
+        mutable bool iHasAnimations = false;
         std::unique_ptr<dragger> iDragger;
         std::unique_ptr<neogfx::context_menu> iMenu;
         std::uint32_t iSuppressTextChangedNotification;
