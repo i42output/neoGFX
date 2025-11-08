@@ -186,7 +186,7 @@ namespace neogfx
     dialog_result dialog::exec()
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::item == this)
+        if (service<i_debug>().item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::exec()" << std::endl;
 #endif
 

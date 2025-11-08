@@ -21,17 +21,35 @@
 
 #include <neolib/app/ostream_logger.hpp>
 
-namespace neogfx
+namespace neogfx::debug
 {
-    namespace debug
-    {
 #ifdef NEOGFX_DEBUG
-        void* item;
-        i_layout_item* layoutItem;
-        i_widget* renderItem;
-        bool renderGeometryText;
+    class debug_service : public i_debug
+    {
+    public:
+        void*& item() final
+        {
+            return iItem;
+        }
+        i_layout_item*& layout_item() final
+        {
+            return iLayoutItem;
+        }
+        i_widget*& render_item() final
+        {
+            return iRenderItem;
+        }
+        bool& render_geometry_text() final
+        {
+            return iRenderGeometryText;
+        }
+    private:
+        void* iItem = nullptr;
+        i_layout_item* iLayoutItem = nullptr;
+        i_widget* iRenderItem = nullptr;
+        bool iRenderGeometryText = false;
+    };
 #endif // NEOGFX_DEBUG
-    }
 }
 
 template<> neogfx::debug::logger& services::start_service<neogfx::debug::logger>()
@@ -40,4 +58,12 @@ template<> neogfx::debug::logger& services::start_service<neogfx::debug::logger>
     sLogger.create_logging_thread();
     return sLogger;
 }
+
+#ifdef NEOGFX_DEBUG
+template<> neogfx::debug::i_debug& services::start_service<neogfx::debug::i_debug>()
+{
+    static neogfx::debug::debug_service sDebug;
+    return sDebug;
+}
+#endif
 

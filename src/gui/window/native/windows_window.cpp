@@ -794,7 +794,7 @@ namespace neogfx
             auto& self = *mapEntry->second;
             scoped_units su{ self.surface_window().as_widget(), units::Pixels};
 #ifdef NEOGFX_DEBUG
-            if (debug::item == &self)
+            if (service<i_debug>().item() == &self)
                 service<debug::logger>() << neolib::logger::severity::Debug << typeid(self).name() << ": Windows message (0x" << std::hex << msg << ")" << std::endl;
 #endif
             LRESULT result = 0;
@@ -1600,7 +1600,7 @@ namespace neogfx
             {
                 iPosition = aPosition;
 #ifdef NEOGFX_DEBUG
-                if (debug::item == this)
+                if (service<i_debug>().item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": update_position(" << aPosition << ")" << std::endl;
 #endif
             }
@@ -1612,7 +1612,7 @@ namespace neogfx
             {
                 iExtents = aExtents;
 #ifdef NEOGFX_DEBUG
-                if (debug::item == this)
+                if (service<i_debug>().item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << ": update_extents(" << aExtents << ")" << std::endl;
 #endif
             }

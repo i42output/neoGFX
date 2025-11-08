@@ -256,7 +256,7 @@ namespace neogfx
         iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
         iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
         iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
-        iUnderlineBox{ iLayoutEffects, "Underline"_t },
+        iUnderlineBox{ iEffectsBox.item_layout(), "Underline"_t },
         iSmartUnderline{ iUnderlineBox.with_item_layout<vertical_layout>(), "Smart"_t },
         iTextFormatContainer{ iLayoutEffects },
         iLayoutTextFormat{ iTextFormatContainer, neogfx::alignment::Top },
@@ -313,7 +313,7 @@ namespace neogfx
         iSuperscript{ iEffectsBox.item_layout(), "Superscript"_t },
         iSubscript{ iEffectsBox.item_layout(), "Subscript"_t },
         iBelowAscenderLine{ iEffectsBox.item_layout(), "Below ascender"_t },
-        iUnderlineBox{ iLayoutEffects, "Underline"_t },
+        iUnderlineBox{ iEffectsBox.item_layout(), "Underline"_t },
         iSmartUnderline{ iUnderlineBox.with_item_layout<vertical_layout>(), "Smart"_t },
         iTextFormatContainer{ iLayoutEffects },
         iLayoutTextFormat{ iTextFormatContainer, neogfx::alignment::Top },
@@ -391,7 +391,6 @@ namespace neogfx
         if (dialog::has_minimum_size())
             return result;
         result.cy += dpi_scale(std::min(font().height(), 16.0) * 8.0);
-        result.cx += dpi_scale(std::min(font().height(), 16.0) * 8.0);
         result.cx = std::max<scalar>(result.cx, 640.0_dip);
         return result;
     }

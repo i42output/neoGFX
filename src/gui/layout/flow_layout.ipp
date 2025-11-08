@@ -31,7 +31,7 @@ namespace neogfx
     inline size flow_layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif
 
@@ -84,7 +84,7 @@ namespace neogfx
         AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -95,7 +95,7 @@ namespace neogfx
     inline size flow_layout::do_maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif
 
@@ -122,7 +122,7 @@ namespace neogfx
             bool const last = (&item == lastVisible);
 
 #ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == this && last)
+            if (service<i_debug>().layout_item() == this && last)
                 service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): last item" << std::endl;
 #endif
 
@@ -147,7 +147,7 @@ namespace neogfx
                     if (totalise)
                     {
 #ifdef NEOGFX_DEBUG
-                        if (debug::layoutItem == this)
+                        if (service<i_debug>().layout_item() == this)
                             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): totalise row" << std::endl;
 #endif
 
@@ -212,7 +212,7 @@ namespace neogfx
             AxisPolicy::cy(result) = size::max_dimension();
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -223,7 +223,7 @@ namespace neogfx
     inline void flow_layout::do_layout_items(const point& aPosition, const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif
 

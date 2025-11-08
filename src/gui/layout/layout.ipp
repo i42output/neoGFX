@@ -151,7 +151,7 @@ namespace neogfx
     inline size layout::do_minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -188,7 +188,7 @@ namespace neogfx
         }
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -199,7 +199,7 @@ namespace neogfx
     inline size layout::do_maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -263,7 +263,7 @@ namespace neogfx
         }
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         
@@ -274,7 +274,7 @@ namespace neogfx
     inline void layout::do_layout_items(const point& aPosition, const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         set_position(aPosition);
@@ -298,7 +298,7 @@ namespace neogfx
             auto const& item = *itemRef;
 
 #ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == &item.subject())
+            if (service<i_debug>().layout_item() == &item.subject())
                 service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -346,7 +346,7 @@ namespace neogfx
                     continue;
 
 #ifdef NEOGFX_DEBUG
-                if (debug::layoutItem == &item.subject())
+                if (service<i_debug>().layout_item() == &item.subject())
                     service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -406,7 +406,7 @@ namespace neogfx
             }
 
 #ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == &item.subject())
+            if (service<i_debug>().layout_item() == &item.subject())
                 service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 

@@ -112,7 +112,7 @@ namespace neogfx
         if (!enabled())
             return;
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "flow_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (has_parent_widget())

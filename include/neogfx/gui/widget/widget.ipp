@@ -747,7 +747,7 @@ namespace neogfx
         if (!aDefer)
         {
 #ifdef NEOGFX_DEBUG
-            if (debug::layoutItem == this)
+            if (service<i_debug>().layout_item() == this)
             {
                 if (!iLayoutPending)
                     service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: layout now" << std::endl;
@@ -760,6 +760,7 @@ namespace neogfx
             if (has_layout())
             {
                 layout_items_started();
+                scoped_layout_items layoutItems;
                 if (widget::is_root() && size_policy() != size_constraint::Manual)
                 {
                     size desiredSize = self.extents();
@@ -803,7 +804,7 @@ namespace neogfx
             if (!iLayoutPending)
             {
 #ifdef NEOGFX_DEBUG
-                if (debug::layoutItem == this)
+                if (service<i_debug>().layout_item() == this)
                     service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: deferred layout" << std::endl;
 #endif
                 iLayoutPending = service<i_async_layout>().defer_layout(*this);
@@ -819,7 +820,7 @@ namespace neogfx
     inline void widget<Interface>::layout_items_started()
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items_started()" << std::endl;
 #endif // NEOGFX_DEBUG
         ++iLayoutInProgress;
@@ -835,7 +836,7 @@ namespace neogfx
     inline void widget<Interface>::layout_items_completed()
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items_completed()" << std::endl;
 #endif // NEOGFX_DEBUG
         if (--iLayoutInProgress == 0)
@@ -875,7 +876,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
         auto const currentPosition = self.position();
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::move(" << aPosition << ")" << 
                 " (from " << currentPosition << ")" << std::endl;
 #endif // NEOGFX_DEBUG
@@ -935,7 +936,7 @@ namespace neogfx
         neolib::scoped_flag sf{ iResizing };
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::resize(" << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -1046,7 +1047,7 @@ namespace neogfx
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << std::endl;
 #endif // NEOGFX_DEBUG
         if (self.has_size_policy())
@@ -1063,7 +1064,7 @@ namespace neogfx
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         size result;
@@ -1083,7 +1084,7 @@ namespace neogfx
         else
             result = self.internal_spacing().size();
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -1095,7 +1096,7 @@ namespace neogfx
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         size result;
@@ -1119,7 +1120,7 @@ namespace neogfx
         if (size_policy().vertical_constraint() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -1140,7 +1141,7 @@ namespace neogfx
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         move(aPosition);
@@ -1210,7 +1211,7 @@ namespace neogfx
     inline bool widget<Interface>::update(const rect& aUpdateRect)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::renderItem == this)
+        if (service<i_debug>().render_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::update(" << aUpdateRect << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         if (!can_update())
@@ -1274,7 +1275,7 @@ namespace neogfx
         const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
 
 #ifdef NEOGFX_DEBUG
-        if (debug::renderItem == this)
+        if (service<i_debug>().render_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -1314,7 +1315,7 @@ namespace neogfx
             aGc.set_origin(self.origin());
 
 #ifdef NEOGFX_DEBUG
-            if (debug::renderItem == this)
+            if (service<i_debug>().render_item() == this)
                 service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << self.origin() << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -1387,7 +1388,7 @@ namespace neogfx
         auto const& updateRect = update_rect();
 
 #ifdef NEOGFX_DEBUG
-        if (debug::renderItem == this)
+        if (service<i_debug>().render_item() == this)
         {
             aGc.flush();
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(...), updateRect: " << updateRect << std::endl;
@@ -1407,15 +1408,15 @@ namespace neogfx
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
-        // todo: move to debug::layoutItem function/service
-        if (debug::renderItem == this || debug::layoutItem == this || (debug::layoutItem != nullptr && has_layout() && debug::layoutItem->is_layout() &&
-            (debug::layoutItem == &layout() || static_cast<i_layout const*>(debug::layoutItem)->is_descendent_of(layout()))))
+        // todo: move to service<i_debug>().layout_item() function/service
+        if (service<i_debug>().render_item() == this || service<i_debug>().layout_item() == this || (service<i_debug>().layout_item() != nullptr && has_layout() && service<i_debug>().layout_item()->is_layout() &&
+            (service<i_debug>().layout_item() == &layout() || static_cast<i_layout const*>(service<i_debug>().layout_item())->is_descendent_of(layout()))))
         {
             neogfx::font debugFont1 = service<i_app>().current_style().font().with_size(16);
             neogfx::font debugFont2 = service<i_app>().current_style().font().with_size(8);
-            if (debug::renderGeometryText)
+            if (service<i_debug>().render_geometry_text())
             {
-                if (debug::layoutItem == this)
+                if (service<i_debug>().layout_item() == this)
                 {
                     aGc.draw_text(self.position(), typeid(*this).name(), debugFont1, text_format{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                     std::ostringstream oss;
@@ -1433,12 +1434,12 @@ namespace neogfx
                 aGc.draw_rect(client_rect(false), pen{ color::White, 1.0 });
                 aGc.draw_rect(client_rect(false), pen{ color::Red, 1.0, line_dash{ 0x5555u } });
             }
-            if (debug::layoutItem != nullptr && (debug::layoutItem != this || has_layout()))
+            if (service<i_debug>().layout_item() != nullptr && (service<i_debug>().layout_item() != this || has_layout()))
             {
-                i_layout const& debugLayout = (debug::layoutItem == this ? layout() : *static_cast<i_layout const*>(debug::layoutItem));
-                if (debug::renderGeometryText)
+                i_layout const& debugLayout = (service<i_debug>().layout_item() == this ? layout() : *static_cast<i_layout const*>(service<i_debug>().layout_item()));
+                if (service<i_debug>().render_geometry_text())
                 {
-                    if (debug::layoutItem != this)
+                    if (service<i_debug>().layout_item() != this)
                     {
                         aGc.draw_text(debugLayout.position(), typeid(debugLayout).name(), debugFont1, text_format{ color::Yellow.with_alpha(0.75), text_effect{ text_effect_type::Outline, color::Black.with_alpha(0.75), 2.0 } });
                         std::ostringstream oss;
@@ -1451,7 +1452,7 @@ namespace neogfx
                 for (layout_item_index itemIndex = 0; itemIndex < debugLayout.count(); ++itemIndex)
                 {
                     auto const& item = debugLayout.item_at(itemIndex);
-                    if (debug::renderGeometryText)
+                    if (service<i_debug>().render_geometry_text())
                     {
                         std::string text = typeid(item).name();
                         auto* l = &item;
@@ -1468,7 +1469,7 @@ namespace neogfx
                 }
                 rect const layoutRect{ debugLayout.position(), debugLayout.extents() };
                 aGc.draw_rect(layoutRect, color::White);
-                aGc.draw_rect(layoutRect, pen{ debug::layoutItem == &layout() ? color::Blue : color::Purple, line_dash{ 0x5555u } });
+                aGc.draw_rect(layoutRect, pen{ service<i_debug>().layout_item() == &layout() ? color::Blue : color::Purple, line_dash{ 0x5555u } });
             }
         }
 #endif // NEOGFX_DEBUG

@@ -34,7 +34,7 @@ namespace neogfx
     inline void framed_widget<Base>::paint_non_client(i_graphics_context& aGc) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::renderItem == this)
+        if (service<i_debug>().render_item() == this)
         {
             aGc.flush();
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::paint_non_client(), frame_color: " << frame_color() << std::endl;

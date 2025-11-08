@@ -531,7 +531,7 @@ namespace neogfx
     void layout::invalidate(bool aDeferLayout)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::invalidate(" << aDeferLayout << ")" << std::endl;
 #endif
         if (!iEnabled)
@@ -544,7 +544,7 @@ namespace neogfx
     void layout::validate()
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::validate()" << std::endl;
 #endif
         if (!iInvalidated)
@@ -562,7 +562,7 @@ namespace neogfx
     size_policy layout::size_policy() const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << std::endl;
 #endif
         if (has_size_policy())
@@ -693,7 +693,7 @@ namespace neogfx
     void layout::remove(item_list::iterator aItem)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::remove(" << std::distance(items().begin(), aItem) << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         {
@@ -706,7 +706,7 @@ namespace neogfx
                 if (!item.is_widget())
                     item.set_parent_widget(nullptr);
             }
-            update_layout();
+            update_layout(true, true);
         }
     }
 

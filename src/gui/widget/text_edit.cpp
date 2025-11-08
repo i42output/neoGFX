@@ -695,7 +695,7 @@ namespace neogfx
     void text_edit::paint(i_graphics_context& aGc) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "text_edit::paint(...)" << std::endl;
 #endif // NEOGFX_DEBUG
 
@@ -2836,7 +2836,7 @@ namespace neogfx
     void text_edit::refresh_lines()
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "text_edit::refresh_lines()" << std::endl;
 #endif // NEOGFX_DEBUG
 

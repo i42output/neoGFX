@@ -167,7 +167,7 @@ namespace neogfx
     void spacer::layout_as(const point&, const size& aSize)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "spacer::layout_as(..., " << aSize << ")" << std::endl;
 #endif
         set_extents(aSize);

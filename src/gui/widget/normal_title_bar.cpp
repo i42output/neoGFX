@@ -167,7 +167,7 @@ namespace neogfx
                 update_textures(); 
         });
         
-        auto update_widgets = [this]()
+        auto update_widgets = [this](bool aUpdateLayout = false)
         {
             scoped_units su{ *this, units::Pixels };
 
@@ -202,7 +202,8 @@ namespace neogfx
             iRestoreButton.show(!isRestored && (root().style() & (window_style::MinimizeBox | window_style::MaximizeBox)) != window_style::Invalid);
             iCloseButton.show((root().style() & window_style::Close) != window_style::Invalid);
             update_textures();
-            update_layout();
+            if (aUpdateLayout)
+                update_layout();
             update(true);
         };
 
@@ -219,10 +220,12 @@ namespace neogfx
             case window_event_type::Disabled:
             case window_event_type::FocusGained:
             case window_event_type::FocusLost:
+                update_widgets();
+                break;
             case window_event_type::Iconized:
             case window_event_type::Maximized:
             case window_event_type::Restored:
-                update_widgets();
+                update_widgets(true);
                 break;
             default:
                 break;

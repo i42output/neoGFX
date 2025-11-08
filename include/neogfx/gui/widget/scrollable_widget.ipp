@@ -584,7 +584,7 @@ namespace neogfx
             return;
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget:layout_items: update_scrollbar_visibility..."  << std::endl;
 #endif
 
@@ -635,7 +635,7 @@ namespace neogfx
         scrollbar_updated(horizontal_scrollbar(), i_scrollbar::update_reason_e::Updated);
         
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
         {
             auto const scrollArea = scroll_area();
             auto const scrollPage = scroll_page();

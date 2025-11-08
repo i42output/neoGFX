@@ -116,7 +116,7 @@ namespace neogfx
     i_layout_item& grid_layout::add_item_at_position(cell_coordinate aRow, cell_coordinate aColumn, i_ref_ptr<i_layout_item> const& aItem)
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::add_item_at_position(" << aRow << ", " << aColumn << ", ...) --> ";
 #endif // NEOGFX_DEBUG
 
@@ -234,7 +234,7 @@ namespace neogfx
     void grid_layout::remove_all()
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::remove_all() --> ";
 #endif // NEOGFX_DEBUG
 
@@ -260,7 +260,7 @@ namespace neogfx
     size grid_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::minimum_size(" << aAvailableSpace << ") --> ";
 #endif // NEOGFX_DEBUG
 
@@ -291,7 +291,7 @@ namespace neogfx
         result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
         result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -300,7 +300,7 @@ namespace neogfx
     size grid_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::maximum_size(" << aAvailableSpace << ") --> ";
 #endif // NEOGFX_DEBUG
 
@@ -337,7 +337,7 @@ namespace neogfx
         if (result.cy != size::max_dimension())
             result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << result << std::endl;
 #endif // NEOGFX_DEBUG
         return result;
@@ -388,7 +388,7 @@ namespace neogfx
             return;
 
 #ifdef NEOGFX_DEBUG
-        if (debug::layoutItem == this)
+        if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "grid_layout::layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
