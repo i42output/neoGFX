@@ -245,13 +245,14 @@ namespace neogfx
 
     void drop_list_popup::dismiss()
     {
+        bool const wasVisible = visible();
         // dismissal may be for reasons other than explicit acceptance or cancellation (e.g. clicking outside of list popup)...
         auto* dropListForCancellation = iDropList.handling_text_change() || iDropList.accepting_selection() || iDropList.cancelling_selection() ? nullptr : &iDropList;
         if (service<i_keyboard>().is_keyboard_grabbed_by(list_view()))
             service<i_keyboard>().ungrab_keyboard(list_view());
         close();
         // 'this' will be destroyed at this point...
-        if (dropListForCancellation)
+        if (dropListForCancellation && wasVisible)
             dropListForCancellation->cancel_and_restore_selection();
     }
 
@@ -788,7 +789,8 @@ namespace neogfx
                 }
                 input_widget().set_spacing(presentation_model().cell_spacing(*this));
                 input_widget().set_image(image);
-                input_widget().set_image_size(presentation_model().cell_image_size(*aCurrentIndex));
+                if (aCurrentIndex != std::nullopt)
+                    input_widget().set_image_size(presentation_model().cell_image_size(*aCurrentIndex));
                 input_widget().set_text(text);
             }
         });
