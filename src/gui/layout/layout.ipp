@@ -24,10 +24,19 @@
 
 namespace neogfx
 {
+    enum class layout_item_disposition
+    {
+        Unknown,
+        Weighted,
+        Unweighted,
+        TooSmall,
+        FixedSize
+    };
+
     template <typename SpecializedPolicy>
     struct layout::common_axis_policy
     {
-        static bool item_zero_sized(layout const& aLayout, i_layout_item const& aItem, size const& aSizeTest)
+        static bool item_zero_sized(i_layout_item const& aItem, size const& aSizeTest)
         {
             auto const itemSizePolicy = aItem.effective_size_policy();
             auto const xSizePolicy = SpecializedPolicy::size_policy_x(itemSizePolicy);
@@ -42,15 +51,21 @@ namespace neogfx
         }
         static std::uint32_t items_zero_sized(layout const& aLayout, optional_size const& aAvailableSpace = optional_size{})
         {
-            std::uint32_t result = 0;
+            thread_local layout_cache<layout, optional_size, std::uint32_t> cache;
+
+            auto const& cacheEntry = cache.entry(aLayout, aAvailableSpace);
+            auto& result = cacheEntry.first.result;
+            if (!cacheEntry.second)
+                return result;
+
             bool const noSpace = (aAvailableSpace == std::nullopt ||
-                SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.minimum_size(aAvailableSpace)) ||
+                SpecializedPolicy::cx(*aAvailableSpace) <= SpecializedPolicy::cx(aLayout.transformed_minimum_size(aAvailableSpace)) ||
                 aLayout.items_visible(ItemTypeSpacer));
             for (auto const& itemRef : aLayout.items())
             {
                 auto const& item = *itemRef;
-                if (item_zero_sized(aLayout, item,
-                    noSpace ? item.minimum_size(aAvailableSpace) : item.maximum_size(aAvailableSpace)))
+                if (item_zero_sized(item,
+                    noSpace ? item.transformed_minimum_size(aAvailableSpace) : item.transformed_maximum_size(aAvailableSpace)))
                     ++result;
             }
             return result;
@@ -131,7 +146,7 @@ namespace neogfx
         }
 
         template <typename AxisPolicy>
-        inline size::dimension_type weighted_size(const i_layout_item_cache& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
+        inline size::dimension_type weighted_size(const i_layout_item& aItem, const size& aTotalExpanderWeight, const size::dimension_type aLeftover, const size& aAvailableSize)
         {
             auto guess = AxisPolicy::cx(aItem.weight()) / AxisPolicy::cx(aTotalExpanderWeight) * aLeftover;
             auto const itemSizePolicy = aItem.effective_size_policy();
@@ -141,7 +156,7 @@ namespace neogfx
             {
                 size aspectCheckSize;
                 AxisPolicy::cx(aspectCheckSize) = guess;
-                AxisPolicy::cy(aspectCheckSize) = AxisPolicy::cy(aItem.maximum_size(aAvailableSize));
+                AxisPolicy::cy(aspectCheckSize) = AxisPolicy::cy(aItem.transformed_maximum_size(aAvailableSize));
                 return std::floor(AxisPolicy::cx(fix_aspect_ratio(itemSizePolicy, aspectCheckSize)));
             }
         }
@@ -155,8 +170,14 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
 
-        std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
+        if (!visible())
+            return size{};
+
+        scoped_units su{ *this, units::Pixels };
+
         size result;
+
+        std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         if (has_minimum_size() && !querying_ideal_size())
             result = base_type::minimum_size(aAvailableSpace);
         else if (itemsVisible != 0)
@@ -170,8 +191,8 @@ namespace neogfx
                 auto const& item = *itemRef;
                 if (!item.visible())
                     continue;
-                auto const itemMinSize = item.minimum_size(availableSpaceForChildren);
-                if (!item.is_spacer() && (AxisPolicy::item_zero_sized(*this, item, itemMinSize)))
+                auto const itemMinSize = item.transformed_minimum_size(availableSpaceForChildren);
+                if (!item.is_spacer() && (AxisPolicy::item_zero_sized(item, itemMinSize)))
                 {
                     ++itemsZeroSized;
                     continue;
@@ -185,6 +206,26 @@ namespace neogfx
                 AxisPolicy::cx(result) += (AxisPolicy::cx(spacing()) * (itemsVisible - itemsZeroSized - 1));
             AxisPolicy::cx(result) = std::max(AxisPolicy::cx(result), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
             AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
+        }
+
+        auto const ourSizePolicy = effective_size_policy();
+        if (ourSizePolicy.maintain_aspect_ratio())
+        {
+            auto const& aspectRatio = ourSizePolicy.aspect_ratio();
+            if (aspectRatio.cx < aspectRatio.cy)
+            {
+                if (result.cx < result.cy)
+                    result = size{ result.cx, result.cx * (aspectRatio.cy / aspectRatio.cx) };
+                else
+                    result = size{ result.cy * (aspectRatio.cx / aspectRatio.cy), result.cy };
+            }
+            else
+            {
+                if (result.cx < result.cy)
+                    result = size{ result.cy * (aspectRatio.cx / aspectRatio.cy), result.cy };
+                else
+                    result = size{ result.cx, result.cx * (aspectRatio.cy / aspectRatio.cx) };
+            }
         }
 
 #ifdef NEOGFX_DEBUG
@@ -203,7 +244,13 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): " << std::endl;
 #endif // NEOGFX_DEBUG
 
+        if (!visible())
+            return size::max_size();
+
         size result;
+
+        scoped_units su{ *this, units::Pixels };
+
         auto const ourSizePolicy = effective_size_policy();
         if (has_maximum_size())
             result = base_type::maximum_size(aAvailableSpace);
@@ -228,13 +275,13 @@ namespace neogfx
                 auto const& item = *itemRef;
                 if (!item.visible())
                     continue;
-                auto const itemMaxSize = item.maximum_size(availableSpaceForChildren);
-                if (!item.is_spacer() && (AxisPolicy::item_zero_sized(*this, item, itemMaxSize)))
+                auto const itemMaxSize = item.transformed_maximum_size(availableSpaceForChildren);
+                if (!item.is_spacer() && (AxisPolicy::item_zero_sized(item, itemMaxSize)))
                     ++itemsZeroSized;
                 AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result),
                     AxisPolicy::size_policy_y(ourSizePolicy) == size_constraint::Expanding ||
                     AxisPolicy::size_policy_y(ourSizePolicy) == size_constraint::Maximum ?
-                    AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(item.minimum_size(availableSpaceForChildren)));
+                    AxisPolicy::cy(itemMaxSize) : AxisPolicy::cy(item.transformed_minimum_size(availableSpaceForChildren)));
                 if (AxisPolicy::cx(result) != size::max_dimension() && AxisPolicy::cx(itemMaxSize) != size::max_dimension())
                     AxisPolicy::cx(result) += AxisPolicy::cx(itemMaxSize);
                 else if (AxisPolicy::cx(itemMaxSize) == size::max_dimension())
@@ -277,6 +324,9 @@ namespace neogfx
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
+        thread_local layout_cache<i_layout_item, std::pair<point, size>, layout_item_disposition> cache;
+
         set_position(aPosition);
         set_extents(aSize);
         auto const itemsVisible = (always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible());
@@ -298,28 +348,31 @@ namespace neogfx
             auto const& item = *itemRef;
 
 #ifdef NEOGFX_DEBUG
-            if (service<i_debug>().layout_item() == &item.subject())
+            if (service<i_debug>().layout_item() == &item)
                 service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
             auto const itemSizePolicy = item.effective_size_policy();
             if (!item.visible())
                 continue;
-            if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
+            if (AxisPolicy::item_zero_sized(item, item.transformed_minimum_size(availableSpace)))
                 continue;
-            auto& disposition = item.cached_disposition();
+
+            auto const& cacheEntry = cache.entry(item, std::make_pair(aPosition, aSize));
+            auto& disposition = cacheEntry.first.result;
+
             disposition = layout_item_disposition::Unknown;
             if (AxisPolicy::size_policy_x(itemSizePolicy) == size_constraint::Minimum)
             {
                 disposition = layout_item_disposition::TooSmall;
-                leftover -= AxisPolicy::cx(item.minimum_size(availableSpace));
+                leftover -= AxisPolicy::cx(item.transformed_minimum_size(availableSpace));
                 if (leftover < 0.0)
                     leftover = 0.0;
             }
             else if (AxisPolicy::size_policy_x(itemSizePolicy) == size_constraint::Fixed)
             {
                 disposition = layout_item_disposition::FixedSize;
-                leftover -= AxisPolicy::cx(item.has_fixed_size() ? item.fixed_size() : item.minimum_size(availableSpace));
+                leftover -= AxisPolicy::cx(item.has_fixed_size() ? item.transformed_fixed_size() : item.transformed_minimum_size(availableSpace));
                 if (leftover < 0.0)
                     leftover = 0.0;
             }
@@ -339,19 +392,22 @@ namespace neogfx
                 auto const itemSizePolicy = item.effective_size_policy();
                 if (!item.visible())
                     continue;
-                if (AxisPolicy::item_zero_sized(*this, item, item.minimum_size(availableSpace)))
+                if (AxisPolicy::item_zero_sized(item, item.transformed_minimum_size(availableSpace)))
                     continue;
-                auto& disposition = item.cached_disposition();
+
+                auto const& cacheEntry = cache.entry(item, std::make_pair(aPosition, aSize));
+                auto& disposition = cacheEntry.first.result;
+
                 if (disposition != layout_item_disposition::Unknown && disposition != layout_item_disposition::Weighted)
                     continue;
 
 #ifdef NEOGFX_DEBUG
-                if (service<i_debug>().layout_item() == &item.subject())
+                if (service<i_debug>().layout_item() == &item)
                     service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
-                auto const minSize = AxisPolicy::cx(item.minimum_size(availableSpace));
-                auto const maxSize = AxisPolicy::cx(item.maximum_size(availableSpace));
+                auto const minSize = AxisPolicy::cx(item.transformed_minimum_size(availableSpace));
+                auto const maxSize = AxisPolicy::cx(item.transformed_maximum_size(availableSpace));
                 auto const weightedSize = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace);
                 if (minSize < weightedSize && maxSize > weightedSize)
                 {
@@ -382,7 +438,10 @@ namespace neogfx
                 auto const& item = *itemRef;
                 if (!item.visible())
                     continue;
-                auto& disposition = item.cached_disposition();
+
+                auto const& cacheEntry = cache.entry(item, std::make_pair(aPosition, aSize));
+                auto& disposition = cacheEntry.first.result;
+
                 if (disposition == layout_item_disposition::Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace);
             }
@@ -406,15 +465,18 @@ namespace neogfx
             }
 
 #ifdef NEOGFX_DEBUG
-            if (service<i_debug>().layout_item() == &item.subject())
+            if (service<i_debug>().layout_item() == &item)
                 service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
-            auto const itemMinSize = item.minimum_size(availableSpace);
-            auto const itemMaxSize = item.maximum_size(availableSpace);
+            auto const itemMinSize = item.transformed_minimum_size(availableSpace);
+            auto const itemMaxSize = item.transformed_maximum_size(availableSpace);
             size s;
             AxisPolicy::cy(s) = std::min(std::max(AxisPolicy::cy(itemMinSize), AxisPolicy::cy(availableSpace)), AxisPolicy::cy(itemMaxSize));
-            auto disposition = item.cached_disposition();
+
+            auto const& cacheEntry = cache.entry(item, std::make_pair(aPosition, aSize));
+            auto& disposition = cacheEntry.first.result;
+
             if (disposition == layout_item_disposition::FixedSize)
                 AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
             else if (disposition == layout_item_disposition::TooSmall)
@@ -444,7 +506,7 @@ namespace neogfx
                 break;
             case alignment::VCenter:
             case alignment::Center:
-                AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s)) / 2.0);
+                AxisPolicy::y(alignmentAdjust) = std::floor((AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s)) / 2.0);
                 break;
             }
             if (AxisPolicy::y(alignmentAdjust) < 0.0)

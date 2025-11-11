@@ -35,24 +35,31 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif
 
+        scoped_units su{ *this, units::Pixels };
+
         if (has_minimum_size() || aAvailableSpace == std::nullopt)
             return layout::minimum_size(aAvailableSpace);
         std::uint32_t itemsVisible = always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible();
         if (itemsVisible == 0)
             return size{};
+
         auto availableSpaceForChildren = aAvailableSpace;
         *availableSpaceForChildren -= internal_spacing().size();
+
         size result;
+
         std::uint32_t itemsZeroSized = 0;
         size extent;
         point pos;
+
         bool previousNonZeroSize = false;
+
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
             if (!item.visible())
                 continue;
-            auto itemMinimumSize = item.minimum_size(availableSpaceForChildren);
+            auto itemMinimumSize = item.transformed_minimum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
             {
                 ++itemsZeroSized;
@@ -83,12 +90,14 @@ namespace neogfx
         AxisPolicy::cx(result) = std::max(std::min(AxisPolicy::cx(result), AxisPolicy::cx(*aAvailableSpace)), AxisPolicy::cx(layout::minimum_size(aAvailableSpace)));
         AxisPolicy::cy(result) = std::max(AxisPolicy::cy(result), AxisPolicy::cy(layout::minimum_size(aAvailableSpace)));
 
+        result = apply_fixed_size(result);
+
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
 
-        return result;
+        return transformation() * result;
     }
 
     template <typename AxisPolicy>
@@ -99,24 +108,32 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif
 
+        scoped_units su{ *this, units::Pixels };
+
         if (has_maximum_size())
             return layout::maximum_size(aAvailableSpace);
         if (items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) == 0)
             return size::max_size();
+
         auto availableSpaceForChildren = aAvailableSpace;
         if (availableSpaceForChildren != std::nullopt)
             *availableSpaceForChildren -= internal_spacing().size();
+
         size result;
+
         coordinate extent = 0.0;
         point posTotal;
         point posCurrentRow;
+        
         auto const ourSizePolicy = effective_size_policy();
         auto const lastVisibleIter = std::find_if(items().rbegin(), items().rend(), [&](auto const& item) { return item->visible(); });
-        auto const lastVisible = (lastVisibleIter != items().rend() ? &(**std::prev(lastVisibleIter.base())).identity() : nullptr);
+        auto const lastVisible = (lastVisibleIter != items().rend() ? &(**std::prev(lastVisibleIter.base())) : nullptr);
+
         bool first = true;
+
         for (auto const& itemRef : items())
         {
-            auto const& item = (*itemRef).identity();
+            auto const& item = (*itemRef);
             if (!item.visible())
                 continue;
             bool const last = (&item == lastVisible);
@@ -126,7 +143,7 @@ namespace neogfx
                 service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::do_maximum_size(" << aAvailableSpace << "): last item" << std::endl;
 #endif
 
-            auto const itemMaximumSize = item.maximum_size(availableSpaceForChildren);
+            auto const itemMaximumSize = item.transformed_maximum_size(availableSpaceForChildren);
             if (AxisPolicy::cx(itemMaximumSize) != size::max_dimension())
             {
                 if (AxisPolicy::x(posTotal) != size::max_dimension())
@@ -244,12 +261,12 @@ namespace neogfx
             auto itemRef = *itemIter;
             itemIter = std::next(itemIter);
             auto& item = *itemRef;
-            if (&item.identity() == &rows)
+            if (&item == &rows)
                 continue;
             bool addRow = (rows.count() == 0);
             if (item.visible())
             {
-                auto itemMinimumSize = item.minimum_size(availableSpace);
+                auto itemMinimumSize = item.transformed_minimum_size(availableSpace);
                 if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
                 {
                     previousNonZeroSize = false;

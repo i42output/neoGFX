@@ -1711,7 +1711,10 @@ namespace neogfx
 
     alignment text_edit::alignment() const
     {
-        return default_style().paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+        return default_style().paragraph().alignment().as_std_optional().value_or(
+            neogfx::alignment::Left | 
+            ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine ? 
+                neogfx::alignment::VCenter : neogfx::alignment::Top));
     }
 
     void text_edit::set_alignment(neogfx::alignment aAlignment)
@@ -1878,7 +1881,7 @@ namespace neogfx
             {
                 delta alignmentAdjust;
                 auto const& paragraphStyle = glyph_style(line->glyph_begin(), iColumns.at(columnIndex));
-                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
                 if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
                     ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                     alignmentAdjust.dx = columnRectSansPadding.cx - line->extents.cx;
@@ -1906,7 +1909,7 @@ namespace neogfx
             pos.x = 0.0;
             auto textDirection = glyph_text_direction(lines.back().glyph_begin(), lines.back().glyph_end());
             auto const& paragraphStyle = glyph_style(lines.back().glyph_begin(), iColumns.at(columnIndex));
-            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
             if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
                 ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
                 pos.x = columnRectSansPadding.cx;
@@ -2942,7 +2945,7 @@ namespace neogfx
                             dimension xLine = 0.0;
 
                             auto textDirection = glyph_text_direction(lineStart, lineEnd);
-                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
 
                             if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
                                 ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
@@ -2998,7 +3001,7 @@ namespace neogfx
                                 dimension xLine = 0.0;
 
                                 auto textDirection = glyph_text_direction(first, last);
-                                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                                auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
 
                                 if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
                                     ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
@@ -3136,7 +3139,7 @@ namespace neogfx
                             dimension xLine = 0.0;
 
                             auto textDirection = glyph_text_direction(lineStart, lineEnd);
-                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                            auto const paragraphAlignment = paragraphStyle.paragraph().alignment().as_std_optional().value_or(alignment());
 
                             if (((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Left && textDirection == text_direction::RTL) ||
                                 ((paragraphAlignment & neogfx::alignment::Horizontal) == neogfx::alignment::Right && textDirection == text_direction::LTR))
@@ -3212,7 +3215,7 @@ namespace neogfx
             if (iTextExtents->cy < client_rect(false).cy)
             {
                 auto const space = client_rect(false).cy - iTextExtents->cy;
-                auto const defaultAlignment = default_style().paragraph().alignment().as_std_optional().value_or(neogfx::alignment::Left | neogfx::alignment::Top);
+                auto const defaultAlignment = default_style().paragraph().alignment().as_std_optional().value_or(alignment());
                 auto const adjust =
                     ((defaultAlignment & neogfx::alignment::Vertical) == neogfx::alignment::Bottom) ? space :
                     ((defaultAlignment & neogfx::alignment::Vertical) == neogfx::alignment::VCenter) ? std::floor(space / 2.0) : 0.0;

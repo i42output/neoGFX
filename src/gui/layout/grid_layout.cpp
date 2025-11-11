@@ -187,7 +187,7 @@ namespace neogfx
     grid_layout::cell_coordinates grid_layout::item_position(const i_layout_item& aItem) const
     {
         for (auto i = iCells.begin(); i != iCells.end(); ++i)
-            if (&(*i->second).identity() == &aItem.identity())
+            if (&(*i->second) == &aItem)
                 return cell_coordinates{ i->first.x, i->first.y };
         throw item_not_found();
     }
@@ -394,13 +394,16 @@ namespace neogfx
 
         if (has_parent_widget())
             parent_widget().layout_items_started();
+
         scoped_layout_items layoutItems;
+
         validate();
         set_position(aPosition);
         set_extents(aSize);
         for (auto& r : iRows)
             while (r->count() < iDimensions.cx)
                 r->add_spacer();
+
         point availablePos = aPosition + internal_spacing().top_left();
         size availableSize = aSize;
         availableSize.cx -= internal_spacing().size().cx;
@@ -516,7 +519,7 @@ namespace neogfx
 
     void grid_layout::remove(item_list::iterator aItem)
     {
-        auto& item = (**aItem).identity();
+        auto& item = **aItem;
         auto itemPos = item_position(item);
         if (&(**aItem).parent_layout() == &row_layout(itemPos.y))
             row_layout(itemPos.y).remove_at(itemPos.x);
@@ -600,7 +603,7 @@ namespace neogfx
             {
                 auto s = find_span(item.first);
                 if (s == iSpans.end() || s->first.y == s->second.y)
-                    result = std::max(result, item.second->minimum_size(aAvailableSpace).cy);
+                    result = std::max(result, item.second->transformed_minimum_size(aAvailableSpace).cy);
             }
         return std::ceil(result);
     }
@@ -613,7 +616,7 @@ namespace neogfx
             {
                 auto s = find_span(item.first);
                 if (s == iSpans.end() || s->first.x == s->second.x)
-                    result = std::max(result, item.second->minimum_size(aAvailableSpace).cx);
+                    result = std::max(result, item.second->transformed_minimum_size(aAvailableSpace).cx);
             }
         return std::ceil(result);
     }
@@ -623,7 +626,7 @@ namespace neogfx
         size::dimension_type result {};
         for (auto const& item : iCells)
             if (item.first.y == aRow)
-                result = std::max(result, item.second->maximum_size(aAvailableSpace).cy);
+                result = std::max(result, item.second->transformed_maximum_size(aAvailableSpace).cy);
         return result;
     }
 
@@ -632,7 +635,7 @@ namespace neogfx
         size::dimension_type result {};
         for (auto const& item : iCells)
             if (item.first.x == aColumn)
-                result = std::max(result, item.second->maximum_size(aAvailableSpace).cx);
+                result = std::max(result, item.second->transformed_maximum_size(aAvailableSpace).cx);
         return result;
     }
 

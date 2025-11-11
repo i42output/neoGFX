@@ -26,7 +26,6 @@
 #include <neogfx/gui/layout/i_layout.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/window/i_window.hpp>
-#include <neogfx/gui/layout/i_layout_item_cache.hpp>
 
 namespace neogfx
 {
@@ -61,19 +60,6 @@ namespace neogfx
         void set_id(const i_string& aId) final
         {
             iId = aId;
-        }
-    public:
-        bool is_cache() const final
-        {
-            return false;
-        }
-        i_layout_item const& identity() const final
-        {
-            return *this;
-        }
-        i_layout_item& identity() final
-        {
-            return *this;
         }
     public:
         bool has_style_sheet() const final
@@ -380,6 +366,21 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             return result;
         }
+        size transformed_ideal_size(optional_size const& aAvailableSpace = {}) const final
+        {
+            neolib::scoped_flag sf{ iTransformationActive };
+
+            thread_local layout_cache<i_layout_item, optional_size, size> cache;
+
+            auto const& cacheEntry = cache.entry(*this, aAvailableSpace);
+            auto& result = cacheEntry.first.result;
+            if (!cacheEntry.second)
+                return transformation() * result;
+
+            result = this->apply_fixed_size(ideal_size(aAvailableSpace));
+
+            return transformation() * result;
+        }
         void set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout = true) override
         {
             optional_size newIdealSize = (aIdealSize != std::nullopt ? units_converter{ *this }.to_device_units(*aIdealSize) : optional_size{});
@@ -417,6 +418,26 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
             return result;
         }
+        size transformed_minimum_size(optional_size const& aAvailableSpace = {}) const final
+        {
+#ifdef NEOGFX_DEBUG
+            if (service<i_debug>().layout_item() == this)
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::transformed_minimum_size(" << aAvailableSpace << ")" << std::endl;
+#endif // NEOGFX_DEBUG
+
+            neolib::scoped_flag sf{ iTransformationActive };
+
+            thread_local layout_cache<i_layout_item, optional_size, size> cache;
+
+            auto const& cacheEntry = cache.entry(*this, aAvailableSpace);
+            auto& result = cacheEntry.first.result;
+            if (!cacheEntry.second)
+                return transformation() * result;
+
+            result = this->apply_fixed_size(minimum_size(aAvailableSpace));
+
+            return transformation() * result;
+        }
         void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) override
         {
             optional_size newMinimumSize = (aMinimumSize != std::nullopt ? units_converter{ *this }.to_device_units(*aMinimumSize) : optional_size{});
@@ -450,6 +471,26 @@ namespace neogfx
                 result = size::max_size();
             return result;
         }
+        size transformed_maximum_size(optional_size const& aAvailableSpace = {}) const final
+        {
+#ifdef NEOGFX_DEBUG
+            if (service<i_debug>().layout_item() == this)
+                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::transformed_maximum_size(" << aAvailableSpace << ")" << std::endl;
+#endif // NEOGFX_DEBUG
+
+            neolib::scoped_flag sf{ iTransformationActive };
+
+            thread_local layout_cache<i_layout_item, optional_size, size> cache;
+
+            auto const& cacheEntry = cache.entry(*this, aAvailableSpace);
+            auto& result = cacheEntry.first.result;
+            if (!cacheEntry.second)
+                return transformation() * result;
+
+            result = this->apply_fixed_size(maximum_size(aAvailableSpace));
+
+            return transformation() * result;
+        }
         void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) override
         {
             optional_size newMaximumSize = (aMaximumSize != std::nullopt ? units_converter{ *this }.to_device_units(*aMaximumSize) : optional_size{});
@@ -473,6 +514,21 @@ namespace neogfx
             if (has_fixed_size())
                 return units_converter{ *this }.from_device_units(*FixedSize);
             return minimum_size(aAvailableSpace);
+        }
+        size transformed_fixed_size(optional_size const& aAvailableSpace = {}) const final
+        {
+            neolib::scoped_flag sf{ iTransformationActive };
+
+            thread_local layout_cache<i_layout_item, optional_size, size> cache;
+
+            auto const& cacheEntry = cache.entry(*this, aAvailableSpace);
+            auto& result = cacheEntry.first.result;
+            if (!cacheEntry.second)
+                return transformation() * result;
+
+            result = this->apply_fixed_size(fixed_size(aAvailableSpace));
+
+            return transformation() * result;
         }
         void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) override
         {
@@ -596,6 +652,10 @@ namespace neogfx
             }
         }
     protected:
+        bool transformation_active() const final
+        {
+            return iTransformationActive;
+        }
         point unconstrained_origin() const override
         {
             auto& self = as_layout_item();
@@ -736,5 +796,6 @@ namespace neogfx
         optional_style_sheet iStyleSheet;
         mutable cache<point> iOrigin;
         mutable cache<mat33> iCombinedTransformation;
+        mutable bool iTransformationActive = false;
     };
 }

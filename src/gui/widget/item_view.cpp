@@ -1090,11 +1090,6 @@ namespace neogfx
         if (editor_has_text_edit())
         {
             auto& textEdit = editor_text_edit();
-            auto const& textEditRect = to_client_coordinates(textEdit.to_window_coordinates(textEdit.client_rect()));
-            auto const& textRect = cell_rect(newIndex, cell_part::Text);
-            auto const adjust = textRect.position() - textEditRect.position();
-            auto const paddingAdjust = neogfx::padding{ adjust.x, adjust.y, adjust.x, 0 };
-            textEdit.set_padding(paddingAdjust);
             if (presentation_model().cell_color(newIndex, color_role::Background) != optional_color{})
                 textEdit.set_background_color(presentation_model().cell_color(newIndex, color_role::Background));
             optional_color backgroundColor = presentation_model().cell_color(newIndex, color_role::Background);

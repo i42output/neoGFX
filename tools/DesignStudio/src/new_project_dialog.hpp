@@ -40,6 +40,7 @@ namespace neogfx::DesignStudio
         };
     public:
         new_project_dialog_ex(i_widget& aParent);
+        ~new_project_dialog_ex();
     public:
         naming_convention namingConvention;
     };

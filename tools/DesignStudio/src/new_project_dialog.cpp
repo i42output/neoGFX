@@ -66,4 +66,8 @@ namespace neogfx::DesignStudio
         projectName.set_text("Project1"_s);
         projectName.select_all();
     }
+
+    new_project_dialog_ex::~new_project_dialog_ex()
+    {
+    }
 }

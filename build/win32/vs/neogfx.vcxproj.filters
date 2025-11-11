@@ -975,12 +975,6 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_menu_item_widget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item_cache.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item_cache.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\gui\window\native\virtual_window.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -1712,9 +1706,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\src\gui\layout\layout_item_cache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_window.cpp">

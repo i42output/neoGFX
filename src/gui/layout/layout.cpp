@@ -23,7 +23,6 @@
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/gui/widget/i_widget.hpp>
 #include <neogfx/gui/layout/layout.hpp>
-#include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/i_spacer.hpp>
 #include <neogfx/gui/widget/i_scrollbar.hpp>
 #include "layout.ipp"
@@ -209,7 +208,7 @@ namespace neogfx
             iOwner = aParentWidget;
             for (auto& itemRef : items())
             {
-                auto& item = (*itemRef).identity();
+                auto& item = (*itemRef);
                 if (!item.has_parent_widget())
                     item.set_parent_widget(aParentWidget);
             }
@@ -244,12 +243,11 @@ namespace neogfx
         }
         while (aPosition > items().size())
             add_spacer_at(0);
-        auto i = items().insert(std::next(items().begin(), aPosition), aItem->is_cache() ?
-            dynamic_pointer_cast<i_layout_item_cache>(aItem) : make_abstract_ref<layout_item_cache>(aItem));
+        auto i = items().insert(std::next(items().begin(), aPosition), aItem);
         (**i).set_parent_layout(this);
         if (has_parent_widget())
             (**i).set_parent_widget(&parent_widget());
-        invalidate();
+        update_layout(true, true);
         return *aItem;
     }
 
@@ -260,8 +258,7 @@ namespace neogfx
 
     bool layout::remove(i_layout_item& aItem)
     {
-        auto existing = std::find_if(begin(), end(), [&](auto const& cachedItem) 
-            { return !cachedItem->subject_destroyed() && &cachedItem->identity() == &aItem.identity(); });
+        auto existing = std::find_if(begin(), end(), [&](auto const& item)  { return &*item == &aItem; });
         if (existing == end())
             return false;
         remove(existing);
@@ -314,7 +311,7 @@ namespace neogfx
         for (auto i = items().begin(); i != items().end(); ++i)
         {
             auto const& item = **i;
-            if (&item.identity() == &aItem.identity())
+            if (&item == &aItem)
                 return static_cast<layout_item_index>(std::distance(items().begin(), i));
         }
         return optional_layout_item_index{};
@@ -333,7 +330,7 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = std::next(items().begin(), aIndex);
-        return (**item).identity();
+        return **item;
     }
 
     i_layout_item& layout::item_at(layout_item_index aIndex)
@@ -346,8 +343,8 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = *std::next(items().begin(), aIndex);
-        if (item->identity().is_widget())
-            return item->identity().as_widget();
+        if (item->is_widget())
+            return item->as_widget();
         throw not_a_widget();
     }
 
@@ -361,8 +358,8 @@ namespace neogfx
         if (aIndex >= items().size())
             throw bad_item_index();
         auto item = *std::next(items().begin(), aIndex);
-        if (item->identity().is_layout())
-            return item->identity().as_layout();
+        if (item->is_layout())
+            return item->as_layout();
         throw not_a_layout();
     }
 
@@ -658,7 +655,7 @@ namespace neogfx
     layout::item_list::const_iterator layout::find_item(const i_layout_item& aItem) const
     {
         for (auto i = items().begin(); i != items().end(); ++i)
-            if (&**i == &aItem || &(**i).identity() == &aItem.identity())
+            if (&**i == &aItem || &(**i) == &aItem)
                 return i;
         return items().end();
     }
@@ -666,7 +663,7 @@ namespace neogfx
     layout::item_list::iterator layout::find_item(i_layout_item& aItem)
     {
         for (auto i = items().begin(); i != items().end(); ++i)
-            if (&**i == &aItem || &(**i).identity() == &aItem.identity())
+            if (&**i == &aItem || &(**i) == &aItem)
                 return i;
         return items().end();
     }
@@ -700,7 +697,7 @@ namespace neogfx
             auto& item = **aItem;
             item_list toRemove;
             toRemove.splice(toRemove.begin(), iItems, aItem);
-            if (!item.subject_destroyed() && item.has_parent_layout() && &item.parent_layout() == this)
+            if (item.has_parent_layout() && &item.parent_layout() == this)
             {
                 item.set_parent_layout(nullptr);
                 if (!item.is_widget())

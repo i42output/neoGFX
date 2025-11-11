@@ -274,17 +274,21 @@ namespace neogfx
         virtual bool has_ideal_size() const noexcept = 0;
         virtual bool is_ideal_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size ideal_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual size transformed_ideal_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_ideal_size(optional_size const& aIdealSize, bool aUpdateLayout = true) = 0;
         virtual bool has_minimum_size() const noexcept = 0;
         virtual bool is_minimum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size minimum_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual size transformed_minimum_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_minimum_size(optional_size const& aMinimumSize, bool aUpdateLayout = true) = 0;
         virtual bool has_maximum_size() const noexcept = 0;
         virtual bool is_maximum_size_constrained() const noexcept = 0; /// @todo remove when abstract anchor support added
         virtual size maximum_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual size transformed_maximum_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_maximum_size(optional_size const& aMaximumSize, bool aUpdateLayout = true) = 0;
         virtual bool has_fixed_size() const noexcept = 0;
         virtual size fixed_size(optional_size const& aAvailableSpace = {}) const = 0;
+        virtual size transformed_fixed_size(optional_size const& aAvailableSpace = {}) const = 0;
         virtual void set_fixed_size(optional_size const& aFixedSize, bool aUpdateLayout = true) = 0;
         virtual bool has_transformation() const noexcept = 0;
         virtual mat33 const& transformation(bool aCombineAncestorTransformations = false) const = 0;
@@ -300,6 +304,7 @@ namespace neogfx
         virtual neogfx::padding padding() const = 0;
         virtual void set_padding(optional_padding const& aPadding, bool aUpdateLayout = true) = 0;
     protected:
+        virtual bool transformation_active() const = 0;
         virtual point unconstrained_origin() const = 0;
         virtual point unconstrained_position() const = 0;
         // helpers

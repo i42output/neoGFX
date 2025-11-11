@@ -29,7 +29,6 @@
 #include <neogfx/core/object.hpp>
 #include <neogfx/core/units.hpp>
 #include <neogfx/gui/layout/layout_item.hpp>
-#include <neogfx/gui/layout/layout_item_cache.hpp>
 #include <neogfx/gui/layout/anchor.hpp>
 #include <neogfx/gui/layout/anchorable.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
@@ -52,7 +51,7 @@ namespace neogfx
     private:
         using base_type = layout_item<object<i_layout>>;
     protected:
-        typedef ref_ptr<layout_item_cache> item;
+        typedef ref_ptr<i_layout_item> item;
         typedef std::list<item> item_list;
         enum item_type_e
         {

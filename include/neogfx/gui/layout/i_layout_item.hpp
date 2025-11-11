@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>
 
 #include <neogfx/core/i_property.hpp>
 #include <neogfx/core/i_style_sheet.hpp>
@@ -34,7 +35,6 @@ namespace neogfx
     class i_layout;
     class i_spacer;
     class i_widget;
-    class i_layout_item_cache;
 
     struct not_a_layout : std::logic_error { not_a_layout() : std::logic_error("neogfx::not_a_layout") {} };
     struct not_a_widget : std::logic_error { not_a_widget() : std::logic_error("neogfx::not_a_widget") {} };
@@ -47,6 +47,27 @@ namespace neogfx
     struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
     struct cannot_fix_weightings : std::logic_error { cannot_fix_weightings() : std::logic_error{ "neogfx::cannot_fix_weightings" } {} };
 
+    class i_item_layout : public i_service
+    {
+    public:
+        virtual std::uint32_t id() const = 0;
+        virtual void increment_id() = 0;
+        virtual bool& in_progress() = 0;
+        virtual bool& querying_ideal_size() = 0;
+    public:
+        static uuid const& iid() { static uuid const sIid{ 0xd7e05b0f, 0xc4eb, 0x440a, 0x844e, { 0x35, 0x18, 0xc0, 0x48, 0xee, 0x53 } }; return sIid; }
+    };
+
+    inline std::uint32_t global_layout_id()
+    {
+        return service<i_item_layout>().id();
+    }
+
+    inline bool querying_ideal_size()
+    {
+        return service<i_item_layout>().querying_ideal_size();
+    }
+
     enum class layout_item_category
     {
         Unspecified,
@@ -55,9 +76,56 @@ namespace neogfx
         Widget
     };
 
+    template <typename Arg, typename Result>
+    struct layout_cache_entry
+    {
+        destroyed_flag itemDestroyed;
+        std::optional<Arg> arg = {};
+        std::optional<std::uint32_t> layoutId = {};
+        Result result = {};
+    };
+
+    template <typename Key, typename Arg, typename Result>
+    class layout_cache
+    {
+    public:
+        using value_type = layout_cache_entry<Arg, Result>;
+        using return_type = std::pair<value_type&, bool>;
+        using result_type = Result;
+    private:
+        using container_type = std::unordered_map<Key const*, value_type>;
+    public:
+        return_type entry(Key const& aKey, Arg const& aArg)
+        {
+            auto existing = iEntries.find(&aKey);
+
+            if (existing != iEntries.end() && existing->second.itemDestroyed)
+            {
+                iEntries.erase(existing);
+                existing = iEntries.end();
+            }
+
+            if (existing == iEntries.end())
+                existing = iEntries.emplace(&aKey, value_type{ aKey }).first;
+
+            auto& cacheEntry = existing->second;
+
+            if (cacheEntry.arg.has_value() && cacheEntry.arg.value() == aArg &&
+                cacheEntry.layoutId.has_value() && cacheEntry.layoutId.value() == global_layout_id())
+                return return_type{ cacheEntry, false };
+
+            cacheEntry.arg = aArg;
+            cacheEntry.layoutId = global_layout_id();
+            cacheEntry.result = {};
+
+            return return_type{ cacheEntry, true };
+        }
+    private:
+        container_type iEntries;
+    };
+
     class i_layout_item : public i_reference_counted, public i_property_owner, public i_geometry, public i_anchorable
     {
-        friend class layout_item_cache;
     public:
         declare_event(style_sheet_changed, i_optional_style_sheet const&)
     public:
@@ -67,10 +135,6 @@ namespace neogfx
     public:
         virtual i_string const& id() const = 0;
         virtual void set_id(const i_string& aId) = 0;
-    public:
-        virtual bool is_cache() const = 0;
-        virtual i_layout_item const& identity() const = 0;
-        virtual i_layout_item& identity() = 0;
     public:
         virtual bool has_style_sheet() const = 0;
         virtual i_style_sheet const& style_sheet() const = 0;
@@ -206,25 +270,4 @@ namespace neogfx
             return base_type::size_policy();
         }
     };
-
-    class i_item_layout : public i_service
-    {
-    public:
-        virtual std::uint32_t id() const = 0;
-        virtual void increment_id() = 0;
-        virtual bool& in_progress() = 0;
-        virtual bool& querying_ideal_size() = 0;
-    public:
-        static uuid const& iid() { static uuid const sIid{ 0xd7e05b0f, 0xc4eb, 0x440a, 0x844e, { 0x35, 0x18, 0xc0, 0x48, 0xee, 0x53 } }; return sIid; }
-    };
-
-    inline std::uint32_t global_layout_id()
-    {
-        return service<i_item_layout>().id();
-    }
-
-    inline bool querying_ideal_size()
-    {
-        return service<i_item_layout>().querying_ideal_size();
-    }
 }

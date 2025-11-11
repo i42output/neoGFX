@@ -27,7 +27,6 @@
 #include <neogfx/gui/widget/widget.hpp>
 #include <neogfx/gui/layout/i_async_layout.hpp>
 #include <neogfx/gui/layout/i_layout.hpp>
-#include <neogfx/gui/layout/i_layout_item_cache.hpp>
 #include <neogfx/hid/i_surface_manager.hpp>
 #include <neogfx/hid/i_surface_window.hpp>
 
@@ -930,15 +929,15 @@ namespace neogfx
     {
         auto& self = *this;
 
-        if (base_type::Size == units_converter{ *this }.to_device_units(aSize))
-            return;
-
-        neolib::scoped_flag sf{ iResizing };
-
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << "widget<Interface>::resize(" << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
+        if (base_type::Size == units_converter{ *this }.to_device_units(aSize))
+            return;
+
+        neolib::scoped_flag sf{ iResizing };
 
         update(true);
         self.set_extents(aSize);
@@ -1067,6 +1066,7 @@ namespace neogfx
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
         size result;
         if (self.has_ideal_size() && querying_ideal_size())
             result = base_type::ideal_size(aAvailableSpace);
@@ -1083,10 +1083,12 @@ namespace neogfx
         }
         else
             result = self.internal_spacing().size();
+
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
+        
         return result;
     }
 
@@ -1099,6 +1101,7 @@ namespace neogfx
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
         size result;
         if (self.has_maximum_size() || (base_type::Anchor_MaximumSize.active() && !base_type::Anchor_MaximumSize.calculating()))
             result = base_type::maximum_size(aAvailableSpace);
@@ -1119,10 +1122,12 @@ namespace neogfx
             result.cx = size::max_size().cx;
         if (size_policy().vertical_constraint() == size_constraint::Maximum)
             result.cy = size::max_size().cy;
+
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
 #endif // NEOGFX_DEBUG
+        
         return result;
     }
 
@@ -1144,6 +1149,7 @@ namespace neogfx
         if (service<i_debug>().layout_item() == this)
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::layout_as(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
+
         move(aPosition);
         if (self.extents() != aSize)
             resize(aSize);
@@ -1260,6 +1266,11 @@ namespace neogfx
     inline void widget<Interface>::render(i_graphics_context& aGc) const
     {
         auto& self = *this;
+
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().render_item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...)" << std::endl;
+#endif // NEOGFX_DEBUG
 
         if (effectively_hidden())
             return;
@@ -1427,12 +1438,13 @@ namespace neogfx
                 }
             }
             rect const nonClientRect = to_client_coordinates(non_client_rect());
+            rect const clientRect = client_rect(false);
             aGc.draw_rect(nonClientRect, pen{ color::White, 3.0 });
             aGc.draw_rect(nonClientRect, pen{ color::Green, 3.0, line_dash{ 0x5555u } });
-            if (nonClientRect != client_rect(false))
+            if (nonClientRect != clientRect)
             {
-                aGc.draw_rect(client_rect(false), pen{ color::White, 1.0 });
-                aGc.draw_rect(client_rect(false), pen{ color::Red, 1.0, line_dash{ 0x5555u } });
+                aGc.draw_rect(clientRect, pen{ color::White, 1.0 });
+                aGc.draw_rect(clientRect, pen{ color::Red, 1.0, line_dash{ 0x5555u } });
             }
             if (service<i_debug>().layout_item() != nullptr && (service<i_debug>().layout_item() != this || has_layout()))
             {

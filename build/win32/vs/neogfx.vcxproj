@@ -408,13 +408,11 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_anchorable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_layout_item_cache.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_async_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\i_geometry.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item.hpp" />
-    <ClInclude Include="..\..\..\include\neogfx\gui\layout\layout_item_cache.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\async_layout.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\spacer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\layout\stack_layout.hpp" />
@@ -707,7 +705,6 @@
     <ClCompile Include="..\..\..\src\gui\layout\grid_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\layout_item_cache.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\async_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\spacer.cpp" />
     <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp" />
