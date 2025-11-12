@@ -720,7 +720,7 @@ namespace neogfx
             for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
             {
                 auto& item = layout.item_at(itemIndex);
-                if (!item.visible())
+                if (!item_effectively_visible_for_layout(layout, item))
                     continue;
                 if (aRecalculate || !item.has_weight())
                     item.set_weight(calculate_relative_weight(layout, item), false);
@@ -733,7 +733,7 @@ namespace neogfx
                 for (layout_item_index itemIndex = 0; itemIndex < layout.count(); ++itemIndex)
                 {
                     auto& item = layout.item_at(itemIndex);
-                    if (!item.visible())
+                    if (!item_effectively_visible_for_layout(layout, item))
                         continue;
                     if (!first)
                         service<debug::logger>() << neolib::logger::severity::Debug << ", ";

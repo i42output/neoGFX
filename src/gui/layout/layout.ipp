@@ -189,7 +189,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                if (!item.visible())
+                if (!item_effectively_visible_for_layout(*this, item))
                     continue;
                 auto const itemMinSize = item.transformed_minimum_size(availableSpaceForChildren);
                 if (!item.is_spacer() && (AxisPolicy::item_zero_sized(item, itemMinSize)))
@@ -273,7 +273,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                if (!item.visible())
+                if (!item_effectively_visible_for_layout(*this, item))
                     continue;
                 auto const itemMaxSize = item.transformed_maximum_size(availableSpaceForChildren);
                 if (!item.is_spacer() && (AxisPolicy::item_zero_sized(item, itemMaxSize)))
@@ -353,7 +353,7 @@ namespace neogfx
 #endif // NEOGFX_DEBUG
 
             auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             if (AxisPolicy::item_zero_sized(item, item.transformed_minimum_size(availableSpace)))
                 continue;
@@ -390,7 +390,7 @@ namespace neogfx
             {
                 auto const& item = *itemRef;
                 auto const itemSizePolicy = item.effective_size_policy();
-                if (!item.visible())
+                if (!item_effectively_visible_for_layout(*this, item))
                     continue;
                 if (AxisPolicy::item_zero_sized(item, item.transformed_minimum_size(availableSpace)))
                     continue;
@@ -436,7 +436,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                if (!item.visible())
+                if (!item_effectively_visible_for_layout(*this, item))
                     continue;
 
                 auto const& cacheEntry = cache.entry(item, std::make_pair(aPosition, aSize));
@@ -456,7 +456,7 @@ namespace neogfx
         {
             auto& item = *itemRef;
             auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             if (addSpace)
             {
@@ -545,7 +545,7 @@ namespace neogfx
                 for (auto& itemRef : *this)
                 {
                     auto& item = *itemRef;
-                    if (!item.visible())
+                    if (!item_effectively_visible_for_layout(*this, item))
                         continue;
                     item.layout_as(item.position() + adjust, item.extents());
                 }

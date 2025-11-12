@@ -57,7 +57,7 @@ namespace neogfx
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             auto itemMinimumSize = item.transformed_minimum_size(availableSpaceForChildren);
             if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))
@@ -134,7 +134,7 @@ namespace neogfx
         for (auto const& itemRef : items())
         {
             auto const& item = (*itemRef);
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             bool const last = (&item == lastVisible);
 
@@ -264,7 +264,7 @@ namespace neogfx
             if (&item == &rows)
                 continue;
             bool addRow = (rows.count() == 0);
-            if (item.visible())
+            if (item_effectively_visible_for_layout(*this, item))
             {
                 auto itemMinimumSize = item.transformed_minimum_size(availableSpace);
                 if (!item.is_spacer() && (AxisPolicy::cx(itemMinimumSize) == 0.0 || AxisPolicy::cy(itemMinimumSize) == 0.0))

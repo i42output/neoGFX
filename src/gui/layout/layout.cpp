@@ -571,7 +571,7 @@ namespace neogfx
             if (item.is_spacer())
                 continue;
             auto const itemSizePolicy = item.effective_size_policy();
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             if (itemSizePolicy.horizontal_constraint() == size_constraint::Expanding)
                 result.set_horizontal_constraint(size_constraint::Expanding);
@@ -713,7 +713,7 @@ namespace neogfx
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            if (item.visible())
+            if (item_effectively_visible_for_layout(*this, item))
             {
                 if ((aItemType & ItemTypeWidget) && item.is_widget())
                     ++count;

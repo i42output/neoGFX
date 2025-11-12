@@ -211,9 +211,11 @@ namespace neogfx
                     if (uniform.singular())
                     {
                         shader->update_uniform_location(uniform.id(), glGetUniformLocation(gl_handle(), uniform.name().c_str()));
-                        GLenum errorCode = glGetError();
+#ifndef NDEBUG
+                        GLenum errorCode =  glGetError();
                         if (errorCode != GL_NO_ERROR)
                             throw shader_program_error(glErrorString(errorCode));
+#endif
                     }
     }
 

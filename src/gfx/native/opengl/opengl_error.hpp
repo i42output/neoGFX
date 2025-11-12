@@ -37,7 +37,9 @@ namespace neogfx
         }
         ~scoped_gl_check()
         {
+#ifndef NDEBUG
             glCheckError(iFile, iLine);
+#endif
         }
     private:
         const char* const iFile;

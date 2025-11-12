@@ -377,13 +377,26 @@ namespace neogfx
         }
     };
 
+    inline bool item_effectively_visible_for_layout(const i_layout& aLayout, const i_layout_item& aItem)
+    {
+        thread_local layout_cache<i_layout_item, int, bool> cache;
+
+        auto const& cacheEntry = cache.entry(aItem, 0);
+        auto& result = cacheEntry.first.result;
+        if (!cacheEntry.second)
+            return result;
+
+        result = aLayout.ignore_child_visibility() || aItem.visible() || aItem.effective_size_policy().ignore_visibility();
+        return result;
+    }
+
     inline size total_child_weight(const i_layout& aLayout)
     {
         size totalWeight;
         for (layout_item_index itemIndex = 0; itemIndex < aLayout.count(); ++itemIndex)
         {
             auto const& item = aLayout.item_at(itemIndex);
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(aLayout, item))
                 continue;
             totalWeight += item.weight();
         }
@@ -396,7 +409,7 @@ namespace neogfx
         for (layout_item_index itemIndex = 0; itemIndex < aLayout.count(); ++itemIndex)
         {
             auto const& item = aLayout.item_at(itemIndex);
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(aLayout, item))
                 continue;
             totalSize += (item.has_fixed_size() ? item.fixed_size() : item.extents());
         }

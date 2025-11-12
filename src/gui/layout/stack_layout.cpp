@@ -63,7 +63,7 @@ namespace neogfx
             for (auto const& itemRef : items())
             {
                 auto const& item = *itemRef;
-                if (!item.visible())
+                if (!item_effectively_visible_for_layout(*this, item))
                     continue;
                 result.cx = std::max(result.cx, item.minimum_size(aAvailableSpace).cx);
                 result.cy = std::max(result.cy, item.minimum_size(aAvailableSpace).cy);
@@ -82,7 +82,7 @@ namespace neogfx
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             auto const& itemMaxSize = item.maximum_size(aAvailableSpace);
             if (itemMaxSize.cx != 0.0)
@@ -118,7 +118,7 @@ namespace neogfx
         for (auto& itemRef : *this)
         {
             auto& item = *itemRef;
-            if (!item.visible())
+            if (!item_effectively_visible_for_layout(*this, item))
                 continue;
             item.layout_as(aPosition + internal_spacing().top_left(), aSize - internal_spacing().size());
         }
