@@ -209,7 +209,7 @@ namespace neogfx
         size result = button::minimum_size(aAvailableSpace);
         if (iStyle == push_button_style::ButtonBox)
         {
-            if (iStandardButtonWidth == std::nullopt || iStandardButtonWidth->first != label().text_widget().font())
+            if (!iStandardButtonWidth.has_value() || iStandardButtonWidth->first != label().text_widget().font())
             {
                 graphics_context gc{ *this, graphics_context::type::Unattached };
                 iStandardButtonWidth.emplace(label().text_widget().font(), gc.text_extent("#StdButton", label().text_widget().font()));
@@ -455,14 +455,16 @@ namespace neogfx
 
     bool push_button::has_face_color() const
     {
-        return iFaceColor != std::nullopt;
+        return iFaceColor.has_value();
     }
 
     color push_button::face_color() const
     {
         if (has_face_color())
             return iFaceColor.value();
-        return style_sheet_value("." + class_name(), "background-color", base_color());
+        else if (iStyleSheetFaceColor.has_value())
+            return iStyleSheetFaceColor.value();
+        return (iStyleSheetFaceColor = style_sheet_value("." + class_name(), "background-color", base_color())).value();
     }
 
     void push_button::set_face_color(const optional_color& aFaceColor)
@@ -476,7 +478,7 @@ namespace neogfx
 
     bool push_button::has_hover_color() const
     {
-        return iHoverColor != std::nullopt;
+        return iHoverColor.has_value();
     }
 
     color push_button::hover_color() const
@@ -546,6 +548,12 @@ namespace neogfx
 
     void push_button::init()
     {
+        iSink += StyleSheetChanged([&](auto const&) { iPenWidth = std::nullopt; iStyleSheetFaceColor = std::nullopt; });
+        iSink += Palette.Changed([&](auto const&) { iPenWidth = std::nullopt; iStyleSheetFaceColor = std::nullopt; });
+        iSink += service<i_app>().current_style_changed([&](auto const&)
+            { iSink2 = service<i_app>().current_style().changed([&](auto const&)
+                { iPenWidth = std::nullopt; iStyleSheetFaceColor = std::nullopt; }); });
+
         layout().set_padding(neogfx::padding{});
         label().set_padding(neogfx::padding{});
         switch(iStyle)
@@ -572,33 +580,39 @@ namespace neogfx
 
     scalar push_button::pen_width() const
     {
-        std::optional<dimension> penWidth;
-        switch (iStyle)
+        if (!iPenWidth.has_value())
         {
-        case push_button_style::Normal:
-        case push_button_style::ButtonBox:
-        case push_button_style::Tab:
-        case push_button_style::DropList:
-        case push_button_style::SpinBox:
+            switch (iStyle)
             {
-                color outerBorderColor = background_color().darker(0x10);
-                color innerBorderColor = border_color();
-                auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
-                auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
-                if (std::get<0>(border).has_value())
+            case push_button_style::Normal:
+            case push_button_style::ButtonBox:
+            case push_button_style::Tab:
+            case push_button_style::DropList:
+            case push_button_style::SpinBox:
                 {
-                    outerBorderColor = std::get<0>(border).value();
-                    innerBorderColor = outerBorderColor;
+                    color outerBorderColor = background_color().darker(0x10);
+                    color innerBorderColor = border_color();
+                    auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
+                    auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
+                    if (std::get<0>(border).has_value())
+                    {
+                        outerBorderColor = std::get<0>(border).value();
+                        innerBorderColor = outerBorderColor;
+                    }
+                    if (std::get<1>(border).has_value())
+                        iPenWidth = std::get<1>(border).value();
+                    else if (borderRadii.has_value())
+                        iPenWidth = 2.0;
+                    if (!iPenWidth.has_value())
+                        iPenWidth = outerBorderColor != innerBorderColor ? 2.0 : 1.0;
                 }
-                if (std::get<1>(border).has_value())
-                    penWidth = std::get<1>(border).value();
-                else if (borderRadii.has_value())
-                    penWidth = 2.0;
-                if (!penWidth.has_value())
-                    penWidth = (outerBorderColor != innerBorderColor ? 2.0 : 1.0);
+                break;
+            default:
+                iPenWidth = 0.0;
+                break;
             }
         }
-        return penWidth.value_or(0.0);
+        return iPenWidth.value();
     }
 }
 

@@ -95,7 +95,11 @@ namespace neogfx
         std::uint32_t iAnimationFrame;
         push_button_style iStyle;
         optional_color iFaceColor;
+        mutable optional_color iStyleSheetFaceColor;
         optional_color iHoverColor;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
+        mutable std::optional<dimension> iPenWidth;
+        sink iSink;
+        sink iSink2;
     };
 }

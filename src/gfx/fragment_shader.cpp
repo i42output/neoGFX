@@ -67,11 +67,13 @@ namespace neogfx
             uGradientTileParams = vec3{ aGradient.tile()->extents.cx, aGradient.tile()->extents.cy, aGradient.tile()->aligned ? 1.0 : 0.0 }.as<std::int32_t>();
         else
             uGradientTileParams = vec3i32{};
-        uGradientColorCount = static_cast<int>(aGradient.colors().sampler().data().extents().cx);
+        auto const& colorsSampler = aGradient.colors().sampler();
+        auto const& filterSampler = aGradient.filter().sampler();
+        uGradientColorCount = static_cast<int>(colorsSampler.data().extents().cx);
         uGradientColorRow = static_cast<int>(aGradient.colors().sampler_row());
-        uGradientFilterSize = static_cast<int>(aGradient.filter().sampler().data().extents().cx);
-        aGradient.colors().sampler().data().bind(3);
-        aGradient.filter().sampler().data().bind(4);
+        uGradientFilterSize = static_cast<int>(filterSampler.data().extents().cx);
+        colorsSampler.data().bind(3);
+        filterSampler.data().bind(4);
         uGradientColors = sampler2DRect{ 3 };
         uGradientFilter = sampler2DRect{ 4 };
         uGradientEnabled = true;
