@@ -207,14 +207,14 @@ namespace neogfx::DesignStudio
             };
             auto draw_resizer_rects = [&]()
             {
-                aGc.draw_rect(resizer_part_rect(cardinal::NorthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::North, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::NorthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::East, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::SouthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::South, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::SouthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
-                aGc.draw_rect(resizer_part_rect(cardinal::West, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::NorthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::North, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::NorthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::East, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::SouthEast, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::South, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::SouthWest, false), color::NavyBlue, color::White.with_alpha(0.75));
+                aGc.draw_rect(cardinal_rect(cardinal::West, false), color::NavyBlue, color::White.with_alpha(0.75));
             };
             switch (element().mode())
             {
@@ -283,12 +283,12 @@ namespace neogfx::DesignStudio
         if (aButton == mouse_button::Left)
         {
             bool const toggleSelect = ((aKeyModifier & key_modifier::CTRL) != key_modifier::None);
-            auto part = toggleSelect ? cardinal::Center : resize_part_at(aPosition);
-            if (!part)
-                part = cardinal::Center;
-            if (part == cardinal::Center)
+            auto clickLocation = cardinal_at(aPosition, aKeyModifier);
+            if (!clickLocation)
+                clickLocation = cardinal::Center;
+            if (clickLocation == cardinal::Center)
                 element().select(toggleSelect ? !element().is_selected() : true, !toggleSelect && element().root().selected_child_count() <= 1);
-            if (element().is_selected() && part == cardinal::Center)
+            if (element().is_selected() && clickLocation == cardinal::Center)
             {
                 element().root().visit([&](i_element& aElement)
                 {
@@ -296,8 +296,8 @@ namespace neogfx::DesignStudio
                         aElement.caddy().start_drag(cardinal::Center, aPosition);
                 });
             }
-            else if (part != cardinal::Center)
-                start_drag(*part, aPosition);
+            else if (clickLocation != cardinal::Center)
+                start_drag(*clickLocation, aPosition);
         }
     }
 
@@ -358,12 +358,16 @@ namespace neogfx::DesignStudio
         update();
     }
 
+// For some reason Visual Studio 2026 C++ optimiser fucks up in widget_caddy::mouse_cursor() (access violation)...
+#ifdef _MSC_VER
+#pragma optimize("", off) 
+#endif
+
     mouse_cursor widget_caddy::mouse_cursor() const
     {
-        auto const part = (service<i_keyboard>().modifiers() & key_modifier::CTRL) == key_modifier::None ?
-            resize_part_at(mouse_position()) : cardinal::Center;
-        if (part)
-            switch (*part)
+        auto const cursorLocation = cardinal_at(mouse_position(), service<i_keyboard>().modifiers());
+        if (cursorLocation.has_value())
+            switch (cursorLocation.value())
             {
             case cardinal::NorthWest:
             case cardinal::SouthEast:
@@ -383,14 +387,18 @@ namespace neogfx::DesignStudio
         return widget::mouse_cursor();
     }
 
+#ifdef _MSC_VER
+#pragma optimize("", on) 
+#endif
+
     void widget_caddy::start_drag(cardinal aPart, point const& aPosition)
     {
-        iDragInfo.emplace(aPart, aPosition - resizer_part_rect(aPart).center());
+        iDragInfo.emplace(aPart, aPosition - cardinal_rect(aPart).center());
     }
 
     void widget_caddy::drag(point const& aPosition, bool aIgnoreConstraints)
     {
-        auto const adjust = point{ aPosition - resizer_part_rect(iDragInfo->part).center() } - iDragInfo->dragFrom;
+        auto const adjust = point{ aPosition - cardinal_rect(iDragInfo->part).center() } - iDragInfo->dragFrom;
         auto r = non_client_rect();
         switch (iDragInfo->part)
         {
@@ -552,31 +560,37 @@ namespace neogfx::DesignStudio
         });
     }
 
-    std::optional<cardinal> widget_caddy::resize_part_at(point const& aPosition) const
+    std::optional<cardinal> widget_caddy::cardinal_at(point const& aPosition, key_modifier aKeyModifier) const
     {
-        if (resizer_part_rect(cardinal::NorthWest).contains(aPosition))
+        return ((aKeyModifier & key_modifier::CTRL) == key_modifier::None) ? 
+            cardinal_at(aPosition) : cardinal::Center;
+    }
+
+    std::optional<cardinal> widget_caddy::cardinal_at(point const& aPosition) const
+    {
+        if (cardinal_rect(cardinal::NorthWest).contains(aPosition))
             return cardinal::NorthWest;
-        else if (resizer_part_rect(cardinal::SouthEast).contains(aPosition))
+        else if (cardinal_rect(cardinal::SouthEast).contains(aPosition))
             return cardinal::SouthEast;
-        else if (resizer_part_rect(cardinal::NorthEast).contains(aPosition))
+        else if (cardinal_rect(cardinal::NorthEast).contains(aPosition))
             return cardinal::NorthEast;
-        else if (resizer_part_rect(cardinal::SouthWest).contains(aPosition))
+        else if (cardinal_rect(cardinal::SouthWest).contains(aPosition))
             return cardinal::SouthWest;
-        else if (resizer_part_rect(cardinal::North).contains(aPosition))
+        else if (cardinal_rect(cardinal::North).contains(aPosition))
             return cardinal::North;
-        else if (resizer_part_rect(cardinal::South).contains(aPosition))
+        else if (cardinal_rect(cardinal::South).contains(aPosition))
             return cardinal::South;
-        else if (resizer_part_rect(cardinal::West).contains(aPosition))
+        else if (cardinal_rect(cardinal::West).contains(aPosition))
             return cardinal::West;
-        else if (resizer_part_rect(cardinal::East).contains(aPosition))
+        else if (cardinal_rect(cardinal::East).contains(aPosition))
             return cardinal::East;
-        else if (resizer_part_rect(cardinal::Center).contains(aPosition))
+        else if (cardinal_rect(cardinal::Center).contains(aPosition))
             return cardinal::Center;
         else
             return {};
     }
 
-    rect widget_caddy::resizer_part_rect(cardinal aPart, bool aForHitTest) const
+    rect widget_caddy::cardinal_rect(cardinal aPart, bool aForHitTest) const
     {
         auto const pw = internal_spacing().left * 2.0;
         auto const cr = client_rect(false).inflated(pw / 2.0);

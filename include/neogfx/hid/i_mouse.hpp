@@ -110,7 +110,7 @@ namespace neogfx
         return aLhs;
     }
 
-    inline mouse_button& operator&=(mouse_button aLhs, mouse_button aRhs)
+    inline mouse_button& operator&=(mouse_button& aLhs, mouse_button aRhs)
     {
         aLhs = aLhs & aRhs;
         return aLhs;

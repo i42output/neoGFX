@@ -257,7 +257,7 @@ namespace neogfx
                 if (value != std::nullopt)
                     return value->as<float>().to_vec4();
             }
-            return aValue.as<float>().to_vec4();
+            return aValue.template as<float>().to_vec4();
         }
     }
 

@@ -182,7 +182,7 @@ namespace neogfx
     {
         iApp.plugin_manager().plugin_unloaded([&](auto& plugin) 
             { 
-                iApp.iThread->cancel_io_service(plugin.module_services()); 
+                iApp.iThread->cancel_io_context(plugin.module_services()); 
             });
         iApp.plugin_manager().unload_plugins();
         iApp.iThread.reset();

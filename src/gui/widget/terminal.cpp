@@ -1133,12 +1133,14 @@ namespace neogfx
     {
         vertical_scrollbar().set_style(vertical_scrollbar().style() | scrollbar_style::AlwaysVisible);
         horizontal_scrollbar().set_style(scrollbar_style::None);
-        set_ideal_size(padding().size() + character_extents() * size { iTerminalSize } +
-            size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() });
+        auto const& characterExtents = character_extents();
+        auto const& idealSize = padding().size() + characterExtents * size{ iTerminalSize } +
+            size{ effective_frame_width() } + size{ vertical_scrollbar().width(), horizontal_scrollbar().width() };
+        set_ideal_size(idealSize);
         iPrimaryBuffer.cursor.set_style(cursor_style::Xor);
-        iPrimaryBuffer.cursor.set_width(character_extents().cx);
+        iPrimaryBuffer.cursor.set_width(characterExtents.cx);
         iAlternateBuffer.cursor.set_style(cursor_style::Xor);
-        iAlternateBuffer.cursor.set_width(character_extents().cx);
+        iAlternateBuffer.cursor.set_width(characterExtents.cx);
 
         iSink += neolib::service<neolib::i_power>().green_mode_entered([this]()
             {
@@ -1389,7 +1391,7 @@ namespace neogfx
 
     terminal::point_type terminal::to_buffer_pos(point_type aCursorPos) const
     {
-        return buffer_origin() + aCursorPos;
+        return (buffer_origin() + aCursorPos).max(point_type{});
     }
 
     terminal::point_type terminal::cursor_pos() const

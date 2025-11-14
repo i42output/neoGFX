@@ -130,15 +130,15 @@ namespace chess
     template <typename Representation, player Player>
     void ai<Representation, Player>::stop()
     {
-        for (auto& thread : iThreads)
-            thread.stop();
+        for (auto& t : iThreads)
+            t.stop();
     }
 
     template <typename Representation, player Player>
     void ai<Representation, Player>::finish()
     {
-        for (auto& thread : iThreads)
-            thread.finish();
+        for (auto& t : iThreads)
+            t.finish();
     }
 
     template <typename Representation, player Player>

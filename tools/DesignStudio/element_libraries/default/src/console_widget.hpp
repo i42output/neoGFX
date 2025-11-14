@@ -94,7 +94,7 @@ namespace neogfx::DesignStudio
         void resized() override
         {
             window::resized();
-            resize(ideal_size());
+            resize(transformed_ideal_size());
         }
     private:
         template <typename ConsoleT = console>

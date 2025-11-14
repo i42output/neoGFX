@@ -279,7 +279,7 @@ namespace neogfx
     template <typename Elem, typename Traits, color_space ColorSpace, typename BaseComponent, typename ViewComponent, typename Derived>
     inline std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& aStream, const basic_rgb_color<ColorSpace, BaseComponent, ViewComponent, Derived>& aColor)
     {
-        aStream << std::setprecision(4) << "[" << aColor.red<double>() << ", " << aColor.green<double>() << ", " << aColor.blue<double>() << ", " << aColor.alpha<double>() << "]";
+        aStream << std::setprecision(4) << "[" << aColor.template red<double>() << ", " << aColor.template green<double>() << ", " << aColor.template blue<double>() << ", " << aColor.template alpha<double>() << "]";
         return aStream;
     }
 

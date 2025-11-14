@@ -98,8 +98,9 @@ namespace neogfx::DesignStudio
         void delete_selected() override;
         void select_all() override;
     private:
-        std::optional<cardinal> resize_part_at(point const& aPosition) const;
-        rect resizer_part_rect(cardinal aPart, bool aForHitTest = true) const;
+        std::optional<cardinal> cardinal_at(point const& aPosition) const;
+        std::optional<cardinal> cardinal_at(point const& aPosition, key_modifier aKeyModifier) const;
+        rect cardinal_rect(cardinal aPart, bool aForHitTest = true) const;
     private:
         sink iSink;
         i_project& iProject;

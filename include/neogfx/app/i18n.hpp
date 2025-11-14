@@ -51,8 +51,8 @@ namespace neogfx
 
     translatable_string translate(string const& aTranslatableString);
     translatable_string translate(string const& aTranslatableString, string const& aContext);
-    translatable_string operator "" _t(const char* aTranslatableString, std::size_t aStringLength);
-    translatable_string operator "" _t(const char8_t* aTranslatableString, std::size_t aStringLength);
+    translatable_string operator""_t(const char* aTranslatableString, std::size_t aStringLength);
+    translatable_string operator""_t(const char8_t* aTranslatableString, std::size_t aStringLength);
 }
 
-using neogfx::operator "" _t;
+using neogfx::operator""_t;

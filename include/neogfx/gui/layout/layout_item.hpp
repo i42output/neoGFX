@@ -377,6 +377,26 @@ namespace neogfx
             if (!cacheEntry.second)
                 return transformation() * result;
 
+            auto const ourSizePolicy = this->effective_size_policy();
+            if (ourSizePolicy.maintain_aspect_ratio())
+            {
+                auto const& aspectRatio = ourSizePolicy.aspect_ratio();
+                if (aspectRatio.cx < aspectRatio.cy)
+                {
+                    if (result.cx < result.cy)
+                        result = size{ result.cx, result.cx * (aspectRatio.cy / aspectRatio.cx) };
+                    else
+                        result = size{ result.cy * (aspectRatio.cx / aspectRatio.cy), result.cy };
+                }
+                else
+                {
+                    if (result.cx < result.cy)
+                        result = size{ result.cy * (aspectRatio.cx / aspectRatio.cy), result.cy };
+                    else
+                        result = size{ result.cx, result.cx * (aspectRatio.cy / aspectRatio.cx) };
+                }
+            }
+
             result = this->apply_fixed_size(ideal_size(aAvailableSpace));
 
             return transformation() * result;
@@ -433,6 +453,26 @@ namespace neogfx
             auto& result = cacheEntry.first.result;
             if (!cacheEntry.second)
                 return transformation() * result;
+
+            auto const ourSizePolicy = this->effective_size_policy();
+            if (ourSizePolicy.maintain_aspect_ratio())
+            {
+                auto const& aspectRatio = ourSizePolicy.aspect_ratio();
+                if (aspectRatio.cx < aspectRatio.cy)
+                {
+                    if (result.cx < result.cy)
+                        result = size{ result.cx, result.cx * (aspectRatio.cy / aspectRatio.cx) };
+                    else
+                        result = size{ result.cy * (aspectRatio.cx / aspectRatio.cy), result.cy };
+                }
+                else
+                {
+                    if (result.cx < result.cy)
+                        result = size{ result.cy * (aspectRatio.cx / aspectRatio.cy), result.cy };
+                    else
+                        result = size{ result.cx, result.cx * (aspectRatio.cy / aspectRatio.cx) };
+                }
+            }
 
             result = this->apply_fixed_size(minimum_size(aAvailableSpace));
 

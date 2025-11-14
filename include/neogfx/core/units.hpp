@@ -831,102 +831,102 @@ namespace neogfx
 
     namespace unit_literals
     {
-        inline basic_length<default_geometry_value_type> operator ""_px(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_px(long double aValue)
         {
             return px(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_dip(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_dip(long double aValue)
         {
             return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_dp(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_dp(long double aValue)
         {
             return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_pt(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_pt(long double aValue)
         {
             return pt(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_pc(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_pc(long double aValue)
         {
             return pc(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_em(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_em(long double aValue)
         {
             return em(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_mm(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_mm(long double aValue)
         {
             return mm(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_cm(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_cm(long double aValue)
         {
             return cm(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_in(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_in(long double aValue)
         {
             return in(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_pct(long double aValue)
+        inline basic_length<default_geometry_value_type> operator""_pct(long double aValue)
         {
             return pct(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_px(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_px(unsigned long long int aValue)
         {
             return px(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_dip(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_dip(unsigned long long int aValue)
         {
             return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_dp(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_dp(unsigned long long int aValue)
         {
             return dip(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_pt(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_pt(unsigned long long int aValue)
         {
             return pt(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_pc(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_pc(unsigned long long int aValue)
         {
             return pc(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_em(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_em(unsigned long long int aValue)
         {
             return em(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_mm(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_mm(unsigned long long int aValue)
         {
             return mm(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_cm(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_cm(unsigned long long int aValue)
         {
             return cm(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_in(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_in(unsigned long long int aValue)
         {
             return in(static_cast<default_geometry_value_type>(aValue));
         }
 
-        inline basic_length<default_geometry_value_type> operator ""_pct(unsigned long long int aValue)
+        inline basic_length<default_geometry_value_type> operator""_pct(unsigned long long int aValue)
         {
             return pct(static_cast<default_geometry_value_type>(aValue));
         }
