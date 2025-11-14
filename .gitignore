@@ -365,3 +365,4 @@ Debug
 /build/win32/vs/neoGFX/neoGFX.tlog
 /build/win32/vs/neoGFX/x64/Tools
 /testing/gui_test_app/build/win32/vs
+/build/win32/vs/.vs/neogfx/v18
