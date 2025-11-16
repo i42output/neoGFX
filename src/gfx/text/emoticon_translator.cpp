@@ -84,6 +84,7 @@ namespace neogfx
             if (active())
                 throw std::logic_error("neogfx::emoticon_translator::activate: already active!");
             iActiveWidget = &aWidget;
+            iSink = aWidget.destroying([&]() { if (active(aWidget)) deactivate(); });
             service<i_keyboard>().grab_keyboard(*this);
         }
         void deactivate() final
@@ -254,6 +255,7 @@ namespace neogfx
         std::string iBuffer;
         std::vector<emoji_map::const_iterator> iEmoticonMatches;
         std::optional<std::tuple<std::chrono::steady_clock::time_point, std::string, std::string>> iLastTranslationForUndo;
+        sink iSink;
     };
 }
 
