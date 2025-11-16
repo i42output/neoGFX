@@ -177,7 +177,7 @@ namespace neogfx
                     iBuffer = neolib::utf32_to_utf8(codePoints);
                 }
                 else if (aScanCode == ScanCode_ESCAPE && lastTranslationForUndo.has_value() &&
-                    std::chrono::steady_clock::now() - std::get<0>(iLastTranslationForUndo.value()) < DEFAULT_UNDO_TIMEOUT)
+                    std::chrono::steady_clock::now() - std::get<0>(lastTranslationForUndo.value()) < DEFAULT_UNDO_TIMEOUT)
                 {
                     std::u32string const codePoints = neolib::utf8_to_utf32(std::get<2>(lastTranslationForUndo.value()));
                     for (std::size_t i = 0; i < codePoints.size(); ++i)
