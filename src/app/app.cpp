@@ -887,18 +887,10 @@ namespace neogfx
                 if (matchResult == key_sequence::match::Full)
                 {
                     iKeySequence.clear();
-                    if (service<i_keyboard>().is_front_grabber(*this))
-                    {
-                        a.second()->triggered()();
-                        if (a.second()->is_checkable())
-                            a.second()->toggle();
-                        return true;
-                    }
-                    else
-                    {
-                        service<i_basic_services>().system_beep();
-                        return false;
-                    }
+                    a.second()->triggered()();
+                    if (a.second()->is_checkable())
+                        a.second()->toggle();
+                    return true;
                 }
                 else if (matchResult == key_sequence::match::Partial)
                     partialMatches = true;

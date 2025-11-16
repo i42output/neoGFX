@@ -66,7 +66,7 @@ namespace neogfx
         bool is_keyboard_grabbed() const override;
         bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const override;
         bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const override;
-        void grab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
+        void grab_keyboard(i_keyboard_handler& aKeyboardHandler, bool aFront = true) override;
         void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) override;
         i_keyboard_handler& grabber() const override;
         bool is_grabber_processing_event() const override;

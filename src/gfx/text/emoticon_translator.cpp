@@ -105,7 +105,7 @@ namespace neogfx
             iCursorPosition = aPosition + iActiveWidget->non_client_rect().top_left() + iActiveWidget->root().window_position();
         }
     private:
-        void handle_emoticon_matches()
+        void handle_emoticon_matches(std::string const& aDelimiter)
         {
             std::set<std::string> availableEmoji;
             std::optional<std::string> selectedEmoji;
@@ -157,11 +157,9 @@ namespace neogfx
                     iActiveWidget->key_pressed(ScanCode_BACKSPACE, KeyCode_BACKSPACE, key_modifier::None);
                 iActiveWidget->text_input(neolib::string{ selectedEmoji.value() });
                 if (availableEmoji.size() == 1) // only need undo if we didn't popup a menu
-                    iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), iBuffer, selectedEmoji.value()));
+                    iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), 
+                        iBuffer + aDelimiter, selectedEmoji.value() + aDelimiter));
             }
-            
-            iBuffer.clear();
-            iEmoticonMatches.clear();
         }
     private:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) final
@@ -200,6 +198,20 @@ namespace neogfx
             if (!active())
                 return false;
 
+            struct cleanup
+            {
+                emoticon_translator& et;
+                bool suppress = false;
+                ~cleanup()
+                {
+                    if (!suppress)
+                    {
+                        et.iBuffer.clear();
+                        et.iEmoticonMatches.clear();
+                    }
+                }
+            } c{ *this };
+
             thread_local std::string partial;
             partial = iBuffer;
             partial += aText.to_std_string_view();
@@ -213,29 +225,18 @@ namespace neogfx
                     emoticonMatches.push_back(e);
             }
 
-            bool reset = false;
-
             if (emoticonMatches.empty() && !iEmoticonMatches.empty())
             {
                 iEmoticonMatches.erase(std::remove_if(iEmoticonMatches.begin(), iEmoticonMatches.end(), 
                     [&](auto const& e) { return e->first != iBuffer; }), iEmoticonMatches.end());
                 if (!iEmoticonMatches.empty() && is_delimiter(aText[0]))
-                    handle_emoticon_matches();
-                else
-                    reset = true;
+                    handle_emoticon_matches(aText);
             }
             else if (!emoticonMatches.empty())
             {
                 iBuffer = partial;
                 std::swap(iEmoticonMatches, emoticonMatches);
-            }
-            else
-                reset = true;
-
-            if (reset)
-            {
-                iBuffer.clear();
-                iEmoticonMatches.clear();
+                c.suppress = true;
             }
 
             return false;

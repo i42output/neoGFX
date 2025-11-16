@@ -717,7 +717,7 @@ namespace neogfx
         virtual bool is_keyboard_grabbed() const = 0;
         virtual bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const = 0;
         virtual bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const = 0;
-        virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
+        virtual void grab_keyboard(i_keyboard_handler& aKeyboardHandler, bool aFront = true) = 0;
         virtual void ungrab_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
         virtual i_keyboard_handler& grabber() const = 0;
         virtual bool is_grabber_processing_event() const = 0;

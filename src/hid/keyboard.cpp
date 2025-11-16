@@ -106,11 +106,14 @@ namespace neogfx
         return !iGrabs.empty() && &**iGrabs.begin() == &aKeyboardHandler;
     }
 
-    void keyboard::grab_keyboard(i_keyboard_handler& aKeyboardHandler)
+    void keyboard::grab_keyboard(i_keyboard_handler& aKeyboardHandler, bool aFront)
     {
         if (is_keyboard_grabbed_by(aKeyboardHandler))
             throw already_grabbed();
-        iGrabs.push_front(&aKeyboardHandler);
+        if (aFront)
+            iGrabs.push_front(&aKeyboardHandler);
+        else
+            iGrabs.push_back(&aKeyboardHandler);
     }
 
     void keyboard::ungrab_keyboard(i_keyboard_handler& aKeyboardHandler)
