@@ -202,6 +202,8 @@ namespace neogfx
             result |= decoration_style::Popup;
         if ((aStyle & window_style::Menu) == window_style::Menu)
             result |= decoration_style::Menu;
+        if ((aStyle & window_style::HorizontalMenuLayout) == window_style::HorizontalMenuLayout)
+            result |= decoration_style::HorizontalMenuLayout;
         if ((aStyle & window_style::Nested) == window_style::Nested)
             result |= decoration_style::Nested;
         if ((aStyle & window_style::Resize) == window_style::Resize)

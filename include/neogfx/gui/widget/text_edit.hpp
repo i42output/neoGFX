@@ -53,6 +53,7 @@ namespace neogfx
 
         NonPrintableWhitespace  = 0x00001000,
         ParseURIs               = 0x00002000,
+        TranslateEmoticons      = 0x00004000,
 
         OnlyAccept              = 0x00010000,
 

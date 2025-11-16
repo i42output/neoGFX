@@ -126,7 +126,7 @@ namespace neogfx
                 auto& selectedItem = item_at(selected_item());
                 if (selectedItem.type() == menu_item_type::Action)
                 {
-                    selectedItem.action().triggered().async_trigger();
+                    selectedItem.action().triggered()();
                     if (selectedItem.action().is_checkable())
                         selectedItem.action().toggle();
                     clear_selection();

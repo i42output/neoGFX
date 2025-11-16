@@ -30,6 +30,7 @@
 #include <neogfx/gfx/graphics_context.hpp>
 #include <neogfx/gfx/text/text_category_map.hpp>
 #include <neogfx/gfx/text/glyph_text.ipp>
+#include <neogfx/gfx/text/i_emoticon_translator.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/action.hpp>
 #include <neogfx/core/easing.hpp>
@@ -800,6 +801,10 @@ namespace neogfx
             cursor().set_position(iText.size(), false);
         }
 
+
+        if ((iCaps & text_edit_caps::TranslateEmoticons) == text_edit_caps::TranslateEmoticons)
+            service<i_emoticon_translator>().activate(*this);
+
         update(true);
     }
 
@@ -820,6 +825,9 @@ namespace neogfx
 
         if ((iCaps & text_edit_caps::LINES_MASK) == text_edit_caps::SingleLine)
             cursor().set_position(iText.size());
+
+        if ((iCaps & text_edit_caps::TranslateEmoticons) == text_edit_caps::TranslateEmoticons)
+            service<i_emoticon_translator>().deactivate();
 
         update(true);
     }
@@ -2399,8 +2407,10 @@ namespace neogfx
         
         iSink += cursor().PositionChanged([this]()
         {
-            if (neolib::service<i_keyboard>().layout().ime_active(*this))
-                neolib::service<i_keyboard>().layout().update_ime_position(cursor_rect().bottom_left());
+            if (service<i_keyboard>().layout().ime_active(*this))
+                service<i_keyboard>().layout().update_ime_position(cursor_rect().bottom_left());
+            if (service<i_emoticon_translator>().active(*this))
+                service<i_emoticon_translator>().update_cursor_position(cursor_rect().bottom_left());
             iNextStyle = std::nullopt;
             iCursorAnimationStartTime = neolib::this_process::elapsed_ms();
             make_cursor_visible();

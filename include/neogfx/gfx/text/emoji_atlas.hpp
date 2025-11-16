@@ -40,8 +40,8 @@ namespace neogfx
         bool is_emoji(char32_t aCodePoint) const final;
         bool is_emoji(const std::u32string& aCodePoints) const final;
         bool is_emoji(const std::u32string& aCodePoints, std::u32string& aPartial) const final;
-        emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize) const final;
-        emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64) const final;
+        emoji_id emoji(char32_t aCodePoint, dimension aDesiredSize = 64.0) const final;
+        emoji_id emoji(const std::u32string& aCodePoints, dimension aDesiredSize = 64.0) const final;
         const i_texture& emoji_texture(emoji_id aId) const final;
     private:
         const std::string kFilePath;

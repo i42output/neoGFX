@@ -381,6 +381,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\glyph_text.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_emoticon_translator.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_emoji_atlas.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_font_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_glyph.hpp" />
@@ -450,6 +451,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_basic_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_button.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_cursor.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dockable.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_document.hpp" />
@@ -683,6 +685,7 @@
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\glyph.cpp" />
@@ -994,6 +997,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/icons.res.cpp</Outputs>
     </CustomBuild>
+    <None Include="..\..\..\src\resources\emoticon.json" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\src\resources\gamecontrollerdb.txt" />

@@ -26,39 +26,40 @@
 
 namespace neogfx
 {
-    enum class window_style : std::uint32_t
+    enum class window_style : std::uint64_t
     {
-        Invalid                     = 0x00000000,
-        NoDecoration                = 0x00000001,    // No decoration at all (useful for splash screens, for example); this style cannot be combined with others
-        TitleBar                    = 0x00000002,    // The window has a titlebar
-        NativeTitleBar              = 0x00000004,    // The window has a native titlebar
-        SystemMenu                  = 0x00000008,
-        MinimizeBox                 = 0x00000010,
-        MaximizeBox                 = 0x00000020,
-        Resize                      = 0x00000040,    // The window can be resized and has a maximize button
-        SizeGrip                    = 0x00000080,
-        Close                       = 0x00000100,    // The window has a close button
-        Nested                      = 0x00000200,    // The window is not a native desktop window but a part of an existing one
-        Fullscreen                  = 0x00000400,    // The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
-        Main                        = 0x00000800,    // The window is a main window so may go fullscreen or change video mode
-        Dialog                      = 0x00001000,
-        Popup                       = 0x00002000,    // The window is a popup
-        Menu                        = 0x00004000,
-        Tool                        = 0x00008000,    // The window shouldn't appear on the operating system taskbar
-        DropShadow                  = 0x00010000,
-        Modal                       = 0x00020000,
-        ApplicationModal            = 0x00040000,
-        NoActivate                  = 0x00080000,
-        RequiresOwnerFocus          = 0x00100000,
-        DismissOnOwnerClick         = 0x00200000,
-        DismissOnParentClick        = 0x00400000,
-        HideOnOwnerClick            = 0x00800000,
-        HideOnParentClick           = 0x01000000,
-        InitiallyHidden             = 0x02000000,
-        InitiallyCentered           = 0x04000000,    // Center on desktop or parent
-        InitiallyRenderable         = 0x08000000,
-        SizeToContents              = 0x10000000,
-        Weak                        = 0x80000000,
+        Invalid                     = 0x0000000000000000,
+        NoDecoration                = 0x0000000000000001,    // No decoration at all (useful for splash screens, for example); this style cannot be combined with others
+        TitleBar                    = 0x0000000000000002,    // The window has a titlebar
+        NativeTitleBar              = 0x0000000000000004,    // The window has a native titlebar
+        SystemMenu                  = 0x0000000000000008,
+        MinimizeBox                 = 0x0000000000000010,
+        MaximizeBox                 = 0x0000000000000020,
+        Resize                      = 0x0000000000000040,    // The window can be resized and has a maximize button
+        SizeGrip                    = 0x0000000000000080,
+        Close                       = 0x0000000000000100,    // The window has a close button
+        Nested                      = 0x0000000000000200,    // The window is not a native desktop window but a part of an existing one
+        Fullscreen                  = 0x0000000000000400,    // The window is shown in fullscreen mode; this style cannot be combined with others, and requires a valid video mode
+        Main                        = 0x0000000000000800,    // The window is a main window so may go fullscreen or change video mode
+        Dialog                      = 0x0000000000001000,
+        Popup                       = 0x0000000000002000,    // The window is a popup
+        Menu                        = 0x0000000000004000,
+        HorizontalMenuLayout        = 0x0000000001000000,    // Layout menu horizontally (mainly used if window is a horizontal popup menu)
+        DropShadow                  = 0x0000000100000000,
+        Tool                        = 0x0000010000000000,    // The window shouldn't appear on the operating system taskbar
+        Modal                       = 0x0000020000000000,
+        ApplicationModal            = 0x0000040000000000,
+        NoActivate                  = 0x0000080000000000,
+        RequiresOwnerFocus          = 0x0000100000000000,
+        DismissOnOwnerClick         = 0x0000200000000000,
+        DismissOnParentClick        = 0x0000400000000000,
+        HideOnOwnerClick            = 0x0000800000000000,
+        HideOnParentClick           = 0x0001000000000000,
+        InitiallyHidden             = 0x0002000000000000,
+        InitiallyCentered           = 0x0004000000000000,    // Center on desktop or parent
+        InitiallyRenderable         = 0x0008000000000000,
+        SizeToContents              = 0x0010000000000000,
+        Weak                        = 0x8000000000000000,
         Default                     = Main | TitleBar | SystemMenu | Menu | MinimizeBox | MaximizeBox | Resize | SizeGrip | Close | DropShadow | InitiallyCentered | InitiallyRenderable,
         DefaultDialog               = (Default | Dialog) & ~(InitiallyRenderable | Main | Menu),
         DefaultNonResizableDialog   = DefaultDialog & ~Resize
@@ -66,27 +67,27 @@ namespace neogfx
 
     inline constexpr window_style operator~(window_style aStyle)
     {
-        return static_cast<window_style>(~static_cast<std::uint32_t>(aStyle));
+        return static_cast<window_style>(~static_cast<std::uint64_t>(aStyle));
     }
 
     inline constexpr window_style operator|(window_style aLhs, window_style aRhs)
     {
-        return static_cast<window_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+        return static_cast<window_style>(static_cast<std::uint64_t>(aLhs) | static_cast<std::uint64_t>(aRhs));
     }
 
     inline constexpr window_style operator&(window_style aLhs, window_style aRhs)
     {
-        return static_cast<window_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+        return static_cast<window_style>(static_cast<std::uint64_t>(aLhs) & static_cast<std::uint64_t>(aRhs));
     }
 
     inline constexpr window_style& operator|=(window_style& aLhs, window_style aRhs)
     {
-        return aLhs = static_cast<window_style>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+        return aLhs = static_cast<window_style>(static_cast<std::uint64_t>(aLhs) | static_cast<std::uint64_t>(aRhs));
     }
 
     inline constexpr window_style& operator&=(window_style& aLhs, window_style aRhs)
     {
-        return aLhs = static_cast<window_style>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+        return aLhs = static_cast<window_style>(static_cast<std::uint64_t>(aLhs) & static_cast<std::uint64_t>(aRhs));
     }
 
     enum class window_state : std::uint32_t
@@ -140,13 +141,17 @@ declare_enum_string(neogfx::window_style, SystemMenu)
 declare_enum_string(neogfx::window_style, MinimizeBox)
 declare_enum_string(neogfx::window_style, MaximizeBox)
 declare_enum_string(neogfx::window_style, Resize)
+declare_enum_string(neogfx::window_style, SizeGrip)
 declare_enum_string(neogfx::window_style, Close)
 declare_enum_string(neogfx::window_style, Nested)
 declare_enum_string(neogfx::window_style, Fullscreen)
 declare_enum_string(neogfx::window_style, Main)
 declare_enum_string(neogfx::window_style, Dialog)
 declare_enum_string(neogfx::window_style, Popup)
+declare_enum_string(neogfx::window_style, Menu)
 declare_enum_string(neogfx::window_style, Tool)
+declare_enum_string(neogfx::window_style, HorizontalMenuLayout)
+declare_enum_string(neogfx::window_style, DropShadow)
 declare_enum_string(neogfx::window_style, Modal)
 declare_enum_string(neogfx::window_style, ApplicationModal)
 declare_enum_string(neogfx::window_style, NoActivate)
@@ -157,10 +162,12 @@ declare_enum_string(neogfx::window_style, HideOnOwnerClick)
 declare_enum_string(neogfx::window_style, HideOnParentClick)
 declare_enum_string(neogfx::window_style, InitiallyHidden)
 declare_enum_string(neogfx::window_style, InitiallyCentered)
-declare_enum_string(neogfx::window_style, DropShadow)
+declare_enum_string(neogfx::window_style, InitiallyRenderable)
+declare_enum_string(neogfx::window_style, SizeToContents)
 declare_enum_string(neogfx::window_style, Weak)
 declare_enum_string(neogfx::window_style, Default)
 declare_enum_string(neogfx::window_style, DefaultDialog)
+declare_enum_string(neogfx::window_style, DefaultNonResizableDialog)
 end_declare_enum(neogfx::window_style)
 
 begin_declare_enum(neogfx::window_state)

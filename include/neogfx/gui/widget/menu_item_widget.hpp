@@ -30,9 +30,9 @@ namespace neogfx
 {
     class popup_menu;
 
-    class menu_item_widget : public widget<>, public i_menu_item_widget
+    class menu_item_widget : public widget<i_menu_item_widget>
     {
-        meta_object(widget<>)
+        meta_object(widget<i_menu_item_widget>)
     public:
         menu_item_widget(i_menu& aMenu, i_menu_item& aMenuItem);
         menu_item_widget(i_widget& aParent, i_menu& aMenu, i_menu_item& aMenuItem);
@@ -44,6 +44,7 @@ namespace neogfx
     public:
         image_widget& item_icon() override; // todo: i_image_widget
         text_widget& item_text() override; // todo: i_text_widget
+        void set_icon_size(size const& aIconSize) override;
     public:
         neogfx::size_policy size_policy() const override;
         size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;

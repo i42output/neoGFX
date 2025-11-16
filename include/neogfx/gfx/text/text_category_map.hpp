@@ -2189,24 +2189,45 @@ namespace neogfx
 		};
     }
 
+	inline text_category get_text_category(char32_t aCharacter)
+	{
+		char32_t ch = aCharacter;
+		if (ch == 0xFE0F || ch == 0xFE0E)
+			return text_category::Control;
+		const detail::text_category_MAP_VALUE_TYPE* rangeStart = std::lower_bound(
+			&detail::text_category_MAP[0],
+			&detail::text_category_MAP[0] + sizeof(detail::text_category_MAP) / sizeof(detail::text_category_MAP[0]),
+			detail::text_category_MAP_VALUE_TYPE(ch, text_category::Unknown),
+			[](const detail::text_category_MAP_VALUE_TYPE& lhs, const detail::text_category_MAP_VALUE_TYPE& rhs) -> bool
+			{
+				return lhs.first < rhs.first;
+			});
+		if (rangeStart != &detail::text_category_MAP[0] && ch < rangeStart->first)
+			--rangeStart;
+		return rangeStart->second;
+	}
+
+	inline text_category get_text_category(char aCharacter)
+	{
+		return get_text_category(static_cast<char32_t>(aCharacter));
+	}
+
+	inline bool is_delimiter(char32_t aCharacter)
+	{
+		return get_text_category(aCharacter) == text_category::Whitespace || get_text_category(aCharacter) == text_category::None;
+	}
+
+	inline bool is_delimiter(char aCharacter)
+	{
+		return is_delimiter(static_cast<char32_t>(aCharacter));
+	}
+
     inline text_category get_text_category(const i_emoji_atlas& aEmojiAtlas, const char32_t* aCodePoint, const char32_t* aCodePointEnd)
     {
         char32_t ch = aCodePoint[0];
         if (aEmojiAtlas.is_emoji(ch))
             return text_category::Emoji;
-        else if (ch == 0xFE0F || ch == 0xFE0E)
-            return text_category::Control;
-        const detail::text_category_MAP_VALUE_TYPE* rangeStart = std::lower_bound(
-            &detail::text_category_MAP[0], 
-            &detail::text_category_MAP[0] + sizeof(detail::text_category_MAP) / sizeof(detail::text_category_MAP[0]),
-            detail::text_category_MAP_VALUE_TYPE(ch, text_category::Unknown),
-            [](const detail::text_category_MAP_VALUE_TYPE& lhs, const detail::text_category_MAP_VALUE_TYPE& rhs) -> bool
-        {
-            return lhs.first < rhs.first;
-        });
-        if (rangeStart != &detail::text_category_MAP[0] && ch < rangeStart->first)
-            --rangeStart;
-        return rangeStart->second;
+		return get_text_category(ch);
     }
 
     inline text_category get_text_category(const i_emoji_atlas& aEmojiAtlas, char32_t aCodePoint)

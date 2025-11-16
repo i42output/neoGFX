@@ -227,6 +227,24 @@ namespace neogfx
 
     bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
+        if ((style() & window_style::HorizontalMenuLayout) == window_style::HorizontalMenuLayout)
+        {
+            switch (aScanCode)
+            {
+            case ScanCode_UP:
+                aScanCode = ScanCode_LEFT;
+                break;
+            case ScanCode_DOWN:
+                aScanCode = ScanCode_RIGHT;
+                break;
+            case ScanCode_LEFT:
+                aScanCode = ScanCode_UP;
+                break;
+            case ScanCode_RIGHT:
+                aScanCode = ScanCode_DOWN;
+                break;
+            }
+        }
         switch (aScanCode)
         {
         case ScanCode_UP:
@@ -286,7 +304,7 @@ namespace neogfx
                 auto& selectedItem = menu().item_at(menu().selected_item());
                 if (selectedItem.type() == menu_item_type::Action)
                 {
-                    selectedItem.action().triggered().async_trigger();
+                    selectedItem.action().triggered()();
                     if (selectedItem.action().is_checkable())
                         selectedItem.action().toggle();
                     menu().clear_selection();
@@ -317,9 +335,10 @@ namespace neogfx
         return true;
     }
 
-    bool popup_menu::text_input(i_string const&)
+    bool popup_menu::text_input(i_string const& aText)
     {
-        service<i_basic_services>().system_beep();
+        if (aText != "\r" && aText != "\n")
+            service<i_basic_services>().system_beep();
         return true;
     }
 

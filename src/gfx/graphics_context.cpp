@@ -1399,7 +1399,9 @@ namespace neogfx
                 std::holds_alternative<color>(aColor) ? game::color{ to_ecs_component(std::get<color>(aColor)) } : std::optional<game::color>{},
                 std::holds_alternative<gradient>(aColor) ? game::gradient{ to_ecs_component(std::get<gradient>(aColor)) } : std::optional<game::gradient>{},
                 {},
-                to_ecs_component(aTexture),
+                aTexture.type() == texture_type::Texture ? 
+                    to_ecs_component(aTexture) : 
+                    to_ecs_component(aTexture.as_sub_texture()),
                 aShaderEffect
             },
             optional_mat44{});

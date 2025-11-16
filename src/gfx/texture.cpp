@@ -35,7 +35,8 @@ namespace neogfx
     }
 
     texture::texture(const i_texture& aTexture) :
-        iNativeTexture{ !aTexture.is_empty() ? aTexture.native_texture() : ref_ptr<i_texture>{} }
+        iNativeTexture{ !aTexture.is_empty() ? aTexture.native_texture() : ref_ptr<i_texture>{} },
+        iSubTexture{ aTexture.type() == texture_type::Texture ? optional_sub_texture{} : aTexture.as_sub_texture() }
     {
     }
 
@@ -53,6 +54,13 @@ namespace neogfx
         iNativeTexture{ !aSubTexture.atlas_texture().is_empty() ? aSubTexture.atlas_texture().native_texture() : ref_ptr<i_texture>{} },
         iSubTexture{ aSubTexture }
     {
+    }
+
+    texture& texture::operator=(const i_texture& aTexture)
+    {
+        iNativeTexture = { !aTexture.is_empty() ? aTexture.native_texture() : ref_ptr<i_texture>{} };
+        iSubTexture = { aTexture.type() == texture_type::Texture ? optional_sub_texture{} : aTexture.as_sub_texture() };
+        return *this;
     }
 
     texture::~texture()
@@ -76,7 +84,7 @@ namespace neogfx
 
     texture_type texture::type() const
     {
-        return texture_type::Texture;
+        return iSubTexture == std::nullopt ? texture_type::Texture : texture_type::SubTexture;
     }
 
     bool texture::is_render_target() const

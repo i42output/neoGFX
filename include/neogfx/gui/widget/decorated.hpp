@@ -48,22 +48,23 @@ namespace neogfx
 
     enum class decoration_style : std::uint32_t
     {
-        None            = 0x00000000,
-        Window          = 0x00000001,
-        Dialog          = 0x00000002,
-        Tool            = 0x00000004,
-        Menu            = 0x00000008,
-        Dock            = 0x00000010,
-        Popup           = 0x00000040,
-        Splash          = 0x00000080,
-        Resizable       = 0x01000000,
-        DockAreas       = 0x02000000,
-        Nested          = 0x10000000,
-        NestedWindow    = Window | Nested,
-        NestedTool      = Tool | Nested,
-        NestedMenu      = Menu | Nested,
-        NestedPopup     = Popup | Nested,
-        NestedSplash    = Splash | Nested
+        None                    = 0x00000000,
+        Window                  = 0x00000001,
+        Dialog                  = 0x00000002,
+        Tool                    = 0x00000004,
+        Menu                    = 0x00000008,
+        Dock                    = 0x00000010,
+        Popup                   = 0x00000040,
+        Splash                  = 0x00000080,
+        Resizable               = 0x01000000,
+        DockAreas               = 0x02000000,
+        HorizontalMenuLayout    = 0x04000000,
+        Nested                  = 0x10000000,
+        NestedWindow            = Window | Nested,
+        NestedTool              = Tool | Nested,
+        NestedMenu              = Menu | Nested,
+        NestedPopup             = Popup | Nested,
+        NestedSplash            = Splash | Nested
     };
 
     inline constexpr decoration operator|(decoration aLhs, decoration aRhs)
@@ -316,9 +317,9 @@ namespace neogfx
             {
                 if (iTitleBar != nullptr && self.to_client_coordinates(iTitleBar->to_window_coordinates(iTitleBar->client_rect())).contains(aPosition))
                     result.part = widget_part::TitleBar;
-                else if (iMenuLayout && rect{ iMenuLayout->origin(), iMenuLayout->extents() }.contains(aPosition))
+                else if (has_layout(standard_layout::Menu) && rect { layout(standard_layout::Menu).origin(), layout(standard_layout::Menu).extents() }.contains(aPosition))
                     result.part = widget_part::Grab;
-                else if (iToolbarLayout && rect{ iToolbarLayout->origin(), iToolbarLayout->extents() }.contains(aPosition))
+                else if (has_layout(standard_layout::Toolbar) && rect{ layout(standard_layout::Toolbar).origin(), layout(standard_layout::Toolbar).extents() }.contains(aPosition))
                     result.part = widget_part::Grab;
                 if ((decoration() & neogfx::decoration::Border) == neogfx::decoration::Border)
                 {
@@ -383,7 +384,7 @@ namespace neogfx
             case standard_layout::TitleBar:
                 return !!iTitleBarLayout;
             case standard_layout::Menu:
-                return !!iMenuLayout;
+                return !std::holds_alternative<std::monostate>(iMenuLayout);
             case standard_layout::Toolbar:
                 return !!iToolbarLayout;
             case standard_layout::Dock:
@@ -412,7 +413,10 @@ namespace neogfx
             case standard_layout::TitleBar:
                 return *iTitleBarLayout;
             case standard_layout::Menu:
-                return *iMenuLayout;
+                if (std::holds_alternative<vertical_layout>(iMenuLayout))
+                    return std::get<vertical_layout>(iMenuLayout);
+                else
+                    return std::get<horizontal_layout>(iMenuLayout);
             case standard_layout::Toolbar:
                 if (aPosition == layout_position::None)
                     return *iToolbarLayout;
@@ -520,11 +524,13 @@ namespace neogfx
                 iTitleBarLayout.emplace(non_client_layout());
                 iTitleBarLayout->set_padding(neogfx::padding{});
             }
-            // todo: create widgets for the following decorations
             if ((decoration() & neogfx::decoration::Menu) == neogfx::decoration::Menu)
             {
-                iMenuLayout.emplace(non_client_layout());
-                iMenuLayout->set_padding(neogfx::padding{});
+                if ((decoration_style() & neogfx::decoration_style::HorizontalMenuLayout) != neogfx::decoration_style::HorizontalMenuLayout)
+                    iMenuLayout.emplace<vertical_layout>(non_client_layout());
+                else
+                    iMenuLayout.emplace<horizontal_layout>(non_client_layout());
+                layout(standard_layout::Menu).set_padding(neogfx::padding{});
             }
             if ((decoration() & neogfx::decoration::Toolbar) == neogfx::decoration::Toolbar)
             {
@@ -676,7 +682,7 @@ namespace neogfx
         neogfx::decoration iDecoration;
         std::optional<vertical_layout> iNonClientLayout;
         std::optional<vertical_layout> iTitleBarLayout;
-        std::optional<vertical_layout> iMenuLayout;
+        std::variant<std::monostate, vertical_layout, horizontal_layout> iMenuLayout;
         std::optional<border_layout> iToolbarLayout;
         std::optional<layout_manager<scrollable_widget<>>> iDockLayoutContainer;
         std::optional<border_layout> iDockLayout;

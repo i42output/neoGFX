@@ -44,6 +44,8 @@ namespace neogfx
         texture(const i_image& aImage, const rect& aImagePart, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte);
         texture(const i_sub_texture& aSubTexture);
         ~texture();
+        // assignment
+        texture& operator=(const i_texture& aTexture);
         // operations
     public:
         texture_id id() const final;

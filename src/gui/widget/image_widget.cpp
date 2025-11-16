@@ -94,7 +94,8 @@ namespace neogfx
     {
         if (iTexture.is_empty())
             return;
-        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, effectively_disabled() ? shader_effect::Monochrome : iColor != none ? shader_effect::Colorize : shader_effect::None);
+        aGc.draw_texture(placement_rect(), iTexture, effectively_disabled() ? color(0xFF, 0xFF, 0xFF, 0x80) : iColor, 
+            effectively_disabled() ? shader_effect::Monochrome : iColor != none ? shader_effect::Colorize : shader_effect::None);
     }
 
     const texture& image_widget::image() const

@@ -1248,6 +1248,12 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\window\i_context_menu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gfx\text\i_emoticon_translator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_cursor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\resources.nrc">
@@ -1849,6 +1855,9 @@
     <ClCompile Include="..\..\..\src\app\native\windows_accessibility.cpp">
       <Filter>Source Files\native\windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\gui\layout\flow_layout.ipp">
@@ -1886,6 +1895,9 @@
     </None>
     <None Include="..\..\..\include\neogfx\gui\widget\tab_page_container.ipp">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\..\src\resources\emoticon.json">
+      <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

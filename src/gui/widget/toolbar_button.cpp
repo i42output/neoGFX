@@ -162,7 +162,7 @@ namespace neogfx
         push_button::handle_clicked();
         if (action().is_enabled() && !action().is_separator())
         {
-            action().triggered().async_trigger();
+            action().triggered()();
             if (action().is_checkable())
             {
                 if (is_checked())

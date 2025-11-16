@@ -27,26 +27,31 @@ namespace neogfx
     action::action() :
         iEnabled{ false }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ true }
     {
+        Triggered.set_trigger_type(trigger_type::Asynchronous);
     }
 
     action::action(string const& aText) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }
     {
+        Triggered.set_trigger_type(trigger_type::Asynchronous);
     }
 
     action::action(string const& aText, string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ neogfx::image{ aImageUri, aDpiScaleFactor, aSampling } }
     {
+        Triggered.set_trigger_type(trigger_type::Asynchronous);
     }
 
     action::action(string const& aText, const i_texture& aImage) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
+        Triggered.set_trigger_type(trigger_type::Asynchronous);
     }
 
     action::action(string const& aText, const i_image& aImage) :
         iEnabled{ true }, iCheckable{ false }, iChecked{ false }, iGroup{}, iSeparator{ false }, iText{ aText }, iImage{ aImage }
     {
+        Triggered.set_trigger_type(trigger_type::Asynchronous);
     }
 
     action::action(i_action_container& aContainer) :

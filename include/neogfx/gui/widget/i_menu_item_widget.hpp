@@ -31,7 +31,7 @@ namespace neogfx
 {
     class popup_menu;
 
-    class i_menu_item_widget : protected i_mnemonic, protected i_help_source
+    class i_menu_item_widget : public i_widget, protected i_mnemonic, protected i_help_source
     {
     public:
         virtual i_menu& menu() const = 0;
@@ -39,5 +39,6 @@ namespace neogfx
     public:
         virtual image_widget& item_icon() = 0; // todo: i_image_widget
         virtual text_widget& item_text() = 0; // todo: i_text_widget
+        virtual void set_icon_size(size const& aIconSize) = 0;
    };
 }

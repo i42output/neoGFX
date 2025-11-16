@@ -20,83 +20,42 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-
-#include <neolib/core/variant.hpp>
-
-#include <neogfx/core/event.hpp>
-#include <neogfx/core/geometrical.hpp>
-#include <neogfx/gfx/primitives.hpp>
+#include <neogfx/gui/widget/i_cursor.hpp>
 
 namespace neogfx
 {
-    class i_document;
-
-    enum class cursor_style
-    {
-        Standard,
-        Xor
-    };
-
-    class cursor
+    class cursor : public i_cursor
     {
     public:
-        define_event(PositionChanged, position_changed)
-        define_event(AnchorChanged, anchor_changed)
-        define_event(AppearanceChanged, appearance_changed)
-    public:
-        enum move_operation_e
-        {
-            None,
-            StartOfDocument,
-            StartOfParagraph,
-            StartOfLine,
-            StartOfWord,
-            EndOfDocument,
-            EndOfParagraph,
-            EndOfLine,
-            EndOfWord,
-            PreviousParagraph, 
-            PreviousLine,
-            PreviousWord,
-            PreviousCharacter,
-            NextParagraph,
-            NextLine,
-            NextWord,
-            NextCharacter,
-            Up,
-            Down,
-            Left,
-            Right
-        };
-        typedef std::size_t position_type;
-    public:
-        struct no_document : std::logic_error { no_document() : std::logic_error("neogfx::cursor::no_document") {} };
+        define_declared_event(PositionChanged, position_changed)
+        define_declared_event(AnchorChanged, anchor_changed)
+        define_declared_event(AppearanceChanged, appearance_changed)
     public:
         cursor();
         cursor(i_document& aDocument);
     public:
-        bool has_document() const;
-        i_document& document() const;
-        void move(move_operation_e aMoveOperation);
-        position_type position() const;
-        void set_position(position_type aPosition, bool aMoveAnchor = true);
-        position_type anchor() const;
-        void set_anchor(position_type aAnchor);
-        bool anchored_over_entire_document() const;
-        const color_or_gradient& color() const;
-        void set_color(const color_or_gradient& aColor);
-        cursor_style style() const;
-        void set_style(cursor_style aStyle);
-        void clear_style();
-        dimension width(i_units_context const& aContext, std::optional<scalar> const& aGlyphWidth = {}) const;
-        void set_width(dimension aWidth);
-        void clear_wdith();
-        std::chrono::milliseconds flash_interval() const;
-        void set_flash_interval(std::chrono::milliseconds aInterval);
-        bool visible() const;
-        bool hidden() const;
-        void show();
-        void hide();
+        bool has_document() const final;
+        i_document& document() const final;
+        void move(move_operation_e aMoveOperation) final;
+        position_type position() const final;
+        void set_position(position_type aPosition, bool aMoveAnchor = true) final;
+        position_type anchor() const final;
+        void set_anchor(position_type aAnchor) final;
+        bool anchored_over_entire_document() const final;
+        const color_or_gradient& color() const final;
+        void set_color(const color_or_gradient& aColor) final;
+        cursor_style style() const final;
+        void set_style(cursor_style aStyle) final;
+        void clear_style() final;
+        dimension width(i_units_context const& aContext, std::optional<scalar> const& aGlyphWidth = {}) const final;
+        void set_width(dimension aWidth) final;
+        void clear_wdith() final;
+        std::chrono::milliseconds flash_interval() const final;
+        void set_flash_interval(std::chrono::milliseconds aInterval) final;
+        bool visible() const final;
+        bool hidden() const final;
+        void show() final;
+        void hide() final;
     private:
         void init();
     private:

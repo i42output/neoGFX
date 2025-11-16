@@ -51,9 +51,10 @@ namespace neogfx
         virtual ~i_help() = default;
     public:
         virtual bool help_active() const = 0;
+        virtual bool help_active(const i_help_source& aHelpSource) const = 0;
         virtual const i_help_source& active_help() const = 0;
     public:
-        virtual void activate(const i_help_source& aSource) = 0;
-        virtual void deactivate(const i_help_source& aSource) = 0;
+        virtual void activate(const i_help_source& aHelpSource) = 0;
+        virtual void deactivate(const i_help_source& aHelpSource) = 0;
     };
 }

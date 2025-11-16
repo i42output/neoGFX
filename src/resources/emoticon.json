@@ -1,0 +1,255 @@
+﻿{
+    "source": "https://en.wikipedia.org/wiki/List_of_emoticons",
+    "retrieved": "2025-11-15",
+    "retrieval method": "Grok",
+    "retrieval prompt": "Convert Latin tables in https://en.wikipedia.org/wiki/List_of_emoticons#:~:text=These%20emoticons%20first%20arose%20in,and%20a%20closing%20round%20parenthesis. into JSON - the emoji must be UTF-8 and not inline images in what you generate so I can copy to clipboard.",
+    "description": "Western/Latin-script emoticons extracted and normalized from the Wikipedia tables. Each entry groups all listed text variants for the same meaning, lists corresponding Unicode emojis (extracted and deduplicated), and provides a cleaned plain-text meaning (wiki links and citation numbers removed).",
+    "license": "https://en.wikipedia.org/wiki/Wikipedia:Text_of_the_Creative_Commons_Attribution-ShareAlike_4.0_International_License",
+    "data": [
+        {
+            "variants": [ ":‑)", ":)", ":‑]", ":]", ":->", ":>", "8-)", "8)", ":‑}", ":}", ":^)", "=]", "=)" ],
+            "emojis": [ "☺️", "🙂", "😊", "😀", "😁" ],
+            "meaning": "Smiley, happy face"
+        },
+        {
+            "variants": [ ":‑D", ":D", "8‑D", "8D", "=D", "=3", "B^D", "c:", "C:" ],
+            "emojis": [ "😃", "😄", "😎" ],
+            "meaning": "Laughing, big grin, grinning with glasses"
+        },
+        {
+            "variants": [ "x‑D", "xD", "X‑D", "XD" ],
+            "emojis": [ "😆", "😂" ],
+            "meaning": "Laughing"
+        },
+        {
+            "variants": [ ":-))", ":))" ],
+            "emojis": [],
+            "meaning": "Very happy or double chin"
+        },
+        {
+            "variants": [ ":‑(", ":(", ":‑c", ":c", ":‑<", ":<", ":‑[", ":[", ":-||", ":{", ":@", ";(" ],
+            "emojis": [ "☹️", "🙁", "😞", "😟", "😣", "😖" ],
+            "meaning": "Frown, sad, pouting"
+        },
+        {
+            "variants": [ ":'‑(", ":'(", ":=(" ],
+            "emojis": [ "😢", "😭" ],
+            "meaning": "Crying"
+        },
+        {
+            "variants": [ ":'‑)", ":')", ":\"D" ],
+            "emojis": [ "🥲", "🥹", "😂" ],
+            "meaning": "Tears of happiness"
+        },
+        {
+            "variants": [ ">:(", ">:[" ],
+            "emojis": [ "😠", "😡" ],
+            "meaning": "Angry"
+        },
+        {
+            "variants": [ "D‑'", "D:<", "D:", "D8", "D;", "D=", "DX" ],
+            "emojis": [ "😨", "😧", "😦", "😱", "😫", "😩" ],
+            "meaning": "Horror, disgust, sadness, great dismay"
+        },
+        {
+            "variants": [ ":‑O", ":O", ":‑o", ":o", ":-0", ":0", "8‑0", ">:O", "=O", "=o", "=0" ],
+            "emojis": [ "😮", "😯", "😲" ],
+            "meaning": "Surprise, shock"
+        },
+        {
+            "variants": [ ":-3", ":3", "=3", "x3", "X3" ],
+            "emojis": [ "😺", "😸", "🐱" ],
+            "meaning": "Cat face, curled mouth, cutesy, playful, mischievous"
+        },
+        {
+            "variants": [ ">:3" ],
+            "emojis": [ "😼" ],
+            "meaning": "Evil cat, playfulness"
+        },
+        {
+            "variants": [ ":‑*", ":*", ":x" ],
+            "emojis": [ "😗", "😙", "😚", "😘", "😍" ],
+            "meaning": "Kiss"
+        },
+        {
+            "variants": [ ";‑)", ";)", "*-)", "*)", ";‑]", ";]", ";^)", ";>", ":‑,", ";D", ";3" ],
+            "emojis": [ "😉", "😜", "😘" ],
+            "meaning": "Wink, smirk"
+        },
+        {
+            "variants": [ ":‑P", ":P", "X‑P", "XP", "x‑p", "xp", ":‑p", ":p", ":‑Þ", ":Þ", ":‑þ", ":þ", ":‑b", ":b", "d:", "=p", ">:b" ],
+            "emojis": [ "😛", "😝", "😜", "🤑" ],
+            "meaning": "Tongue sticking out, cheeky/playful, blowing a raspberry"
+        },
+        {
+            "variants": [ ":-/", ":/", ">:\\", ">:/", ":\\", "=/", "=\\", ":L", "=L", ":S" ],
+            "emojis": [ "🫤", "🤔", "😕", "😟" ],
+            "meaning": "Skeptical, annoyed, undecided, uneasy, hesitant"
+        },
+        {
+            "variants": [ ":‑|", ":|" ],
+            "emojis": [ "😑", "😑" ],
+            "meaning": "Straight face, no expression, indecision"
+        },
+        {
+            "variants": [ ":$" ],
+            "emojis": [ "😳", "😞", "😖" ],
+            "meaning": "Embarrassed, blushing"
+        },
+        {
+            "variants": [ ":‑X", ":X", ":‑#", ":#", ":‑&", ":&" ],
+            "emojis": [ "🤐", "😶" ],
+            "meaning": "Sealed lips, wearing braces, tongue-tied"
+        },
+        {
+            "variants": [ "O:‑)", "O:)", "0:‑3", "0:3", "0:‑)", "0:)", "0;^)" ],
+            "emojis": [ "😇", "👼" ],
+            "meaning": "Angel, halo, saint, innocent"
+        },
+        {
+            "variants": [ ">:‑)", ">:)", "}:‑)", "}:)", "3:‑)", "3:)", ">;‑)", ">;)", ">:3" ],
+            "emojis": [ "😈" ],
+            "meaning": "Evil, devilish"
+        },
+        {
+            "variants": [ "|;‑)", "|‑O", "B-)" ],
+            "emojis": [ "😎", "😪" ],
+            "meaning": "Cool, bored, yawning"
+        },
+        {
+            "variants": [ ":‑J" ],
+            "emojis": [ "😏", "😒" ],
+            "meaning": "Tongue-in-cheek"
+        },
+        {
+            "variants": [ "#‑)" ],
+            "emojis": [ "🥴" ],
+            "meaning": "Partied all night"
+        },
+        {
+            "variants": [ "%‑)", "%)" ],
+            "emojis": [ "😵", "😵‍💫", "😕", "🤕" ],
+            "meaning": "Drunk, confused"
+        },
+        {
+            "variants": [ ":‑###..", ":###.." ],
+            "emojis": [ "🤒", "😷", "🤢" ],
+            "meaning": "Being sick"
+        },
+        {
+            "variants": [ "<:‑|" ],
+            "emojis": [],
+            "meaning": "Dumb, dunce-like"
+        },
+        {
+            "variants": [ "',:-|", "',:-l" ],
+            "emojis": [ "🤨" ],
+            "meaning": "Scepticism, disbelief, disapproval"
+        },
+        {
+            "variants": [ ":E" ],
+            "emojis": [ "😬" ],
+            "meaning": "Grimacing, nervous, awkward"
+        },
+        {
+            "variants": [ "8-X", "8=X", "x-3", "x=3" ],
+            "emojis": [ "☠️", "💀", "🏴‍☠️" ],
+            "meaning": "Skull and crossbones"
+        },
+        {
+            "variants": [ "~:>" ],
+            "emojis": [ "🐔", "🐓" ],
+            "meaning": "Chicken"
+        },
+        {
+            "variants": [ "@};-", "@}->--", "@}‑;‑'‑‑‑", "@>‑‑>‑‑" ],
+            "emojis": [ "🌹" ],
+            "meaning": "Rose"
+        },
+        {
+            "variants": [ "*<|:‑)" ],
+            "emojis": [ "🎅" ],
+            "meaning": "Santa Claus"
+        },
+        {
+            "variants": [ "</3", "<\\3" ],
+            "emojis": [ "💔" ],
+            "meaning": "Broken heart"
+        },
+        {
+            "variants": [ "<3" ],
+            "emojis": [ "❤️" ],
+            "meaning": "Heart"
+        },
+        {
+            "variants": [ "><>", "<><", "<*)))‑{", "><(((*>" ],
+            "emojis": [ "🐟", "🐠" ],
+            "meaning": "Fish, something's fishy, Ichthys fish"
+        },
+        {
+            "variants": [ "\\o/" ],
+            "emojis": [ "🍻" ],
+            "meaning": "Cheer \"Yay, yay.\""
+        },
+        {
+            "variants": [ "*\\0/*" ],
+            "emojis": [],
+            "meaning": "Cheerleader"
+        },
+        {
+            "variants": [ "o7" ],
+            "emojis": [ "🫡" ],
+            "meaning": "Salute"
+        },
+        {
+            "variants": [ "v.v", "._.", "._.;" ],
+            "emojis": [ "😔" ],
+            "meaning": "Sadness, great dismay, disgust"
+        },
+        {
+            "variants": [ ";-;", "T_T", "T-T", "QQ", "qq" ],
+            "emojis": [ "🥺", "😭", "😢" ],
+            "meaning": "Crying"
+        },
+        {
+            "variants": [ "X_X", "x_x", "+_+", "X_x", "x_X" ],
+            "emojis": [ "😵", "☠️" ],
+            "meaning": "Dead person, fainted"
+        },
+        {
+            "variants": [ "<_<", ">_>", "<.<", ">.>" ],
+            "emojis": [],
+            "meaning": "Sideways look. Devious or guilty."
+        },
+        {
+            "variants": [ "O_O", "o_o", "O-O", "o‑o", "O_o", "o_O" ],
+            "emojis": [ "😳" ],
+            "meaning": "Surprise, shock, yawn"
+        },
+        {
+            "variants": [ ">.<", ">_<" ],
+            "emojis": [ "😣" ],
+            "meaning": "Annoyed, frustrated"
+        },
+        {
+            "variants": [ "^5", "o/\\o", ">_>^", "^<_<" ],
+            "emojis": [],
+            "meaning": "High five"
+        },
+        {
+            "variants": [ "V.v.V", "V=(° °)=V" ],
+            "emojis": [ "🦀", "🦞" ],
+            "meaning": "Crab, Lobster"
+        },
+        {
+            "variants": [ "(^^^)" ],
+            "emojis": [ "🦈" ],
+            "meaning": "Shark"
+        },
+        {
+            "variants": [ "::[]::" ],
+            "emojis": [ "🩹", "🤕", "❤️‍🩹" ],
+            "meaning": "Bandage"
+        }
+    ]
+}

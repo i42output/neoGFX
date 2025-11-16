@@ -70,6 +70,12 @@ namespace neogfx
         return iText;
     }
 
+    void menu_item_widget::set_icon_size(size const& aIconSize)
+    {
+        iIconSize = aIconSize;
+        menu_item().action().changed().trigger();
+    }
+
     neogfx::size_policy menu_item_widget::size_policy() const
     {
         if (has_size_policy())
@@ -288,25 +294,33 @@ namespace neogfx
         iMenuItem.set_widget(*this);
 
         set_padding(neogfx::padding{});
-        iLayout.set_padding(dpi_scale(neogfx::padding{ iGap, dpi_scale(2.0), iGap * (menu().type() == menu_type::Popup ? 2.0 : 1.0), dpi_scale(2.0) }));
+        iLayout.set_padding(dpi_scale(
+            neogfx::padding{ 
+                iGap, 
+                2.0, 
+                iGap * (menu().type() == menu_type::Popup ? (root().style() & window_style::HorizontalMenuLayout) != window_style::HorizontalMenuLayout ? 2.0 : 1.0 : 1.0),
+                2.0 }));
         iLayout.set_spacing(dpi_scale(size{ iGap, 0.0 }));
         if (menu().type() == menu_type::Popup)
             iIcon.set_fixed_size(dpi_scale(iIconSize));
         else
             iIcon.set_fixed_size(size{});
         iSpacer.set_minimum_size(size{ 0.0, 0.0 });
+
         iText.set_font_role(font_role::Menu);
         iShortcutText.set_font_role(font_role::Menu);
+
         auto text_updated = [this]()
-        {
-            auto m = mnemonic_from_text(iText.text());
-            if (!m.empty())
-                service<i_app>().add_mnemonic(*this);
-            else
-                service<i_app>().remove_mnemonic(*this);
-        };
+            {
+                auto m = mnemonic_from_text(iText.text());
+                if (!m.empty())
+                    service<i_app>().add_mnemonic(*this);
+                else
+                    service<i_app>().remove_mnemonic(*this);
+            };
         iSink += iText.TextChanged(text_updated);
         text_updated();
+
         if (menu_item().type() == menu_item_type::Action)
         {
             auto action_changed = [this]()
@@ -358,14 +372,28 @@ namespace neogfx
                             dpi_select("neogfx::menu_item_widget::sTickPattern::"s, "neogfx::menu_item_widget::sTickHighDpiPattern::"s) + ink.to_string(),
                             dpi_select(sTickPattern, sTickHighDpiPattern), { { "paper", color{} },{ "ink", ink } }, dpi_select(1.0, 2.0) });
                 }
+                
                 if (!iIcon.image().is_empty())
                     iIcon.set_fixed_size(dpi_scale(iIconSize));
                 else if (menu().type() == menu_type::MenuBar)
                     iIcon.set_fixed_size(size{});
+
                 iText.set_text(menu_item().action().menu_text());
+
                 if (menu().type() != menu_type::MenuBar)
                     iShortcutText.set_text(menu_item().action().shortcut() != std::nullopt ? string{ menu_item().action().shortcut()->as_text() } : string{});
-                iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != std::nullopt && menu().type() != menu_type::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
+
+                if (!menu_item().action().menu_text().empty())
+                {
+                    iText.show();
+                    iSpacer.set_minimum_size(dpi_scale(size{ menu_item().action().shortcut() != std::nullopt && menu().type() != menu_type::MenuBar ? iGap * 2.0 : 0.0, 0.0 }));
+                }
+                else
+                {
+                    iText.hide();
+                    iSpacer.set_minimum_size(size{});
+                }
+
                 enable(menu_item().action().is_enabled());
             };
             iSink += menu_item().action().changed(action_changed);
@@ -380,10 +408,10 @@ namespace neogfx
             iSink += menu_item().sub_menu().opened([this]() {update(); });
             iSink += menu_item().sub_menu().closed([this]() {update(); });
             auto menu_changed = [this]() 
-            { 
-                iIcon.set_image(menu_item().sub_menu().image());
-                iText.set_text(menu_item().sub_menu().title());
-            };
+                { 
+                    iIcon.set_image(menu_item().sub_menu().image());
+                    iText.set_text(menu_item().sub_menu().title());
+                };
             iSink += menu_item().sub_menu().menu_changed(menu_changed);
             menu_changed();
         }
@@ -396,23 +424,26 @@ namespace neogfx
                 if (!iSubMenuOpener)
                 {
                     iSubMenuOpener = std::make_unique<widget_timer>(*this, [this](widget_timer&)
-                    {
-                        destroyed_flag destroyed{ *this };
-                        if (!menu_item().sub_menu().is_open())
-                            menu().open_sub_menu()(menu_item().sub_menu());
-                        if (!destroyed)
-                            update();
-                        iSubMenuOpener.reset();
-                    }, std::chrono::milliseconds{ 250 });
+                        {
+                            destroyed_flag destroyed{ *this };
+                            if (!menu_item().sub_menu().is_open())
+                                menu().open_sub_menu()(menu_item().sub_menu());
+                            if (!destroyed)
+                                update();
+                            iSubMenuOpener.reset();
+                        }, std::chrono::milliseconds{ 250 });
                 }
             }
         });
         iSink += menu_item().deselected([this]()
-        {
-            if (menu_item().type() == menu_item_type::Action)
-                service<i_app>().help().deactivate(*this);
-            iSubMenuOpener.reset();
-        });
+            {
+                if (menu_item().type() == menu_item_type::Action)
+                {
+                    if (service<i_app>().help().help_active(*this))
+                        service<i_app>().help().deactivate(*this);
+                }
+                iSubMenuOpener.reset();
+            });
     }
 
     void menu_item_widget::select_item(bool aOpenAnySubMenu)

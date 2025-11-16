@@ -32,6 +32,7 @@
 #include <neolib/app/power.hpp>
 #include <neogfx/gfx/image.hpp>
 #include <neogfx/gfx/i_gradient_manager.hpp>
+#include <neogfx/gfx/text/i_emoticon_translator.hpp>
 #include <neogfx/app/app.hpp>
 #include <neogfx/hid/surface_manager.hpp>
 #include <neogfx/hid/i_hid_devices.hpp>
@@ -296,6 +297,8 @@ namespace neogfx
 
         if (program_options().turbo())
             neolib::service<neolib::i_power>().enable_turbo_mode();
+        
+        service<i_emoticon_translator>();
 
         style lightStyle("Light");
         register_style(lightStyle);
@@ -759,6 +762,11 @@ namespace neogfx
         {
             return !iActiveSources.empty();
         }
+        bool help_active(const i_help_source& aHelpSource) const override
+        {
+            auto existing = std::find(iActiveSources.rbegin(), iActiveSources.rend(), &aHelpSource);
+            return existing != iActiveSources.rend();
+        }
         const i_help_source& active_help() const override
         {
             if (help_active())
@@ -766,18 +774,18 @@ namespace neogfx
             throw help_not_active();
         }
     public:
-        void activate(const i_help_source& aSource) override
+        void activate(const i_help_source& aHelpSource) override
         {
-            iActiveSources.push_back(&aSource);
-            HelpActivated(aSource);
+            iActiveSources.push_back(&aHelpSource);
+            HelpActivated(aHelpSource);
         }
-        void deactivate(const i_help_source& aSource) override
+        void deactivate(const i_help_source& aHelpSource) override
         {
-            auto existing = std::find(iActiveSources.rbegin(), iActiveSources.rend(), &aSource);
+            auto existing = std::find(iActiveSources.rbegin(), iActiveSources.rend(), &aHelpSource);
             if (existing == iActiveSources.rend())
-                throw invalid_help_source();
+                    throw invalid_help_source();
             iActiveSources.erase(existing.base() - 1);
-            HelpDeactivated(aSource);
+            HelpDeactivated(aHelpSource);
         }
     private:
         std::vector<const i_help_source*> iActiveSources;
