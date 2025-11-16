@@ -88,7 +88,7 @@ namespace neogfx
         void deactivate() final
         {
             if (!active())
-                throw std::logic_error("neogfx::emoticon_translator::activate: not active!");
+                throw std::logic_error("neogfx::emoticon_translator::deactivate: not active!");
             service<i_keyboard>().ungrab_keyboard(*this);
             iActiveWidget = nullptr;
             iCursorPosition = std::nullopt;
@@ -100,7 +100,7 @@ namespace neogfx
         void update_cursor_position(point const& aPosition) final
         {
             if (!active())
-                throw std::logic_error("neogfx::emoticon_translator::activate: not active!");
+                throw std::logic_error("neogfx::emoticon_translator::update_cursor_position: not active!");
             iCursorPosition = aPosition + iActiveWidget->non_client_rect().top_left() + iActiveWidget->root().window_position();
         }
     private:
