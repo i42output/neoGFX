@@ -1490,14 +1490,14 @@ namespace neogfx
                 break;
             case WM_ACTIVATE:
                 {
-                    BOOL minimized = HIWORD(wparam);
-                    if (!minimized && (LOWORD(wparam) != WA_INACTIVE))
-                        self.handle_event(window_event{ window_event_type::FocusGained, self.iActivationMousePos ? *self.iActivationMousePos : window_event::parameter_type{} });
-                    else
+                    if (LOWORD(wparam) != WA_INACTIVE)
                     {
-                        if (self.is_alive())
-                            self.handle_event(window_event{ window_event_type::FocusLost });
+                        BOOL minimized = HIWORD(wparam);
+                        if (!minimized)
+                            self.handle_event(window_event{ window_event_type::FocusGained, self.iActivationMousePos ? *self.iActivationMousePos : window_event::parameter_type{} });
                     }
+                    else if (self.is_alive())
+                        self.handle_event(window_event{ window_event_type::FocusLost });
                     self.iActivationMousePos = std::nullopt;
                 }
                 break;
