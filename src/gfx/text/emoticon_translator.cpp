@@ -104,8 +104,10 @@ namespace neogfx
             iCursorPosition = aPosition + iActiveWidget->non_client_rect().top_left() + iActiveWidget->root().window_position();
         }
     private:
-        void handle_emoticon_matches(std::string const& aDelimiter)
+        void handle_emoticon_matches(std::string_view const& aText, bool aHaveExtra)
         {
+            iActiveWidget->text_input(neolib::string{ aText });
+
             std::set<std::string> availableEmoji;
             std::optional<std::string> selectedEmoji;
 
@@ -154,10 +156,10 @@ namespace neogfx
                 std::u32string const codePoints = neolib::utf8_to_utf32(iBuffer);
                 for (std::size_t i = 0; i < codePoints.size(); ++i)
                     iActiveWidget->key_pressed(ScanCode_BACKSPACE, KeyCode_BACKSPACE, key_modifier::None);
-                iActiveWidget->text_input(neolib::string{ selectedEmoji.value() });
+                auto const& toInsert = neolib::string{ selectedEmoji.value() } + (aHaveExtra ? aText : std::string_view{});
+                iActiveWidget->text_input(toInsert);
                 if (availableEmoji.size() == 1) // only need undo if we didn't popup a menu
-                    iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), 
-                        iBuffer + aDelimiter, selectedEmoji.value() + aDelimiter));
+                    iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), iBuffer, toInsert));
             }
         }
     private:
@@ -211,31 +213,62 @@ namespace neogfx
                 }
             } c{ *this };
 
-            thread_local std::string partial;
-            partial = iBuffer;
-            partial += aText.to_std_string_view();
+            thread_local std::string potentialMatch;
+            potentialMatch = iBuffer;
+            potentialMatch += aText.to_std_string_view();
 
             thread_local std::vector<emoji_map::const_iterator> emoticonMatches;
-            emoticonMatches.clear();
 
-            for (auto e = iEmojiMap.begin(); e != iEmojiMap.end(); ++e)
+            bool const previousMatches = !iEmoticonMatches.empty();
+            bool anyMatches;
+            bool partialMatches;
+
+            auto find = [&](std::string_view const& aPotentialMatch, bool aIgnorePartials = false)
+                {
+                    emoticonMatches.clear();
+                    anyMatches = false;
+                    partialMatches = false;
+                    for (auto e = iEmojiMap.begin(); e != iEmojiMap.end(); ++e)
+                    {
+                        if (e->first.starts_with(aPotentialMatch))
+                        {
+                            bool const isPartial = (e->first != aPotentialMatch);
+                            if (isPartial)
+                            {
+                                if (!aIgnorePartials)
+                                    partialMatches = true;
+                            }
+                            if (!isPartial || !aIgnorePartials)
+                            {
+                                anyMatches = true;
+                                emoticonMatches.push_back(e);
+                            }
+                        }
+                    }
+                };
+
+            find(potentialMatch);
+
+            bool haveExtra = false;
+
+            if (!anyMatches && previousMatches)
             {
-                if (e->first.starts_with(partial))
-                    emoticonMatches.push_back(e);
+                find(static_cast<std::string_view const&>(potentialMatch).substr(0, potentialMatch.size() - 1), true);
+                if (anyMatches)
+                    haveExtra = true;
             }
 
-            if (emoticonMatches.empty() && !iEmoticonMatches.empty())
+            if (anyMatches)
             {
-                iEmoticonMatches.erase(std::remove_if(iEmoticonMatches.begin(), iEmoticonMatches.end(), 
-                    [&](auto const& e) { return e->first != iBuffer; }), iEmoticonMatches.end());
-                if (!iEmoticonMatches.empty() && is_delimiter(aText[0]))
-                    handle_emoticon_matches(aText);
-            }
-            else if (!emoticonMatches.empty())
-            {
-                iBuffer = partial;
                 std::swap(iEmoticonMatches, emoticonMatches);
-                c.suppress = true;
+                iBuffer = potentialMatch;
+                if (!partialMatches)
+                {
+                    handle_emoticon_matches(aText.to_std_string_view(), haveExtra);
+                    return true;
+                }
+                else
+                    c.suppress = true;
             }
 
             return false;
