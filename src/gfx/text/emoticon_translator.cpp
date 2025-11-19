@@ -61,11 +61,11 @@ namespace neogfx
             neolib::json const database{ lines };
             for (auto const& entry : database.root().as<neolib::json_object>().at("data"))
             {
-                std::vector<std::string> emojies;
-                for (auto const& emoji : entry.as<neolib::json_object>().at("emojis").as<neolib::json_array>())
-                    emojies.push_back(emoji->as<neolib::json_string>().to_std_string());
-                for (auto const& variant : entry.as<neolib::json_object>().at("variants").as<neolib::json_array>())
-                    iEmojiMap[variant->as<neolib::json_string>().to_std_string()] = emojies;
+                std::vector<std::string> emoji;
+                for (auto const& emojiVariant : entry.as<neolib::json_object>().at("emoji").as<neolib::json_array>())
+                    emoji.push_back(emojiVariant->as<neolib::json_string>().to_std_string());
+                for (auto const& emoticonVariant : entry.as<neolib::json_object>().at("emoticons").as<neolib::json_array>())
+                    iEmojiMap[emoticonVariant->as<neolib::json_string>().to_std_string()] = emoji;
             }
         }
     public:
