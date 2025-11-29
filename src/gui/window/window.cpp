@@ -851,19 +851,25 @@ namespace neogfx
 
     void window::set_focused_widget(i_widget& aWidget, focus_reason aFocusReason)
     {
+        if (iFocusedWidget == &aWidget)
+            return;
         i_widget* previouslyFocused = iFocusedWidget;
         iFocusedWidget = &aWidget;
-        if (previouslyFocused != nullptr && previouslyFocused != iFocusedWidget)
-            previouslyFocused->focus_lost(aFocusReason);
-        iFocusedWidget->focus_gained(aFocusReason);
+        if (is_active())
+        {
+            if (previouslyFocused != nullptr && previouslyFocused != iFocusedWidget)
+                previouslyFocused->focus_lost(aFocusReason);
+            iFocusedWidget->focus_gained(aFocusReason);
+        }
     }
 
-    void window::release_focused_widget(i_widget& aWidget)
+    void window::release_focused_widget(i_widget& aWidget, focus_reason aFocusReason)
     {
         if (iFocusedWidget != &aWidget)
             throw widget_not_focused();
         iFocusedWidget = nullptr;
-        aWidget.focus_lost(focus_reason::Other);
+        if (is_active())
+            aWidget.focus_lost(aFocusReason);
     }
 
     void window::alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval, std::optional<std::uint32_t> const& aCount)

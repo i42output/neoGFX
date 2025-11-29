@@ -262,7 +262,7 @@ namespace neogfx
         bool has_focus() const override;
         bool child_has_focus() const override;
         bool set_focus(focus_reason aFocusReason = focus_reason::Other) override;
-        bool release_focus() override;
+        bool release_focus(focus_reason aFocusReason = focus_reason::Other) override;
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
     public:

@@ -1,4 +1,4 @@
-// animator.cpp
+ // animator.cpp
 /*
   neogfx C++ App/Game Engine
   Copyright (c) 2020 Leigh Johnston.  All Rights Reserved.
@@ -73,7 +73,7 @@ namespace neogfx::game
 
         Animate(now);
 
-        std::scoped_lock<decltype(iLock)> lock{ iLock };
+        std::unique_lock lk{ iLock };
 
         auto& infos = ecs().component<entity_info>();
         auto& filters = ecs().component<animation_filter>();

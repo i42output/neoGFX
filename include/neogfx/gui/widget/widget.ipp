@@ -1908,11 +1908,11 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
-    inline bool widget<Interface>::release_focus()
+    inline bool widget<Interface>::release_focus(focus_reason aReason)
     {
         if (has_focus() || child_has_focus())
         {
-            widget::root().release_focused_widget(widget::root().focused_widget());
+            widget::root().release_focused_widget(widget::root().focused_widget(), aReason);
             return true;
         }
         return false;

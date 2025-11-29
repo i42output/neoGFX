@@ -238,7 +238,7 @@ namespace neogfx
         virtual bool has_focus() const = 0;
         virtual bool child_has_focus() const = 0;
         virtual bool set_focus(focus_reason aFocusReason = focus_reason::Other) = 0;
-        virtual bool release_focus() = 0;
+        virtual bool release_focus(focus_reason aFocusReason = focus_reason::Other) = 0;
         virtual void focus_gained(focus_reason aFocusReason) = 0;
         virtual void focus_lost(focus_reason aFocusReason) = 0;
     public:

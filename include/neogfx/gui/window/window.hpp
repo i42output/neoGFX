@@ -199,7 +199,7 @@ namespace neogfx
         bool has_focused_widget() const override;
         i_widget& focused_widget() const override;
         void set_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
-        void release_focused_widget(i_widget& aWidget) override;
+        void release_focused_widget(i_widget& aWidget, focus_reason aFocusReason) override;
     public:
         void alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval = {}, std::optional<std::uint32_t> const& aCount = {}) override;
     protected:
