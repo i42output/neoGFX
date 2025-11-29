@@ -104,7 +104,7 @@ namespace neogfx
             iCursorPosition = aPosition + iActiveWidget->non_client_rect().top_left() + iActiveWidget->root().window_position();
         }
     private:
-        void handle_emoticon_matches(std::string_view const& aText, bool aHaveExtra, bool& aSupressBufferClear)
+        void handle_emoticon_matches(std::string_view const& aText, bool aHaveExtra, bool& aSuppressBufferClear)
         {
             iActiveWidget->text_input(neolib::string{ aText });
 
@@ -151,7 +151,7 @@ namespace neogfx
                             aDismiss = true;
                             iBuffer.clear();
                             iEmoticonMatches.clear();
-                            aSupressBufferClear = true;
+                            aSuppressBufferClear = true;
                         });
 
                     contextMenu.menu().select_item_at(0);
