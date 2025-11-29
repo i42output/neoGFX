@@ -104,7 +104,7 @@ namespace neogfx
             iCursorPosition = aPosition + iActiveWidget->non_client_rect().top_left() + iActiveWidget->root().window_position();
         }
     private:
-        void handle_emoticon_matches(std::string_view const& aText, bool aHaveExtra)
+        void handle_emoticon_matches(std::string_view const& aText, bool aHaveExtra, bool& aSupressBufferClear)
         {
             iActiveWidget->text_input(neolib::string{ aText });
 
@@ -144,6 +144,14 @@ namespace neogfx
                             auto const iconSize = size{ std::max(iActiveWidget->font().height(), 16.0) };
                             for (i_menu::item_index i = 0; i < contextMenu.menu().count(); ++i)
                                 contextMenu.menu().item_at(i).as_widget().set_icon_size(iconSize);
+                        });
+
+                    contextMenu.menu().dismiss_on_text_input([&](i_string const& aText, bool& aDismiss)
+                        {
+                            aDismiss = true;
+                            iBuffer.clear();
+                            iEmoticonMatches.clear();
+                            aSupressBufferClear = true;
                         });
 
                     contextMenu.menu().select_item_at(0);
@@ -264,7 +272,7 @@ namespace neogfx
                 iBuffer = potentialMatch;
                 if (!partialMatches)
                 {
-                    handle_emoticon_matches(aText.to_std_string_view(), haveExtra);
+                    handle_emoticon_matches(aText.to_std_string_view(), haveExtra, c.suppress);
                     return true;
                 }
                 else
@@ -276,7 +284,10 @@ namespace neogfx
         bool sys_text_input(i_string const& aText) final
         {
             if (active())
+            {
                 iBuffer.clear();
+                iEmoticonMatches.clear();
+            }
             return false;
         }
     private:

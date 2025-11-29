@@ -54,8 +54,6 @@ template<> neogfx::i_context_menu& services::start_service<neogfx::i_context_men
 
 namespace neogfx
 {
-    std::unique_ptr<popup_menu> context_menu::sWidget;
-
     context_menu::context_menu(const point& aPosition, window_style aStyle)
         : iMenu{ new neogfx::menu{} }, iParent{ nullptr }, iPosition{ aPosition }, iStyle{ aStyle }
     {
@@ -75,11 +73,12 @@ namespace neogfx
         return *iMenu;
     }
 
-    popup_menu& context_menu::root_widget()
+    popup_menu& context_menu::popup()
     {
-        if (sWidget == nullptr)
-            throw widget_not_created_yet();
-        return *sWidget;
+        if (popup_ptr() == nullptr)
+            throw popup_not_created_yet();
+
+        return *popup_ptr();
     }
 
     void context_menu::exec()
@@ -90,20 +89,26 @@ namespace neogfx
         {
             finished = true;
         });
-        if (sWidget != nullptr)
-            sWidget = nullptr;
-        sWidget = (iParent != nullptr ?
+        if (popup_ptr() != nullptr)
+            popup_ptr() = nullptr;
+        popup_ptr() = (iParent != nullptr ?
             std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
             std::make_unique<popup_menu>(iPosition, menu(), iStyle));
         service<i_context_menu>().activate_context_menu();
-        PopupCreated(*sWidget);
+        PopupCreated(popup());
         event_processing_context epc{ service<i_async_task>(), "neogfx::context_menu" };
         while (!finished && service<i_context_menu>().context_menu_active())
         {
             service<i_app>().process_events(epc);
         }
-        sWidget = nullptr;
+        popup_ptr() = nullptr;
         if (service<i_context_menu>().context_menu_active())
             service<i_context_menu>().deactivate_context_menu();
+    }
+
+    std::unique_ptr<popup_menu>& context_menu::popup_ptr()
+    {
+        static std::unique_ptr<popup_menu> sPopup;
+        return sPopup;
     }
 }

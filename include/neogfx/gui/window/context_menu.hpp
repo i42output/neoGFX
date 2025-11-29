@@ -31,21 +31,22 @@ namespace neogfx
     public:
         define_event(PopupCreated, popup_created, popup_menu&)
     public:
-        struct widget_not_created_yet : std::logic_error { widget_not_created_yet() : std::logic_error("neogfx::context_menu::widget_not_created_yet") {} };
+        struct popup_not_created_yet : std::logic_error { popup_not_created_yet() : std::logic_error("neogfx::context_menu::popup_not_created_yet") {} };
     public:
         context_menu(const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
         context_menu(i_widget& aParent, const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
         ~context_menu();
     public:
         i_menu& menu();
-        popup_menu& root_widget();
+        popup_menu& popup();
         void exec();
+    private:
+        std::unique_ptr<popup_menu>& popup_ptr();
     private:
         std::unique_ptr<i_menu> iMenu;
         i_widget* iParent;
         point iPosition;
         window_style iStyle;
-        static std::unique_ptr<popup_menu> sWidget;
     };
 
 }

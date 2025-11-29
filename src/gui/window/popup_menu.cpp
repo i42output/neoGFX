@@ -338,7 +338,18 @@ namespace neogfx
     bool popup_menu::text_input(i_string const& aText)
     {
         if (aText != "\r" && aText != "\n")
-            service<i_basic_services>().system_beep();
+        {
+            bool dismiss = false;
+            menu().dismiss_on_text_input()(aText, dismiss);
+            if (!dismiss)
+                service<i_basic_services>().system_beep();
+            else
+            {
+                menu().clear_selection();
+                menu().close();
+                return false;
+            }
+        }
         return true;
     }
 

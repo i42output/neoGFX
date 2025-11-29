@@ -49,6 +49,7 @@ namespace neogfx
         declare_event(item_selected, i_menu_item&)
         declare_event(selection_cleared)
         declare_event(open_sub_menu, i_menu&)
+        declare_event(dismiss_on_text_input, i_string const&, bool&)
     public:
         typedef std::uint32_t item_index;
     public:
