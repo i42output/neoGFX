@@ -414,7 +414,7 @@ namespace neogfx
                 if (keyboardEvent.scan_code() == ScanCode_LALT)
                 {
                     if (service<i_context_menu>().context_menu_active())
-                        service<i_context_menu>().deactivate_context_menu();
+                        service<i_context_menu>().close_context_menu();
                 }
                 keyboard.set_event_modifiers(keyboardEvent.key_modifiers());
                 if (!keyboard.grabber().key_pressed(keyboardEvent.scan_code(), keyboardEvent.key_code(), keyboardEvent.key_modifiers()))

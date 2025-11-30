@@ -41,7 +41,6 @@ namespace neogfx
         define_declared_event(ItemSelected, item_selected, i_menu_item&)
         define_declared_event(SelectionCleared, selection_cleared)
         define_declared_event(OpenSubMenu, open_sub_menu, i_menu&)
-        define_declared_event(DismissOnTextInput, dismiss_on_text_input, i_string const&, bool&)
     private:
         typedef std::unique_ptr<i_menu_item> item_pointer;
         typedef std::vector<item_pointer> item_list;

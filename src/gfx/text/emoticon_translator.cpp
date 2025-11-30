@@ -83,13 +83,13 @@ namespace neogfx
                 throw std::logic_error("neogfx::emoticon_translator::activate: already active!");
             iActiveWidget = &aWidget;
             iSink = aWidget.destroying([&]() { if (active(aWidget)) deactivate(); });
-            service<i_keyboard>().grab_keyboard(*this);
+            service<i_keyboard>().filter_keyboard(*this);
         }
         void deactivate() final
         {
             if (!active())
                 throw std::logic_error("neogfx::emoticon_translator::deactivate: not active!");
-            service<i_keyboard>().ungrab_keyboard(*this);
+            service<i_keyboard>().unfilter_keyboard(*this);
             iActiveWidget = nullptr;
             iCursorPosition = std::nullopt;
             iBuffer.clear();
@@ -114,6 +114,8 @@ namespace neogfx
             for (auto const& emojiAlternatives : iEmoticonMatches)
                 for (auto const& emoji : emojiAlternatives->second)
                     availableEmoji.insert(emoji);
+
+            iEmoticonMatches.clear();
 
             if (availableEmoji.empty())
                 return;
@@ -146,16 +148,12 @@ namespace neogfx
                                 contextMenu.menu().item_at(i).as_widget().set_icon_size(iconSize);
                         });
 
-                    contextMenu.menu().dismiss_on_text_input([&](i_string const& aText, bool& aDismiss)
-                        {
-                            aDismiss = true;
-                            iBuffer.clear();
-                            iEmoticonMatches.clear();
-                            aSuppressBufferClear = true;
-                        });
-
                     contextMenu.menu().select_item_at(0);
-                    contextMenu.exec();
+
+                    neolib::scoped_flag sf{ iSelectorOpen };
+                    auto const reason = contextMenu.exec();
+                    if (reason == context_menu::exit_reason::Cancelled)
+                        aSuppressBufferClear = true;
                 }
             }
 
@@ -173,6 +171,7 @@ namespace neogfx
     private:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) final
         {
+            bool consumeEvent = false;
             if (active())
             {
                 auto const lastTranslationForUndo = iLastTranslationForUndo;
@@ -182,21 +181,28 @@ namespace neogfx
                     std::u32string codePoints = neolib::utf8_to_utf32(iBuffer);
                     codePoints.pop_back();
                     iBuffer = neolib::utf32_to_utf8(codePoints);
+                    iActiveWidget->key_pressed(ScanCode_BACKSPACE, KeyCode_BACKSPACE, key_modifier::None);
+                    consumeEvent = true;
                 }
                 else if (aScanCode == ScanCode_ESCAPE && lastTranslationForUndo.has_value() &&
-                    std::chrono::steady_clock::now() - std::get<0>(lastTranslationForUndo.value()) < DEFAULT_UNDO_TIMEOUT)
+                        std::chrono::steady_clock::now() - std::get<0>(lastTranslationForUndo.value()) < DEFAULT_UNDO_TIMEOUT)
                 {
                     std::u32string const codePoints = neolib::utf8_to_utf32(std::get<2>(lastTranslationForUndo.value()));
                     for (std::size_t i = 0; i < codePoints.size(); ++i)
                         iActiveWidget->key_pressed(ScanCode_BACKSPACE, KeyCode_BACKSPACE, key_modifier::None);
                     iActiveWidget->text_input(neolib::string{ std::get<1>(lastTranslationForUndo.value()) });
-                    return true;
+                    consumeEvent = true;
                 }
                 else if ((aKeyCode < static_cast<key_code_e>(' ') || aKeyCode > static_cast<key_code_e>(0xFF)) &&
                     aScanCode != ScanCode_LSHIFT && aScanCode != ScanCode_RSHIFT)
-                    iBuffer.clear();
+                {
+                    if (!iSelectorOpen)
+                        iBuffer.clear();
+                }
             }
-            return false;
+            if (consumeEvent && iSelectorOpen)
+                service<i_context_menu>().cancel_context_menu();
+            return consumeEvent;
         }
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) final
         {
@@ -206,6 +212,15 @@ namespace neogfx
         {
             if (!active())
                 return false;
+
+            if (iSelectorOpen)
+            {
+                if (aText == "\r" || aText == "\n")
+                    return false;
+                iBuffer.clear();
+                iEmoticonMatches.clear();
+                service<i_context_menu>().cancel_context_menu();
+            }
 
             struct cleanup
             {
@@ -297,6 +312,7 @@ namespace neogfx
         std::string iBuffer;
         std::vector<emoji_map::const_iterator> iEmoticonMatches;
         std::optional<std::tuple<std::chrono::steady_clock::time_point, std::string, std::string>> iLastTranslationForUndo;
+        bool iSelectorOpen = false;
         sink iSink;
     };
 }

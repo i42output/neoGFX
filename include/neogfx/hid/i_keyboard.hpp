@@ -714,6 +714,9 @@ namespace neogfx
         virtual void set_event_modifiers(key_modifier aModifiers) = 0;
         virtual void clear_event_modifiers() = 0;
     public:
+        virtual void filter_keyboard(i_keyboard_handler& aKeyboardHandler, bool aFront = true) = 0;
+        virtual void unfilter_keyboard(i_keyboard_handler& aKeyboardHandler) = 0;
+        virtual bool is_filter_processing_event() const = 0;
         virtual bool is_keyboard_grabbed() const = 0;
         virtual bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const = 0;
         virtual bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const = 0;

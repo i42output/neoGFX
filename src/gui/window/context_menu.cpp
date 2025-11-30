@@ -31,18 +31,44 @@ namespace neogfx
     public:
         bool context_menu_active() const noexcept final
         {
-            return iContextMenuActive;
+            return iActiveContextMenu;
         }
-        void activate_context_menu() noexcept final
+        bool context_menu_cancelling() const noexcept final
         {
-            iContextMenuActive = true;
+            return iCancelling;
+        }
+    public:
+        void activate_context_menu(i_menu& aMenu) noexcept final
+        {
+            iActiveContextMenu = &aMenu;
         }
         void deactivate_context_menu() noexcept final
         {
-            iContextMenuActive = false;
+            if (iActiveContextMenu)
+            {
+                close_context_menu();
+                iActiveContextMenu = nullptr;
+            }
+        }
+        void cancel_context_menu() noexcept final
+        {
+            if (iActiveContextMenu)
+            {
+                neolib::scoped_flag sf{ iCancelling };
+                deactivate_context_menu();
+            }
+        }
+        void close_context_menu() noexcept final
+        {
+            if (iActiveContextMenu && iActiveContextMenu->is_open())
+            {
+                iActiveContextMenu->clear_selection();
+                iActiveContextMenu->close();
+            }
         }
     private:
-        bool iContextMenuActive = false;
+        i_menu* iActiveContextMenu = nullptr;
+        bool iCancelling = false;
     };
 }
 
@@ -81,29 +107,33 @@ namespace neogfx
         return *popup_ptr();
     }
 
-    void context_menu::exec()
+    context_menu::exit_reason context_menu::exec()
     {
-        bool finished = false;
+        std::optional<exit_reason> exitReason;
         menu().set_modal(true);
-        menu().closed([&finished]()
-        {
-            finished = true;
-        });
+        menu().closed([&]()
+            {
+                if (!service<i_context_menu>().context_menu_cancelling())
+                    exitReason = exit_reason::Normal;
+                else
+                    exitReason = exit_reason::Cancelled;
+            });
         if (popup_ptr() != nullptr)
             popup_ptr() = nullptr;
         popup_ptr() = (iParent != nullptr ?
             std::make_unique<popup_menu>(*iParent, iPosition, menu(), iStyle) :
             std::make_unique<popup_menu>(iPosition, menu(), iStyle));
-        service<i_context_menu>().activate_context_menu();
+        service<i_context_menu>().activate_context_menu(menu());
         PopupCreated(popup());
         event_processing_context epc{ service<i_async_task>(), "neogfx::context_menu" };
-        while (!finished && service<i_context_menu>().context_menu_active())
+        while (!exitReason.has_value() && service<i_context_menu>().context_menu_active())
         {
             service<i_app>().process_events(epc);
         }
         popup_ptr() = nullptr;
         if (service<i_context_menu>().context_menu_active())
             service<i_context_menu>().deactivate_context_menu();
+        return exitReason.value_or(exit_reason::Normal);
     }
 
     std::unique_ptr<popup_menu>& context_menu::popup_ptr()

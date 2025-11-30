@@ -31,6 +31,12 @@ namespace neogfx
     public:
         define_event(PopupCreated, popup_created, popup_menu&)
     public:
+        enum class exit_reason : std::uint32_t
+        {
+            Normal          = 0,
+            Cancelled       = 1
+        };
+    public:
         struct popup_not_created_yet : std::logic_error { popup_not_created_yet() : std::logic_error("neogfx::context_menu::popup_not_created_yet") {} };
     public:
         context_menu(const point& aPosition, window_style aStyle = popup_menu::DEFAULT_STYLE | window_style::DismissOnParentClick);
@@ -39,7 +45,7 @@ namespace neogfx
     public:
         i_menu& menu();
         popup_menu& popup();
-        void exec();
+        exit_reason exec();
     private:
         std::unique_ptr<popup_menu>& popup_ptr();
     private:

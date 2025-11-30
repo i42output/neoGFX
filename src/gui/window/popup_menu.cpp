@@ -227,6 +227,9 @@ namespace neogfx
 
     bool popup_menu::key_pressed(scan_code_e aScanCode, key_code_e, key_modifier)
     {
+        if (!has_menu() || !menu().is_open())
+            return false;
+
         if ((style() & window_style::HorizontalMenuLayout) == window_style::HorizontalMenuLayout)
         {
             switch (aScanCode)
@@ -332,24 +335,20 @@ namespace neogfx
 
     bool popup_menu::key_released(scan_code_e, key_code_e, key_modifier)
     {
+        if (!has_menu() || !menu().is_open())
+            return false;
+
         return true;
     }
 
     bool popup_menu::text_input(i_string const& aText)
     {
+        if (!has_menu() || !menu().is_open())
+            return false;
+
         if (aText != "\r" && aText != "\n")
-        {
-            bool dismiss = false;
-            menu().dismiss_on_text_input()(aText, dismiss);
-            if (!dismiss)
-                service<i_basic_services>().system_beep();
-            else
-            {
-                menu().clear_selection();
-                menu().close();
-                return false;
-            }
-        }
+            service<i_basic_services>().system_beep();
+
         return true;
     }
 

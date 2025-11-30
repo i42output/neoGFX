@@ -27,6 +27,11 @@ namespace neogfx
     {
     }
 
+    bool keyboard_grabber::is_filter_processing_event() const
+    {
+        return iFiltering;
+    }
+
     bool keyboard_grabber::is_processing_event() const
     {
         return iProcessingEvent;
@@ -34,6 +39,12 @@ namespace neogfx
 
     bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
+        {
+            neolib::scoped_flag sf{ iFiltering };
+            for (auto& f : iKeyboard.iFilters)
+                if (f->key_pressed(aScanCode, aKeyCode, aKeyModifier))
+                    return true;
+        }
         neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->key_pressed(aScanCode, aKeyCode, aKeyModifier))
@@ -43,6 +54,12 @@ namespace neogfx
 
     bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
+        {
+            neolib::scoped_flag sf{ iFiltering };
+            for (auto& f : iKeyboard.iFilters)
+                if (f->key_released(aScanCode, aKeyCode, aKeyModifier))
+                    return true;
+        }
         neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->key_released(aScanCode, aKeyCode, aKeyModifier))
@@ -52,6 +69,12 @@ namespace neogfx
 
     bool keyboard_grabber::text_input(i_string const& aText)
     {
+        {
+            neolib::scoped_flag sf{ iFiltering };
+            for (auto& f : iKeyboard.iFilters)
+                if (f->text_input(aText))
+                    return true;
+        }
         neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->text_input(aText))
@@ -61,6 +84,12 @@ namespace neogfx
 
     bool keyboard_grabber::sys_text_input(i_string const& aText)
     {
+        {
+            neolib::scoped_flag sf{ iFiltering };
+            for (auto& f : iKeyboard.iFilters)
+                if (f->sys_text_input(aText))
+                    return true;
+        }
         neolib::scoped_flag sf{ iProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->sys_text_input(aText))
@@ -89,6 +118,26 @@ namespace neogfx
     void keyboard::clear_event_modifiers()
     {
         iEventModifiers = std::nullopt;
+    }
+
+    void keyboard::filter_keyboard(i_keyboard_handler& aKeyboardHandler, bool aFront)
+    {
+        if (aFront)
+            iFilters.push_front(&aKeyboardHandler);
+        else
+            iFilters.push_back(&aKeyboardHandler);
+    }
+
+    void keyboard::unfilter_keyboard(i_keyboard_handler& aKeyboardHandler)
+    {
+        auto filter = std::find(iFilters.begin(), iFilters.end(), &aKeyboardHandler);
+        if (filter != iFilters.end())
+            iFilters.erase(filter);
+    }
+
+    bool keyboard::is_filter_processing_event() const
+    {
+        return iGrabber.is_filter_processing_event();
     }
 
     bool keyboard::is_keyboard_grabbed() const

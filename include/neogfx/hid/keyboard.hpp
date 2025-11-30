@@ -35,6 +35,7 @@ namespace neogfx
     public:
         keyboard_grabber(keyboard& aKeyboard);
     public:
+        bool is_filter_processing_event() const;
         bool is_processing_event() const;
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
@@ -43,6 +44,7 @@ namespace neogfx
         bool sys_text_input(i_string const& aText) override;
     private:
         keyboard& iKeyboard;
+        bool iFiltering = false;
         bool iProcessingEvent = false;
     };
 
@@ -63,6 +65,9 @@ namespace neogfx
         void set_event_modifiers(key_modifier aModifiers) override;
         void clear_event_modifiers() override;
     public:
+        void filter_keyboard(i_keyboard_handler& aKeyboardHandler, bool aFront = true) override;
+        void unfilter_keyboard(i_keyboard_handler& aKeyboardHandler) override;
+        bool is_filter_processing_event() const override;
         bool is_keyboard_grabbed() const override;
         bool is_keyboard_grabbed_by(i_keyboard_handler& aKeyboardHandler) const override;
         bool is_front_grabber(i_keyboard_handler& aKeyboardHandler) const override;
@@ -71,8 +76,9 @@ namespace neogfx
         i_keyboard_handler& grabber() const override;
         bool is_grabber_processing_event() const override;
     private:
-        mutable keyboard_grabber iGrabber;
+        std::deque<i_keyboard_handler*> iFilters;
         std::deque<i_keyboard_handler*> iGrabs;
+        mutable keyboard_grabber iGrabber;
         std::optional<key_modifier> iEventModifiers;
     };
 }
