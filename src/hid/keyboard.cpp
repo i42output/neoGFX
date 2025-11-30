@@ -29,23 +29,23 @@ namespace neogfx
 
     bool keyboard_grabber::is_filter_processing_event() const
     {
-        return iFiltering;
+        return iFilterProcessingEvent;
     }
 
-    bool keyboard_grabber::is_processing_event() const
+    bool keyboard_grabber::is_grabber_processing_event() const
     {
-        return iProcessingEvent;
+        return iGrabberProcessingEvent;
     }
 
     bool keyboard_grabber::key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         {
-            neolib::scoped_flag sf{ iFiltering };
+            neolib::scoped_flag sf{ iFilterProcessingEvent };
             for (auto& f : iKeyboard.iFilters)
                 if (f->key_pressed(aScanCode, aKeyCode, aKeyModifier))
                     return true;
         }
-        neolib::scoped_flag sf{ iProcessingEvent };
+        neolib::scoped_flag sf{ iGrabberProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->key_pressed(aScanCode, aKeyCode, aKeyModifier))
                 return true;
@@ -55,12 +55,12 @@ namespace neogfx
     bool keyboard_grabber::key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier)
     {
         {
-            neolib::scoped_flag sf{ iFiltering };
+            neolib::scoped_flag sf{ iFilterProcessingEvent };
             for (auto& f : iKeyboard.iFilters)
                 if (f->key_released(aScanCode, aKeyCode, aKeyModifier))
                     return true;
         }
-        neolib::scoped_flag sf{ iProcessingEvent };
+        neolib::scoped_flag sf{ iGrabberProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->key_released(aScanCode, aKeyCode, aKeyModifier))
                 return true;
@@ -70,12 +70,12 @@ namespace neogfx
     bool keyboard_grabber::text_input(i_string const& aText)
     {
         {
-            neolib::scoped_flag sf{ iFiltering };
+            neolib::scoped_flag sf{ iFilterProcessingEvent };
             for (auto& f : iKeyboard.iFilters)
                 if (f->text_input(aText))
                     return true;
         }
-        neolib::scoped_flag sf{ iProcessingEvent };
+        neolib::scoped_flag sf{ iGrabberProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->text_input(aText))
                 return true;
@@ -85,12 +85,12 @@ namespace neogfx
     bool keyboard_grabber::sys_text_input(i_string const& aText)
     {
         {
-            neolib::scoped_flag sf{ iFiltering };
+            neolib::scoped_flag sf{ iFilterProcessingEvent };
             for (auto& f : iKeyboard.iFilters)
                 if (f->sys_text_input(aText))
                     return true;
         }
-        neolib::scoped_flag sf{ iProcessingEvent };
+        neolib::scoped_flag sf{ iGrabberProcessingEvent };
         for (auto& g : iKeyboard.iGrabs)
             if (g->sys_text_input(aText))
                 return true;
@@ -179,6 +179,6 @@ namespace neogfx
 
     bool keyboard::is_grabber_processing_event() const
     {
-        return iGrabber.is_processing_event();
+        return iGrabber.is_grabber_processing_event();
     }
 }

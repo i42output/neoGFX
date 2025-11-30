@@ -36,7 +36,7 @@ namespace neogfx
         keyboard_grabber(keyboard& aKeyboard);
     public:
         bool is_filter_processing_event() const;
-        bool is_processing_event() const;
+        bool is_grabber_processing_event() const;
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
@@ -44,8 +44,8 @@ namespace neogfx
         bool sys_text_input(i_string const& aText) override;
     private:
         keyboard& iKeyboard;
-        bool iFiltering = false;
-        bool iProcessingEvent = false;
+        bool iFilterProcessingEvent = false;
+        bool iGrabberProcessingEvent = false;
     };
 
     class keyboard : public hid_device<i_keyboard>
