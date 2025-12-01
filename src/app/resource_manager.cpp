@@ -33,6 +33,8 @@ namespace neogfx
 {    
     resource_manager::resource_manager()
     {
+        if (!service_provider_allocated())
+            allocate_service_provider();
     }
     
     resource_manager& resource_manager::instance()
