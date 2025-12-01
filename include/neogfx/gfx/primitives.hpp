@@ -36,6 +36,20 @@
 
 namespace neogfx
 {
+    enum class front_face : std::uint32_t
+    {
+        CW,
+        CCW
+    };
+
+    enum class face_culling : std::uint32_t
+    {
+        None,
+        Front,
+        Back,
+        FrontAndBack
+    };
+
     enum class blending_mode : std::uint32_t
     {
         None,

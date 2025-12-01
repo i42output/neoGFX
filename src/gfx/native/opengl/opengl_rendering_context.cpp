@@ -273,6 +273,8 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
+        set_front_face(front_face());
+        set_face_culling(face_culling());
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]() 
@@ -299,6 +301,8 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
+        set_front_face(front_face());
+        set_face_culling(face_culling());
         set_blending_mode(aBlendingMode);
         set_smoothing_mode(neogfx::smoothing_mode::AntiAlias);
         iSink += render_target().target_deactivating([&]()
@@ -326,6 +330,8 @@ namespace neogfx
         iSnapToPixelUsesOffset{ true },
         iUseDefaultShaderProgram{ *this, rendering_engine().default_shader_program() }
     {
+        set_front_face(aOther.front_face());
+        set_face_culling(aOther.face_culling());
         set_blending_mode(aOther.blending_mode());
         set_smoothing_mode(aOther.smoothing_mode());
         iSink += render_target().target_deactivating([&]()
@@ -517,6 +523,12 @@ namespace neogfx
                 break;
             case graphics_operation::operation_type::SnapToPixelOff:
                 set_snap_to_pixel(false);
+                break;
+            case graphics_operation::operation_type::SetFrontFace:
+                set_front_face(static_variant_cast<const graphics_operation::set_front_face&>(*(std::prev(opBatch.cend()))).frontFace);
+                break;
+             case graphics_operation::operation_type::SetCullFaces:
+                set_face_culling(static_variant_cast<const graphics_operation::set_face_culling&>(*(std::prev(opBatch.cend()))).culling);
                 break;
             case graphics_operation::operation_type::SetOpacity:
                 set_opacity(static_variant_cast<const graphics_operation::set_opacity&>(*(std::prev(opBatch.cend()))).opacity);
@@ -732,7 +744,60 @@ namespace neogfx
             glCheck(glDisable(GL_SAMPLE_SHADING));
         }
     }
-    
+
+    front_face opengl_rendering_context::front_face() const
+    {
+        return iFrontFace.value_or(neogfx::front_face::CCW);
+    }
+
+    void opengl_rendering_context::set_front_face(neogfx::front_face aFrontFace)
+    {
+        if (iFrontFace == std::nullopt || iFrontFace != aFrontFace)
+        {
+            iFrontFace = aFrontFace;
+            switch (iFrontFace.value())
+            {
+            case neogfx::front_face::CCW:
+                glCheck(glFrontFace(GL_CCW));
+                break;
+            case neogfx::front_face::CW:
+                glCheck(glFrontFace(GL_CW));
+                break;
+            }
+        }
+    }
+
+    face_culling opengl_rendering_context::face_culling() const
+    {
+        return iFaceCulling.value_or(face_culling::None);
+    }
+
+    void opengl_rendering_context::set_face_culling(neogfx::face_culling aCulling)
+    {
+        if (iFaceCulling == std::nullopt || iFaceCulling != aCulling)
+        {
+            iFaceCulling = aCulling;
+            switch (iFaceCulling.value())
+            {
+            case neogfx::face_culling::None:
+                glCheck(glDisable(GL_CULL_FACE));
+                break;
+            case neogfx::face_culling::Front:
+                glCheck(glCullFace(GL_FRONT));
+                glCheck(glEnable(GL_CULL_FACE));
+                break;
+            case neogfx::face_culling::Back:
+                glCheck(glCullFace(GL_BACK));
+                glCheck(glEnable(GL_CULL_FACE));
+                break;
+            case neogfx::face_culling::FrontAndBack:
+                glCheck(glCullFace(GL_FRONT_AND_BACK));
+                glCheck(glEnable(GL_CULL_FACE));
+                break;
+            }
+        }
+    }
+
     void opengl_rendering_context::set_opacity(double aOpacity)
     {
         iOpacity = aOpacity;

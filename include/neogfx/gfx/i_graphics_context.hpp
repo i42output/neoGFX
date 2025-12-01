@@ -177,6 +177,12 @@ namespace neogfx
     public:
         virtual void scissor_on(rect const& aRect) const = 0;
         virtual void scissor_off() const = 0;
+        // rendering
+    public:
+        virtual neogfx::front_face front_face() const = 0;
+        virtual void set_front_face(neogfx::front_face aFrontFace) const = 0;
+        virtual neogfx::face_culling face_culling() const = 0;
+        virtual void set_face_culling(neogfx::face_culling aCulling) const = 0;
         // anti-aliasing
     public:
         virtual neogfx::smoothing_mode smoothing_mode() const = 0;
@@ -486,6 +492,23 @@ namespace neogfx
     private:
         i_graphics_context const& iGc;
         bool iPreviousSnapped;
+    };
+
+    class scoped_face_culling
+    {
+    public:
+        scoped_face_culling(i_graphics_context const& aGc, face_culling aCulling) :
+            iGc{ aGc }, iPreviousCulling{ aGc.face_culling() }
+        {
+            iGc.set_face_culling(aCulling);
+        }
+        ~scoped_face_culling()
+        {
+            iGc.set_face_culling(iPreviousCulling);
+        }
+    private:
+        i_graphics_context const& iGc;
+        face_culling iPreviousCulling;
     };
 
     class scoped_opacity

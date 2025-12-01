@@ -82,6 +82,16 @@ namespace neogfx
         {
         };
 
+        struct set_front_face
+        {
+            front_face frontFace;
+        };
+
+        struct set_face_culling
+        {
+            face_culling culling;
+        };
+
         struct set_opacity
         {
             double opacity;
@@ -304,6 +314,8 @@ namespace neogfx
             scissor_off,
             snap_to_pixel_on,
             snap_to_pixel_off,
+            set_front_face,
+            set_face_culling,
             set_opacity,
             set_blending_mode,
             set_smoothing_mode,
@@ -350,6 +362,8 @@ namespace neogfx
             ScissorOff,
             SnapToPixelOn,
             SnapToPixelOff,
+            SetFrontFace,
+            SetCullFaces,
             SetOpacity,
             SetBlendingMode,
             SetSmoothingMode,

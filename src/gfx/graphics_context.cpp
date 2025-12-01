@@ -102,6 +102,8 @@ namespace neogfx
         iExtents{ aSurface.extents() },
         iLayer{ LayerWidget },
         iSnapToPixel{ false },
+        iFrontFace{ neogfx::front_face::CCW },
+        iCulling{ neogfx::face_culling::None }, 
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -117,6 +119,8 @@ namespace neogfx
         iExtents{ aSurface.extents() },
         iLayer{ LayerWidget },
         iSnapToPixel{ false },
+        iFrontFace{ neogfx::front_face::CCW },
+        iCulling{ neogfx::face_culling::None },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -133,6 +137,8 @@ namespace neogfx
         iExtents{ aWidget.extents() },
         iLayer{ LayerWidget },
         iSnapToPixel{ false },
+        iFrontFace{ neogfx::front_face::CCW },
+        iCulling{ neogfx::face_culling::None },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -149,6 +155,8 @@ namespace neogfx
         iExtents{ aTexture.extents() },
         iLayer{ LayerWidget },
         iSnapToPixel{ false },
+        iFrontFace{ neogfx::front_face::CCW },
+        iCulling{ neogfx::face_culling::None },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -168,6 +176,8 @@ namespace neogfx
         iLogicalCoordinateSystem{ aOther.iLogicalCoordinateSystem },
         iLogicalCoordinates{ aOther.iLogicalCoordinates },
         iSnapToPixel{ aOther.iSnapToPixel },
+        iFrontFace{ neogfx::front_face::CCW },
+        iCulling{ neogfx::face_culling::None },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -931,6 +941,34 @@ namespace neogfx
         {
             iBlendingMode = aBlendingMode;
             native_context().enqueue(graphics_operation::set_blending_mode{ aBlendingMode });
+        }
+    }
+
+    front_face graphics_context::front_face() const
+    {
+        return iFrontFace;
+    }
+
+    void graphics_context::set_front_face(neogfx::front_face aFrontFace) const
+    {
+        if (iFrontFace != aFrontFace)
+        {
+            iFrontFace = aFrontFace;
+            native_context().enqueue(graphics_operation::set_front_face{ aFrontFace });
+        }
+    }
+
+    face_culling graphics_context::face_culling() const
+    {
+        return iCulling;
+    }
+
+    void graphics_context::set_face_culling(neogfx::face_culling aCulling) const
+    {
+        if (iCulling != aCulling)
+        {
+            iCulling = aCulling;
+            native_context().enqueue(graphics_operation::set_face_culling{ aCulling });
         }
     }
 

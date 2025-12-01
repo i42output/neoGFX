@@ -94,6 +94,12 @@ namespace neogfx
     public:
         void scissor_on(rect const& aRect) const final;
         void scissor_off() const final;
+        // rendering
+    public:
+        neogfx::front_face front_face() const final;
+        void set_front_face(neogfx::front_face aFrontFace) const final;
+        neogfx::face_culling face_culling() const final;
+        void set_face_culling(neogfx::face_culling aCulling) const final;
         // anti-aliasing
     public:
         neogfx::smoothing_mode smoothing_mode() const final;
@@ -274,6 +280,8 @@ namespace neogfx
         mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
         mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
         mutable bool iSnapToPixel;
+        mutable neogfx::front_face iFrontFace;
+        mutable neogfx::face_culling iCulling;
         mutable double iOpacity;
         mutable neogfx::blending_mode iBlendingMode;
         mutable neogfx::smoothing_mode iSmoothingMode;

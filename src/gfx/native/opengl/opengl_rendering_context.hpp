@@ -278,6 +278,7 @@ namespace neogfx
         void set_offset(const optional_vec2& aOffset) override;
         bool gradient_set() const override;
         void apply_gradient(i_gradient_shader& aShader) override;
+    public:
         bool snap_to_pixel() const;
         void set_snap_to_pixel(bool aSnapToPixel);
         void scissor_on(const rect& aRect);
@@ -287,6 +288,10 @@ namespace neogfx
         void set_multisample(bool aMultisample);
         void enable_sample_shading(double aSampleShadingRate);
         void disable_sample_shading();
+        neogfx::front_face front_face() const;
+        void set_front_face(neogfx::front_face aFrontFace);
+        neogfx::face_culling face_culling() const;
+        void set_face_culling(neogfx::face_culling aCullinge);
         void set_opacity(double aOpacity);
         neogfx::blending_mode blending_mode() const;
         void set_blending_mode(neogfx::blending_mode aBlendingMode);
@@ -347,6 +352,8 @@ namespace neogfx
         point iOrigin;
         bool iMultisample;
         std::optional<double> iSampleShadingRate;
+        std::optional<neogfx::front_face> iFrontFace;
+        std::optional<neogfx::face_culling> iFaceCulling;
         double iOpacity;
         std::optional<neogfx::blending_mode> iBlendingMode;
         std::optional<neogfx::smoothing_mode> iSmoothingMode;

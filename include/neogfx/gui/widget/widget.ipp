@@ -1296,6 +1296,10 @@ namespace neogfx
         aGc.set_default_font(font());
 
         scoped_snap_to_pixel snap{ aGc };
+
+        /// @todo Consider defaulting to back face culling once all drawing primitives use CCW winding
+        scoped_face_culling cull{ aGc, face_culling::None };
+
         scoped_opacity sc{ aGc, effectively_enabled() ? opacity() : opacity() * 0.75 };
 
         {
