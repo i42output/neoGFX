@@ -39,6 +39,7 @@ namespace neogfx
         define_declared_event(TargetActivated, target_activated)
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
+        define_declared_event(TargetDestroying, target_destroying)
     public:
         struct unsupported_color_format : std::runtime_error { unsupported_color_format() : std::runtime_error("neogfx::vulkan_texture::unsupported_color_format") {} };
         struct multisample_texture_initialization_unsupported : std::logic_error { multisample_texture_initialization_unsupported() : std::logic_error("neogfx::vulkan_texture::multisample_texture_initialization_unsupported") {} };

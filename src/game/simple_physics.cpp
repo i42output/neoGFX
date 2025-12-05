@@ -68,12 +68,15 @@ namespace neogfx::game
 
         std::optional<scoped_component_lock<entity_info, mesh_render_cache, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
 
-        auto const now = ecs().system<game::time>().system_time();
-        auto& worldClock = ecs().shared_component<game::clock>()[0];
-        auto const& physicalConstants = ecs().shared_component<physics>()[0];
+        thread_local auto const& time = ecs().system<game::time>();
+        auto const now = time.system_time();
+        thread_local auto& clock = ecs().shared_component<game::clock>();
+        auto& worldClock = clock[0];
+        thread_local auto const& physicalConstants = ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3f{};
-        auto& rigidBodies = ecs().component<rigid_body>();
+        thread_local auto& infos = ecs().component<entity_info>();
+        thread_local auto& rigidBodies = ecs().component<rigid_body>();
         bool didWork = false;
         auto currentTimestep = worldClock.timestep;
         auto nextTime = worldClock.time + currentTimestep;
@@ -100,7 +103,7 @@ namespace neogfx::game
             for (auto& rigidBody1 : rigidBodies.component_data())
             {
                 auto entity1 = rigidBodies.entity(rigidBody1);
-                auto const& entity1Info = ecs().component<entity_info>().entity_record(entity1);
+                auto const& entity1Info = infos.entity_record(entity1);
                 if (entity1Info.destroyed)
                     continue; // todo: add support for skip iterators
                 vec3f totalForce = rigidBody1.mass * uniformGravity;
@@ -110,7 +113,7 @@ namespace neogfx::game
                     {
                         auto& rigidBody2 = *iterRigidBody2;
                         auto entity2 = rigidBodies.entity(rigidBody2);
-                        auto const& entity2Info = ecs().component<entity_info>().entity_record(entity2);
+                        auto const& entity2Info = infos.entity_record(entity2);
                         if (entity2Info.destroyed)
                             continue; // todo: add support for skip iterators
                         vec3f distance = rigidBody1.position - rigidBody2.position;

@@ -250,6 +250,10 @@ namespace neogfx
         try
         {
             TODO;
+
+            TargetDestroying.trigger();
+
+            service<i_rendering_engine>().remove_target(*this);
         }
         catch (...)
         {

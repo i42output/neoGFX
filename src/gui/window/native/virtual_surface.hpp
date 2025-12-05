@@ -42,6 +42,7 @@ namespace neogfx
         define_declared_event(TargetActivated, target_activated)
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
+        define_declared_event(TargetDestroying, target_destroying)
     public:
         virtual_surface(i_rendering_engine& aRenderingEngine, i_surface_window& aWindow);
         ~virtual_surface();

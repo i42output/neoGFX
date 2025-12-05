@@ -90,6 +90,7 @@ namespace neogfx
         virtual void deactivate_context() = 0;
         virtual handle create_context(const i_render_target& aTarget) = 0;
         virtual void destroy_context(handle aContext) = 0;
+        virtual void remove_target(const i_render_target& aTarget) = 0;
     public:
         virtual const shader_program_list& shader_programs() const = 0;
         virtual const i_shader_program& shader_program(const neolib::i_string& aName) const = 0;

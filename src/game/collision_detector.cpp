@@ -111,13 +111,14 @@ namespace neogfx::game
         if (ecs().component_instantiated<box_collider>())
         {
             scoped_component_lock<entity_info, box_collider, mesh_filter, animation_filter, rigid_body> lock{ ecs() };
-            auto const& meshFilters = ecs().component<mesh_filter>();
-            auto const& animatedMeshFilters = ecs().component<animation_filter>();
-            auto const& rigidBodies = ecs().component<rigid_body>();
-            auto& boxColliders = ecs().component<box_collider>();
+            thread_local auto const& infos = ecs().component<entity_info>();
+            thread_local auto const& meshFilters = ecs().component<mesh_filter>();
+            thread_local auto const& animatedMeshFilters = ecs().component<animation_filter>();
+            thread_local auto const& rigidBodies = ecs().component<rigid_body>();
+            thread_local auto& boxColliders = ecs().component<box_collider>();
             for (auto entity : boxColliders.entities())
             {
-                auto const& info = ecs().component<entity_info>().entity_record(entity);
+                auto const& info = infos.entity_record(entity);
                 if (info.destroyed)
                     continue; // todo: add support for skip iterators
                 // todo: only update collider AABBs if rigid_body changes require it
@@ -144,13 +145,14 @@ namespace neogfx::game
         if (ecs().component_instantiated<box_collider_2d>())
         {
             scoped_component_lock<entity_info, box_collider_2d, mesh_filter, animation_filter, rigid_body> lock{ ecs() };
-            auto const& meshFilters = ecs().component<mesh_filter>();
-            auto const& animatedMeshFilters = ecs().component<animation_filter>();
-            auto const& rigidBodies = ecs().component<rigid_body>();
-            auto& boxColliders2d = ecs().component<box_collider_2d>();
+            thread_local auto const& infos = ecs().component<entity_info>();
+            thread_local auto const& meshFilters = ecs().component<mesh_filter>();
+            thread_local auto const& animatedMeshFilters = ecs().component<animation_filter>();
+            thread_local auto const& rigidBodies = ecs().component<rigid_body>();
+            thread_local auto& boxColliders2d = ecs().component<box_collider_2d>();
             for (auto entity : boxColliders2d.entities())
             {
-                auto const& info = ecs().component<entity_info>().entity_record(entity);
+                auto const& info = infos.entity_record(entity);
                 if (info.destroyed)
                     continue; // todo: add support for skip iterators
                 // todo: only update collider AABBs if rigid_body changes require it

@@ -56,6 +56,10 @@ namespace neogfx
 
     native_surface::~native_surface()
     {
+        TargetDestroying.trigger();
+
+        service<i_rendering_engine>().remove_target(*this);
+
         set_destroyed();
     }
 

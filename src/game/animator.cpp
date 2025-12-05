@@ -69,16 +69,17 @@ namespace neogfx::game
 
     void animator::update_animations()
     {
-        auto now = ecs().system<game::time>().world_time();
+        thread_local auto const& time = ecs().system<game::time>();
+        auto now = time.world_time();
 
         Animate(now);
 
-        std::unique_lock lk{ iLock };
+        thread_local auto& infos = ecs().component<entity_info>();
+        thread_local auto& filters = ecs().component<animation_filter>();
+        thread_local auto& cache = ecs().component<mesh_render_cache>();
+        thread_local auto const& worldClock = ecs().shared_component<game::clock>()[0];
 
-        auto& infos = ecs().component<entity_info>();
-        auto& filters = ecs().component<animation_filter>();
-        auto& cache = ecs().component<mesh_render_cache>();
-        auto const& worldClock = ecs().shared_component<game::clock>()[0];
+        std::unique_lock lk{ iLock };
 
         for (auto entity : filters.entities())
         {

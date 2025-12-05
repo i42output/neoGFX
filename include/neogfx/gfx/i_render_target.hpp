@@ -45,6 +45,7 @@ namespace neogfx
         declare_event(target_activated)
         declare_event(target_deactivating)
         declare_event(target_deactivated)
+        declare_event(target_destroying)
     public:
         struct failed_to_create_framebuffer : std::runtime_error { failed_to_create_framebuffer(std::string const& aReason) : std::runtime_error("neogfx::i_render_target::failed_to_create_framebuffer: Failed to create frame buffer, reason: " + aReason) {} };
         struct already_active : std::logic_error { already_active() : std::logic_error("neogfx::i_render_target::already_active") {} };

@@ -118,7 +118,7 @@ namespace neogfx
             return true;
         }
 
-        HGLRC create_opengl_context(HDC hDC)
+        HGLRC create_opengl_context(HDC hDC, HGLRC hShareContext = nullptr)
         {
             if (hDC == NULL)
                 throw renderer::failed_to_create_opengl_context("No device context!");
@@ -130,7 +130,7 @@ namespace neogfx
                 0, 0
             };
 
-            HGLRC hRC = wglCreateContextAttribsARB(hDC, 0, contextAttributes);
+            HGLRC hRC = wglCreateContextAttribsARB(hDC, hShareContext, contextAttributes);
             if (hRC == NULL)
                 throw renderer::failed_to_create_opengl_context(GetLastErrorText());
 
@@ -191,7 +191,9 @@ namespace neogfx
             iInitialized{ false },
             iVsyncEnabled{ true },
             iContext{ nullptr },
-            iCreatingWindow{ 0 }
+            iCreatingWindow{ 0 },
+            iPreviousActiveTarget{ nullptr },
+            iActiveTarget{ nullptr }
         {
             if (aRenderer != neogfx::renderer::None)
             {
@@ -245,7 +247,8 @@ namespace neogfx
             if (iInitialized && opengl_renderer::renderer() != neogfx::renderer::None)
             {
                 if (iContext != nullptr)
-                    wglMakeCurrent(static_cast<HDC>(iDefaultOffscreenWindow.lock()->device_handle()), static_cast<HGLRC>(iContext));
+                    wglMakeCurrent(static_cast<HDC>(iDefaultOffscreenWindow.lock()->device_handle()), 
+                        static_cast<HGLRC>(iContext));
                 opengl_renderer::cleanup();
                 if (iContext != nullptr)
                     destroy_context(iContext);
@@ -295,10 +298,7 @@ namespace neogfx
             //if constexpr (!ndebug)
             //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: activating context..." << std::endl;
 
-            if (iContext == nullptr)
-                iContext = static_cast<HGLRC>(create_context(aTarget));
-            else
-                aTarget.pixel_format();
+            (void)create_context(aTarget);
 
             iTargetStack.push_back(&aTarget);
 
@@ -316,43 +316,53 @@ namespace neogfx
             //if constexpr (!ndebug)
             //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: deactivating context..." << std::endl;
 
-            if (active_target() != nullptr)
-                deallocate_offscreen_window(active_target());
-
             if (iTargetStack.empty())
                 throw no_target_active();
+
             iTargetStack.pop_back();
 
-            auto activeTarget = active_target();
-            if (activeTarget != nullptr)
-            {
-                iTargetStack.pop_back();
-                activeTarget->activate_target();
-            }
-            else
-                activate_current_target();
+            iPreviousActiveTarget = iActiveTarget;
+
+            deallocate_offscreen_window(iPreviousActiveTarget);
+
+            current_target()->activate_target();
 
             //if constexpr (!ndebug)
             //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: context deactivated" << std::endl;
         }
 
-        renderer::opengl_context renderer::create_context(const i_render_target& aTarget)
+        renderer::handle renderer::create_context(const i_render_target& aTarget)
         {
             if (aTarget.target_type() == render_target_type::Surface)
             {
                 aTarget.pixel_format();
-                return create_opengl_context(static_cast<HDC>(aTarget.target_device_handle()));
+
+                if (iContext == nullptr)
+                    iContext = create_opengl_context(static_cast<HDC>(aTarget.target_device_handle()));
             }
             else
-                return create_opengl_context(static_cast<HDC>(allocate_offscreen_window(&aTarget)->device_handle()));
+            {
+                if (iContext == nullptr)
+                    iContext = create_opengl_context(static_cast<HDC>(allocate_offscreen_window(&aTarget)->device_handle()));
+            }
+            return iContext;
         }
 
-        void renderer::destroy_context(opengl_context aContext)
+        void renderer::destroy_context(handle aContext)
         {
             if (!::wglDeleteContext(static_cast<HGLRC>(aContext)))
                 throw renderer::failed_to_destroy_opengl_context(GetLastErrorText());
             if (iContext == aContext)
                 iContext = nullptr;
+        }
+
+        void renderer::remove_target(const i_render_target& aTarget)
+        {
+            if (iPreviousActiveTarget == &aTarget)
+                iPreviousActiveTarget = nullptr;
+            if (iActiveTarget == &aTarget)
+                iActiveTarget = nullptr;
+            iTargetStack.erase(std::remove(iTargetStack.begin(), iTargetStack.end(), &aTarget), iTargetStack.end());
         }
 
         void renderer::create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult)
@@ -522,6 +532,13 @@ namespace neogfx
             return pixelFormat;
         }
 
+        const i_render_target* renderer::current_target() const
+        {
+            if (!iTargetStack.empty())
+                return iTargetStack.back();
+            return iPreviousActiveTarget;
+        }
+
         std::shared_ptr<neogfx::offscreen_window> renderer::allocate_offscreen_window(const i_render_target* aRenderTarget)
         {
             auto existingWindow = iOffscreenWindows.find(aRenderTarget);
@@ -550,13 +567,25 @@ namespace neogfx
 
         void renderer::activate_current_target()
         {
+            if (iActiveTarget == current_target())
+                return;
+
+            auto previouslyActive = iActiveTarget;
+            iActiveTarget = current_target();
+
             BOOL result = FALSE;
-            if (active_target() != nullptr && active_target()->target_type() == render_target_type::Surface)
-                result = ::wglMakeCurrent(static_cast<HDC>(active_target()->target_device_handle()), static_cast<HGLRC>(iContext));
+            if (iActiveTarget->target_type() == render_target_type::Surface)
+                result = ::wglMakeCurrent(static_cast<HDC>(iActiveTarget->target_device_handle()),
+                    static_cast<HGLRC>(iContext));
             else
-                result = ::wglMakeCurrent(static_cast<HDC>(allocate_offscreen_window(active_target())->device_handle()), static_cast<HGLRC>(iContext));
+                result = ::wglMakeCurrent(static_cast<HDC>(allocate_offscreen_window(iActiveTarget)->device_handle()),
+                    static_cast<HGLRC>(iContext));
+
             if (!result)
+            {
+                iActiveTarget = previouslyActive;
                 throw failed_to_activate_opengl_context(GetLastErrorText());
+            }
 
             typedef BOOL(WINAPI * PFNWGLSWAPINTERVALEXTPROC) (int interval);
             static PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT = reinterpret_cast<PFNWGLSWAPINTERVALEXTPROC>(wglGetProcAddress("wglSwapIntervalEXT"));

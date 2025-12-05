@@ -60,32 +60,35 @@ namespace neogfx
             renderer(neogfx::renderer aRenderer);
             ~renderer();
         public:
-            void initialize() override;
-            void cleanup() override;
+            void initialize() final;
+            void cleanup() final;
         public:
-            bool vsync_enabled() const override;
-            void enable_vsync() override;
-            void disable_vsync() override;
-            pixel_format_t set_pixel_format(const i_render_target& aTarget) override;
-            const i_render_target* active_target() const override;
-            void activate_context(const i_render_target& aTarget) override;
-            void deactivate_context() override;
-            handle create_context(const i_render_target& aTarget) override;
-            void destroy_context(handle aContext) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) override;
-            bool creating_window() const override;
+            bool vsync_enabled() const final;
+            void enable_vsync() final;
+            void disable_vsync() final;
+            pixel_format_t set_pixel_format(const i_render_target& aTarget) final;
+            const i_render_target* active_target() const final;
+            void activate_context(const i_render_target& aTarget) final;
+            void deactivate_context() final;
+            handle create_context(const i_render_target& aTarget) final;
+            void destroy_context(handle aContext) final;
+            void remove_target(const i_render_target& aTarget) final;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
+            void create_window(i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const point& aPosition, const size& aDimensions, std::string const& aWindowTitle, window_style aStyle, i_ref_ptr<i_native_window>& aResult) final;
+            bool creating_window() const final;
         public:
-            void render_now() override;
-            bool use_rendering_priority() const override;
+            void render_now() final;
+            bool use_rendering_priority() const final;
         public:
             virtual bool process_events();
         public:
             static pixel_format_t set_pixel_format(void* aNativeSurfaceDevinceHandle);
+        private:
+            const i_render_target* current_target() const;
         private:
             std::shared_ptr<neogfx::offscreen_window> allocate_offscreen_window(const i_render_target* aRenderTarget);
             void deallocate_offscreen_window(const i_render_target* aRenderTarget);
@@ -96,8 +99,10 @@ namespace neogfx
             std::vector<std::shared_ptr<offscreen_window>> iOffscreenWindowPool;
             std::unordered_map<const i_render_target*, std::shared_ptr<offscreen_window>> iOffscreenWindows;
             std::weak_ptr<offscreen_window> iDefaultOffscreenWindow;
-            HGLRC iContext;
+            handle iContext;
             std::uint32_t iCreatingWindow;
+            const i_render_target* iPreviousActiveTarget;
+            const i_render_target* iActiveTarget;
             std::vector<const i_render_target*> iTargetStack;
         };
     }

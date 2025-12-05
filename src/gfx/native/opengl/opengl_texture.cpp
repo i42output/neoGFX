@@ -285,6 +285,10 @@ namespace neogfx
             glCheck(glDeleteFramebuffers(1, &iFrameBuffer));
         }
         glCheck(glDeleteTextures(1, &iHandle));
+
+        TargetDestroying.trigger();
+
+        service<i_rendering_engine>().remove_target(*this);
     }
 
     template <typename T>

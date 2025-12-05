@@ -43,6 +43,7 @@ namespace neogfx
         define_declared_event(TargetActivated, target_activated)
         define_declared_event(TargetDeactivating, target_deactivating)
         define_declared_event(TargetDeactivated, target_deactivated)
+        define_declared_event(TargetDestroying, target_destroying)
     public:
         struct bad_pause_count : std::logic_error { bad_pause_count() : std::logic_error("neogfx::native_surface::bad_pause_count") {} };
     public:
