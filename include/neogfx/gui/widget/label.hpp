@@ -125,7 +125,7 @@ namespace neogfx
         i_string const& text() const;
         void set_text(i_string const& aText);
         const texture& image() const;
-        void set_image(i_string const& aImageUri);
+        void set_image(i_string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled);
         void set_image(const neogfx::image& aImage);
         void set_image(const texture& aImage);
         label_placement placement() const;

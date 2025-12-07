@@ -117,9 +117,9 @@ namespace neogfx
         return iColor;
     }
 
-    void image_widget::set_image(i_string const& aImageUri)
+    void image_widget::set_image(i_string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
-        set_image(neogfx::image{ aImageUri });
+        set_image(neogfx::image{ aImageUri, aDpiScaleFactor, aSampling });
     }
 
     void image_widget::set_image(const i_image& aImage)
@@ -129,8 +129,8 @@ namespace neogfx
 
     void image_widget::set_image(const i_texture& aTexture)
     {
-        size oldSize = minimum_size();
-        size oldTextureSize = image().extents();
+        size const oldSize = minimum_size();
+        size const oldTextureSize = image().extents();
         iTexture = aTexture;
         ImageChanged();
         if (oldSize != minimum_size() || oldTextureSize != image().extents())
@@ -144,7 +144,18 @@ namespace neogfx
 
     void image_widget::set_image_size(const i_optional<size>& aImageSize)
     {
-        iImageSize = aImageSize;
+        if (iImageSize != aImageSize)
+        {
+            size const oldSize = minimum_size();
+            iImageSize = aImageSize;
+            if (oldSize != minimum_size())
+            {
+                ImageGeometryChanged();
+                if (visible() || effective_size_policy().ignore_visibility())
+                    update_layout(true, true);
+            }
+            update();
+        }
     }
 
     void image_widget::set_image_color(const color_or_gradient& aImageColor)

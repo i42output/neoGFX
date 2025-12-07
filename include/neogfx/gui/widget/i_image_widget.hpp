@@ -31,7 +31,7 @@ namespace neogfx
         virtual const i_texture& image() const = 0;
         virtual const i_optional<size>& image_size() const = 0;
         virtual const color_or_gradient& image_color() const = 0;
-        virtual void set_image(i_string const& aImageUri) = 0;
+        virtual void set_image(i_string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap) = 0;
         virtual void set_image(const i_image& aImage) = 0;
         virtual void set_image(const i_texture& aImage) = 0;
         virtual void set_image_size(const i_optional<size>& aImageSize) = 0;

@@ -286,9 +286,9 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline void button<ButtonInterface>::set_image(i_string const& aImageUri)
+    inline void button<ButtonInterface>::set_image(i_string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
-        label().set_image(neogfx::image{ aImageUri });
+        label().set_image(neogfx::image{ aImageUri, aDpiScaleFactor, aSampling });
     }
 
     template <typename ButtonInterface>

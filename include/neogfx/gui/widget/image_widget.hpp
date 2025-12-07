@@ -52,7 +52,7 @@ namespace neogfx
         const texture& image() const override;
         const optional_size& image_size() const override;
         const color_or_gradient& image_color() const override;
-        void set_image(i_string const& aImageUri) override;
+        void set_image(i_string const& aImageUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap) override;
         void set_image(const i_image& aImage) override;
         void set_image(const i_texture& aImage) override;
         void set_image_size(const i_optional<size>& aImageSize) override;

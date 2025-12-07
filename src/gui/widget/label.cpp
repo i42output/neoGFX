@@ -310,9 +310,9 @@ namespace neogfx
         return image_widget().image();
     }
 
-    void label::set_image(i_string const& aImageUri)
+    void label::set_image(i_string const& aImageUri, dimension aDpiScaleFactor, texture_sampling aSampling)
     {
-        image_widget().set_image(aImageUri);
+        image_widget().set_image(aImageUri, aDpiScaleFactor, aSampling);
     }
 
     void label::set_image(const neogfx::image& aImage)
