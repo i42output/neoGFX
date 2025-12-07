@@ -75,6 +75,13 @@ namespace neogfx
         BottomRight,
         BottomLeft
     };
+
+    enum class axis : std::uint32_t
+    {
+        X,
+        Y,
+        Z
+    };
 }
 
 begin_declare_enum(neogfx::size_constraint)
@@ -118,6 +125,12 @@ declare_enum_string(neogfx::corner, TopRight)
 declare_enum_string(neogfx::corner, BottomRight)
 declare_enum_string(neogfx::corner, BottomLeft)
 end_declare_enum(neogfx::corner)
+
+begin_declare_enum(neogfx::axis)
+declare_enum_string(neogfx::axis, X)
+declare_enum_string(neogfx::axis, Y)
+declare_enum_string(neogfx::axis, Z)
+end_declare_enum(neogfx::axis)
 
 namespace neogfx
 {

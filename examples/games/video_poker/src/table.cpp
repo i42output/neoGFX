@@ -127,12 +127,12 @@ namespace video_poker
         iSpacer3.set_weight(ng::size{ 0.25 });
         iSpacer4.set_weight(ng::size{ 0.1 });
         iGambleLayout.set_size_policy(ng::size_policy{ ng::size_constraint::Expanding, ng::size_constraint::Minimum });
-        iAddCredit.image_widget().set_minimum_size(ng::size{64.0_dip, 64.0_dip});
-        iAddCredit.set_size_policy(ng::size_constraint::Expanding, ng::visibility_constraint::Consider, ng::size{ 1.0 });
+        iAddCredit.image_widget().set_minimum_size(ng::size{48.0_dip, 48.0_dip});
+        iAddCredit.set_size_policy(ng::size_constraint::Expanding, ng::visibility_constraint::Consider, ng::size{ 1.2, 1.0 });
         iAddCredit.set_weight(ng::size{ 0.0 });
         auto set_bet_button_appearance = [](ng::push_button& aButton)
         {
-            aButton.set_size_policy(ng::size_constraint::Expanding, ng::visibility_constraint::Consider, ng::size{ 1.0 });
+            aButton.set_size_policy(ng::size_constraint::Expanding, ng::visibility_constraint::Consider, ng::size{ 1.2, 1.0 });
             aButton.set_weight(ng::size{ 0.0 });
             aButton.set_base_color(ng::color::White);
             aButton.text_widget().set_size_hint(ng::size_hint{ "MAX\nBET" });
@@ -143,7 +143,7 @@ namespace video_poker
         set_bet_button_appearance(iBetPlus);
         set_bet_button_appearance(iBetMax);
         set_bet_button_appearance(iDeal);
-        ng::layout_as_same_size(iAddCredit, iBetMinus);
+        ng::layout_as_same_size(iBetMinus, iAddCredit);
         iLabelCredits.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 }.with_outline({ 1.0_dp }));
         iLabelCredits.text_widget().set_text_format(shiny_text(ng::color::Yellow));
         iLabelCreditsValue.text_widget().set_font(ng::font{ "Exo 2", "Black", 36.0 }.with_outline({ 1.0_dp }));

@@ -327,7 +327,7 @@ namespace neogfx
 
     void text_widget::init()
     {
-        set_padding(neogfx::padding{ 0.0 });
+        set_padding(neogfx::padding{});
         set_ignore_mouse_events(true);
         auto style_changed = [&]()
         {
