@@ -82,7 +82,7 @@ namespace neogfx::DesignStudio
         ref_ptr<i_console_client_manager> iClientManager;
         elements_ordered_t iElementsOrdered;
         elements_t iElements;
-        mutable std::map<color, std::map<std::string, texture>> iIcons;
+        mutable std::map<color, std::map<string, texture>> iIcons;
         action iSeparator;
         action iNewScript;
         action iStartDebugging;

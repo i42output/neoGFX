@@ -32,7 +32,7 @@ namespace neogfx
         init();
     }
 
-    dialog::dialog(std::string const& aDialogTitle, window_style aStyle) :
+    dialog::dialog(string const& aDialogTitle, window_style aStyle) :
         window{ aDialogTitle, aStyle }
     {
         init();
@@ -44,7 +44,7 @@ namespace neogfx
         init();
     }
 
-    dialog::dialog(const size& aDimensions, std::string const& aDialogTitle, window_style aStyle) :
+    dialog::dialog(const size& aDimensions, string const& aDialogTitle, window_style aStyle) :
         window{ aDimensions, aDialogTitle, aStyle }
     {
         init();
@@ -56,7 +56,7 @@ namespace neogfx
         init();
     }
 
-    dialog::dialog(const point& aPosition, const size& aDimensions, std::string const& aDialogTitle, window_style aStyle) :
+    dialog::dialog(const point& aPosition, const size& aDimensions, string const& aDialogTitle, window_style aStyle) :
         window{ rect{ aPosition, aDimensions }, aDialogTitle, aStyle }
     {
         init();
@@ -68,7 +68,7 @@ namespace neogfx
         init();
     }
 
-    dialog::dialog(i_widget& aParent, std::string const& aDialogTitle, window_style aStyle) :
+    dialog::dialog(i_widget& aParent, string const& aDialogTitle, window_style aStyle) :
         window{ aParent, aDialogTitle, aStyle }
     {
         init();
@@ -80,7 +80,7 @@ namespace neogfx
         init();
     }
 
-    dialog::dialog(i_widget& aParent, const size& aDimensions, std::string const& aDialogTitle, window_style aStyle) :
+    dialog::dialog(i_widget& aParent, const size& aDimensions, string const& aDialogTitle, window_style aStyle) :
         window{ aParent, aDimensions, aDialogTitle, aStyle }
     {
         init();
@@ -92,7 +92,7 @@ namespace neogfx
         init();
     }
 
-    dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, std::string const& aDialogTitle, window_style aStyle) :
+    dialog::dialog(i_widget& aParent, const point& aPosition, const size& aDimensions, string const& aDialogTitle, window_style aStyle) :
         window{ aParent, rect{ aPosition, aDimensions }, aDialogTitle, aStyle }
     {
         init();

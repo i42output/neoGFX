@@ -78,6 +78,6 @@ namespace neogfx::DesignStudio
         std::string iPluginPath;
         elements_ordered_t iElementsOrdered;
         elements_t iElements;
-        mutable std::map<color, std::map<std::string, texture>> iIcons;
+        mutable std::map<color, std::map<string, texture>> iIcons;
     };
 }

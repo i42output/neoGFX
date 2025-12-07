@@ -50,6 +50,12 @@ namespace neogfx
         {
             add_module_resource(string{ aUri }, aResourceData, aResourceSize);
         }
+        ref_ptr<i_resource> load_resource(i_string const& aUri)
+        {
+            ref_ptr<i_resource> result;
+            load_resource(aUri, result);
+            return result;
+        }
         ref_ptr<i_resource> load_resource(std::string const& aUri)
         {
             ref_ptr<i_resource> result;

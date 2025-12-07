@@ -698,8 +698,8 @@ namespace neogfx
     public:
         declare_event(key_pressed, scan_code_e, key_code_e, key_modifier)
         declare_event(key_released, scan_code_e, key_code_e, key_modifier)
-        declare_event(text_input, std::string const&)
-        declare_event(sys_text_input, std::string const&)
+        declare_event(text_input, i_string const&)
+        declare_event(sys_text_input, i_string const&)
         declare_event(input_language_changed)
     public:
         struct no_grab : std::logic_error { no_grab() : std::logic_error("neogfx::i_keyboard::no_grab") {} };
@@ -744,10 +744,10 @@ namespace neogfx
         typedef std::pair<key_code_e, std::set<key_modifier>> combo_type;
         typedef std::vector<combo_type> sequence_type;
     public:
-        explicit key_sequence(std::string const& aSequence) : iText{ aSequence }
+        explicit key_sequence(string const& aSequence) : iText{ aSequence }
         {
             std::vector<neolib::ci_string> sequenceBits;
-            neolib::tokens(neolib::make_ci_string(aSequence), neolib::ci_string(", "), sequenceBits);
+            neolib::tokens(neolib::make_ci_string(aSequence.to_std_string()), neolib::ci_string(", "), sequenceBits);
             for (auto const& combo : sequenceBits)
             {
                 combo_type nextCombo;

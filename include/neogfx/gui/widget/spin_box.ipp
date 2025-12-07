@@ -20,7 +20,7 @@
 #pragma once
 
 #include <cmath>
-#include <boost/format.hpp>
+#include <format>
 #include <neolib/core/scoped.hpp>
 #include <neogfx/app/i_app.hpp>
 #include <neogfx/app/i_basic_services.hpp>
@@ -41,7 +41,7 @@ namespace neogfx
         iMaximum{},
         iStep{},
         iValue{},
-        iFormat{ "%1%" }
+        iFormat{ "{0}" }
     {
         init();
     }
@@ -58,7 +58,7 @@ namespace neogfx
         iMaximum{},
         iStep{},
         iValue{},
-        iFormat{ "%1%" }
+        iFormat{ "{0}" }
     {
         init();
     }
@@ -75,7 +75,7 @@ namespace neogfx
         iMaximum{},
         iStep{},
         iValue{},
-        iFormat{ "%1%" }
+        iFormat{ "{0}" }
     {
         init();
     }
@@ -178,7 +178,7 @@ namespace neogfx
     };
 
     template <typename T>
-    inline std::optional<T> basic_spin_box<T>::string_to_value(std::string const& aText) const
+    inline std::optional<T> basic_spin_box<T>::string_to_value(i_string const& aText) const
     {
         if (aText.empty())
             return std::optional<value_type>{};
@@ -187,7 +187,7 @@ namespace neogfx
             return result;
         if (aText == "-")
             return result;
-        std::istringstream iss(aText);
+        std::istringstream iss{ aText.to_std_string() };
         if (!(iss >> result))
             return std::optional<value_type>{};
         std::string guff;
@@ -217,9 +217,9 @@ namespace neogfx
         iStepDownButton.DoubleClicked.set_trigger_type(trigger_type::Synchronous);
         iTextBox.set_frame_style(frame_style::NoFrame);
 
-        iSink += iTextBox.TextFilter([this](std::string const& aText, bool& aAccept)
+        iSink += iTextBox.TextFilter([this](i_string const& aText, bool& aAccept)
             {
-                aAccept = aText.find_first_not_of(valid_text_characters()) == std::string::npos;
+                aAccept = aText.to_std_string_view().find_first_not_of(valid_text_characters()) == std::string::npos;
                 if (!aAccept)
                     service<i_basic_services>().system_beep();
             });
@@ -317,16 +317,16 @@ namespace neogfx
             try
             {
                 std::string tryText;
-                tryText = boost::str(boost::format(iFormat) % minimum());
+                tryText = neolib::format(iFormat, minimum());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
-                tryText = boost::str(boost::format(iFormat) % (minimum() + step()));
+                tryText = neolib::format(iFormat, minimum() + step());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
-                tryText = boost::str(boost::format(iFormat) % maximum());
+                tryText = neolib::format(iFormat, maximum());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
-                tryText = boost::str(boost::format(iFormat) % (maximum() - step()));
+                tryText = neolib::format(iFormat, maximum() - step());
                 if (tryText.length() > hintText.length())
                     hintText = tryText;
             }
@@ -422,7 +422,7 @@ namespace neogfx
     {
         iMinimum = aMinimum;
         std::string text;
-        try { text = boost::str(boost::format(iFormat) % minimum()); } catch (...) {}
+        try { text = neolib::format(iFormat, minimum()); } catch (...) {}
         if (text_box().text().empty())
             text_box().set_text(string{ text });
         ConstraintsChanged.trigger();
@@ -484,13 +484,13 @@ namespace neogfx
     }
 
     template <typename T>
-    inline std::string const& basic_spin_box<T>::format() const
+    inline i_string const& basic_spin_box<T>::format() const
     {
         return iFormat;
     }
 
     template <typename T>
-    inline void basic_spin_box<T>::set_format(std::string const& aFormat)
+    inline void basic_spin_box<T>::set_format(i_string const& aFormat)
     {
         iFormat = aFormat;
         update_size_hint();
@@ -511,38 +511,38 @@ namespace neogfx
     }
 
     template <typename T>
-    inline std::string const& basic_spin_box<T>::valid_text_characters() const
+    inline i_string const& basic_spin_box<T>::valid_text_characters() const
     {
         if (std::is_integral<T>::value)
         {
             if (std::is_signed<T>::value)
             {
-                static const std::string sValid{ "01234567890+-" };
+                static const string sValid{ "01234567890+-" };
                 return sValid;
             }
             else
             {
-                static const std::string sValid{ "01234567890" };
+                static const string sValid{ "01234567890" };
                 return sValid;
             }
         }
         else if (std::is_floating_point<T>::value)
         {
-            static const std::string sValid{ "01234567890.+-eE" };
+            static const string sValid{ "01234567890.+-eE" };
             return sValid;
         }
         else
         {
-            static const std::string sValid;
+            static const string sValid;
             return sValid;
         }
     }
 
     template <typename T>
-    inline std::string basic_spin_box<T>::value_to_string() const
+    inline string basic_spin_box<T>::value_to_string() const
     {
-        std::string text;
-        try { text = boost::str(boost::format(iFormat) % value()); } catch (...) {}
+        string text;
+        try { text = neolib::format(iFormat, value()); } catch (...) {}
         return text;
     }
 }

@@ -33,7 +33,7 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(std::string const& aText, alignment aAlignment) :
+    inline button<ButtonInterface>::button(string const& aText, alignment aAlignment) :
         base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
@@ -54,14 +54,14 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(std::string const& aText, const i_texture& aTexture, alignment aAlignment) :
+    inline button<ButtonInterface>::button(string const& aText, const i_texture& aTexture, alignment aAlignment) :
         base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(std::string const& aText, const i_image& aImage, alignment aAlignment) :
+    inline button<ButtonInterface>::button(string const& aText, const i_image& aImage, alignment aAlignment) :
         base_type{}, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
@@ -75,7 +75,7 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(i_widget& aParent, std::string const& aText, alignment aAlignment) :
+    inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, alignment aAlignment) :
         base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
@@ -96,14 +96,14 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(i_widget& aParent, std::string const& aText, const i_texture& aTexture, alignment aAlignment) :
+    inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, const i_texture& aTexture, alignment aAlignment) :
         base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(i_widget& aParent, std::string const& aText, const i_image& aImage, alignment aAlignment) :
+    inline button<ButtonInterface>::button(i_widget& aParent, string const& aText, const i_image& aImage, alignment aAlignment) :
         base_type{ aParent }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
@@ -117,7 +117,7 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(i_layout& aLayout, std::string const& aText, alignment aAlignment) :
+    inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, alignment aAlignment) :
         base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, label_type::MultiLine, aAlignment }
     {
         init();
@@ -138,14 +138,14 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, alignment aAlignment) :
+    inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, const i_texture& aTexture, alignment aAlignment) :
         base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aTexture, label_type::MultiLine, aAlignment }
     {
         init();
     }
 
     template <typename ButtonInterface>
-    inline button<ButtonInterface>::button(i_layout& aLayout, std::string const& aText, const i_image& aImage, alignment aAlignment) :
+    inline button<ButtonInterface>::button(i_layout& aLayout, string const& aText, const i_image& aImage, alignment aAlignment) :
         base_type{ aLayout }, iPressed{ false }, iCheckable{ button_checkable::NotCheckable }, iCheckedState{ false }, iLayout{ *this }, iLabel{ iLayout, aText, aImage, label_type::MultiLine, aAlignment }
     {
         init();
@@ -446,9 +446,9 @@ namespace neogfx
     }
 
     template <typename ButtonInterface>
-    inline std::string button<ButtonInterface>::mnemonic() const
+    inline string button<ButtonInterface>::mnemonic() const
     {
-        return mnemonic_from_text(label().text());
+        return mnemonic_from_text(label().text().to_std_string());
     }
 
     template <typename ButtonInterface>

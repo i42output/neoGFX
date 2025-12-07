@@ -38,13 +38,13 @@ namespace neogfx
         catch (std::exception& e)
         {
             service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::async_task::run: terminating with exception: " << e.what() << std::endl;
-            service<i_basic_services>().display_error_dialog(name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + name(), std::string("neogfx::async_task::run: terminating with exception: ") + e.what());
+            service<i_basic_services>().display_error_dialog(name().empty() ? "Abnormal Program Termination"_s : "Abnormal Program Termination - "_s + name(), "neogfx::async_task::run: terminating with exception: "_s + e.what());
             throw;
         }
         catch (...)
         {
             service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::async_task::run: terminating with unknown exception" << std::endl;
-            service<i_basic_services>().display_error_dialog(name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + name(), "neogfx::async_task::run: terminating with unknown exception");
+            service<i_basic_services>().display_error_dialog(name().empty() ? "Abnormal Program Termination"_s : "Abnormal Program Termination - "_s + name(), "neogfx::async_task::run: terminating with unknown exception"_s);
             throw;
         }
     }

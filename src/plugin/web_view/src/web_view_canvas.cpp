@@ -319,12 +319,12 @@ namespace neogfx
                 break;
             case keyboard_event_type::TextInput:
                 cefEvent.type = KEYEVENT_CHAR;
-                text = neolib::utf8_to_utf16(aEvent.text());
+                text = neolib::utf8_to_utf16(aEvent.text().to_std_string());
                 cefEvent.windows_key_code = (*text)[0];
                 break;
             case keyboard_event_type::SysTextInput:
                 cefEvent.type = KEYEVENT_CHAR;
-                text = neolib::utf8_to_utf16(aEvent.text());
+                text = neolib::utf8_to_utf16(aEvent.text().to_std_string());
                 cefEvent.windows_key_code = (*text)[0];
                 break;
             }

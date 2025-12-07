@@ -54,23 +54,23 @@ namespace neogfx
         // button
     public:
         button(alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(std::string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(std::string const& aText, const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(string const& aText, const i_image& aImaget, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_widget& aParent, std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_widget& aParent, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_widget& aParent, std::string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_widget& aParent, std::string const& aText, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_widget& aParent, string const& aText, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_layout& aLayout, std::string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, string const& aText, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
         button(i_layout& aLayout, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
-        button(i_layout& aLayout, std::string const& aText, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, string const& aText, const i_texture& aTexture, alignment aAlignment = alignment::Left | alignment::VCenter);
+        button(i_layout& aLayout, string const& aText, const i_image& aImage, alignment aAlignment = alignment::Left | alignment::VCenter);
         ~button();
         // widget
     public:
@@ -121,7 +121,7 @@ namespace neogfx
         virtual const std::optional<bool>& checked_state() const;
         virtual bool set_checked_state(const std::optional<bool>& aCheckedState);
     protected:
-        std::string mnemonic() const override;
+        string mnemonic() const override;
         void mnemonic_execute() override;
         i_widget& mnemonic_widget() override;
     private:

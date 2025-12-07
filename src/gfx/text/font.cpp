@@ -39,9 +39,9 @@ namespace neogfx
             return font_weight::Normal;
     }
 
-    font_weight font_info::weight_from_style_name(std::string const& aStyleName, bool aUnknownAsRegular)
+    font_weight font_info::weight_from_style_name(string const& aStyleName, bool aUnknownAsRegular)
     {
-        static std::unordered_map<std::string, font_weight> sWeightMap =
+        static std::unordered_map<string, font_weight> sWeightMap =
         {
             { "thin", font_weight::Thin },
             { "extralight", font_weight::Extralight },
@@ -65,7 +65,7 @@ namespace neogfx
             { "heavy", font_weight::Heavy },
             { "black", font_weight::Black },
         };
-        static std::unordered_map<std::string, font_weight> sAbbreviatedWeightMap =
+        static std::unordered_map<string, font_weight> sAbbreviatedWeightMap =
         {
             { "t", font_weight::Thin },
             { "el", font_weight::Extralight },
@@ -91,7 +91,7 @@ namespace neogfx
             return aw->second;
         decltype(sWeightMap)::value_type const* match = nullptr;
         for (auto const& wme : sWeightMap)
-            if (key.find(wme.first) != std::string::npos)
+            if (key.as_std_string().find(wme.first.as_std_string()) != string::npos)
             {
                 if (match == nullptr || match->first.size() < wme.first.size())
                     match = &wme;
@@ -110,7 +110,7 @@ namespace neogfx
     {
     }
 
-    font_info::font_info(std::string const& aFamilyName, font_style aStyle, point_size aSize) :
+    font_info::font_info(string const& aFamilyName, font_style aStyle, point_size aSize) :
         iFamilyName{ aFamilyName }, 
         iStyle{ aStyle }, 
         iUnderline{ (aStyle & font_style::Underline) == font_style::Underline }, 
@@ -121,7 +121,7 @@ namespace neogfx
     {
     }
 
-    font_info::font_info(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize) :
+    font_info::font_info(string const& aFamilyName, string const& aStyleName, point_size aSize) :
         iFamilyName{ aFamilyName }, 
         iStyleName{ aStyleName }, 
         iUnderline{ false }, 
@@ -132,7 +132,7 @@ namespace neogfx
     {
     }
 
-    font_info::font_info(std::string const& aFamilyName, font_style aStyle, std::string const& aStyleName, point_size aSize) :
+    font_info::font_info(string const& aFamilyName, font_style aStyle, string const& aStyleName, point_size aSize) :
         iFamilyName{ aFamilyName }, 
         iStyle{ aStyle }, 
         iStyleName{ aStyleName }, 
@@ -144,7 +144,7 @@ namespace neogfx
     {
     }
 
-    font_info::font_info(std::string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
+    font_info::font_info(string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize) :
         iFamilyName{ aFamilyName },
         iStyle{ aStyle },
         iStyleName{ aStyleName },
@@ -288,7 +288,7 @@ namespace neogfx
         return result;
     }
 
-    font_info font_info::with_style_name(std::string const& aStyleName) const
+    font_info font_info::with_style_name(string const& aStyleName) const
     {
         font_info result{ *this };
         result.iStyleName = aStyleName;
@@ -394,12 +394,12 @@ namespace neogfx
     {
     }
 
-    font::font(std::string const& aFamilyName, font_style aStyle, point_size aSize) :
+    font::font(string const& aFamilyName, font_style aStyle, point_size aSize) :
         iInstance{ std::make_shared<instance>(font_info{ aFamilyName, aStyle, aSize }, service<i_font_manager>().create_font(string{ aFamilyName }, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics())) }
     {
     }
 
-    font::font(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize) :
+    font::font(string const& aFamilyName, string const& aStyleName, point_size aSize) :
         iInstance{ std::make_shared<instance>(font_info{ aFamilyName, aStyleName, aSize }, service<i_font_manager>().create_font(string{ aFamilyName }, font_style{}, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics())) }
     {
     }
@@ -419,7 +419,7 @@ namespace neogfx
     {
     }
 
-    font::font(const font& aOther, std::string const& aStyleName, point_size aSize) :
+    font::font(const font& aOther, string const& aStyleName, point_size aSize) :
         iInstance{ std::make_shared<instance>(font_info{ aOther.native_font_face().family_name(), aStyleName, aSize }, service<i_font_manager>().create_font(aOther.iInstance->native_font_face().native_font(), font_style{}, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics())) }
     {
     }
@@ -434,17 +434,17 @@ namespace neogfx
     {
     }
 
-    font font::load_from_file(std::string const& aFileName)
+    font font::load_from_file(string const& aFileName)
     {
         return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, service<i_rendering_engine>().default_screen_metrics()) };
     }
 
-    font font::load_from_file(std::string const& aFileName, font_style aStyle, point_size aSize)
+    font font::load_from_file(string const& aFileName, font_style aStyle, point_size aSize)
     {
         return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }
     
-    font font::load_from_file(std::string const& aFileName, std::string const& aStyleName, point_size aSize)
+    font font::load_from_file(string const& aFileName, string const& aStyleName, point_size aSize)
     {
         return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, font_style{}, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }
@@ -459,7 +459,7 @@ namespace neogfx
         return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }
 
-    font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, point_size aSize)
+    font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, string const& aStyleName, point_size aSize)
     {
         return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, font_style{}, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics()) };
     }

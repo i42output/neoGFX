@@ -29,10 +29,10 @@
 
 namespace neogfx
 {
-    resource::resource(i_resource_manager& aManager, std::string const& aUri) : 
+    resource::resource(i_resource_manager& aManager, string const& aUri) : 
         iManager{aManager}, iUri{aUri}, iSize{0}
     {
-        neolib::uri uri{aUri};
+        neolib::uri uri{ aUri.to_std_string() };
         if (uri.scheme() == "file")
         {
             if (uri.fragment().empty()) // individual asset file
@@ -83,7 +83,7 @@ namespace neogfx
         }
     }
 
-    resource::resource(i_resource_manager& aManager, std::string const& aUri, const void* aData, std::size_t aSize) : 
+    resource::resource(i_resource_manager& aManager, string const& aUri, const void* aData, std::size_t aSize) : 
         iManager{aManager}, iUri{aUri}, iSize{aSize}, iData{reinterpret_cast<const std::uint8_t*>(aData), reinterpret_cast<const std::uint8_t*>(aData) + aSize}
     {
     }

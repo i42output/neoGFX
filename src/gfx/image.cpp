@@ -50,7 +50,7 @@ namespace neogfx
                 set_pixel(point{ x, y }, aColor);
     }
 
-    image::image(std::string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+    image::image(string const& aUri, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iResource{ service<i_resource_manager>().load_resource(aUri) },
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
@@ -62,12 +62,12 @@ namespace neogfx
             load();
     }
 
-    image::image(std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
-        image{ std::string{}, aImagePattern, aColorMap, aDpiScaleFactor, aSampling, aColorSpace }
+    image::image(string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+        image{ string{}, aImagePattern, aColorMap, aDpiScaleFactor, aSampling, aColorSpace }
     {
     }
 
-    image::image(std::string const& aUri, std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
+    image::image(string const& aUri, string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor, texture_sampling aSampling, neogfx::color_space aColorSpace) :
         iUri{ aUri },
         iDpiScaleFactor{ aDpiScaleFactor },
         iColorSpace{ aColorSpace },
@@ -77,7 +77,7 @@ namespace neogfx
         try
         {
             neolib::vecarray<std::string, 2> bits1;
-            neolib::tokens(aImagePattern, std::string{ "[]" }, bits1, 2);
+            neolib::tokens(aImagePattern.to_std_string(), std::string{"[]"}, bits1, 2);
             neolib::vecarray<std::string, 2> bits2;
             neolib::tokens(bits1.at(0), std::string{ "," }, bits2, 2);
             std::vector<std::string> bits3;

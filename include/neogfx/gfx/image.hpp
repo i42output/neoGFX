@@ -50,9 +50,9 @@ namespace neogfx
     public:
         image(dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
         image(const neogfx::size& aSize, const color& aColor = color::Black, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
-        image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
-        image(std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
-        image(std::string const& aUri, std::string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
+        image(string const& aUri, string const& aImagePattern, const std::unordered_map<std::string, color>& aColorMap, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, neogfx::color_space aColorSpace = neogfx::color_space::sRGB);
         image(image const& aOther);
         image(image&& aOther);
         image(image const& aOther, texture_sampling aSampling);

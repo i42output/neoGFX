@@ -150,12 +150,12 @@ namespace neogfx
     {
     }
 
-    window::window(const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(const window_placement& aPlacement, string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ nullptr, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
@@ -170,12 +170,12 @@ namespace neogfx
     {
     }
 
-    window::window(i_widget& aParent, const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, const window_placement& aPlacement, string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, aPlacement, aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
 
-    window::window(i_widget& aParent, std::string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(i_widget& aParent, string const& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         window{ &aParent, window_placement::default_placement(), aWindowTitle, aStyle, aFrameStyle, aScrollbarStyle }
     {
     }
@@ -213,7 +213,7 @@ namespace neogfx
         return result;
     }
 
-    window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
+    window::window(i_widget* aParent, const window_placement& aPlacement, const std::optional<string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle) :
         base_type{ window_style_to_decoration_style(aStyle), aScrollbarStyle, aFrameStyle },
         iWindowManager{ service<i_window_manager>() },
         iParentWindow{ nullptr },

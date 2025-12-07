@@ -171,7 +171,7 @@ namespace neogfx
         texture_index_e iTextureState;
     };
 
-    tab_button::tab_button(i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
+    tab_button::tab_button(i_tab_container& aContainer, string const& aText, bool aClosable, bool aStandardImageSize) :
         push_button{ aText, push_button_style::Tab }, 
         iContainer{ aContainer }, 
         iStandardImageSize{ aStandardImageSize }, 
@@ -182,7 +182,7 @@ namespace neogfx
         set_closable(aClosable);
     }
 
-    tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
+    tab_button::tab_button(i_widget& aParent, i_tab_container& aContainer, string const& aText, bool aClosable, bool aStandardImageSize) :
         push_button{ aParent, aText, push_button_style::Tab }, 
         iContainer{ aContainer }, 
         iStandardImageSize{ aStandardImageSize }, 
@@ -193,7 +193,7 @@ namespace neogfx
         set_closable(aClosable);
     }
 
-    tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, std::string const& aText, bool aClosable, bool aStandardImageSize) :
+    tab_button::tab_button(i_layout& aLayout, i_tab_container& aContainer, string const& aText, bool aClosable, bool aStandardImageSize) :
         push_button{ aLayout, aText, push_button_style::Tab }, 
         iContainer{ aContainer }, 
         iStandardImageSize{ aStandardImageSize }, 
@@ -270,6 +270,12 @@ namespace neogfx
     i_tab& tab_button::set_image(const i_texture& aTexture)
     {
         push_button::set_image(aTexture);
+        return *this;
+    }
+
+    i_tab& tab_button::set_image(i_string const& aImageUri)
+    {
+        push_button::set_image(aImageUri);
         return *this;
     }
 

@@ -34,9 +34,9 @@ namespace neogfx
     private:
         typedef std::variant<std::monostate, neogfx::glyph_text, neogfx::multiline_glyph_text> glyph_text_t;
     public:
-        text_widget(std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-        text_widget(i_widget& aParent, std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
-        text_widget(i_layout& aLayout, std::string const& aText = std::string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(string const& aText = string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(i_widget& aParent, string const& aText = string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
+        text_widget(i_layout& aLayout, string const& aText = string{}, text_widget_type aType = text_widget_type::SingleLine, text_widget_flags aFlags = text_widget_flags::None);
         ~text_widget();
     public:
         neogfx::size_policy size_policy() const override;

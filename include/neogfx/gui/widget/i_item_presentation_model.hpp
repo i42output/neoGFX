@@ -226,10 +226,11 @@ namespace neogfx
             Ascending,
             Descending
         };
-        typedef std::optional<sort_direction> optional_sort_direction;
-        typedef std::pair<item_presentation_model_index::column_type, sort_direction> sort_by_param;
-        typedef std::optional<sort_by_param> optional_sort_by_param;
-        typedef std::string filter_search_key;
+        using optional_sort_direction = std::optional<sort_direction>;
+        using sort_by_param = std::pair<item_presentation_model_index::column_type, sort_direction>;
+        using optional_sort_by_param = std::optional<sort_by_param>;
+        using i_filter_search_key = i_string;
+        using filter_search_key = string;
         enum class filter_search_type
         {
             Prefix,
@@ -277,9 +278,9 @@ namespace neogfx
         virtual void accept(i_meta_visitor& aVisitor, bool aIgnoreCollapsedState = false) = 0;
     public:
         virtual dimension column_width(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext, bool aExtendIntoPadding = true) const = 0;
-        virtual std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
+        virtual i_string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual size column_heading_extents(item_presentation_model_index::column_type aColumnIndex, i_units_context const& aUnitsContext) const = 0;
-        virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) = 0;
+        virtual void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, i_string const& aHeadingText) = 0;
         virtual item_cell_flags column_flags(item_presentation_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_flags(item_presentation_model_index::column_type aColumnIndex, item_cell_flags aFlags) = 0;
         virtual optional_size column_image_size(item_presentation_model_index::column_type aColumnIndex) const = 0;
@@ -319,9 +320,9 @@ namespace neogfx
         virtual void set_cell_flags(item_presentation_model_index const& aIndex, item_cell_flags aFlags) = 0;
         virtual cell_meta_type& cell_meta(item_presentation_model_index const& aIndex) const = 0;
     public:
-        virtual std::string cell_to_string(item_presentation_model_index const& aIndex) const = 0;
-        virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString) const = 0;
-        virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString, bool& aError) const = 0;
+        virtual string cell_to_string(item_presentation_model_index const& aIndex) const = 0;
+        virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, i_string const& aString) const = 0;
+        virtual item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, i_string const& aString, bool& aError) const = 0;
         virtual boost::basic_format<char> cell_format(item_presentation_model_index const& aIndex) const = 0;
         virtual optional_color cell_color(item_presentation_model_index const& aIndex, color_role aColorRole) const = 0;
         virtual optional_font cell_font(item_presentation_model_index const& aIndex) const = 0;
@@ -341,11 +342,11 @@ namespace neogfx
         virtual void sort_by(item_presentation_model_index::column_type aColumnIndex, optional_sort_direction const& aSortDirection = optional_sort_direction{}) = 0;
         virtual void reset_sort() = 0;
     public:
-        virtual optional_item_presentation_model_index find_item(filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const = 0;
+        virtual optional_item_presentation_model_index find_item(i_filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const = 0;
     public:
         virtual bool filtering() const = 0;
         virtual optional_filter filtering_by() const = 0;
-        virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, filter_search_key const& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) = 0;
+        virtual void filter_by(item_presentation_model_index::column_type aColumnIndex, i_filter_search_key const& aFilterSearchKey, filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) = 0;
         virtual void reset_filter() = 0;
         // helpers
     public:

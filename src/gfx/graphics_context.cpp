@@ -103,7 +103,7 @@ namespace neogfx
         iLayer{ LayerWidget },
         iSnapToPixel{ false },
         iFrontFace{ neogfx::front_face::CCW },
-        iCulling{ neogfx::face_culling::None }, 
+        iCulling{ neogfx::face_culling::None },
         iOpacity{ 1.0 },
         iBlendingMode{ neogfx::blending_mode::Default },
         iSmoothingMode{ neogfx::smoothing_mode::None },
@@ -517,10 +517,10 @@ namespace neogfx
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
             graphics_operation::draw_shape{
-                mat44{ 
+                mat44{
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
-                    { 0.0, 0.0, 1.0, 0.0 }, 
+                    { 0.0, 0.0, 1.0, 0.0 },
                     { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
                 aPosition,
                 aPen,
@@ -532,15 +532,15 @@ namespace neogfx
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
         native_context().enqueue(
-            graphics_operation::draw_entities{ 
-                aEcs, 
+            graphics_operation::draw_entities{
+                aEcs,
                 aLayer,
                 mat44{
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 },
                     { iOrigin.x, iOrigin.y, 0.0, 1.0 } }
-                });
+            });
     }
 
     void graphics_context::draw_focus_rect(rect const& aRect) const
@@ -572,64 +572,79 @@ namespace neogfx
         iTabStops = std::nullopt;
     }
 
-    size graphics_context::text_extent(std::string const& aText) const
+    size graphics_context::text_extent(string const& aText) const
     {
         return text_extent(aText, default_font());
     }
 
-    size graphics_context::text_extent(std::string const& aText, font const& aFont) const
+    size graphics_context::text_extent(string const& aText, font const& aFont) const
     {
-        return text_extent(aText.begin(), aText.end(), [&aFont](std::size_t) { return aFont; });
+        return text_extent(std::to_address(aText.begin()), std::to_address(aText.end()), [&aFont](std::size_t) { return aFont; });
     }
 
-    size graphics_context::text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const
+    size graphics_context::text_extent(string const& aText, std::function<font(std::size_t)> aFontSelector) const
     {
-        return text_extent(aText.begin(), aText.end(), aFontSelector);
+        return text_extent(std::to_address(aText.begin()), std::to_address(aText.end()), aFontSelector);
     }
 
-    size graphics_context::text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd) const
+    size graphics_context::text_extent(char const* aTextBegin, char const* aTextEnd) const
     {
         return text_extent(aTextBegin, aTextEnd, default_font());
     }
 
-    size graphics_context::text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const
+    size graphics_context::text_extent(char const* aTextBegin, char const* aTextEnd, font const& aFont) const
     {
         return text_extent(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
     }
 
-    size graphics_context::text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const
+    size graphics_context::text_extent(char const* aTextBegin, char const* aTextEnd, std::function<font(std::size_t)> aFontSelector) const
     {
         return glyph_text_extent(to_glyph_text(aTextBegin, aTextEnd, aFontSelector));
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText) const
+    size graphics_context::text_extent(char32_t const* aTextBegin, char32_t const* aTextEnd) const
+    {
+        return glyph_text_extent(to_glyph_text(aTextBegin, aTextEnd, default_font()));
+    }
+
+    size graphics_context::text_extent(char32_t const* aTextBegin, char32_t const* aTextEnd, font const& aFont) const
+    {
+        return glyph_text_extent(to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; }));
+    }
+
+    size graphics_context::text_extent(char32_t const* aTextBegin, char32_t const* aTextEnd, std::function<font(string::size_type)> aFontSelector) const
+    {
+        return glyph_text_extent(to_glyph_text(aTextBegin, aTextEnd, aFontSelector));
+    }
+
+    size graphics_context::multiline_text_extent(string const& aText) const
     {
         return multiline_text_extent(aText, default_font());
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText, font const& aFont) const
+    size graphics_context::multiline_text_extent(string const& aText, font const& aFont) const
     {
         return multiline_text_extent(aText, [&aFont](std::size_t) { return aFont; }, 0);
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const
+    size graphics_context::multiline_text_extent(string const& aText, std::function<font(std::size_t)> aFontSelector) const
     {
         return multiline_text_extent(aText, aFontSelector, 0);
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText, dimension aMaxWidth) const
+    size graphics_context::multiline_text_extent(string const& aText, dimension aMaxWidth) const
     {
         return multiline_text_extent(aText, default_font(), aMaxWidth);
     }
 
-    size graphics_context::multiline_text_extent(std::string const& aText, font const& aFont, dimension aMaxWidth) const
+    size graphics_context::multiline_text_extent(string const& aText, font const& aFont, dimension aMaxWidth) const
     {
         return multiline_text_extent(aText, [&aFont](std::size_t) { return aFont; }, aMaxWidth);
     }
         
-    size graphics_context::multiline_text_extent(std::string const& aText, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth) const
+    size graphics_context::multiline_text_extent(string const& aText, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth) const
     {
-        return multiline_glyph_text_extent(to_glyph_text(aText.begin(), aText.end(), aFontSelector), aMaxWidth);
+        return multiline_glyph_text_extent(to_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFontSelector), aMaxWidth);
     }
 
     size graphics_context::glyph_text_extent(glyph_text const& aText) const
@@ -647,103 +662,103 @@ namespace neogfx
         return quad_extents(to_multiline_glyph_text(aText, aMaxWidth).bbox);
     }
 
-    bool graphics_context::is_text_left_to_right(std::string const& aText) const
+    bool graphics_context::is_text_left_to_right(string const& aText) const
     {
         return is_text_left_to_right(aText, default_font());
     }
 
-    bool graphics_context::is_text_left_to_right(std::string const& aText, font const& aFont) const
+    bool graphics_context::is_text_left_to_right(string const& aText, font const& aFont) const
     {
-        auto const& glyphText = to_glyph_text(aText.begin(), aText.end(), aFont);
+        auto const& glyphText = to_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFont);
         return glyph_text_direction(glyphText.cbegin(), glyphText.cend()) == text_direction::LTR;
     }
 
-    bool graphics_context::is_text_right_to_left(std::string const& aText) const
+    bool graphics_context::is_text_right_to_left(string const& aText) const
     {
         return is_text_right_to_left(aText, default_font());
     }
 
-    bool graphics_context::is_text_right_to_left(std::string const& aText, font const& aFont) const
+    bool graphics_context::is_text_right_to_left(string const& aText, font const& aFont) const
     {
         return !is_text_left_to_right(aText, aFont);
     }
 
-    void graphics_context::draw_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aText, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(point const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const
     {
         draw_text(aPoint.to_vec3(), aText, aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(point const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aTextBegin, aTextEnd, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(point const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const
     {
         draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, std::string const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aText, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const
     {
-        draw_text(aPoint, aText.begin(), aText.end(), aFont, aTextFormat);
+        draw_text(aPoint, std::to_address(aText.begin()), std::to_address(aText.begin()) + std::distance(std::to_address(aText.begin()), std::to_address(aText.end())), aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const
     {
         draw_text(aPoint, aTextBegin, aTextEnd, default_font() , aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const
     {
         draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aTextFormat.apply(aFont)), aTextFormat);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint.to_vec3(), aText, aFont, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aMaxWidth, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aTextFormat, aAlignment);
     }
         
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, aFont, 0, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_text(aPoint, aText, default_font(), aMaxWidth, aTextFormat, aAlignment);
     }
     
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
     {
         draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aTextFormat.apply(aFont), aMaxWidth, aAlignment), aTextFormat);
     }
@@ -1103,32 +1118,32 @@ namespace neogfx
         }
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string const& aText) const
+    glyph_text graphics_context::to_glyph_text(string const& aText) const
     {
         return to_glyph_text(aText, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string const& aText, font const& aFont) const
+    glyph_text graphics_context::to_glyph_text(string const& aText, font const& aFont) const
     {
-        return to_glyph_text(aText.begin(), aText.end(), aFont);
+        return to_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFont);
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string const& aText, std::function<font(std::size_t)> aFontSelector) const
+    glyph_text graphics_context::to_glyph_text(string const& aText, std::function<font(std::size_t)> aFontSelector) const
     {
-        return to_glyph_text(aText.begin(), aText.end(), aFontSelector);
+        return to_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFontSelector);
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd) const
+    glyph_text graphics_context::to_glyph_text(char const* aTextBegin, char const* aTextEnd) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const
+    glyph_text graphics_context::to_glyph_text(char const* aTextBegin, char const* aTextEnd, font const& aFont) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
     }
 
-    glyph_text graphics_context::to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const
+    glyph_text graphics_context::to_glyph_text(char const* aTextBegin, char const* aTextEnd, std::function<font(std::size_t)> aFontSelector) const
     {
         return service<i_font_manager>().glyph_text_factory().to_glyph_text(*this, std::string_view{ aTextBegin, aTextEnd }, aFontSelector);
     }
@@ -1140,50 +1155,50 @@ namespace neogfx
 
     glyph_text graphics_context::to_glyph_text(std::u32string const& aText, font const& aFont) const
     {
-        return to_glyph_text(aText.begin(), aText.end(), aFont);
+        return to_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFont);
     }
 
     glyph_text graphics_context::to_glyph_text(std::u32string const& aText, std::function<font(std::size_t)> aFontSelector) const
     {
-        return to_glyph_text(aText.begin(), aText.end(), aFontSelector);
+        return to_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFontSelector);
     }
 
-    glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd) const
+    glyph_text graphics_context::to_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, default_font());
     }
 
-    glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont) const
+    glyph_text graphics_context::to_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, font const& aFont) const
     {
         return to_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; });
     }
 
-    glyph_text graphics_context::to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector) const
+    glyph_text graphics_context::to_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, std::function<font(std::size_t)> aFontSelector) const
     {
         return service<i_font_manager>().glyph_text_factory().to_glyph_text(*this, std::u32string_view{ aTextBegin, aTextEnd }, aFontSelector);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string const& aText, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(string const& aText, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aText, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
-        return to_multiline_glyph_text(aText.begin(), aText.end(), aFont, aMaxWidth, aAlignment);
+        return to_multiline_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFont, aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(char const* aTextBegin, char const* aTextEnd, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aTextBegin, aTextEnd, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(char const* aTextBegin, char const* aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aTextBegin, aTextEnd, [aFont](std::size_t) { return aFont; }, aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(char const* aTextBegin, char const* aTextEnd, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(to_glyph_text(aTextBegin, aTextEnd, aFontSelector), aMaxWidth, aAlignment);
     }
@@ -1195,20 +1210,20 @@ namespace neogfx
 
     multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
-        return to_multiline_glyph_text(aText.begin(), aText.end(), aFont, aMaxWidth, aAlignment);
+        return to_multiline_glyph_text(std::to_address(aText.begin()), std::to_address(aText.end()), aFont, aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aTextBegin, aTextEnd, default_font(), aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(aTextBegin, aTextEnd, [&aFont](std::size_t) { return aFont; }, aMaxWidth, aAlignment);
     }
 
-    multiline_glyph_text graphics_context::to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const
+    multiline_glyph_text graphics_context::to_multiline_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, std::function<font(std::size_t)> aFontSelector, dimension aMaxWidth, alignment aAlignment) const
     {
         return to_multiline_glyph_text(to_glyph_text(aTextBegin, aTextEnd, aFontSelector), aMaxWidth, aAlignment);
     }
@@ -1348,7 +1363,7 @@ namespace neogfx
     void graphics_context::draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aText.begin(), aText.end(), aSpans, mnemonics_shown()});
+        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, std::to_address(aText.begin()), std::to_address(aText.end()), aSpans, mnemonics_shown()});
     }
 
     char graphics_context::mnemonic() const
@@ -1383,7 +1398,7 @@ namespace neogfx
         return iPassword != std::nullopt;
     }
 
-    std::string const& graphics_context::password_mask() const
+    string const& graphics_context::password_mask() const
     {
         if (password())
         {
@@ -1394,7 +1409,7 @@ namespace neogfx
         throw password_not_set();
     }
 
-    void graphics_context::set_password(bool aPassword, std::string const& aMask)
+    void graphics_context::set_password(bool aPassword, string const& aMask)
     {
         if (aPassword)
             iPassword = aMask;

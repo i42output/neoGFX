@@ -344,7 +344,7 @@ namespace neogfx
         iSmoothnessSpinBox.set_minimum(0.0);
         iSmoothnessSpinBox.set_maximum(100.0);
         iSmoothnessSpinBox.set_step(0.1);
-        iSmoothnessSpinBox.set_format("%.1f");
+        iSmoothnessSpinBox.set_format("{:.1f}");
         iSmoothnessSlider.set_minimum(0.0);
         iSmoothnessSlider.set_maximum(100.0);
         iSmoothnessSlider.set_step(0.1);
@@ -352,7 +352,7 @@ namespace neogfx
         iAngleSpinBox.set_minimum(-360.0);
         iAngleSpinBox.set_maximum(360.0);
         iAngleSpinBox.set_step(0.1);
-        iAngleSpinBox.set_format("%.1f");
+        iAngleSpinBox.set_format("{:.1f}");
         iAngleSlider.set_minimum(-360.0);
         iAngleSlider.set_maximum(360.0);
         iAngleSlider.set_step(0.1);
@@ -363,26 +363,26 @@ namespace neogfx
         iMExponentSpinBox.set_minimum(0.0);
         iMExponentSpinBox.set_maximum(std::numeric_limits<double>::max());
         iMExponentSpinBox.set_step(0.1);
-        iMExponentSpinBox.set_format("%.2f");
+        iMExponentSpinBox.set_format("{:.2f}");
         iMExponentSpinBox.text_box().set_alignment(alignment::Right);
         iMExponentSpinBox.text_box().set_size_hint(size_hint{ "00.00" });
         iNExponentSpinBox.set_minimum(0.0);
         iNExponentSpinBox.set_maximum(std::numeric_limits<double>::max());
         iNExponentSpinBox.set_step(0.1);
-        iNExponentSpinBox.set_format("%.2f");
+        iNExponentSpinBox.set_format("{:.2f}");
         iNExponentSpinBox.text_box().set_alignment(alignment::Right);
         iNExponentSpinBox.text_box().set_size_hint(size_hint{ "00.00" });
         iCenterGroupBox.set_checkable(true);
         iXCenterSpinBox.set_minimum(-1.0);
         iXCenterSpinBox.set_maximum(1.0);
         iXCenterSpinBox.set_step(0.001);
-        iXCenterSpinBox.set_format("%.3f");
+        iXCenterSpinBox.set_format("{:.3f}");
         iXCenterSpinBox.text_box().set_alignment(alignment::Right);
         iXCenterSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
         iYCenterSpinBox.set_minimum(-1.0);
         iYCenterSpinBox.set_maximum(1.0);
         iYCenterSpinBox.set_step(0.001);
-        iYCenterSpinBox.set_format("%.3f");
+        iYCenterSpinBox.set_format("{:.3f}");
         iYCenterSpinBox.text_box().set_alignment(alignment::Right);
         iYCenterSpinBox.text_box().set_size_hint(size_hint{ "-0.000" });
 

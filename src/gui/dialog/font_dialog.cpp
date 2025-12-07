@@ -419,7 +419,7 @@ namespace neogfx
         iAnimationFrequency.set_minimum(0.1);
         iAnimationFrequency.set_maximum(10.0);
         iAnimationFrequency.set_step(0.1);
-        iAnimationFrequency.spin_box().set_format("%.2f");
+        iAnimationFrequency.spin_box().set_format("{:.2f}");
 
         iSink += iUnderline.Toggled([&]() { update_selected_font(iUnderline); });
         iSink += iSuperscript.Toggled([&]() { if (iSuperscript.is_checked()) { iSubscript.uncheck(); iBelowAscenderLine.set_text("Below ascender"_t); } update_selected_font(iSuperscript); });
@@ -559,7 +559,7 @@ namespace neogfx
             auto style = iStylePicker.presentation_model().find_item(iSelectedFont.style_name());
             if (style != std::nullopt)
                 iStylePicker.selection_model().set_current_index(*style);
-            auto size = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(iSelectedFont.size()));
+            auto size = iSizePicker.presentation_model().find_item(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
             if (size != std::nullopt)
                 iSizePicker.selection_model().set_current_index(*size);
             iSizePicker.input_widget().set_text(string{ boost::lexical_cast<std::string>(iSelectedFont.size()) });
@@ -578,7 +578,7 @@ namespace neogfx
         }
         else
             iSelectedFont = iCurrentFont;
-        auto fontSizeIndex = iSizePicker.presentation_model().find_item(boost::lexical_cast<std::string>(static_cast<int>(iSelectedFont.size())));
+        auto fontSizeIndex = iSizePicker.presentation_model().find_item(string{ boost::lexical_cast<std::string>(static_cast<int>(iSelectedFont.size())) });
         if (fontSizeIndex != std::nullopt)
             iSizePicker.selection_model().set_current_index(*fontSizeIndex);
         else

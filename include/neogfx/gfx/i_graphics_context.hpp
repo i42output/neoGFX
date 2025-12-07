@@ -122,7 +122,7 @@ namespace neogfx
         tab_stop iDefaultStop;
         neolib::vector<tab_stop> iStops;
     };
-        
+
     class i_graphics_context : public i_rendering_context, public i_device_metrics, public i_units_context
     {
         // types
@@ -237,6 +237,8 @@ namespace neogfx
         virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) const = 0;
         virtual void draw_focus_rect(rect const& aRect) const = 0;
         // text
+        /// @todo: polymorphic interface requires `i_string` not `string`.
+        /// @todo: integrate polymorphic i_u32string when available.
     public:
         virtual font const& default_font() const = 0;
         virtual void set_default_font(font const& aDefaultFont) const = 0;
@@ -244,64 +246,67 @@ namespace neogfx
         virtual i_tab_stops const& tab_stops() const = 0;
         virtual void set_tab_stops(i_tab_stops const& aTabStops) = 0;
         virtual void clear_tab_stops() = 0;
-        virtual size text_extent(std::string const& aText) const = 0;
-        virtual size text_extent(std::string const& aText, font const& aFont) const = 0;
-        virtual size text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
-        virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd) const = 0;
-        virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const = 0;
-        virtual size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
-        virtual size multiline_text_extent(std::string const& aText) const = 0;
-        virtual size multiline_text_extent(std::string const& aText, font const& aFont) const = 0;
-        virtual size multiline_text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
-        virtual size multiline_text_extent(std::string const& aText, dimension aMaxWidth) const = 0;
-        virtual size multiline_text_extent(std::string const& aText, font const& aFont, dimension aMaxWidth) const = 0;
-        virtual size multiline_text_extent(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth) const = 0;
+        virtual size text_extent(string const& aText) const = 0;
+        virtual size text_extent(string const& aText, font const& aFont) const = 0;
+        virtual size text_extent(string const& aText, std::function<font(string::size_type)> aFontSelector) const = 0;
+        virtual size multiline_text_extent(string const& aText) const = 0;
+        virtual size multiline_text_extent(string const& aText, font const& aFont) const = 0;
+        virtual size multiline_text_extent(string const& aText, std::function<font(string::size_type)> aFontSelector) const = 0;
+        virtual size multiline_text_extent(string const& aText, dimension aMaxWidth) const = 0;
+        virtual size multiline_text_extent(string const& aText, font const& aFont, dimension aMaxWidth) const = 0;
+        virtual size multiline_text_extent(string const& aText, std::function<font(string::size_type)> aFontSelector, dimension aMaxWidth) const = 0;
         virtual size glyph_text_extent(glyph_text const& aText) const = 0;
         virtual size glyph_text_extent(glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd) const = 0;
         virtual size multiline_glyph_text_extent(glyph_text const& aText, dimension aMaxWidth) const = 0;
-        virtual glyph_text to_glyph_text(std::string const& aText) const = 0;
-        virtual glyph_text to_glyph_text(std::string const& aText, std::function<font(std::string::size_type)> aFontSelector) const = 0;
-        virtual glyph_text to_glyph_text(std::string const& aText, font const& aFont) const = 0;
-        virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd) const = 0;
-        virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const = 0;
-        virtual glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector) const = 0;
+        virtual glyph_text to_glyph_text(string const& aText) const = 0;
+        virtual glyph_text to_glyph_text(string const& aText, std::function<font(string::size_type)> aFontSelector) const = 0;
+        virtual glyph_text to_glyph_text(string const& aText, font const& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::u32string const& aText) const = 0;
         virtual glyph_text to_glyph_text(std::u32string const& aText, font const& aFont) const = 0;
         virtual glyph_text to_glyph_text(std::u32string const& aText, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
-        virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd) const = 0;
-        virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont) const = 0;
-        virtual glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::string const& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(std::string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(string const& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::u32string const& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(std::u32string const& aText, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
         virtual multiline_glyph_text to_multiline_glyph_text(glyph_text const& aText, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
-        virtual bool is_text_left_to_right(std::string const& aText) const = 0;
-        virtual bool is_text_left_to_right(std::string const& aText, font const& aFont) const = 0;
-        virtual bool is_text_right_to_left(std::string const& aText) const = 0;
-        virtual bool is_text_right_to_left(std::string const& aText, font const& aFont) const = 0;
-        virtual void draw_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(point const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(point const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(point const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, std::string const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, std::string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, std::string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, std::string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, std::string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual size text_extent(char const* aTextBegin, char const* aTextEnd) const = 0;
+        virtual size text_extent(char const* aTextBegin, char const* aTextEnd, font const& aFont) const = 0;
+        virtual size text_extent(char const* aTextBegin, char const* aTextEnd, std::function<font(string::size_type)> aFontSelector) const = 0;
+        virtual size text_extent(char32_t const* aTextBegin, char32_t const* aTextEnd) const = 0;
+        virtual size text_extent(char32_t const* aTextBegin, char32_t const* aTextEnd, font const& aFont) const = 0;
+        virtual size text_extent(char32_t const* aTextBegin, char32_t const* aTextEnd, std::function<font(string::size_type)> aFontSelector) const = 0;
+        virtual glyph_text to_glyph_text(char const* aTextBegin, char const* aTextEnd) const = 0;
+        virtual glyph_text to_glyph_text(char const* aTextBegin, char const* aTextEnd, font const& aFont) const = 0;
+        virtual glyph_text to_glyph_text(char const* aTextBegin, char const* aTextEnd, std::function<font(string::size_type)> aFontSelector) const = 0;
+        virtual glyph_text to_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd) const = 0;
+        virtual glyph_text to_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, font const& aFont) const = 0;
+        virtual glyph_text to_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(char const* aTextBegin, char const* aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(char const* aTextBegin, char const* aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(char const* aTextBegin, char const* aTextEnd, std::function<font(string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual multiline_glyph_text to_multiline_glyph_text(char32_t const* aTextBegin, char32_t const* aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const = 0;
+        virtual bool is_text_left_to_right(string const& aText) const = 0;
+        virtual bool is_text_left_to_right(string const& aText, font const& aFont) const = 0;
+        virtual bool is_text_right_to_left(string const& aText) const = 0;
+        virtual bool is_text_right_to_left(string const& aText, font const& aFont) const = 0;
+        virtual void draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const = 0;
+        virtual void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
         virtual void draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const = 0;
         virtual void draw_glyph_text(point const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const = 0;
         virtual void draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const = 0;
@@ -320,8 +325,8 @@ namespace neogfx
         virtual void unset_mnemonic() const = 0;
         virtual bool mnemonics_shown() const = 0;
         virtual bool password() const = 0;
-        virtual std::string const& password_mask() const = 0;
-        virtual void set_password(bool aPassword, std::string const& aMask = "\xE2\x97\x8F") = 0;
+        virtual string const& password_mask() const = 0;
+        virtual void set_password(bool aPassword, string const& aMask = "\xE2\x97\x8F") = 0;
         // texture
     public:
         virtual void draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
@@ -336,6 +341,114 @@ namespace neogfx
         virtual void draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation = optional_mat44{}, std::optional<game::filter> const& aFilter = {}) const = 0;
         // helpers
     public:
+        size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd));
+        }
+        size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, font const& aFont) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont);
+        }
+        size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector);
+        }
+        glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd));
+        }
+        glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, font const& aFont) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont);
+        }
+        glyph_text to_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector);
+        }
+        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd));
+        }
+        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont);
+        }
+        size text_extent(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector);
+        }
+        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd));
+        }
+        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont);
+        }
+        glyph_text to_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector);
+        }
+        size text_extent(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd));
+        }
+        size text_extent(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont);
+        }
+        size text_extent(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector) const
+        {
+            return text_extent(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector);
+        }
+        glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd));
+        }
+        glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont);
+        }
+        glyph_text to_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector) const
+        {
+            return to_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector);
+        }
+        multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont, aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(string::const_iterator aTextBegin, string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector, aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont, aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(std::string::const_iterator aTextBegin, std::string::const_iterator aTextEnd, std::function<font(string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector, aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, font const& aFont, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFont, aMaxWidth, aAlignment);
+        }
+        multiline_glyph_text to_multiline_glyph_text(std::u32string::const_iterator aTextBegin, std::u32string::const_iterator aTextEnd, std::function<font(std::u32string::size_type)> aFontSelector, dimension aMaxWidth, alignment aAlignment = alignment::Left) const
+        {
+            return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector, aMaxWidth, aAlignment);
+        }
         void draw_rounded_rect(rect const& aRect, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const
         {
             draw_rounded_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, aPen, aFill);

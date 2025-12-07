@@ -79,8 +79,8 @@ namespace neogfx
         struct unknown_standard_menu : std::logic_error { unknown_standard_menu() : std::logic_error("neogfx::i_app::unknown_standard_menu") {} };
     public:
         virtual const i_program_options& program_options() const = 0;
-        virtual std::string const& name() const = 0;
-        virtual void set_name(std::string const& aName) = 0;
+        virtual i_string const& name() const = 0;
+        virtual void set_name(i_string const& aName) = 0;
         virtual int exec(bool aQuitWhenLastWindowClosed = true) = 0;
         virtual bool in_exec() const = 0;
         virtual void quit(int aResultCode) = 0;
@@ -94,7 +94,7 @@ namespace neogfx
         virtual void set_default_window_icon(const i_image& aIcon) = 0;
         virtual const i_style& current_style() const = 0;
         virtual i_style& current_style() = 0;
-        virtual i_style& change_style(std::string const& aStyleName) = 0;
+        virtual i_style& change_style(i_string const& aStyleName) = 0;
         virtual i_style& register_style(const i_style& aStyle) = 0;
     public:
         /// @todo add support for multiple plurals in a string
@@ -131,6 +131,16 @@ namespace neogfx
         virtual bool process_events() = 0;
         virtual bool process_events(i_event_processing_context& aContext) = 0;
         virtual i_event_processing_context& event_processing_context() = 0;
+        // helpers
+    public:
+        void set_name(std::string const& aName)
+        {
+            set_name(string{ aName });
+        }
+        i_style& change_style(std::string const& aStyleName)
+        {
+            return change_style(string{ aStyleName });
+        }
     public:
         static uuid const& iid() { static uuid const sIid{ 0xa8bd88d7, 0xbd19, 0x4501, 0xb199, { 0x84, 0x84, 0x55, 0xfc, 0x80, 0x45 } }; return sIid; }
     };

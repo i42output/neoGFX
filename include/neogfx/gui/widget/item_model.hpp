@@ -236,7 +236,7 @@ namespace neogfx
     private:
         struct column_info
         {
-            std::string name;
+            string name;
             mutable optional_item_cell_info defaultDataInfo;
         };
         typedef typename container_traits::template rebind<item_model_index::row_type, column_info>::other::row_cell_array column_info_array;
@@ -266,13 +266,14 @@ namespace neogfx
         {
             return static_cast<std::uint32_t>(row(aIndex).cells.size());
         }
-        std::string const& column_name(item_model_index::value_type aColumnIndex) const final
+        i_string const& column_name(item_model_index::value_type aColumnIndex) const final
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 throw base_type::bad_column_index();
             return iColumns[aColumnIndex].name;
         }
-        void set_column_name(item_model_index::value_type aColumnIndex, std::string const& aName) final
+        using i_item_model::set_column_name;
+        void set_column_name(item_model_index::value_type aColumnIndex, i_string const& aName) final
         {
             if (iColumns.size() < aColumnIndex + 1u)
                 iColumns.resize(aColumnIndex + 1u);

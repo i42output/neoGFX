@@ -74,7 +74,7 @@ namespace neogfx
         virtual size surface_extents() const = 0;
         virtual void resize_surface(const size& aExtents) = 0;
     public:
-        virtual void display_error_message(std::string const& aTitle, std::string const& aMessage) const = 0;
+        virtual void display_error_message(i_string const& aTitle, i_string const& aMessage) const = 0;
         virtual bool events_queued() const = 0;
         virtual void push_event(const native_event& aEvent) = 0;
         virtual bool pump_event() = 0;

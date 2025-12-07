@@ -44,6 +44,8 @@ namespace neogfx
     public:
         /// @todo add support for multiple plurals in a string
         translatable_string& operator()(std::int64_t aPlurality);
+    public:
+        operator std::string() const { return to_std_string(); }
     private:
         string iTranslatableString;
         string iContext;

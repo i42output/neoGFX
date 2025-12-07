@@ -31,7 +31,7 @@ namespace neogfx::DesignStudio
         projectLocation.set_text(string{ neolib::user_documents_directory() });
         browseProjectLocation.Clicked([&]()
         {
-            auto newLocation = neogfx::select_folder_dialog(*this, "Project Location"_t, projectLocation.text());
+            auto newLocation = neogfx::select_folder_dialog(*this, "Project Location"_t, projectLocation.text().to_std_string());
             if (newLocation)
                 projectLocation.set_text(string{ *newLocation });
         });

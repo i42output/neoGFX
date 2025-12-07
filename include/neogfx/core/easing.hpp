@@ -858,16 +858,16 @@ namespace neogfx
             ease(e4, (t - (w1 + w2 + w3) / wTotal) / (w4 / wTotal));
     }
 
-    inline std::string to_string(easing e)
+    inline string to_string(easing e)
     {
         std::ostringstream oss;
         oss << e;
         return oss.str();
     }
 
-    inline easing from_string(std::string const& s)
+    inline easing from_string(string const& s)
     {
-        std::istringstream iss{ s };
+        std::istringstream iss{ s.to_std_string() };
         easing e;
         iss >> e;
         return e;

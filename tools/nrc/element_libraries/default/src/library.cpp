@@ -145,7 +145,7 @@ namespace neogfx::nrc
 
     i_ui_element* default_ui_element_library::do_create_element(const i_ui_element_parser& aParser, const neolib::i_string& aElementType)
     {
-        static const std::map<std::string, std::function<i_ui_element*(const i_ui_element_parser&)>> sFactoryMethods =
+        static const std::map<string, std::function<i_ui_element*(const i_ui_element_parser&)>> sFactoryMethods =
         {
             { "app", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new app{ aParser }; } },
             { "window", [](const i_ui_element_parser& aParser) -> i_ui_element* { return new window{ aParser }; } },
@@ -159,7 +159,7 @@ namespace neogfx::nrc
 
     i_ui_element* default_ui_element_library::do_create_element(const i_ui_element_parser& aParser, i_ui_element& aParent, const neolib::i_string& aElementType)
     {
-        static const std::map<std::string, std::function<i_ui_element*(const i_ui_element_parser&, i_ui_element&)>> sFactoryMethods =
+        static const std::map<string, std::function<i_ui_element*(const i_ui_element_parser&, i_ui_element&)>> sFactoryMethods =
         {
             { "action", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new action{ aParser, aParent }; } },
             { "window", [](const i_ui_element_parser& aParser, i_ui_element& aParent) -> i_ui_element* { return new window{ aParser, aParent }; } },

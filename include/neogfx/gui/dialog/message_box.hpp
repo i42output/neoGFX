@@ -31,31 +31,31 @@ namespace neogfx
     public:
         struct no_response : std::logic_error { no_response() : std::logic_error("neogfx::message_box::no_response") {} };
     public:
-        message_box(std::string const& aTitle, const image& aIcon, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        message_box(std::string const& aTitle, const image& aIcon, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        message_box(i_widget& aParent, std::string const& aTitle, const image& aIcon, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        message_box(i_widget& aParent, std::string const& aTitle, const image& aIcon, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        message_box(string const& aTitle, const image& aIcon, string const& aText, standard_button aButtons = standard_button::Ok);
+        message_box(string const& aTitle, const image& aIcon, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        message_box(i_widget& aParent, string const& aTitle, const image& aIcon, string const& aText, standard_button aButtons = standard_button::Ok);
+        message_box(i_widget& aParent, string const& aTitle, const image& aIcon, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
     public:
-        static standard_button information(std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button information(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button information(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button information(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button question(std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Yes | standard_button::No);
-        static standard_button question(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Yes | standard_button::No);
-        static standard_button question(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Yes | standard_button::No);
-        static standard_button question(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Yes | standard_button::No);
-        static standard_button stop(std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button stop(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button stop(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button stop(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button warning(std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button warning(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button warning(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button warning(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button error(std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button error(std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
-        static standard_button error(i_widget& aParent, std::string const& aTitle, std::string const& aText, standard_button aButtons = standard_button::Ok);
-        static standard_button error(i_widget& aParent, std::string const& aTitle, std::string const& aText, std::string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button information(string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button information(string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button information(i_widget& aParent, string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button information(i_widget& aParent, string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button question(string const& aTitle, string const& aText, standard_button aButtons = standard_button::Yes | standard_button::No);
+        static standard_button question(string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Yes | standard_button::No);
+        static standard_button question(i_widget& aParent, string const& aTitle, string const& aText, standard_button aButtons = standard_button::Yes | standard_button::No);
+        static standard_button question(i_widget& aParent, string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Yes | standard_button::No);
+        static standard_button stop(string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button stop(string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button stop(i_widget& aParent, string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button stop(i_widget& aParent, string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button warning(string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button warning(string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button warning(i_widget& aParent, string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button warning(i_widget& aParent, string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button error(string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button error(string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
+        static standard_button error(i_widget& aParent, string const& aTitle, string const& aText, standard_button aButtons = standard_button::Ok);
+        static standard_button error(i_widget& aParent, string const& aTitle, string const& aText, string const& aDetailedText, standard_button aButtons = standard_button::Ok);
     public:
         const image_widget& icon() const;
         image_widget& icon();

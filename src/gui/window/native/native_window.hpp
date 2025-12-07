@@ -50,7 +50,7 @@ namespace neogfx
     public:
         i_surface_window& surface_window() const final;
     public:
-        void display_error_message(std::string const& aTitle, std::string const& aMessage) const final;
+        void display_error_message(i_string const& aTitle, i_string const& aMessage) const final;
         bool events_queued() const final;
         void push_event(const native_event& aEvent) final;
         bool pump_event() final;

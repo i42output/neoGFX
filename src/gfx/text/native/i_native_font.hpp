@@ -61,9 +61,9 @@ namespace neogfx
         }
         font_weight min_weight() const
         {
-            auto minWeight = font_info::weight_from_style_name(style_name(0));
+            auto minWeight = font_info::weight_from_style_name(style_name(0).to_std_string());
             for (auto si = 1u; si < style_count(); ++si)
-                minWeight = std::min(minWeight, font_info::weight_from_style_name(style_name(si)));
+                minWeight = std::min(minWeight, font_info::weight_from_style_name(style_name(si).to_std_string()));
             return minWeight;
         }
         ref_ptr<i_native_font_face> create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice)
@@ -72,10 +72,10 @@ namespace neogfx
             create_face(aStyle, aSize, aOutline, aDevice, result);
             return result;
         }
-        ref_ptr<i_native_font_face> create_face(font_style aStyle, std::string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice)
+        ref_ptr<i_native_font_face> create_face(font_style aStyle, string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice)
         {
             ref_ptr<i_native_font_face> result;
-            create_face(aStyle, string{ aStyleName }, aSize, aOutline, aDevice, result);
+            create_face(aStyle, aStyleName, aSize, aOutline, aDevice, result);
             return result;
         }
         ref_ptr<i_native_font_face> create_face(font_info const& aFontInfo, i_device_resolution const& aDevice)

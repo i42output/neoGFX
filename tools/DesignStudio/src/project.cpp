@@ -41,7 +41,7 @@ namespace neogfx::DesignStudio
 
     void project::create(const i_string& aName, const i_string& aNamespace)
     {
-        iRoot = manager().library("project"_s).create_element(*this, "project", aName);
+        iRoot = manager().library("project"_s).create_element(*this, "project", aName.to_std_string());
     }
 
     void project::open(const i_string& aPath)
@@ -144,7 +144,7 @@ namespace neogfx::DesignStudio
 
     i_element& project::create_element(i_element& aParent, const i_string& aType, const i_string& aElementId)
     {
-        auto result = manager().library(aType).create_element(aParent, aType, aElementId);
+        auto result = manager().library(aType).create_element(aParent, aType.to_std_string(), aElementId.to_std_string());
         ElementAdded(*result);
         result->create_default_children();
         return *result;

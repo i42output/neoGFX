@@ -202,7 +202,7 @@ namespace neogfx
         return iShortcut;
     }
 
-    action& action::set_enabled(bool aEnabled)
+    i_action& action::set_enabled(bool aEnabled)
     {
         if (iEnabled != aEnabled)
         {
@@ -215,7 +215,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_checkable(bool aCheckable)
+    i_action& action::set_checkable(bool aCheckable)
     {
         if (iCheckable != aCheckable)
         {
@@ -225,7 +225,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_checked(bool aChecked)
+    i_action& action::set_checked(bool aChecked)
     {
         if (iChecked != aChecked)
         {
@@ -238,7 +238,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_group(uuid const& aGroup)
+    i_action& action::set_group(uuid const& aGroup)
     {
         if (iGroup != aGroup)
         {
@@ -248,7 +248,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_separator(bool aIsSeparator)
+    i_action& action::set_separator(bool aIsSeparator)
     {
         if (iSeparator != aIsSeparator)
         {
@@ -258,7 +258,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_text(i_optional<i_string> const& aText)
+    i_action& action::set_text(i_optional<i_string> const& aText)
     {
         if (iText != aText)
         {
@@ -270,7 +270,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_menu_text(i_optional<i_string> const& aMenuText)
+    i_action& action::set_menu_text(i_optional<i_string> const& aMenuText)
     {
         if (iMenuText != aMenuText)
         {
@@ -282,7 +282,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_button_text(i_optional<i_string> const& aButtonText)
+    i_action& action::set_button_text(i_optional<i_string> const& aButtonText)
     {
         if (iButtonText != aButtonText)
         {
@@ -294,7 +294,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_tool_tip_text(i_optional<i_string> const& aToolTipText)
+    i_action& action::set_tool_tip_text(i_optional<i_string> const& aToolTipText)
     {
         if (iToolTipText != aToolTipText)
         {
@@ -306,7 +306,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_help_text(i_optional<i_string> const& aHelpText)
+    i_action& action::set_help_text(i_optional<i_string> const& aHelpText)
     {
         if (iHelpText != aHelpText)
         {
@@ -318,7 +318,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_image(const i_texture& aTexture)
+    i_action& action::set_image(const i_texture& aTexture)
     {
         iImage = aTexture;
         if (!iImage.is_empty() && iSeparator)
@@ -327,7 +327,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_checked_image(const i_texture& aTexture)
+    i_action& action::set_checked_image(const i_texture& aTexture)
     {
         iCheckedImage = aTexture;
         if (!iCheckedImage.is_empty() && iSeparator)
@@ -336,7 +336,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_shortcut(const optional_key_sequence& aShortcut)
+    i_action& action::set_shortcut(const optional_key_sequence& aShortcut)
     {
         if (iShortcut != aShortcut)
         {
@@ -348,7 +348,7 @@ namespace neogfx
         return *this;
     }
 
-    action& action::set_shortcut(i_string const& aShortcut)
+    i_action& action::set_shortcut(i_string const& aShortcut)
     {
         return set_shortcut(key_sequence{ aShortcut });
     }

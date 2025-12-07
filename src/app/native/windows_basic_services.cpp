@@ -132,7 +132,7 @@ namespace neogfx
     #endif 
         }
 
-        void basic_services::display_error_dialog(std::string const& aTitle, std::string const& aMessage, void* aParentWindowHandle) const
+        void basic_services::display_error_dialog(i_string const& aTitle, i_string const& aMessage, void* aParentWindowHandle) const
         {
             tinyfd_messageBox(aParentWindowHandle, aTitle.c_str(), aMessage.c_str(), "ok", "error", 1);
         }
@@ -199,7 +199,7 @@ namespace neogfx
             {
                 if (::OpenClipboard(NULL))
                 {
-                    auto const src = neolib::utf8_to_utf16(aText);
+                    auto const src = neolib::utf8_to_utf16(aText.to_std_string());
                     auto const hMem = ::GlobalAlloc(GMEM_MOVEABLE, (src.size() + 1) * sizeof(char16_t));
                     if (hMem)
                     {

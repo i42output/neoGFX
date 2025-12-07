@@ -1097,17 +1097,17 @@ namespace neogfx
                 switch (*iColorSpace)
                 {
                 case color_space::LinearRGB:
-                    iR.second.set_format("%.3f"); iR.second.set_minimum(0.0); iR.second.set_maximum(1.0); iR.second.set_step(0.001);
-                    iG.second.set_format("%.3f"); iG.second.set_minimum(0.0); iG.second.set_maximum(1.0); iG.second.set_step(0.001);
-                    iB.second.set_format("%.3f"); iB.second.set_minimum(0.0); iB.second.set_maximum(1.0); iB.second.set_step(0.001);
-                    iA.second.set_format("%.3f"); iA.second.set_minimum(0.0); iA.second.set_maximum(1.0); iA.second.set_step(0.001);
+                    iR.second.set_format("{:.3f}"); iR.second.set_minimum(0.0); iR.second.set_maximum(1.0); iR.second.set_step(0.001);
+                    iG.second.set_format("{:.3f}"); iG.second.set_minimum(0.0); iG.second.set_maximum(1.0); iG.second.set_step(0.001);
+                    iB.second.set_format("{:.3f}"); iB.second.set_minimum(0.0); iB.second.set_maximum(1.0); iB.second.set_step(0.001);
+                    iA.second.set_format("{:.3f}"); iA.second.set_minimum(0.0); iA.second.set_maximum(1.0); iA.second.set_step(0.001);
                     iRgb.hide();
                     break;
                 case color_space::sRGB:
-                    iR.second.set_format("%.0f"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
-                    iG.second.set_format("%.0f"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
-                    iB.second.set_format("%.0f"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
-                    iA.second.set_format("%.0f"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
+                    iR.second.set_format("{:.0f}"); iR.second.set_minimum(0); iR.second.set_maximum(255); iR.second.set_step(1);
+                    iG.second.set_format("{:.0f}"); iG.second.set_minimum(0); iG.second.set_maximum(255); iG.second.set_step(1);
+                    iB.second.set_format("{:.0f}"); iB.second.set_minimum(0); iB.second.set_maximum(255); iB.second.set_step(1);
+                    iA.second.set_format("{:.0f}"); iA.second.set_minimum(0); iA.second.set_maximum(255); iA.second.set_step(1);
                     iRgb.show();
                     break;
                 }

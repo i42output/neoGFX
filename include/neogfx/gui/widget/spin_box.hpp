@@ -35,21 +35,25 @@ namespace neogfx
     public:
         define_event(ValueChanged, value_changed)
         define_event(ConstraintsChanged, constraints_changed)
+        // types
     public:
-        typedef T value_type;
+        using value_type = T;
     private:
         enum class step_direction
         {
             Up, 
             Down
         };
+        // constants
     public:
         static constexpr size INTERNAL_SPACING = { 2.0, 0.0 };
         static constexpr size SPIN_BUTTON_MINIMUM_SIZE = { 13.0, 9.0 };
+        // construction
     public:
         basic_spin_box();
         basic_spin_box(i_widget& aParent);
         basic_spin_box(i_layout& aLayout);
+        // operations
     public:
         i_string const& text();
         const line_edit& text_box() const;
@@ -65,13 +69,14 @@ namespace neogfx
         void set_step(value_type aStep);
         value_type value() const;
         void set_value(value_type aValue, bool aNotify = true);
-        std::string const& format() const;
-        void set_format(std::string const& aFormat);
+        i_string const& format() const;
+        void set_format(i_string const& aFormat);
         const std::optional<size_hint>& text_box_size_hint() const;
         void set_text_box_size_hint(const std::optional<size_hint>& aSizeHint);
     public:
-        std::string const& valid_text_characters() const;
-        std::string value_to_string() const;
+        i_string const& valid_text_characters() const;
+        string value_to_string() const;
+        // implementation
     protected:
         neogfx::size_policy size_policy() const override;
     protected:
@@ -84,10 +89,18 @@ namespace neogfx
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
     private:
         void do_step(step_direction aDirection, std::uint32_t aAmount = 1);
-        std::optional<value_type> string_to_value(std::string const& aString) const;
+        std::optional<value_type> string_to_value(i_string const& aString) const;
         void init();
         void update_size_hint();
         void update_arrows();
+        // helpers
+        /// @todo move to i_spin_box
+    public:
+        void set_format(std::string const& aFormat)
+        {
+            set_format(string{ aFormat });
+        }
+        // state
     private:
         sink iSink;
         string iText;
@@ -104,7 +117,7 @@ namespace neogfx
         value_type iMaximum;
         value_type iStep;
         value_type iValue;
-        std::string iFormat;
+        string iFormat;
         std::optional<size_hint> iTextBoxSizeHint;
         bool iDontSetText = false;
     };

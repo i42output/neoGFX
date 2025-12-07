@@ -247,7 +247,7 @@ namespace neogfx
         return false;
     }
 
-    std::string menu_item_widget::mnemonic() const
+    string menu_item_widget::mnemonic() const
     {
         return mnemonic_from_text(iText.text());
     }

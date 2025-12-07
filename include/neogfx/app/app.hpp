@@ -88,7 +88,7 @@ namespace neogfx
             app& iApp;
         };
     private:
-        typedef std::map<std::string, style> style_list;
+        typedef std::map<string, style> style_list;
         typedef neolib::multimap<string, ref_ptr<i_action>> action_list;
         typedef std::vector<i_mnemonic*> mnemonic_list;
     public:
@@ -108,8 +108,9 @@ namespace neogfx
         app_thread& thread() const noexcept;;
     public:
         const i_program_options& program_options() const noexcept override;
-        std::string const& name() const noexcept override;
-        void set_name(std::string const& aName) override;
+        i_string const& name() const noexcept override;
+        using i_app::set_name;
+        void set_name(i_string const& aName) override;
         int exec(bool aQuitWhenLastWindowClosed = true) override;
         bool in_exec() const override;
         void quit(int aResultCode = 0) override;
@@ -123,7 +124,8 @@ namespace neogfx
         void set_default_window_icon(const i_image& aIcon) override;
         const i_style& current_style() const override;
         i_style& current_style() override;
-        i_style& change_style(std::string const& aStyleName) override;
+        using i_app::change_style;
+        i_style& change_style(i_string const& aStyleName) override;
         i_style& register_style(const i_style& aStyle) override;
     public:
         void clear_translations();
@@ -176,7 +178,7 @@ namespace neogfx
         std::unique_ptr<app_thread> iThread;
         neogfx::program_options iProgramOptions;
         std::unique_ptr<loader> iLoader;
-        std::string iName;
+        string iName;
         bool iQuitWhenLastWindowClosed;
         bool iInExec;
         std::optional<int> iQuitResultCode;
@@ -189,7 +191,7 @@ namespace neogfx
         neogfx::event_processing_context iAppContext;
         std::vector<std::pair<key_code_e, key_modifier>> iKeySequence;
         mutable std::unique_ptr<i_help> iHelp;
-        std::map<std::string, std::map<std::string, std::map<std::pair<std::int64_t, std::int64_t>, string>>> iTranslations;
+        std::map<string, std::map<string, std::map<std::pair<std::int64_t, std::int64_t>, string>>> iTranslations;
         // standard actions
     public:
         action actionFileNew;

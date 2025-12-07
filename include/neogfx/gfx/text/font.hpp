@@ -176,14 +176,14 @@ namespace neogfx
         class instance;
     public:
         font_info();
-        font_info(std::string const& aFamilyName, font_style aStyle, point_size aSize);
-        font_info(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize);
-        font_info(std::string const& aFamilyName, font_style aStyle, std::string const& aStyleName, point_size aSize);
+        font_info(string const& aFamilyName, font_style aStyle, point_size aSize);
+        font_info(string const& aFamilyName, string const& aStyleName, point_size aSize);
+        font_info(string const& aFamilyName, font_style aStyle, string const& aStyleName, point_size aSize);
         font_info(const font_info& aOther);
         virtual ~font_info();
         font_info& operator=(const font_info& aOther);
     private:
-        font_info(std::string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
+        font_info(string const& aFamilyName, const optional_style& aStyle, const optional_style_name& aStyleName, point_size aSize);
     public:
         i_string const& family_name() const;
         bool style_available() const;
@@ -203,7 +203,7 @@ namespace neogfx
     public:
         font_info with_style(font_style aStyle) const;
         font_info with_style_xor(font_style aStyle) const;
-        font_info with_style_name(std::string const& aStyleName) const;
+        font_info with_style_name(string const& aStyleName) const;
         font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
         font_info with_outline(stroke aOutline) const;
@@ -211,7 +211,7 @@ namespace neogfx
         auto operator<=>(const font_info& aRhs) const = default;
     public:
         static font_weight weight_from_style(font_style aStyle);
-        static font_weight weight_from_style_name(std::string const& aStyleName, bool aUnknownAsRegular = true);
+        static font_weight weight_from_style_name(string const& aStyleName, bool aUnknownAsRegular = true);
     private:
         string iFamilyName;
         optional_style iStyle;
@@ -244,18 +244,18 @@ namespace neogfx
         // construction
     public:
         font();
-        font(std::string const& aFamilyName, font_style aStyle, point_size aSize);
-        font(std::string const& aFamilyName, std::string const& aStyleName, point_size aSize);
+        font(string const& aFamilyName, font_style aStyle, point_size aSize);
+        font(string const& aFamilyName, string const& aStyleName, point_size aSize);
         font(const font_info& aFontInfo);
         font(const font& aOther);
         font(const font& aOther, font_style aStyle, point_size aSize);
-        font(const font& aOther, std::string const& aStyleName, point_size aSize);
-        static font load_from_file(std::string const& aFileName);
-        static font load_from_file(std::string const& aFileName, font_style aStyle, point_size aSize);
-        static font load_from_file(std::string const& aFileName, std::string const& aStyleName, point_size aSize);
+        font(const font& aOther, string const& aStyleName, point_size aSize);
+        static font load_from_file(string const& aFileName);
+        static font load_from_file(string const& aFileName, font_style aStyle, point_size aSize);
+        static font load_from_file(string const& aFileName, string const& aStyleName, point_size aSize);
         static font load_from_memory(const void* aData, std::size_t aSizeInBytes);
         static font load_from_memory(const void* aData, std::size_t aSizeInBytes, font_style aStyle, point_size aSize);
-        static font load_from_memory(const void* aData, std::size_t aSizeInBytes, std::string const& aStyleName, point_size aSize);
+        static font load_from_memory(const void* aData, std::size_t aSizeInBytes, string const& aStyleName, point_size aSize);
         ~font();
         font& operator=(const font& aOther);
     private:
@@ -334,8 +334,8 @@ namespace neogfx
     template <typename Elem, typename Traits>
     inline std::basic_istream<Elem, Traits>& operator>>(std::basic_istream<Elem, Traits>& aStream, font_info& aFontInfo)
     {
-        std::string familyName;
-        std::variant<font_style, std::string> style;
+        string familyName;
+        std::variant<font_style, string> style;
         font_info::point_size size;
         bool underline;
         bool kerning;
@@ -346,7 +346,7 @@ namespace neogfx
         char ignore;
         aStream >> ignore;
         aStream >> familyName;
-        std::string styleString;
+        string styleString;
         aStream >> styleString;
         auto tryStyle = neolib::try_string_to_enum<font_style>(styleString);
         if (tryStyle.has_value())
@@ -363,7 +363,7 @@ namespace neogfx
         if (std::holds_alternative<font_style>(style))
             aFontInfo = font_info{ familyName, std::get<font_style>(style), size };
         else
-            aFontInfo = font_info{ familyName, std::get<std::string>(style), size };
+            aFontInfo = font_info{ familyName, std::get<string>(style), size };
         aFontInfo.set_underline(underline);
         if (kerning)
             aFontInfo.enable_kerning();

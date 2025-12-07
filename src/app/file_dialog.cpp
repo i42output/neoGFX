@@ -68,7 +68,7 @@ namespace neogfx
         return result ? neolib::tokens(std::string{ result }, "|"s) : optional_file_paths{};
     }
 
-    optional_file_path do_select_folder_dialog(std::optional<std::string> const& aTitle, optional_file_path const& aDefaultPath)
+    optional_file_path do_select_folder_dialog(std::optional<string> const& aTitle, optional_file_path const& aDefaultPath)
     {
         auto result = tinyfd_selectFolderDialog(
             aTitle ? aTitle->c_str() : nullptr,
@@ -86,7 +86,7 @@ namespace neogfx
         return do_open_file_dialog(aSpec, aAllowMultipleSelection);
     }
 
-    optional_file_path select_folder_dialog(std::optional<std::string> const& aTitle, optional_file_path const& aDefaultPath)
+    optional_file_path select_folder_dialog(std::optional<string> const& aTitle, optional_file_path const& aDefaultPath)
     {
         return do_select_folder_dialog(aTitle, aDefaultPath);
     }
@@ -101,7 +101,7 @@ namespace neogfx
         return modal_task<optional_file_paths>(aParent, "neogfx::open_file_dialog", do_open_file_dialog, aSpec, aAllowMultipleSelection);
     }
 
-    optional_file_path select_folder_dialog(i_widget& aParent, std::optional<std::string> const& aTitle, optional_file_path const& aDefaultPath)
+    optional_file_path select_folder_dialog(i_widget& aParent, std::optional<string> const& aTitle, optional_file_path const& aDefaultPath)
     {
         return modal_task<optional_file_path>(aParent, "neogfx::select_folder_dialog", do_select_folder_dialog, aTitle, aDefaultPath);
     }

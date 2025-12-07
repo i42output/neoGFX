@@ -81,8 +81,8 @@ namespace neogfx
                 }
             }
         }
-        if (neolib::uri{ aUri }.scheme().empty() && iResources.as_std_map().find(aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#'))) == iResources.as_std_map().end())
-            throw embedded_resource_not_found(aUri);
+        if (neolib::uri{ aUri.to_std_string() }.scheme().empty() && iResources.as_std_map().find(string{ aUri.to_std_string_view().substr(0, aUri.to_std_string_view().rfind('#')) }) == iResources.as_std_map().end())
+            throw embedded_resource_not_found(aUri.to_std_string());
         auto newResource = make_ref<resource>(*this, aUri);
         iResources[aUri] = decltype(iResources)::mapped_type{ weak_ref_ptr<i_resource>{ newResource } };
         aResult = newResource;

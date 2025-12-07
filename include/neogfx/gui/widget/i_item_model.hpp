@@ -193,6 +193,14 @@ namespace neogfx
             item_cell_data_variant{ string{ aString } } 
         {
         }
+        item_cell_data(i_string const& aString) :
+            item_cell_data_variant{ string{ aString } }
+        {
+        }
+        item_cell_data(i_string&& aString) :
+            item_cell_data_variant{ string{ std::move(aString) } }
+        {
+        }
         item_cell_data(std::string const& aString) :
             item_cell_data_variant{ string{ aString } }
         {
@@ -230,20 +238,20 @@ namespace neogfx
             item_cell_data_variant::operator=(string{ aString });
             return *this;
         }
-        item_cell_data& operator=(std::string const& aString)
+        item_cell_data& operator=(i_string const& aString)
         {
             item_cell_data_variant::operator=(string{ aString });
             return *this;
         }
-        item_cell_data& operator=(std::string&& aString)
+        item_cell_data& operator=(i_string&& aString)
         {
             item_cell_data_variant::operator=(string{ aString });
             return *this;
         }
     public:
-        std::string to_string() const
+        string to_string() const
         {
-            return std::visit([](auto&& arg) -> std::string
+            return std::visit([](auto&& arg) -> string
             {
                 typedef typename std::remove_cv<typename std::remove_reference<decltype(arg)>::type>::type type;
                 if constexpr(!std::is_same_v<type, std::monostate> && classify_item_call_data<type>::category == item_cell_data_category::Value)
@@ -251,6 +259,10 @@ namespace neogfx
                 else
                     return "";
             }, *this);
+        }
+        std::string to_std_string() const
+        {
+            return to_string().to_std_string();
         }
     };
 
@@ -288,8 +300,8 @@ namespace neogfx
         virtual std::uint32_t rows() const = 0;
         virtual std::uint32_t columns() const = 0;
         virtual std::uint32_t columns(item_model_index const& aIndex) const = 0;
-        virtual std::string const& column_name(item_model_index::column_type aColumnIndex) const = 0;
-        virtual void set_column_name(item_model_index::column_type aColumnIndex, std::string const& aName) = 0;
+        virtual i_string const& column_name(item_model_index::column_type aColumnIndex) const = 0;
+        virtual void set_column_name(item_model_index::column_type aColumnIndex, i_string const& aName) = 0;
         virtual item_data_type column_data_type(item_model_index::column_type aColumnIndex) const = 0;
         virtual void set_column_data_type(item_model_index::column_type aColumnIndex, item_data_type aType) = 0;
         virtual item_cell_data const& column_min_value(item_model_index::column_type aColumnIndex) const = 0;
@@ -339,5 +351,11 @@ namespace neogfx
     public:
         virtual const item_cell_info& cell_info(item_model_index const& aIndex) const = 0;
         virtual item_cell_data const& cell_data(item_model_index const& aIndex) const = 0;
+        // helpers
+    public:
+        void set_column_name(item_model_index::column_type aColumnIndex, std::string const& aName)
+        {
+            set_column_name(aColumnIndex, string{ aName });
+        }
     };
 }

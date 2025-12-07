@@ -29,7 +29,7 @@
 
 namespace neogfx
 {
-    virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
+    virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_size<int>& aDimensions, string const& aWindowTitle, window_style aStyle) :
         native_window{ aRenderingEngine, aSurfaceManager, aWindow },
         iSurfaceWindow{ aWindow },
         iParent{ aParent },
@@ -52,7 +52,7 @@ namespace neogfx
         surface_window().set_native_window(*this);
     }
 
-    virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
+    virtual_window::virtual_window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, i_native_window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, string const& aWindowTitle, window_style aStyle) :
         native_window{ aRenderingEngine, aSurfaceManager, aWindow },
         iSurfaceWindow{ aWindow },
         iParent{ aParent },

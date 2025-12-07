@@ -44,9 +44,9 @@ namespace neogfx
             size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
         };
     public:
-        radio_button(std::string const& aText = std::string());
-        radio_button(i_widget& aParent, std::string const& aText = std::string());
-        radio_button(i_layout& aLayout, std::string const& aText = std::string());
+        radio_button(string const& aText = string());
+        radio_button(i_widget& aParent, string const& aText = string());
+        radio_button(i_layout& aLayout, string const& aText = string());
     protected:
         neogfx::object_type object_type() const override;
     public:

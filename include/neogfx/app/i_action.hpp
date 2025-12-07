@@ -118,6 +118,10 @@ namespace neogfx
         {
             return set_help_text(to_abstract(aHelpText));
         }
+        i_action& set_image(i_string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
+        {
+            return set_image(texture{ neogfx::image{aUri, aDpiScaleFactor, aSampling} });
+        }
         i_action& set_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
         {
             return set_image(texture{ neogfx::image{aUri, aDpiScaleFactor, aSampling} });
@@ -125,6 +129,10 @@ namespace neogfx
         i_action& set_image(i_image const& aImage)
         {
             return set_image(texture{ aImage });
+        }
+        i_action& set_checked_image(i_string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
+        {
+            return set_checked_image(texture{ neogfx::image{ aUri, aDpiScaleFactor, aSampling } });
         }
         i_action& set_checked_image(std::string const& aUri, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::Scaled)
         {
@@ -136,7 +144,7 @@ namespace neogfx
         }
         i_action& set_shortcut(std::string const& aShortcut)
         {
-            return set_shortcut(string(aShortcut));
+            return set_shortcut(string{ aShortcut });
         }
     };
 

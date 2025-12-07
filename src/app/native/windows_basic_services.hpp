@@ -41,7 +41,7 @@ namespace neogfx
             i_async_task& app_task() final;
             void* helper_window_handle() const final;
             void system_beep() final;
-            void display_error_dialog(std::string const& aTitle, std::string const& aMessage, void* aParentWindowHandle = 0) const final;
+            void display_error_dialog(i_string const& aTitle, i_string const& aMessage, void* aParentWindowHandle = 0) const final;
             std::uint32_t display_count() const final;
             i_display& display(std::uint32_t aDisplayIndex = 0) const final;
             bool has_system_clipboard() const final;

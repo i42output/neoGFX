@@ -125,7 +125,7 @@ namespace neogfx
     {
         style_map::value_type* foundStyle = 0;
         for (auto& s : iStyleMap)
-            if (neolib::make_ci_string(s.first.second) == neolib::make_ci_string(aStyleName))
+            if (neolib::make_ci_string(s.first.second.to_std_string()) == neolib::make_ci_string(aStyleName.to_std_string()))
             {
                 foundStyle = &s;
                 break;

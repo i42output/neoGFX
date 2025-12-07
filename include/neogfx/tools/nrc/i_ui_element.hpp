@@ -242,11 +242,12 @@ namespace neogfx::nrc
         template <typename T, typename Target>
         void emplace_2(const neolib::string& aKey, Target& aTarget) const
         {
+            auto const key = aKey.to_std_string();
             std::vector<T> scalars;
-            if (parser().data_exists(aKey))
-                scalars.push_back(get_scalar<T>(parser().get_data(aKey)));
-            else if (parser().array_data_exists(aKey))
-                scalars = get_scalars<T>(parser().get_array_data(aKey));
+            if (parser().data_exists(key))
+                scalars.push_back(get_scalar<T>(parser().get_data(key)));
+            else if (parser().array_data_exists(key))
+                scalars = get_scalars<T>(parser().get_array_data(key));
             else
                 return;
             switch (scalars.size())
@@ -264,11 +265,12 @@ namespace neogfx::nrc
         template <typename T, typename Target>
         void emplace_4(const neolib::string& aKey, Target& aTarget) const
         {
+            auto const key = aKey.to_std_string();
             std::vector<T> scalars;
-            if (parser().data_exists(aKey))
-                scalars.push_back(get_scalar<T>(parser().get_data(aKey)));
-            else if (parser().array_data_exists(aKey))
-                scalars = get_scalars<T>(parser().get_array_data(aKey));
+            if (parser().data_exists(key))
+                scalars.push_back(get_scalar<T>(parser().get_data(key)));
+            else if (parser().array_data_exists(key))
+                scalars = get_scalars<T>(parser().get_array_data(key));
             else
                 return;
             switch (scalars.size())
@@ -334,7 +336,7 @@ namespace neogfx::nrc
         template <typename Enum>
         static std::string enum_to_string(std::string const& aEnumName, Enum aEnumValue) 
         {
-            auto es = neolib::enum_to_string(aEnumValue);
+            auto es = neolib::enum_to_string(aEnumValue).to_std_string();
             if (es[0] != '0')
                 return aEnumName + "::" + es;
             else

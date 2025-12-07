@@ -180,7 +180,7 @@ namespace neogfx
 
         std::map<void*, window*> sHandleMap;
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const video_mode& aVideoMode, string const& aWindowTitle, window_style aStyle) :
             native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
@@ -191,10 +191,12 @@ namespace neogfx
 
             sNewWindow = this;
 
+            auto const& windowTitle = neolib::utf8_to_utf16(aWindowTitle.to_std_string());
+
             iHandle = ::CreateWindowEx(
                 convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
-                reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
+                reinterpret_cast<LPCWSTR>(windowTitle.c_str()),
                 convert_style(aStyle),
                 0,
                 0,
@@ -215,7 +217,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_size<int>& aDimensions, string const& aWindowTitle, window_style aStyle) :
             native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
@@ -226,10 +228,12 @@ namespace neogfx
 
             sNewWindow = this;
 
+            auto const& windowTitle = neolib::utf8_to_utf16(aWindowTitle.to_std_string());
+
             iHandle = ::CreateWindowEx(
                 convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
-                reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
+                reinterpret_cast<LPCWSTR>(windowTitle.c_str()),
                 convert_style(aStyle),
                 aSurfaceManager.display(0).desktop_rect().as<int>().center().x - aDimensions.cx / 2,
                 aSurfaceManager.display(0).desktop_rect().as<int>().center().y - aDimensions.cy / 2,
@@ -248,7 +252,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, string const& aWindowTitle, window_style aStyle) :
             native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{},
             iStyle{ aStyle },
@@ -259,10 +263,12 @@ namespace neogfx
 
             sNewWindow = this;
 
+            auto const& windowTitle = neolib::utf8_to_utf16(aWindowTitle.to_std_string());
+
             iHandle = ::CreateWindowEx(
                 convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
-                reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
+                reinterpret_cast<LPCWSTR>(windowTitle.c_str()),
                 convert_style(aStyle),
                 aPosition.x,
                 aPosition.y,
@@ -281,7 +287,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, std::string const& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const video_mode& aVideoMode, string const& aWindowTitle, window_style aStyle) :
             native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
@@ -292,10 +298,12 @@ namespace neogfx
 
             sNewWindow = this;
 
+            auto const& windowTitle = neolib::utf8_to_utf16(aWindowTitle.to_std_string());
+
             iHandle = ::CreateWindowEx(
                 convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
-                reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
+                reinterpret_cast<LPCWSTR>(windowTitle.c_str()),
                 convert_style(aStyle),
                 0,
                 0,
@@ -316,7 +324,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_size<int>& aDimensions, string const& aWindowTitle, window_style aStyle) :
             native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
@@ -327,10 +335,12 @@ namespace neogfx
 
             sNewWindow = this;
 
+            auto const& windowTitle = neolib::utf8_to_utf16(aWindowTitle.to_std_string());
+
             iHandle = ::CreateWindowEx(
                 convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
-                reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
+                reinterpret_cast<LPCWSTR>(windowTitle.c_str()),
                 convert_style(aStyle),
                 aSurfaceManager.display(0).desktop_rect().as<int>().center().x - aDimensions.cx / 2,
                 aSurfaceManager.display(0).desktop_rect().as<int>().center().y - aDimensions.cy / 2,
@@ -349,7 +359,7 @@ namespace neogfx
                 show((aStyle & window_style::NoActivate) != window_style::NoActivate);
         }
 
-        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, std::string const& aWindowTitle, window_style aStyle) :
+        window::window(i_rendering_engine& aRenderingEngine, i_surface_manager& aSurfaceManager, i_surface_window& aWindow, window& aParent, const basic_point<int>& aPosition, const basic_size<int>& aDimensions, string const& aWindowTitle, window_style aStyle) :
             native_window{ aRenderingEngine, aSurfaceManager, aWindow },
             iParent{ &aParent },
             iStyle{ aStyle },
@@ -360,10 +370,12 @@ namespace neogfx
 
             sNewWindow = this;
 
+            auto const& windowTitle = neolib::utf8_to_utf16(aWindowTitle.to_std_string());
+
             iHandle = ::CreateWindowEx(
                 convert_ex_style(aStyle),
                 sWindowClassName.c_str(),
-                reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aWindowTitle).c_str()),
+                reinterpret_cast<LPCWSTR>(windowTitle.c_str()),
                 convert_style(aStyle),
                 aPosition.x,
                 aPosition.y,
@@ -750,7 +762,8 @@ namespace neogfx
 
         void window::set_title_text(i_string const& aTitleText)
         {
-            ::SetWindowText(iHandle, reinterpret_cast<LPCWSTR>(neolib::utf8_to_utf16(aTitleText).c_str()));
+            auto const& windowTitle = neolib::utf8_to_utf16(aTitleText.to_std_string());
+            ::SetWindowText(iHandle, reinterpret_cast<LPCWSTR>(windowTitle.c_str()));
         }
 
         class suppress_style

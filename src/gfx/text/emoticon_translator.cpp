@@ -162,7 +162,7 @@ namespace neogfx
                 std::u32string const codePoints = neolib::utf8_to_utf32(iBuffer);
                 for (std::size_t i = 0; i < codePoints.size(); ++i)
                     iActiveWidget->key_pressed(ScanCode_BACKSPACE, KeyCode_BACKSPACE, key_modifier::None);
-                auto const& toInsert = neolib::string{ selectedEmoji.value() } + (aHaveExtra ? aText : std::string_view{});
+                auto const& toInsert = string{ selectedEmoji.value() } + string{ aHaveExtra ? aText : std::string_view{} };
                 iActiveWidget->text_input(toInsert);
                 if (availableEmoji.size() == 1) // only need undo if we didn't popup a menu
                     iLastTranslationForUndo.emplace(std::make_tuple(std::chrono::steady_clock::now(), iBuffer, toInsert));

@@ -338,7 +338,7 @@ namespace neogfx
             auto selector = iSelectors.find("." + std::string{ bit.first, bit.second });
             if (selector != iSelectors.end())
             {
-                auto property = selector->second.find(aProperty.to_std_string_view());
+                auto property = selector->second.find(aProperty);
                 if (property != selector->second.end())
                     return property->second;
             }

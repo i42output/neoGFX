@@ -84,11 +84,11 @@ namespace neogfx::nrc
             if (iChecked)
                 emit("   %1%.set_checked(%2%);\n", id(), *iChecked);
             if (iImage)
-                emit("   %1%.set_image(\"%2%\");\n", id(), *iImage);
+                emit("   %1%.set_image(\"%2%\"_s);\n", id(), *iImage);
             if (iShortcut)
-                emit("   %1%.set_shortcut(\"%2%\");\n", id(), *iShortcut);
+                emit("   %1%.set_shortcut(\"%2%\"_s);\n", id(), *iShortcut);
             if (iCheckedImage)
-                emit("   %1%.set_checked_image(\"%2%\");\n", id(), *iCheckedImage);
+                emit("   %1%.set_checked_image(\"%2%\"_s);\n", id(), *iCheckedImage);
             ui_element<>::emit_body();
         }
     protected:

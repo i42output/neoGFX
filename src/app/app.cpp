@@ -105,7 +105,7 @@ namespace neogfx
                 return size_u32{};
             else
             {
-                neolib::vecarray<std::string, 2> bits;
+                neolib::vecarray<string, 2> bits;
                 neolib::tokens(screenResolution, ","s, bits, 2, false, false);
                 if (bits.size() == 2)
                 {
@@ -128,7 +128,7 @@ namespace neogfx
                 return std::optional<size_u32>{};
             else
             {
-                neolib::vecarray<std::string, 2> bits;
+                neolib::vecarray<string, 2> bits;
                 neolib::tokens(dpiOverride, ","s, bits, 2, false, false);
                 if (bits.size() == 2)
                 {
@@ -340,13 +340,13 @@ namespace neogfx
     catch (std::exception& e)
     {
         service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with exception: " << e.what() << std::endl;
-        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), std::string("main: terminating with exception: ") + e.what());
+        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + aAppInfo.name(), "main: terminating with exception: "_t + e.what());
         throw;
     }
     catch (...)
     {
         service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::app: terminating with unknown exception" << std::endl;
-        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + aAppInfo.name(), "main: terminating with unknown exception");
+        service<i_basic_services>().display_error_dialog(aAppInfo.name().empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + aAppInfo.name(), "main: terminating with unknown exception"_t);
         throw;
     }
 
@@ -374,12 +374,12 @@ namespace neogfx
         return iProgramOptions;
     }
 
-    std::string const& app::name() const noexcept
+    i_string const& app::name() const noexcept
     {
         return iName;
     }
 
-    void app::set_name(std::string const& aName)
+    void app::set_name(i_string const& aName)
     {
         iName = aName;
         NameChanged();
@@ -410,14 +410,14 @@ namespace neogfx
         {
             thread().halt();
             service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
-            service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::exec: terminating with exception: ") + e.what());
+            service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + iName, "neogfx::app::exec: terminating with exception: "_t + e.what());
             std::exit(EXIT_FAILURE);
         }
         catch (...)
         {
             thread().halt();
             service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::exec: terminating with unknown exception" << std::endl;
-            service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::exec: terminating with unknown exception");
+            service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + iName, "neogfx::app::exec: terminating with unknown exception"_t);
             std::exit(EXIT_FAILURE);
         }
     }
@@ -480,7 +480,7 @@ namespace neogfx
         return iCurrentStyle->second;
     }
 
-    i_style& app::change_style(std::string const& aStyleName)
+    i_style& app::change_style(i_string const& aStyleName)
     {
         style_list::iterator existingStyle = iStyles.find(aStyleName);
         if (existingStyle == iStyles.end())
@@ -530,8 +530,8 @@ namespace neogfx
             {
                 if (item.name() == "text")
                 {
-                    std::optional<std::string> source;
-                    std::vector<std::pair<std::pair<std::int64_t, std::int64_t>, std::string>> targets;
+                    std::optional<string> source;
+                    std::vector<std::pair<std::pair<std::int64_t, std::int64_t>, string>> targets;
                     for (auto const& part : item)
                     {
                         if (part.name() == "source")
@@ -542,7 +542,7 @@ namespace neogfx
                             if (part.has_attribute("n"))
                             {
                                 auto const& n = part.attribute_value("n").to_std_string();
-                                neolib::vecarray<std::string, 2> bits;
+                                neolib::vecarray<string, 2> bits;
                                 neolib::tokens(n, ".."s, bits, 2, false, true);
                                 if (bits.size() == 1)
                                     plurality.second = (plurality.first = boost::lexical_cast<std::int64_t>(bits[0]));
@@ -834,7 +834,7 @@ namespace neogfx
             {
                 thread().halt();
                 service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with exception: " << e.what() << std::endl;
-                service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, std::string("neogfx::app::process_events: terminating with exception: ") + e.what());
+                service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + iName, "neogfx::app::process_events: terminating with exception: "_t + e.what());
                 std::exit(EXIT_FAILURE);
             }
         }
@@ -844,7 +844,7 @@ namespace neogfx
             {
                 thread().halt();
                 service<debug::logger>() << neolib::logger::severity::Debug << "neogfx::app::process_events: terminating with unknown exception" << std::endl;
-                service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + iName, "neogfx::app::process_events: terminating with unknown exception");
+                service<i_surface_manager>().display_error_message(iName.empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + iName, "neogfx::app::process_events: terminating with unknown exception"_t);
                 std::exit(EXIT_FAILURE);
             }
         }
@@ -958,7 +958,7 @@ namespace neogfx
                 else if (lastWindowSurface != &m->mnemonic_widget().surface())
                     continue;
             }
-            if (boost::locale::to_lower(m->mnemonic(), loc) == boost::locale::to_lower(aInput.to_std_string(), loc))
+            if (boost::locale::to_lower(m->mnemonic().as_std_string(), loc) == boost::locale::to_lower(aInput.to_std_string(), loc))
             {
                 m->mnemonic_execute();
                 return true;

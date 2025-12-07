@@ -45,8 +45,8 @@ namespace neogfx
         typedef std::unique_ptr<i_menu_item> item_pointer;
         typedef std::vector<item_pointer> item_list;
     public:
-        menu(i_menu& aParent, std::string const& aTitle = std::string{}, menu_type aType = menu_type::Popup);
-        menu(std::string const& aTitle = std::string{}, menu_type aType = menu_type::Popup);
+        menu(i_menu& aParent, string const& aTitle = string{}, menu_type aType = menu_type::Popup);
+        menu(string const& aTitle = string{}, menu_type aType = menu_type::Popup);
         ~menu();
     public:
         const i_widget& as_widget() const override;

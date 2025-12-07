@@ -45,8 +45,8 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
         
-    check_box::check_box(std::string const& aText, button_checkable aCheckable) :
-        button(aText), iBox(*this)
+    check_box::check_box(string const& aText, button_checkable aCheckable) :
+        button{ aText }, iBox{ *this }
     {
         set_checkable(aCheckable);
         set_padding(neogfx::padding{ 0.0 });
@@ -55,8 +55,8 @@ namespace neogfx
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    check_box::check_box(i_widget& aParent, std::string const& aText, button_checkable aCheckable) :
-        button(aParent, aText), iBox(*this)
+    check_box::check_box(i_widget& aParent, string const& aText, button_checkable aCheckable) :
+        button{ aParent, aText }, iBox{ *this }
     {
         set_checkable(aCheckable);
         set_padding(neogfx::padding{ 0.0 });
@@ -65,8 +65,8 @@ namespace neogfx
         label().text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    check_box::check_box(i_layout& aLayout, std::string const& aText, button_checkable aCheckable) :
-        button(aLayout, aText), iBox(*this)
+    check_box::check_box(i_layout& aLayout, string const& aText, button_checkable aCheckable) :
+        button{ aLayout, aText }, iBox{ *this }
     {
         set_checkable(aCheckable);
         set_padding(neogfx::padding{ 0.0 });

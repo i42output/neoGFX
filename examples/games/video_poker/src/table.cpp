@@ -59,7 +59,7 @@ namespace video_poker
     class outcome : public ng::game::shape::text
     {
     public:
-        outcome(ng::game::canvas& aCanvas, std::string const& aOutcome, const ng::color& aColor) :
+        outcome(ng::game::canvas& aCanvas, ng::string const& aOutcome, const ng::color& aColor) :
             ng::game::shape::text{
                 aCanvas.ecs(),
                 ng::graphics_context{ aCanvas },

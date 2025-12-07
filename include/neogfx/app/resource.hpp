@@ -39,8 +39,8 @@ namespace neogfx
         typedef data_type hash_digest_type;
     public:
         resource() = delete;
-        resource(i_resource_manager& aManager, std::string const& aUri);
-        resource(i_resource_manager& aManager, std::string const& aUri, const void* aData, std::size_t aSize);
+        resource(i_resource_manager& aManager, string const& aUri);
+        resource(i_resource_manager& aManager, string const& aUri, const void* aData, std::size_t aSize);
         ~resource();
     public:
         bool available() const override;

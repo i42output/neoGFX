@@ -58,7 +58,7 @@ namespace neogfx::nrc
             if constexpr (SpacerType != ui_element_type::Spacer)
             {
                 if (iExpansionPolicy)
-                    throw element_ill_formed(id());
+                    throw element_ill_formed(id().to_std_string());
                 ui_element<>::emit_generic_ctor();
             }
             else
@@ -76,7 +76,7 @@ namespace neogfx::nrc
                     emit(",\n"
                         "   %1%{ %2%, %3% }", id(), parent().id(), enum_to_string("expansion_policy", expansion_policy::ExpandVertically | expansion_policy::ExpandHorizontally));
                 else
-                    throw element_ill_formed(id());
+                    throw element_ill_formed(id().to_std_string());
             }
             ui_element<>::emit_ctor();
         }

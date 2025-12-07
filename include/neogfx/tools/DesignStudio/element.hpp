@@ -89,7 +89,7 @@ namespace neogfx::DesignStudio
         typedef abstract_t<base_type> abstract_type;
         typedef neolib::vector<ref_ptr<i_element>> children_t;
     public:
-        element(i_element_library const& aLibrary, i_project& aProject, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_project& aProject, i_string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iProject{ aProject },
             iParent { nullptr }, 
@@ -97,7 +97,7 @@ namespace neogfx::DesignStudio
             iType{ aType }
         {
         }
-        element(i_element_library const& aLibrary, i_project& aProject, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_project& aProject, i_string const& aType, i_string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iProject{ aProject },
             iParent{ nullptr },
@@ -106,7 +106,7 @@ namespace neogfx::DesignStudio
             iId{ aId }
         {
         }
-        element(i_element_library const& aLibrary, i_element& aParent, std::string const& aType, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_element& aParent, i_string const& aType, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iProject{ aParent.project() },
             iParent{ &aParent },
@@ -115,7 +115,7 @@ namespace neogfx::DesignStudio
         {
             parent().add_child(*this);
         }
-        element(i_element_library const& aLibrary, i_element& aParent, std::string const& aType, std::string const& aId, element_group aGroup = default_element_group<Type>()) :
+        element(i_element_library const& aLibrary, i_element& aParent, i_string const& aType, i_string const& aId, element_group aGroup = default_element_group<Type>()) :
             iLibrary{ aLibrary }, 
             iProject{ aParent.project() },
             iParent{ &aParent },
@@ -340,8 +340,8 @@ namespace neogfx::DesignStudio
         i_project& iProject;
         i_element* iParent;
         element_group iGroup;
-        neolib::string iType;
-        neolib::string iId;
+        string iType;
+        string iId;
         children_t iChildren;
         mutable ref_ptr<i_layout_item> iLayoutItem;
         ref_ptr<i_element_caddy> iCaddy;

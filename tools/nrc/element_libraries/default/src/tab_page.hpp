@@ -75,7 +75,7 @@ namespace neogfx::nrc
         void emit_body() const override
         {
             if (iTabImage)
-                emit("   %1%.tab().set_image(image{ \"%2%\" });\n", id(), *iTabImage);
+                emit("   %1%.tab().set_image(\"%2%\"_s);\n", id(), *iTabImage);
             ui_element<>::emit_body();
         }
     protected:

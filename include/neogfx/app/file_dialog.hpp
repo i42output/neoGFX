@@ -49,9 +49,9 @@ namespace neogfx
 
     optional_file_path save_file_dialog(file_dialog_spec const& aSpec = {});
     optional_file_paths open_file_dialog(file_dialog_spec const& aSpec = {}, bool aAllowMultipleSelection = false);
-    optional_file_path select_folder_dialog(std::optional<std::string> const& aTitle = {}, optional_file_path const& aDefaultPath = {});
+    optional_file_path select_folder_dialog(std::optional<string> const& aTitle = {}, optional_file_path const& aDefaultPath = {});
 
     optional_file_path save_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec = {});
     optional_file_paths open_file_dialog(i_widget& aParent, file_dialog_spec const& aSpec = {}, bool aAllowMultipleSelection = false);
-    optional_file_path select_folder_dialog(i_widget& aParent, std::optional<std::string> const& aTitle = {}, optional_file_path const& aDefaultPath = {});
+    optional_file_path select_folder_dialog(i_widget& aParent, std::optional<string> const& aTitle = {}, optional_file_path const& aDefaultPath = {});
 }

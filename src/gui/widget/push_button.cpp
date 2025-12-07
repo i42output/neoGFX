@@ -49,7 +49,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(std::string const& aText, push_button_style aStyle) :
+    push_button::push_button(string const& aText, push_button_style aStyle) :
         button{ aText, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -76,7 +76,7 @@ namespace neogfx
         init();
     }
     
-    push_button::push_button(std::string const& aText, const i_texture& aTexture, push_button_style aStyle) :
+    push_button::push_button(string const& aText, const i_texture& aTexture, push_button_style aStyle) :
         button{ aText, aTexture, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -85,7 +85,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(std::string const& aText, const i_image& aImage, push_button_style aStyle) :
+    push_button::push_button(string const& aText, const i_image& aImage, push_button_style aStyle) :
         button{ aText, aImage, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -103,7 +103,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_widget& aParent, std::string const& aText, push_button_style aStyle) :
+    push_button::push_button(i_widget& aParent, string const& aText, push_button_style aStyle) :
         button{ aParent, aText, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -130,7 +130,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_widget& aParent, std::string const& aText, const i_texture& aTexture, push_button_style aStyle) :
+    push_button::push_button(i_widget& aParent, string const& aText, const i_texture& aTexture, push_button_style aStyle) :
         button{ aParent, aText, aTexture, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -139,7 +139,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_widget& aParent, std::string const& aText, const i_image& aImage, push_button_style aStyle) :
+    push_button::push_button(i_widget& aParent, string const& aText, const i_image& aImage, push_button_style aStyle) :
         button{ aParent, aText, aImage, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -157,7 +157,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_layout& aLayout, std::string const& aText, push_button_style aStyle) :
+    push_button::push_button(i_layout& aLayout, string const& aText, push_button_style aStyle) :
         button{ aLayout, aText, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -184,7 +184,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_layout& aLayout, std::string const& aText, const i_texture& aTexture, push_button_style aStyle) :
+    push_button::push_button(i_layout& aLayout, string const& aText, const i_texture& aTexture, push_button_style aStyle) :
         button{ aLayout, aText, aTexture, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },
@@ -193,7 +193,7 @@ namespace neogfx
         init();
     }
 
-    push_button::push_button(i_layout& aLayout, std::string const& aText, const i_image& aImage, push_button_style aStyle) :
+    push_button::push_button(i_layout& aLayout, string const& aText, const i_image& aImage, push_button_style aStyle) :
         button{ aLayout, aText, aImage, default_push_button_alignment(aStyle) },
         iAnimator{ *this, [this](widget_timer&) { animate(); }, std::chrono::milliseconds{ 20 }, false },
         iAnimationFrame{ 0 },

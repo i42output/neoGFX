@@ -30,14 +30,14 @@ namespace neogfx
     class i_mnemonic
     {
     public:
-        virtual std::string mnemonic() const = 0;
+        virtual string mnemonic() const = 0;
         virtual void mnemonic_execute() = 0;
         virtual i_widget& mnemonic_widget() = 0;
     };
 
-    inline std::string mnemonic_from_text(std::string const& aText, char aMnemonicPrefix = '&')
+    inline string mnemonic_from_text(string const& aText, char aMnemonicPrefix = '&')
     {
-        auto u = neolib::utf8_to_utf32(aText);
+        auto u = neolib::utf8_to_utf32(aText.to_std_string());
         for (std::size_t i = 0; i < u.size(); ++i)
         {
             if (u[i] == static_cast<char32_t>(aMnemonicPrefix) && i < u.size() - 1 && u[i + 1] != static_cast<char32_t>(aMnemonicPrefix))
@@ -45,6 +45,6 @@ namespace neogfx
                 return neolib::utf32_to_utf8(u.substr(i + 1, 1));
             }
         }
-        return std::string{};
+        return string{};
     }
 }

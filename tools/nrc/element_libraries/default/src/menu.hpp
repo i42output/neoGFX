@@ -87,7 +87,7 @@ namespace neogfx::nrc
         {
             ui_element<>::emit_body();
             if (iImage)
-                emit("   %1%.set_image(image{ \"%2%\" });\n", id(), *iImage);
+                emit("   %1%.set_image(\"%2%\"_s);\n", id(), *iImage);
         }
     protected:
         using ui_element<>::emit;

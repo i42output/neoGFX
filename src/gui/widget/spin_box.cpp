@@ -25,7 +25,7 @@ namespace neogfx
 {
     template class basic_spin_box<std::int8_t>;
     template class basic_spin_box<std::uint8_t>;
-    template class basic_spin_box<int16_t>;
+    template class basic_spin_box<std::int16_t>;
     template class basic_spin_box<std::uint16_t>;
     template class basic_spin_box<std::int32_t>;
     template class basic_spin_box<std::uint32_t>;

@@ -104,7 +104,7 @@ namespace neogfx
         return iSurfaceWindow;
     }
 
-    void native_window::display_error_message(std::string const& aTitle, std::string const& aMessage) const
+    void native_window::display_error_message(i_string const& aTitle, i_string const& aMessage) const
     {
         surface_manager().display_error_message(*this, aTitle, aMessage);
     }

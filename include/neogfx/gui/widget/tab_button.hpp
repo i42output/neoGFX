@@ -37,9 +37,9 @@ namespace neogfx
         friend class tab_bar;
         class close_button;
     public:
-        tab_button(i_tab_container& aContainer, std::string const& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
-        tab_button(i_widget& aParent, i_tab_container& aContainer, std::string const& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
-        tab_button(i_layout& aLayout, i_tab_container& aContainer, std::string const& aText = std::string(), bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_tab_container& aContainer, string const& aText = string{}, bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_widget& aParent, i_tab_container& aContainer, string const& aText = string{}, bool aClosable = false, bool aStandardImageSize = true);
+        tab_button(i_layout& aLayout, i_tab_container& aContainer, string const& aText = string{}, bool aClosable = false, bool aStandardImageSize = true);
         ~tab_button();
     public:
         const i_tab_container& container() const override;
@@ -52,8 +52,9 @@ namespace neogfx
     public:
         i_string const& text() const override;
         i_tab& set_text(i_string const& aText) override;
-        i_tab& set_image(const i_texture& aTexture) override;
-        i_tab& set_image(const i_image& aImage) override;
+        i_tab& set_image(i_texture const& aTexture) override;
+        i_tab& set_image(i_string const& aImageUri) override;
+        i_tab& set_image(i_image const& aImage) override;
         i_tab& set_image_color(const color_or_gradient& aColor) override;
     public:
         const i_widget& as_widget() const override;

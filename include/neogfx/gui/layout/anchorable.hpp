@@ -45,9 +45,9 @@ namespace neogfx
             auto lhsAnchor = anchors().find(aLhsAnchor);
             auto rhsAnchor = aRhs.anchors().find(aRhsAnchor);
             if (lhsAnchor == anchors().end())
-                throw anchor_not_found(aLhsAnchor);
+                throw anchor_not_found(aLhsAnchor.to_std_string());
             if (rhsAnchor == aRhs.anchors().end())
-                throw anchor_not_found(aRhsAnchor);
+                throw anchor_not_found(aRhsAnchor.to_std_string());
             rhsAnchor->second()->constrain(*lhsAnchor->second(), aLhsFunction, aRhsFunction);
             return *lhsAnchor->second();
         }

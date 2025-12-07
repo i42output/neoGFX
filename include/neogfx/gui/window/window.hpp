@@ -54,15 +54,15 @@ namespace neogfx
     public:
         window(window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         window(const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(const window_placement& aPlacement, string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         window(i_widget& aParent, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         window(i_widget& aParent, const window_placement& aPlacement, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(i_widget& aParent, const window_placement& aPlacement, std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
-        window(i_widget& aParent, std::string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, const window_placement& aPlacement, string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
+        window(i_widget& aParent, string const& aWindowTitle, window_style aStyle = window_style::Default, frame_style aFrameStyle = frame_style::WindowFrame, neogfx::scrollbar_style aScrollbarStyle = neogfx::scrollbar_style::Normal);
         ~window();
     private:
-        window(i_widget* aParent, const window_placement& aPlacement, const std::optional<std::string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle);
+        window(i_widget* aParent, const window_placement& aPlacement, const std::optional<string>& aWindowTitle, window_style aStyle, frame_style aFrameStyle, neogfx::scrollbar_style aScrollbarStyle);
     public:
         window_style style() const override;
         void set_style(window_style aStyle) override;

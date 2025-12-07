@@ -45,7 +45,7 @@ namespace neogfx
         return minimum_size(aAvailableSpace);
     }
         
-    radio_button::radio_button(std::string const& aText) :
+    radio_button::radio_button(string const& aText) :
         base_type{ aText }, iDisc{ *this }
     {
         set_checkable(button_checkable::BiState);
@@ -57,7 +57,7 @@ namespace neogfx
         text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    radio_button::radio_button(i_widget& aParent, std::string const& aText) :
+    radio_button::radio_button(i_widget& aParent, string const& aText) :
         base_type{ aParent, aText }, iDisc{ *this }
     {
         set_checkable(button_checkable::BiState);
@@ -69,7 +69,7 @@ namespace neogfx
         text_widget().set_alignment(alignment::Left | alignment::VCenter);
     }
 
-    radio_button::radio_button(i_layout& aLayout, std::string const& aText) :
+    radio_button::radio_button(i_layout& aLayout, string const& aText) :
         base_type{ aLayout, aText }, iDisc{ *this }
     {
         set_checkable(button_checkable::BiState);

@@ -301,9 +301,9 @@ namespace neogfx
             }
             return oss.str();
         }
-        static basic_length from_string(std::string const& aValue)
+        static basic_length from_string(string const& aValue)
         {
-            static const std::unordered_map<std::string, neogfx::units> sUnitTypes
+            static const std::unordered_map<string, neogfx::units> sUnitTypes
             {
                 { "px", neogfx::units::Pixels },
                 { "dip", neogfx::units::ScaledPixels },
@@ -320,7 +320,7 @@ namespace neogfx
             if (aValue == "max")
                 return basic_length{ 0.0, neogfx::units::NoUnitsAsMaximumLength };
             basic_length result;
-            std::istringstream iss{ aValue };
+            std::istringstream iss{ aValue.to_std_string()};
             iss >> result.iValue;
             std::string unitName;
             iss >> unitName;

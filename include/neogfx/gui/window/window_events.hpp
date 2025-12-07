@@ -256,7 +256,7 @@ namespace neogfx
         {
             return static_variant_cast<key_modifier>(iKeyModifiers);
         }
-        std::string text() const
+        string text() const
         {
             return static_variant_cast<string>(iScanCodeOrText);
         }

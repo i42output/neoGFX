@@ -53,7 +53,7 @@ namespace neogfx::nrc
         using i_ui_element::array_data_t;
         typedef neolib::vector<neolib::simple_variant> concrete_array_data_t;
     protected:
-        typedef std::set<std::string> data_names_t;
+        typedef std::set<neolib::string> data_names_t;
     public:
         ui_element(const i_ui_element_parser& aParser, ui_element_type aType) :
             iParser{ aParser }, iParent{ nullptr }, iName{ aParser.current_element() }, iFragmentName{ aParser.current_fragment() }, iTypeName{ aParser.current_element() }, iMemberElement{ false }, iId{ aParser.get_optional<neolib::string>("id") }, iAnonymousIdCounter{ 0u }, iType{ aType }
@@ -454,7 +454,7 @@ namespace neogfx::nrc
             if (iTextFieldPlacement)
                 emit("   %1%.set_placement(%2%);\n", id(), enum_to_string("text_field_placement", *iTextFieldPlacement));
             if (iImage)
-                emit("   %1%.set_image(image{ \"%2%\" });\n", id(), *iImage);
+                emit("   %1%.set_image(\"%2%\"_s);\n", id(), *iImage);
             if (iAspectRatio)
                 emit("   %1%.set_aspect_ratio(%2%);\n", id(), enum_to_string("aspect_ratio", *iAspectRatio));
             if (iImagePlacement)

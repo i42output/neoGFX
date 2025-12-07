@@ -281,10 +281,10 @@ namespace neogfx::DesignStudio
 
     void neos_element_library::create_element(i_project& aProject, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
-        static const std::map<std::string, std::function<i_element* (i_project& aProject, const neolib::i_string&)>> sFactoryMethods =
+        static const std::map<string, std::function<i_element* (i_project& aProject, const neolib::i_string&)>> sFactoryMethods =
         {
-            #define MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_project& aProject, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aProject, #Type, aElementId }; } },
-            #define MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_project& aProject, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aProject, #Name, aElementId }; } },
+            #define MAKE_ROOT_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_project& aProject, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aProject, string{ #Type }, aElementId }; } },
+            #define MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_project& aProject, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aProject, string{ #Name }, aElementId }; } },
             MAKE_NAMED_ROOT_ELEMENT_FACTORY_FUNCTION(project, i_project)
         };
         auto method = sFactoryMethods.find(aElementType);
@@ -298,10 +298,10 @@ namespace neogfx::DesignStudio
 
     void neos_element_library::create_element(i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId, neolib::i_ref_ptr<i_element>& aResult)
     {
-        static const std::map<std::string, std::function<i_element*(i_element&, const neolib::i_string&, const neolib::i_string&)>> sFactoryMethods =
+        static const std::map<string, std::function<i_element*(i_element&, const neolib::i_string&, const neolib::i_string&)>> sFactoryMethods =
         {
-            #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Type, aElementId, element_group(aElementType) }; } },
-            #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, #Name, aElementId, element_group(aElementType) }; } },
+            #define MAKE_ELEMENT_FACTORY_FUNCTION(Type) { #Type, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, string{ #Type }, aElementId, element_group(aElementType) }; } },
+            #define MAKE_NAMED_ELEMENT_FACTORY_FUNCTION(Name, Type) { #Name, [this](i_element& aParent, const neolib::i_string& aElementType, const neolib::i_string& aElementId) -> i_element* { return new element<Type>{ *this, aParent, string{ #Name }, aElementId, element_group(aElementType) }; } },
         };
         auto method = sFactoryMethods.find(aElementType);
         if (method != sFactoryMethods.end())
@@ -314,7 +314,7 @@ namespace neogfx::DesignStudio
 
     element_group neos_element_library::element_group(const neolib::i_string& aElementType) const
     {
-        static const std::map<std::string, DesignStudio::element_group> sElementGroups =
+        static const std::map<string, DesignStudio::element_group> sElementGroups =
         {
         };
         auto group = sElementGroups.find(aElementType);
@@ -328,15 +328,15 @@ namespace neogfx::DesignStudio
     i_texture const& neos_element_library::element_icon(const neolib::i_string& aElementType) const
     {
         auto& icons = iIcons[service<i_app>().current_style().palette().color(color_role::Text)];
-        static std::map<std::string, std::function<void(texture&)>> sIconResources =
+        static std::map<string, std::function<void(texture&)>> sIconResources =
         {
         };
-        auto existing = sIconResources.find(aElementType.to_std_string());
+        auto existing = sIconResources.find(aElementType);
         if (existing != sIconResources.end())
         {
-            if (icons.find(aElementType.to_std_string()) == icons.end())
-                existing->second(icons[aElementType.to_std_string()]);
-            return icons[aElementType.to_std_string()];
+            if (icons.find(aElementType) == icons.end())
+                existing->second(icons[aElementType]);
+            return icons[aElementType];
         }
         if (icons.find("default") == icons.end())
             icons["default"] = texture{ size{32.0, 32.0} };

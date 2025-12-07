@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace neogfx
 {
-    menu::menu(std::string const& aTitle, menu_type aType) :
+    menu::menu(string const& aTitle, menu_type aType) :
         iParent{ nullptr }, 
         iType{ aType }, 
         iGroup{},
@@ -35,7 +35,7 @@ namespace neogfx
     {
     }
 
-    menu::menu(i_menu& aParent, std::string const& aTitle, menu_type aType) :
+    menu::menu(i_menu& aParent, string const& aTitle, menu_type aType) :
         iParent{ &aParent }, 
         iType{ aType }, 
         iGroup{},

@@ -102,7 +102,7 @@ namespace neogfx
             mutable item_model_index::optional_column_type modelColumn;
             item_cell_flags flags = item_cell_flags::Default;
             mutable std::map<dimension, std::uint32_t> cellWidths;
-            mutable std::optional<std::string> headingText;
+            mutable std::optional<string> headingText;
             mutable font headingFont;
             mutable optional_size headingExtents;
             optional_size imageSize;
@@ -320,7 +320,7 @@ namespace neogfx
                 cell_extents(item_presentation_model_index{ row, aColumnIndex }, aUnitsContext);
             return units_converter(aUnitsContext).from_device_units(cellWidths.rbegin()->first) + (aExtendIntoPadding ? cell_padding(aUnitsContext).size().cx : 0.0);
         }
-        std::string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
+        i_string const& column_heading_text(item_presentation_model_index::column_type aColumnIndex) const override
         {
             if (column(aColumnIndex).headingText != std::nullopt)
                 return *column(aColumnIndex).headingText;
@@ -328,7 +328,7 @@ namespace neogfx
                 return item_model().column_name(model_column(aColumnIndex));
             else
             {
-                static std::string const none;
+                static string const none;
                 return none;
             }
         }
@@ -348,7 +348,7 @@ namespace neogfx
             column(aColumnIndex).headingExtents = units_converter(aUnitsContext).to_device_units(columnHeadingExtents).ceil();
             return units_converter(aUnitsContext).from_device_units(*column(aColumnIndex).headingExtents);
         }
-        void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, std::string const& aHeadingText) final
+        void set_column_heading_text(item_presentation_model_index::column_type aColumnIndex, i_string const& aHeadingText) final
         {
             column(aColumnIndex).headingText = aHeadingText;
             column(aColumnIndex).headingExtents = std::nullopt;
@@ -579,7 +579,7 @@ namespace neogfx
                     height = std::max(height, units_converter(aUnitsContext).from_device_units(*cell_meta(index).extents).cy);
                 else
                 {
-                    std::string cellString = cell_to_string(index);
+                    string cellString = cell_to_string(index);
                     auto const& cellFont = cell_font(index);
                     auto const& effectiveFont = (cellFont == std::nullopt ? default_font() : *cellFont);
                     height = std::max(height, units_converter(aUnitsContext).from_device_units(size{ 0.0, std::ceil(effectiveFont.height()) }).cy *
@@ -698,10 +698,10 @@ namespace neogfx
             throw bad_index();
         }
     public:
-        std::string cell_to_string(item_presentation_model_index const& aIndex) const final
+        string cell_to_string(item_presentation_model_index const& aIndex) const final
         {
             auto const modelIndex = to_item_model_index(aIndex);
-            return std::visit([&, this](auto&& arg) -> std::string
+            return std::visit([&, this](auto&& arg) -> string
             {
                 typedef std::decay_t<decltype(arg)> type;
                 if constexpr(!std::is_same_v<type, std::monostate> && classify_item_call_data<type>::category == item_cell_data_category::Value)
@@ -710,17 +710,17 @@ namespace neogfx
                     return "";
             }, item_model().cell_data(modelIndex));
         }
-        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString) const final
+        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, i_string const& aString) const final
         {
             bool error = false;
             return string_to_cell_data(aIndex, aString, error);
         }
-        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, std::string const& aString, bool& aError) const final
+        item_cell_data string_to_cell_data(item_presentation_model_index const& aIndex, i_string const& aString, bool& aError) const final
         {
             aError = false;
             auto const& cellInfo = item_model().cell_info(to_item_model_index(aIndex));
-            std::istringstream input{ aString };
-            std::string guff;
+            std::istringstream input{ aString.to_std_string() };
+            string guff;
             switch (cellInfo.dataType)
             {
             case item_data_type::Bool:
@@ -988,16 +988,16 @@ namespace neogfx
                 execute_sort();
         }
     public:
-        optional_item_presentation_model_index find_item(filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, 
+        optional_item_presentation_model_index find_item(i_filter_search_key const& aFilterSearchKey, item_presentation_model_index::column_type aColumnIndex = 0, 
             filter_search_type aFilterSearchType = filter_search_type::Prefix, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) const final
         {
             for (item_presentation_model_index::row_type row = 0; row < rows(); ++row)
             {
                 auto modelIndex = to_item_model_index(item_presentation_model_index{ row, aColumnIndex });
-                auto const& origValue = item_model().cell_data(modelIndex).to_string();
-                auto const& value = aCaseSensitivity == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue);
-                auto const& origKey = aFilterSearchKey;
-                auto const& key = aCaseSensitivity == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey);
+                auto const& origValue = item_model().cell_data(modelIndex).to_std_string();
+                auto const& value = aCaseSensitivity == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy(origValue);
+                auto const& origKey = aFilterSearchKey.to_std_string();
+                auto const& key = aCaseSensitivity == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy(origKey);
                 if (key.empty())
                     continue;
                 switch (aFilterSearchType)
@@ -1021,7 +1021,7 @@ namespace neogfx
             else
                 return optional_filter{};
         }
-        void filter_by(item_presentation_model_index::column_type aColumnIndex, filter_search_key const& aFilterSearchKey, 
+        void filter_by(item_presentation_model_index::column_type aColumnIndex, i_filter_search_key const& aFilterSearchKey, 
             filter_search_type aFilterSearchType = filter_search_type::Value, case_sensitivity aCaseSensitivity = case_sensitivity::CaseInsensitive) final
         {
             iFilters.push_back(filter{ aColumnIndex, aFilterSearchKey, aFilterSearchType, aCaseSensitivity });
@@ -1079,8 +1079,8 @@ namespace neogfx
                     auto const& v2 = item_model().cell_data(item_model_index{ aRhs.value, model_column(col) });
                     if (std::holds_alternative<string>(v1) && std::holds_alternative<string>(v2))
                     {
-                        std::string s1 = boost::to_upper_copy<std::string>(std::get<string>(v1));
-                        std::string s2 = boost::to_upper_copy<std::string>(std::get<string>(v2));
+                        string s1 = boost::to_upper_copy(std::get<string>(v1).to_std_string());
+                        string s2 = boost::to_upper_copy(std::get<string>(v2).to_std_string());
                         if (s1 < s2)
                             return iSortOrder[i].second == sort_direction::Ascending;
                         else if (s2 < s1)
@@ -1113,10 +1113,10 @@ namespace neogfx
                     bool matches = true;
                     for (auto const& filter : iFilters)
                     {
-                        auto const& origValue = item_model().cell_data(item_model_index{ row, model_column(std::get<0>(filter)) }).to_string();
-                        auto const& value = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy<std::string>(origValue));
-                        auto const& origKey = std::get<1>(filter);
-                        auto const& key = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy<std::string>(origKey));
+                        auto const& origValue = item_model().cell_data(item_model_index{ row, model_column(std::get<0>(filter)) }).to_std_string();
+                        auto const& value = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origValue : boost::to_upper_copy(origValue));
+                        auto const& origKey = std::get<1>(filter).to_std_string();
+                        auto const& key = (std::get<3>(filter) == case_sensitivity::CaseSensitive ? origKey : boost::to_upper_copy(origKey));
                         if (key.empty())
                             continue;
                         switch (std::get<2>(filter))

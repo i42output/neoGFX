@@ -117,14 +117,14 @@ int main(int argc, char* argv[])
     {
         app.thread().halt();
         ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with exception: " << e.what() << std::endl;
-        ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), std::string("main: terminating with exception: ") + e.what());
+        ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + app.name(), "main: terminating with exception: "_t + e.what());
         std::exit(EXIT_FAILURE);
     }
     catch (...)
     {
         app.thread().halt();
         ng::service<ng::debug::logger>() << "neogfx::app::exec: terminating with unknown exception" << std::endl;
-        ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination" : "Abnormal Program Termination - " + app.name(), "main: terminating with unknown exception");
+        ng::service<ng::i_surface_manager>().display_error_message(app.name().empty() ? "Abnormal Program Termination"_t : "Abnormal Program Termination - "_t + app.name(), "main: terminating with unknown exception"_t);
         std::exit(EXIT_FAILURE);
     }
 }
