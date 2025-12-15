@@ -1219,15 +1219,15 @@ int main(int argc, char* argv[])
                 });
                 window.sliderBoxYieldAfter.ValueChanged([&]()
                 {
-                    ecs.system<ng::game::simple_physics>().yield_after(std::chrono::duration<double, std::milli>{window.sliderBoxYieldAfter.value() });
+                    ecs.system<ng::game::simple_physics_2d>().yield_after(std::chrono::duration<double, std::milli>{window.sliderBoxYieldAfter.value() });
                 });
                 window.checkCollisions.set_checked(true);
                 window.checkCollisions.Toggled([&]()
                 {
                     if (window.checkCollisions.is_checked())
-                        ecs.system<ng::game::collision_detector>().resume();
+                        ecs.system<ng::game::collision_detector_2d>().resume();
                     else
-                        ecs.system<ng::game::collision_detector>().pause();
+                        ecs.system<ng::game::collision_detector_2d>().pause();
                 });
                 gameCreated = true;
             }
@@ -1610,10 +1610,10 @@ int main(int argc, char* argv[])
                 window.update();
             if (gameEcs)
             {
-                if (gameEcs->system<ng::game::simple_physics>().can_apply())
-                    gameEcs->system<ng::game::simple_physics>().apply();
-                if (gameEcs->system<ng::game::collision_detector>().can_apply())
-                    gameEcs->system<ng::game::collision_detector>().apply();
+                if (gameEcs->system<ng::game::simple_physics_2d>().can_apply())
+                    gameEcs->system<ng::game::simple_physics_2d>().apply();
+                if (gameEcs->system<ng::game::collision_detector_2d>().can_apply())
+                    gameEcs->system<ng::game::collision_detector_2d>().apply();
             }
         }, std::chrono::milliseconds{ 1 } };
 

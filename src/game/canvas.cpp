@@ -188,8 +188,9 @@ namespace neogfx::game
         widget::mouse_button_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && EntityClicked.has_slots())
         {
-            ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
-            auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
+            /// @todo 3D
+            ecs().system<collision_detector_2d>().run_cycle(collision_detection_cycle::Test);
+            auto const hit = ecs().system<collision_detector_2d>().entity_at(aPosition.to_vec3());
             if (hit)
                 EntityClicked(*hit);
         }
@@ -200,8 +201,9 @@ namespace neogfx::game
         widget::mouse_button_double_clicked(aButton, aPosition, aKeyModifier);
         if (aButton == mouse_button::Left && (EntityClicked.has_slots() || EntityDoubleClicked.has_slots()))
         {
-            ecs().system<collision_detector>().run_cycle(collision_detection_cycle::Test);
-            auto const hit = ecs().system<collision_detector>().entity_at(aPosition.to_vec3());
+            /// @todo 3D
+            ecs().system<collision_detector_2d>().run_cycle(collision_detection_cycle::Test);
+            auto const hit = ecs().system<collision_detector_2d>().entity_at(aPosition.to_vec3());
             if (hit)
             {
                 if (EntityDoubleClicked.has_slots())

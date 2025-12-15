@@ -77,7 +77,7 @@ namespace video_poker
     };
     
     table::table(ng::i_layout& aLayout) :
-        ng::game::canvas{ aLayout, ng::game::make_ecs<ng::game::simple_physics>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused) },
+        ng::game::canvas{ aLayout, ng::game::make_ecs<ng::game::simple_physics_2d>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused) },
         iState{ table_state::TakeBet },
         iCredit{ STARTING_CREDIT },
         iStake{ 0 },
@@ -189,7 +189,7 @@ namespace video_poker
         update_widgets();
 
         // Instantiate physics...
-        ecs().system<ng::game::simple_physics>();
+        ecs().system<ng::game::simple_physics_2d>();
         // Instantiate non-default components...
         ecs().component<ng::game::text_mesh>();
 

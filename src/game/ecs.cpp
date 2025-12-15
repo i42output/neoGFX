@@ -44,7 +44,7 @@ namespace neogfx
 
         bool ecs::run_threaded(const system_id& aSystemId) const
         {
-            if (system_instantiated<simple_physics>())
+            if (system_instantiated<simple_physics_2d>() || system_instantiated<simple_physics_3d>())
             {
                 if (aSystemId == time::meta::id() || aSystemId == animator::meta::id())
                     return false;

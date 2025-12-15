@@ -29,8 +29,13 @@
 
 namespace neogfx::game
 {
-    class simple_physics : public game::system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body, mesh_render_cache>
+    template <typename ColliderType>
+    class simple_physics : public game::system<entity_info, ColliderType, mesh_filter, rigid_body, mesh_render_cache>
     {
+    private:
+        using base_type = game::system<entity_info, ColliderType, mesh_filter, rigid_body, mesh_render_cache>;
+    public:
+        using base_type::cannot_apply;
     public:
         simple_physics(i_ecs& aEcs);
         ~simple_physics();
@@ -50,16 +55,35 @@ namespace neogfx::game
         {
             static const neolib::uuid& id()
             {
-                static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
-                return sId;
+                if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
+                {
+                    static const neolib::uuid sId = { 0x49443e26, 0x762e, 0x4517, 0xbbb8,{ 0xc3, 0xd6, 0x95, 0x7b, 0xe9, 0xd4 } };
+                    return sId;
+                }
+                else if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
+                {
+                    static const neolib::uuid sId = { 0x79b3adca, 0xbdab, 0x4d38, 0xa0eb, { 0xb5, 0x91, 0x4a, 0xb0, 0x24, 0x3e } };
+                    return sId;
+                }
             }
             static const i_string& name()
             {
-                static const string sName = "Simple Physics";
-                return sName;
+                if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
+                {
+                    static const string sName = "Simple Physics (2D)";
+                    return sName;
+                }
+                else
+                {
+                    static const string sName = "Simple Physics (3D)";
+                    return sName;
+                }
             }
         };
     private:
         std::chrono::duration<double, std::milli> iYieldTime = std::chrono::duration<double, std::milli>{ 1.0 };
     };
+
+    using simple_physics_2d = simple_physics<box_collider_2d>;
+    using simple_physics_3d = simple_physics<box_collider_3d>;
 }

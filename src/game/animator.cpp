@@ -59,6 +59,7 @@ namespace neogfx::game
     {
         if (!can_apply())
             throw cannot_apply();
+
         if (!ecs().component_instantiated<animation_filter>())
             return false;
 

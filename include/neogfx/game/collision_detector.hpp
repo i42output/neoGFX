@@ -51,16 +51,20 @@ namespace neogfx::game
         return static_cast<collision_detection_cycle>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
-    class collision_detector : public game::system<entity_info, box_collider, box_collider_2d>
+    template<typename ColliderType, typename BroadphaseTreeType>
+    class collision_detector : public game::system<entity_info, ColliderType>
     {
+    private:
+        using base_type = game::system<entity_info, ColliderType>;
     public:
         define_event(Collision, collision, entity_id, entity_id)
     public:
+        using base_type::cannot_apply;
+    public:
+        using broadphase_tree_type = BroadphaseTreeType;
+    public:
         collision_detector(i_ecs& aEcs);
         ~collision_detector();
-    public:
-        const system_id& id() const override;
-        const i_string& name() const override;
     public:
         std::optional<entity_id> entity_at(const vec3& aPoint) const;
     public:
@@ -72,18 +76,36 @@ namespace neogfx::game
         {
             iBroadphaseTree.visit_aabbs(aVisitor);
         }
-        template <typename Visitor>
-        void visit_aabbs_2d(const Visitor& aVisitor) const
+    public:
+        const broadphase_tree_type& broadphase_tree() const;
+    private:
+        void update();
+        void update_broadphase();
+        void detect_collisions();
+    private:
+        broadphase_tree_type iBroadphaseTree;
+        std::atomic<bool> iUpdated;
+    };
+
+    class collision_detector_3d : public collision_detector<box_collider_3d, aabb_octree<box_collider_3d>>
+    {
+    private:
+        using base_type = collision_detector<box_collider_3d, aabb_octree<box_collider_3d>>;
+    public:
+        collision_detector_3d(i_ecs& aEcs) :
+            base_type{ aEcs }
         {
-            iBroadphase2dTree.visit_aabbs(aVisitor);
+            start_thread_if();
         }
     public:
-        const aabb_octree<box_collider>& broadphase_tree() const;
-        const aabb_quadtree<box_collider_2d>& broadphase_2d_tree() const;
-    private:
-        void update_colliders();
-        void update_trees();
-        void detect_collisions();
+        const system_id& id() const final
+        {
+            return meta::id();
+        }
+        const i_string& name() const final
+        {
+            return meta::name();
+        }
     public:
         struct meta
         {
@@ -94,13 +116,44 @@ namespace neogfx::game
             }
             static const i_string& name()
             {
-                static const string sName = "Collision Detector";
+                static const string sName = "Collision Detector (3D)";
                 return sName;
             }
         };
+    };
+
+    class collision_detector_2d : public collision_detector<box_collider_2d, aabb_quadtree<box_collider_2d>>
+    {
     private:
-        aabb_octree<box_collider> iBroadphaseTree;
-        aabb_quadtree<box_collider_2d> iBroadphase2dTree;
-        std::atomic<bool> iCollidersUpdated;
+        using base_type = collision_detector<box_collider_2d, aabb_quadtree<box_collider_2d>>;
+    public:
+        collision_detector_2d(i_ecs& aEcs) :
+            base_type{ aEcs }
+        {
+            start_thread_if();
+        }
+    public:
+        const system_id& id() const final
+        {
+            return meta::id();
+        }
+        const i_string& name() const final
+        {
+            return meta::name();
+        }
+    public:
+        struct meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0xdb9c2033, 0xae26, 0x463e, 0x9100,{ 0xd5, 0x41, 0xfe, 0x4a, 0xd, 0xae } };
+                return sId;
+            }
+            static const i_string& name()
+            {
+                static const string sName = "Collision Detector (3D)";
+                return sName;
+            }
+        };
     };
 }

@@ -28,48 +28,41 @@
 
 namespace neogfx::game
 {
-    collision_detector::collision_detector(i_ecs& aEcs) :
-        system<entity_info, box_collider, box_collider_2d>{ aEcs },
+    template<typename ColliderType, typename BroadphaseTreeType>
+    collision_detector< ColliderType, BroadphaseTreeType>::collision_detector(i_ecs& aEcs) :
+        system<entity_info, ColliderType>{ aEcs },
         iBroadphaseTree{ aEcs },
-        iBroadphase2dTree{ aEcs },
-        iCollidersUpdated{ false }
+        iUpdated{ false }
     {
         Collision.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
-        start_thread_if();
     }
 
-    collision_detector::~collision_detector()
+    template<typename ColliderType, typename BroadphaseTreeType>
+    collision_detector<ColliderType, BroadphaseTreeType>::~collision_detector()
     {
     }
 
-    const system_id& collision_detector::id() const
+    template<typename ColliderType, typename BroadphaseTreeType>
+    std::optional<entity_id> collision_detector<ColliderType, BroadphaseTreeType>::entity_at(const vec3& aPoint) const
     {
-        return meta::id();
-    }
+        if (!this->components_available())
+            return {};
 
-    const i_string& collision_detector::name() const
-    {
-        return meta::name();
-    }
-
-    std::optional<entity_id> collision_detector::entity_at(const vec3& aPoint) const
-    {
-        if (ecs().component_instantiated<box_collider>())
+        if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
-            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
+            scoped_component_lock<entity_info, box_collider_3d> lock{ this->ecs() };
             thread_local std::vector<entity_id> hits;
             hits.clear();
             iBroadphaseTree.pick(aPoint, hits);
             if (!hits.empty())
                 return hits[0];
         }
-
-        if (ecs().component_instantiated<box_collider_2d>())
+        else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
-            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
+            scoped_component_lock<entity_info, box_collider_2d> lock{ this->ecs() };
             thread_local std::vector<entity_id> hits;
             hits.clear();
-            iBroadphase2dTree.pick(aPoint.xy, hits);
+            iBroadphaseTree.pick(aPoint.xy, hits);
             if (!hits.empty())
                 return hits[0];
         }
@@ -77,45 +70,63 @@ namespace neogfx::game
         return {};
     }
 
-    bool collision_detector::apply()
+    template<typename ColliderType, typename BroadphaseTreeType>
+    bool collision_detector<ColliderType, BroadphaseTreeType>::apply()
     {
-        if (!can_apply())
+        if (!this->can_apply())
             throw cannot_apply();
-        if (!ecs().component_instantiated<box_collider>() && !ecs().component_instantiated<box_collider_2d>())
+
+        if (!this->components_available())
             return false;
-        
-        start_update();
+
+        this->start_update();
         run_cycle(collision_detection_cycle::Detect);
-        end_update();
+        this->end_update();
 
         return true;
     }
 
-    void collision_detector::run_cycle(collision_detection_cycle aCycle)
+    template<typename ColliderType, typename BroadphaseTreeType>
+    void collision_detector<ColliderType, BroadphaseTreeType>::run_cycle(collision_detection_cycle aCycle)
     {
-        if (paused())
+        if (this->paused())
             return;
-        if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
-            ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions && !ecs().system_instantiated<simple_physics>()))
-            update_colliders();
-        if (!iCollidersUpdated)
+        if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
+        {
+            if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
+                ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions &&
+                    !this->ecs().system_instantiated<simple_physics_2d>()))
+                update();
+        }
+        else if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
+        {
+            if ((aCycle & collision_detection_cycle::UpdateColliders) == collision_detection_cycle::UpdateColliders ||
+                ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions &&
+                    !this->ecs().system_instantiated<simple_physics_3d>()))
+                update();
+        }
+        if (!iUpdated)
             return;
         if ((aCycle & collision_detection_cycle::UpdateTrees) == collision_detection_cycle::UpdateTrees)
-            update_trees();
+            update_broadphase();
         if ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions)
             detect_collisions();
     }
 
-    void collision_detector::update_colliders()
+    template<typename ColliderType, typename BroadphaseTreeType>
+    void collision_detector<ColliderType, BroadphaseTreeType>::update()
     {
-        if (ecs().component_instantiated<box_collider>())
+        if (!this->components_available())
+            return;
+
+        if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
-            scoped_component_lock<entity_info, box_collider, mesh_filter, animation_filter, rigid_body> lock{ ecs() };
-            thread_local auto const& infos = ecs().component<entity_info>();
-            thread_local auto const& meshFilters = ecs().component<mesh_filter>();
-            thread_local auto const& animatedMeshFilters = ecs().component<animation_filter>();
-            thread_local auto const& rigidBodies = ecs().component<rigid_body>();
-            thread_local auto& boxColliders = ecs().component<box_collider>();
+            scoped_component_lock<entity_info, box_collider_3d, mesh_filter, animation_filter, rigid_body> lock{ this->ecs() };
+            thread_local auto const& infos = this->ecs().component<entity_info>();
+            thread_local auto const& meshFilters = this->ecs().component<mesh_filter>();
+            thread_local auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
+            thread_local auto const& rigidBodies = this->ecs().component<rigid_body>();
+            thread_local auto& boxColliders = this->ecs().component<box_collider_3d>();
             for (auto entity : boxColliders.entities())
             {
                 auto const& info = infos.entity_record(entity);
@@ -141,15 +152,14 @@ namespace neogfx::game
                     collider.previousAabb = collider.currentAabb;
             }
         }
-
-        if (ecs().component_instantiated<box_collider_2d>())
+        else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
-            scoped_component_lock<entity_info, box_collider_2d, mesh_filter, animation_filter, rigid_body> lock{ ecs() };
-            thread_local auto const& infos = ecs().component<entity_info>();
-            thread_local auto const& meshFilters = ecs().component<mesh_filter>();
-            thread_local auto const& animatedMeshFilters = ecs().component<animation_filter>();
-            thread_local auto const& rigidBodies = ecs().component<rigid_body>();
-            thread_local auto& boxColliders2d = ecs().component<box_collider_2d>();
+            scoped_component_lock<entity_info, box_collider_2d, mesh_filter, animation_filter, rigid_body> lock{ this->ecs() };
+            thread_local auto const& infos = this->ecs().component<entity_info>();
+            thread_local auto const& meshFilters = this->ecs().component<mesh_filter>();
+            thread_local auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
+            thread_local auto const& rigidBodies = this->ecs().component<rigid_body>();
+            thread_local auto& boxColliders2d = this->ecs().component<box_collider_2d>();
             for (auto entity : boxColliders2d.entities())
             {
                 auto const& info = infos.entity_record(entity);
@@ -176,55 +186,37 @@ namespace neogfx::game
             }
         }
 
-        iCollidersUpdated = true;
+        iUpdated = true;
     }
 
-    void collision_detector::update_trees()
+    template<typename ColliderType, typename BroadphaseTreeType>
+    void collision_detector<ColliderType, BroadphaseTreeType>::update_broadphase()
     {
-        if (ecs().component_instantiated<box_collider>())
-        {
-            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
-            iBroadphaseTree.full_update();
-        }
-
-        if (ecs().component_instantiated<box_collider_2d>())
-        {
-            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
-            iBroadphase2dTree.full_update();
-        }
+        scoped_component_lock<entity_info, ColliderType> lock{ this->ecs() };
+        iBroadphaseTree.full_update();
     }
 
-    void collision_detector::detect_collisions()
+    template<typename ColliderType, typename BroadphaseTreeType>
+    void collision_detector<ColliderType, BroadphaseTreeType>::detect_collisions()
     {
-        if (ecs().component_instantiated<box_collider>())
-        {
-            scoped_component_lock<entity_info, box_collider> lock{ ecs() };
-            iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
-            {
-                Collision(e1, e2);
-            });
-        }
+        if (!this->components_available())
+            return;
 
-        if (ecs().component_instantiated<box_collider_2d>())
+        scoped_component_lock<entity_info, ColliderType> lock{ this->ecs() };
+        iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
         {
-            scoped_component_lock<entity_info, box_collider_2d> lock{ ecs() };
-            iBroadphase2dTree.full_update();
-            iBroadphase2dTree.collisions([this](entity_id e1, entity_id e2)
-            {
-                Collision(e1, e2);
-            });
-        }
+            Collision(e1, e2);
+        });
 
-        iCollidersUpdated = false;
+        iUpdated = false;
     }
 
-    const aabb_octree<box_collider>& collision_detector::broadphase_tree() const
+    template<typename ColliderType, typename BroadphaseTreeType>
+    const BroadphaseTreeType& collision_detector<ColliderType, BroadphaseTreeType>::broadphase_tree() const
     {
         return iBroadphaseTree;
     }
 
-    const aabb_quadtree<box_collider_2d>& collision_detector::broadphase_2d_tree() const
-    {
-        return iBroadphase2dTree;
-    }
+    template class collision_detector<box_collider_3d, aabb_octree<box_collider_3d>>;
+    template class collision_detector<box_collider_2d, aabb_quadtree<box_collider_2d>>;
 }

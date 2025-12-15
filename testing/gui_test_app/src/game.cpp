@@ -33,11 +33,11 @@ using namespace neolib::stdint_suffix;
 
 namespace archetypes
 {
-    ng::game::sprite_archetype const spaceship{ "Spaceship" };
-    ng::game::sprite_archetype const asteroid{ "Asteroid" };
-    ng::game::sprite_archetype const missile{ "Missile" };
-    ng::game::animated_sprite_archetype const explosion{ "Explosion" };
-    ng::game::animated_sprite_archetype const missileExplosion{ "MissileExplosion" };
+    ng::game::sprite_2d_archetype const spaceship{ "Spaceship" };
+    ng::game::sprite_2d_archetype const asteroid{ "Asteroid" };
+    ng::game::sprite_2d_archetype const missile{ "Missile" };
+    ng::game::animated_sprite_2d_archetype const explosion{ "Explosion" };
+    ng::game::animated_sprite_2d_archetype const missileExplosion{ "MissileExplosion" };
 }
 
 ng::game::i_ecs& create_game(ng::i_layout& aLayout)
@@ -45,7 +45,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     // Create an ECS and canvas to render game world on...
     auto& canvas = aLayout.add(
         ng::make_ref<ng::game::canvas>(
-            ng::game::make_ecs<ng::game::simple_physics>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused)));
+            ng::game::make_ecs<ng::game::simple_physics_2d>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused)));
     canvas.set_font(ng::font{ canvas.font(), ng::font_style::Bold, 16 });
     canvas.set_background_color(ng::color::Black);
     canvas.set_layers(4);
@@ -66,12 +66,12 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
     // Background...
     for (int i = 0; i < 1000; ++i)
         ng::game::shape::rectangle
-    {
-        ecs,
-        { gameState->prng(800.0f), gameState->prng(800.0f), -1.0f + 0.5f * (gameState->prng(32.0f) / 32.0f) },
-        { gameState->prng(64.0f), gameState->prng(64.0f) },
-        ng::color{ ng::vec4f{ gameState->prng(0.25f), gameState->prng(0.25f), gameState->prng(0.25f), 1.0f } }
-    }.detach();
+        {
+            ecs,
+            { gameState->prng(800.0f), gameState->prng(800.0f), -1.0f + 0.5f * (gameState->prng(32.0f) / 32.0f) },
+            { gameState->prng(64.0f), gameState->prng(64.0f) },
+            ng::color{ ng::vec4f{ gameState->prng(0.25f), gameState->prng(0.25f), gameState->prng(0.25f), 1.0f } }
+        }.detach();
 
     // Spaceship...
     const char* spaceshipImage
@@ -197,8 +197,8 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
             if (aButton == ng::game_controller_button::B)
             {
                 gameState->timeUpdates = !gameState->timeUpdates;
-                ecs.system<ng::game::simple_physics>().set_debug(gameState->timeUpdates);
-                ecs.system<ng::game::collision_detector>().set_debug(gameState->timeUpdates);
+                ecs.system<ng::game::simple_physics_2d>().set_debug(gameState->timeUpdates);
+                ecs.system<ng::game::collision_detector_2d>().set_debug(gameState->timeUpdates);
             }
             if (aButton == ng::game_controller_button::LeftShoulder)
                 gameState->autoFire = !gameState->autoFire;
@@ -215,7 +215,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         {
             if (gameState->showAabbGrid)
             {
-                ecs.system<ng::game::collision_detector>().visit_aabbs_2d([&gc](const ng::aabb_2df& aabb)
+                ecs.system<ng::game::collision_detector_2d>().visit_aabbs([&gc](const ng::aabb_2df& aabb)
                 {
                     gc.draw_rect(ng::rect{ ng::point{ aabb.min }, ng::point{ aabb.max } }, ng::pen{ ng::color::Blue });
                 });
@@ -227,13 +227,13 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                 debugText << "Rigid body count: " << ecs.component<ng::game::rigid_body>().entities().size() << "\n";
                 if (gameState->timeUpdates)
                 {
-                    debugText << "Physics Update Time (0): " << std::setprecision(6) << ecs.system<ng::game::simple_physics>().update_time(0).count() / 1000.0 << " ms\n";
-                    debugText << "Physics Update Time (1): " << std::setprecision(6) << ecs.system<ng::game::simple_physics>().update_time(1).count() / 1000.0 << " ms\n";
-                    debugText << "Physics Update Time (2): " << std::setprecision(6) << ecs.system<ng::game::simple_physics>().update_time(2).count() / 1000.0 << " ms\n";
-                    debugText << "Collision Detector Update Time: " << std::setprecision(6) << ecs.system<ng::game::collision_detector>().update_time().count() / 1000.0 << " ms\n";
+                    debugText << "Physics Update Time (0): " << std::setprecision(6) << ecs.system<ng::game::simple_physics_2d>().update_time(0).count() / 1000.0 << " ms\n";
+                    debugText << "Physics Update Time (1): " << std::setprecision(6) << ecs.system<ng::game::simple_physics_2d>().update_time(1).count() / 1000.0 << " ms\n";
+                    debugText << "Physics Update Time (2): " << std::setprecision(6) << ecs.system<ng::game::simple_physics_2d>().update_time(2).count() / 1000.0 << " ms\n";
+                    debugText << "Collision Detector Update Time: " << std::setprecision(6) << ecs.system<ng::game::collision_detector_2d>().update_time().count() / 1000.0 << " ms\n";
                 }
-                debugText << "Collision tree (quadtree) nodes: " << ecs.system<ng::game::collision_detector>().broadphase_2d_tree().count() << "\n";
-                debugText << "Collision tree (quadtree) depth: " << ecs.system<ng::game::collision_detector>().broadphase_2d_tree().depth() << "\n";
+                debugText << "Collision tree (quadtree) nodes: " << ecs.system<ng::game::collision_detector_2d>().broadphase_tree().count() << "\n";
+                debugText << "Collision tree (quadtree) depth: " << ecs.system<ng::game::collision_detector_2d>().broadphase_tree().depth() << "\n";
                 // debugText << "Collision tree (quadtree) update type: " << (spritePlane.dynamic_update_enabled() ? "dynamic" : "full") << "\n";
                 gc.draw_multiline_text(ng::point{ 64.0, 128.0 }, debugText.str(), debugFont,
                     ng::text_format{ ng::color::PowderBlue, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black, 2.0 } });
@@ -251,7 +251,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         }
     });
 
-    ~~~~ecs.system<ng::game::collision_detector>().Collision([&ecs, gameState, make_explosion, make_asteroid, spaceship](ng::game::entity_id e1, ng::game::entity_id e2)
+    ~~~~ecs.system<ng::game::collision_detector_2d>().Collision([&ecs, gameState, make_explosion, make_asteroid, spaceship](ng::game::entity_id e1, ng::game::entity_id e2)
     {
         auto id1 = ecs.component<ng::game::entity_info>().entity_record(e1).archetypeId;
         auto id2 = ecs.component<ng::game::entity_info>().entity_record(e2).archetypeId;

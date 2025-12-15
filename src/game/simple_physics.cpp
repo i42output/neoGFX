@@ -33,50 +33,55 @@
 
 namespace neogfx::game
 {
-    simple_physics::simple_physics(i_ecs& aEcs) :
-        system<entity_info, box_collider, box_collider_2d, mesh_filter, rigid_body, mesh_render_cache>{ aEcs }
+    template <typename ColliderType>
+    simple_physics<ColliderType>::simple_physics(i_ecs& aEcs) :
+        system<entity_info, ColliderType, mesh_filter, rigid_body, mesh_render_cache>{ aEcs }
     {
-        if (!ecs().shared_component_registered<physics>())
-            ecs().register_shared_component<physics>();
-        if (ecs().shared_component<physics>().component_data().empty())
-            ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11f });
-        start_thread_if();
+        if (!this->ecs().shared_component_registered<physics>())
+            this->ecs().register_shared_component<physics>();
+        if (this->ecs().shared_component<physics>().component_data().empty())
+            this->ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11f });
+        this->start_thread_if();
     }
 
-    simple_physics::~simple_physics()
+    template <typename ColliderType>
+    simple_physics<ColliderType>::~simple_physics()
     {
     }
 
-    const system_id& simple_physics::id() const
+    template <typename ColliderType>
+    const system_id& simple_physics<ColliderType>::id() const
     {
         return meta::id();
     }
 
-    const i_string& simple_physics::name() const
+    template <typename ColliderType>
+    const i_string& simple_physics<ColliderType>::name() const
     {
         return meta::name();
     }
 
-    bool simple_physics::apply()
+    template <typename ColliderType>
+    bool simple_physics<ColliderType>::apply()
     {
-        if (!can_apply())
+        if (!this->can_apply())
             throw cannot_apply();
-        if (!ecs().component_instantiated<rigid_body>())
+        if (!this->ecs().component_instantiated<rigid_body>())
             return false;
 
-        start_update();
+        this->start_update();
 
-        std::optional<scoped_component_lock<entity_info, mesh_render_cache, box_collider, box_collider_2d, mesh_filter, rigid_body>> lock{ ecs() };
+        std::optional<scoped_component_lock<entity_info, mesh_render_cache, box_collider_2d, mesh_filter, rigid_body>> lock{ this->ecs() };
 
-        thread_local auto const& time = ecs().system<game::time>();
+        thread_local auto const& time = this->ecs().system<game::time>();
         auto const now = time.system_time();
-        thread_local auto& clock = ecs().shared_component<game::clock>();
+        thread_local auto& clock = this->ecs().shared_component<game::clock>();
         auto& worldClock = clock[0];
-        thread_local auto const& physicalConstants = ecs().shared_component<physics>()[0];
+        thread_local auto const& physicalConstants = this->ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3f{};
-        thread_local auto& infos = ecs().component<entity_info>();
-        thread_local auto& rigidBodies = ecs().component<rigid_body>();
+        thread_local auto& infos = this->ecs().component<entity_info>();
+        thread_local auto& rigidBodies = this->ecs().component<rigid_body>();
         bool didWork = false;
         auto currentTimestep = worldClock.timestep;
         auto nextTime = worldClock.time + currentTimestep;
@@ -86,14 +91,14 @@ namespace neogfx::game
             if (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(std::chrono::high_resolution_clock::now() - startTime) > iYieldTime)
             {
                 lock.reset();
-                yield();
-                lock.emplace(ecs());
+                this->yield();
+                lock.emplace(this->ecs());
                 startTime = std::chrono::high_resolution_clock::now();
             }
-            start_update(1);
+            this->start_update(1);
             didWork = true;
-            ecs().system<game_world>().ApplyingPhysics(worldClock.time);
-            start_update(2);
+            this->ecs().system<game_world>().ApplyingPhysics(worldClock.time);
+            this->start_update(2);
             bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
                 rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
@@ -132,46 +137,53 @@ namespace neogfx::game
                 rigidBody1.position = rigidBody1.position + vec3f{ 1.0f, 1.0f, 1.0f }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0f);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0f * boost::math::constants::pi<float>());
                 if (p0 != rigidBody1.position || a0 != rigidBody1.angle)
-                    set_render_cache_dirty(ecs(), entity1);
+                    set_render_cache_dirty(this->ecs(), entity1);
             }
-            end_update(2);
-            if (ecs().system_instantiated<collision_detector>() && !ecs().system<collision_detector>().paused())
-                ecs().system<collision_detector>().run_cycle(collision_detection_cycle::UpdateColliders);
-            if (ecs().system_instantiated<animator>() && ecs().system<animator>().can_apply())
-                ecs().system<animator>().apply();
-            ecs().system<game::time>().apply();
-            ecs().system<game_world>().PhysicsApplied(worldClock.time);
-            shared_component_scoped_lock<game::clock> lockClock{ ecs() };
+            this->end_update(2);
+            if (this->ecs().system_instantiated<collision_detector_2d>() && !this->ecs().system<collision_detector_2d>().paused())
+                this->ecs().system<collision_detector_2d>().run_cycle(collision_detection_cycle::UpdateColliders);
+            if (this->ecs().system_instantiated<animator>() && this->ecs().system<animator>().can_apply())
+                this->ecs().system<animator>().apply();
+            this->ecs().system<game::time>().apply();
+            this->ecs().system<game_world>().PhysicsApplied(worldClock.time);
+            shared_component_scoped_lock<game::clock> lockClock{ this->ecs() };
             worldClock.time = nextTime;
             currentTimestep = std::min(static_cast<i64>(currentTimestep * worldClock.timestepGrowth), std::max(worldClock.timestep, worldClock.maximumTimestep));
             nextTime += currentTimestep;
-            end_update(1);
+            this->end_update(1);
         }
 
         lock.reset();
 
-        end_update();
+        this->end_update();
 
         return didWork;
     }
 
-    bool simple_physics::universal_gravitation_enabled() const
+    template <typename ColliderType>
+    bool simple_physics<ColliderType>::universal_gravitation_enabled() const
     {
-        return ecs().system<game_world>().universal_gravitation_enabled();
+        return this->ecs().system<game_world>().universal_gravitation_enabled();
     }
 
-    void simple_physics::enable_universal_gravitation()
+    template <typename ColliderType>
+    void simple_physics<ColliderType>::enable_universal_gravitation()
     {
-        return ecs().system<game_world>().enable_universal_gravitation();
+        return this->ecs().system<game_world>().enable_universal_gravitation();
     }
 
-    void simple_physics::disable_universal_gravitation()
+    template <typename ColliderType>
+    void simple_physics<ColliderType>::disable_universal_gravitation()
     {
-        return ecs().system<game_world>().disable_universal_gravitation();
+        return this->ecs().system<game_world>().disable_universal_gravitation();
     }
 
-    void simple_physics::yield_after(std::chrono::duration<double, std::milli> aTime)
+    template <typename ColliderType>
+    void simple_physics<ColliderType>::yield_after(std::chrono::duration<double, std::milli> aTime)
     {
         iYieldTime = aTime;
     }
+
+    template class simple_physics<box_collider_2d>;
+    template class simple_physics<box_collider_3d>;
 }

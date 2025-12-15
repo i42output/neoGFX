@@ -28,7 +28,7 @@
 
 namespace neogfx::game
 {
-    struct box_collider
+    struct box_collider_3d
     {
         std::uint64_t mask;
         std::optional<aabbf> untransformedAabb;
@@ -45,7 +45,7 @@ namespace neogfx::game
             }
             static const i_string& name()
             {
-                static const string sName = "Box Collider";
+                static const string sName = "Box Collider (3D)";
                 return sName;
             }
             static std::uint32_t field_count()
