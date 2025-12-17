@@ -1697,12 +1697,12 @@ namespace neogfx
             for (auto& d : drawables)
                 d.clear();
             lock.emplace(aEcs);
-            thread_local auto const& rigidBodies = aEcs.component<game::rigid_body>();
-            thread_local auto const& animatedMeshFilters = aEcs.component<game::animation_filter>();
-            thread_local auto const& infos = aEcs.component<game::entity_info>();
-            thread_local auto const& meshRenderers = aEcs.component<game::mesh_renderer>();
-            thread_local auto const& meshFilters = aEcs.component<game::mesh_filter>();
-            thread_local auto const& cache = aEcs.component<game::mesh_render_cache>();
+            auto const& rigidBodies = aEcs.component<game::rigid_body>();
+            auto const& animatedMeshFilters = aEcs.component<game::animation_filter>();
+            auto const& infos = aEcs.component<game::entity_info>();
+            auto const& meshRenderers = aEcs.component<game::mesh_renderer>();
+            auto const& meshFilters = aEcs.component<game::mesh_filter>();
+            auto const& cache = aEcs.component<game::mesh_render_cache>();
             for (auto entity : meshRenderers.entities())
             {
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)

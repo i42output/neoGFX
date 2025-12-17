@@ -341,20 +341,19 @@ namespace neogfx::game
             iDepth = 0;
             iRootNode.~node();
             new(&iRootNode) node{ *this, iRootAabb };
+            auto const& infos = iEcs.component<game::entity_info>();
             for (auto entity : iEcs.component<collider_type>().entities())
             {
+                auto const& info = infos.entity_record_no_lock(entity);
+                if (info.destroyed)
+                    continue;
                 auto& collider = iEcs.component<collider_type>().entity_record(entity);
                 iRootNode.add_entity(entity, collider);
             }
         }
         void dynamic_update()
         {
-            iDepth = 0;
-            for (auto entity : iEcs.component<collider_type>().entities())
-            {
-                auto& collider = iEcs.component<collider_type>().entity_record(entity);
-                iRootNode.update_entity(entity, collider);
-            }
+            // todo
         }
         template <typename CollisionAction>
         void collisions(CollisionAction aCollisionAction) const

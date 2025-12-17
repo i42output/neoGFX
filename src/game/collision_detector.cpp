@@ -107,6 +107,7 @@ namespace neogfx::game
         }
         if (!iUpdated)
             return;
+        scoped_component_lock<entity_info, ColliderType> lock{ this->ecs() };
         if ((aCycle & collision_detection_cycle::UpdateTrees) == collision_detection_cycle::UpdateTrees)
             update_broadphase();
         if ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions)
