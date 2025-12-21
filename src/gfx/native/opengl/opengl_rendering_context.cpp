@@ -1685,18 +1685,18 @@ namespace neogfx
 
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        thread_local std::vector<std::vector<mesh_drawable>> drawables;
-        thread_local game::scene_layer maxLayer = 0;
-        thread_local optional_ecs_render_lock lock;
+        thread_local std::vector<std::vector<mesh_drawable>> tDrawables;
+        thread_local game::scene_layer tMaxLayer = 0;
+        thread_local optional_ecs_render_lock tLock;
 
-        if (drawables.size() <= aLayer)
-            drawables.resize(aLayer + 1);
+        if (tDrawables.size() <= aLayer)
+            tDrawables.resize(aLayer + 1);
 
         if (aLayer == 0)
         {
-            for (auto& d : drawables)
+            for (auto& d : tDrawables)
                 d.clear();
-            lock.emplace(aEcs);
+            tLock.emplace(aEcs);
             auto const& rigidBodies = aEcs.component<game::rigid_body>();
             auto const& animatedMeshFilters = aEcs.component<game::animation_filter>();
             auto const& infos = aEcs.component<game::entity_info>();
@@ -1713,13 +1713,13 @@ namespace neogfx
                 if (info.destroyed)
                     continue;
                 auto const& meshRenderer = meshRenderers.entity_record_no_lock(entity);
-                maxLayer = std::max(maxLayer, meshRenderer.layer);
-                if (drawables.size() <= maxLayer)
-                    drawables.resize(maxLayer + 1);
+                tMaxLayer = std::max(tMaxLayer, meshRenderer.layer);
+                if (tDrawables.size() <= tMaxLayer)
+                    tDrawables.resize(tMaxLayer + 1);
                 auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
                     meshFilters.entity_record_no_lock(entity) :
                     game::current_animation_frame(animatedMeshFilters.entity_record_no_lock(entity));
-                drawables[meshRenderer.layer].emplace_back(
+                tDrawables[meshRenderer.layer].emplace_back(
                     meshFilter,
                     meshRenderer,
                     optional_mat44f{},
@@ -1733,18 +1733,21 @@ namespace neogfx
                     auto const& animationMeshFilterTransformation = (animatedMeshFilters.has_entity_record_no_lock(entity) ?
                         to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44f::identity());
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
-                    drawables[meshRenderer.layer].back().transformation = transformation;
+                    tDrawables[meshRenderer.layer].back().transformation = transformation;
                 }
             }
         }
-        if (!drawables[aLayer].empty())
-            draw_meshes(lock, dynamic_cast<i_vertex_provider&>(aEcs), &*drawables[aLayer].begin(), &*drawables[aLayer].begin() + drawables[aLayer].size(), aTransformation);
-        if (aLayer >= maxLayer)
+        if (!tDrawables[aLayer].empty())
         {
-            maxLayer = 0;
-            for (auto& d : drawables)
+            game::scoped_component_relock<game::entity_info, game::rigid_body> relock{ tLock.value() };
+            draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), &*tDrawables[aLayer].begin(), &*tDrawables[aLayer].begin() + tDrawables[aLayer].size(), aTransformation);
+        }
+        if (aLayer >= tMaxLayer)
+        {
+            tMaxLayer = 0;
+            for (auto& d : tDrawables)
                 d.clear();
-            lock.reset();
+            tLock.reset();
         }
     }
 
@@ -1867,20 +1870,20 @@ namespace neogfx
         disable_anti_alias daa{ *this };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        thread_local std::vector<game::mesh_filter> meshFilters;
-        thread_local std::vector<game::mesh_renderer> meshRenderers;
-        thread_local std::vector<mesh_drawable> drawables;
+        thread_local std::vector<game::mesh_filter> tMeshFilters;
+        thread_local std::vector<game::mesh_renderer> tMeshRenderers;
+        thread_local std::vector<mesh_drawable> tDrawables;
 
         auto draw = [&]()
         {
-            for (std::size_t i = 0; i < meshFilters.size(); ++i)
-                drawables.emplace_back(meshFilters[i], meshRenderers[i]);
+            for (std::size_t i = 0; i < tMeshFilters.size(); ++i)
+                tDrawables.emplace_back(tMeshFilters[i], tMeshRenderers[i]);
             optional_ecs_render_lock ignore;
-            if (!drawables.empty())
-                draw_meshes(ignore, as_vertex_provider(), &*drawables.begin(), &*drawables.begin() + drawables.size(), mat44::identity());
-            meshFilters.clear();
-            meshRenderers.clear();
-            drawables.clear();
+            if (!tDrawables.empty())
+                draw_meshes(ignore, as_vertex_provider(), &*tDrawables.begin(), &*tDrawables.begin() + tDrawables.size(), mat44::identity());
+            tMeshFilters.clear();
+            tMeshRenderers.clear();
+            tDrawables.clear();
         };
 
         auto bounding_rect = [&]()
@@ -2007,8 +2010,8 @@ namespace neogfx
                     {
                         auto const& mesh = to_ecs_component(drawOp.point.as<float>() + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
 
-                        meshFilters.push_back(game::mesh_filter{ {}, mesh });
-                        meshRenderers.push_back(
+                        tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
+                        tMeshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
                                     paper_maybe_animated(drawOp),
@@ -2068,11 +2071,11 @@ namespace neogfx
 
                     auto const& emojiAtlas = rendering_engine().font_manager().emoji_atlas();
                     auto const& emojiTexture = emojiAtlas.emoji_texture(glyphChar.value).as_sub_texture();
-                    meshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
+                    tMeshFilters.push_back(game::mesh_filter{ game::shared<game::mesh>{}, mesh });
                     auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                         (drawOp.appearance->ignore_emoji() ? neolib::none : drawOp.appearance->ink()) : 
                         (drawOp.appearance->effect()->ignore_emoji() ? neolib::none : drawOp.appearance->effect()->color());
-                    meshRenderers.push_back(game::mesh_renderer
+                    tMeshRenderers.push_back(game::mesh_renderer
                         {
                             game::material
                             {
@@ -2126,9 +2129,9 @@ namespace neogfx
                                     (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                                 auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                                meshFilters.push_back(game::mesh_filter{ {}, mesh });
+                                tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                                 auto const& ink = drawOp.appearance->effect()->color();
-                                meshRenderers.push_back(
+                                tMeshRenderers.push_back(
                                     game::mesh_renderer{
                                         game::material{
                                             ink_maybe_animated(drawOp, ink),
@@ -2153,10 +2156,10 @@ namespace neogfx
                             (glyphChar.cell[0] + shapeQuad[3]).round() } + ~drawOp.point.as<float>().xy;
 
                         auto const& mesh = to_ecs_component(glyphQuad, mesh_type::Triangles);
-                        meshFilters.push_back(game::mesh_filter{ {}, mesh });
+                        tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         auto const& ink = !drawOp.appearance->effect() || !drawOp.appearance->being_filtered() ?
                             drawOp.appearance->ink() : drawOp.appearance->effect()->color();
-                        meshRenderers.push_back(
+                        tMeshRenderers.push_back(
                             game::mesh_renderer{
                                 game::material{
                                     ink_maybe_animated(drawOp, ink),

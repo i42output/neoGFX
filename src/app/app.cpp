@@ -176,14 +176,6 @@ namespace neogfx
             }
 #endif
             service<i_rendering_engine>().initialize();
-            static struct debug_mutexes : neolib::i_mutex_profiler_observer
-            {
-                void mutex_contended(neolib::i_lockable& aMutex, const std::chrono::microseconds& aContendedFor, neolib::mutex_lock_info const* aPreviousLocks, std::size_t aPreviousLocksCount) noexcept final
-                {
-                }
-            } sDebugMutexes;
-            service<neolib::i_mutex_profiler>().enable(std::chrono::milliseconds{ 1 }, 10u, true);
-            service<neolib::i_mutex_profiler>().subscribe(sDebugMutexes);
         }
     }
 

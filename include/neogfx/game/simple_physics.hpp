@@ -30,10 +30,10 @@
 namespace neogfx::game
 {
     template <typename ColliderType>
-    class simple_physics : public game::system<entity_info, ColliderType, mesh_filter, rigid_body, mesh_render_cache>
+    class simple_physics : public game::system<entity_info, rigid_body, ColliderType, mesh_render_cache>
     {
     private:
-        using base_type = game::system<entity_info, ColliderType, mesh_filter, rigid_body, mesh_render_cache>;
+        using base_type = game::system<entity_info, rigid_body, ColliderType, mesh_render_cache>;
     public:
         using base_type::cannot_apply;
     public:

@@ -35,7 +35,7 @@ namespace neogfx::game
 {
     template <typename ColliderType>
     simple_physics<ColliderType>::simple_physics(i_ecs& aEcs) :
-        system<entity_info, ColliderType, mesh_filter, rigid_body, mesh_render_cache>{ aEcs }
+        system<entity_info, rigid_body, ColliderType, mesh_render_cache>{ aEcs }
     {
         if (!this->ecs().shared_component_registered<physics>())
             this->ecs().register_shared_component<physics>();
@@ -71,7 +71,7 @@ namespace neogfx::game
 
         this->start_update();
 
-        std::optional<scoped_component_lock<entity_info, mesh_render_cache, rigid_body>> lock{ this->ecs() };
+        std::optional<scoped_component_lock<entity_info, rigid_body, mesh_render_cache>> lock{ this->ecs() };
 
         auto const& time = this->ecs().system<game::time>();
         auto const now = time.system_time();
@@ -90,9 +90,8 @@ namespace neogfx::game
         {
             if (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(std::chrono::high_resolution_clock::now() - startTime) > iYieldTime)
             {
-                lock.reset();
+                scoped_component_relock<entity_info, rigid_body, mesh_render_cache> relock{ lock.value() };
                 this->yield();
-                lock.emplace(this->ecs());
                 startTime = std::chrono::high_resolution_clock::now();
             }
             this->start_update(1);
@@ -133,18 +132,21 @@ namespace neogfx::game
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
                 auto elapsedTime = static_cast<float>(from_step_time(nextTime - worldClock.time));
-                rigidBody1.velocity = v0 + ((rigidBody1.mass == 0.0f ? vec3f{} : totalForce / rigidBody1.mass) + (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3f{ elapsedTime, elapsedTime, elapsedTime });
+                rigidBody1.velocity = v0 + ((rigidBody1.mass == 0.0f ? vec3f{} : totalForce / rigidBody1.mass) + 
+                    (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3f{ elapsedTime, elapsedTime, elapsedTime });
                 rigidBody1.position = rigidBody1.position + vec3f{ 1.0f, 1.0f, 1.0f }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0f);
                 rigidBody1.angle = (rigidBody1.angle + rigidBody1.spin * elapsedTime) % (2.0f * boost::math::constants::pi<float>());
                 if (p0 != rigidBody1.position || a0 != rigidBody1.angle)
                     set_render_cache_dirty(this->ecs(), entity1);
             }
             this->end_update(2);
-            if (this->ecs().system_instantiated<collision_detector_2d>() && !this->ecs().system<collision_detector_2d>().paused())
-                this->ecs().system<collision_detector_2d>().run_cycle(collision_detection_cycle::UpdateColliders);
-            if (this->ecs().system_instantiated<animator>() && this->ecs().system<animator>().can_apply())
-                this->ecs().system<animator>().apply();
-            this->ecs().system<game::time>().apply();
+            {
+                if (this->ecs().system_instantiated<collision_detector_2d>() && !this->ecs().system<collision_detector_2d>().paused())
+                    this->ecs().system<collision_detector_2d>().run_cycle(collision_detection_cycle::UpdateColliders);
+                if (this->ecs().system_instantiated<animator>() && this->ecs().system<animator>().can_apply())
+                    this->ecs().system<animator>().apply();
+                this->ecs().system<game::time>().apply();
+            }
             this->ecs().system<game_world>().PhysicsApplied(worldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ this->ecs() };
             worldClock.time = nextTime;

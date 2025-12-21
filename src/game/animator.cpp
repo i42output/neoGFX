@@ -75,10 +75,12 @@ namespace neogfx::game
 
         Animate(now);
 
-        thread_local auto& infos = ecs().component<entity_info>();
-        thread_local auto& filters = ecs().component<animation_filter>();
-        thread_local auto& cache = ecs().component<mesh_render_cache>();
-        thread_local auto const& worldClock = ecs().shared_component<game::clock>()[0];
+        scoped_component_lock<entity_info, animation_filter, mesh_renderer, mesh_render_cache> lock{ ecs() };
+
+        auto& infos = ecs().component<entity_info>();
+        auto& filters = ecs().component<animation_filter>();
+        auto& cache = ecs().component<mesh_render_cache>();
+        auto const& worldClock = ecs().shared_component<game::clock>()[0];
 
         std::unique_lock lk{ iLock };
 

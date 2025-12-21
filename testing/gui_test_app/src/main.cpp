@@ -30,6 +30,17 @@ int main(int argc, char* argv[])
 
     test::main_app app{ argc, argv, "neoGFX Test App (Pre-Release)" };
 
+    static struct debug_mutexes : neolib::i_mutex_profiler_observer
+    {
+        void mutex_contended(neolib::i_lockable& aMutex, const std::chrono::microseconds& aContendedFor,
+            neolib::mutex_lock_info const* aPreviousLocks, std::size_t aPreviousLocksCount) noexcept final
+        {
+            ng::service<ng::debug::logger>() << "Mutex contended for " << aContendedFor << " us" << std::endl;
+        }
+    } sDebugMutexes;
+    ng::service<neolib::i_mutex_profiler>().enable(std::chrono::milliseconds{ 1 }, 10u, true);
+    ng::service<neolib::i_mutex_profiler>().subscribe(sDebugMutexes);
+
     try
     {
         app.register_style(ng::style("Keypad"));
