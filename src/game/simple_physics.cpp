@@ -71,17 +71,17 @@ namespace neogfx::game
 
         this->start_update();
 
-        std::optional<scoped_component_lock<entity_info, mesh_render_cache, box_collider_2d, mesh_filter, rigid_body>> lock{ this->ecs() };
+        std::optional<scoped_component_lock<entity_info, mesh_render_cache, rigid_body>> lock{ this->ecs() };
 
-        thread_local auto const& time = this->ecs().system<game::time>();
+        auto const& time = this->ecs().system<game::time>();
         auto const now = time.system_time();
-        thread_local auto& clock = this->ecs().shared_component<game::clock>();
+        auto& clock = this->ecs().shared_component<game::clock>();
         auto& worldClock = clock[0];
-        thread_local auto const& physicalConstants = this->ecs().shared_component<physics>()[0];
+        auto const& physicalConstants = this->ecs().shared_component<physics>()[0];
         auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
             *physicalConstants.uniformGravity : vec3f{};
-        thread_local auto& infos = this->ecs().component<entity_info>();
-        thread_local auto& rigidBodies = this->ecs().component<rigid_body>();
+        auto& infos = this->ecs().component<entity_info>();
+        auto& rigidBodies = this->ecs().component<rigid_body>();
         bool didWork = false;
         auto currentTimestep = worldClock.timestep;
         auto nextTime = worldClock.time + currentTimestep;

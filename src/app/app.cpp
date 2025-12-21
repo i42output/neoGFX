@@ -168,7 +168,7 @@ namespace neogfx
             {
                 AllocConsole();
                 freopen("CONOUT$", "w", stdout);
-                freopen("CONOUT$", "w", stderr);
+                freopen("CONOUT$", "w", stderr); 
                 std::cout.sync_with_stdio(false);
                 std::cout.sync_with_stdio(true);
                 std::cerr.sync_with_stdio(false);
@@ -176,6 +176,14 @@ namespace neogfx
             }
 #endif
             service<i_rendering_engine>().initialize();
+            static struct debug_mutexes : neolib::i_mutex_profiler_observer
+            {
+                void mutex_contended(neolib::i_lockable& aMutex, const std::chrono::microseconds& aContendedFor, neolib::mutex_lock_info const* aPreviousLocks, std::size_t aPreviousLocksCount) noexcept final
+                {
+                }
+            } sDebugMutexes;
+            service<neolib::i_mutex_profiler>().enable(std::chrono::milliseconds{ 1 }, 10u, true);
+            service<neolib::i_mutex_profiler>().subscribe(sDebugMutexes);
         }
     }
 
