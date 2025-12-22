@@ -38,9 +38,60 @@ namespace neogfx::game
 
     struct mesh_render_cache
     {
-        mutable cache_state state;
+        mutable std::atomic<cache_state> state;
         mutable vec2u32 meshVertexArrayIndices;
         mutable std::vector<vec2u32> patchVertexArrayIndices;
+
+        mesh_render_cache() :
+            state{ cache_state::Invalid }
+        {
+        }
+
+        mesh_render_cache(const mesh_render_cache& other) : 
+            state{ other.state.load() },
+            meshVertexArrayIndices{ other.meshVertexArrayIndices },
+            patchVertexArrayIndices{ other.patchVertexArrayIndices }
+        {
+        }
+
+        mesh_render_cache(mesh_render_cache&& other) noexcept : 
+            state{ other.state.load() },
+            meshVertexArrayIndices{ std::move(other.meshVertexArrayIndices) },
+            patchVertexArrayIndices{ std::move(other.patchVertexArrayIndices) }
+        {
+            state.store(other.state.load(std::memory_order_relaxed), std::memory_order_relaxed);
+        }
+
+        mesh_render_cache& operator=(const mesh_render_cache& other)
+        {
+            if (this != &other)
+            {
+                state = other.state.load();
+                meshVertexArrayIndices = other.meshVertexArrayIndices;
+                patchVertexArrayIndices = other.patchVertexArrayIndices;
+            }
+            return *this;
+        }
+
+        mesh_render_cache& operator=(mesh_render_cache&& other) noexcept
+        {
+            if (this != &other)
+            {
+                state = other.state.load();
+                meshVertexArrayIndices = std::move(other.meshVertexArrayIndices);
+                patchVertexArrayIndices = std::move(other.patchVertexArrayIndices);
+            }
+            return *this;
+        }
+
+        friend void swap(mesh_render_cache& lhs, mesh_render_cache& rhs) noexcept 
+        {
+            using std::swap;
+            cache_state temp = rhs.state.exchange(lhs.state.load());
+            lhs.state.exchange(temp);
+            swap(lhs.meshVertexArrayIndices, rhs.meshVertexArrayIndices);
+            swap(lhs.patchVertexArrayIndices, rhs.patchVertexArrayIndices);
+        }
 
         struct meta : i_component_data::meta
         {
@@ -63,7 +114,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::Enum | component_data_field_type::Internal;
+                    return component_data_field_type::Enum | component_data_field_type::Atomic | component_data_field_type::Internal;
                 case 1:
                     return component_data_field_type::Vec2u32 | component_data_field_type::Internal;
                 case 2:

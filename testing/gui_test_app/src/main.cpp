@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
         void mutex_contended(neolib::i_lockable& aMutex, const std::chrono::microseconds& aContendedFor,
             neolib::mutex_lock_info const* aPreviousLocks, std::size_t aPreviousLocksCount) noexcept final
         {
-            ng::service<ng::debug::logger>() << "Mutex contended for " << aContendedFor << " us" << std::endl;
+            ng::service<ng::debug::logger>() << "Mutex contended for " << aContendedFor << std::endl;
         }
     } sDebugMutexes;
     ng::service<neolib::i_mutex_profiler>().enable(std::chrono::milliseconds{ 1 }, 10u, true);

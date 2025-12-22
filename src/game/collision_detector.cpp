@@ -123,11 +123,11 @@ namespace neogfx::game
         if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
             scoped_component_lock<entity_info, box_collider_3d, mesh_filter, animation_filter, rigid_body> lock{ this->ecs() };
-            thread_local auto const& infos = this->ecs().component<entity_info>();
-            thread_local auto const& meshFilters = this->ecs().component<mesh_filter>();
-            thread_local auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
-            thread_local auto const& rigidBodies = this->ecs().component<rigid_body>();
-            thread_local auto& boxColliders = this->ecs().component<box_collider_3d>();
+            auto const& infos = this->ecs().component<entity_info>();
+            auto const& meshFilters = this->ecs().component<mesh_filter>();
+            auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
+            auto const& rigidBodies = this->ecs().component<rigid_body>();
+            auto& boxColliders = this->ecs().component<box_collider_3d>();
             for (auto entity : boxColliders.entities())
             {
                 auto const& info = infos.entity_record(entity);
@@ -156,11 +156,11 @@ namespace neogfx::game
         else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
             scoped_component_lock<entity_info, box_collider_2d, mesh_filter, animation_filter, rigid_body> lock{ this->ecs() };
-            thread_local auto const& infos = this->ecs().component<entity_info>();
-            thread_local auto const& meshFilters = this->ecs().component<mesh_filter>();
-            thread_local auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
-            thread_local auto const& rigidBodies = this->ecs().component<rigid_body>();
-            thread_local auto& boxColliders2d = this->ecs().component<box_collider_2d>();
+            auto const& infos = this->ecs().component<entity_info>();
+            auto const& meshFilters = this->ecs().component<mesh_filter>();
+            auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
+            auto const& rigidBodies = this->ecs().component<rigid_body>();
+            auto& boxColliders2d = this->ecs().component<box_collider_2d>();
             for (auto entity : boxColliders2d.entities())
             {
                 auto const& info = infos.entity_record(entity);

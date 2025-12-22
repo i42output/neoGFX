@@ -25,15 +25,14 @@
 #include <neogfx/game/box_collider.hpp>
 #include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/rigid_body.hpp>
-#include <neogfx/game/mesh_render_cache.hpp>
 
 namespace neogfx::game
 {
     template <typename ColliderType>
-    class simple_physics : public game::system<entity_info, rigid_body, ColliderType, mesh_render_cache>
+    class simple_physics : public game::system<entity_info, rigid_body, ColliderType>
     {
     private:
-        using base_type = game::system<entity_info, rigid_body, ColliderType, mesh_render_cache>;
+        using base_type = game::system<entity_info, rigid_body, ColliderType>;
     public:
         using base_type::cannot_apply;
     public:
