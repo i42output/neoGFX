@@ -53,7 +53,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             { 
-                return 8; 
+                return 9; 
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -62,14 +62,16 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Vec3f;
                 case 1:
-                    return component_data_field_type::Float32;
+                    return component_data_field_type::Vec3f | component_data_field_type::Array;
                 case 2:
+                    return component_data_field_type::Float32;
                 case 3:
                 case 4:
                 case 5:
                 case 6:
-                    return component_data_field_type::Vec3f;
                 case 7:
+                    return component_data_field_type::Vec3f;
+                case 8:
                     return component_data_field_type::Float32;
                 default:
                     throw invalid_field_index();
@@ -80,6 +82,7 @@ namespace neogfx::game
                 static const string sFieldNames[] = 
                 {
                     "Position",
+                    "Hull",
                     "Mass",
                     "Velocity",
                     "Acceleration",

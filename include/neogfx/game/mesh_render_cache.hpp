@@ -59,7 +59,6 @@ namespace neogfx::game
             meshVertexArrayIndices{ std::move(other.meshVertexArrayIndices) },
             patchVertexArrayIndices{ std::move(other.patchVertexArrayIndices) }
         {
-            state.store(other.state.load(std::memory_order_relaxed), std::memory_order_relaxed);
         }
 
         mesh_render_cache& operator=(const mesh_render_cache& other)
@@ -156,22 +155,31 @@ namespace neogfx::game
 
     inline void set_render_cache_invalid_no_lock(component<game::mesh_render_cache>& aCache, entity_id aEntity)
     {
-        auto& cache = aCache.entity_record_no_lock(aEntity, true);
-        cache.state = cache_state::Invalid;
+        if (aCache.has_entity_record_no_lock(aEntity))
+        {
+            auto& cache = aCache.entity_record_no_lock(aEntity);
+            cache.state = cache_state::Invalid;
+        }
     }
 
     inline void set_render_cache_dirty_no_lock(component<game::mesh_render_cache>& aCache, entity_id aEntity)
     {
-        auto& cache = aCache.entity_record_no_lock(aEntity, true);
-        if (cache.state == cache_state::Clean)
-            cache.state = cache_state::Dirty;
+        if (aCache.has_entity_record_no_lock(aEntity))
+        {
+            auto& cache = aCache.entity_record_no_lock(aEntity);
+            if (cache.state == cache_state::Clean)
+                cache.state = cache_state::Dirty;
+        }
     }
 
     inline void set_render_cache_clean_no_lock(component<game::mesh_render_cache>& aCache, entity_id aEntity)
     {
-        auto& cache = aCache.entity_record_no_lock(aEntity, true);
-        if (cache.state == cache_state::Dirty)
-            cache.state = cache_state::Clean;
+        if (aCache.has_entity_record_no_lock(aEntity))
+        {
+            auto& cache = aCache.entity_record_no_lock(aEntity);
+            if (cache.state == cache_state::Dirty)
+                cache.state = cache_state::Clean;
+        }
     }
 
     inline bool is_render_cache_valid_no_lock(i_ecs const& aEcs, entity_id aEntity)

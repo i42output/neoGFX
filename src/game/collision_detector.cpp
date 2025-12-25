@@ -30,7 +30,7 @@ namespace neogfx::game
 {
     template<typename ColliderType, typename BroadphaseTreeType>
     collision_detector< ColliderType, BroadphaseTreeType>::collision_detector(i_ecs& aEcs) :
-        system<entity_info, ColliderType>{ aEcs },
+        system<ColliderType>{ aEcs },
         iBroadphaseTree{ aEcs },
         iUpdated{ false }
     {
@@ -50,7 +50,7 @@ namespace neogfx::game
 
         if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
-            scoped_component_lock<entity_info, box_collider_3d> lock{ this->ecs() };
+            scoped_component_lock<box_collider_3d> lock{ this->ecs() };
             thread_local std::vector<entity_id> hits;
             hits.clear();
             iBroadphaseTree.pick(aPoint, hits);
@@ -59,7 +59,7 @@ namespace neogfx::game
         }
         else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
-            scoped_component_lock<entity_info, box_collider_2d> lock{ this->ecs() };
+            scoped_component_lock<box_collider_2d> lock{ this->ecs() };
             thread_local std::vector<entity_id> hits;
             hits.clear();
             iBroadphaseTree.pick(aPoint.xy, hits);
@@ -75,11 +75,13 @@ namespace neogfx::game
     {
         if (!this->can_apply())
             throw cannot_apply();
-
         if (!this->components_available())
+            return false;
+        if (this->paused())
             return false;
 
         this->start_update();
+        run_cycle(collision_detection_cycle::UpdateColliders);
         run_cycle(collision_detection_cycle::Detect);
         this->end_update();
 
@@ -107,7 +109,7 @@ namespace neogfx::game
         }
         if (!iUpdated)
             return;
-        scoped_component_lock<entity_info, ColliderType> lock{ this->ecs() };
+        scoped_component_lock<ColliderType> lock{ this->ecs() };
         if ((aCycle & collision_detection_cycle::UpdateTrees) == collision_detection_cycle::UpdateTrees)
             update_broadphase();
         if ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions)
@@ -122,66 +124,44 @@ namespace neogfx::game
 
         if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
-            scoped_component_lock<entity_info, box_collider_3d, mesh_filter, animation_filter, rigid_body> lock{ this->ecs() };
+            scoped_component_lock<box_collider_3d, rigid_body> lock{ this->ecs() };
             auto const& infos = this->ecs().component<entity_info>();
-            auto const& meshFilters = this->ecs().component<mesh_filter>();
-            auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
             auto const& rigidBodies = this->ecs().component<rigid_body>();
             auto& boxColliders = this->ecs().component<box_collider_3d>();
             for (auto entity : boxColliders.entities())
             {
-                auto const& info = infos.entity_record(entity);
+                auto const& info = infos.entity_record_no_lock(entity);
                 if (info.destroyed)
-                    continue; // todo: add support for skip iterators
-                // todo: only update collider AABBs if rigid_body changes require it
-                auto const& meshFilter = meshFilters.has_entity_record(entity) ?
-                    meshFilters.entity_record(entity) : current_animation_frame(animatedMeshFilters.entity_record(entity));
+                    continue;
+                auto const& rigidBody = rigidBodies.entity_record(entity);
                 auto& collider = boxColliders.entity_record(entity);
                 collider.previousAabb = collider.currentAabb;
-                auto const& untransformed = (meshFilter.mesh != std::nullopt ?
-                    *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
                 if (!collider.untransformedAabb)
-                    collider.untransformedAabb = to_aabb(untransformed.vertices);
+                    collider.untransformedAabb = to_aabb(collider.hull);
                 collider.currentAabb = aabb_transform(*collider.untransformedAabb,
-                    (animatedMeshFilters.has_entity_record(entity) ?
-                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44f::identity()),
-                    (meshFilter.transformation ?
-                        *meshFilter.transformation : mat44f::identity()),
-                    (rigidBodies.has_entity_record(entity) ?
-                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44f::identity()));
+                    to_transformation_matrix(rigidBody));
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
         }
         else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
-            scoped_component_lock<entity_info, box_collider_2d, mesh_filter, animation_filter, rigid_body> lock{ this->ecs() };
+            scoped_component_lock<box_collider_2d, rigid_body> lock{ this->ecs() };
             auto const& infos = this->ecs().component<entity_info>();
-            auto const& meshFilters = this->ecs().component<mesh_filter>();
-            auto const& animatedMeshFilters = this->ecs().component<animation_filter>();
             auto const& rigidBodies = this->ecs().component<rigid_body>();
-            auto& boxColliders2d = this->ecs().component<box_collider_2d>();
-            for (auto entity : boxColliders2d.entities())
+            auto& boxColliders = this->ecs().component<box_collider_2d>();
+            for (auto entity : boxColliders.entities())
             {
-                auto const& info = infos.entity_record(entity);
+                auto const& info = infos.entity_record_no_lock(entity);
                 if (info.destroyed)
-                    continue; // todo: add support for skip iterators
-                // todo: only update collider AABBs if rigid_body changes require it
-                auto const& meshFilter = meshFilters.has_entity_record(entity) ?
-                    meshFilters.entity_record(entity) : current_animation_frame(animatedMeshFilters.entity_record(entity));
-                auto& collider = boxColliders2d.entity_record(entity);
+                    continue;
+                auto const& rigidBody = rigidBodies.entity_record(entity);
+                auto& collider = boxColliders.entity_record(entity);
                 collider.previousAabb = collider.currentAabb;
-                auto const& untransformed = (meshFilter.mesh != std::nullopt ?
-                    *meshFilter.mesh : *meshFilter.sharedMesh.ptr);
                 if (!collider.untransformedAabb)
-                    collider.untransformedAabb = to_aabb_2d(untransformed.vertices);
-                collider.currentAabb = aabb_transform(*collider.untransformedAabb, 
-                    (animatedMeshFilters.has_entity_record(entity) ?
-                        to_transformation_matrix(animatedMeshFilters.entity_record(entity)) : mat44f::identity()),
-                    (meshFilter.transformation ?
-                        *meshFilter.transformation : mat44f::identity()),
-                    (rigidBodies.has_entity_record(entity) ?
-                        to_transformation_matrix(rigidBodies.entity_record(entity)) : mat44f::identity()));
+                    collider.untransformedAabb = to_aabb_2d(collider.hull);
+                collider.currentAabb = aabb_transform(*collider.untransformedAabb,
+                    to_transformation_matrix(rigidBody));
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
@@ -193,7 +173,7 @@ namespace neogfx::game
     template<typename ColliderType, typename BroadphaseTreeType>
     void collision_detector<ColliderType, BroadphaseTreeType>::update_broadphase()
     {
-        scoped_component_lock<entity_info, ColliderType> lock{ this->ecs() };
+        scoped_component_lock<ColliderType> lock{ this->ecs() };
         iBroadphaseTree.full_update();
     }
 
@@ -203,7 +183,7 @@ namespace neogfx::game
         if (!this->components_available())
             return;
 
-        scoped_component_lock<entity_info, ColliderType> lock{ this->ecs() };
+        scoped_component_lock<ColliderType> lock{ this->ecs() };
         iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
         {
             Collision(e1, e2);

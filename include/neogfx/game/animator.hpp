@@ -31,7 +31,7 @@
 
 namespace neogfx::game
 {
-    class animator : public game::system<entity_info, animation_filter, mesh_renderer, mesh_render_cache>
+    class animator : public game::system<animation_filter>
     {
     public:
         define_event(Animate, animate, step_time)
@@ -59,7 +59,5 @@ namespace neogfx::game
                 return sName;
             }
         };
-    private:
-        scoped_component_lock<entity_info, mesh_render_cache, animation_filter> iLock;
     };
 }   

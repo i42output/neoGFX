@@ -33,6 +33,7 @@
 #include <neogfx/game/rectangle.hpp>
 #include <neogfx/game/text_mesh.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
+#include <neogfx/game/animator.hpp>
 #include <neogfx/hid/i_native_surface.hpp>
 #include "../i_native_texture.hpp"
 #include "../../text/native/i_native_font_face.hpp"
@@ -1697,6 +1698,10 @@ namespace neogfx
             for (auto& d : tDrawables)
                 d.clear();
             tLock.emplace(aEcs);
+
+            if (aEcs.system_instantiated<game::animator>() && aEcs.system<game::animator>().can_apply())
+                aEcs.system<game::animator>().apply();
+
             auto const& rigidBodies = aEcs.component<game::rigid_body>();
             auto const& animatedMeshFilters = aEcs.component<game::animation_filter>();
             auto const& infos = aEcs.component<game::entity_info>();
@@ -1738,7 +1743,10 @@ namespace neogfx
             }
         }
         if (!tDrawables[aLayer].empty())
+        {
+            neolib::ecs::scoped_component_relock<game::rigid_body> relock{ tLock.value() };
             draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), &*tDrawables[aLayer].begin(), &*tDrawables[aLayer].begin() + tDrawables[aLayer].size(), aTransformation);
+        }
         if (aLayer >= tMaxLayer)
         {
             tMaxLayer = 0;
@@ -2354,7 +2362,7 @@ namespace neogfx
                         {
                             textureId = nextTextureId;
                             auto const& texture = *service<i_texture_manager>().find_texture(nextTextureId);
-                            textureStorageExtents = texture.storage_extents().to_vec2();
+                            textureStorageExtents = texture.storage_extents().to_vec2().as<float>();
                             uvFixupCoefficient = materialTexture.extents;
                             if (materialTexture.type == texture_type::Texture)
                                 uvFixupOffset = vec2f{ 1.0f, 1.0f };

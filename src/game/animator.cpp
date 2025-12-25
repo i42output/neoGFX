@@ -34,11 +34,9 @@
 namespace neogfx::game
 {
     animator::animator(game::i_ecs& aEcs) :
-        system<entity_info, animation_filter, mesh_renderer, mesh_render_cache>{ aEcs },
-        iLock{ aEcs, neolib::ecs::dont_lock }
+        system<animation_filter>{ aEcs }
     {
         Animate.set_trigger_type(neolib::trigger_type::SynchronousDontQueue);
-        start_thread_if();
     }
 
     animator::~animator()
@@ -59,8 +57,9 @@ namespace neogfx::game
     {
         if (!can_apply())
             throw cannot_apply();
-
         if (!ecs().component_instantiated<animation_filter>())
+            return false;
+        if (paused())
             return false;
 
         update_animations();
@@ -75,18 +74,16 @@ namespace neogfx::game
 
         Animate(now);
 
-        scoped_component_lock<entity_info, animation_filter, mesh_renderer, mesh_render_cache> lock{ ecs() };
+        scoped_component_lock<animation_filter> lock{ ecs() };
 
         auto& infos = ecs().component<entity_info>();
         auto& filters = ecs().component<animation_filter>();
         auto& cache = ecs().component<mesh_render_cache>();
         auto const& worldClock = ecs().shared_component<game::clock>()[0];
 
-        std::unique_lock lk{ iLock };
-
         for (auto entity : filters.entities())
         {
-            auto const& info = infos.entity_record(entity);
+            auto const& info = infos.entity_record_no_lock(entity);
             if (info.destroyed)
                 continue;
             auto& filter = filters.entity_record(entity);
@@ -102,7 +99,7 @@ namespace neogfx::game
                     ecs().async_destroy_entity(entity, false);
                     break;
                 }
-                set_render_cache_dirty(cache, entity);
+                set_render_cache_dirty_no_lock(cache, entity);
             }
         }
     }

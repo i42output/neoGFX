@@ -221,7 +221,12 @@
     <ClCompile Include="..\..\..\src\project.cpp" />
     <ClCompile Include="..\..\..\src\project_manager.cpp" />
     <ClCompile Include="..\..\..\src\project_model.cpp" />
-    <ClCompile Include="..\..\..\src\settings.cpp" />
+    <ClCompile Include="..\..\..\src\settings.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="..\..\..\src\toolbox_model.cpp">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>

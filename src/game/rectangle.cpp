@@ -29,37 +29,37 @@ namespace neogfx::game
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition.as<float>(), aExtents.as<float>() }, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const neogfx::color& aColor) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ to_ecs_component(aColor), {}, {} } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition.as<float>(), aExtents.as<float>(), material{to_ecs_component(aColor), {}, {}}}, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ {}, {}, {}, to_ecs_component(aTexture) } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition.as<float>(), aExtents.as<float>(), material{ {}, {}, {}, to_ecs_component(aTexture) } }, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ {}, {}, {}, to_ecs_component(aImage) } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition.as<float>(), aExtents.as<float>(), material{ {}, {}, {}, to_ecs_component(aImage) } }, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_texture& aTexture, const rect& aTextureRect) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ {}, {}, {}, to_ecs_component(aTexture, aTextureRect) } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition.as<float>(), aExtents.as<float>(), material{ {}, {}, {}, to_ecs_component(aTexture, aTextureRect) } }, aEcs, id());
         }
 
         rectangle::rectangle(i_ecs& aEcs, const vec3& aPosition, const vec2& aExtents, const i_image& aImage, const rect& aTextureRect) :
             entity{ aEcs, archetype(aEcs).id() }
         {
-            game::rectangle::meta::update(game::rectangle{ aPosition, aExtents, material{ {}, {}, {}, to_ecs_component(aImage, aTextureRect) } }, aEcs, id());
+            game::rectangle::meta::update(game::rectangle{ aPosition.as<float>(), aExtents.as<float>(), material{ {}, {}, {}, to_ecs_component(aImage, aTextureRect) } }, aEcs, id());
         }
 
         rectangle::rectangle(const rectangle& aOther) :

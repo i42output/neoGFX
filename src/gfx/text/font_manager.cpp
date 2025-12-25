@@ -621,9 +621,9 @@ namespace neogfx
                 float const cellHeight = static_cast<float>(font.height());
 
                 vec2f advance = textDirections[startCluster].category != text_category::Emoji ?
-                    vec2{ glyphPosition.x_advance / 64.0, glyphPosition.y_advance / 64.0 }.round() :
-                    vec2{ cellHeight, 0.0 }.round();
-                vec2f const offset = vec2{ glyphPosition.x_offset / 64.0, glyphPosition.y_offset / 64.0 }.round();
+                    vec2{ glyphPosition.x_advance / 64.0, glyphPosition.y_advance / 64.0 }.as<float>().round() :
+                    vec2{ cellHeight, 0.0 }.as<float>().round();
+                vec2f const offset = vec2{ glyphPosition.x_offset / 64.0, glyphPosition.y_offset / 64.0 }.as<float>().round();
 
                 auto& newGlyph = result.emplace_back(
                     shapes.glyph_info(j).codepoint,

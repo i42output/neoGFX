@@ -39,6 +39,7 @@ namespace neogfx
             ~ecs();
         public:
             bool run_threaded(const system_id& aSystemId) const final;
+            bool is_child(const system_id& aSystemId, system_id& aParentSystemId) const final;
         public:
             void destroy_entity(entity_id aEntityId, bool aNotify = true) final;
         public:

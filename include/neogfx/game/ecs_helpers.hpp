@@ -42,8 +42,8 @@ namespace neogfx
         auto const& rectVertices = rect_vertices<vec3f>(aRect, aMeshType, aTransformation);
         aResult.vertices.assign(rectVertices.begin(), rectVertices.end());
         aResult.uv = {
-            vec2f{ 0.0f, 1.0f }, vec2f{ 1.0f, 1.0f }, vec2{ 0.0f, 0.0f },
-            vec2f{ 1.0f, 1.0f }, vec2f{ 1.0f, 0.0f }, vec2{ 0.0f, 0.0f } };
+            vec2f{ 0.0f, 1.0f }, vec2f{ 1.0f, 1.0f }, vec2f{ 0.0f, 0.0f },
+            vec2f{ 1.0f, 1.0f }, vec2f{ 1.0f, 0.0f }, vec2f{ 0.0f, 0.0f } };
         aResult.faces = {
             game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
             game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u } };
@@ -100,8 +100,8 @@ namespace neogfx
                 centeredQuad[0], centeredQuad[1], centeredQuad[2] };
         }
         aResult.uv = {
-            vec2f{ 0.0f, 0.0f }, vec2{ 0.0f, 1.0f }, vec2{ 1.0f, 1.0f },
-            vec2f{ 0.0f, 0.0f }, vec2{ 1.0f, 0.0f }, vec2{ 1.0f, 1.0f } };
+            vec2f{ 0.0f, 0.0f }, vec2f{ 0.0f, 1.0f }, vec2f{ 1.0f, 1.0f },
+            vec2f{ 0.0f, 0.0f }, vec2f{ 1.0f, 0.0f }, vec2f{ 1.0f, 1.0f } };
         aResult.faces = {
             game::face{ aOffset + 0u, aOffset + 1u, aOffset + 2u },
             game::face{ aOffset + 3u, aOffset + 4u, aOffset + 5u } };
@@ -221,7 +221,7 @@ namespace neogfx
             aTexture.type(),
             aTexture.sampling(),
             aTexture.dpi_scale_factor(),
-            aTexture.extents().to_vec2(),
+            aTexture.extents().to_vec2().as<float>(),
             aTexture.type() == texture_type::Texture ? optional_aabb_2df{} : aTexture.as_sub_texture().atlas_location().to_aabb_2df()
         };
     }
@@ -234,7 +234,7 @@ namespace neogfx
             aTexture.type(),
             aTexture.sampling(),
             aTexture.dpi_scale_factor(),
-            aTexture.extents().to_vec2(),
+            aTexture.extents().to_vec2().as<float>(),
             aTextureRect.to_aabb_2df()
         };
     }
@@ -248,7 +248,7 @@ namespace neogfx
             newTexture.type(),
             newTexture.sampling(),
             newTexture.dpi_scale_factor(),
-            newTexture.extents().to_vec2(),
+            newTexture.extents().to_vec2().as<float>(),
             {}
         };
     }
@@ -279,13 +279,13 @@ namespace neogfx
 
     inline game::animation regular_sprite_sheet_to_animation(const vec2u32& aSpriteSheetExtents, const vec2u32& aCells, const vec2u32& aCellIndexTopLeft, const vec2u32& aCellIndexBottomRight, scalar aDefaultDuration = 0.0)
     {
-        vec2 const uvCellExtents{ 1.0 / aCells.as<scalar>().x, 1.0 / aCells.as<scalar>().y };
+        auto const uvCellExtents = vec2{ 1.0 / aCells.as<scalar>().x, 1.0 / aCells.as<scalar>().y }.as<float>();
         game::animation results;
         for (u32 y = aCellIndexTopLeft.y; y <= aCellIndexBottomRight.y; ++y)
         {
             for (u32 x = aCellIndexTopLeft.x; x <= aCellIndexBottomRight.x; ++x)
             {
-                vec2 const uvOffset{ x * uvCellExtents.x, 1.0 - (y + 1) * uvCellExtents.y };
+                auto const uvOffset = vec2{ x * uvCellExtents.x, 1.0 - (y + 1) * uvCellExtents.y }.as<float>();
                 results.frames.push_back(
                     game::animation_frame
                     {
@@ -295,8 +295,8 @@ namespace neogfx
                             {},
                             game::mesh
                             {
-                                { vec3{ -1.0, -1.0, 0.0 }, vec3{ 1.0, -1.0, 0.0 }, vec3{ 1.0, 1.0, 0.0 }, vec3{ -1.0, 1.0, 0.0 } },
-                                { uvOffset, uvOffset + vec2{ uvCellExtents.x, 0.0 }, uvOffset + vec2{ uvCellExtents.x, uvCellExtents.y }, uvOffset + vec2{ 0.0, uvCellExtents.y } },
+                                { vec3f{ -1.0f, -1.0f, 0.0f }, vec3f{ 1.0f, -1.0f, 0.0f }, vec3f{ 1.0f, 1.0f, 0.0f }, vec3f{ -1.0f, 1.0f, 0.0f } },
+                                { uvOffset, uvOffset + vec2f{ uvCellExtents.x, 0.0f }, uvOffset + vec2f{ uvCellExtents.x, uvCellExtents.y }, uvOffset + vec2f{ 0.0f, uvCellExtents.y } },
                                 { game::face{ 3u, 2u, 0u }, game::face{ 2u, 1u, 0u } }
                             }
                         }

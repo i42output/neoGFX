@@ -250,7 +250,7 @@ namespace neogfx
             };
             std::vector<item> items;
         };
-        typedef game::scoped_component_lock<game::entity_info, game::mesh_renderer, game::mesh_render_cache, game::mesh_filter, game::animation_filter, game::rigid_body> ecs_render_lock;
+        typedef game::scoped_component_lock<game::mesh_renderer, game::mesh_render_cache, game::mesh_filter, game::animation_filter, game::rigid_body> ecs_render_lock;
         typedef std::optional<ecs_render_lock> optional_ecs_render_lock;
     public:
         opengl_rendering_context(const i_render_target& aTarget, blending_mode aBlendingMode = blending_mode::Default);

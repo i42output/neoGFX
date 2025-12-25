@@ -22,17 +22,28 @@
 
 #include <neogfx/core/event.hpp>
 #include <neogfx/game/system.hpp>
+#include <neogfx/game/collision_detector.hpp>
+#include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/box_collider.hpp>
-#include <neogfx/game/mesh_filter.hpp>
 #include <neogfx/game/rigid_body.hpp>
+#include <neogfx/game/physics.hpp>
+#include <neogfx/game/time.hpp>
+#include <neogfx/game/clock.hpp>
+#include <neogfx/game/game_world.hpp>
 
 namespace neogfx::game
 {
+    template <typename ColliderType> struct collision_detector_type {};
+    template <> struct collision_detector_type<box_collider_2d> { using detector = collision_detector_2d; };
+    template <> struct collision_detector_type<box_collider_3d> { using detector = collision_detector_3d; };
     template <typename ColliderType>
-    class simple_physics : public game::system<entity_info, rigid_body, ColliderType>
+    using collision_detector_t = typename collision_detector_type<ColliderType>::detector;
+
+    template <typename ColliderType>
+    class simple_physics : public game::system<rigid_body, ColliderType>
     {
     private:
-        using base_type = game::system<entity_info, rigid_body, ColliderType>;
+        using base_type = game::system<rigid_body, ColliderType>;
     public:
         using base_type::cannot_apply;
     public:
@@ -81,6 +92,13 @@ namespace neogfx::game
         };
     private:
         std::chrono::duration<double, std::milli> iYieldTime = std::chrono::duration<double, std::milli>{ 1.0 };
+        neolib::ecs::time& iTime;
+        neolib::ecs::clock& iWorldClock;
+        game_world& iGameWorld;
+        collision_detector_t<ColliderType>& iCollisionDetector;
+        physics& iPhysicalConstants;
+        neolib::ecs::component<neolib::ecs::entity_info>& iInfos;
+        neolib::ecs::component<rigid_body>& iRigidBodies;
     };
 
     using simple_physics_2d = simple_physics<box_collider_2d>;

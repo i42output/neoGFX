@@ -21,26 +21,31 @@
 
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
-#include <neogfx/game/entity_info.hpp>
-#include <neogfx/game/game_world.hpp>
-#include <neogfx/game/clock.hpp>
-#include <neogfx/game/collision_detector.hpp>
-#include <neogfx/game/animator.hpp>
 #include <neogfx/game/mesh_render_cache.hpp>
 #include <neogfx/game/simple_physics.hpp>
-#include <neogfx/game/time.hpp>
-#include <neogfx/game/physics.hpp>
 
 namespace neogfx::game
 {
+    physics& standard_physics(i_ecs& aEcs)
+    {
+        if (!aEcs.shared_component_registered<physics>())
+            aEcs.register_shared_component<physics>();
+        if (aEcs.shared_component<physics>().component_data().empty())
+            aEcs.populate_shared<physics>("Standard Universe", physics{ 6.67408e-11f });
+        return aEcs.shared_component<physics>()[0];
+    }
+
     template <typename ColliderType>
     simple_physics<ColliderType>::simple_physics(i_ecs& aEcs) :
-        system<entity_info, rigid_body, ColliderType>{ aEcs }
+        system<rigid_body, ColliderType>{ aEcs },
+        iTime{ aEcs.system<game::time>() },
+        iWorldClock{ aEcs.shared_component<game::clock>()[0] },
+        iGameWorld{ aEcs.system<game_world>() },
+        iCollisionDetector{ aEcs.system<collision_detector_t<ColliderType>>() },
+        iPhysicalConstants{ standard_physics(aEcs) },
+        iInfos{ aEcs.component<entity_info>() },
+        iRigidBodies{ aEcs.component<rigid_body>() }
     {
-        if (!this->ecs().shared_component_registered<physics>())
-            this->ecs().register_shared_component<physics>();
-        if (this->ecs().shared_component<physics>().component_data().empty())
-            this->ecs().populate_shared<physics>("Standard Universe", physics{ 6.67408e-11f });
         this->start_thread_if();
     }
 
@@ -66,63 +71,57 @@ namespace neogfx::game
     {
         if (!this->can_apply())
             throw cannot_apply();
-        if (!this->ecs().component_instantiated<rigid_body>())
+        if (this->paused())
             return false;
 
         this->start_update();
 
-        std::optional<scoped_component_lock<entity_info, rigid_body>> lock{ this->ecs() };
+        std::optional<scoped_component_lock<rigid_body, ColliderType>> lock{ this->ecs() };
 
-        auto const& time = this->ecs().system<game::time>();
-        auto const now = time.system_time();
-        auto& clock = this->ecs().shared_component<game::clock>();
-        auto& worldClock = clock[0];
-        auto const& physicalConstants = this->ecs().shared_component<physics>()[0];
-        auto const uniformGravity = physicalConstants.uniformGravity != std::nullopt ?
-            *physicalConstants.uniformGravity : vec3f{};
-        auto& infos = this->ecs().component<entity_info>();
-        auto& rigidBodies = this->ecs().component<rigid_body>();
+        auto const now = iTime.system_time();
+        auto const uniformGravity = iPhysicalConstants.uniformGravity != std::nullopt ?
+            *iPhysicalConstants.uniformGravity : vec3f{};
         bool didWork = false;
-        auto currentTimestep = worldClock.timestep;
-        auto nextTime = worldClock.time + currentTimestep;
+        auto currentTimestep = iWorldClock.timestep;
+        auto nextTime = iWorldClock.time + currentTimestep;
         auto startTime = std::chrono::high_resolution_clock::now();
-        while (worldClock.time <= now)
+        while (iWorldClock.time <= now)
         {
             if (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(std::chrono::high_resolution_clock::now() - startTime) > iYieldTime)
             {
-                scoped_component_relock<entity_info, rigid_body> relock{ lock.value() };
+                scoped_component_relock<rigid_body, ColliderType> relock{ lock.value() };
                 this->yield();
                 startTime = std::chrono::high_resolution_clock::now();
             }
             this->start_update(1);
             didWork = true;
-            this->ecs().system<game_world>().ApplyingPhysics(worldClock.time);
+            iGameWorld.ApplyingPhysics(iWorldClock.time);
             this->start_update(2);
-            bool useUniversalGravitation = (universal_gravitation_enabled() && physicalConstants.gravitationalConstant != 0.0);
+            bool useUniversalGravitation = (universal_gravitation_enabled() && iPhysicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
-                rigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
+                iRigidBodies.sort([](const rigid_body& lhs, const rigid_body& rhs) { return lhs.mass > rhs.mass; });
             auto firstMassless = useUniversalGravitation ?
-                std::find_if(rigidBodies.component_data().begin(), rigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; }) :
-                rigidBodies.component_data().begin();
-            for (auto& rigidBody1 : rigidBodies.component_data())
+                std::find_if(iRigidBodies.component_data().begin(), iRigidBodies.component_data().end(), [](const rigid_body& body) { return body.mass == 0.0; }) :
+                iRigidBodies.component_data().begin();
+            for (auto& rigidBody1 : iRigidBodies.component_data())
             {
-                auto entity1 = rigidBodies.entity(rigidBody1);
-                auto const& entity1Info = infos.entity_record(entity1);
+                auto entity1 = iRigidBodies.entity(rigidBody1);
+                auto const& entity1Info = iInfos.entity_record_no_lock(entity1);
                 if (entity1Info.destroyed)
                     continue; // todo: add support for skip iterators
                 vec3f totalForce = rigidBody1.mass * uniformGravity;
                 if (useUniversalGravitation)
                 {
-                    for (auto iterRigidBody2 = rigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
+                    for (auto iterRigidBody2 = iRigidBodies.component_data().begin(); iterRigidBody2 != firstMassless; ++iterRigidBody2)
                     {
                         auto& rigidBody2 = *iterRigidBody2;
-                        auto entity2 = rigidBodies.entity(rigidBody2);
-                        auto const& entity2Info = infos.entity_record(entity2);
+                        auto entity2 = iRigidBodies.entity(rigidBody2);
+                        auto const& entity2Info = iInfos.entity_record(entity2);
                         if (entity2Info.destroyed)
                             continue; // todo: add support for skip iterators
                         vec3f distance = rigidBody1.position - rigidBody2.position;
                         if (distance.magnitude() > 0.0f) // avoid division by zero or rigidBody1 == rigidBody2
-                            totalForce += -physicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0f);
+                            totalForce += -iPhysicalConstants.gravitationalConstant * rigidBody2.mass * rigidBody1.mass * distance / std::pow(distance.magnitude(), 3.0f);
                     }
                 }
                 // GCSE-level physics (Newtonian) going on here... :)
@@ -131,7 +130,7 @@ namespace neogfx::game
                 auto v0 = rigidBody1.velocity;
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
-                auto elapsedTime = static_cast<float>(from_step_time(nextTime - worldClock.time));
+                auto elapsedTime = static_cast<float>(from_step_time(nextTime - iWorldClock.time));
                 rigidBody1.velocity = v0 + ((rigidBody1.mass == 0.0f ? vec3f{} : totalForce / rigidBody1.mass) + 
                     (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3f{ elapsedTime, elapsedTime, elapsedTime });
                 rigidBody1.position = rigidBody1.position + vec3f{ 1.0f, 1.0f, 1.0f }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0f);
@@ -141,16 +140,14 @@ namespace neogfx::game
             }
             this->end_update(2);
             {
-                if (this->ecs().system_instantiated<collision_detector_2d>() && !this->ecs().system<collision_detector_2d>().paused())
-                    this->ecs().system<collision_detector_2d>().run_cycle(collision_detection_cycle::UpdateColliders);
-                if (this->ecs().system_instantiated<animator>() && this->ecs().system<animator>().can_apply())
-                    this->ecs().system<animator>().apply();
-                this->ecs().system<game::time>().apply();
+                iCollisionDetector.apply();
+                iTime.apply();
             }
-            this->ecs().system<game_world>().PhysicsApplied(worldClock.time);
+            iGameWorld.PhysicsApplied(iWorldClock.time);
             shared_component_scoped_lock<game::clock> lockClock{ this->ecs() };
-            worldClock.time = nextTime;
-            currentTimestep = std::min(static_cast<i64>(currentTimestep * worldClock.timestepGrowth), std::max(worldClock.timestep, worldClock.maximumTimestep));
+            iWorldClock.time = nextTime;
+            currentTimestep = std::min(static_cast<i64>(currentTimestep * iWorldClock.timestepGrowth), 
+                std::max(iWorldClock.timestep, iWorldClock.maximumTimestep));
             nextTime += currentTimestep;
             this->end_update(1);
         }

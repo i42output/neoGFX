@@ -92,9 +92,11 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         "010000010"
     };
 
+    auto const& mesh = ng::to_ecs_component(ng::game_rect{ ng::size{ 36.0, 36.0} }.with_centered_origin());
+
     auto spaceship = ecs.create_entity(
         archetypes::spaceship,
-        ng::to_ecs_component(ng::game_rect{ ng::size{ 36.0, 36.0} }.with_centered_origin()),
+        mesh,
         ng::game::mesh_renderer{ 
             ng::game::material
             { 
@@ -116,7 +118,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         {
             { 400.0f, 18.0f, 0.0f }, 1.0f
         },
-        ng::game::box_collider_2d{ 0x1ull });
+        ng::game::box_collider_2d{ 0x1ull, { mesh.vertices.begin(), mesh.vertices.end() } });
 
     // Asteroids...
     auto make_asteroid_mesh = [gameState](ng::scalar w)
@@ -142,13 +144,14 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
         } while (ng::aabb_intersects(
             ng::to_aabb(position, size),
             ng::to_aabb(ecs.component<ng::game::rigid_body>().entity_record(spaceship).position, 36.0f * 3.0f)));
+        auto const& mesh = make_asteroid_mesh(size);
         ecs.async_create_entity(
             archetypes::asteroid,
             ng::game::mesh_renderer
             {
                 ng::game::material{ ng::to_ecs_component(ng::color::from_hsl(gameState->prng(360.0f), 1.0f, 0.75f)) }, {}, 1
             },
-            make_asteroid_mesh(size),
+            mesh,
             ng::game::rigid_body
             {
                 position, 1.0f,
@@ -157,7 +160,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                 {},
                 { 0.0f, 0.0f, ng::to_rad(gameState->prng(90.0f) + 45.0f) * (std::rand() % 2 == 0 ? 1.0f : -1.0f) }
             },
-            ng::game::box_collider_2d{ 0x2ull });
+            ng::game::box_collider_2d{ 0x2ull, { mesh.vertices.begin(), mesh.vertices.end() }});
     };
 
     for (int i = 0; i < 75; ++i)
@@ -372,9 +375,10 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                     auto make_missile = [&](float angle)
                     {
                         auto tm = ng::game::to_transformation_matrix(spaceshipPhysics, false);
-                        auto missile = ecs.create_entity(
+                        auto const& mesh = ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centered_origin());
+                        ecs.async_create_entity(
                             archetypes::missile,
-                            ng::to_ecs_component(ng::rect{ ng::size{ 3.0, 3.0} }.with_centered_origin()),
+                            mesh,
                             ng::game::material{ ng::to_ecs_component(ng::color{ rand() % 160 + 96, rand() % 160 + 96, rand() % 160 + 96 }), {}, {}, {} },
                             ng::game::rigid_body
                             {
@@ -384,7 +388,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                                 {},
                                 spaceshipPhysics.angle + ng::vec3f{ 0.0f, 0.0f, ng::to_rad(angle) }
                             },
-                            ng::game::box_collider_2d{ 0x1ull },
+                            ng::game::box_collider_2d{ 0x1ull, { mesh.vertices.begin(), mesh.vertices.end() } },
                             ng::game::entity_life_span{ ng::game::to_step_time(ecs, 4.0) });
                     };
                     for (float angle = -30.0f; angle <= 30.0f; angle += 10.0f)

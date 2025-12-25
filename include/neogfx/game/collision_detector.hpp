@@ -52,10 +52,10 @@ namespace neogfx::game
     }
 
     template<typename ColliderType, typename BroadphaseTreeType>
-    class collision_detector : public game::system<entity_info, ColliderType>
+    class collision_detector : public game::system<ColliderType>
     {
     private:
-        using base_type = game::system<entity_info, ColliderType>;
+        using base_type = game::system<ColliderType>;
     public:
         define_event(Collision, collision, entity_id, entity_id)
     public:

@@ -506,7 +506,7 @@ namespace neogfx::game
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {
                 auto const& matchInfo = iEcs.component<entity_info>().entity_record(aMatch);
-                if (!matchInfo.destroyed && aColliderPredicate(aMatch, aPoint))
+                if (!matchInfo.destroyed && aColliderPredicate(aMatch, aPoint.as<double>()))
                     aResult.insert(aResult.end(), aMatch);
             });
         }
@@ -516,7 +516,7 @@ namespace neogfx::game
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {
                 auto const& matchInfo = iEcs.component<entity_info>().entity_record(aMatch);
-                if (!matchInfo.destroyed && aColliderPredicate(aMatch, aPoint))
+                if (!matchInfo.destroyed && aColliderPredicate(aMatch, aPoint.as<double>()))
                     aResult.insert(aResult.end(), aMatch);
             });
         }

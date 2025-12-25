@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
         void mutex_contended(neolib::i_lockable& aMutex, const std::chrono::microseconds& aContendedFor,
             neolib::mutex_lock_info const* aPreviousLocks, std::size_t aPreviousLocksCount) noexcept final
         {
-            ng::service<ng::debug::logger>() << "Mutex contended for " << aContendedFor << std::endl;
+            ng::service<ng::debug::logger>() << "Mutex " << typeid(aMutex).name() << " contended for " << aContendedFor << std::endl;
         }
     } sDebugMutexes;
     ng::service<neolib::i_mutex_profiler>().enable(std::chrono::milliseconds{ 1 }, 10u, true);
@@ -1516,8 +1516,8 @@ int main(int argc, char* argv[])
                         ng::game::shape::rectangle
                         {
                             *ecs,
-                            ng::vec3f{},
-                            ng::vec2f{ r.cx, r.cy },
+                            ng::vec3{},
+                            ng::vec2{ r.cx, r.cy },
                             random_color().with_alpha(random_color().red())
                         }.detach();
                     }
@@ -1619,13 +1619,6 @@ int main(int argc, char* argv[])
             window.groupMeshShape.show(mouseOver);
             if (window.groupBox.is_checkable() && window.groupBox.check_box().is_checked())
                 window.update();
-            if (gameEcs)
-            {
-                if (gameEcs->system<ng::game::simple_physics_2d>().can_apply())
-                    gameEcs->system<ng::game::simple_physics_2d>().apply();
-                if (gameEcs->system<ng::game::collision_detector_2d>().can_apply())
-                    gameEcs->system<ng::game::collision_detector_2d>().apply();
-            }
         }, std::chrono::milliseconds{ 1 } };
 
         return app.exec();

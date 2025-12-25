@@ -294,10 +294,10 @@ namespace neogfx
         auto const& firstGlyph = *aBegin;
         auto const& lastGlyph = *std::prev(aEnd);
         quad_2d const quadExtents{ 
-            firstGlyph.cell[0],
-            lastGlyph.cell[1],
-            lastGlyph.cell[3],
-            firstGlyph.cell[3] };
+            firstGlyph.cell[0].as<double>(),
+            lastGlyph.cell[1].as<double>(),
+            lastGlyph.cell[3].as<double>(),
+            firstGlyph.cell[3].as<double>() };
         rect const boundingRect{ to_aabb_2d(quadExtents.begin(), quadExtents.end()) };
         return boundingRect.extents().ceil();
     }

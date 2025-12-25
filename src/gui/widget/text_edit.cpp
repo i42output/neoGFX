@@ -3041,7 +3041,7 @@ namespace neogfx
                                 coordinate offset = (lineEnd != lineStart ? lineStart->cell[0].x : 0.0);
                                 while (next != paragraphLineEnd)
                                 {
-                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0f }, vec2{ offset + availableWidth, 0.0f } }, {} };
+                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset + availableWidth, 0.0 }.as<float>(), vec2{offset + availableWidth, 0.0}.as<float>()}, {}};
                                     auto split = std::lower_bound(next, paragraphLineEnd, key, [](auto const& lhs, auto const& rhs) { return lhs.cell[0].x < rhs.cell[0].x; });
                                     if (split != next)
                                     {
@@ -3087,7 +3087,7 @@ namespace neogfx
                                 coordinate offset = rightmost;
                                 while (next != std::reverse_iterator{ paragraphLineStart })
                                 {
-                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset - availableWidth, 0.0f } }, {} };
+                                    glyph_char const key{ {}, {}, {}, {}, {}, quadf_2d{ vec2{ offset - availableWidth, 0.0 }.as<float>() }, {}};
                                     auto split = std::lower_bound(next, std::reverse_iterator{ paragraphLineStart }, key, [=](auto const& lhs, auto const& rhs) { return offset - lhs.cell[0].x < offset - rhs.cell[0].x; });
                                     if (split != next && (split != std::reverse_iterator{ paragraphLineStart } || static_cast<coordinate>((split - 1)->cell[0].x) + static_cast<coordinate>((split - 1)->cell_extents().x) >= rightmost - offset + availableWidth))
                                         --split;

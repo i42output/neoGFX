@@ -157,7 +157,7 @@ namespace neogfx::nrc
 
     const ui_parser::data_t& ui_parser::do_get_data(const neolib::i_string& aKey) const
     {
-        if (!data_exists(aKey))
+        if (!data_exists(aKey.to_std_string()))
             throw element_data_not_found(aKey.to_std_string());
         auto const cacheKey = std::make_pair(&current_object(), aKey.to_std_string());
         auto const existing = iDataCache.find(cacheKey);
@@ -175,7 +175,7 @@ namespace neogfx::nrc
         
     const ui_parser::array_data_t& ui_parser::do_get_array_data(const neolib::i_string& aKey) const
     {
-        if (!array_data_exists(aKey))
+        if (!array_data_exists(aKey.to_std_string()))
             throw element_data_not_found(aKey.to_std_string());
         auto const cacheKey = std::make_pair(&current_object(), aKey.to_std_string());
         auto const existing = iArrayDataCache.find(cacheKey);
@@ -264,7 +264,7 @@ namespace neogfx::nrc
     void ui_parser::next_header(const i_ui_element& aElement, std::set<std::string>& aHeaders) const
     {
         for (auto const& header : aElement.headers())
-            aHeaders.insert(header);
+            aHeaders.insert(header.to_std_string());
         for (auto const& e : aElement.children())
             next_header(*e, aHeaders);
     }

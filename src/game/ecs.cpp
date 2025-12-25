@@ -44,12 +44,24 @@ namespace neogfx
 
         bool ecs::run_threaded(const system_id& aSystemId) const
         {
-            if (system_instantiated<simple_physics_2d>() || system_instantiated<simple_physics_3d>())
-            {
-                if (aSystemId == time::meta::id() || aSystemId == animator::meta::id())
-                    return false;
-            }
+            system_id ignore;
+            if (is_child(aSystemId, ignore))
+                return false;
             return base_type::run_threaded(aSystemId);
+        }
+
+        bool ecs::is_child(const system_id& aSystemId, system_id& aParentSystemId) const
+        {
+            if (aSystemId == time::meta::id() || aSystemId == collision_detector_2d::meta::id() || aSystemId == collision_detector_3d::meta::id())
+            {
+                if (system_instantiated<simple_physics_2d>())
+                    aParentSystemId = simple_physics_2d::meta::id();
+                else if (system_instantiated<simple_physics_3d>())
+                    aParentSystemId = simple_physics_3d::meta::id();
+                return true;
+            }
+            (void)aParentSystemId;
+            return false;
         }
 
         void ecs::destroy_entity(entity_id aEntityId, bool aNotify)

@@ -58,9 +58,8 @@ namespace neogfx
         uGradientStartFrom = std::holds_alternative<corner>(aGradient.orientation()) ? static_cast<int>(static_variant_cast<corner>(aGradient.orientation())) : -1;
         uGradientSize = aGradient.size();
         uGradientShape = aGradient.shape();
-        basic_vector<float, 2> gradientExponents = (aGradient.exponents() != std::nullopt ? *aGradient.exponents() : vec2{ 2.0, 2.0 });
-        uGradientExponents = vec2f{ gradientExponents.x, gradientExponents.y };
-        basic_point<float> gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
+        uGradientExponents = (aGradient.exponents() != std::nullopt ? aGradient.exponents()->as<float>() : vec2f{2.0f, 2.0f});
+        basic_point<float> const gradientCenter = (aGradient.center() != std::nullopt ? *aGradient.center() : point{});
         uGradientCenter = vec2f{ gradientCenter.x, gradientCenter.y };
         uGradientTile = (aGradient.tile() != std::nullopt);
         if (aGradient.tile() != std::nullopt)

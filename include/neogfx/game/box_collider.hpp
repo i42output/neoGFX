@@ -28,9 +28,13 @@
 
 namespace neogfx::game
 {
+    using vertices = neolib::small_vector<vec3f, 6u>;
+    using vertices_2d = neolib::small_vector<vec2f, 6u>;
+
     struct box_collider_3d
     {
         std::uint64_t mask;
+        vertices hull;
         std::optional<aabbf> untransformedAabb;
         std::optional<aabbf> previousAabb;
         std::optional<aabbf> currentAabb;
@@ -59,10 +63,12 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Uint64;
                 case 1:
+                    return component_data_field_type::Vec3f | component_data_field_type::Array;
                 case 2:
                 case 3:
-                    return component_data_field_type::Aabbf | component_data_field_type::Optional | component_data_field_type::Internal;
                 case 4:
+                    return component_data_field_type::Aabbf | component_data_field_type::Optional | component_data_field_type::Internal;
+                case 5:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
@@ -73,6 +79,7 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Mask",
+                    "Hull",
                     "AABB (Untransformed)",
                     "AABB (Previous)",
                     "AABB (Current)",
@@ -86,6 +93,7 @@ namespace neogfx::game
     struct box_collider_2d
     {
         std::uint64_t mask;
+        vertices_2d hull;
         std::optional<aabb_2df> untransformedAabb;
         std::optional<aabb_2df> previousAabb;
         std::optional<aabb_2df> currentAabb;
@@ -114,10 +122,12 @@ namespace neogfx::game
                 case 0:
                     return component_data_field_type::Uint64;
                 case 1:
+                    return component_data_field_type::Vec2f | component_data_field_type::Array;
                 case 2:
                 case 3:
-                    return component_data_field_type::Aabb2df | component_data_field_type::Optional | component_data_field_type::Internal;
                 case 4:
+                    return component_data_field_type::Aabb2df | component_data_field_type::Optional | component_data_field_type::Internal;
+                case 5:
                     return component_data_field_type::Uint32 | component_data_field_type::Internal;
                 default:
                     throw invalid_field_index();
@@ -128,6 +138,7 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Mask",
+                    "Hull",
                     "AABB (Untransformed)",
                     "AABB (Previous)",
                     "AABB (Current)",
