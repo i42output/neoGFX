@@ -22,7 +22,6 @@
 #include <neogfx/core/async_thread.hpp>
 #include <neogfx/game/ecs.hpp>
 #include <neogfx/game/ecs_helpers.hpp>
-#include <neogfx/game/entity_info.hpp>
 #include <neogfx/game/simple_physics.hpp>
 #include <neogfx/game/collision_detector.hpp>
 
@@ -31,6 +30,9 @@ namespace neogfx::game
     template<typename ColliderType, typename BroadphaseTreeType>
     collision_detector< ColliderType, BroadphaseTreeType>::collision_detector(i_ecs& aEcs) :
         system<ColliderType>{ aEcs },
+        iInfos{ aEcs.component<entity_info>() },
+        iRigidBodies{ aEcs.component<rigid_body>() },
+        iBoxColliders{ aEcs.component<box_collider_type>() },
         iBroadphaseTree{ aEcs },
         iUpdated{ false }
     {
@@ -125,16 +127,13 @@ namespace neogfx::game
         if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
             scoped_component_lock<box_collider_3d, rigid_body> lock{ this->ecs() };
-            auto const& infos = this->ecs().component<entity_info>();
-            auto const& rigidBodies = this->ecs().component<rigid_body>();
-            auto& boxColliders = this->ecs().component<box_collider_3d>();
-            for (auto entity : boxColliders.entities())
+            for (auto entity : iBoxColliders.entities())
             {
-                auto const& info = infos.entity_record_no_lock(entity);
+                auto const& info = iInfos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
-                auto const& rigidBody = rigidBodies.entity_record(entity);
-                auto& collider = boxColliders.entity_record(entity);
+                auto const& rigidBody = iRigidBodies.entity_record(entity);
+                auto& collider = iBoxColliders.entity_record(entity);
                 collider.previousAabb = collider.currentAabb;
                 if (!collider.untransformedAabb)
                     collider.untransformedAabb = to_aabb(collider.hull);
@@ -147,16 +146,13 @@ namespace neogfx::game
         else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
             scoped_component_lock<box_collider_2d, rigid_body> lock{ this->ecs() };
-            auto const& infos = this->ecs().component<entity_info>();
-            auto const& rigidBodies = this->ecs().component<rigid_body>();
-            auto& boxColliders = this->ecs().component<box_collider_2d>();
-            for (auto entity : boxColliders.entities())
+            for (auto entity : iBoxColliders.entities())
             {
-                auto const& info = infos.entity_record_no_lock(entity);
+                auto const& info = iInfos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
-                auto const& rigidBody = rigidBodies.entity_record(entity);
-                auto& collider = boxColliders.entity_record(entity);
+                auto const& rigidBody = iRigidBodies.entity_record(entity);
+                auto& collider = iBoxColliders.entity_record(entity);
                 collider.previousAabb = collider.currentAabb;
                 if (!collider.untransformedAabb)
                     collider.untransformedAabb = to_aabb_2d(collider.hull);

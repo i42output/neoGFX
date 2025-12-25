@@ -24,6 +24,8 @@
 #include <neogfx/game/system.hpp>
 #include <neogfx/game/aabb_quadtree.hpp>
 #include <neogfx/game/aabb_octree.hpp>
+#include <neogfx/game/entity_info.hpp>
+#include <neogfx/game/rigid_body.hpp>
 #include <neogfx/game/box_collider.hpp>
 
 namespace neogfx::game
@@ -60,6 +62,7 @@ namespace neogfx::game
         define_event(Collision, collision, entity_id, entity_id)
     public:
         using base_type::cannot_apply;
+        using box_collider_type = ColliderType;
     public:
         using broadphase_tree_type = BroadphaseTreeType;
     public:
@@ -83,6 +86,9 @@ namespace neogfx::game
         void update_broadphase();
         void detect_collisions();
     private:
+        neolib::ecs::component<neolib::ecs::entity_info>& iInfos;
+        neolib::ecs::component<rigid_body>& iRigidBodies;
+        neolib::ecs::component<box_collider_type>& iBoxColliders;
         broadphase_tree_type iBroadphaseTree;
         std::atomic<bool> iUpdated;
     };
