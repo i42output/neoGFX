@@ -98,7 +98,7 @@ namespace neogfx::game
 
     inline mat44f to_transformation_matrix(const game::rigid_body& aRigidBody, bool aIncludeTranslation = true)
     {
-        float az = aRigidBody.angle.z;
+        float const az = aRigidBody.angle.z;
         // todo: following rotation is 2D, make it 3D...
         return aIncludeTranslation ?
             mat44

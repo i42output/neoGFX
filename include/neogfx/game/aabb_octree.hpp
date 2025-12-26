@@ -230,7 +230,7 @@ namespace neogfx::game
             void visit(const neogfx::aabbf& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
-                    if (aabb_intersects(aAabb, iTree.iEcs.component<collider_type>().entity_record(e).currentAabb))
+                    if (aabb_intersects(aAabb, iTree.iColliders.entity_record(e).currentAabb))
                         aVisitor(e);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
@@ -253,8 +253,8 @@ namespace neogfx::game
             void visit(const neogfx::aabb_2df& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
-                    if (iTree.iEcs.component<collider_type>().entity_record(e).currentAabb &&
-                        aabb_intersects(aAabb, aabb_2df{ *iTree.iEcs.component<collider_type>().entity_record(e).currentAabb }))
+                    if (iTree.iColliders.entity_record(e).currentAabb &&
+                        aabb_intersects(aAabb, aabb_2df{ *iTree.iColliders.entity_record(e).currentAabb }))
                         aVisitor(e);
                 if (has_child<0, 0, 0>() && aabb_intersects(iOctants2d[0][0][0], aAabb))
                     child<0, 0, 0>().visit(aAabb, aVisitor);
@@ -379,7 +379,7 @@ namespace neogfx::game
             {
                 for (auto e : entities())
                 {
-                    auto const& collider = iTree.iEcs.component<collider_type>().entity_record(e);
+                    auto const& collider = iTree.iColliders.entity_record(e);
                     if (aabb_intersects(iOctants[0][0][0], collider.currentAabb))
                         child<0, 0, 0>().add_entity(e, collider);
                     if (aabb_intersects(iOctants[0][0][1], collider.currentAabb))
@@ -435,9 +435,11 @@ namespace neogfx::game
         };
         typedef typename allocator_type::template rebind<node>::other node_allocator;
     public:
-        aabb_octree(i_ecs& iEcs, const aabbf& aRootAabb = aabbf{ vec3{-4096.0f, -4096.0f, -4096.0f}, vec3{4096.0f, 4096.0f, 4096.0f} }, float aMinimumOctantSize = 16.0f, const allocator_type& aAllocator = allocator_type{}) :
+        aabb_octree(i_ecs& aEcs, const aabbf& aRootAabb = aabbf{ vec3{-4096.0f, -4096.0f, -4096.0f}, vec3{4096.0f, 4096.0f, 4096.0f} }, float aMinimumOctantSize = 16.0f, const allocator_type& aAllocator = allocator_type{}) :
             iAllocator{ aAllocator },
-            iEcs{ iEcs },
+            iEcs{ aEcs },
+            iInfos{ aEcs.component<entity_info>() },
+            iColliders{ aEcs.component<collider_type>() },
             iRootAabb{ aRootAabb },
             iCount{ 0 },
             iDepth{ 0 },
@@ -456,13 +458,12 @@ namespace neogfx::game
             iDepth = 0;
             iRootNode.~node();
             new(&iRootNode) node{ *this, iRootAabb };
-            auto const& infos = iEcs.component<game::entity_info>();
-            for (auto entity : iEcs.component<collider_type>().entities())
+            for (auto entity : iColliders.entities())
             {
-                auto const& info = infos.entity_record_no_lock(entity);
+                auto const& info = iInfos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
-                auto& collider = iEcs.component<collider_type>().entity_record(entity);
+                auto& collider = iColliders.entity_record(entity);
                 iRootNode.add_entity(entity, collider);
             }
         }
@@ -473,12 +474,12 @@ namespace neogfx::game
         template <typename CollisionAction>
         void collisions(CollisionAction aCollisionAction) const
         {
-            for (auto candidate : iEcs.component<collider_type>().entities())
+            for (auto candidate : iColliders.entities())
             {
-                auto const& candidateInfo = iEcs.component<entity_info>().entity_record(candidate);
+                auto const& candidateInfo = iInfos.entity_record(candidate);
                 if (candidateInfo.destroyed)
                     continue;
-                auto& candidateCollider = iEcs.component<collider_type>().entity_record(candidate);
+                auto& candidateCollider = iColliders.entity_record(candidate);
                 if (++iCollisionUpdateId == 0)
                     iCollisionUpdateId = 1;
                 iRootNode.visit(candidateCollider, [&](entity_id aHit)
@@ -487,10 +488,10 @@ namespace neogfx::game
                         return;
                     if (candidate < aHit)
                     {
-                        auto const& hitInfo = iEcs.component<entity_info>().entity_record(aHit);
+                        auto const& hitInfo = iInfos.entity_record(aHit);
                         if (hitInfo.destroyed)
                             return;
-                        auto& hitCollider = iEcs.component<collider_type>().entity_record(aHit);
+                        auto& hitCollider = iColliders.entity_record(aHit);
                         if ((candidateCollider.mask & hitCollider.mask) == 0 && hitCollider.collisionEventId != iCollisionUpdateId)
                         {
                             hitCollider.collisionEventId = iCollisionUpdateId;
@@ -505,7 +506,7 @@ namespace neogfx::game
         {
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {
-                auto const& matchInfo = iEcs.component<entity_info>().entity_record(aMatch);
+                auto const& matchInfo = iInfos.entity_record(aMatch);
                 if (!matchInfo.destroyed && aColliderPredicate(aMatch, aPoint.as<double>()))
                     aResult.insert(aResult.end(), aMatch);
             });
@@ -515,7 +516,7 @@ namespace neogfx::game
         {
             iRootNode.visit(aPoint, [&](entity_id aMatch)
             {
-                auto const& matchInfo = iEcs.component<entity_info>().entity_record(aMatch);
+                auto const& matchInfo = iInfos.entity_record(aMatch);
                 if (!matchInfo.destroyed && aColliderPredicate(aMatch, aPoint.as<double>()))
                     aResult.insert(aResult.end(), aMatch);
             });
@@ -568,6 +569,8 @@ namespace neogfx::game
     private:
         node_allocator iAllocator;
         i_ecs& iEcs;
+        component<entity_info>& iInfos;
+        component<collider_type>& iColliders;
         aabbf iRootAabb;
         float iMinimumOctantSize;
         std::uint32_t iCount;

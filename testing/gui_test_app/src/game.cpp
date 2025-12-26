@@ -207,6 +207,19 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                 gameState->autoFire = !gameState->autoFire;
         });
     }
+    ng::service<ng::i_keyboard>().key_pressed([&, gameState](ng::scan_code_e aScanCode, ng::key_code_e aKeyCode, ng::key_modifier)
+        {
+            if (aKeyCode == ng::KeyCode_g)
+                gameState->showAabbGrid = !gameState->showAabbGrid;
+            else if (aKeyCode == ng::KeyCode_m)
+                gameState->showMetrics = !gameState->showMetrics;
+            else if (aKeyCode == ng::KeyCode_t)
+            {
+                gameState->timeUpdates = !gameState->timeUpdates;
+                ecs.system<ng::game::simple_physics_2d>().set_debug(gameState->timeUpdates);
+                ecs.system<ng::game::collision_detector_2d>().set_debug(gameState->timeUpdates);
+            }
+        });
 
     ng::font debugFont{ "SnareDrum Two NBP", "Regular", 30.0 };
     ng::font clockFont{ "SnareDrum Two NBP", "Regular", 40.0 };

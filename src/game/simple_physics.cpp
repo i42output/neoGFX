@@ -86,17 +86,10 @@ namespace neogfx::game
         bool didWork = false;
         auto currentTimestep = iWorldClock.timestep;
         auto nextTime = iWorldClock.time + currentTimestep;
-        auto startTime = std::chrono::high_resolution_clock::now();
         while (iWorldClock.time <= now)
         {
-            if (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(std::chrono::high_resolution_clock::now() - startTime) > iYieldTime)
-            {
-                scoped_component_relock relock{ *lock };
-                this->yield();
-                startTime = std::chrono::high_resolution_clock::now();
-            }
-            this->start_update(1);
             didWork = true;
+            this->start_update(1);
             iGameWorld.ApplyingPhysics(iWorldClock.time);
             this->start_update(2);
             bool useUniversalGravitation = (universal_gravitation_enabled() && iPhysicalConstants.gravitationalConstant != 0.0);
