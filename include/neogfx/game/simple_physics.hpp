@@ -46,6 +46,7 @@ namespace neogfx::game
         using base_type = game::system<rigid_body, ColliderType>;
     public:
         using base_type::cannot_apply;
+        using collider_type = ColliderType;
     public:
         simple_physics(i_ecs& aEcs);
         ~simple_physics();
@@ -99,6 +100,7 @@ namespace neogfx::game
         physics& iPhysicalConstants;
         neolib::ecs::component<neolib::ecs::entity_info>& iInfos;
         neolib::ecs::component<rigid_body>& iRigidBodies;
+        neolib::ecs::component<collider_type>& iColliders;
     };
 
     using simple_physics_2d = simple_physics<box_collider_2d>;

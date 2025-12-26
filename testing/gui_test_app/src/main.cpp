@@ -1504,7 +1504,7 @@ int main(int argc, char* argv[])
                     ecs->system<ng::game::animator>().resume();
                 }
                 auto const meshesWanted = window.sliderShapeCount.value();
-                ng::game::scoped_component_lock<ng::game::mesh_filter> lock{ *ecs };
+                ng::game::scoped_component_data_lock<ng::game::mesh_filter> lock{ *ecs };
                 auto& meshFilterComponent = ecs->component<ng::game::mesh_filter>();
                 auto& meshFilters = meshFilterComponent.component_data();
                 auto const& instancingRect = window.pageInstancing.client_rect().as<float>();

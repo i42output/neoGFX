@@ -52,7 +52,7 @@ namespace neogfx::game
 
         if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
-            scoped_component_lock<box_collider_3d> lock{ this->ecs() };
+            scoped_component_data_lock<box_collider_3d> lock{ this->ecs() };
             thread_local std::vector<entity_id> hits;
             hits.clear();
             iBroadphaseTree.pick(aPoint, hits);
@@ -61,7 +61,7 @@ namespace neogfx::game
         }
         else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
-            scoped_component_lock<box_collider_2d> lock{ this->ecs() };
+            scoped_component_data_lock<box_collider_2d> lock{ this->ecs() };
             thread_local std::vector<entity_id> hits;
             hits.clear();
             iBroadphaseTree.pick(aPoint.xy, hits);
@@ -111,7 +111,7 @@ namespace neogfx::game
         }
         if (!iUpdated)
             return;
-        scoped_component_lock<ColliderType> lock{ this->ecs() };
+        scoped_component_lock lock{ iBoxColliders };
         if ((aCycle & collision_detection_cycle::UpdateTrees) == collision_detection_cycle::UpdateTrees)
             update_broadphase();
         if ((aCycle & collision_detection_cycle::DetectCollisions) == collision_detection_cycle::DetectCollisions)
@@ -126,7 +126,7 @@ namespace neogfx::game
 
         if constexpr (std::is_same_v<ColliderType, box_collider_3d>)
         {
-            scoped_component_lock<box_collider_3d, rigid_body> lock{ this->ecs() };
+            scoped_component_lock lock{ iBoxColliders, iRigidBodies };
             for (auto entity : iBoxColliders.entities())
             {
                 auto const& info = iInfos.entity_record_no_lock(entity);
@@ -145,7 +145,7 @@ namespace neogfx::game
         }
         else if constexpr (std::is_same_v<ColliderType, box_collider_2d>)
         {
-            scoped_component_lock<box_collider_2d, rigid_body> lock{ this->ecs() };
+            scoped_component_lock lock{ iBoxColliders, iRigidBodies };
             for (auto entity : iBoxColliders.entities())
             {
                 auto const& info = iInfos.entity_record_no_lock(entity);
@@ -169,7 +169,7 @@ namespace neogfx::game
     template<typename ColliderType, typename BroadphaseTreeType>
     void collision_detector<ColliderType, BroadphaseTreeType>::update_broadphase()
     {
-        scoped_component_lock<ColliderType> lock{ this->ecs() };
+        scoped_component_lock lock{ iBoxColliders };
         iBroadphaseTree.full_update();
     }
 
@@ -179,7 +179,7 @@ namespace neogfx::game
         if (!this->components_available())
             return;
 
-        scoped_component_lock<ColliderType> lock{ this->ecs() };
+        scoped_component_lock lock{ iBoxColliders };
         iBroadphaseTree.collisions([this](entity_id e1, entity_id e2)
         {
             Collision(e1, e2);

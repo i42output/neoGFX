@@ -69,7 +69,7 @@ namespace video_poker
                 ng::text_format{aColor, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } },
                 ng::alignment::Center}
         {
-            ng::game::scoped_component_lock<ng::game::mesh_renderer, ng::game::entity_info, ng::game::rigid_body> lock{ aCanvas.ecs() };
+            ng::game::scoped_component_data_lock<ng::game::mesh_renderer, ng::game::entity_info, ng::game::rigid_body> lock{ aCanvas.ecs() };
             aCanvas.ecs().component<ng::game::mesh_renderer>().entity_record(id()).layer = 1; 
             aCanvas.ecs().populate(id(), ng::game::entity_life_span{ ng::game::to_step_time(aCanvas.ecs(), 10.0) });
             auto const& boundingBox = ng::game::bounding_rect(*aCanvas.ecs().component<ng::game::mesh_filter>().entity_record(id()).mesh);

@@ -1744,7 +1744,7 @@ namespace neogfx
         }
         if (!tDrawables[aLayer].empty())
         {
-            neolib::ecs::scoped_component_relock<game::rigid_body> relock{ tLock.value() };
+            neolib::ecs::scoped_component_data_relock<game::rigid_body> relock{ tLock.value() };
             draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), &*tDrawables[aLayer].begin(), &*tDrawables[aLayer].begin() + tDrawables[aLayer].size(), aTransformation);
         }
         if (aLayer >= tMaxLayer)

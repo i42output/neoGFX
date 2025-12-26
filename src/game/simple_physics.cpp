@@ -44,7 +44,8 @@ namespace neogfx::game
         iCollisionDetector{ aEcs.system<collision_detector_t<ColliderType>>() },
         iPhysicalConstants{ standard_physics(aEcs) },
         iInfos{ aEcs.component<entity_info>() },
-        iRigidBodies{ aEcs.component<rigid_body>() }
+        iRigidBodies{ aEcs.component<rigid_body>() },
+        iColliders{ aEcs.component<collider_type>() }
     {
         this->start_thread_if();
     }
@@ -76,7 +77,8 @@ namespace neogfx::game
 
         this->start_update();
 
-        std::optional<scoped_component_lock<rigid_body, ColliderType>> lock{ this->ecs() };
+        std::optional<scoped_component_lock<decltype(iRigidBodies), decltype(iColliders)>> lock;
+        lock.emplace(iRigidBodies, iColliders);
 
         auto const now = iTime.system_time();
         auto const uniformGravity = iPhysicalConstants.uniformGravity != std::nullopt ?
@@ -89,7 +91,7 @@ namespace neogfx::game
         {
             if (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(std::chrono::high_resolution_clock::now() - startTime) > iYieldTime)
             {
-                scoped_component_relock<rigid_body, ColliderType> relock{ lock.value() };
+                scoped_component_relock relock{ *lock };
                 this->yield();
                 startTime = std::chrono::high_resolution_clock::now();
             }
@@ -144,7 +146,7 @@ namespace neogfx::game
                 iTime.apply();
             }
             iGameWorld.PhysicsApplied(iWorldClock.time);
-            shared_component_scoped_lock<game::clock> lockClock{ this->ecs() };
+            scoped_shared_component_data_lock<game::clock> lockClock{ this->ecs() };
             iWorldClock.time = nextTime;
             currentTimestep = std::min(static_cast<i64>(currentTimestep * iWorldClock.timestepGrowth), 
                 std::max(iWorldClock.timestep, iWorldClock.maximumTimestep));

@@ -74,7 +74,7 @@ namespace neogfx::game
 
         Animate(now);
 
-        scoped_component_lock<animation_filter> lock{ ecs() };
+        scoped_component_data_lock<animation_filter> lock{ ecs() };
 
         auto& infos = ecs().component<entity_info>();
         auto& filters = ecs().component<animation_filter>();

@@ -66,7 +66,7 @@ namespace neogfx
 
         void ecs::destroy_entity(entity_id aEntityId, bool aNotify)
         {
-            scoped_component_lock<mesh_render_cache> lock{ *this };
+            scoped_component_data_lock<mesh_render_cache> lock{ *this };
             if (component<mesh_render_cache>().has_entity_record(aEntityId) && service<i_rendering_engine>().vertex_buffer_allocated(*this))
             {
                 auto const& cacheEntry = component<mesh_render_cache>().entity_record(aEntityId);

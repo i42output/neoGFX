@@ -238,7 +238,7 @@ namespace neogfx::game
             if (have_ecs() && ecs().component_registered<mesh_renderer>())
             {
                 aGc.clear_depth_buffer();
-                scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+                scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
                 RenderingEntities(aGc, 0);
                 aGc.draw_entities(ecs());
                 EntitiesRendered(aGc, 0);
@@ -249,7 +249,7 @@ namespace neogfx::game
         {
             if (have_ecs() && ecs().component_registered<mesh_renderer>())
             {
-                scoped_component_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+                scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
                 for (scene_layer layer = 1; layer < layers(); ++layer)
                 {
                     if (!layer_visible(layer))
