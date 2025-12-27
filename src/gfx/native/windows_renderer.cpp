@@ -325,7 +325,10 @@ namespace neogfx
 
             deallocate_offscreen_window(iPreviousActiveTarget);
 
-            current_target()->activate_target();
+            auto currentTarget = current_target();
+
+            if (currentTarget)
+                currentTarget->activate_target();
 
             //if constexpr (!ndebug)
             //    service<debug::logger>() << neolib::logger::severity::Debug << "renderer: context deactivated" << std::endl;
