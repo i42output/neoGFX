@@ -132,13 +132,16 @@ namespace neogfx::game
                 auto const& info = iInfos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
-                auto const& rigidBody = iRigidBodies.entity_record(entity);
-                auto& collider = iBoxColliders.entity_record(entity);
+                auto& collider = iBoxColliders.entity_record_no_lock(entity);
                 collider.previousAabb = collider.currentAabb;
                 if (!collider.untransformedAabb)
                     collider.untransformedAabb = to_aabb(collider.hull);
-                collider.currentAabb = aabb_transform(*collider.untransformedAabb,
-                    to_transformation_matrix(rigidBody));
+                if (iRigidBodies.has_entity_record_no_lock(entity))
+                {
+                    auto const& rigidBody = iRigidBodies.entity_record_no_lock(entity);
+                    collider.currentAabb = aabb_transform(*collider.untransformedAabb,
+                        to_transformation_matrix(rigidBody));
+                }
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
@@ -151,13 +154,16 @@ namespace neogfx::game
                 auto const& info = iInfos.entity_record_no_lock(entity);
                 if (info.destroyed)
                     continue;
-                auto const& rigidBody = iRigidBodies.entity_record(entity);
-                auto& collider = iBoxColliders.entity_record(entity);
+                auto& collider = iBoxColliders.entity_record_no_lock(entity);
                 collider.previousAabb = collider.currentAabb;
                 if (!collider.untransformedAabb)
                     collider.untransformedAabb = to_aabb_2d(collider.hull);
-                collider.currentAabb = aabb_transform(*collider.untransformedAabb,
-                    to_transformation_matrix(rigidBody));
+                if (iRigidBodies.has_entity_record_no_lock(entity))
+                {
+                    auto const& rigidBody = iRigidBodies.entity_record_no_lock(entity);
+                    collider.currentAabb = aabb_transform(*collider.untransformedAabb,
+                        to_transformation_matrix(rigidBody));
+                }
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
             }
