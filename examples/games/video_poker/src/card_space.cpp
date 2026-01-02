@@ -111,6 +111,8 @@ namespace video_poker
                 { 0.0, extents().cy * kBridgeCardSize.cx / kBridgeCardSize.cy, 0.0, 0.0 },
                 { 0.0, 0.0, 1.0, 0.0 },
                 { xy.x, xy.y, 0.8, 1.0 } };
+            auto& hull = iCanvas.ecs().component<ng::game::box_collider_2d>().entity_record(iCardSprite);
+            hull.transformation = meshFilter.transformation;
             ng::game::set_render_cache_dirty(iCanvas.ecs(), iCardSprite);
             iCanvas.update();
         }

@@ -192,8 +192,11 @@ namespace neogfx::game
             void visit(const aabb_2df& aAabb, const Visitor& aVisitor) const
             {
                 for (auto e : entities())
-                    if (aabb_intersects(aAabb, iTree.iColliders.entity_record(e).currentAabb))
+                {
+                    auto const& aabb = iTree.iColliders.entity_record(e).currentAabb;
+                    if (aabb_intersects(aAabb, aabb))
                         aVisitor(e);
+                }
                 if (has_child<0, 0>() && aabb_intersects(iQuadrants[0][0], aAabb))
                     child<0, 0>().visit(aAabb, aVisitor);
                 if (has_child<0, 1>() && aabb_intersects(iQuadrants[0][1], aAabb))

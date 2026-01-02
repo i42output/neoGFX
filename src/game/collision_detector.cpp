@@ -139,8 +139,17 @@ namespace neogfx::game
                 if (iRigidBodies.has_entity_record_no_lock(entity))
                 {
                     auto const& rigidBody = iRigidBodies.entity_record_no_lock(entity);
-                    collider.currentAabb = aabb_transform(*collider.untransformedAabb,
-                        to_transformation_matrix(rigidBody));
+                    if (collider.transformation.has_value())
+                        collider.currentAabb = aabb_transform(*collider.untransformedAabb, *collider.transformation * to_transformation_matrix(rigidBody));
+                    else
+                        collider.currentAabb = aabb_transform(*collider.untransformedAabb, to_transformation_matrix(rigidBody));
+                }
+                else
+                {
+                    if (collider.transformation.has_value())
+                        collider.currentAabb = aabb_transform(*collider.untransformedAabb, *collider.transformation);
+                    else
+                        collider.currentAabb = collider.untransformedAabb;
                 }
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;
@@ -161,8 +170,17 @@ namespace neogfx::game
                 if (iRigidBodies.has_entity_record_no_lock(entity))
                 {
                     auto const& rigidBody = iRigidBodies.entity_record_no_lock(entity);
-                    collider.currentAabb = aabb_transform(*collider.untransformedAabb,
-                        to_transformation_matrix(rigidBody));
+                    if (collider.transformation.has_value())
+                        collider.currentAabb = aabb_transform(*collider.untransformedAabb, *collider.transformation * to_transformation_matrix(rigidBody));
+                    else
+                        collider.currentAabb = aabb_transform(*collider.untransformedAabb, to_transformation_matrix(rigidBody));
+                }
+                else
+                {
+                    if (collider.transformation.has_value())
+                        collider.currentAabb = aabb_transform(*collider.untransformedAabb, *collider.transformation);
+                    else
+                        collider.currentAabb = collider.untransformedAabb;
                 }
                 if (!collider.previousAabb)
                     collider.previousAabb = collider.currentAabb;

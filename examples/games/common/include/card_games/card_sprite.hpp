@@ -143,7 +143,7 @@ namespace neogames
             for (auto const& r : faceTextureRects)
                 ng::add_patch(mesh, meshRenderer, r.first, aCardTextures.face_texture(aCard), r.second ? uvRotate180 : ng::mat33::identity());
 
-            return aEcs.create_entity(cardArchetype, ng::game::box_collider_2d{}, ng::game::mesh_filter{ {}, mesh, {} }, meshRenderer);
+            return aEcs.create_entity(cardArchetype, ng::game::box_collider_2d{ {}, { cardBackgroundVertices.begin(), cardBackgroundVertices.end() } }, ng::game::mesh_filter{{}, mesh, {}}, meshRenderer);
         }
     }
 }
