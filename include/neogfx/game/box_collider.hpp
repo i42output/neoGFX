@@ -83,7 +83,7 @@ namespace neogfx::game
                 {
                     "Mask",
                     "Hull",
-                    "Transformation Matrix",
+                    "Transformation",
                     "AABB (Untransformed)",
                     "AABB (Previous)",
                     "AABB (Current)",
