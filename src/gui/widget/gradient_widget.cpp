@@ -303,9 +303,9 @@ namespace neogfx
             {
                 auto& stop = *static_variant_cast<gradient::color_stop_list::iterator>(stopIter);
                 sRGB_color const originalColor = stop.second();
-                color_dialog cd{ *this, stop.second() };
+                auto cd = std::make_unique<color_dialog>(*this, stop.second());
                 if (iCustomColors != std::nullopt)
-                    cd.set_custom_colors(*iCustomColors);
+                    cd->set_custom_colors(*iCustomColors);
                 auto update_stop = [&](color updatedColor)
                 {
                     auto const color = updatedColor;
@@ -321,15 +321,15 @@ namespace neogfx
                     update();
                     GradientChanged();
                 };
-                cd.SelectionChanged([&]()
+                cd->SelectionChanged([&]()
                 {
-                    update_stop(cd.selected_color());
+                    update_stop(cd->selected_color());
                 });
-                if (cd.exec() == dialog_result::Accepted)
-                    update_stop(cd.selected_color());
+                if (cd->exec() == dialog_result::Accepted)
+                    update_stop(cd->selected_color());
                 else
                     update_stop(originalColor);
-                iCustomColors = cd.custom_colors();
+                iCustomColors = cd->custom_colors();
             }
             else if (std::holds_alternative<gradient::alpha_stop_list::iterator>(stopIter))
             {
@@ -354,19 +354,19 @@ namespace neogfx
             moreAction->Triggered([this]()
             {
                 neogfx::gradient const originalGradient = gradient();
-                gradient_dialog gd{ *this, gradient() };
+                auto gd = std::make_unique<gradient_dialog>(*this, gradient());
                 if (iCustomColors != std::nullopt)
-                    gd.gradient_selector().custom_colors() = iCustomColors;
-                gd.gradient_selector().GradientChanged([&]()
+                    gd->gradient_selector().custom_colors() = iCustomColors;
+                gd->gradient_selector().GradientChanged([&]()
                 {
-                    set_gradient(gd.gradient_selector().gradient());
+                    set_gradient(gd->gradient_selector().gradient());
                 });
-                if (gd.exec() == dialog_result::Accepted)
-                    set_gradient(gd.gradient());
+                if (gd->exec() == dialog_result::Accepted)
+                    set_gradient(gd->gradient());
                 else
                     set_gradient(originalGradient);
-                if (gd.gradient_selector().custom_colors() != std::nullopt)
-                    iCustomColors = gd.gradient_selector().custom_colors();
+                if (gd->gradient_selector().custom_colors() != std::nullopt)
+                    iCustomColors = gd->gradient_selector().custom_colors();
             });
             auto stopIter = stop_at(aPosition);
             if (!std::holds_alternative<std::monostate>(stopIter) && stopIter == stop_at(*iClicked))
@@ -379,9 +379,9 @@ namespace neogfx
                     {
                         auto& stop = *iter;
                         sRGB_color const originalColor = stop.second();
-                        color_dialog cd{ *this, stop.second() };
+                        auto cd = std::make_unique<color_dialog>(*this, stop.second());
                         if (iCustomColors != std::nullopt)
-                            cd.set_custom_colors(*iCustomColors);
+                            cd->set_custom_colors(*iCustomColors);
                         auto update_stop = [&](color updatedColor)
                         {
                             auto const color = updatedColor;
@@ -397,15 +397,15 @@ namespace neogfx
                             update();
                             GradientChanged();
                         };
-                        cd.SelectionChanged([&]()
+                        cd->SelectionChanged([&]()
                         {
-                            update_stop(cd.selected_color());
+                            update_stop(cd->selected_color());
                         });
-                        if (cd.exec() == dialog_result::Accepted)
-                            update_stop(cd.selected_color());
+                        if (cd->exec() == dialog_result::Accepted)
+                            update_stop(cd->selected_color());
                         else
                             update_stop(originalColor);
-                        iCustomColors = cd.custom_colors();
+                        iCustomColors = cd->custom_colors();
                     });
                     auto splitStopAction = make_ref<action>("Split stop"_t);
                     splitStopAction->Triggered([this, iter]()
