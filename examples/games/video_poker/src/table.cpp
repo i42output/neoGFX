@@ -70,8 +70,8 @@ namespace video_poker
                 ng::alignment::Center}
         {
             ng::game::scoped_component_data_lock<ng::game::mesh_renderer, ng::game::entity_info, ng::game::rigid_body> lock{ aCanvas.ecs() };
-            aCanvas.ecs().component<ng::game::mesh_renderer>().entity_record(id()).layer = 1; 
-            aCanvas.ecs().populate(id(), ng::game::entity_life_span{ ng::game::to_step_time(aCanvas.ecs(), 10.0) });
+            aCanvas.ecs().component<ng::game::mesh_renderer>().entity_record(id()).layer = 1;
+            aCanvas.ecs().populate(id(), ng::game::entity_life_span{ ng::game::to_step_time(aCanvas.ecs(), 3.0) });
             auto const& boundingBox = ng::game::bounding_rect(*aCanvas.ecs().component<ng::game::mesh_filter>().entity_record(id()).mesh);
             aCanvas.ecs().populate(id(), ng::game::rigid_body{ 
                 ng::vec3{ (aCanvas.extents().cx - boundingBox.cx) / 2.0, (aCanvas.extents().cy - boundingBox.cy) / 2.0, 0.9 }, 

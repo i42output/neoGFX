@@ -181,6 +181,7 @@ namespace neogfx
             game::mesh_renderer const* renderer;
             optional_mat44f transformation;
             game::entity_id entity;
+            bool debug = false;
             mesh_drawable(
                 game::mesh_filter const& filter, 
                 game::mesh_renderer const& renderer,

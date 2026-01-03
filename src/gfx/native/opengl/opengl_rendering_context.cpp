@@ -1740,6 +1740,8 @@ namespace neogfx
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                     tDrawables[meshRenderer.layer].back().transformation = transformation;
                 }
+                if (info.debug)
+                    tDrawables[meshRenderer.layer].back().debug = true;
             }
         }
         if (!tDrawables[aLayer].empty())

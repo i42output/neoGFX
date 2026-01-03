@@ -96,7 +96,7 @@ namespace neogfx::game
                 filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
                 if (filter.currentFrame == 0 && filter.autoDestroy)
                 {
-                    ecs().async_destroy_entity(entity, false);
+                    ecs().async_destroy_entity(entity);
                     break;
                 }
                 set_render_cache_dirty_no_lock(cache, entity);

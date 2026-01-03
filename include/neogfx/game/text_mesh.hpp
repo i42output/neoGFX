@@ -193,6 +193,7 @@ namespace neogfx::game
         public:
             text(i_ecs& aEcs, i_graphics_context const& aGc, i_string const& aText, const neogfx::font& aFont, const neogfx::text_format& aTextFormat, neogfx::alignment aAlignment = alignment::Left);
             text(const text& aOther);
+            ~text();
         };
     }
 }

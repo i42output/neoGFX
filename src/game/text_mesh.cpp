@@ -52,5 +52,9 @@ namespace neogfx::game
         {
             // todo: clone entity
         }
+
+        text::~text()
+        {
+        }
     }
 }
