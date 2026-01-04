@@ -45,6 +45,7 @@
 #include <neolib/file/file.hpp>
 
 #include <neogfx/app/i_app.hpp>
+#include <neogfx/app/i_resource_manager.hpp>
 #include <neogfx/gfx/i_rendering_engine.hpp>
 #include <neogfx/gfx/i_graphics_context.hpp>
 #include <neogfx/gfx/text/font_manager.hpp>
@@ -1007,74 +1008,17 @@ namespace neogfx
         return true;
     }
 
-    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, const i_device_resolution& aDevice)
+    void font_manager::load_font_from_file(i_string const& aFileName, i_string& aFamilyName)
     {
-        throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
-        (void)aFileName;
-        (void)aDevice;
+        auto resource = service<i_resource_manager>().load_resource(aFileName);
+        load_font_from_memory(resource->cdata(), resource->size(), aFamilyName);
     }
 
-    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
+    void font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string& aFamilyName)
     {
-        throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
-        (void)aFileName;
-        (void)aStyle;
-        (void)aSize;
-        (void)aDevice;
-    }
-
-    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
-    {
-        throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
-        (void)aFileName;
-        (void)aStyleName;
-        (void)aSize;
-        (void)aDevice;
-    }
-
-    i_native_font_face& font_manager::load_font_from_file(i_string const& aFileName, font_info const& aFontInfo, const i_device_resolution& aDevice)
-    {
-        throw std::logic_error("neogfx::font_manager::load_font_from_file function overload not yet implemented");
-        (void)aFileName;
-        (void)aFontInfo;
-        (void)aDevice;
-    }
-
-    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice)
-    {
-        throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
-        (void)aData;
-        (void)aSizeInBytes;
-        (void)aDevice;
-    }
-
-    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice)
-    {
-        throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
-        (void)aData;
-        (void)aSizeInBytes;
-        (void)aStyle;
-        (void)aSize;
-        (void)aDevice;
-    }
-
-    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice)
-    {
-        throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
-        (void)aData;
-        (void)aSizeInBytes;
-        (void)aStyleName;
-        (void)aSize;
-        (void)aDevice;
-    }
-
-    i_native_font_face& font_manager::load_font_from_memory(const void* aData, std::size_t aSizeInBytes, font_info const& aFontInfo, const i_device_resolution& aDevice)
-    {
-        throw std::logic_error("neogfx::font_manager::load_font_from_memory function overload not yet implemented");
-        (void)aData;
-        (void)aSizeInBytes;
-        (void)aFontInfo;
-        (void)aDevice;
+        auto font = iNativeFonts.emplace(iNativeFonts.end(), iFontLib, aData, aSizeInBytes);
+        iFontFamilies[font->family_name()].push_back(font);
+        aFamilyName = font->family_name();
     }
 
     std::uint32_t font_manager::font_family_count() const

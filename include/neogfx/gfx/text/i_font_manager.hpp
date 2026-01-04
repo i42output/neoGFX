@@ -78,14 +78,8 @@ namespace neogfx
         virtual i_native_font_face& create_font(i_native_font& aFont, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
         virtual i_native_font_face& create_font(i_native_font& aFont, const font_info& aInfo, const i_device_resolution& aDevice) = 0;
         virtual bool is_font_file(i_string const& aFileName) const = 0;
-        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, i_device_resolution const& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_file(i_string const& aFileName, const font_info& aInfo, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_device_resolution const& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) = 0;
-        virtual i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const font_info& aInfo, const i_device_resolution& aDevice) = 0;
+        virtual void load_font_from_file(i_string const& aFileName, i_string& aFamilyName) = 0;
+        virtual void load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string& aFamilyName) = 0;
     public:
         virtual std::uint32_t font_family_count() const = 0;
         virtual i_string const& font_family(std::uint32_t aFamilyIndex) const = 0;

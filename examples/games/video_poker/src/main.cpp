@@ -18,13 +18,15 @@ using namespace ng::unit_literals;
 
 int main(int argc, char* argv[])
 {
-    ng::app app(argc, argv, "neoGFX Sample Application - Video Poker");
+    ng::app app(argc, argv, "Neon Jacks Video Poker 1.0");
 
     try
     {
         app.set_default_window_icon(ng::image(":/video_poker/resources/icon.png"));
         app.change_style("Light").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
         app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
+
+        (void)ng::font::load_from_file(":/video_poker/resources/Audiowide-Regular.ttf");
 
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())

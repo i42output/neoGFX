@@ -436,32 +436,40 @@ namespace neogfx
 
     font font::load_from_file(string const& aFileName)
     {
-        return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, service<i_rendering_engine>().default_screen_metrics()) };
+        return load_from_file(aFileName, service<i_app>().current_style().font().style(), service<i_app>().current_style().font().size());
     }
 
     font font::load_from_file(string const& aFileName, font_style aStyle, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        string familyName;
+        service<i_font_manager>().load_font_from_file(aFileName, familyName);
+        return font{ familyName, aStyle, aSize };
     }
     
     font font::load_from_file(string const& aFileName, string const& aStyleName, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_file(string{ aFileName }, font_style{}, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        string familyName;
+        service<i_font_manager>().load_font_from_file(aFileName, familyName);
+        return font{ familyName, aStyleName, aSize };
     }
 
     font font::load_from_memory(const void* aData, std::size_t aSizeInBytes)
     {
-        return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, service<i_rendering_engine>().default_screen_metrics()) };
+        return load_from_memory(aData, aSizeInBytes, service<i_app>().current_style().font().style(), service<i_app>().current_style().font().size());
     }
 
     font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, font_style aStyle, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, aStyle, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        string familyName;
+        service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, familyName);
+        return font{ familyName, aStyle, aSize };
     }
 
     font font::load_from_memory(const void* aData, std::size_t aSizeInBytes, string const& aStyleName, point_size aSize)
     {
-        return font{ service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, font_style{}, string{ aStyleName }, aSize, service<i_rendering_engine>().default_screen_metrics()) };
+        string familyName;
+        service<i_font_manager>().load_font_from_memory(aData, aSizeInBytes, familyName);
+        return font{ familyName, aStyleName, aSize };
     }
 
     font::~font()

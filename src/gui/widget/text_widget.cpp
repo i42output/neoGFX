@@ -145,6 +145,7 @@ namespace neogfx
         auto appearance = text_format();
         if (appearance.ink() == neolib::none)
             appearance.set_ink(text_color());
+        textPosition += size{ font().info().outline().radius };
         if (appearance.effect())
             textPosition += size{ appearance.effect()->width() };
         if (multi_line())
@@ -155,8 +156,16 @@ namespace neogfx
 
     void text_widget::set_font(optional_font const& aFont)
     {
+        size oldSize = minimum_size();
         widget::set_font(aFont);
         reset_cache();
+        if (oldSize != minimum_size())
+        {
+            TextGeometryChanged();
+            if (visible() || effective_size_policy().ignore_visibility())
+                update_layout(true, true);
+        }
+        update();
     }
 
     bool text_widget::visible() const
@@ -196,8 +205,12 @@ namespace neogfx
             size oldSize = minimum_size();
             iSizeHint = aSizeHint;
             reset_cache();
-            if (visible() || effective_size_policy().ignore_visibility())
-                update_layout(true, true);
+            if (oldSize != minimum_size())
+            {
+                TextGeometryChanged();
+                if (visible() || effective_size_policy().ignore_visibility())
+                    update_layout(true, true);
+            }
         }
     }
 
@@ -287,6 +300,7 @@ namespace neogfx
             iTextExtent = gc.glyph_text_extent(std::get<neogfx::glyph_text>(glyph_text()));
         if (iTextExtent->cy == 0.0)
             iTextExtent->cy = font().height();
+        *iTextExtent += size{ font().info().outline().radius * 2.0 };
         if (text_format().effect())
             *iTextExtent += size{ text_format().effect()->width() * 2.0 };
         iTextExtent = iTextExtent->ceil();

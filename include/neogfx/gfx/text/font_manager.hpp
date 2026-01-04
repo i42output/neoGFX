@@ -77,14 +77,8 @@ namespace neogfx
         i_native_font_face& create_font(i_native_font& aFont, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) final;
         i_native_font_face& create_font(i_native_font& aFont, const font_info& aInfo, const i_device_resolution& aDevice) final;
         bool is_font_file(i_string const& aFileName) const final;
-        i_native_font_face& load_font_from_file(i_string const& aFileName, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_file(i_string const& aFileName, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_file(i_string const& aFileName, const font_info& aInfo, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, font::point_size aSize, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, neogfx::font_style aStyle, i_string const& aStyleName, font::point_size aSize, const i_device_resolution& aDevice) final;
-        i_native_font_face& load_font_from_memory(const void* aData, std::size_t aSizeInBytes, const font_info& aInfo, const i_device_resolution& aDevice) final;
+        void load_font_from_file(i_string const& aFileName, i_string& aFamilyName) final;
+        void load_font_from_memory(const void* aData, std::size_t aSizeInBytes, i_string& aFamilyName) final;
     public:
         std::uint32_t font_family_count() const final;
         i_string const& font_family(std::uint32_t aFamilyIndex) const final;

@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <card_games/card_sprite.hpp>
 #include <video_poker/card_space.hpp>
 
+using namespace ng::unit_literals;
+
 namespace video_poker
 {
     card_widget::card_widget(ng::i_layout& aLayout, ng::game::canvas& aCanvas, const i_card_textures& aCardTextures) :
@@ -144,7 +146,7 @@ namespace video_poker
         iHoldButton.set_consider_ancestors_for_mouse_events(false);
         iHoldButton.set_size_policy(ng::size_constraint::Minimum);
         iHoldButton.set_base_color(ng::color::Black);
-        iHoldButton.text_widget().set_font(ng::font{ "Exo 2", "Black", 16.0 });
+        iHoldButton.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 16.0 }.with_outline({ 2.0_dp }));
         iHoldButton.text_widget().set_text_format(ng::text_format{ ng::color::Black, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White.with_alpha(0.5) } });
         iHoldButton.set_checkable();
         auto update_hold = [this]() 
