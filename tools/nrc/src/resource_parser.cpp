@@ -51,6 +51,7 @@ namespace neogfx::nrc
         if (!symbol.empty() && !resourceRef.empty())
             symbol += "_";
         symbol += resourceRef;
+        boost::replace_all(symbol, ".", "_");
 
         iOutput << "namespace nrc" << std::endl << "{" << std::endl;
         iOutput << "namespace" << std::endl << "{" << std::endl;
@@ -130,6 +131,7 @@ namespace neogfx::nrc
 
         auto initializerName = (iNamespace + (resource.has("namespace") ? ("_" + resource.at("namespace").text()) : "")) + "_" + symbol;
         boost::replace_all(initializerName, "::", "_");
+        boost::replace_all(initializerName, ".", "_");
         iOutput << "extern \"C\" void* nrc_" << initializerName << " = &nrc::" << symbol << ";" << std::endl << std::endl;
     }
 }

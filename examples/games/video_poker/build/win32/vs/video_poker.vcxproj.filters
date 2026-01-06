@@ -33,6 +33,12 @@
     <ClCompile Include="x64\Release\GeneratedFiles\video_poker.res.cpp">
       <Filter>GeneratedFiles</Filter>
     </ClCompile>
+    <ClCompile Include="x64\Release\GeneratedFiles\video_poker.closed.res.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="x64\Debug\GeneratedFiles\video_poker.closed.res.cpp">
+      <Filter>GeneratedFiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\resources\win32\resource.h">
@@ -87,6 +93,9 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\..\..\src\video_poker.nrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\..\..\..\..\..\src\closed\video_poker.closed.nrc">
       <Filter>Resource Files</Filter>
     </CustomBuild>
   </ItemGroup>

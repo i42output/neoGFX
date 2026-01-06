@@ -27,15 +27,25 @@ int main(int argc, char* argv[])
         app.change_style("Dark").set_font_info(ng::font_info("Segoe UI", std::string("Regular"), 9));
 
         (void)ng::font::load_from_file(":/video_poker/resources/Audiowide-Regular.ttf");
+        (void)ng::font::load_from_file(":/video_poker/resources/MeowScript-Regular.ttf");
 
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())
-            windowObject.emplace(ng::size{ 1280_dip, 720_dip });
+            windowObject.emplace(ng::size{ 614_dip, 600_dip });
         else
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
 
         auto& window = *windowObject;
+
         video_poker::table table{ window.client_layout() };
+
+        table.set_background_opacity(0.0);
+        table.parent().set_background_opacity(0.0);
+        window.PaintBackground([&](ng::i_graphics_context& aGc)
+            {
+                aGc.fill_rect(window.client_rect(), ng::gradient{ ng::color::Blue.darker(0x80), ng::color::Blue.darker(0xE0) });
+                window.PaintBackground.accept();
+            });
 
         return app.exec();
     }

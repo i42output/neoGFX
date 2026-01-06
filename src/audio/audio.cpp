@@ -125,11 +125,16 @@ namespace neogfx
         if (deviceInfo != nullptr)
             return create_device(*deviceInfo, aDataFormat);
         else
-            throw std::runtime_error("neogfx::audo::create_playback_device");
+            throw std::runtime_error("neogfx::audo::create_capture_device");
     }
 
     void audio::destroy_device(i_audio_device& aDevice)
     {
+    }
+
+    void audio::create_audio_sample(i_audio_clip const& aClip, i_ref_ptr<i_audio_sample>& aSample)
+    {
+        // todo
     }
 
     i_audio_instrument_atlas& audio::instrument_atlas()

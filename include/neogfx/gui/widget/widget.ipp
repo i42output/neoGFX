@@ -1410,10 +1410,13 @@ namespace neogfx
         }
 #endif // NEOGFX_DEBUG
 
-        if (self.has_background_color() || !self.background_is_transparent())
+        if (!event_consumed(PaintBackground(aGc)))
         {
-            auto const backgroundColor = self.background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0);
-            aGc.fill_rect(updateRect, backgroundColor);
+            if (self.has_background_color() || !self.background_is_transparent())
+            {
+                auto const backgroundColor = self.background_color().with_combined_alpha(has_background_opacity() ? background_opacity() : 1.0);
+                aGc.fill_rect(updateRect, backgroundColor);
+            }
         }
     }
 

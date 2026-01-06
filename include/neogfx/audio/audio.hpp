@@ -17,13 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/audio/i_audio.hpp>
 #include <neogfx/audio/audio_device.hpp>
 #include <neogfx/audio/audio_instrument_atlas.hpp>
-
-#pragma once
 
 namespace neogfx
 {
@@ -31,15 +31,17 @@ namespace neogfx
 	{
 	public:
 		audio();
-		~audio() override;
+		~audio() final;
 	public:
-		i_vector<i_audio_device_info> const& available_devices() override;
-		i_audio_device& create_device(i_audio_device_info const& aDeviceInfo, audio_data_format const& aDataFormat) override;
-		i_audio_device& create_playback_device(audio_data_format const& aDataFormat) override;
-		i_audio_device& create_capture_device(audio_data_format const& aDataFormat) override;
-		void destroy_device(i_audio_device& aDevice) override;
+		i_vector<i_audio_device_info> const& available_devices() final;
+		i_audio_device& create_device(i_audio_device_info const& aDeviceInfo, audio_data_format const& aDataFormat) final;
+		i_audio_device& create_playback_device(audio_data_format const& aDataFormat) final;
+		i_audio_device& create_capture_device(audio_data_format const& aDataFormat) final;
+		void destroy_device(i_audio_device& aDevice) final;
 	public:
-		i_audio_instrument_atlas& instrument_atlas() override;
+		void create_audio_sample(i_audio_clip const& aClip, i_ref_ptr<i_audio_sample>& aSample) final;
+	public:
+		i_audio_instrument_atlas& instrument_atlas() final;
 	private:
 		i_audio_device_info const* find_device(audio_device_type aType, audio_data_format const& aDataFormat);
 	private:

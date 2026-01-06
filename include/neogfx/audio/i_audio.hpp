@@ -17,11 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/audio/i_audio_device.hpp>
-
-#pragma once
+#include <neogfx/audio/i_audio_clip.hpp>
+#include <neogfx/audio/i_audio_sample.hpp>
 
 namespace neogfx
 {
@@ -39,6 +41,14 @@ namespace neogfx
 		virtual i_audio_device& create_playback_device(audio_data_format const& aDataFormat) = 0;
 		virtual i_audio_device& create_capture_device(audio_data_format const& aDataFormat) = 0;
 		virtual void destroy_device(i_audio_device& aDevice) = 0;
+	public:
+		ref_ptr<i_audio_sample> create_audio_sample(i_audio_clip const& aClip)
+		{
+			ref_ptr<i_audio_sample> sample;
+			create_audio_sample(aClip, sample);
+			return sample;
+		}
+		virtual void create_audio_sample(i_audio_clip const& aClip, i_ref_ptr<i_audio_sample>& aSample) = 0;
 	public:
 		virtual i_audio_instrument_atlas& instrument_atlas() = 0;
 	public:

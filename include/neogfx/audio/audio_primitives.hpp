@@ -17,13 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/neogfx.hpp>
 
 #include <array>
 #include <bit>
 #include <boost/lexical_cast.hpp>
-
-#pragma once
 
 namespace neogfx
 {

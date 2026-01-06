@@ -41,7 +41,7 @@ namespace video_poker
 {
     using namespace neogames::card_games;
 
-    const credit_t STARTING_CREDIT = 10;
+    const credit_t ADD_CREDIT_AMOUNT = 1;
     const credit_t MAX_BET = 100;
 
     const std::map<poker_hand, credit_t> PAY_TABLE = 
@@ -65,7 +65,7 @@ namespace video_poker
                 aCanvas.ecs(),
                 ng::graphics_context{ aCanvas },
                 aOutcome,
-                ng::font{ "Audiowide", ng::font_style::EmulatedBold, 48.0 }.with_outline({ 2.0_dp }),
+                ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 1.0_dp }),
                 ng::text_format{aColor, ng::text_effect{ ng::text_effect_type::Outline, ng::color::Black } },
                 ng::alignment::Center}
         {
@@ -84,10 +84,11 @@ namespace video_poker
     table::table(ng::i_layout& aLayout) :
         ng::game::canvas{ aLayout, ng::game::make_ecs<ng::game::simple_physics_2d>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused) },
         iState{ table_state::TakeBet },
-        iCredit{ STARTING_CREDIT },
+        iCredit{ 0 },
         iStake{ 0 },
         iMainLayout{ *this, ng::alignment::Center },
-        iLabelTitle{ iMainLayout, "VIDEO POKER" },
+        iLabelTitle1{ iMainLayout, "Neon Jacks" },
+        iLabelTitle2{ iMainLayout, "VIDEO POKER" },
         iSpacer1{ iMainLayout },
         iSpacesLayout{ iMainLayout },
         iSpacer2{ iSpacesLayout },
@@ -117,16 +118,24 @@ namespace video_poker
 
         set_layers(2);
 
-        iMainLayout.set_spacing(ng::size{ 16.0 });
+        iMainLayout.set_spacing(ng::size{ 4.0 });
         iSpacesLayout.set_spacing(ng::size{ 16.0 });
+        auto neon_text = [](const ng::color& aColor, double a = 4, double b = 10, double c = 2 )
+            {
+                return ng::text_format{
+                    aColor.lighter(0x40),
+                    ng::text_effect{ng::text_effect_type::Glow, aColor, a, {}, b, c } };
+            };
         auto shiny_text = [](const ng::color& aColor)
-        {
-            return ng::text_format{
-                ng::gradient{ { ng::color::Black, aColor, ng::color::Black } },
-                ng::text_effect{ng::text_effect_type::Outline, ng::color::White } };
-        };
-        iLabelTitle.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 48.0 }.with_outline({ 2.0_dp }));
-        iLabelTitle.text_widget().set_text_format(shiny_text(ng::color::Green));
+            {
+                return ng::text_format{
+                    ng::gradient{ { ng::color::Black, aColor, ng::color::Black } },
+                    ng::text_effect{ng::text_effect_type::Outline, ng::color::White } };
+            };
+        iLabelTitle1.text_widget().set_font(ng::font{ "Meow Script", "Regular", 64.0 });
+        iLabelTitle1.text_widget().set_text_format(neon_text(ng::color::Red));
+        iLabelTitle2.text_widget().set_font(ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 1.0_dp }));
+        iLabelTitle2.text_widget().set_text_format(shiny_text(ng::color::Green));
         iSpacer1.set_weight(ng::size{ 0.1 });
         iSpacer2.set_weight(ng::size{ 0.25 });
         iSpacer3.set_weight(ng::size{ 0.25 });
@@ -142,23 +151,23 @@ namespace video_poker
             aButton.set_base_color(ng::color::White);
             aButton.text_widget().set_size_hint(ng::size_hint{ "DEAL\nDEAL" });
             aButton.text_widget().set_text_color(ng::color::Black);
-            aButton.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 24.0 }.with_outline({ 2.0_dp }));
+            aButton.text_widget().set_font(ng::font{ "Audiowide", "Regular", 24.0 });
         };
         set_bet_button_appearance(iBetMinus);
         set_bet_button_appearance(iBetPlus);
         set_bet_button_appearance(iBetMax);
         set_bet_button_appearance(iDeal);
         ng::layout_as_same_size(iBetMinus, iAddCredit);
-        iLabelCredits.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 36.0 }.with_outline({ 2.0_dp }));
+        iLabelCredits.text_widget().set_font(ng::font{ "Audiowide", "Regular", 36.0 }.with_outline({ 1.0_dp }));
         iLabelCredits.text_widget().set_text_format(shiny_text(ng::color::Yellow));
-        iLabelCreditsValue.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 36.0 }.with_outline({ 2.0_dp }));
+        iLabelCreditsValue.text_widget().set_font(ng::font{ "Audiowide", "Regular", 36.0 }.with_outline({ 1.0_dp }));
         iLabelCreditsValue.text_widget().set_text_format(shiny_text(ng::color::White));
-        iLabelStake.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 36.0 }.with_outline({ 2.0_dp }));
+        iLabelStake.text_widget().set_font(ng::font{ "Audiowide", "Regular", 36.0 }.with_outline({ 1.0_dp }));
         iLabelStake.text_widget().set_text_format(shiny_text(ng::color::Yellow));
-        iLabelStakeValue.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 36.0 }.with_outline({ 2.0_dp }));
+        iLabelStakeValue.text_widget().set_font(ng::font{ "Audiowide", "Regular", 36.0 }.with_outline({ 1.0_dp }));
         iLabelStakeValue.text_widget().set_text_format(shiny_text(ng::color::White));
 
-        iAddCredit.clicked([this]() { add_credit(STARTING_CREDIT); });
+        iAddCredit.clicked([this]() { add_credit(ADD_CREDIT_AMOUNT); });
         iBetMinus.clicked([this]() { bet(-1); });
         iBetPlus.clicked([this]() { bet(+1); });
         iBetMax.clicked([this]() { bet(MAX_BET); });
@@ -290,7 +299,7 @@ namespace video_poker
     {
         iOutcome = std::make_unique<outcome>(
             *this, 
-            to_string(video_poker::to_poker_hand(*iHand)) + ng::to_string(u8"\nWIN £") + boost::lexical_cast<std::string>(aWinnings) + "!",
+            to_string(video_poker::to_poker_hand(*iHand)) + ng::to_string(u8"\nWIN $") + boost::lexical_cast<std::string>(aWinnings) + "!",
             ng::color::Goldenrod.with_lightness(0.8));
         iCredit += aWinnings;
     }
@@ -322,19 +331,11 @@ namespace video_poker
                     auto lastStake = iStake;
                     iStake = 0;
                     bet(lastStake);
-                    /* todo win/lose animation */
                     change_state(iCredit + iStake > 0 ? table_state::TakeBet : table_state::GameOver);
                 }
                 break;
             case table_state::GameOver:
-                if (ng::message_box::question(*this, "Out Of Credit - Game Over", "You have run out of credit!\n\nPlay again?") == ng::standard_button::Yes)
-                {
-                    iCredit = STARTING_CREDIT;
-                    iHand.emplace();
-                    change_state(table_state::TakeBet);
-                }
-                else
-                    ng::app::instance().quit();
+                change_state(table_state::TakeBet);
                 break;
             default:
                 // do nothing
@@ -345,8 +346,8 @@ namespace video_poker
 
     void table::update_widgets()
     {
-        iLabelCreditsValue.set_text( ng::to_string(u8"£") + boost::lexical_cast<std::string>(iCredit));
-        iLabelStakeValue.set_text( ng::to_string(u8"£") + boost::lexical_cast<std::string>(iStake));
+        iLabelCreditsValue.set_text( ng::to_string(u8"$") + boost::lexical_cast<std::string>(iCredit));
+        iLabelStakeValue.set_text( ng::to_string(u8"$") + boost::lexical_cast<std::string>(iStake));
         iBetMinus.enable(iState == table_state::TakeBet && iStake > 0);
         iBetPlus.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);
         iBetMax.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);

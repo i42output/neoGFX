@@ -248,11 +248,11 @@ namespace neogfx
         typedef optional<auxiliary_parameter> optional_auxiliary_parameter;
     public:
         text_effect() :
-            iType{ text_effect_type::None }, iColor{}, iWidth{}, iAux1{}, iIgnoreEmoji{}
+            iType{ text_effect_type::None }, iColor{}, iWidth{}, iAux1{}, iAux2{}, iIgnoreEmoji{}
         {
         }
-        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, bool aIgnoreEmoji = false) :
-            iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iIgnoreEmoji{ aIgnoreEmoji }
+        text_effect(text_effect_type aType, const text_color& aColor, const optional_dimension& aWidth = {}, const optional_vec3& aOffset = {}, const optional_auxiliary_parameter& aAux1 = {}, const optional_auxiliary_parameter& aAux2 = {}, bool aIgnoreEmoji = false) :
+            iType{ aType }, iColor{ aColor }, iWidth{ aWidth }, iAux1{ aAux1 }, iAux2{ aAux2 }, iIgnoreEmoji{ aIgnoreEmoji }
         {
         }
     public:
@@ -265,19 +265,20 @@ namespace neogfx
             iWidth = aOther.iWidth;
             iOffset = aOther.iOffset;
             iAux1 = aOther.iAux1;
+            iAux2 = aOther.iAux2;
             iIgnoreEmoji = aOther.iIgnoreEmoji;
             return *this;
         }
     public:
         bool operator==(const text_effect& that) const noexcept
         {
-            return std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) ==
-                std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iIgnoreEmoji);
+            return std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iAux2, iIgnoreEmoji) ==
+                std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iAux2, that.iIgnoreEmoji);
         }
         auto operator<=>(const text_effect& that) const noexcept
         {
-            return std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iIgnoreEmoji) <=>
-                std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iIgnoreEmoji);
+            return std::forward_as_tuple(iType, iColor, iWidth, iOffset, iAux1, iAux2, iIgnoreEmoji) <=>
+                std::forward_as_tuple(that.iType, that.iColor, that.iWidth, that.iOffset, that.iAux1, that.iAux2, that.iIgnoreEmoji);
         }
     public:
         text_effect_type type() const
@@ -362,12 +363,32 @@ namespace neogfx
                 return 0.0;
             case text_effect_type::Glow:
             case text_effect_type::Shadow:
-                return 1.0;
+                return 5.0;
             }
         }
         void set_aux1(double aAux1)
         {
             iAux1 = aAux1;
+        }
+        double aux2() const
+        {
+            if (iAux2 != std::nullopt)
+                return *iAux2;
+            switch (type())
+            {
+            case text_effect_type::None:
+            default:
+                return 0.0;
+            case text_effect_type::Outline:
+                return 0.0;
+            case text_effect_type::Glow:
+            case text_effect_type::Shadow:
+                return 1.0;
+            }
+        }
+        void set_aux2(double aAux2)
+        {
+            iAux2 = aAux2;
         }
         bool ignore_emoji() const
         {
@@ -391,6 +412,7 @@ namespace neogfx
         optional_dimension iWidth;
         optional_vec3 iOffset;
         optional_auxiliary_parameter iAux1;
+        optional_auxiliary_parameter iAux2;
         bool iIgnoreEmoji;
     };
 
@@ -409,6 +431,8 @@ namespace neogfx
         aStream << aEffect.offset();
         aStream << ',';
         aStream << aEffect.aux1();
+        aStream << ',';
+        aStream << aEffect.aux2();
         aStream << ',';
         aStream << aEffect.ignore_emoji();
         aStream << ']';
@@ -436,6 +460,9 @@ namespace neogfx
         double aux1;
         aStream >> aux1;
         aEffect.set_aux1(aux1);
+        double aux2;
+        aStream >> aux2;
+        aEffect.set_aux2(aux2);
         bool ignoreEmoji;
         aStream >> ignoreEmoji;
         aEffect.set_ignore_emoji(ignoreEmoji);

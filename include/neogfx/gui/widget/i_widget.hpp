@@ -60,6 +60,7 @@ namespace neogfx
         declare_event(size_changed)
         declare_event(layout_completed)
         declare_event(painting_non_client, i_graphics_context&)
+        declare_event(paint_background, i_graphics_context&)
         declare_event(painted_non_client, i_graphics_context&)
         declare_event(painting, i_graphics_context&)
         declare_event(painting_children, i_graphics_context&)

@@ -43,29 +43,29 @@ namespace neogfx
     public:
         ref_ptr<i_texture> find_texture(texture_id aId) const
         {
-            ref_ptr<i_texture> result;
-            find_texture(aId, result);
-            return result;
+            ref_ptr<i_texture> texture;
+            find_texture(aId, texture);
+            return texture;
         }
-        virtual void find_texture(texture_id aId, i_ref_ptr<i_texture>& aResult) const = 0;
+        virtual void find_texture(texture_id aId, i_ref_ptr<i_texture>& aTexture) const = 0;
         ref_ptr<i_texture> create_texture(neogfx::size const& aExtents, dimension aDpiScaleFactor = 1.0, texture_sampling aSampling = texture_sampling::NormalMipmap, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte, color_space aColorSpace = color_space::sRGB, optional_color const& aColor = optional_color())
         {
-            ref_ptr<i_texture> result;
-            create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColorSpace, aColor, result);
-            return result;
+            ref_ptr<i_texture> texture;
+            create_texture(aExtents, aDpiScaleFactor, aSampling, aDataFormat, aDataType, aColorSpace, aColor, texture);
+            return texture;
         }
-        virtual void create_texture(neogfx::size const& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, color_space aColorSpace, optional_color const& aColor, i_ref_ptr<i_texture>& aResult) = 0;
+        virtual void create_texture(neogfx::size const& aExtents, dimension aDpiScaleFactor, texture_sampling aSampling, texture_data_format aDataFormat, texture_data_type aDataType, color_space aColorSpace, optional_color const& aColor, i_ref_ptr<i_texture>& aTexture) = 0;
         ref_ptr<i_texture> create_texture(i_image const& aImage, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte)
         {
             return create_texture(aImage, rect{ point{}, aImage.extents() }, aDataFormat, aDataType);
         }
         ref_ptr<i_texture> create_texture(i_image const& aImage, const rect& aImagePart, texture_data_format aDataFormat = texture_data_format::RGBA, texture_data_type aDataType = texture_data_type::UnsignedByte)
         {
-            ref_ptr<i_texture> result;
-            create_texture(aImage, aImagePart, aDataFormat, aDataType, result);
-            return result;
+            ref_ptr<i_texture> texture;
+            create_texture(aImage, aImagePart, aDataFormat, aDataType, texture);
+            return texture;
         }
-        virtual void create_texture(i_image const& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aResult) = 0;
+        virtual void create_texture(i_image const& aImage, const rect& aImagePart, texture_data_format aDataFormat, texture_data_type aDataType, i_ref_ptr<i_texture>& aTexture) = 0;
         virtual void clear_textures() = 0;
     public:
         virtual std::unique_ptr<i_texture_atlas> create_texture_atlas(const size& aSize = size{ 1024.0, 1024.0 }) = 0;

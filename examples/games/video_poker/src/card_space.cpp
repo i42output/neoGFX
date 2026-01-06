@@ -146,7 +146,7 @@ namespace video_poker
         iHoldButton.set_consider_ancestors_for_mouse_events(false);
         iHoldButton.set_size_policy(ng::size_constraint::Minimum);
         iHoldButton.set_base_color(ng::color::Black);
-        iHoldButton.text_widget().set_font(ng::font{ "Audiowide", ng::font_style::EmulatedBold, 16.0 }.with_outline({ 2.0_dp }));
+        iHoldButton.text_widget().set_font(ng::font{ "Audiowide", "Regular", 16.0 }.with_outline({ 1.0_dp }));
         iHoldButton.text_widget().set_text_format(ng::text_format{ ng::color::Black, ng::text_effect{ ng::text_effect_type::Outline, ng::color::White.with_alpha(0.5) } });
         iHoldButton.set_checkable();
         auto update_hold = [this]() 
@@ -204,7 +204,7 @@ namespace video_poker
     void card_space::update_widgets()
     {
         iCardWidget.enable(has_card() && iTable.state() == table_state::DealtFirst);
-        iHoldButton.set_base_color(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? ng::color::LightYellow1 : ng::color::Black.with_alpha(0.5));
+        iHoldButton.set_base_color(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst ? ng::color::LightYellow1 : ng::color::Gray);
         iHoldButton.enable(has_card() && iTable.state() == table_state::DealtFirst);
         iHoldButton.set_checked(has_card() && !card().discarded() && iTable.state() == table_state::DealtFirst);
     }

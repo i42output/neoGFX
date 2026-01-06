@@ -2047,7 +2047,8 @@ namespace neogfx
                             continue;
 
                         if (!filter)
-                            filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width() });
+                            filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian, 
+                                drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() });
 
                         filter->front_buffer().draw_glyph(
                             drawOp.point.as<scalar>() + drawOp.appearance->effect()->offset(),

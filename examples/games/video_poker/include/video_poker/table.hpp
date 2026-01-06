@@ -31,6 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gui/widget/text_edit.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 
 #include <card_games/deck.hpp>
@@ -78,7 +79,8 @@ namespace video_poker
         std::optional<deck> iDeck;
         std::optional<hand> iHand;
         neogfx::vertical_layout iMainLayout;
-        neogfx::label iLabelTitle;
+        neogfx::label iLabelTitle1;
+        neogfx::label iLabelTitle2;
         neogfx::vertical_spacer iSpacer1;
         neogfx::horizontal_layout iSpacesLayout;
         neogfx::horizontal_spacer iSpacer2;

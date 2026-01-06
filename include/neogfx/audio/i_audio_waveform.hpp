@@ -17,13 +17,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/audio/audio_primitives.hpp>
 #include <neogfx/audio/i_audio_bitstream.hpp>
 #include <neogfx/audio/i_audio_oscillator.hpp>
-
-#pragma once
 
 namespace neogfx
 {

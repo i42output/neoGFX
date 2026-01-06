@@ -1,18 +1,18 @@
-// i_audio_track.hpp
+// audio_sample.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2021 Leigh Johnston.  All Rights Reserved.
-  
+  Copyright (c) 2025 Leigh Johnston.  All Rights Reserved.
+
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -20,18 +20,12 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
-
-#include <neogfx/audio/audio_primitives.hpp>
-#include <neogfx/audio/i_audio_bitstream.hpp>
+#include <neogfx/audio/i_audio_clip.hpp>
 
 namespace neogfx
 {
-    class i_audio_track : public i_audio_bitstream
-    {
-    public:
-        typedef i_audio_track abstract_type;
-    public:
-        virtual ~i_audio_track() = default;
-    public:
-    };
+	class audio_sample : public reference_counted<i_audio_sample>
+	{
+		// todo
+	};
 }
