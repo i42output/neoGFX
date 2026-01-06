@@ -1,7 +1,7 @@
 // audio_clip.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2025 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2026 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #pragma once
 
 #include <neogfx/neogfx.hpp>
+
 #include <neogfx/audio/i_audio_clip.hpp>
 
 namespace neogfx

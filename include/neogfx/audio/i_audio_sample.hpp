@@ -1,7 +1,7 @@
 // i_audio_sample.hpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2025 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2026 Leigh Johnston.  All Rights Reserved.
 
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by

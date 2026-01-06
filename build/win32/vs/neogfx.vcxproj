@@ -638,10 +638,12 @@
     <ClCompile Include="..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_bitstream.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_clip.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_device.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_instrument.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_instrument_atlas.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_oscillator.cpp" />
+    <ClCompile Include="..\..\..\src\audio\audio_sample.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_waveform.cpp" />
     <ClCompile Include="..\..\..\src\core\transition_animator.cpp" />
     <ClCompile Include="..\..\..\src\core\async_task.cpp" />

@@ -1870,6 +1870,12 @@
     <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\audio\audio_clip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\audio\audio_sample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\src\gui\layout\flow_layout.ipp">
