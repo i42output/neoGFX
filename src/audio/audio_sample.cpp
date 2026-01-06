@@ -21,7 +21,6 @@
 
 #include <neogfx/audio/audio_sample.hpp>
 
-#define MINIAUDIO_IMPLEMENTATION
 #ifdef _WIN32
 #define MA_ENABLE_WASAPI
 #endif
