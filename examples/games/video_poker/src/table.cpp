@@ -175,9 +175,9 @@ namespace video_poker
 
         iTextures = ng::service<ng::i_rendering_engine>().texture_manager().create_texture_atlas(ng::size{ 1024.0, 2048.0 });
         auto const& values = { " ", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
-        ng::size const valueDimensions = { 72.0, 72.0 };
+        ng::size const valueDimensions = { 100.0, 100.0 };
         auto& valueTextures = iTextures->create_sub_texture(ng::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, ng::texture_sampling::Multisample);
-        ng::font valueFont{ "Audiowide", "Regular", -valueDimensions.cy };
+        ng::font valueFont{ "Google Sans Flex 72pt", "ExtraBold", -valueDimensions.cy};
         ng::graphics_context gcValue{ valueTextures };
         auto cursor = valueTextures.atlas_location().position();
         for (auto value : values)

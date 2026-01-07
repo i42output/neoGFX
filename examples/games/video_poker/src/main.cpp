@@ -28,6 +28,7 @@ int main(int argc, char* argv[])
 
         (void)ng::font::load_from_file(":/video_poker/resources/Audiowide-Regular.ttf");
         (void)ng::font::load_from_file(":/video_poker/resources/MeowScript-Regular.ttf");
+        (void)ng::font::load_from_file(":/video_poker/resources/GoogleSansFlex_72pt-ExtraBold.ttf");
 
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())
