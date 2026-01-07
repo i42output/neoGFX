@@ -25,23 +25,13 @@
 namespace neogfx
 {
     audio_oscillator::audio_oscillator(audio_sample_rate aSampleRate, float aFrequency, float aAmplitude, oscillator_function aFunction) :
-        iSampleRate{ aSampleRate }, iFrequency{ aFrequency }, iAmplitude{ aAmplitude }, iFunction{ aFunction }
+        audio_bitstream{ aSampleRate, aAmplitude}, iFrequency{ aFrequency }, iFunction{ aFunction }
     {
     }
 
     audio_oscillator::audio_oscillator(audio_sample_rate aSampleRate, float aFrequency, float aAmplitude, std::function<float(float)> const& aFunction) :
-        iSampleRate{ aSampleRate }, iFrequency{ aFrequency }, iAmplitude{ aAmplitude }, iFunction{ oscillator_function::Custom }, iCustomFunction{ aFunction }
+        audio_bitstream{ aSampleRate, aAmplitude }, iFrequency{ aFrequency }, iFunction{ oscillator_function::Custom }, iCustomFunction{ aFunction }
     {
-    }
-
-    audio_sample_rate audio_oscillator::sample_rate() const
-    {
-        return iSampleRate;
-    }
-
-    void audio_oscillator::set_sample_rate(audio_sample_rate aSampleRate)
-    {
-        iSampleRate = aSampleRate;
     }
 
     float audio_oscillator::frequency() const
@@ -53,16 +43,6 @@ namespace neogfx
     {
         iFrequency = aFrequency;
         iCursor = 0ULL;
-    }
-
-    float audio_oscillator::amplitude() const
-    {
-        return iAmplitude;
-    }
-
-    void audio_oscillator::set_amplitude(float aAmplitude)
-    {
-        iAmplitude = aAmplitude;
     }
 
     oscillator_function audio_oscillator::function() const
@@ -85,14 +65,21 @@ namespace neogfx
         iCursor = 0ULL;
     }
 
-    void audio_oscillator::generate(audio_sample_count aSampleCount, float* aOutputSamples)
+    audio_frame_count audio_oscillator::length() const
     {
-        generate_from(iCursor, aSampleCount, aOutputSamples);
+        return sample_rate();
     }
 
-    void audio_oscillator::generate_from(audio_sample_index aSampleFrom, audio_sample_count aSampleCount, float* aOutputSamples)
+    void audio_oscillator::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
     {
-        iCursor = aSampleFrom;
+        generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
+    }
+
+    void audio_oscillator::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+    {
+        iCursor = static_cast<audio_sample_index>(aFrameFrom);
+
+        // todo: multiple channels
 
         switch (function())
         {
@@ -100,10 +87,10 @@ namespace neogfx
             // todo
             break;
         case oscillator_function::Sine:
-            for (auto cursor = iCursor; cursor < iCursor + aSampleCount; ++cursor)
+            for (auto cursor = iCursor; cursor < iCursor + static_cast<audio_sample_count>(aFrameCount); ++cursor)
             {
                 auto x = static_cast<float>(cursor) / sample_rate() * math::two_pi<float>() * frequency();
-                *(aOutputSamples++) = std::sin(x) * amplitude();
+                *(aOutputFrames++) = std::sin(x) * amplitude();
             }
             break;
         case oscillator_function::Square:
@@ -119,6 +106,6 @@ namespace neogfx
             break;
         }
 
-        iCursor += aSampleCount;
+        iCursor += static_cast<audio_sample_count>(aFrameCount);
     }
 }

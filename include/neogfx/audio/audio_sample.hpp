@@ -21,12 +21,21 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/audio/audio_bitstream.hpp>
 #include <neogfx/audio/i_audio_sample.hpp>
 
 namespace neogfx
 {
-	class audio_sample : public reference_counted<i_audio_sample>
+	class audio_sample : public audio_bitstream<i_audio_sample>
 	{
-		// todo
+	public:
+		audio_sample(audio_sample_rate aSampleRate, std::vector<float>&& aPcmFrames);
+	public:
+		audio_frame_count length() const override;
+		void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) override;
+		void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) override;
+	private:
+		std::vector<float> iPcmFrames;
+		audio_frame_index iCursor = 0ULL;
 	};
 }

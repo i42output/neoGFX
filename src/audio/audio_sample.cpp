@@ -28,5 +28,31 @@
 
 namespace neogfx
 {
-    // todo
+	audio_sample::audio_sample(audio_sample_rate aSampleRate, std::vector<float>&& aPcmFrames) :
+		audio_bitstream<i_audio_sample>{ aSampleRate },
+		iPcmFrames{ aPcmFrames }
+	{
+	}
+
+	audio_frame_count audio_sample::length() const
+	{
+		return iPcmFrames.size();
+	}
+
+	void audio_sample::generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames)
+	{
+		generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
+	}
+	
+	void audio_sample::generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames)
+	{
+		// todo multiple channels
+
+		std::fill(aOutputFrames, aOutputFrames + aFrameCount, 0.0f);
+		if (aFrameFrom >= iPcmFrames.size())
+			return;
+		auto count = std::min(iPcmFrames.size() - aFrameFrom, aFrameCount);
+		std::copy(std::next(iPcmFrames.begin(), aFrameFrom), std::next(iPcmFrames.begin(), aFrameFrom + count), aOutputFrames);
+		iCursor = aFrameFrom + count;
+	}
 }

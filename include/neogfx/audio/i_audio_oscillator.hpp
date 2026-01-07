@@ -22,6 +22,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/audio/audio_primitives.hpp>
+#include <neogfx/audio/i_audio_bitstream.hpp>
 
 namespace neogfx
 {
@@ -34,24 +35,15 @@ namespace neogfx
         Sawtooth    = 4
     };
 
-    class i_audio_oscillator : public i_reference_counted
+    class i_audio_oscillator : public i_audio_bitstream
     {
     public:
         typedef i_audio_oscillator abstract_type;
     public:
-        virtual ~i_audio_oscillator() = default;
-    public:
-        virtual audio_sample_rate sample_rate() const = 0;
-        virtual void set_sample_rate(audio_sample_rate aSampleRate) = 0;
         virtual float frequency() const = 0;
         virtual void set_frequency(float aFrequency) = 0;
-        virtual float amplitude() const = 0;
-        virtual void set_amplitude(float aAmplitude) = 0;
         virtual oscillator_function function() const = 0;
         virtual void set_function(oscillator_function aFunction) = 0;
         virtual void set_function(std::function<float(float)> const& aFunction) = 0; ///< Note: not plugin-safe.
-    public:
-        virtual void generate(audio_sample_count aSampleCount, float* aOutputSamples) = 0;
-        virtual void generate_from(audio_sample_index aSampleFrom, audio_sample_count aSampleCount, float* aOutputSamples) = 0;
     };
 }

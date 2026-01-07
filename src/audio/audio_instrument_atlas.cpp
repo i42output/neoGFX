@@ -35,6 +35,7 @@
 #include <neogfx/audio/audio_instrument_atlas.hpp>
 #include <neogfx/audio/audio_bitstream.hpp>
 #include <neogfx/audio/audio_oscillator.hpp>
+#include <neogfx/audio/audio_sample.hpp>
 
 struct smbContext;
 smbContext* smbCreateContext(long fftFrameSize);
@@ -121,62 +122,6 @@ namespace neogfx
 		return true;
 	}
 
-	class pure_tone : public audio_bitstream<i_audio_bitstream>
-	{
-	public:
-		pure_tone(audio_sample_rate aSampleRate, float aFrequency) :
-			audio_bitstream<i_audio_bitstream>{ aSampleRate },
-			iOscillator{ aSampleRate, aFrequency }
-		{
-		}
-	public:
-		audio_frame_count length() const override
-		{
-			return sample_rate();
-		}
-		void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) override
-		{
-			iOscillator.generate(aFrameCount, aOutputFrames);
-		}
-		void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) override
-		{
-			iOscillator.generate_from(aFrameFrom, aFrameCount, aOutputFrames);
-		}
-	private:
-		audio_oscillator iOscillator;
-	};
-
-	class sample : public audio_bitstream<i_audio_bitstream>
-	{
-	public:
-		sample(audio_sample_rate aSampleRate, std::vector<float>&& aPcmFrames) :
-			audio_bitstream<i_audio_bitstream>{ aSampleRate },
-			iPcmFrames{ aPcmFrames }
-		{
-		}
-	public:
-		audio_frame_count length() const override
-		{
-			return iPcmFrames.size();
-		}
-		void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) override
-		{
-			generate_from(aChannel, iCursor, aFrameCount, aOutputFrames);
-		}
-		void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) override
-		{
-			std::fill(aOutputFrames, aOutputFrames + aFrameCount, 0.0f);
-			if (aFrameFrom >= iPcmFrames.size())
-				return;
-			auto count = std::min(iPcmFrames.size() - aFrameFrom, aFrameCount);
-			std::copy(std::next(iPcmFrames.begin(), aFrameFrom), std::next(iPcmFrames.begin(), aFrameFrom + count), aOutputFrames);
-			iCursor = aFrameFrom + count;
-		}
-	private:
-		std::vector<float> iPcmFrames;
-		audio_frame_index iCursor = 0ULL;
-	};
-
 	i_audio_bitstream& audio_instrument_atlas::instrument(neogfx::instrument aInstrument, audio_sample_rate aSampleRate, note aNote)
 	{
 		note_key const key{ aInstrument, aSampleRate, aNote };
@@ -187,7 +132,7 @@ namespace neogfx
 
 		if (aInstrument == neogfx::instrument::PureTone)
 		{
-			iNotes[key] = make_ref<pure_tone>(aSampleRate, frequency(aNote));
+			iNotes[key] = make_ref<audio_oscillator>(aSampleRate, frequency(aNote));
 			return *iNotes[key];
 		}
 
@@ -231,7 +176,7 @@ namespace neogfx
 			smbDestroyContext(context);
 		}
 
-		iNotes[key] = make_ref<sample>(aSampleRate, std::move(entireSample));
+		iNotes[key] = make_ref<audio_sample>(aSampleRate, std::move(entireSample));
 
 		return *iNotes[key];
 	}

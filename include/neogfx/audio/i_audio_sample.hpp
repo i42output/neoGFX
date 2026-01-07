@@ -21,13 +21,13 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/audio/i_audio_bitstream.hpp>
+
 namespace neogfx
 {
-	class i_audio_sample : public i_reference_counted
+	class i_audio_sample : public i_audio_bitstream
 	{
 	public:
 		using abstract_type = i_audio_sample;
-	public:
-		virtual ~i_audio_sample() = default;
 	};
 }

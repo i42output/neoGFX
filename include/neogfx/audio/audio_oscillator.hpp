@@ -21,32 +21,28 @@
 
 #include <neogfx/neogfx.hpp>
 
+#include <neogfx/audio/audio_bitstream.hpp>
 #include <neogfx/audio/i_audio_oscillator.hpp>
 
 namespace neogfx
 {
-    class audio_oscillator : public reference_counted<i_audio_oscillator>
+    class audio_oscillator : public audio_bitstream<i_audio_oscillator>
     {
     public:
         audio_oscillator(audio_sample_rate aSampleRate, float aFrequency, float aAmplitude = 1.0f, oscillator_function aFunction = oscillator_function::Sine);
         audio_oscillator(audio_sample_rate aSampleRate, float aFrequency, float aAmplitude, std::function<float(float)> const& aFunction);
     public:
-        audio_sample_rate sample_rate() const final;
-        void set_sample_rate(audio_sample_rate aSampleRate) final;
         float frequency() const final;
         void set_frequency(float aFrequency) final;
-        float amplitude() const final;
-        void set_amplitude(float aAmplitude) final;
         oscillator_function function() const final;
         void set_function(oscillator_function aFunction) final;
         void set_function(std::function<float(float)> const& aFunction) final; ///< Note: not plugin-safe.
     public:
-        void generate(audio_sample_count aSampleCount, float* aOutputSamples) final;
-        void generate_from(audio_sample_index aSampleFrom, audio_sample_count aSampleCount, float* aOutputSamples) final;
+        audio_frame_count length() const final;
+        void generate(audio_channel aChannel, audio_frame_count aFrameCount, float* aOutputFrames) final;
+        void generate_from(audio_channel aChannel, audio_frame_index aFrameFrom, audio_frame_count aFrameCount, float* aOutputFrames) final;
     private:
-        audio_sample_rate iSampleRate;
         float iFrequency;
-        float iAmplitude;
         oscillator_function iFunction;
         std::function<float(float)> iCustomFunction;
         audio_sample_index iCursor = 0ULL;

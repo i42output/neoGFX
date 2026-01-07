@@ -87,7 +87,7 @@ namespace neogfx
             thread_local std::vector<float> componentResult;
             componentResult.resize(aFrameCount);
 
-            o->generate(aFrameCount, componentResult.data());
+            o->generate(audio_channel::Mono, aFrameCount, componentResult.data());
 
             auto outputSample = aOutputFrames;
             for (auto sampleComponent : componentResult)
@@ -105,7 +105,7 @@ namespace neogfx
             thread_local std::vector<float> componentResult;
             componentResult.resize(aFrameCount);
 
-            o->generate_from(aFrameFrom, aFrameCount, componentResult.data());
+            o->generate_from(audio_channel::Mono, aFrameFrom, aFrameCount, componentResult.data());
 
             auto outputSample = aOutputFrames;
             for (auto sampleComponent : componentResult)
