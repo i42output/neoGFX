@@ -173,25 +173,25 @@ namespace video_poker
         iBetMax.clicked([this]() { bet(MAX_BET); });
         iDeal.clicked([this]() { deal(); });
 
-        iTextures = ng::service<ng::i_rendering_engine>().texture_manager().create_texture_atlas();
-        // Assumes font "Card Characters" by "Harold's Fonts" has been installed.
-        auto const& values = { 'A', 'K', 'Q', 'J', '=', '9', '8', '7', '6', '5', '4', '3', '2', ' ' };
+        iTextures = ng::service<ng::i_rendering_engine>().texture_manager().create_texture_atlas(ng::size{ 1024.0, 2048.0 });
+        auto const& values = { " ", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
         ng::size const valueDimensions = { 72.0, 72.0 };
         auto& valueTextures = iTextures->create_sub_texture(ng::size{ valueDimensions.cx, values.size() * valueDimensions.cy }, 1.0, ng::texture_sampling::Multisample);
-        ng::font valueFont{ "Card Characters", "Regular", -valueDimensions.cy };
-        if (valueFont.family_name() != "Card Characters" &&
-            ng::message_box::question(*this, "Setup", "Please install font \"CARD CHARACTERS\" by \"Harold's Fonts\" before playing neoGFX Video Poker", "Exit game?") == ng::standard_button::Yes)
-            ng::app::instance().quit(EXIT_FAILURE);
+        ng::font valueFont{ "Audiowide", "Regular", -valueDimensions.cy };
         ng::graphics_context gcValue{ valueTextures };
         auto cursor = valueTextures.atlas_location().position();
         for (auto value : values)
         {
-            gcValue.draw_text(cursor, std::string( 1, value ), valueFont, ng::color::White);
+            gcValue.draw_text(cursor, value, valueFont, ng::color::White);
             cursor.y += valueDimensions.cy;
         }
-        iValueTextures.emplace(card::value::Joker, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position(), valueDimensions } });
-        for (auto v = card::value::Two; v <= card::value::Ace; v = static_cast<card::value>(static_cast<std::uint32_t>(v) + 1))
-            iValueTextures.emplace(v, ng::sub_texture{ valueTextures, ng::rect{ valueTextures.atlas_location().position() + ng::point{0.0, (static_cast<std::uint32_t>(card::value::Ace) - static_cast<std::uint32_t>(v)) * valueDimensions.cy}, valueDimensions } });
+        for (auto v = card::value::Joker; v <= card::value::Ace; v = static_cast<card::value>(static_cast<std::uint32_t>(v) + 1))
+            iValueTextures.emplace(v, ng::sub_texture{ 
+                valueTextures, 
+                ng::rect{ 
+                    valueTextures.atlas_location().position() + 
+                        ng::point{0.0, static_cast<std::uint32_t>(v) * valueDimensions.cy}, 
+                    valueDimensions } });
         iSuitTextures.emplace(card::suit::Club, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/club.png" }));
         iSuitTextures.emplace(card::suit::Diamond, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/diamond.png" }));
         iSuitTextures.emplace(card::suit::Spade, iTextures->create_sub_texture(ng::image{ ":/video_poker/resources/spade.png" }));
