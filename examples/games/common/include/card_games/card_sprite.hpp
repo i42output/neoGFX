@@ -132,12 +132,12 @@ namespace neogames
 
             const ng::mat33 uvRotate180{ { -1.0, 0.0, 0.0 }, { 0.0, -1.0, 0.0 }, { 1.0, 1.0, 1.0 } };
 
-            ng::add_patch(mesh, meshRenderer, ng::rect{ aabb.bottom_right() + ng::size{ -0.2 }, ng::size{ 0.2 } }, aCardTextures.value_texture(aCard), uvRotate180);
+            ng::add_patch(mesh, meshRenderer, ng::rect{ aabb.bottom_right() + ng::delta{ -0.2 }, ng::size{ 0.2 } }, aCardTextures.value_texture(aCard), uvRotate180);
             meshRenderer.patches.back().material.color = ng::to_ecs_component(aCard == basic_card<GameTraits>::color::Black ? ng::color::Black : ng::color{ 213, 0, 0 });
 
             // Card suit textures under card value textures...
-            ng::add_patch(mesh, meshRenderer, ng::rect{ aabb.top_left() + ng::delta{0.025, 0.4 - 0.15}, ng::size{ 0.15 } }, aCardTextures.suit_texture(aCard));
-            ng::add_patch(mesh, meshRenderer, ng::rect{ aabb.bottom_right() + ng::size{ -0.2 } +ng::delta{ 0.025, -0.2 }, ng::size{ 0.15 } }, aCardTextures.suit_texture(aCard), uvRotate180);
+            ng::add_patch(mesh, meshRenderer, ng::rect{ aabb.top_left() + ng::delta{ 0.025, 0.4 - 0.15 }, ng::size{ 0.15 } }, aCardTextures.suit_texture(aCard));
+            ng::add_patch(mesh, meshRenderer, ng::rect{ aabb.bottom_right() + ng::delta{ 0.025 - 0.2, -0.4 }, ng::size{ 0.15 } }, aCardTextures.suit_texture(aCard), uvRotate180);
 
             auto faceTextureRects = face_texture_rects(aabb, static_cast<typename basic_card<GameTraits>::value>(aCard));
             for (auto const& r : faceTextureRects)

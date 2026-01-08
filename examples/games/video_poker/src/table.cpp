@@ -182,7 +182,8 @@ namespace video_poker
         auto cursor = valueTextures.atlas_location().position();
         for (auto value : values)
         {
-            gcValue.draw_text(cursor, value, valueFont, ng::color::White);
+            auto textExtent = gcValue.text_extent(value, valueFont);
+            gcValue.draw_text(cursor + ng::point{ (valueDimensions.cx - textExtent.cx) / 2.0, 0.0 }, value, valueFont, ng::color::White);
             cursor.y += valueDimensions.cy;
         }
         for (auto v = card::value::Joker; v <= card::value::Ace; v = static_cast<card::value>(static_cast<std::uint32_t>(v) + 1))
@@ -330,7 +331,6 @@ namespace video_poker
                         no_win();
                     auto lastStake = iStake;
                     iStake = 0;
-                    bet(lastStake);
                     change_state(iCredit + iStake > 0 ? table_state::TakeBet : table_state::GameOver);
                 }
                 break;
