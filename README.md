@@ -42,6 +42,7 @@ v1.20   | WID + 36 months | macOS support
 
 ![](http://neogfx.org/temp/select_font.png?id=2)
 ![](http://neogfx.org/temp/gradient2.png?id=1)
+![](http://neogfx.org/temp/video_poker.png?id=1)
 ![](http://neogfx.org/temp/lol.png?id=4)
 
 
@@ -87,6 +88,7 @@ HID: Game Controllers           | 80      |     Calibration/settings UI; DirectI
 Multi-monitor					| 50      |     DPI changes when changing or dragging between monitors
 Scene Graph						| 0		  |		
 Skins                           | 40      |
+
 
 
 
