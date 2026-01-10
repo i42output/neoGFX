@@ -87,7 +87,7 @@ namespace video_poker
         iCredit{ 0 },
         iStake{ 0 },
         iMainLayout{ *this, ng::alignment::Center },
-        iLabelTitle1{ iMainLayout, "Neon Jacks" },
+        iLabelTitle1{ iMainLayout, "NEOGFX" },
         iLabelTitle2{ iMainLayout, "VIDEO POKER" },
         iScoreMainLayout{ iMainLayout },
         iScoreLayout{ iScoreMainLayout, ng::alignment::Center },
@@ -158,7 +158,7 @@ namespace video_poker
         iLabelHighScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 }.with_outline({ 1.0_dp }));
         iLabelHighScoreValue.text_widget().set_text_format(score_text(ng::color::White));
         iLabelTitle1.text_widget().set_font(ng::font{ "Meow Script", "Regular", 64.0 });
-        iLabelTitle1.text_widget().set_text_format(neon_text(ng::color::Red));
+        iLabelTitle1.text_widget().set_text_format(neon_text(ng::color::Goldenrod));
         iLabelTitle2.text_widget().set_font(ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 1.0_dp }));
         iLabelTitle2.text_widget().set_text_format(shiny_text(ng::color::Green));
         iSpacer1.set_weight(ng::size{ 0.1 });
