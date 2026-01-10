@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Tools_Debug|x64">
+      <Configuration>Tools_Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Tools|x64">
+      <Configuration>Tools</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup>
+    <UseNativeEnvironment>true</UseNativeEnvironment>
+  </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BD16CD23-FC2A-46F7-ADF1-A5B2F8F0468C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>neogfx_widget</RootNamespace>
+    <ProjectName>neogfx_widget</ProjectName>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)d</TargetName>
+    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
+    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
+    <OutDir>$(ProjectDir)\..\..\..\lib\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;DEBUG_HID;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;/usr/local/include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>Disabled</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NEOGFX_DEBUG;GLEW_STATIC;NEOLIB_HOSTED_ENVIRONMENT;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\..\include;/usr/local/include;..\..\..\3rdparty\libpng\libpng-1.6.21\include;$(DevDirHarfBuzz)\src;$(DevDirFreetype)\include;$(DevDirVulkan)\Include;$(DevDirGlew)\include;$(IntermediateOutputPath)\GeneratedFiles\;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PrecompiledHeaderFile>neogfx/neogfx.hpp</PrecompiledHeaderFile>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/bigobj /MP4 %(AdditionalOptions)</AdditionalOptions>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ConformanceMode>true</ConformanceMode>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
+    <ClCompile Include="..\..\..\src\core\transition_animator.cpp" />
+    <ClCompile Include="..\..\..\src\core\style_sheet.cpp" />
+    <ClCompile Include="..\..\..\src\core\html.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\gradient_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\image.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\color_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\game_controller_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\gradient_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\message_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\paragraph_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\dialog\settings_dialog.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\border_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\flow_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\grid_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\async_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\spacer.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\layout\vertical_layout.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\color_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\default_skin.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\dock.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\dockable.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\font_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\group_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\header_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\image_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\item_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\label.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\line_edit.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\list_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\menu.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\progress_bar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\slider.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\status_bar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\table_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tab_bar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tab_button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tab_page.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tab_page_container.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\terminal.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\text_edit.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\text_widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\normal_title_bar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tool_title_bar.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\web_view.cpp" />
+    <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
+    <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
+    <ClCompile Include="..\..\..\src\hid\display.cpp" />
+    <ClCompile Include="..\..\..\src\hid\game_controller.cpp" />
+    <ClCompile Include="..\..\..\src\hid\game_controllers.cpp" />
+    <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\src\gui\layout\flow_layout.ipp" />
+    <None Include="..\..\..\src\gui\layout\layout.ipp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

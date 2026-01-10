@@ -18,7 +18,7 @@ using namespace ng::unit_literals;
 
 int main(int argc, char* argv[])
 {
-    ng::app app(argc, argv, "Neon Jacks Video Poker 1.0");
+    ng::app app(argc, argv, "Neon Jacks Video Poker");
 
     try
     {

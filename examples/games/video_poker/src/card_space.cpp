@@ -169,7 +169,7 @@ namespace video_poker
         };
         iHoldButton.Toggled(update_hold);
 
-        iCardWidget.set_minimum_size(iCardWidget.minimum_size() * (iHoldButton.minimum_size().cx / iCardWidget.minimum_size().cx));
+        iCardWidget.set_minimum_size((iCardWidget.minimum_size() * (iHoldButton.minimum_size().cx / iCardWidget.minimum_size().cx)).ceil());
 
         iTable.state_changed([this](table_state) { update_widgets(); });
         update_widgets();

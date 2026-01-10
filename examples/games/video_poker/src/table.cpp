@@ -137,20 +137,26 @@ namespace video_poker
                     aColor.lighter(0x40),
                     ng::text_effect{ng::text_effect_type::Glow, aColor, a, {}, b, c } };
             };
+        auto score_text = [](const ng::color& aColor)
+            {
+                return ng::text_format{
+                    aColor,
+                    ng::text_effect{ng::text_effect_type::Outline, ng::color::Black } };
+            };
         auto shiny_text = [](const ng::color& aColor)
             {
                 return ng::text_format{
                     ng::gradient{ { ng::color::Black, aColor, ng::color::Black } },
                     ng::text_effect{ng::text_effect_type::Outline, ng::color::White } };
             };
-        iLabelScore.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
-        iLabelScore.text_widget().set_text_color(ng::color::Crimson);
-        iLabelScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
-        iLabelScoreValue.text_widget().set_text_color(ng::color::White);
-        iLabelHighScore.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
-        iLabelHighScore.text_widget().set_text_color(ng::color::Crimson);
-        iLabelHighScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
-        iLabelHighScoreValue.text_widget().set_text_color(ng::color::White);
+        iLabelScore.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 }.with_outline({ 1.0_dp }));
+        iLabelScore.text_widget().set_text_format(score_text(ng::color::Crimson));
+        iLabelScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 }.with_outline({ 1.0_dp }));
+        iLabelScoreValue.text_widget().set_text_format(score_text(ng::color::White));
+        iLabelHighScore.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 }.with_outline({ 1.0_dp }));
+        iLabelHighScore.text_widget().set_text_format(score_text(ng::color::Crimson));
+        iLabelHighScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 }.with_outline({ 1.0_dp }));
+        iLabelHighScoreValue.text_widget().set_text_format(score_text(ng::color::White));
         iLabelTitle1.text_widget().set_font(ng::font{ "Meow Script", "Regular", 64.0 });
         iLabelTitle1.text_widget().set_text_format(neon_text(ng::color::Red));
         iLabelTitle2.text_widget().set_font(ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 1.0_dp }));

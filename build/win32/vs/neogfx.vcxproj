@@ -25,7 +25,7 @@
     <ProjectGuid>{405D8C5B-DD6B-418A-9331-D1EA18A5A83D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>neogfx</RootNamespace>
-    <ProjectName>neoGFX</ProjectName>
+    <ProjectName>neogfx</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -632,7 +632,6 @@
     <ClCompile Include="..\..\..\src\app\native\windows_services.cpp" />
     <ClCompile Include="..\..\..\src\app\palette.cpp" />
     <ClCompile Include="..\..\..\src\app\resource.cpp" />
-    <ClCompile Include="..\..\..\src\app\resource_manager.cpp" />
     <ClCompile Include="..\..\..\src\app\settings.cpp" />
     <ClCompile Include="..\..\..\src\app\style.cpp" />
     <ClCompile Include="..\..\..\src\audio\3rdparty\smb\smbPitchShift.cpp" />
@@ -645,12 +644,9 @@
     <ClCompile Include="..\..\..\src\audio\audio_oscillator.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_sample.cpp" />
     <ClCompile Include="..\..\..\src\audio\audio_waveform.cpp" />
-    <ClCompile Include="..\..\..\src\core\transition_animator.cpp" />
     <ClCompile Include="..\..\..\src\core\async_task.cpp" />
     <ClCompile Include="..\..\..\src\core\async_thread.cpp" />
-    <ClCompile Include="..\..\..\src\core\style_sheet.cpp" />
     <ClCompile Include="..\..\..\src\core\units.cpp" />
-    <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\game\animator.cpp" />
     <ClCompile Include="..\..\..\src\game\collision_detector.cpp" />
     <ClCompile Include="..\..\..\src\game\ecs.cpp" />
@@ -663,12 +659,10 @@
     <ClCompile Include="..\..\..\src\gfx\color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\fragment_shader.cpp" />
     <ClCompile Include="..\..\..\src\gfx\gradient.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\gradient_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_context.cpp" />
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />
     <ClCompile Include="..\..\..\src\gfx\hsl_color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\hsv_color.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\image.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\native_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_helpers.cpp" />
@@ -683,15 +677,12 @@
     <ClCompile Include="..\..\..\src\gfx\native\vulkan\vulkan_texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\windows_renderer.cpp" />
     <ClCompile Include="..\..\..\src\gfx\rect_pack.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
     <ClCompile Include="..\..\..\src\gfx\standard_shader_program.cpp" />
     <ClCompile Include="..\..\..\src\gfx\sub_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture_atlas.cpp" />
     <ClCompile Include="..\..\..\src\gfx\texture_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\emoji_atlas.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\font_manager.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\glyph.cpp" />
@@ -699,25 +690,6 @@
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\native\native_font_face.cpp" />
     <ClCompile Include="..\..\..\src\gfx\vertex_shader.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\color_dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\dialog_button_box.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\font_dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\game_controller_dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\gradient_dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\message_box.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\paragraph_dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\dialog\settings_dialog.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\border_layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\flow_layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\grid_layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\async_layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\spacer.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\stack_layout.cpp" />
-    <ClCompile Include="..\..\..\src\gui\layout\vertical_layout.cpp" />
     <ClCompile Include="..\..\..\src\gui\mvc\controller.cpp" />
     <ClCompile Include="..\..\..\src\gui\mvc\view.cpp">
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)mvc_view.obj</ObjectFileName>
@@ -726,67 +698,13 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)mvc_view.obj</ObjectFileName>
     </ClCompile>
     <ClCompile Include="..\..\..\src\gui\mvc\view_container.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\button.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\check_box.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\color_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\cursor.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\default_skin.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\dock.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\dockable.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\drop_list.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\font_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\framed_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\gradient_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\group_box.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\header_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\image_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\item_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\label.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\line_edit.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\list_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\menu.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\menu_bar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\menu_item.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\menu_item_widget.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\native_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\progress_bar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\push_button.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\radio_button.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\scrollable_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\scrollbar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\skin_manager.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\slider.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\spin_box.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\splitter.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\status_bar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\table_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\tab_bar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\tab_button.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\tab_page.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\tab_page_container.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\terminal.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\text_edit.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\text_field.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\text_widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\normal_title_bar.cpp" />
     <ClCompile Include="..\..\..\src\gui\widget\timer.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\toolbar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\toolbar_button.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\tool_title_bar.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\tree_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\web_view.cpp" />
-    <ClCompile Include="..\..\..\src\gui\widget\widget.cpp" />
-    <ClCompile Include="..\..\..\src\gui\window\context_menu.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\native_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_surface.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\virtual_window.cpp" />
     <ClCompile Include="..\..\..\src\gui\window\native\windows_window.cpp" />
-    <ClCompile Include="..\..\..\src\gui\window\popup_menu.cpp" />
-    <ClCompile Include="..\..\..\src\gui\window\window.cpp" />
-    <ClCompile Include="..\..\..\src\hid\display.cpp" />
-    <ClCompile Include="..\..\..\src\hid\game_controller.cpp" />
-    <ClCompile Include="..\..\..\src\hid\game_controllers.cpp" />
     <ClCompile Include="..\..\..\src\hid\hid_devices.cpp" />
     <ClCompile Include="..\..\..\src\hid\keyboard.cpp" />
     <ClCompile Include="..\..\..\src\hid\mouse.cpp" />
@@ -801,7 +719,6 @@
     <ClCompile Include="..\..\..\src\hid\nest.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp" />
     <ClCompile Include="..\..\..\src\hid\surface_window.cpp" />
-    <ClCompile Include="..\..\..\src\hid\window_manager.cpp" />
     <ClCompile Include="..\..\..\src\neogfx.cpp" />
     <ClCompile Include="neoGFX\x64\Debug\GeneratedFiles\icons.res.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -990,8 +907,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Tools_Debug|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)/GeneratedFiles/%(Filename)%(Extension).hpp</Outputs>
     </CustomBuild>
-    <None Include="..\..\..\src\gui\layout\flow_layout.ipp" />
-    <None Include="..\..\..\src\gui\layout\layout.ipp" />
     <CustomBuild Include="..\..\..\src\icons.nrc">
       <FileType>Document</FileType>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(DevDirNeogfx)/tools/bin/nrc %(Identity) $(IntDir)/GeneratedFiles</Command>
