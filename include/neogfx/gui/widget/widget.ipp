@@ -1045,10 +1045,6 @@ namespace neogfx
     {
         auto& self = *this;
 
-#ifdef NEOGFX_DEBUG
-        if (service<i_debug>().layout_item() == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << std::endl;
-#endif // NEOGFX_DEBUG
         if (self.has_size_policy())
             return base_type::size_policy();
         else if (self.has_fixed_size())

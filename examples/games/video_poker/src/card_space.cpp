@@ -47,11 +47,15 @@ namespace video_poker
 
     ng::size card_widget::minimum_size(const ng::optional_size& aAvailableSpace) const
     {
-        return ceil_rasterized(ng::from_mm(kBridgeCardSize * 0.5));
+        if (has_minimum_size())
+            return widget::minimum_size(aAvailableSpace);
+        return ceil_rasterized(ng::from_mm(kBridgeCardSize) * 0.5);
     }
 
     ng::size card_widget::maximum_size(const ng::optional_size& aAvailableSpace) const
     {
+        if (has_maximum_size())
+            return widget::maximum_size(aAvailableSpace);
         return ceil_rasterized(minimum_size(aAvailableSpace) * 2.0);
     }
         
@@ -140,9 +144,12 @@ namespace video_poker
         iHoldButton{ iVerticalLayout, "HOLD\n CANCEL " },
         iCard{ nullptr }
     {
-        set_size_policy(ng::size_constraint::ExpandingUniform);
         set_ignore_mouse_events(true);
+
+        set_size_policy(ng::size_constraint::ExpandingUniform);
+
         iVerticalLayout.set_spacing(ng::size{ 8.0 });
+
         iHoldButton.set_consider_ancestors_for_mouse_events(false);
         iHoldButton.set_size_policy(ng::size_constraint::Minimum);
         iHoldButton.set_base_color(ng::color::Black);
@@ -161,6 +168,9 @@ namespace video_poker
             }
         };
         iHoldButton.Toggled(update_hold);
+
+        iCardWidget.set_minimum_size(iCardWidget.minimum_size() * (iHoldButton.minimum_size().cx / iCardWidget.minimum_size().cx));
+
         iTable.state_changed([this](table_state) { update_widgets(); });
         update_widgets();
     }

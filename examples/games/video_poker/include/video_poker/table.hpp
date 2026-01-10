@@ -1,5 +1,5 @@
 ﻿/*
-neogfx C++ App/Game Engine - Examples - Games - Video Poker
+ng C++ App/Game Engine - Examples - Games - Video Poker
 Copyright(C) 2017 Leigh Johnston
 
 This program is free software: you can redistribute it and / or modify
@@ -49,21 +49,21 @@ namespace video_poker
 
     class outcome;
 
-    class table : public neogfx::game::canvas, public i_table, private i_card_textures
+    class table : public ng::game::canvas, public i_table, private i_card_textures
     {
     private:
         typedef std::shared_ptr<card_space> card_space_pointer;
     public:
-        table(neogfx::i_layout& aLayout);
+        table(ng::i_layout& aParentLayout);
         ~table();
     public:
         table_state state() const override;
     public:
         const i_card_textures& textures() const override;
     private:
-        const neogfx::i_texture& value_texture(const card& aCard) const override;
-        const neogfx::i_texture& suit_texture(const card& aCard) const override;
-        const neogfx::i_texture& face_texture(const card& aCard) const override;
+        const ng::i_texture& value_texture(const card& aCard) const override;
+        const ng::i_texture& suit_texture(const card& aCard) const override;
+        const ng::i_texture& face_texture(const card& aCard) const override;
     private:
         void add_credit(credit_t aCredit);
         void bet(credit_t aBet);
@@ -78,32 +78,40 @@ namespace video_poker
         credit_t iStake;
         std::optional<deck> iDeck;
         std::optional<hand> iHand;
-        neogfx::vertical_layout iMainLayout;
-        neogfx::label iLabelTitle1;
-        neogfx::label iLabelTitle2;
-        neogfx::vertical_spacer iSpacer1;
-        neogfx::horizontal_layout iSpacesLayout;
-        neogfx::horizontal_spacer iSpacer2;
+        ng::vertical_layout iMainLayout;
+        ng::horizontal_layout iScoreMainLayout;
+        ng::vertical_layout iScoreLayout;
+        ng::label iLabelScore;
+        ng::label iLabelScoreValue;
+        ng::horizontal_spacer iSpacer0;
+        ng::vertical_layout iHighScoreLayout;
+        ng::label iLabelHighScore;
+        ng::label iLabelHighScoreValue;
+        ng::label iLabelTitle1;
+        ng::label iLabelTitle2;
+        ng::vertical_spacer iSpacer1;
+        ng::horizontal_layout iSpacesLayout;
+        ng::horizontal_spacer iSpacer2;
         std::array<card_space_pointer, 5> iSpaces;
-        neogfx::horizontal_spacer iSpacer3;
-        neogfx::vertical_spacer iSpacer4;
-        neogfx::horizontal_layout iGambleLayout;
-        neogfx::push_button iAddCredit;
+        ng::horizontal_spacer iSpacer3;
+        ng::vertical_spacer iSpacer4;
+        ng::horizontal_layout iGambleLayout;
+        ng::push_button iAddCredit;
         flashing_button iBetMinus;
         flashing_button iBetPlus;
         flashing_button iBetMax;
-        neogfx::horizontal_spacer iSpacerGamble;
+        ng::horizontal_spacer iSpacerGamble;
         flashing_button iDeal;
-        neogfx::horizontal_layout iInfoBarLayout;
-        neogfx::label iLabelCredits;
-        neogfx::label iLabelCreditsValue;
-        neogfx::horizontal_spacer iSpacer5;
-        neogfx::label iLabelStake;
-        neogfx::label iLabelStakeValue;
-        std::unique_ptr<neogfx::i_texture_atlas> iTextures;
-        std::map<card::value, neogfx::sub_texture> iValueTextures;
-        std::map<card::suit, neogfx::sub_texture> iSuitTextures;
-        std::map<card::value, neogfx::sub_texture> iFaceTextures;
+        ng::horizontal_layout iInfoBarLayout;
+        ng::label iLabelCredits;
+        ng::label iLabelCreditsValue;
+        ng::horizontal_spacer iSpacer5;
+        ng::label iLabelStake;
+        ng::label iLabelStakeValue;
+        std::unique_ptr<ng::i_texture_atlas> iTextures;
+        std::map<card::value, ng::sub_texture> iValueTextures;
+        std::map<card::suit, ng::sub_texture> iSuitTextures;
+        std::map<card::value, ng::sub_texture> iFaceTextures;
         std::unique_ptr<outcome> iOutcome;
     };
 }

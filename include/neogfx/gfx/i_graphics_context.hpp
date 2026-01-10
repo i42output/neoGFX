@@ -758,9 +758,11 @@ namespace neogfx
     template <typename ValueType = double, std::uint32_t W = 5>
     inline std::array<std::array<ValueType, W>, W> static_gaussian_filter(ValueType aSigma = 1.0)
     {
-        const std::int32_t mean = static_cast<std::int32_t>(W / 2);
+        static_assert(W % 2 == 1);
+
+        constexpr std::int32_t mean = static_cast<std::int32_t>(W / 2);
         std::array<std::array<ValueType, W>, W> kernel = {};
-        if (aSigma != 0)
+        if (aSigma > 0.0)
         {
             ValueType sum = 0.0;
             for (std::int32_t x = -mean; x <= mean; ++x)
@@ -768,7 +770,8 @@ namespace neogfx
                 for (std::int32_t y = -mean; y <= mean; ++y)
                 {
                     kernel[x + mean][y + mean] =
-                        static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
+                        static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * 
+                            std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
                     sum += kernel[x + mean][y + mean];
                 }
             }
@@ -784,6 +787,8 @@ namespace neogfx
     template <typename ValueType = double>
     inline boost::multi_array<ValueType, 2> dynamic_gaussian_filter(std::uint32_t aKernelSize = 5, ValueType aSigma = 1.0)
     {
+        assert(aKernelSize % 2 == 1);
+
         const std::int32_t mean = static_cast<std::int32_t>(aKernelSize / 2);
         boost::multi_array<ValueType, 2> kernel(boost::extents[aKernelSize][aKernelSize]);
         if (aSigma != 0)
@@ -794,7 +799,8 @@ namespace neogfx
                 for (std::int32_t y = -mean; y <= mean; ++y)
                 {
                     kernel[x + mean][y + mean] =
-                        static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
+                        static_cast<ValueType>((1.0 / (2.0 * boost::math::constants::pi<ValueType>() * aSigma * aSigma)) * 
+                            std::exp(-((x * x + y * y) / (2.0 * aSigma * aSigma))));
                     sum += kernel[x + mean][y + mean];
                 }
             }

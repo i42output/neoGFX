@@ -349,7 +349,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
             if (service<i_debug>().layout_item() == &item)
-                service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (1) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (1) of " << typeid(item).name() << " by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
             auto const itemSizePolicy = item.effective_size_policy();
@@ -403,7 +403,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
                 if (service<i_debug>().layout_item() == &item)
-                    service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (2) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                    service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (2) of " << typeid(item).name() << " by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
                 auto const minSize = AxisPolicy::cx(item.transformed_minimum_size(availableSpace));
@@ -466,7 +466,7 @@ namespace neogfx
 
 #ifdef NEOGFX_DEBUG
             if (service<i_debug>().layout_item() == &item)
-                service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (3) by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
+                service<debug::logger>() << neolib::logger::severity::Debug << "Consideration (3) of " << typeid(item).name() << " by " << typeid(*this).name() << "::do_layout_items(" << aPosition << ", " << aSize << ")" << std::endl;
 #endif // NEOGFX_DEBUG
 
             auto const itemMinSize = item.transformed_minimum_size(availableSpace);

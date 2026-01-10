@@ -135,7 +135,10 @@ namespace neogfx
 
     size window::client::minimum_size(optional_size const& aAvailableSpace) const
     {
-        if (has_minimum_size() || (root().style() & window_style::Resize) != window_style::Resize || querying_ideal_size())
+        if (has_minimum_size() || 
+            (root().style() & window_style::Resize) != window_style::Resize || 
+            (root().style() & window_style::SizeToContents) == window_style::SizeToContents ||
+            querying_ideal_size())
             return framed_scrollable_widget::minimum_size(aAvailableSpace);
         return service<i_app>().current_style().padding(padding_role::Window).size();
     }
@@ -1036,7 +1039,12 @@ namespace neogfx
         set_decoration_style(window_style_to_decoration_style(style()));
 
         if ((style() & (window_style::SizeToContents | window_style::Main)) == (window_style::SizeToContents | window_style::Main))
-            layout(standard_layout::Dock, layout_position::Center).parent_layout().set_minimum_size({});
+        {
+            if (has_layout(standard_layout::Toolbar))
+                layout(standard_layout::Toolbar, layout_position::Center).parent_layout().set_minimum_size({});
+            if (has_layout(standard_layout::Dock))
+                layout(standard_layout::Dock, layout_position::Center).parent_layout().set_minimum_size({});
+        }
 
         if (is_fullscreen() || (service<i_app>().program_options().nest() && &ultimate_ancestor() == this))
         {

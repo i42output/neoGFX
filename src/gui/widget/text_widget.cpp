@@ -259,7 +259,7 @@ namespace neogfx
     void text_widget::set_text_color(const optional_color& aTextColor)
     {
         if (has_text_format())
-            set_text_format(neogfx::text_format{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{}, iTextAppearance->paper(), iTextAppearance->effect() });
+            set_text_format(text_format().with_ink(aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{}));
         else
             set_text_format(neogfx::text_format{ aTextColor != std::nullopt ? *aTextColor : neogfx::text_color{} });
     }

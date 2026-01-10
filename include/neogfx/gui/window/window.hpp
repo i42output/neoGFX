@@ -27,8 +27,6 @@
 #include <neogfx/hid/i_surface_window.hpp>
 #include <neogfx/gui/widget/framed_widget.hpp>
 #include <neogfx/gui/widget/scrollable_widget.hpp>
-#include <neogfx/gui/layout/vertical_layout.hpp>
-#include <neogfx/gui/layout/border_layout.hpp>
 #include <neogfx/gui/widget/normal_title_bar.hpp>
 
 namespace neogfx

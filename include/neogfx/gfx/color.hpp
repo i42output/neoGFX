@@ -445,6 +445,7 @@ namespace neogfx
         static const sRGB_color Cornsilk2;
         static const sRGB_color Cornsilk3;
         static const sRGB_color Cornsilk4;
+        static const sRGB_color Crimson;
         static const sRGB_color Cyan;
         static const sRGB_color Cyan1;
         static const sRGB_color Cyan2;

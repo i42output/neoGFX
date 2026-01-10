@@ -29,16 +29,19 @@ int main(int argc, char* argv[])
         (void)ng::font::load_from_file(":/video_poker/resources/Audiowide-Regular.ttf");
         (void)ng::font::load_from_file(":/video_poker/resources/MeowScript-Regular.ttf");
         (void)ng::font::load_from_file(":/video_poker/resources/GoogleSansFlex_72pt-ExtraBold.ttf");
+        (void)ng::font::load_from_file(":/video_poker/resources/SyneMono-Regular.ttf");
 
         std::optional<ng::window> windowObject;
         if (!app.program_options().full_screen())
-            windowObject.emplace(ng::size{ 614_dip, 600_dip });
+            windowObject.emplace(ng::window_style::Default | ng::window_style::SizeToContents);
         else
             windowObject.emplace(ng::video_mode{ *app.program_options().full_screen() });
 
         auto& window = *windowObject;
 
         video_poker::table table{ window.client_layout() };
+
+        window.center_on_parent();
 
         table.set_background_opacity(0.0);
         table.parent().set_background_opacity(0.0);

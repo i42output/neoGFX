@@ -558,10 +558,6 @@ namespace neogfx
 
     size_policy layout::size_policy() const
     {
-#ifdef NEOGFX_DEBUG
-        if (service<i_debug>().layout_item() == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::size_policy()" << std::endl;
-#endif
         if (has_size_policy())
             return base_type::size_policy();
         neogfx::size_policy result{ size_constraint::Minimum, size_constraint::Minimum };

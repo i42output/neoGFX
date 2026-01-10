@@ -43,7 +43,7 @@ namespace video_poker
     {
     public:
         card_widget(ng::i_layout& aLayout, ng::game::canvas& aCanvas, const i_card_textures& aCardTextures);
-    protected:
+    public:
         ng::size minimum_size(const ng::optional_size& aAvailableSpace = {}) const override;
         ng::size maximum_size(const ng::optional_size& aAvailableSpace = {}) const override;
     protected:

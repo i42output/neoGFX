@@ -57,6 +57,10 @@ namespace neogfx
 
     size stack_layout::minimum_size(optional_size const& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().layout_item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "stack_layout::minimum_size(" << aAvailableSpace << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         size result;
         if (items_visible() != 0)
         {
@@ -73,11 +77,19 @@ namespace neogfx
             result.cx = std::max(result.cx, layout::minimum_size(aAvailableSpace).cx);
             result.cy = std::max(result.cy, layout::minimum_size(aAvailableSpace).cy);
         }
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().layout_item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "stack_layout::minimum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 
     size stack_layout::maximum_size(optional_size const& aAvailableSpace) const
     {
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().layout_item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "stack_layout::maximum_size(" << aAvailableSpace << ")" << std::endl;
+#endif // NEOGFX_DEBUG
         size result{ size::max_size() };
         for (auto const& itemRef : items())
         {
@@ -98,6 +110,10 @@ namespace neogfx
             result.cx = std::min(result.cx, layout::maximum_size(aAvailableSpace).cx);
         if (result.cy != size::max_dimension())
             result.cy = std::min(result.cy, layout::maximum_size(aAvailableSpace).cy);
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().layout_item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << "stack_layout::maximum_size(" << aAvailableSpace << ") --> " << result << std::endl;
+#endif // NEOGFX_DEBUG
         return result;
     }
 

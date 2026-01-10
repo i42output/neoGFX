@@ -256,6 +256,7 @@ namespace neogfx
     const sRGB_color sRGB_color::Cornsilk2 = sRGB_color{ 0xEE, 0xE8, 0xCD };
     const sRGB_color sRGB_color::Cornsilk3 = sRGB_color{ 0xCD, 0xC8, 0xB1 };
     const sRGB_color sRGB_color::Cornsilk4 = sRGB_color{ 0x8B, 0x88, 0x78 };
+    const sRGB_color sRGB_color::Crimson = sRGB_color{ 0xDC, 0x14, 0x3C };
     const sRGB_color sRGB_color::Cyan = sRGB_color{ 0x00, 0xFF, 0xFF };
     const sRGB_color sRGB_color::Cyan1 = sRGB_color{ 0x00, 0xFF, 0xFF };
     const sRGB_color sRGB_color::Cyan2 = sRGB_color{ 0x00, 0xEE, 0xEE };

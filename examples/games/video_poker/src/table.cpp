@@ -81,14 +81,22 @@ namespace video_poker
         }
     };
     
-    table::table(ng::i_layout& aLayout) :
-        ng::game::canvas{ aLayout, ng::game::make_ecs<ng::game::simple_physics_2d>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused) },
+    table::table(ng::i_layout& aParentLayout) :
+        ng::game::canvas{ aParentLayout, ng::game::make_ecs<ng::game::simple_physics_2d>(ng::game::ecs_flags::Default | ng::game::ecs_flags::CreatePaused) },
         iState{ table_state::TakeBet },
         iCredit{ 0 },
         iStake{ 0 },
         iMainLayout{ *this, ng::alignment::Center },
         iLabelTitle1{ iMainLayout, "Neon Jacks" },
         iLabelTitle2{ iMainLayout, "VIDEO POKER" },
+        iScoreMainLayout{ iMainLayout },
+        iScoreLayout{ iScoreMainLayout, ng::alignment::Center },
+        iLabelScore{ iScoreLayout, "1UP" },
+        iLabelScoreValue{ iScoreLayout, "00000000" },
+        iSpacer0{ iScoreMainLayout },
+        iHighScoreLayout{ iScoreMainLayout, ng::alignment::Center },
+        iLabelHighScore{ iHighScoreLayout, "HI-SCORE" },
+        iLabelHighScoreValue{ iHighScoreLayout, "00000000" },
         iSpacer1{ iMainLayout },
         iSpacesLayout{ iMainLayout },
         iSpacer2{ iSpacesLayout },
@@ -118,8 +126,11 @@ namespace video_poker
 
         set_layers(2);
 
-        iMainLayout.set_spacing(ng::size{ 4.0 });
-        iSpacesLayout.set_spacing(ng::size{ 16.0 });
+        iMainLayout.set_spacing(ng::size{ 2.0_dip });
+        iSpacesLayout.set_spacing(ng::size{ 8.0_dip });
+        iSpacesLayout.set_padding(ng::padding{ 16.0_dip });
+        iScoreLayout.set_spacing(ng::size{});
+        iHighScoreLayout.set_spacing(ng::size{});
         auto neon_text = [](const ng::color& aColor, double a = 4, double b = 10, double c = 2 )
             {
                 return ng::text_format{
@@ -132,6 +143,14 @@ namespace video_poker
                     ng::gradient{ { ng::color::Black, aColor, ng::color::Black } },
                     ng::text_effect{ng::text_effect_type::Outline, ng::color::White } };
             };
+        iLabelScore.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
+        iLabelScore.text_widget().set_text_color(ng::color::Crimson);
+        iLabelScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
+        iLabelScoreValue.text_widget().set_text_color(ng::color::White);
+        iLabelHighScore.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
+        iLabelHighScore.text_widget().set_text_color(ng::color::Crimson);
+        iLabelHighScoreValue.text_widget().set_font(ng::font{ "Syne Mono", "Regular", 26.0 });
+        iLabelHighScoreValue.text_widget().set_text_color(ng::color::White);
         iLabelTitle1.text_widget().set_font(ng::font{ "Meow Script", "Regular", 64.0 });
         iLabelTitle1.text_widget().set_text_format(neon_text(ng::color::Red));
         iLabelTitle2.text_widget().set_font(ng::font{ "Audiowide", "Regular", 48.0 }.with_outline({ 1.0_dp }));
