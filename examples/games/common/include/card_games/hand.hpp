@@ -46,6 +46,30 @@ namespace neogames
             {
             }
         public:
+            cards::const_iterator begin() const
+            {
+                return iCards.begin();
+            }
+            cards::const_iterator end() const
+            {
+                return iCards.end();
+            }
+            cards::const_iterator cbegin() const
+            {
+                return iCards.begin();
+            }
+            cards::const_iterator cend() const
+            {
+                return iCards.end();
+            }
+            cards::iterator begin()
+            {
+                return iCards.begin();
+            }
+            cards::iterator end()
+            {
+                return iCards.end();
+            }
             bool have_card_at(size_type aSlotIndex) const
             {
                 if (aSlotIndex >= iCards.size())

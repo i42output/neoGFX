@@ -34,6 +34,7 @@ namespace neogfx::game
     {
         material material;
         faces faces;
+        std::optional<i32> layer;
 
         struct meta : i_component_data::meta
         {
@@ -49,7 +50,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 2;
+                return 3;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -59,6 +60,8 @@ namespace neogfx::game
                     return component_data_field_type::ComponentData;
                 case 1:
                     return component_data_field_type::Face | component_data_field_type::Array;
+                case 2:
+                    return component_data_field_type::Int32 | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }
@@ -71,6 +74,8 @@ namespace neogfx::game
                     return material::meta::id();
                 case 1:
                     return neolib::uuid{};
+                case 2:
+                    return neolib::uuid{};
                 default:
                     throw invalid_field_index();
                 }
@@ -80,7 +85,8 @@ namespace neogfx::game
                 static const string sFieldNames[] =
                 {
                     "Material",
-                    "Faces"
+                    "Faces",
+                    "Layer"
                 };
                 return sFieldNames[aFieldIndex];
             }

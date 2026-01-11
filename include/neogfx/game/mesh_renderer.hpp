@@ -82,9 +82,9 @@ namespace neogfx::game
                     return material::meta::id();
                 case 1:
                     return patch::meta::id();
-                case 3:
-                    return neolib::uuid{};
                 case 2:
+                    return neolib::uuid{};
+                case 3:
                     return filter::meta::id();
                 case 4:
                     return neolib::uuid{};

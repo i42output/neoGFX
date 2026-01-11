@@ -100,6 +100,31 @@ namespace neogames
                     iCards.insert(iCards.end(), 2, card_type{ card_value::Joker, card_suit::Joker });
             }
         public:
+            cards::const_iterator begin() const
+            {
+                return iCards.begin();
+            }
+            cards::const_iterator end() const
+            {
+                return iCards.end();
+            }
+            cards::const_iterator cbegin() const
+            {
+                return iCards.begin();
+            }
+            cards::const_iterator cend() const
+            {
+                return iCards.end();
+            }
+            cards::iterator begin()
+            {
+                return iCards.begin();
+            }
+            cards::iterator end()
+            {
+                return iCards.end();
+            }
+        public:
             void shuffle()
             {
                 // todo: this is probably OK as the shuffle will be using less than 624 outputs of the mersenne twister but move to a CSPRNG such as HC-128 instead.

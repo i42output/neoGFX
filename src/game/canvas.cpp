@@ -217,48 +217,48 @@ namespace neogfx::game
     void canvas::init()
     {
         iUpdater.emplace(*this, [this](widget_timer& aTimer)
-        {
-            aTimer.again();
-            if (!have_ecs())
-                return;
-            if (!iEcsPaused && effectively_hidden())
             {
-                ecs().pause_all_systems();
-                iEcsPaused = true;
-            }
-            else if (iEcsPaused && effectively_visible())
-            {
-                ecs().resume_all_systems();
-                iEcsPaused = false;
-            }
-        }, std::chrono::milliseconds{ 1000 });
+                aTimer.again();
+                if (!have_ecs())
+                    return;
+                if (!iEcsPaused && effectively_hidden())
+                {
+                    ecs().pause_all_systems();
+                    iEcsPaused = true;
+                }
+                else if (iEcsPaused && effectively_visible())
+                {
+                    ecs().resume_all_systems();
+                    iEcsPaused = false;
+                }
+            }, std::chrono::milliseconds{ 1000 });
 
         Painting([this](i_graphics_context& aGc)
-        {
-            if (have_ecs() && ecs().component_registered<mesh_renderer>())
             {
-                aGc.clear_depth_buffer();
-                scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
-                RenderingEntities(aGc, 0);
-                aGc.draw_entities(ecs());
-                EntitiesRendered(aGc, 0);
-            }
-        });
+                if (have_ecs() && ecs().component_registered<mesh_renderer>())
+                {
+                    scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+                    aGc.clear_depth_buffer();
+                    RenderingEntities(aGc, 0);
+                    aGc.draw_entities(ecs());
+                    EntitiesRendered(aGc, 0);
+                }
+            });
 
         Painted([this](i_graphics_context& aGc)
-        {
-            if (have_ecs() && ecs().component_registered<mesh_renderer>())
             {
-                scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
-                for (scene_layer layer = 1; layer < layers(); ++layer)
+                if (have_ecs() && ecs().component_registered<mesh_renderer>())
                 {
-                    if (!layer_visible(layer))
-                        continue;
-                    RenderingEntities(aGc, layer);
-                    aGc.draw_entities(ecs(), layer);
-                    EntitiesRendered(aGc, layer);
+                    scoped_component_data_lock<mesh_renderer> lgMeshRenderer{ ecs() };
+                    for (scene_layer layer = 1; layer < layers(); ++layer)
+                    {
+                        if (!layer_visible(layer))
+                            continue;
+                        RenderingEntities(aGc, layer);
+                        aGc.draw_entities(ecs(), layer);
+                        EntitiesRendered(aGc, layer);
+                    }
                 }
-            }
-        });
+            });
     }
 }

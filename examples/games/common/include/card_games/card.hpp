@@ -78,7 +78,7 @@ namespace neogames
                 iValue{ aOther.iValue }, iSuit{ aOther.iSuit }, iDiscarded{ aOther.iDiscarded }
             {
             }
-            ~basic_card()
+                ~basic_card()
             {
                 destroyed(*this);
             }
@@ -107,6 +107,18 @@ namespace neogames
             }
             operator color() const 
             { 
+                return iSuit == suit::Club || iSuit == suit::Spade ? color::Black : color::Red;
+            }
+            value get_value() const
+            {
+                return iValue;
+            }
+            suit get_suit() const
+            {
+                return iSuit;
+            }
+            color get_color() const
+            {
                 return iSuit == suit::Club || iSuit == suit::Spade ? color::Black : color::Red;
             }
             bool is_face_card() const

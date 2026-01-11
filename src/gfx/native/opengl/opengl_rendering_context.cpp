@@ -1719,6 +1719,9 @@ namespace neogfx
                     continue;
                 auto const& meshRenderer = meshRenderers.entity_record_no_lock(entity);
                 tMaxLayer = std::max(tMaxLayer, meshRenderer.layer);
+                for (auto const& patch : meshRenderer.patches)
+                    if (patch.layer.has_value())
+                        tMaxLayer = std::max(tMaxLayer, patch.layer.value());
                 if (tDrawables.size() <= tMaxLayer)
                     tDrawables.resize(tMaxLayer + 1);
                 auto const& meshFilter = meshFilters.has_entity_record_no_lock(entity) ?
@@ -1729,6 +1732,14 @@ namespace neogfx
                     meshRenderer,
                     optional_mat44f{},
                     entity);
+                for (auto const& patch : meshRenderer.patches)
+                    if (patch.layer.has_value() && patch.layer.value() != meshRenderer.layer && 
+                        (tDrawables[patch.layer.value()].empty() || tDrawables[patch.layer.value()].back().entity != entity))
+                        tDrawables[patch.layer.value()].emplace_back(
+                            meshFilter,
+                            meshRenderer,
+                            optional_mat44f{},
+                            entity);
                 if (!game::is_render_cache_clean_no_lock(cache, entity))
                 {
                     auto const& rigidBodyTransformation = (rigidBodies.has_entity_record_no_lock(entity) ?
@@ -1739,13 +1750,17 @@ namespace neogfx
                         to_transformation_matrix(animatedMeshFilters.entity_record_no_lock(entity)) : mat44f::identity());
                     auto const& transformation = rigidBodyTransformation * meshFilterTransformation * animationMeshFilterTransformation;
                     tDrawables[meshRenderer.layer].back().transformation = transformation;
+                    for (auto const& patch : meshRenderer.patches)
+                        if (patch.layer.has_value() && patch.layer.value() != meshRenderer.layer && 
+                            !tDrawables[patch.layer.value()].back().transformation.has_value())
+                            tDrawables[patch.layer.value()].back().transformation = transformation;
                 }
                 if (info.debug)
                     tDrawables[meshRenderer.layer].back().debug = true;
             }
         }
         if (!tDrawables[aLayer].empty())
-            draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), &*tDrawables[aLayer].begin(), &*tDrawables[aLayer].begin() + tDrawables[aLayer].size(), aTransformation);
+            draw_meshes(tLock, dynamic_cast<i_vertex_provider&>(aEcs), aLayer, &*tDrawables[aLayer].begin(), &*tDrawables[aLayer].begin() + tDrawables[aLayer].size(), aTransformation);
         if (aLayer >= tMaxLayer)
         {
             tMaxLayer = 0;
@@ -1884,7 +1899,7 @@ namespace neogfx
                 tDrawables.emplace_back(tMeshFilters[i], tMeshRenderers[i]);
             optional_ecs_render_lock ignore;
             if (!tDrawables.empty())
-                draw_meshes(ignore, as_vertex_provider(), &*tDrawables.begin(), &*tDrawables.begin() + tDrawables.size(), mat44::identity());
+                draw_meshes(ignore, as_vertex_provider(), 0, &*tDrawables.begin(), &*tDrawables.begin() + tDrawables.size(), mat44::identity());
             tMeshFilters.clear();
             tMeshRenderers.clear();
             tDrawables.clear();
@@ -2273,10 +2288,10 @@ namespace neogfx
             aMeshRenderer
         };
         optional_ecs_render_lock ignore;
-        draw_meshes(ignore, as_vertex_provider(), &drawable, &drawable + 1, aTransformation);
+        draw_meshes(ignore, as_vertex_provider(), aMeshRenderer.layer, &drawable, &drawable + 1, aTransformation);
     }
 
-    void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
+    void opengl_rendering_context::draw_meshes(optional_ecs_render_lock& aLock, i_vertex_provider& aVertexProvider, game::scene_layer aLayer, mesh_drawable* aFirst, mesh_drawable* aLast, const mat44& aTransformation)
     {
         auto const logicalCoordinates = logical_coordinates();
 
@@ -2341,7 +2356,7 @@ namespace neogfx
             auto const& faces = mesh.faces;
             auto const& material = meshRenderer.material;
             vec4f const defaultColor{ 1.0f, 1.0f, 1.0f, 1.0f };
-            auto add_item = [&](vec2u32& cacheIndices, auto const& mesh, auto const& material, auto const& faces)
+            auto add_item = [&](vec2u32& cacheIndices, game::scene_layer aItemLayer, auto const& mesh, auto const& material, auto const& faces)
             {
                 auto const function = material.gradient != std::nullopt && material.gradient->boundingBox ?
                     vec4f{
@@ -2404,23 +2419,34 @@ namespace neogfx
                     cacheIndices[0] = static_cast<std::uint32_t>(vertexStartIndex);
                     cacheIndices[1] = static_cast<std::uint32_t>(nextIndex);
                 }
-                patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
+                if (aItemLayer == aLayer)
+                {
+                    patchDrawable.items.emplace_back(meshDrawable, cacheIndices[0], cacheIndices[1], material, faces);
+                    return true;
+                }
+                else
+                    return false;
             };
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
             if (meshDrawable.entity != game::null_entity &&
                 dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
                 service<debug::logger>() << neolib::logger::severity::Debug << "Adding service<i_debug>().layout_item() entity drawable..." << std::endl;
 #endif // NEOGFX_DEBUG
+            bool added = false;
             if (!faces.empty())
-                add_item(meshRenderCache.meshVertexArrayIndices, mesh, material, faces);
+                added = add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, material, faces);
             auto const patchCount = meshRenderer.patches.size();
             meshRenderCache.patchVertexArrayIndices.resize(patchCount);
+            bool outstandingPatches = false;
             for (std::size_t patchIndex = 0; patchIndex < patchCount; ++patchIndex)
             {
                 auto& patch = meshRenderer.patches[patchIndex];
-                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], mesh, patch.material, patch.faces);
+                add_item(meshRenderCache.patchVertexArrayIndices[patchIndex], patch.layer.value_or(meshRenderer.layer), mesh, patch.material, patch.faces);
+                if (patch.layer.has_value() && patch.layer.value() > aLayer)
+                    outstandingPatches = true;
             }
-            meshRenderCache.state = game::cache_state::Clean;
+            if (added && !outstandingPatches)
+                meshRenderCache.state = game::cache_state::Clean;
         }
 
         draw_patch(patchDrawable, aTransformation);
