@@ -27,17 +27,17 @@ namespace neogames
 {
     namespace card_games
     {
-        template <typename GameTraits>
+        template <typename GameTraits, typename CardT = basic_card<GameTraits>>
         class basic_hand
         {
         public:
-            typedef GameTraits game_traits;
-            typedef basic_card<game_traits> card_type;
-            typedef basic_deck<game_traits> deck_type;
+            using game_traits = GameTraits;
+            using card_type = CardT;
+            using deck_type = basic_deck<game_traits, card_type>;
         private:
-            typedef std::optional<card_type> optional_card;
-            typedef std::array<optional_card, game_traits::hand_size> cards;
-            typedef typename cards::size_type size_type;
+            using optional_card = std::optional<card_type>;
+            using cards = std::array<optional_card, game_traits::hand_size>;
+            using size_type = typename cards::size_type;
         public:
             struct no_card_in_slot : std::logic_error { no_card_in_slot() : std::logic_error("neogames::card_games::basic_hand::no_card_in_slot") {} };
             struct bad_slot_index : std::logic_error { bad_slot_index() : std::logic_error("neogames::card_games::basic_hand::bad_slot_index") {} };

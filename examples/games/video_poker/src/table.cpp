@@ -16,8 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <boost/lexical_cast.hpp>
-
 #include <video_poker/video_poker.hpp>
 
 #include <neogfx/gui/dialog/message_box.hpp>
@@ -325,7 +323,7 @@ namespace video_poker
     {
         iOutcome = std::make_unique<outcome>(
             *this, 
-            to_string(video_poker::to_poker_hand(*iHand)) + ng::to_string(u8"\nWIN $") + boost::lexical_cast<std::string>(aWinnings) + "!",
+            to_string(video_poker::to_poker_hand(*iHand)) + ng::to_string(u8"\nWIN $") + std::to_string(aWinnings) + "!",
             ng::color::Goldenrod.with_lightness(0.8));
         iCredit += aWinnings;
     }
@@ -371,8 +369,8 @@ namespace video_poker
 
     void table::update_widgets()
     {
-        iLabelCreditsValue.set_text( ng::to_string(u8"$") + boost::lexical_cast<std::string>(iCredit));
-        iLabelStakeValue.set_text( ng::to_string(u8"$") + boost::lexical_cast<std::string>(iStake));
+        iLabelCreditsValue.set_text( ng::to_string(u8"$") + std::to_string(iCredit));
+        iLabelStakeValue.set_text( ng::to_string(u8"$") + std::to_string(iStake));
         iBetMinus.enable(iState == table_state::TakeBet && iStake > 0);
         iBetPlus.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);
         iBetMax.enable(iState == table_state::TakeBet && iCredit > 0 && iStake < MAX_BET);

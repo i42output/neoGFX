@@ -27,16 +27,16 @@ namespace neogames
 {
     namespace card_games
     {
-        template <typename GameTraits>
+        template <typename GameTraits, typename CardT = basic_card<GameTraits>>
         class basic_deck
         {
         public:
-            typedef typename GameTraits game_traits;
-            typedef basic_card<game_traits> card_type;
-            typedef typename card_type::value card_value;
-            typedef typename card_type::suit card_suit;
+            using game_traits = GameTraits;
+            using card_type = CardT;
+            using card_value = typename card_type::value;
+            using card_suit = typename card_type::suit;
         private:
-            typedef std::vector<card_type> cards;
+            using cards = std::vector<card_type>;
         public:
             struct deck_empty : std::runtime_error { deck_empty() : std::runtime_error("neogames::card_games::basic_deck::deck_empty") {} };
         public:

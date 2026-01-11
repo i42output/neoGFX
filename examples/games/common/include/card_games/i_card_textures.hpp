@@ -26,11 +26,11 @@ namespace neogames
 {
     namespace card_games
     {
-        template <typename GameTraits>
+        template <typename GameTraits, typename CardT = basic_card<GameTraits>>
         class i_basic_card_textures
         {
         public:
-            typedef basic_card<GameTraits> card_type;
+            using card_type = CardT;
         public:
             struct texture_not_found : std::logic_error { texture_not_found() : std::logic_error("neogames::card_games::i_basic_card_textures::texture_not_found") {} };
         public:

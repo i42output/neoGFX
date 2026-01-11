@@ -33,7 +33,7 @@ namespace neogames
             ng::event<basic_card&> changed;
             ng::event<basic_card&> destroyed;
         public:
-            typedef GameTraits game_traits;
+            using game_traits = GameTraits;
         public:
             enum class value : std::uint32_t
             {
