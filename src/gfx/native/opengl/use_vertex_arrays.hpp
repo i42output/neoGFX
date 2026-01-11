@@ -256,10 +256,11 @@ namespace neogfx
                 if (aCount == 0u)
                     return;
                 iDrawOnExit = false;
-                auto skipCount = aSkip.skipCount ? std::max<std::size_t>(*aSkip.skipCount, 1u) : 1u;
-                if (static_cast<std::size_t>(iStart) + aCount > vertices().size())
+                auto const skipCount = aSkip.skipCount ? std::max<std::size_t>(*aSkip.skipCount, 1u) : 1u;
+                auto const vertexCount = vertices().size();
+                if (static_cast<std::size_t>(iStart) + aCount > vertexCount)
                     throw invalid_draw_count();
-                if (static_cast<std::size_t>(iStart) == vertices().size())
+                if (static_cast<std::size_t>(iStart) == vertexCount)
                     return;
                 iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
                 if (!iUseBarrier && mode() == translated_mode())

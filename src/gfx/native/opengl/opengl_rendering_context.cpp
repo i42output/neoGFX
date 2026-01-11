@@ -2389,8 +2389,14 @@ namespace neogfx
                                 uvGui = static_cast<float>(texture.extents().to_vec2().as<float>().y / textureStorageExtents.y);
                         }
                     }
-                    // todo: check vertex count is same as in cache
-                    auto const vertexStartIndex = (meshRenderCache.state != game::cache_state::Invalid ? cacheIndices[0] : vertices.find_space_for(faces.size() * 3));
+                    auto const vertexCount = faces.size() * 3;
+                    auto const currentCachedVertexCount = cacheIndices[1] - cacheIndices[0];
+                    auto vertexStartIndex = cacheIndices[0];
+                    if (vertexCount != currentCachedVertexCount || meshRenderCache.state == game::cache_state::Invalid)
+                    {
+                        vertices.reclaim(cacheIndices[0], cacheIndices[1]);
+                        vertexStartIndex = static_cast<std::uint32_t>(vertices.find_space_for(vertexCount));
+                    }
                     auto nextIndex = vertexStartIndex;
                     for (auto const& face : faces)
                     {
@@ -2432,9 +2438,9 @@ namespace neogfx
                 dynamic_cast<game::i_ecs&>(aVertexProvider).component<game::entity_info>().entity_record(meshDrawable.entity).debug)
                 service<debug::logger>() << neolib::logger::severity::Debug << "Adding service<i_debug>().layout_item() entity drawable..." << std::endl;
 #endif // NEOGFX_DEBUG
-            bool added = false;
+            bool addedPrimaryMesh = false;
             if (!faces.empty())
-                added = add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, material, faces);
+                addedPrimaryMesh = add_item(meshRenderCache.meshVertexArrayIndices, meshRenderer.layer, mesh, material, faces);
             auto const patchCount = meshRenderer.patches.size();
             meshRenderCache.patchVertexArrayIndices.resize(patchCount);
             bool outstandingPatches = false;
@@ -2445,7 +2451,7 @@ namespace neogfx
                 if (patch.layer.has_value() && patch.layer.value() > aLayer)
                     outstandingPatches = true;
             }
-            if (added && !outstandingPatches)
+            if (!outstandingPatches)
                 meshRenderCache.state = game::cache_state::Clean;
         }
 
