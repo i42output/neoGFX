@@ -273,14 +273,14 @@ namespace neogfx
         color colorStart = faceColor.lighter(0x0A);
         color colorEnd = faceColor;
         color outerBorderColor = background_color().darker(0x10);
-        color innerBorderColor = border_color();
+        color innerBorderColor = border_color();    
         std::optional<line_style> lineStyle;
 
         scoped_units su{ *this, units::Pixels };
 
         neogfx::path outlinePath = path();
 
-        auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
+        auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", border_radius());
         auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
         auto const& borderStyle = style_sheet_value("." + class_name(), "border-style", std::optional<border_style>{});
 
@@ -493,6 +493,25 @@ namespace neogfx
             iHoverColor = aHoverColor;
             update();
         }
+    }
+
+    std::optional<border_radii> const& push_button::border_radius() const
+    {
+        return iBorderRadii;
+    }
+
+    void push_button::set_border_radius(std::optional<border_radii> const& aBorderRadii)
+    {
+        if (iBorderRadii != aBorderRadii)
+        {
+            iBorderRadii = aBorderRadii;
+            update();
+        }
+    }
+
+    void push_button::set_border_radius(length const& aBorderRadius)
+    {
+        set_border_radius(border_radii{ { { aBorderRadius , aBorderRadius }, { aBorderRadius , aBorderRadius }, { aBorderRadius , aBorderRadius }, { aBorderRadius , aBorderRadius } } });
     }
 
     void push_button::animate()

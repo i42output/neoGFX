@@ -29,6 +29,8 @@ namespace neogfx
     extern template class widget<i_push_button>;
     extern template class button<i_push_button>;
 
+    using border_radii = std::array<std::array<length, 2u>, 4u>;
+
     class push_button : public button<i_push_button>
     {
         meta_object(button<i_push_button>)
@@ -55,8 +57,8 @@ namespace neogfx
         push_button(i_layout& aLayout, string const& aText, const i_image& aImage, push_button_style aStyle = push_button_style::Normal);
         // button
     public:
-        size minimum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
-        size maximum_size(optional_size const& aAvailableSpace = optional_size{}) const override;
+        size minimum_size(optional_size const& aAvailableSpace = {}) const override;
+        size maximum_size(optional_size const& aAvailableSpace = {}) const override;
         neogfx::padding padding() const override;
     public:
         void paint_non_client(i_graphics_context& aGc) const override;
@@ -71,11 +73,15 @@ namespace neogfx
         push_button_style style() const override;
         virtual bool has_face_color() const;
         virtual color face_color() const;
-        virtual void set_face_color(const optional_color& aFaceColor = optional_color{});
+        virtual void set_face_color(const optional_color& aFaceColor = {});
         virtual bool has_hover_color() const;
         virtual color hover_color() const;
-        virtual void set_hover_color(const optional_color& aHoverColor = optional_color{});
+        virtual void set_hover_color(const optional_color& aHoverColor = {});
         // push_button
+    public:
+        std::optional<border_radii> const& border_radius() const;
+        void set_border_radius(std::optional<border_radii> const& aBorderRadii = {});
+        void set_border_radius(length const& aBorderRadius);
     protected:
         virtual rect path_bounding_rect() const;
         virtual neogfx::path path() const;
@@ -97,6 +103,7 @@ namespace neogfx
         optional_color iFaceColor;
         mutable optional_color iStyleSheetFaceColor;
         optional_color iHoverColor;
+        std::optional<border_radii> iBorderRadii;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
         mutable std::optional<dimension> iPenWidth;
         sink iSink;
