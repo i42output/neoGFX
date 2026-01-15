@@ -286,7 +286,9 @@ namespace neogfx
             for (u32 x = aCellIndexTopLeft.x; x <= aCellIndexBottomRight.x; ++x)
             {
                 auto const uvOffset = vec2{ x * uvCellExtents.x, 1.0 - (y + 1) * uvCellExtents.y }.as<float>();
-                results.frames.push_back(
+                if (!results.frames)
+                    results.frames.emplace();
+                results.frames.value().push_back(
                     game::animation_frame
                     {
                         aDefaultDuration,

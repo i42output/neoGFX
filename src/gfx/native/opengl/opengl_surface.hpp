@@ -55,8 +55,8 @@ namespace neogfx
         color read_pixel(const point& aPosition) const override;
         void do_render() override;
     public:
-        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode) const override;
-        std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const override;
+        std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode) const override;
+        std::unique_ptr<i_rendering_context> create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const override;
         graphics_operation::i_queue& graphics_operation_queue() const final;
     protected:
         void set_destroying() override;

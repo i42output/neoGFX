@@ -169,12 +169,12 @@ namespace neogfx
         glCheck(glBlitFramebuffer(0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), 0, 0, static_cast<GLint>(extents().cx), static_cast<GLint>(extents().cy), GL_COLOR_BUFFER_BIT, GL_NEAREST));
     }
 
-    std::unique_ptr<i_rendering_context> opengl_surface::create_graphics_context(blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> opengl_surface::create_rendering_context(blending_mode aBlendingMode) const
     {
         return std::make_unique<opengl_rendering_context>(*this, aBlendingMode);
     }
 
-    std::unique_ptr<i_rendering_context> opengl_surface::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> opengl_surface::create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
         return std::make_unique<opengl_rendering_context>(*this, aWidget, aBlendingMode);
     }

@@ -3311,7 +3311,7 @@ namespace neogfx
         return result;
     }
 
-    void text_edit::draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
+    void text_edit::draw_glyphs(i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const
     {
         auto lineStart = aLine->glyph_begin();
         auto lineEnd = aLine->glyph_end();
@@ -3377,7 +3377,7 @@ namespace neogfx
             iHasAnimations = true;
     }
 
-    void text_edit::draw_cursor(i_graphics_context const& aGc) const
+    void text_edit::draw_cursor(i_graphics_context& aGc) const
     {
         auto elapsedTime_ms = (neolib::this_process::elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();

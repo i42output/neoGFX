@@ -44,6 +44,8 @@
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
 
+#include <neogfx/hid/i_keyboard.hpp>
+
 namespace neogfx
 {
     class i_surface;
@@ -64,7 +66,7 @@ namespace neogfx
         std::unique_ptr<i_graphics_context> buffer2;
     };
         
-    ping_pong_buffers create_ping_pong_buffers(const i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} });
+    ping_pong_buffers create_ping_pong_buffers(i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} });
 
     struct tab_stop
     {
@@ -153,9 +155,6 @@ namespace neogfx
         virtual point from_device_units(point const& aValue) const = 0;
         virtual rect from_device_units(rect const& aValue) const = 0;
         virtual path from_device_units(path const& aValue) const = 0;
-        // state
-    public:
-        virtual void flush() const = 0;
         // layers
     public:
         virtual layer_t layer() const = 0;
@@ -163,85 +162,85 @@ namespace neogfx
         // coordinate system
     public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
-        virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const = 0;
+        virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
-        virtual void set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) const = 0;
+        virtual void set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) = 0;
         // viewport
     public:
-        virtual void set_extents(size const& aExtents) const = 0;
-        virtual void set_origin(point const& aOrigin) const = 0;
+        virtual void set_extents(size const& aExtents) = 0;
+        virtual void set_origin(point const& aOrigin) = 0;
         virtual point origin() const = 0;
-        virtual void set_viewport(optional_rect const& aViewport = {}) const = 0;
-        virtual void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) const = 0;
+        virtual void set_viewport(optional_rect const& aViewport = {}) = 0;
+        virtual void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) = 0;
         // clipping
     public:
-        virtual void scissor_on(rect const& aRect) const = 0;
-        virtual void scissor_off() const = 0;
+        virtual void scissor_on(rect const& aRect) = 0;
+        virtual void scissor_off() = 0;
         // rendering
     public:
         virtual neogfx::front_face front_face() const = 0;
-        virtual void set_front_face(neogfx::front_face aFrontFace) const = 0;
+        virtual void set_front_face(neogfx::front_face aFrontFace) = 0;
         virtual neogfx::face_culling face_culling() const = 0;
-        virtual void set_face_culling(neogfx::face_culling aCulling) const = 0;
+        virtual void set_face_culling(neogfx::face_culling aCulling) = 0;
         // anti-aliasing
     public:
         virtual neogfx::smoothing_mode smoothing_mode() const = 0;
-        virtual void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const = 0;
+        virtual void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) = 0;
         virtual bool snap_to_pixel() const = 0;
-        virtual void set_snap_to_pixel(bool aSnap) const = 0;
+        virtual void set_snap_to_pixel(bool aSnap) = 0;
         // blending
     public:
         virtual double opacity() const = 0;
-        virtual void set_opacity(double aOpacity) const = 0;
+        virtual void set_opacity(double aOpacity) = 0;
         virtual neogfx::blending_mode blending_mode() const = 0;
-        virtual void set_blending_mode(neogfx::blending_mode aBlendingMode) const = 0;
+        virtual void set_blending_mode(neogfx::blending_mode aBlendingMode) = 0;
         // drawing mode
     public:
-        virtual void push_logical_operation(logical_operation aLogicalOperation) const = 0;
-        virtual void pop_logical_operation() const = 0;
+        virtual void push_logical_operation(logical_operation aLogicalOperation) = 0;
+        virtual void pop_logical_operation() = 0;
         virtual std::optional<stipple> const& line_stipple() const = 0;
-        virtual void line_stipple_on(stipple const& aStipple) const = 0;
-        virtual void line_stipple_off() const = 0;
+        virtual void line_stipple_on(stipple const& aStipple) = 0;
+        virtual void line_stipple_off() = 0;
         virtual bool is_subpixel_rendering_on() const = 0;
-        virtual void subpixel_rendering_on() const = 0;
-        virtual void subpixel_rendering_off() const = 0;
+        virtual void subpixel_rendering_on() = 0;
+        virtual void subpixel_rendering_off() = 0;
         // canvas
     public:
-        virtual void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) const = 0;
-        virtual void clear_depth_buffer() const = 0;
-        virtual void clear_stencil_buffer() const = 0;
-        virtual void blit(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect) const = 0;
-        virtual void blur(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const = 0;
+        virtual void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) = 0;
+        virtual void clear_depth_buffer() = 0;
+        virtual void clear_stencil_buffer() = 0;
+        virtual void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect) = 0;
+        virtual void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) = 0;
         // gradient
     public:
         virtual void clear_gradient() = 0;
         virtual void set_gradient(gradient const& aGradient, rect const& aBoundingBox) = 0;
         // shape
     public:
-        virtual void set_pixel(point const& aPoint, color const& aColor) const = 0;
-        virtual void draw_pixel(point const& aPoint, color const& aColor) const = 0;
-        virtual void draw_line(point const& aFrom, point const& aTo, pen const& aPen) const = 0;
-        virtual void draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const = 0;
-        virtual void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const = 0;
-        virtual void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) const = 0;
-        virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) const = 0;
-        virtual void draw_focus_rect(rect const& aRect) const = 0;
+        virtual void set_pixel(point const& aPoint, color const& aColor) = 0;
+        virtual void draw_pixel(point const& aPoint, color const& aColor) = 0;
+        virtual void draw_line(point const& aFrom, point const& aTo, pen const& aPen) = 0;
+        virtual void draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) = 0;
+        virtual void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) = 0;
+        virtual void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) = 0;
+        virtual void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) = 0;
+        virtual void draw_focus_rect(rect const& aRect) = 0;
         // text
         /// @todo: polymorphic interface requires `i_string` not `string`.
         /// @todo: integrate polymorphic i_u32string when available.
     public:
         virtual font const& default_font() const = 0;
-        virtual void set_default_font(font const& aDefaultFont) const = 0;
+        virtual void set_default_font(font const& aDefaultFont) = 0;
         virtual bool has_tab_stops() const = 0;
         virtual i_tab_stops const& tab_stops() const = 0;
         virtual void set_tab_stops(i_tab_stops const& aTabStops) = 0;
@@ -291,54 +290,54 @@ namespace neogfx
         virtual bool is_text_left_to_right(string const& aText, font const& aFont) const = 0;
         virtual bool is_text_right_to_left(string const& aText) const = 0;
         virtual bool is_text_right_to_left(string const& aText, font const& aFont) const = 0;
-        virtual void draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const = 0;
-        virtual void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_glyph_text(point const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const = 0;
-        virtual void draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const = 0;
-        virtual void draw_multiline_glyph_text(point const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_glyph_text(vec3 const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const = 0;
-        virtual void draw_multiline_glyph_text(point const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_multiline_glyph_text(vec3 const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) const = 0;
-        virtual void draw_glyph(point const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) const = 0;
-        virtual void draw_glyph(vec3 const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) const = 0;
-        virtual void draw_glyphs(point const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const = 0;
-        virtual void draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const = 0;
+        virtual void draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) = 0;
+        virtual void draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) = 0;
+        virtual void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) = 0;
+        virtual void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) = 0;
+        virtual void draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) = 0;
+        virtual void draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) = 0;
+        virtual void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) = 0;
+        virtual void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat) = 0;
+        virtual void draw_glyph_text(point const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) = 0;
+        virtual void draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, text_format const& aTextFormat) = 0;
+        virtual void draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) = 0;
+        virtual void draw_multiline_glyph_text(point const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_glyph_text(vec3 const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) = 0;
+        virtual void draw_multiline_glyph_text(point const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) = 0;
+        virtual void draw_multiline_glyph_text(vec3 const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) = 0;
+        virtual void draw_glyph(point const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) = 0;
+        virtual void draw_glyph(vec3 const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) = 0;
+        virtual void draw_glyphs(point const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) = 0;
+        virtual void draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) = 0;
         virtual char mnemonic() const = 0;
         virtual bool mnemonic_set() const = 0;
-        virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const = 0;
-        virtual void unset_mnemonic() const = 0;
+        virtual void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') = 0;
+        virtual void unset_mnemonic() = 0;
         virtual bool mnemonics_shown() const = 0;
         virtual bool password() const = 0;
         virtual string const& password_mask() const = 0;
         virtual void set_password(bool aPassword, string const& aMask = "\xE2\x97\x8F") = 0;
         // texture
     public:
-        virtual void draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
-        virtual void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const = 0;
+        virtual void draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
+        virtual void draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
+        virtual void draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
+        virtual void draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
+        virtual void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
+        virtual void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) = 0;
         // 3D
     public:
         // todo: set_transformation et al
-        virtual void draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation = optional_mat44{}, std::optional<game::filter> const& aFilter = {}) const = 0;
+        virtual void draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation = optional_mat44{}, std::optional<game::filter> const& aFilter = {}) = 0;
         // helpers
     public:
         size text_extent(string::const_iterator aTextBegin, string::const_iterator aTextEnd) const
@@ -449,59 +448,59 @@ namespace neogfx
         {
             return to_multiline_glyph_text(std::to_address(aTextBegin), std::to_address(aTextEnd), aFontSelector, aMaxWidth, aAlignment);
         }
-        void draw_rounded_rect(rect const& aRect, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const
+        void draw_rounded_rect(rect const& aRect, dimension aRadius, pen const& aPen, brush const& aFill = brush{})
         {
             draw_rounded_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, aPen, aFill);
         }
-        void draw_ellipse_rect(rect const& aRect, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const
+        void draw_ellipse_rect(rect const& aRect, dimension aRadius, pen const& aPen, brush const& aFill = brush{})
         {
             draw_ellipse_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, vec4{ aRadius, aRadius, aRadius, aRadius }, aPen, aFill);
         }
-        void fill_triangle(point const& aP0, point const& aP1, point const& aP2, brush const& aFill) const
+        void fill_triangle(point const& aP0, point const& aP1, point const& aP2, brush const& aFill)
         {
             draw_triangle(aP0, aP1, aP2, pen{}, aFill);
         }
-        void fill_rect(rect const& aRect, brush const& aFill) const
+        void fill_rect(rect const& aRect, brush const& aFill)
         {
             draw_rect(aRect, pen{}, aFill);
         }
-        void fill_rounded_rect(rect const& aRect, const vec4& aRadius, brush const& aFill) const
+        void fill_rounded_rect(rect const& aRect, const vec4& aRadius, brush const& aFill)
         {
             draw_rounded_rect(aRect, aRadius, pen{}, aFill);
         }
-        void fill_ellipse_rect(rect const& aRect, const vec4& aRadiusX, const vec4& aRadiusY, brush const& aFill) const
+        void fill_ellipse_rect(rect const& aRect, const vec4& aRadiusX, const vec4& aRadiusY, brush const& aFill)
         {
             draw_ellipse_rect(aRect, aRadiusX, aRadiusY, pen{}, aFill);
         }
-        void fill_checkerboard(rect const& aRect, const size& aSquareSize, brush const& aFill1, brush const& aFill2) const
+        void fill_checkerboard(rect const& aRect, const size& aSquareSize, brush const& aFill1, brush const& aFill2)
         {
             draw_checkerboard(aRect, aSquareSize, pen{}, aFill1, aFill2);
         }
-        void fill_circle(point const& aCenter, dimension aRadius, brush const& aFill) const
+        void fill_circle(point const& aCenter, dimension aRadius, brush const& aFill)
         {
             draw_circle(aCenter, aRadius, pen{}, aFill);
         }
-        void fill_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, brush const& aFill) const
+        void fill_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, brush const& aFill)
         {
             draw_ellipse(aCenter, aRadiusA, aRadiusB, pen{}, aFill);
         }
-        void fill_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, brush const& aFill) const
+        void fill_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, brush const& aFill)
         {
             draw_pie(aCenter, aRadius, aStartAngle, aEndAngle, pen{}, aFill);
         }
-        void fill_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, brush const& aFill) const
+        void fill_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, brush const& aFill)
         {
             draw_arc(aCenter, aRadius, aStartAngle, aEndAngle, pen{}, aFill);
         }
-        void fill_path(const path& aPath, brush const& aFill) const
+        void fill_path(const path& aPath, brush const& aFill)
         {
             draw_path(aPath, pen{}, aFill);
         }
-        void fill_shape(game::mesh const& aShape, vec3 const& aPosition, brush const& aFill) const
+        void fill_shape(game::mesh const& aShape, vec3 const& aPosition, brush const& aFill)
         {
             draw_shape(aShape, aPosition, pen{}, aFill);
         }
-        void fill_rounded_rect(rect const& aRect, dimension aRadius, brush const& aFill) const
+        void fill_rounded_rect(rect const& aRect, dimension aRadius, brush const& aFill)
         {
             fill_rounded_rect(aRect, vec4{ aRadius, aRadius, aRadius, aRadius }, aFill);
         }
@@ -510,7 +509,7 @@ namespace neogfx
     ssbo_range path_to_vertices(path const& aPath, path::sub_path_type const& aSubPath);
     
     template <typename Iter>
-    inline void draw_glyph_text(i_graphics_context const& aGc, vec3 const& aPoint, glyph_text const& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, text_format const& aTextFormat)
+    inline void draw_glyph_text(i_graphics_context& aGc, vec3 const& aPoint, glyph_text const& aGlyphText, Iter aGlyphTextBegin, Iter aGlyphTextEnd, text_format const& aTextFormat)
     {
         vec3 pos = aPoint;
         for (auto iterGlyph = aGlyphTextBegin; iterGlyph != aGlyphTextEnd; ++iterGlyph)
@@ -523,7 +522,7 @@ namespace neogfx
     class scoped_mnemonics
     {
     public:
-        scoped_mnemonics(i_graphics_context const& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
+        scoped_mnemonics(i_graphics_context& aGc, bool aShowMnemonics, char aMnemonicPrefix = '&') :
             iGc(aGc)
         {
             iGc.set_mnemonic(aShowMnemonics, aMnemonicPrefix);
@@ -533,33 +532,33 @@ namespace neogfx
             iGc.unset_mnemonic();
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
     };
 
     class scoped_coordinate_system
     {
     public:
-        scoped_coordinate_system(i_graphics_context const& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+        scoped_coordinate_system(i_graphics_context& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             apply_origin(aOrigin, aExtents);
         }
-        scoped_coordinate_system(i_graphics_context const& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
+        scoped_coordinate_system(i_graphics_context& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aCoordinateSystem);
             iGc.set_logical_coordinates(aCoordinates);
             apply_origin(aOrigin, aExtents);
         }
-        scoped_coordinate_system(i_graphics_context const& aGc, i_graphics_context const& aSource) :
+        scoped_coordinate_system(i_graphics_context& aGc, i_graphics_context& aSource) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
             iGc.set_logical_coordinates(aSource.logical_coordinates());
             iGc.set_origin(aSource.origin());
         }
-        scoped_coordinate_system(i_graphics_context const& aGc, i_rendering_context const& aSource) :
+        scoped_coordinate_system(i_graphics_context& aGc, i_rendering_context const& aSource) :
             iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
         {
             iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
@@ -584,7 +583,7 @@ namespace neogfx
                 iGc.set_origin(point{ aOrigin.x, iGc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
         point iPreviousOrigin;
         logical_coordinate_system iPreviousCoordinateSystem;
         neogfx::logical_coordinates iPreviousCoordinates;
@@ -593,7 +592,7 @@ namespace neogfx
     class scoped_snap_to_pixel
     {
     public:
-        scoped_snap_to_pixel(i_graphics_context const& aGc, bool aSnapToPixel = true) :
+        scoped_snap_to_pixel(i_graphics_context& aGc, bool aSnapToPixel = true) :
             iGc{ aGc }, iPreviousSnapped{ aGc.snap_to_pixel() }
         {
             iGc.set_snap_to_pixel(aSnapToPixel);
@@ -603,14 +602,14 @@ namespace neogfx
             iGc.set_snap_to_pixel(iPreviousSnapped);
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
         bool iPreviousSnapped;
     };
 
     class scoped_face_culling
     {
     public:
-        scoped_face_culling(i_graphics_context const& aGc, face_culling aCulling) :
+        scoped_face_culling(i_graphics_context& aGc, face_culling aCulling) :
             iGc{ aGc }, iPreviousCulling{ aGc.face_culling() }
         {
             iGc.set_face_culling(aCulling);
@@ -620,14 +619,14 @@ namespace neogfx
             iGc.set_face_culling(iPreviousCulling);
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
         face_culling iPreviousCulling;
     };
 
     class scoped_opacity
     {
     public:
-        scoped_opacity(i_graphics_context const& aGc, double aOpacity) :
+        scoped_opacity(i_graphics_context& aGc, double aOpacity) :
             iGc{ aGc }, iPreviousOpacity { aGc.opacity() }
         {
             iGc.set_opacity(iGc.opacity() * aOpacity);
@@ -637,14 +636,14 @@ namespace neogfx
             iGc.set_opacity(iPreviousOpacity);
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
         double iPreviousOpacity;
     };
 
     class scoped_blending_mode
     {
     public:
-        scoped_blending_mode(i_graphics_context const& aGc, neogfx::blending_mode aBlendigMode) :
+        scoped_blending_mode(i_graphics_context& aGc, neogfx::blending_mode aBlendigMode) :
             iGc{ aGc }, iPreviousBlendingMode{ aGc.blending_mode() }
         {
             iGc.set_blending_mode(aBlendigMode);
@@ -654,14 +653,14 @@ namespace neogfx
             iGc.set_blending_mode(iPreviousBlendingMode);
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
         neogfx::blending_mode iPreviousBlendingMode;
     };
 
     class scoped_scissor
     {
     public:
-        scoped_scissor(i_graphics_context const& aGc, rect const& aScissorRect) :
+        scoped_scissor(i_graphics_context& aGc, rect const& aScissorRect) :
             iGc{ aGc }
         {
             iGc.scissor_on(aScissorRect);
@@ -671,13 +670,13 @@ namespace neogfx
             iGc.scissor_off();
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
     };
 
     class scoped_stipple
     {
     public:
-        scoped_stipple(i_graphics_context const& aGc, std::optional<stipple> const& aStipple) :
+        scoped_stipple(i_graphics_context& aGc, std::optional<stipple> const& aStipple) :
             iGc{ aGc }, iPreviousStipple{ aGc.line_stipple() }
         {
             if (aStipple.has_value())
@@ -693,7 +692,7 @@ namespace neogfx
                 iGc.line_stipple_off();
         }
     private:
-        i_graphics_context const& iGc;
+        i_graphics_context& iGc;
         std::optional<stipple> iPreviousStipple;
     };
 
@@ -724,6 +723,7 @@ namespace neogfx
             iRenderTarget{ front_buffer() }
         {
             front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
+            back_buffer().set_origin({});
         }
         ~scoped_filter()
         {
@@ -739,11 +739,11 @@ namespace neogfx
             iGc.draw_texture(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
         }
     public:
-        i_graphics_context const& front_buffer() const
+        i_graphics_context& front_buffer() const
         {
             return *iBuffers.buffer1;
         }
-        i_graphics_context const& back_buffer() const
+        i_graphics_context& back_buffer() const
         {
             return *iBuffers.buffer2;
         }

@@ -135,6 +135,7 @@ namespace neogfx
                 iRenderTarget{ front_buffer() }
             {
                 front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
+                back_buffer().set_origin({});
                 iParent.iFilters.push_back(aFilter);
             }
             ~scoped_filter()
@@ -153,11 +154,11 @@ namespace neogfx
                 iParent.iFilters.pop_back();
             }
         public: 
-            i_graphics_context const& front_buffer() const
+            i_graphics_context& front_buffer() const
             {
                 return *iBuffers.buffer1;
             }
-            i_graphics_context const& back_buffer() const
+            i_graphics_context& back_buffer() const
             {
                 return *iBuffers.buffer2;
             }

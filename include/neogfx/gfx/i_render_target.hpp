@@ -75,7 +75,7 @@ namespace neogfx
         virtual neogfx::color_space color_space() const = 0;
         virtual color read_pixel(const point& aPosition) const = 0;
     public:
-        virtual std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const = 0; // todo: use ref_ptr
+        virtual std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const = 0; // todo: use ref_ptr
         virtual graphics_operation::i_queue& graphics_operation_queue() const = 0;
     };
 

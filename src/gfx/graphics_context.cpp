@@ -38,8 +38,9 @@
 
 namespace neogfx
 {
-    ping_pong_buffers create_ping_pong_buffers(i_rendering_context const& aContext, size const& aExtents, texture_sampling aSampling, optional_color const& aClearColor)
+    ping_pong_buffers create_ping_pong_buffers(i_rendering_context& aContext, size const& aExtents, texture_sampling aSampling, optional_color const& aClearColor)
     {
+        aContext.flush();
         size previousExtents;
         auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
         buffer1.as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
@@ -80,7 +81,7 @@ namespace neogfx
         return slb.range();
     }
 
-    inline void apply_stipple(graphics_context const& aGc, pen const& aPen, std::optional<scoped_stipple>& aScopedStipple)
+    inline void apply_stipple(graphics_context& aGc, pen const& aPen, std::optional<scoped_stipple>& aScopedStipple)
     {
         switch (aPen.style())
         {
@@ -97,7 +98,7 @@ namespace neogfx
     graphics_context::graphics_context(i_surface const& aSurface, type aType) :
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
-        iNativeGraphicsContext{ nullptr },
+        iRenderingContext{ nullptr },
         iDefaultFont{},
         iExtents{ aSurface.extents() },
         iLayer{ LayerWidget },
@@ -114,7 +115,7 @@ namespace neogfx
     graphics_context::graphics_context(i_surface const& aSurface, font const& aDefaultFont, type aType) :
         iType{ aType },
         iRenderTarget{ aSurface.native_surface() },
-        iNativeGraphicsContext{ nullptr },
+        iRenderingContext{ nullptr },
         iDefaultFont{ aDefaultFont },
         iExtents{ aSurface.extents() },
         iLayer{ LayerWidget },
@@ -131,7 +132,7 @@ namespace neogfx
     graphics_context::graphics_context(i_widget const& aWidget, type aType) :
         iType{ aType },
         iRenderTarget{ aWidget.surface().native_surface() },
-        iNativeGraphicsContext{ nullptr },
+        iRenderingContext{ nullptr },
         iDefaultFont{ aWidget.font() },
         iOrigin{ aWidget.origin() },
         iExtents{ aWidget.extents() },
@@ -150,7 +151,7 @@ namespace neogfx
     graphics_context::graphics_context(i_texture const& aTexture, type aType) :
         iType{ aType },
         iRenderTarget{ static_cast<i_native_texture&>(aTexture.native_texture()) },
-        iNativeGraphicsContext{ nullptr },
+        iRenderingContext{ nullptr },
         iDefaultFont{ font() },
         iExtents{ aTexture.extents() },
         iLayer{ LayerWidget },
@@ -168,7 +169,7 @@ namespace neogfx
         iType{ aOther.iType },
         iRenderTarget{ aOther.iRenderTarget },
         iSrt{ aOther.iRenderTarget },
-        iNativeGraphicsContext{ aOther.active() ? aOther.native_context().clone() : nullptr },
+        iRenderingContext{ aOther.active() ? aOther.rendering_context().clone() : nullptr },
         iDefaultFont{ aOther.iDefaultFont },
         iOrigin{ aOther.origin() },
         iExtents{ aOther.extents() },
@@ -200,7 +201,7 @@ namespace neogfx
 
     i_rendering_engine& graphics_context::rendering_engine() const
     {
-        return native_context().rendering_engine();
+        return rendering_context().rendering_engine();
     }
 
     const i_render_target& graphics_context::render_target() const
@@ -210,23 +211,17 @@ namespace neogfx
 
     rect graphics_context::rendering_area(bool aConsiderScissor) const
     {
-        return native_context().rendering_area(aConsiderScissor);
+        return rendering_context().rendering_area(aConsiderScissor);
     }
 
     graphics_operation::queue& graphics_context::queue() const
     {
-        return native_context().queue();
+        return rendering_context().queue();
     }
 
     void graphics_context::enqueue(graphics_operation::operation const& aOperation)
     {
-        native_context().enqueue(aOperation);
-    }
-
-    void graphics_context::flush()
-    {
-        if (attached() && active())
-            native_context().flush();
+        rendering_context().enqueue(aOperation);
     }
 
     delta graphics_context::to_device_units(delta const& aValue) const
@@ -306,7 +301,7 @@ namespace neogfx
             iLayer = aLayer;
             // todo:-
 //            if (attached())
-//                native_context().enqueue(graphics_operation::set_layer{ aLayer });
+//                rendering_context().enqueue(graphics_operation::set_layer{ aLayer });
         }
     }
 
@@ -317,13 +312,13 @@ namespace neogfx
         return render_target().logical_coordinate_system();
     }
 
-    void graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const
+    void graphics_context::set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem)
     {
         if (iLogicalCoordinateSystem != aSystem)
         {
             iLogicalCoordinateSystem = aSystem;
             if (attached())
-                native_context().enqueue(graphics_operation::set_logical_coordinate_system{ aSystem });
+                rendering_context().enqueue(graphics_operation::set_logical_coordinate_system{ aSystem });
         }
     }
 
@@ -334,13 +329,13 @@ namespace neogfx
         return render_target().logical_coordinates();
     }
 
-    void graphics_context::set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) const
+    void graphics_context::set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates)
     {
         if (iLogicalCoordinates != aCoordinates)
         {
             iLogicalCoordinates = aCoordinates;
             if (attached())
-                native_context().enqueue(graphics_operation::set_logical_coordinates{ aCoordinates });
+                rendering_context().enqueue(graphics_operation::set_logical_coordinates{ aCoordinates });
         }
     }
 
@@ -369,22 +364,22 @@ namespace neogfx
         return iDefaultFont;
     }
 
-    void graphics_context::set_default_font(font const& aDefaultFont) const
+    void graphics_context::set_default_font(font const& aDefaultFont)
     {
         iDefaultFont = aDefaultFont;
     }
 
-    void graphics_context::set_extents(size const& aExtents) const
+    void graphics_context::set_extents(size const& aExtents)
     {
         iExtents = aExtents;
     }
 
-    void graphics_context::set_origin(point const& aOrigin) const
+    void graphics_context::set_origin(point const& aOrigin)
     {
         if (iOrigin != to_device_units(aOrigin))
         {
             iOrigin = to_device_units(aOrigin);
-            native_context().enqueue(graphics_operation::set_origin{ iOrigin });
+            rendering_context().enqueue(graphics_operation::set_origin{ iOrigin });
         }
     }
 
@@ -395,103 +390,103 @@ namespace neogfx
 
     void graphics_context::clear_gradient()
     {
-        native_context().enqueue(graphics_operation::clear_gradient{});
+        rendering_context().enqueue(graphics_operation::clear_gradient{});
     }
 
     void graphics_context::set_gradient(gradient const& aGradient, rect const& aBoundingBox)
     {
-        native_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox) + iOrigin) });
+        rendering_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox) + iOrigin) });
     }
 
-    void graphics_context::set_pixel(point const& aPoint, color const& aColor) const
+    void graphics_context::set_pixel(point const& aPoint, color const& aColor)
     {
-        native_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColor });
+        rendering_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColor });
     }
 
-    void graphics_context::draw_pixel(point const& aPoint, color const& aColor) const
+    void graphics_context::draw_pixel(point const& aPoint, color const& aColor)
     {
-        native_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint) + iOrigin, aColor });
+        rendering_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint) + iOrigin, aColor });
     }
 
-    void graphics_context::draw_line(point const& aFrom, point const& aTo, pen const& aPen) const
-    {
-        std::optional<scoped_stipple> st;
-        apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen });
-    }
-
-    void graphics_context::draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_line(point const& aFrom, point const& aTo, pen const& aPen)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen });
     }
 
-    void graphics_context::draw_rect(rect const& aRect, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen, aFill });
     }
 
-    void graphics_context::draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_rect(rect const& aRect, pen const& aPen, brush const& aFill)
+    {
+        std::optional<scoped_stipple> st;
+        apply_stipple(*this, aPen, st);
+        rendering_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen, aFill });
+    }
+
+    void graphics_context::draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         if (aPen.style() == line_style::CustomDash)
             st.emplace(*this, aPen.custom_dash());
-        native_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
     }
 
-    void graphics_context::draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect) + iOrigin, aRadiusX, aRadiusY, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect) + iOrigin, aRadiusX, aRadiusY, aPen, aFill });
     }
 
-    void graphics_context::draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const
+    void graphics_context::draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_checkerboard{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
+        rendering_context().enqueue(graphics_operation::draw_checkerboard{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
     }
 
-    void graphics_context::draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aFill });
     }
 
-    void graphics_context::draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen, aFill });
     }
 
-    void graphics_context::draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
-    void graphics_context::draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
-    void graphics_context::draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const
+    void graphics_context::draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        native_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, to_device_units(aP3) + iOrigin, aPen });
+        rendering_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, to_device_units(aP3) + iOrigin, aPen });
     }
 
-    void graphics_context::draw_path(path const& aPath, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_path(path const& aPath, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
@@ -505,17 +500,17 @@ namespace neogfx
         }
     }
 
-    void graphics_context::draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill)
     {
-        native_context().enqueue(graphics_operation::draw_path{ aPathVertices, aPathShape, aBoundingRect, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_path{ aPathVertices, aPathShape, aBoundingRect, aPen, aFill });
     }
 
-    void graphics_context::draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill) const
+    void graphics_context::draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-        native_context().enqueue(
+        rendering_context().enqueue(
             graphics_operation::draw_shape{
                 mat44{
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
@@ -528,10 +523,10 @@ namespace neogfx
             });
     }
 
-    void graphics_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer) const
+    void graphics_context::draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer)
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-        native_context().enqueue(
+        rendering_context().enqueue(
             graphics_operation::draw_entities{
                 aEcs,
                 aLayer,
@@ -543,7 +538,7 @@ namespace neogfx
             });
     }
 
-    void graphics_context::draw_focus_rect(rect const& aRect) const
+    void graphics_context::draw_focus_rect(rect const& aRect)
     {
         push_logical_operation(neogfx::logical_operation::Xor);
         draw_rect(aRect, pen{ color::White, line_dash{ 0x5555u } });
@@ -683,125 +678,125 @@ namespace neogfx
         return !is_text_left_to_right(aText, aFont);
     }
 
-    void graphics_context::draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat)
     {
         draw_text(aPoint, aText, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat)
     {
         draw_text(aPoint.to_vec3(), aText, aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat)
     {
         draw_text(aPoint, aTextBegin, aTextEnd, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat)
     {
         draw_text(aPoint.to_vec3(), aTextBegin, aTextEnd, aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat)
     {
         draw_text(aPoint, aText, default_font(), aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat)
     {
         draw_text(aPoint, std::to_address(aText.begin()), std::to_address(aText.begin()) + std::distance(std::to_address(aText.begin()), std::to_address(aText.end())), aFont, aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat)
     {
         draw_text(aPoint, aTextBegin, aTextEnd, default_font() , aTextFormat);
     }
 
-    void graphics_context::draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const
+    void graphics_context::draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat)
     {
         draw_glyph_text(aPoint, to_glyph_text(aTextBegin, aTextEnd, aTextFormat.apply(aFont)), aTextFormat);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint, aText, default_font(), aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint.to_vec3(), aText, aFont, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint, aText, default_font(), aMaxWidth, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint.to_vec3(), aText, aFont, aMaxWidth, aTextFormat, aAlignment);
     }
         
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint, aText, default_font(), aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint, aText, aFont, 0, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_text(aPoint, aText, default_font(), aMaxWidth, aTextFormat, aAlignment);
     }
     
-    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aTextFormat.apply(aFont), aMaxWidth, aAlignment), aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, text_format const& aTextFormat)
     {
         draw_glyph_text(aPoint.to_vec3(), aText, aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const
+    void graphics_context::draw_glyph_text(point const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat)
     {
         draw_glyph_text(aPoint.to_vec3(), aText, aTextBegin, aTextEnd, aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, text_format const& aTextFormat)
     {
         draw_glyph_text(aPoint, aText, aText.cbegin(), aText.cend(), aTextFormat);
     }
 
-    void graphics_context::draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const
+    void graphics_context::draw_glyph_text(vec3 const& aPoint, glyph_text const& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat)
     {
         if (aTextBegin == aTextEnd)
             return;
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, text_format_span{ 0, aTextEnd - aTextBegin, aTextFormat }, mnemonics_shown() });
+        rendering_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, text_format_span{ 0, aTextEnd - aTextBegin, aTextFormat }, mnemonics_shown() });
     }
 
-    void graphics_context::draw_multiline_glyph_text(point const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_glyph_text(point const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_glyph_text(aPoint.to_vec3(), aText, aMaxWidth, aTextFormat, aAlignment);
     }
 
-    void graphics_context::draw_multiline_glyph_text(vec3 const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment) const
+    void graphics_context::draw_multiline_glyph_text(vec3 const& aPoint, glyph_text const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment)
     {
         draw_multiline_glyph_text(aPoint, to_multiline_glyph_text(aText, aMaxWidth, aAlignment), aTextFormat);
     }
 
-    void graphics_context::draw_multiline_glyph_text(point const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_multiline_glyph_text(point const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat)
     {
         draw_multiline_glyph_text(aPoint.to_vec3(), aText, aTextFormat);
     }
 
-    void graphics_context::draw_multiline_glyph_text(vec3 const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat) const
+    void graphics_context::draw_multiline_glyph_text(vec3 const& aPoint, multiline_glyph_text const& aText, text_format const& aTextFormat)
     {
         for (auto& line : aText.lines)
         {
@@ -815,7 +810,7 @@ namespace neogfx
 
     subpixel_format graphics_context::subpixel_format() const
     {
-        return native_context().subpixel_format();
+        return rendering_context().subpixel_format();
     }
 
     bool graphics_context::metrics_available() const
@@ -865,10 +860,10 @@ namespace neogfx
 
     bool graphics_context::active() const
     {
-        return iNativeGraphicsContext != nullptr;
+        return iRenderingContext != nullptr;
     }
 
-    i_rendering_context& graphics_context::native_context() const
+    i_rendering_context& graphics_context::rendering_context() const
     {
         if (attached())
         {
@@ -876,42 +871,43 @@ namespace neogfx
             {
                 if (iSrt == std::nullopt)
                     iSrt.emplace(render_target());
-                iNativeGraphicsContext = iRenderTarget.create_graphics_context(iBlendingMode);
+                iRenderingContext = iRenderTarget.create_rendering_context(iBlendingMode);
             }
-            return *iNativeGraphicsContext;
+            return *iRenderingContext;
         }
         throw unattached();
     }
 
-    void graphics_context::flush() const
+    void graphics_context::flush()
     {
-        native_context().flush();
+        if (attached() && active())
+            rendering_context().flush();
     }
 
-    void graphics_context::set_viewport(optional_rect const& aViewport) const
+    void graphics_context::set_viewport(optional_rect const& aViewport)
     {
         if (aViewport)
-            native_context().enqueue(graphics_operation::set_viewport{ to_device_units(aViewport.value() )});
+            rendering_context().enqueue(graphics_operation::set_viewport{ to_device_units(aViewport.value() )});
         else
-            native_context().enqueue(graphics_operation::set_viewport{});
+            rendering_context().enqueue(graphics_operation::set_viewport{});
     }
 
-    void graphics_context::set_view_transforamtion(optional_mat33 const& aViewTransforamtion) const
+    void graphics_context::set_view_transforamtion(optional_mat33 const& aViewTransforamtion)
     {
         if (aViewTransforamtion)
-            native_context().enqueue(graphics_operation::set_view_transformation{ aViewTransforamtion.value() });
+            rendering_context().enqueue(graphics_operation::set_view_transformation{ aViewTransforamtion.value() });
         else
-            native_context().enqueue(graphics_operation::set_view_transformation{});
+            rendering_context().enqueue(graphics_operation::set_view_transformation{});
     }
 
-    void graphics_context::scissor_on(rect const& aRect) const
+    void graphics_context::scissor_on(rect const& aRect)
     {
-        native_context().enqueue(graphics_operation::scissor_on{ to_device_units(aRect) + iOrigin });
+        rendering_context().enqueue(graphics_operation::scissor_on{ to_device_units(aRect) + iOrigin });
     }
 
-    void graphics_context::scissor_off() const
+    void graphics_context::scissor_off()
     {
-        native_context().enqueue(graphics_operation::scissor_off{});
+        rendering_context().enqueue(graphics_operation::scissor_off{});
     }
 
     bool graphics_context::snap_to_pixel() const
@@ -919,15 +915,15 @@ namespace neogfx
         return iSnapToPixel;
     }
 
-    void graphics_context::set_snap_to_pixel(bool aSnap) const
+    void graphics_context::set_snap_to_pixel(bool aSnap)
     {
         if (iSnapToPixel != aSnap)
         {
             iSnapToPixel = aSnap;
             if (snap_to_pixel())
-                native_context().enqueue(graphics_operation::snap_to_pixel_on{});
+                rendering_context().enqueue(graphics_operation::snap_to_pixel_on{});
             else
-                native_context().enqueue(graphics_operation::snap_to_pixel_off{});
+                rendering_context().enqueue(graphics_operation::snap_to_pixel_off{});
         }
     }
 
@@ -936,12 +932,12 @@ namespace neogfx
         return iOpacity;
     }
 
-    void graphics_context::set_opacity(double aOpacity) const
+    void graphics_context::set_opacity(double aOpacity)
     {
         if (iOpacity != aOpacity)
         {
             iOpacity = aOpacity;
-            native_context().enqueue(graphics_operation::set_opacity{ aOpacity });
+            rendering_context().enqueue(graphics_operation::set_opacity{ aOpacity });
         }
     }
 
@@ -950,12 +946,12 @@ namespace neogfx
         return iBlendingMode;
     }
 
-    void graphics_context::set_blending_mode(neogfx::blending_mode aBlendingMode) const
+    void graphics_context::set_blending_mode(neogfx::blending_mode aBlendingMode)
     {
         if (iBlendingMode != aBlendingMode)
         {
             iBlendingMode = aBlendingMode;
-            native_context().enqueue(graphics_operation::set_blending_mode{ aBlendingMode });
+            rendering_context().enqueue(graphics_operation::set_blending_mode{ aBlendingMode });
         }
     }
 
@@ -964,12 +960,12 @@ namespace neogfx
         return iFrontFace;
     }
 
-    void graphics_context::set_front_face(neogfx::front_face aFrontFace) const
+    void graphics_context::set_front_face(neogfx::front_face aFrontFace)
     {
         if (iFrontFace != aFrontFace)
         {
             iFrontFace = aFrontFace;
-            native_context().enqueue(graphics_operation::set_front_face{ aFrontFace });
+            rendering_context().enqueue(graphics_operation::set_front_face{ aFrontFace });
         }
     }
 
@@ -978,12 +974,12 @@ namespace neogfx
         return iCulling;
     }
 
-    void graphics_context::set_face_culling(neogfx::face_culling aCulling) const
+    void graphics_context::set_face_culling(neogfx::face_culling aCulling)
     {
         if (iCulling != aCulling)
         {
             iCulling = aCulling;
-            native_context().enqueue(graphics_operation::set_face_culling{ aCulling });
+            rendering_context().enqueue(graphics_operation::set_face_culling{ aCulling });
         }
     }
 
@@ -992,23 +988,23 @@ namespace neogfx
         return iSmoothingMode;
     }
 
-    void graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const
+    void graphics_context::set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode)
     {
         if (iSmoothingMode != aSmoothingMode)
         {
             iSmoothingMode = aSmoothingMode;
-            native_context().enqueue(graphics_operation::set_smoothing_mode{ aSmoothingMode });
+            rendering_context().enqueue(graphics_operation::set_smoothing_mode{ aSmoothingMode });
         }
     }
 
-    void graphics_context::push_logical_operation(logical_operation aLogicalOperation) const
+    void graphics_context::push_logical_operation(logical_operation aLogicalOperation)
     {
-        native_context().enqueue(graphics_operation::push_logical_operation{ aLogicalOperation });
+        rendering_context().enqueue(graphics_operation::push_logical_operation{ aLogicalOperation });
     }
 
-    void graphics_context::pop_logical_operation() const
+    void graphics_context::pop_logical_operation()
     {
-        native_context().enqueue(graphics_operation::pop_logical_operation{});
+        rendering_context().enqueue(graphics_operation::pop_logical_operation{});
     }
 
     std::optional<stipple> const& graphics_context::line_stipple() const
@@ -1016,16 +1012,16 @@ namespace neogfx
         return iLineStipple;
     }
 
-    void graphics_context::line_stipple_on(stipple const& aStipple) const
+    void graphics_context::line_stipple_on(stipple const& aStipple)
     {
         iLineStipple = aStipple;
-        native_context().enqueue(graphics_operation::line_stipple_on{ iLineStipple.value() });
+        rendering_context().enqueue(graphics_operation::line_stipple_on{ iLineStipple.value() });
     }
 
-    void graphics_context::line_stipple_off() const
+    void graphics_context::line_stipple_off()
     {
         iLineStipple = std::nullopt;
-        native_context().enqueue(graphics_operation::line_stipple_off{});
+        rendering_context().enqueue(graphics_operation::line_stipple_off{});
     }
 
     bool graphics_context::is_subpixel_rendering_on() const
@@ -1033,50 +1029,50 @@ namespace neogfx
         return iSubpixelRendering;
     }
 
-    void graphics_context::subpixel_rendering_on() const
+    void graphics_context::subpixel_rendering_on()
     {
         if (iSubpixelRendering != true)
         {
             iSubpixelRendering = true;
-            native_context().enqueue(graphics_operation::subpixel_rendering_on{});
+            rendering_context().enqueue(graphics_operation::subpixel_rendering_on{});
         }
     }
 
-    void graphics_context::subpixel_rendering_off() const
+    void graphics_context::subpixel_rendering_off()
     {
         if (iSubpixelRendering != false)
         {
             iSubpixelRendering = false;
-            native_context().enqueue(graphics_operation::subpixel_rendering_off{});
+            rendering_context().enqueue(graphics_operation::subpixel_rendering_off{});
         }
     }
 
-    void graphics_context::clear(color const& aColor, std::optional<scalar> const& aZpos) const
+    void graphics_context::clear(color const& aColor, std::optional<scalar> const& aZpos)
     {
         if (aZpos == std::nullopt)
-            native_context().enqueue(graphics_operation::clear{ aColor });
+            rendering_context().enqueue(graphics_operation::clear{ aColor });
         else
             fill_rect(rect{ render_target().target_type() == render_target_type::Surface ? 
                 point{ 0.0, 0.0, aZpos ? *aZpos : 0.0 } : point{ -1.0, -1.0 }, iRenderTarget.target_texture().storage_extents() }, aColor);
     }
 
-    void graphics_context::clear_depth_buffer() const
+    void graphics_context::clear_depth_buffer()
     {
-        native_context().enqueue(graphics_operation::clear_depth_buffer{});
+        rendering_context().enqueue(graphics_operation::clear_depth_buffer{});
     }
 
-    void graphics_context::clear_stencil_buffer() const
+    void graphics_context::clear_stencil_buffer()
     {
-        native_context().enqueue(graphics_operation::clear_stencil_buffer{});
+        rendering_context().enqueue(graphics_operation::clear_stencil_buffer{});
     }
 
-    void graphics_context::blit(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect) const
+    void graphics_context::blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect)
     {
         scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
         draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
     }
 
-    void blur(i_graphics_context const& aDestination, rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
+    void blur(i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt{ aDestination };
         auto mesh = aDestination.logical_coordinate_system() == logical_coordinate_system::AutomaticGui ?
@@ -1098,7 +1094,7 @@ namespace neogfx
             to_ecs_component(aAlgorithm, aParameter1, aParameter2));
     }
 
-    void graphics_context::blur(rect const& aDestinationRect, const i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2) const
+    void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
         scoped_render_target srt1{ *this };
         scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Blit };
@@ -1344,26 +1340,26 @@ namespace neogfx
         return result;
     }
 
-    void graphics_context::draw_glyph(point const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) const
+    void graphics_context::draw_glyph(point const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat)
     {
         draw_glyph(aPoint.to_vec3(), aText, aGlyphChar, aTextFormat);
     }
 
-    void graphics_context::draw_glyph(vec3 const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat) const
+    void graphics_context::draw_glyph(vec3 const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat)
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyphChar, std::next(&aGlyphChar), text_format_span{ 0, 1, aTextFormat }, mnemonics_shown() });
+        rendering_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyphChar, std::next(&aGlyphChar), text_format_span{ 0, 1, aTextFormat }, mnemonics_shown() });
     }
 
-    void graphics_context::draw_glyphs(point const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const
+    void graphics_context::draw_glyphs(point const& aPoint, glyph_text const& aText, text_format_spans const& aSpans)
     {
         draw_glyphs(aPoint.to_vec3(), aText, aSpans);
     }
 
-    void graphics_context::draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans) const
+    void graphics_context::draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans)
     {
         auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
-        native_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, std::to_address(aText.begin()), std::to_address(aText.end()), aSpans, mnemonics_shown()});
+        rendering_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, std::to_address(aText.begin()), std::to_address(aText.end()), aSpans, mnemonics_shown()});
     }
 
     char graphics_context::mnemonic() const
@@ -1378,12 +1374,12 @@ namespace neogfx
         return iMnemonic != std::nullopt;
     }
 
-    void graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix) const
+    void graphics_context::set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix)
     {
         iMnemonic = std::make_pair(aShowMnemonics, aMnemonicPrefix);
     }
 
-    void graphics_context::unset_mnemonic() const
+    void graphics_context::unset_mnemonic()
     {
         iMnemonic = std::nullopt;
     }
@@ -1417,12 +1413,12 @@ namespace neogfx
             iPassword = std::nullopt;
     }
 
-    void graphics_context::draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect)
     {
         draw_texture(rect{ aPoint, aTexture.extents() }, aTexture, with_bounding_box(aColor, rect{ aPoint, aTexture.extents() }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect)
     {
         if (logical_coordinates().is_gui_orientation())
             draw_texture(to_ecs_component(aRect), aTexture, with_bounding_box(aColor, aRect), aShaderEffect);
@@ -1430,12 +1426,12 @@ namespace neogfx
             draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, with_bounding_box(aColor, game_rect{ aRect }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect)
     {
         draw_texture(rect{ aPoint, aTextureRect.extents() }, aTexture, aTextureRect, with_bounding_box(aColor, rect{ aPoint, aTextureRect.extents() }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect)
     {
         if (logical_coordinates().is_gui_orientation())
             draw_texture(to_ecs_component(aRect), aTexture, aTextureRect, with_bounding_box(aColor, aRect), aShaderEffect);
@@ -1443,7 +1439,7 @@ namespace neogfx
             draw_texture(to_ecs_component(game_rect{ aRect }), aTexture, aTextureRect, with_bounding_box(aColor, game_rect{ aRect }), aShaderEffect);
     }
 
-    void graphics_context::draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor, shader_effect aShaderEffect)
     {
         draw_mesh(
             aMesh, 
@@ -1460,7 +1456,7 @@ namespace neogfx
             optional_mat44{});
     }
 
-    void graphics_context::draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect) const
+    void graphics_context::draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor, shader_effect aShaderEffect)
     {
         auto adjustedMesh = aMesh;
         for (auto& uv : adjustedMesh.uv)
@@ -1468,10 +1464,10 @@ namespace neogfx
         draw_texture(adjustedMesh, aTexture, aColor, aShaderEffect);
     }
 
-    void graphics_context::draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation, std::optional<game::filter> const& aFilter) const
+    void graphics_context::draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation, std::optional<game::filter> const& aFilter)
     {
         vec2 const toDeviceUnits = to_device_units(vec2{ 1.0, 1.0 });
-        native_context().enqueue(
+        rendering_context().enqueue(
             graphics_operation::draw_mesh{
                 aMesh,
                 aMaterial,

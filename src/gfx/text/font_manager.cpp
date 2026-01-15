@@ -205,7 +205,7 @@ namespace neogfx
         class glyphs
         {
         public:
-            glyphs(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun) :
+            glyphs(i_graphics_context const& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun) :
                 iParent{ aParent },
                 iFont{ static_cast<font_face_handle*>(aFont.native_font_face().handle())->harfbuzzFont },
                 iGlyphRun{ aGlyphRun },
@@ -260,7 +260,7 @@ namespace neogfx
                 return false;
             }
         private:
-            const i_graphics_context& iParent;
+            i_graphics_context const& iParent;
             hb_font_t* iFont;
             const glyph_text_factory::glyph_run& iGlyphRun;
             hb_buffer_t* iBuf;
@@ -271,7 +271,7 @@ namespace neogfx
         typedef std::list<glyphs> glyphs_list;
         typedef std::vector<std::pair<glyphs_list::const_iterator, std::uint32_t>> result_type;
     public:
-        glyph_shapes(const i_graphics_context& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun)
+        glyph_shapes(i_graphics_context const& aParent, const font& aFont, const glyph_text_factory::glyph_run& aGlyphRun)
         {
             thread_local std::vector<font> fontsTried;
             auto tryFont = aFont;

@@ -50,7 +50,6 @@ namespace neogfx
         rect rendering_area(bool aConsiderScissor = true) const final;
         graphics_operation::queue& queue() const final;
         void enqueue(graphics_operation::operation const& aOperation) final;
-        void flush() final;
         // i_rendering_context
     public:
         neogfx::logical_coordinates logical_coordinates() const final;
@@ -73,7 +72,7 @@ namespace neogfx
         path from_device_units(const path& aValue) const final;
         // state
     public:
-        void flush() const final;
+        void flush() final;
         // layers
     public:
         layer_t layer() const final;
@@ -81,76 +80,76 @@ namespace neogfx
         // coordinate system
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const final;
-        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) const final;
-        void set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) const final;
+        void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) final;
+        void set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) final;
         // viewport
     public:
-        void set_extents(size const& aExtents) const final;
-        void set_origin(point const& aOrigin) const final;
+        void set_extents(size const& aExtents) final;
+        void set_origin(point const& aOrigin) final;
         point origin() const final;
-        void set_viewport(optional_rect const& aViewport = {}) const final;
-        void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) const final;
+        void set_viewport(optional_rect const& aViewport = {}) final;
+        void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) final;
         // clipping
     public:
-        void scissor_on(rect const& aRect) const final;
-        void scissor_off() const final;
+        void scissor_on(rect const& aRect) final;
+        void scissor_off() final;
         // rendering
     public:
         neogfx::front_face front_face() const final;
-        void set_front_face(neogfx::front_face aFrontFace) const final;
+        void set_front_face(neogfx::front_face aFrontFace) final;
         neogfx::face_culling face_culling() const final;
-        void set_face_culling(neogfx::face_culling aCulling) const final;
+        void set_face_culling(neogfx::face_culling aCulling) final;
         // anti-aliasing
     public:
         neogfx::smoothing_mode smoothing_mode() const final;
-        void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) const final;
+        void set_smoothing_mode(neogfx::smoothing_mode aSmoothingMode) final;
         bool snap_to_pixel() const final;
-        void set_snap_to_pixel(bool aSnap) const final;
+        void set_snap_to_pixel(bool aSnap) final;
         // blending
     public:
         double opacity() const final;
-        void set_opacity(double aOpacity) const final;
+        void set_opacity(double aOpacity) final;
         neogfx::blending_mode blending_mode() const final;
-        void set_blending_mode(neogfx::blending_mode aBlendingMode) const final;
+        void set_blending_mode(neogfx::blending_mode aBlendingMode) final;
         // drawing mode
     public:
-        void push_logical_operation(logical_operation aLogicalOperation) const final;
-        void pop_logical_operation() const final;
+        void push_logical_operation(logical_operation aLogicalOperation) final;
+        void pop_logical_operation() final;
         std::optional<stipple> const& line_stipple() const final;
-        void line_stipple_on(stipple const& aStipple) const final;
-        void line_stipple_off() const final;
+        void line_stipple_on(stipple const& aStipple) final;
+        void line_stipple_off() final;
         bool is_subpixel_rendering_on() const final;
-        void subpixel_rendering_on() const final;
-        void subpixel_rendering_off() const final;
-        void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) const final;
-        void clear_depth_buffer() const final;
-        void clear_stencil_buffer() const final;
-        void blit(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect) const final;
-        void blur(rect const& aDestinationRect, i_graphics_context const& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) const final;
+        void subpixel_rendering_on() final;
+        void subpixel_rendering_off() final;
+        void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) final;
+        void clear_depth_buffer() final;
+        void clear_stencil_buffer() final;
+        void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect) final;
+        void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) final;
         void clear_gradient() final;
         void set_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
-        void set_pixel(point const& aPoint, color const& aColor) const final;
-        void draw_pixel(point const& aPoint, color const& aColor) const final;
-        void draw_line(point const& aFrom, point const& aTo, pen const& aPen) const final;
-        void draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) const final;
-        void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) const final;
-        void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) const final;
-        void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) const final;
-        void draw_focus_rect(rect const& aRect) const final;
+        void set_pixel(point const& aPoint, color const& aColor) final;
+        void draw_pixel(point const& aPoint, color const& aColor) final;
+        void draw_line(point const& aFrom, point const& aTo, pen const& aPen) final;
+        void draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_rect(rect const& aRect, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2) final;
+        void draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen) final;
+        void draw_path(path const& aPath, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_path(ssbo_range const& aPathVertices, path_shape aPathShape, rect const& aBoundingRect, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_shape(game::mesh const& aShape, vec3 const& aPosition, pen const& aPen, brush const& aFill = brush{}) final;
+        void draw_entities(game::i_ecs& aEcs, game::scene_layer aLayer = 0) final;
+        void draw_focus_rect(rect const& aRect) final;
         // text
     public:
         font const& default_font() const final;
-        void set_default_font(font const& aDefaultFont) const final;
+        void set_default_font(font const& aDefaultFont) final;
         bool has_tab_stops() const override;
         i_tab_stops const& tab_stops() const override;
         void set_tab_stops(i_tab_stops const& aTabStops) override;
@@ -200,54 +199,54 @@ namespace neogfx
         bool is_text_left_to_right(string const& aText, font const& aFont) const final;
         bool is_text_right_to_left(string const& aText) const final;
         bool is_text_right_to_left(string const& aText, font const& aFont) const final;
-        void draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) const final;
-        void draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const final;
-        void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const final;
-        void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const final;
-        void draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) const final;
-        void draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) const final;
-        void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) const final;
-        void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) const final;
-        void draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_glyph_text(point const& aPoint, const glyph_text& aText, text_format const& aTextFormat) const final;
-        void draw_glyph_text(point const& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const final;
-        void draw_glyph_text(vec3 const& aPoint, const glyph_text& aText, text_format const& aTextFormat) const final;
-        void draw_glyph_text(vec3 const& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) const final;
-        void draw_multiline_glyph_text(point const& aPoint, const glyph_text& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_glyph_text(vec3 const& aPoint, const glyph_text& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) const final;
-        void draw_multiline_glyph_text(point const& aPoint, const multiline_glyph_text& aText, text_format const& aTextFormat) const final;
-        void draw_multiline_glyph_text(vec3 const& aPoint, const multiline_glyph_text& aText, text_format const& aTextFormat) const final;
-        void draw_glyph(point const& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, text_format const& aTextFormat) const final;
-        void draw_glyph(vec3 const& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, text_format const& aTextFormat) const final;
-        void draw_glyphs(point const& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const final;
-        void draw_glyphs(vec3 const& aPoint, const glyph_text& aText, const text_format_spans& aSpans) const final;
+        void draw_text(point const& aPoint, string const& aText, text_format const& aTextFormat) final;
+        void draw_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) final;
+        void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) final;
+        void draw_text(point const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) final;
+        void draw_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat) final;
+        void draw_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat) final;
+        void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, text_format const& aTextFormat) final;
+        void draw_text(vec3 const& aPoint, char const* aTextBegin, char const* aTextEnd, font const& aFont, text_format const& aTextFormat) final;
+        void draw_multiline_text(point const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(point const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(point const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(vec3 const& aPoint, string const& aText, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(vec3 const& aPoint, string const& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_text(vec3 const& aPoint, string const& aText, font const& aFont, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_glyph_text(point const& aPoint, const glyph_text& aText, text_format const& aTextFormat) final;
+        void draw_glyph_text(point const& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) final;
+        void draw_glyph_text(vec3 const& aPoint, const glyph_text& aText, text_format const& aTextFormat) final;
+        void draw_glyph_text(vec3 const& aPoint, const glyph_text& aText, glyph_text::const_iterator aTextBegin, glyph_text::const_iterator aTextEnd, text_format const& aTextFormat) final;
+        void draw_multiline_glyph_text(point const& aPoint, const glyph_text& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_glyph_text(vec3 const& aPoint, const glyph_text& aText, dimension aMaxWidth, text_format const& aTextFormat, alignment aAlignment = alignment::Left) final;
+        void draw_multiline_glyph_text(point const& aPoint, const multiline_glyph_text& aText, text_format const& aTextFormat) final;
+        void draw_multiline_glyph_text(vec3 const& aPoint, const multiline_glyph_text& aText, text_format const& aTextFormat) final;
+        void draw_glyph(point const& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, text_format const& aTextFormat) final;
+        void draw_glyph(vec3 const& aPoint, const glyph_text& aText, const glyph_char& aGlyphChar, text_format const& aTextFormat) final;
+        void draw_glyphs(point const& aPoint, const glyph_text& aText, const text_format_spans& aSpans) final;
+        void draw_glyphs(vec3 const& aPoint, const glyph_text& aText, const text_format_spans& aSpans) final;
         char mnemonic() const final;
         bool mnemonic_set() const final;
-        void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') const final;
-        void unset_mnemonic() const final;
+        void set_mnemonic(bool aShowMnemonics, char aMnemonicPrefix = '&') final;
+        void unset_mnemonic() final;
         bool mnemonics_shown() const final;
         bool password() const final;
         string const& password_mask() const final;
         void set_password(bool aPassword, string const& aMask = "\xE2\x97\x8F") final;
         // texture
     public:
-        void draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const final;
-        void draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const final;
-        void draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const final;
-        void draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const final;
-        void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const final;
-        void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) const final;
+        void draw_texture(point const& aPoint, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) final;
+        void draw_texture(rect const& aRect, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) final;
+        void draw_texture(point const& aPoint, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) final;
+        void draw_texture(rect const& aRect, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) final;
+        void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) final;
+        void draw_texture(game::mesh const& aMesh, i_texture const& aTexture, rect const& aTextureRect, color_or_gradient const& aColor = {}, shader_effect aShaderEffect = shader_effect::None) final;
         // 3D
     public:
         // todo: set_transformation et al
-        void draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) const final;
+        void draw_mesh(game::mesh const& aMesh, game::material const& aMaterial, optional_mat44 const& aTransformation = optional_mat44{}, const std::optional<game::filter>& aFilter = {}) final;
 
         // implementation
         // from i_rendering_context
@@ -268,14 +267,14 @@ namespace neogfx
     protected:
         bool attached() const;
         bool active() const;
-        i_rendering_context& native_context() const;
+        i_rendering_context& rendering_context() const;
         // helpers
         // attributes
     private:
         type iType;
         const i_render_target& iRenderTarget;
         mutable std::optional<scoped_render_target> iSrt;
-        mutable std::unique_ptr<i_rendering_context> iNativeGraphicsContext;
+        mutable std::unique_ptr<i_rendering_context> iRenderingContext;
         mutable font iDefaultFont;
         mutable point iOrigin;
         mutable size iExtents;

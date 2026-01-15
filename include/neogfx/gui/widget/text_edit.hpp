@@ -898,8 +898,8 @@ namespace neogfx
         std::pair<document_glyphs::difference_type, bool> glyph_hit_test(const point& aPosition, bool aAdjustForScrollPosition = true) const;
         void make_visible(position_info const& aGlyphPosition, point const& aPreview = {});
         style glyph_style(document_glyphs::const_iterator aGlyphChar, const document_column& aColumn) const;
-        void draw_glyphs(i_graphics_context const& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
-        void draw_cursor(i_graphics_context const& aGc) const;
+        void draw_glyphs(i_graphics_context& aGc, const point& aPosition, const glyph_column& aColumn, glyph_lines::const_iterator aLine) const;
+        void draw_cursor(i_graphics_context& aGc) const;
         rect cursor_rect() const;
         double calc_padding_adjust(style const& aStyle) const;
         double padding_adjust() const;

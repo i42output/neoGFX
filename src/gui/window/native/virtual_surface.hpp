@@ -81,8 +81,8 @@ namespace neogfx
         neogfx::color_space color_space() const final;
         color read_pixel(const point& aPosition) const final;
     public:
-        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode) const final;
-        std::unique_ptr<i_rendering_context> create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const final;
+        std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode) const final;
+        std::unique_ptr<i_rendering_context> create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const final;
         graphics_operation::i_queue& graphics_operation_queue() const final;
 
     public:

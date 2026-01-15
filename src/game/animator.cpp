@@ -89,17 +89,20 @@ namespace neogfx::game
             auto& filter = filters.entity_record(entity);
             if (!filter.currentFrameStartTime)
                 filter.currentFrameStartTime = info.creationTime;
-            auto const& frames = (filter.animation ? filter.animation->frames : filter.sharedAnimation.ptr->frames);
-            while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timestep) < now)
+            if (has_animation_frames(filter))
             {
-                *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timestep);
-                filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
-                if (filter.currentFrame == 0 && filter.autoDestroy)
+                auto const& frames = to_animation_frames(filter);
+                while (*filter.currentFrameStartTime + to_step_time(frames[filter.currentFrame].duration, worldClock.timestep) < now)
                 {
-                    ecs().async_destroy_entity(entity);
-                    break;
+                    *filter.currentFrameStartTime += to_step_time(frames[filter.currentFrame % frames.size()].duration, worldClock.timestep);
+                    filter.currentFrame = (filter.currentFrame + 1u) % frames.size();
+                    if (filter.currentFrame == 0 && filter.autoDestroy)
+                    {
+                        ecs().async_destroy_entity(entity);
+                        break;
+                    }
+                    set_render_cache_dirty_no_lock(cache, entity);
                 }
-                set_render_cache_dirty_no_lock(cache, entity);
             }
         }
     }

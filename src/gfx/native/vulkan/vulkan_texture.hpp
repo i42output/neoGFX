@@ -83,7 +83,7 @@ namespace neogfx
         bool metrics_available() const final;
         dimension em_size() const final;
     public:
-        std::unique_ptr<i_rendering_context> create_graphics_context(blending_mode aBlendingMode = blending_mode::Default) const final;
+        std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const final;
         graphics_operation::i_queue& vulkan_texture<T>::graphics_operation_queue() const final;
     public:
         void bind(std::uint32_t aTextureUnit) const final;

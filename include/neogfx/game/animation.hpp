@@ -91,9 +91,168 @@ namespace neogfx::game
 
     typedef std::vector<animation_frame> animation_frames;
 
+    struct tween
+    {
+        i32 i; // todo
+
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x65918d0e, 0x87a8, 0x42cd, 0x8203, { 0x19, 0xe5, 0xab, 0xef, 0x80, 0xe } };
+                return sId;
+            }
+            static const i_string& name()
+            {
+                static const string sName = "Tween";
+                return sName;
+            }
+            static std::uint32_t field_count()
+            {
+                return 1;
+            }
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Int32;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return neolib::uuid{};
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const i_string& field_name(std::uint32_t aFieldIndex)
+            {
+                static const string sFieldNames[] =
+                {
+                    "Todo"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
+
+    struct tween_matrix
+    {
+        i32 i; // todo
+
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0x11161f9a, 0x4708, 0x4ed3, 0xadea, { 0x0, 0x5c, 0xef, 0x18, 0xf6, 0xda } };
+                return sId;
+            }
+            static const i_string& name()
+            {
+                static const string sName = "Tween Matrix";
+                return sName;
+            }
+            static std::uint32_t field_count()
+            {
+                return 1;
+            }
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Int32;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return tween::meta::id();
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const i_string& field_name(std::uint32_t aFieldIndex)
+            {
+                static const string sFieldNames[] =
+                {
+                    "Todo"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
+
+    struct animation_tween
+    {
+        scalar duration;
+        tween_matrix tweenMatrix;
+
+        struct meta : i_component_data::meta
+        {
+            static const neolib::uuid& id()
+            {
+                static const neolib::uuid sId = { 0xc4981e75, 0x2199, 0x4a77, 0xaf54, { 0x7f, 0x67, 0xdd, 0xd8, 0x6c, 0x71 } };
+                return sId;
+            }
+            static const i_string& name()
+            {
+                static const string sName = "Animation Tween";
+                return sName;
+            }
+            static std::uint32_t field_count()
+            {
+                return 2;
+            }
+            static component_data_field_type field_type(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return component_data_field_type::Scalar;
+                case 1:
+                    return component_data_field_type::ComponentData;
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static neolib::uuid field_type_id(std::uint32_t aFieldIndex)
+            {
+                switch (aFieldIndex)
+                {
+                case 0:
+                    return neolib::uuid{};
+                case 1:
+                    return tween_matrix::meta::id();
+                default:
+                    throw invalid_field_index();
+                }
+            }
+            static const i_string& field_name(std::uint32_t aFieldIndex)
+            {
+                static const string sFieldNames[] =
+                {
+                    "Duration",
+                    "Tween Matrix"
+                };
+                return sFieldNames[aFieldIndex];
+            }
+        };
+    };
+
     struct animation
     {
-        animation_frames frames;
+        std::optional<animation_frames> frames;
 
         struct meta : i_component_data::meta
         {
@@ -116,7 +275,7 @@ namespace neogfx::game
                 switch (aFieldIndex)
                 {
                 case 0:
-                    return component_data_field_type::ComponentData | component_data_field_type::Array;
+                    return component_data_field_type::ComponentData | component_data_field_type::Array | component_data_field_type::Optional;
                 default:
                     throw invalid_field_index();
                 }

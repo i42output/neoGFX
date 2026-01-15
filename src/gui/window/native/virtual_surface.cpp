@@ -191,14 +191,14 @@ namespace neogfx
         return parent().read_pixel(surface_window().surface_position() + aPosition);
     }
 
-    std::unique_ptr<i_rendering_context> virtual_surface::create_graphics_context(blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> virtual_surface::create_rendering_context(blending_mode aBlendingMode) const
     {
-        return parent().create_graphics_context(aBlendingMode);
+        return parent().create_rendering_context(aBlendingMode);
     }
 
-    std::unique_ptr<i_rendering_context> virtual_surface::create_graphics_context(const i_widget& aWidget, blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> virtual_surface::create_rendering_context(const i_widget& aWidget, blending_mode aBlendingMode) const
     {
-        return parent().create_graphics_context(aWidget, aBlendingMode);
+        return parent().create_rendering_context(aWidget, aBlendingMode);
     }
 
     graphics_operation::i_queue& virtual_surface::graphics_operation_queue() const

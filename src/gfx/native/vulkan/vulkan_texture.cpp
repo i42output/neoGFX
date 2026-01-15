@@ -490,7 +490,7 @@ namespace neogfx
     }
 
     template <typename T>
-    std::unique_ptr<i_rendering_context> vulkan_texture<T>::create_graphics_context(blending_mode aBlendingMode) const
+    std::unique_ptr<i_rendering_context> vulkan_texture<T>::create_rendering_context(blending_mode aBlendingMode) const
     {
         TODO;
     }

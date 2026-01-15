@@ -105,11 +105,25 @@ namespace neogfx::game
         };
     };
 
+    inline bool has_animation_frames(animation_filter const& aAnimationFilter)
+    {
+        return (aAnimationFilter.animation && aAnimationFilter.animation->frames) ||
+            (aAnimationFilter.sharedAnimation.ptr && aAnimationFilter.sharedAnimation.ptr->frames);
+    }
+
+    inline animation_frames const& to_animation_frames(animation_filter const& aAnimationFilter)
+    {
+        if (aAnimationFilter.animation && aAnimationFilter.animation->frames)
+            return aAnimationFilter.animation->frames.value();
+        else if (aAnimationFilter.sharedAnimation.ptr && aAnimationFilter.sharedAnimation.ptr->frames)
+            return aAnimationFilter.sharedAnimation.ptr->frames.value();
+        else
+            throw std::logic_error("neogfx::game::to_animation_frames: no animation frames!");
+    }
+
     inline mesh_filter const& current_animation_frame(animation_filter const& aAnimationFilter)
     {
-        return aAnimationFilter.animation ?
-            aAnimationFilter.animation->frames[aAnimationFilter.currentFrame].filter :
-            aAnimationFilter.sharedAnimation.ptr->frames[aAnimationFilter.currentFrame].filter;
+        return to_animation_frames(aAnimationFilter)[aAnimationFilter.currentFrame].filter;
     }
 
     inline mat44f const& to_transformation_matrix(animation_filter const& aAnimationFilter)
