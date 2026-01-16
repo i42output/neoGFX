@@ -67,7 +67,49 @@ namespace neogfx
         // types
     public:
         typedef neolib::vector<neolib::ref_ptr<i_shader_program>> shader_program_list;
-        typedef std::map<std::pair<texture_sampling, size>, std::pair<texture, size>> ping_pong_buffers_t;
+        class ping_pong_buffer : public i_ping_pong_buffer
+        {
+        public:
+            ping_pong_buffer(i_texture const& aTexture, neogfx::size const& aSize) :
+                iTexture{ aTexture }, iSize{ aSize }
+            {
+            }
+        public:
+            i_texture& texture() final
+            {
+                return iTexture;
+            }
+            neogfx::size const& size() const final
+            {
+                return iSize;
+            }
+            void set_size(neogfx::size const& aSize)
+            {
+                iSize = aSize;
+            }
+            void release() final
+            {
+                if (!iInUse)
+                    throw std::logic_error("neogfx::opengl_renderer::ping_pong_buffer::release");
+                iInUse = false;
+            }
+        public:
+            bool in_use()
+            {
+                return iInUse;
+            }
+            void use()
+            {
+                if (iInUse)
+                    throw std::logic_error("neogfx::opengl_renderer::ping_pong_buffer::use");
+                iInUse = true;
+            }
+        private:
+            neogfx::texture iTexture;
+            neogfx::size iSize;
+            bool iInUse = false;
+        };
+        typedef std::multimap<std::pair<texture_sampling, size>, ping_pong_buffer> ping_pong_buffers_t;
         typedef i_rendering_engine::handle opengl_context;
         // construction
     public:
@@ -105,8 +147,8 @@ namespace neogfx
         i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) override;
         void execute_vertex_buffers() override;
     public:
-        i_texture& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
-        i_texture& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
+        i_ping_pong_buffer& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
+        i_ping_pong_buffer& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) override;
     public:
         bool is_subpixel_rendering_on() const override;
         void subpixel_rendering_on() override;
@@ -121,7 +163,7 @@ namespace neogfx
         void register_frame_counter(i_widget& aWidget, std::uint32_t aDuration) override;
         void unregister_frame_counter(i_widget& aWidget, std::uint32_t aDuration) override;
         std::uint32_t frame_counter(std::uint32_t aDuration) const override;
-        i_texture& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling);
+        i_ping_pong_buffer& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling);
     private:
         neogfx::renderer iRenderer;
         mutable std::optional<opengl_texture_manager> iTextureManager;

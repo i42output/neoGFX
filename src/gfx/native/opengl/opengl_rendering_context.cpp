@@ -438,6 +438,12 @@ namespace neogfx
         return !!iGradient;
     }
 
+    void opengl_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect)
+    {
+        scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
+        draw_texture(aDestinationRect, aTexture, aSourceRect);
+    }
+
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
     {
         aShader.set_gradient(*this, *iGradient);

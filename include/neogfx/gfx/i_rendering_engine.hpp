@@ -31,6 +31,7 @@
 #include <neogfx/gfx/i_shader.hpp>
 #include <neogfx/gfx/i_standard_shader_program.hpp>
 #include <neogfx/gfx/i_vertex_buffer.hpp>
+#include <neogfx/gfx/i_ping_pong_buffer.hpp>
 
 namespace neogfx
 {
@@ -160,8 +161,8 @@ namespace neogfx
         virtual i_vertex_buffer& vertex_buffer(i_vertex_provider& aProvider) = 0;
         virtual void execute_vertex_buffers() = 0;
     public:
-        virtual i_texture& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
-        virtual i_texture& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
+        virtual i_ping_pong_buffer& ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
+        virtual i_ping_pong_buffer& ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling = texture_sampling::Multisample) = 0;
     public:
         virtual bool is_subpixel_rendering_on() const = 0;
         virtual void subpixel_rendering_on() = 0;

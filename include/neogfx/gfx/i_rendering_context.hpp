@@ -51,6 +51,7 @@ namespace neogfx
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
         virtual vec2 offset() const = 0;
         virtual void set_offset(const optional_vec2& aOffset) = 0;
+        virtual void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect) = 0;
         virtual bool gradient_set() const = 0;
         virtual void apply_gradient(i_gradient_shader& aShader) = 0;
     public:

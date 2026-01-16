@@ -40,35 +40,38 @@ namespace neogfx
 {
     ping_pong_buffers create_ping_pong_buffers(i_rendering_context& aContext, size const& aExtents, texture_sampling aSampling, optional_color const& aClearColor)
     {
-        aContext.flush();
         size previousExtents;
-        auto& buffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
-        buffer1.as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
-        auto gcBuffer1 = std::make_unique<graphics_context>(buffer1);
+        auto& pingPongBuffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
+        auto buffer1 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer1, std::make_unique<graphics_context>(pingPongBuffer1.texture()));
+        pingPongBuffer1.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
+        auto& gcBuffer1 = buffer1->gc();
         {
+            gcBuffer1.set_origin({});
             if (aClearColor != std::nullopt)
             {
-                scoped_render_target srt{ *gcBuffer1 };
-                scoped_scissor ss{ *gcBuffer1, rect{ point{}, previousExtents }.inflate(1.0) };
-                gcBuffer1->clear(*aClearColor);
-                gcBuffer1->clear_depth_buffer();
-                gcBuffer1->clear_stencil_buffer();
+                scoped_render_target srt{ gcBuffer1 };
+                scoped_scissor ss{ gcBuffer1, rect{ point{}, previousExtents }.inflate(1.0) };
+                gcBuffer1.clear(*aClearColor);
+                gcBuffer1.clear_depth_buffer();
+                gcBuffer1.clear_stencil_buffer();
             }
         }
-        auto& buffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
-        buffer2.as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
-        auto gcBuffer2 = std::make_unique<graphics_context>(buffer2);
+        auto& pingPongBuffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
+        auto buffer2 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer2, std::make_unique<graphics_context>(pingPongBuffer2.texture()));
+        pingPongBuffer2.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
+        auto& gcBuffer2 = buffer2->gc();
         {
+            gcBuffer2.set_origin({});
             if (aClearColor != std::nullopt)
             {
-                scoped_render_target srt{ *gcBuffer2 };
-                scoped_scissor ss{ *gcBuffer2, rect{ point{}, previousExtents }.inflate(1.0) };
-                gcBuffer2->clear(*aClearColor);
-                gcBuffer2->clear_depth_buffer();
-                gcBuffer2->clear_stencil_buffer();
+                scoped_render_target srt{ gcBuffer2 };
+                scoped_scissor ss{ gcBuffer2, rect{ point{}, previousExtents }.inflate(1.0) };
+                gcBuffer2.clear(*aClearColor);
+                gcBuffer2.clear_depth_buffer();
+                gcBuffer2.clear_stencil_buffer();
             }
         }
-        return ping_pong_buffers{ {}, std::move(gcBuffer1), std::move(gcBuffer2) };
+        return ping_pong_buffers{ {}, std::move(buffer1), std::move(buffer2) };
     }
 
     ssbo_range path_to_vertices(path const& aPath, path::sub_path_type const& aSubPath)
@@ -347,6 +350,12 @@ namespace neogfx
     void graphics_context::set_offset(optional_vec2 const& aOffset)
     {
         throw not_implemented();
+    }
+
+    void graphics_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect)
+    {
+        scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
+        draw_texture(aDestinationRect, aTexture, aSourceRect);
     }
 
     bool graphics_context::gradient_set() const

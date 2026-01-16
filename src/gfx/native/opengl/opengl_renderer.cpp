@@ -296,20 +296,20 @@ namespace neogfx
         }
     }
 
-    i_texture& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
+    i_ping_pong_buffer& opengl_renderer::ping_pong_buffer1(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         if (!iPingPongBuffer1s)
             iPingPongBuffer1s.emplace();
-        auto& bufferTexture = create_ping_pong_buffer(*iPingPongBuffer1s, aExtents, aPreviousExtents, aSampling);
-        return bufferTexture;
+        auto& pingPongBuffer = create_ping_pong_buffer(*iPingPongBuffer1s, aExtents, aPreviousExtents, aSampling);
+        return pingPongBuffer;
     }
 
-    i_texture& opengl_renderer::ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
+    i_ping_pong_buffer& opengl_renderer::ping_pong_buffer2(const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
         if (!iPingPongBuffer2s)
             iPingPongBuffer2s.emplace();
-        auto& bufferTexture = create_ping_pong_buffer(*iPingPongBuffer2s, aExtents, aPreviousExtents, aSampling);
-        return bufferTexture;
+        auto& pingPongBuffer = create_ping_pong_buffer(*iPingPongBuffer2s, aExtents, aPreviousExtents, aSampling);
+        return pingPongBuffer;
     }
 
     bool opengl_renderer::is_subpixel_rendering_on() const
@@ -405,20 +405,25 @@ namespace neogfx
         return 0;
     }    
     
-    i_texture& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
+    i_ping_pong_buffer& opengl_renderer::create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling)
     {
-        auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents));
-        if (existing != aBufferList.end() && existing->first.first == aSampling && existing->first.second.greater_than_or_equal(aExtents))
+        for (auto existing = aBufferList.lower_bound(std::make_pair(aSampling, aExtents)); existing != aBufferList.end(); ++existing)
         {
-            aPreviousExtents = existing->second.second;
-            existing->second.second = aExtents;
-            return existing->second.first;
+            if (existing->first.first == aSampling && existing->first.second.greater_than_or_equal(aExtents) && !existing->second.in_use())
+            {
+                auto& pingPongBuffer = existing->second;
+                aPreviousExtents = pingPongBuffer.size();
+                pingPongBuffer.set_size(aExtents);
+                pingPongBuffer.use();
+                return pingPongBuffer;
+            }
         }
         auto const sizeMultiple = 1024;
         basic_size<std::int32_t> idealSize{ (((static_cast<std::int32_t>(aExtents.cx) - 1) / sizeMultiple) + 1) * sizeMultiple, (((static_cast<std::int32_t>(aExtents.cy) - 1) / sizeMultiple) + 1) * sizeMultiple };
-        auto newBuffer = aBufferList.emplace(std::make_pair(aSampling, idealSize), std::make_pair(texture{ idealSize, 1.0, aSampling }, aExtents)).first;
-        newBuffer->second.second = aExtents;
+        auto newBuffer = aBufferList.emplace(std::make_pair(aSampling, idealSize), ping_pong_buffer{ texture{ idealSize, 1.0, aSampling }, aExtents });
         aPreviousExtents = idealSize;
-        return newBuffer->second.first;
+        auto& pingPongBuffer = newBuffer->second;
+        pingPongBuffer.use();
+        return pingPongBuffer;
     }
 }

@@ -347,6 +347,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_gradient.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_gradient_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_ping_pong_buffer.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_context.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_image.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\i_rendering_engine.hpp" />

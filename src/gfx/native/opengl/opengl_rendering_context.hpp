@@ -123,51 +123,6 @@ namespace neogfx
             opengl_rendering_context& iParent;
             neogfx::blending_mode iPreviousBlendingMode;
         };
-        typedef std::variant<blur_filter> filter; // todo: more filters to follow
-        template <typename Filter>
-        class scoped_filter
-        {
-        public:
-            scoped_filter(opengl_rendering_context& aParent, Filter const& aFilter) :
-                iParent{ aParent },
-                iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
-                iBuffers{ std::move(create_ping_pong_buffers(aParent, iBufferRect.extents())) },
-                iRenderTarget{ front_buffer() }
-            {
-                front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
-                back_buffer().set_origin({});
-                iParent.iFilters.push_back(aFilter);
-            }
-            ~scoped_filter()
-            {
-                front_buffer().set_origin({});
-                Filter const& filter = std::get<Filter>(iParent.iFilters.back());
-                {
-                    iRenderTarget.emplace(back_buffer());
-                    if constexpr (std::is_same_v<Filter, blur_filter>)
-                        back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, filter.radius, filter.algorithm, filter.parameter1, filter.parameter2);
-                }
-                iRenderTarget = {};
-                scoped_blending_mode sbm{ iParent, neogfx::blending_mode::Blit };
-                rect const drawRect { filter.region.top_left() - point{ filter.radius, filter.radius }, iBufferRect.extents() };
-                iParent.draw_texture(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
-                iParent.iFilters.pop_back();
-            }
-        public: 
-            i_graphics_context& front_buffer() const
-            {
-                return *iBuffers.buffer1;
-            }
-            i_graphics_context& back_buffer() const
-            {
-                return *iBuffers.buffer2;
-            }
-        private:
-            opengl_rendering_context& iParent;
-            rect iBufferRect;
-            ping_pong_buffers iBuffers;
-            std::optional<scoped_render_target> iRenderTarget;
-        };
         struct draw_glyph
         {
             vec3f point;
@@ -278,6 +233,7 @@ namespace neogfx
         void set_origin(const point& aOrigin);
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
+        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect) override;
         bool gradient_set() const override;
         void apply_gradient(i_gradient_shader& aShader) override;
     public:
@@ -372,7 +328,6 @@ namespace neogfx
         bool iSnapToPixel;
         bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;
-        std::vector<filter> iFilters;
         use_shader_program iUseDefaultShaderProgram; // must be last
     private:
         static standard_batching& as_vertex_provider()

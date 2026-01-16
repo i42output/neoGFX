@@ -40,15 +40,15 @@ namespace neogfx
             rect const r{ point{}, size{aSource.extents()} };
             auto pingPongBuffers = create_ping_pong_buffers(gc, aSource.extents(), texture_sampling::Multisample);
             {
-                scoped_render_target srt{ *pingPongBuffers.buffer1 };
-                pingPongBuffers.buffer1->draw_texture(targetRect, aSource, color::Black);
+                scoped_render_target srt{ pingPongBuffers.buffer1->gc() };
+                pingPongBuffers.buffer1->gc().draw_texture(targetRect, aSource, color::Black);
             }
             {
                 scoped_render_target srt{ *pingPongBuffers.buffer2 };
-                pingPongBuffers.buffer2->blur(r, *pingPongBuffers.buffer1, r, outline, blurring_algorithm::Gaussian, 5.0, 1.0);
+                pingPongBuffers.buffer2->gc().blur(r, pingPongBuffers.buffer1->gc(), r, outline, blurring_algorithm::Gaussian, 5.0, 1.0);
             }
             scoped_render_target srt{ gc };
-            gc.blit(r, *pingPongBuffers.buffer2, r);
+            gc.blit(r, pingPongBuffers.buffer2->gc(), r);
         }
         scoped_render_target srt{ gc };
         gc.draw_texture(targetRect, aSource, aColor ? *aColor : service<i_app>().current_style().palette().color(color_role::Text), shader_effect::ColorizeAlpha);

@@ -40,6 +40,7 @@
 #include <neogfx/gfx/text/font.hpp>
 #include <neogfx/gfx/primitives.hpp>
 #include <neogfx/gfx/i_rendering_context.hpp>
+#include <neogfx/gfx/i_ping_pong_buffer.hpp>
 #include <neogfx/gfx/view.hpp>
 #include <neogfx/game/mesh.hpp>
 #include <neogfx/game/material.hpp>
@@ -61,9 +62,31 @@ namespace neogfx
 
     struct ping_pong_buffers
     {
+        class attachment
+        {
+        public:
+            attachment(i_ping_pong_buffer& aPingPongBuffer, std::unique_ptr<i_graphics_context>&& aGc) :
+                iPingPongBuffer{ aPingPongBuffer },
+                iGc{ std::move(aGc) }
+            {
+            }
+            ~attachment()
+            {
+                iPingPongBuffer.release();
+            }
+        public:
+            i_graphics_context& gc()
+            {
+                return *iGc;
+            }
+        private:
+            i_ping_pong_buffer& iPingPongBuffer;
+            std::unique_ptr<i_graphics_context> iGc;
+        };
+
         scoped_render_target srt;
-        std::unique_ptr<i_graphics_context> buffer1;
-        std::unique_ptr<i_graphics_context> buffer2;
+        std::unique_ptr<attachment> buffer1;
+        std::unique_ptr<attachment> buffer2;
     };
         
     ping_pong_buffers create_ping_pong_buffers(i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} });
@@ -715,40 +738,36 @@ namespace neogfx
     class scoped_filter
     {
     public:
-        scoped_filter(i_graphics_context& aGc, Filter const& aFilter) :
-            iGc{ aGc },
+        scoped_filter(i_rendering_context& aRc, Filter const& aFilter) :
+            iRc{ aRc },
             iFilter{ aFilter },
             iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
-            iBuffers{ std::move(create_ping_pong_buffers(aGc, iBufferRect.extents())) },
+            iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents())) },
             iRenderTarget{ front_buffer() }
         {
             front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
-            back_buffer().set_origin({});
         }
         ~scoped_filter()
         {
             front_buffer().set_origin({});
-            {
-                iRenderTarget.emplace(back_buffer());
-                if constexpr (std::is_same_v<Filter, blur_filter>)
-                    back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
-            }
+            iRenderTarget.emplace(back_buffer());
+            if constexpr (std::is_same_v<Filter, blur_filter>)
+                back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
             iRenderTarget = {};
-            scoped_blending_mode sbm{ iGc, neogfx::blending_mode::Blit };
             rect const drawRect{ iFilter.region.top_left() - point{ iFilter.radius, iFilter.radius }, iBufferRect.extents() };
-            iGc.draw_texture(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
+            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
         }
     public:
         i_graphics_context& front_buffer() const
         {
-            return *iBuffers.buffer1;
+            return iBuffers.buffer1->gc();
         }
         i_graphics_context& back_buffer() const
         {
-            return *iBuffers.buffer2;
+            return iBuffers.buffer2->gc();
         }
     private:
-        i_graphics_context& iGc;
+        i_rendering_context& iRc;
         Filter iFilter;
         rect iBufferRect;
         ping_pong_buffers iBuffers;
