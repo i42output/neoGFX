@@ -44,7 +44,7 @@ namespace neogfx
                 pingPongBuffers.buffer1->gc().draw_texture(targetRect, aSource, color::Black);
             }
             {
-                scoped_render_target srt{ *pingPongBuffers.buffer2 };
+                scoped_render_target srt{ pingPongBuffers.buffer2->gc() };
                 pingPongBuffers.buffer2->gc().blur(r, pingPongBuffers.buffer1->gc(), r, outline, blurring_algorithm::Gaussian, 5.0, 1.0);
             }
             scoped_render_target srt{ gc };
