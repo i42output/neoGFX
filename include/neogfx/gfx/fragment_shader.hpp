@@ -169,7 +169,9 @@ namespace neogfx
         cache_uniform(uFilterArguments)
         cache_uniform(uFilterKernelSize)
         cache_uniform(uFilterKernel)
-        std::map<std::pair<shader_filter, vec4>, std::optional<shader_array<float>>> iFilterKernel;
+        using kernels = std::map<std::pair<shader_filter, vec4>, std::optional<shader_array<float>>>;
+        kernels iFilterKernels;
+        i_texture* iActiveKernel = nullptr;
     };
 
     class standard_glyph_shader : public standard_fragment_shader<i_glyph_shader>

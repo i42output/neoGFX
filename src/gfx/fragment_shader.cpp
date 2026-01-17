@@ -167,19 +167,23 @@ namespace neogfx
             aArgument1 += (1u - static_cast<std::uint32_t>(aArgument1) % 2u);
         auto const arguments = vec4{ aArgument1, aArgument2, aArgument3, aArgument4 };
         uFilterArguments = arguments.as<float>();
-        auto kernel = iFilterKernel.find(std::make_pair(aFilter, arguments));
-        if (kernel == iFilterKernel.end())
+        auto kernel = iFilterKernels.find(std::make_pair(aFilter, arguments));
+        if (kernel == iFilterKernels.end())
         {
             if (aFilter == shader_filter::GaussianBlur)
             {
-                kernel = iFilterKernel.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
+                kernel = iFilterKernels.emplace(std::make_pair(aFilter, arguments), std::optional<shader_array<float>>{}).first;
                 auto const kernelValues = dynamic_gaussian_filter<float>(static_cast<std::uint32_t>(aArgument1), static_cast<float>(aArgument2));
                 kernel->second.emplace(size{ aArgument1, aArgument1 });
-                kernel->second->data().set_pixels(rect{ point{0.0, 0.0}, size{aArgument1, aArgument1} }, &kernelValues[0][0]);
+                kernel->second->data().set_pixels(rect{ point{}, size{aArgument1, aArgument1} }, &kernelValues[0][0]);
             }
         }
-        uFilterKernelSize = static_cast<i32>(kernel->second->data().extents().cx);
-        kernel->second->data().bind(5);
+        auto& kernelData = kernel->second->data();
+        uFilterKernelSize = static_cast<i32>(kernelData.extents().cx);
+        if (iActiveKernel && iActiveKernel != &kernelData)
+            iActiveKernel->unbind();
+        iActiveKernel = &kernelData;
+        kernelData.bind(5);
         uFilterKernel = sampler2DRect{ 5 };
     }
 

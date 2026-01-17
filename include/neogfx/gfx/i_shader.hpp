@@ -200,6 +200,7 @@ namespace neogfx
         virtual void set_value(const abstract_t<shader_value_type>& aValue) = 0;
         virtual bool is_dirty() const = 0;
         virtual void clean() const = 0;
+        virtual void set_dirty() const = 0;
         virtual bool different_type_to(const abstract_t<shader_value_type>& aValue) const = 0;
     public:
         template <typename T>
@@ -375,6 +376,10 @@ namespace neogfx
         void clean() const final 
         { 
             iDirty = false; 
+        }
+        void set_dirty() const final
+        {
+            iDirty = true;
         }
         bool different_type_to(const abstract_t<shader_value_type>& aValue) const
         {

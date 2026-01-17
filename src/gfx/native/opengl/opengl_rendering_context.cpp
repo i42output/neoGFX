@@ -2068,7 +2068,7 @@ namespace neogfx
                             continue;
 
                         if (!filter)
-                            filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian, 
+                            filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian,
                                 drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() });
 
                         filter->front_buffer().draw_glyph(
@@ -2106,7 +2106,9 @@ namespace neogfx
                             game::material
                             {
                                 ink_maybe_animated(drawOp, ink),
-                                std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) })) : std::optional<game::gradient>{},
+                                std::holds_alternative<gradient>(ink) ? 
+                                    to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(rect{ to_aabb_2d(glyphQuad.begin(), glyphQuad.end()) })) : 
+                                    std::optional<game::gradient>{},
                                 {}, 
                                 to_ecs_component(emojiTexture),
                                 !drawOp.appearance->being_filtered() ?
@@ -2457,7 +2459,7 @@ namespace neogfx
                 if (patch.layer.has_value() && patch.layer.value() > aLayer)
                     outstandingPatches = true;
             }
-            if (!outstandingPatches)
+            if (cache && !outstandingPatches)
                 meshRenderCache.state = game::cache_state::Clean;
         }
 

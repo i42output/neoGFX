@@ -1089,6 +1089,7 @@ namespace neogfx
         auto const& source = aSource.render_target();
         for (auto& uv : mesh.uv)
             uv = (aSourceRect.top_left() / source.extents()).to_vec2().as<float>() + uv.scale((aSourceRect.extents() / source.extents()).to_vec2().as<float>());
+        aDestination.flush();
         aDestination.draw_mesh(
             mesh,
             game::material
@@ -1101,10 +1102,12 @@ namespace neogfx
             },
             optional_mat44{},
             to_ecs_component(aAlgorithm, aParameter1, aParameter2));
+        aDestination.flush();
     }
 
     void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
     {
+        aSource.flush();
         scoped_render_target srt1{ *this };
         scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Blit };
         scoped_scissor ss1{ *this, aDestinationRect };

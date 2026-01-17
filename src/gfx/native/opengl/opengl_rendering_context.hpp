@@ -301,6 +301,12 @@ namespace neogfx
         void apply_scissor();
         void apply_logical_operation();
     private:
+        static standard_batching& as_vertex_provider()
+        {
+            static standard_batching sProvider;
+            return sProvider;
+        }
+    private:
         i_rendering_engine& iRenderingEngine;
         const i_render_target& iTarget;
         const i_widget* iWidget;
@@ -329,11 +335,5 @@ namespace neogfx
         bool iSnapToPixelUsesOffset;
         std::optional<gradient> iGradient;
         use_shader_program iUseDefaultShaderProgram; // must be last
-    private:
-        static standard_batching& as_vertex_provider()
-        {
-            static standard_batching sProvider;
-            return sProvider;
-        }
     };
 }
