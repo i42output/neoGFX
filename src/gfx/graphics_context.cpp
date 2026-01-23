@@ -1239,9 +1239,10 @@ namespace neogfx
     multiline_glyph_text graphics_context::to_multiline_glyph_text(glyph_text const& aText, dimension aMaxWidth, alignment aAlignment) const
     {
         multiline_glyph_text result{ aText.clone() };
-        typedef std::pair<glyph_text::iterator, glyph_text::iterator> line_t;
-        typedef std::vector<line_t> lines_t;
-        lines_t lines;
+        using line_t = std::pair<glyph_text::iterator, glyph_text::iterator>;
+        using lines_t = std::vector<line_t>;
+        thread_local lines_t lines;
+        lines.clear();
         std::array<glyph_char, 2> delimeters = { glyph_char{ '\r', {}, text_category::Whitespace }, glyph_char{ '\n', {}, text_category::Whitespace } };
         neolib::tokens(result.glyphText.begin(), result.glyphText.end(), delimeters.begin(), delimeters.end(), lines, 0, false);
         vec3 pos;
@@ -1279,8 +1280,13 @@ namespace neogfx
                             if (next != lineStart)
                             {
                                 auto wordBreak = word_break(lineStart, next, result.glyphText.end());
-                                lineEnd = wordBreak.first;
-                                next = wordBreak.second;
+                                if (wordBreak.first != lineStart)
+                                {
+                                    lineEnd = wordBreak.first;
+                                    next = wordBreak.second;
+                                }
+                                else
+                                    lineEnd = next;
                             }
                             else
                                 ++next;

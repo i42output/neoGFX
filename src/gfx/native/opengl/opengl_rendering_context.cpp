@@ -2191,7 +2191,9 @@ namespace neogfx
                             game::mesh_renderer{
                                 game::material{
                                     ink_maybe_animated(drawOp, ink),
-                                    std::holds_alternative<gradient>(ink) ? to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : std::optional<game::gradient>{},
+                                    std::holds_alternative<gradient>(ink) ? 
+                                        to_ecs_component(static_variant_cast<const gradient&>(ink).with_bounding_box_if_none(to_aabb_2d(glyphQuad.begin(), glyphQuad.end()))) : 
+                                        std::optional<game::gradient>{},
                                     {},
                                     to_ecs_component(theGlyph.texture()),
                                     shader_effect::Ignore
