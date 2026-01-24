@@ -812,7 +812,7 @@ namespace neogfx
             if (line.begin == line.end)
                 continue;
             auto const glyphs = std::ranges::subrange(aText.glyphText.begin() + line.begin, aText.glyphText.begin() + line.end);
-            auto const adjust = line.bbox[0] - vec3f{ glyphs.begin()->cell[0] };
+            auto const adjust = line.bbox[0] - line.origin;
             draw_glyph_text(aPoint + adjust.as<scalar>(), aText.glyphText, glyphs.begin(), glyphs.end(), aTextFormat);
         }
     }
@@ -1258,7 +1258,7 @@ namespace neogfx
                 {
                     auto const& glyphs = std::ranges::subrange(lineStart, lineEnd);
                     result.lines.push_back(multiline_glyph_text::line{
-                        {},
+                        {}, {},
                         std::distance(result.glyphText.begin(), lineStart), std::distance(result.glyphText.begin(), lineEnd) });
                     auto const& firstGlyph = *glyphs.begin();
                     auto const xAdjust = static_cast<float>(-firstGlyph.cell[0].x);
@@ -1298,7 +1298,7 @@ namespace neogfx
                         {
                             auto const& glyphs = std::ranges::subrange(lineStart, lineEnd);
                             result.lines.push_back(multiline_glyph_text::line{
-                                {},
+                                {}, {},
                                 std::distance(result.glyphText.begin(), lineStart), std::distance(result.glyphText.begin(), lineEnd) });
                             auto const xAdjust = static_cast<float>(-lineStart->cell[0].x);
                             for (auto& glyph : glyphs)
@@ -1327,6 +1327,7 @@ namespace neogfx
             line.bbox[1] = std::prev(glyphs.end())->cell[1];
             line.bbox[2] = std::prev(glyphs.end())->cell[2];
             line.bbox[3] = glyphs.begin()->cell[3];
+            line.origin = line.bbox[0];
             if (!min)
                 min = vec3{ line.bbox[0] };
             else

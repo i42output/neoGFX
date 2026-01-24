@@ -555,6 +555,7 @@ namespace neogfx
         quadf bbox;
         struct line
         {
+            vec3f origin;
             quadf bbox;
             glyph_text::difference_type begin;
             glyph_text::difference_type end;
