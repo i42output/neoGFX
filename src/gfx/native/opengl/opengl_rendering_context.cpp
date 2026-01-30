@@ -828,7 +828,7 @@ namespace neogfx
             case neogfx::blending_mode::Blit:
                 glCheck(glEnable(GL_BLEND));
                 glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+                glCheck(glBlendFunc(iOpacity == 1.0 ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             case neogfx::blending_mode::Default:
                 glCheck(glEnable(GL_BLEND));
@@ -1116,7 +1116,7 @@ namespace neogfx
                         std::holds_alternative<std::monostate>(drawOp.fill)))
                 {
                     bool optimise = false;
-                    if (!logical_operation_active())
+                    if (!logical_operation_active() && iOpacity == 1.0)
                     {
                         auto const penWidth = drawOp.pen.width();
                         if (penWidth == 0.0)
