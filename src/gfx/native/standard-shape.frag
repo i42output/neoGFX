@@ -408,8 +408,6 @@ void draw_checkerboard(inout vec4 color, inout vec4 function1, inout vec4 functi
 
 void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 function1, inout vec4 function2, inout vec4 function3, inout vec4 function4, inout vec4 function5, inout vec4 function6)
 {
-    float alpha = color.a;
-    color.a = 1.0;
     if (uShapeEnabled)
     {
         switch(uShape)
@@ -452,5 +450,4 @@ void standard_shape_shader(inout vec4 color, inout vec4 function0, inout vec4 fu
             break;
         }
     }
-    color.a *= alpha;
 }

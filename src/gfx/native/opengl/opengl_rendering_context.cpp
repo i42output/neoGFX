@@ -1087,9 +1087,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1183,9 +1183,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1234,9 +1234,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1285,9 +1285,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>(),
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>(),
                         drawOp.radiusY.as<float>() });
             }
         }
@@ -1345,9 +1345,9 @@ namespace neogfx
                                 0.0,
                                 drawOp.pen.width() }.as<float>(),
                             std::holds_alternative<color>(drawOp.pen.color()) ?
-                                static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                                static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                            drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                            drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
 
                     maybeVertexArrays = std::nullopt;
                     usp = std::nullopt;
@@ -1399,9 +1399,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1449,9 +1449,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1499,9 +1499,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1549,9 +1549,9 @@ namespace neogfx
                             0.0,
                             drawOp.pen.width() }.as<float>(),
                         std::holds_alternative<color>(drawOp.pen.color()) ?
-                            static_variant_cast<color>(drawOp.pen.color()).as<float>() :
+                            static_variant_cast<color>(drawOp.pen.color()).with_combined_alpha(iOpacity).as<float>() :
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
-                        drawOp.pen.secondary_color().value_or(vec4{}).as<float>() });
+                        drawOp.pen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
             }
         }
     }
@@ -1634,7 +1634,7 @@ namespace neogfx
                             std::holds_alternative<color>(aPen.color()) ?
                                 static_variant_cast<color>(aPen.color()).as<float>() :
                                 vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(aPen.color()) ? 0.0f : 1.0f },
-                            aPen.secondary_color().value_or(vec4{}).as<float>() });
+                            aPen.secondary_color().value_or(vec4{}).with_combined_alpha(iOpacity).as<float>() });
                 }
             }
             break;
