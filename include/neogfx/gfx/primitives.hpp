@@ -54,7 +54,8 @@ namespace neogfx
     {
         None,
         Default, // todo
-        Blit
+        Blit,
+        Filter
     };
 
     enum class smoothing_mode : std::uint32_t

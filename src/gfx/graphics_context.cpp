@@ -1109,10 +1109,10 @@ namespace neogfx
     {
         aSource.flush();
         scoped_render_target srt1{ *this };
-        scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Blit };
+        scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Filter };
         scoped_scissor ss1{ *this, aDestinationRect };
         scoped_render_target srt2{ aSource };
-        scoped_blending_mode sbm2{ aSource, neogfx::blending_mode::Blit };
+        scoped_blending_mode sbm2{ aSource, neogfx::blending_mode::Filter };
         scoped_scissor ss2{ aSource, aSourceRect };
         std::int32_t passes = static_cast<std::int32_t>(aRadius);
         if (passes % 2 == 0)

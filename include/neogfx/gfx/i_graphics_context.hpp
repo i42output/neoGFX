@@ -738,10 +738,9 @@ namespace neogfx
     class scoped_filter
     {
     public:
-        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, blending_mode aBlendingMode = blending_mode::Blit) :
+        scoped_filter(i_rendering_context& aRc, Filter const& aFilter) :
             iRc{ aRc },
             iFilter{ aFilter },
-            iBlendingMode{ aBlendingMode },
             iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
             iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents())) },
             iRenderTarget{ front_buffer() }
@@ -756,7 +755,7 @@ namespace neogfx
                 back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
             iRenderTarget = {};
             rect const drawRect{ iFilter.region.top_left() - point{ iFilter.radius, iFilter.radius }, iBufferRect.extents() };
-            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, iBlendingMode);
+            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, blending_mode::Default);
         }
     public:
         i_graphics_context& front_buffer() const
@@ -770,7 +769,6 @@ namespace neogfx
     private:
         i_rendering_context& iRc;
         Filter iFilter;
-        blending_mode iBlendingMode;
         rect iBufferRect;
         ping_pong_buffers iBuffers;
         std::optional<scoped_render_target> iRenderTarget;

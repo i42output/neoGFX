@@ -184,7 +184,7 @@ namespace neogfx
     {
         if (iText != aText)
         {
-            size oldSize = minimum_size();
+            size const oldSize = minimum_size();
             iText = aText;
             reset_cache();
             TextChanged();

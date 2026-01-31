@@ -825,15 +825,20 @@ namespace neogfx
             case neogfx::blending_mode::None:
                 glCheck(glDisable(GL_BLEND));
                 break;
-            case neogfx::blending_mode::Blit:
-                glCheck(glEnable(GL_BLEND));
-                glCheck(glBlendEquation(GL_FUNC_ADD));
-                glCheck(glBlendFunc(iOpacity == 1.0 ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-                break;
             case neogfx::blending_mode::Default:
                 glCheck(glEnable(GL_BLEND));
                 glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                break;
+            case neogfx::blending_mode::Blit:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
+                glCheck(glBlendFunc(GL_ONE, GL_ZERO));
+                break;
+            case neogfx::blending_mode::Filter:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
+                glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             }
         }
@@ -2069,7 +2074,7 @@ namespace neogfx
 
                         if (!filter)
                             filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian,
-                                drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() }, neogfx::blending_mode::Default);
+                                drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() });
 
                         filter->front_buffer().draw_glyph(
                             drawOp.point.as<scalar>() + drawOp.appearance->effect()->offset(),
