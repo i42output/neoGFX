@@ -91,17 +91,22 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << "stack_layout::maximum_size(" << aAvailableSpace << ")" << std::endl;
 #endif // NEOGFX_DEBUG
         size result{ size::max_size() };
+        std::optional<size> maxItemSize;
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
             if (!item_effectively_visible_for_layout(*this, item))
                 continue;
+            if (!maxItemSize.has_value())
+                maxItemSize.emplace();
             auto const& itemMaxSize = item.maximum_size(aAvailableSpace);
             if (itemMaxSize.cx != 0.0)
-                result.cx = std::min(result.cx, itemMaxSize.cx);
+                maxItemSize.value().cx = std::max(maxItemSize.value().cx, itemMaxSize.cx);
             if (itemMaxSize.cy != 0.0)
-                result.cy = std::min(result.cy, itemMaxSize.cy);
+                maxItemSize.value().cy = std::max(maxItemSize.value().cy, itemMaxSize.cy);
         }
+        if (maxItemSize)
+            result = result.min(maxItemSize.value());
         if (result.cx != size::max_dimension())
             result.cx += internal_spacing().size().cx;
         if (result.cy != size::max_dimension())
@@ -136,7 +141,14 @@ namespace neogfx
             auto& item = *itemRef;
             if (!item_effectively_visible_for_layout(*this, item))
                 continue;
-            item.layout_as(aPosition + internal_spacing().top_left(), aSize - internal_spacing().size());
+            auto const desiredSize = aSize - internal_spacing().size();
+            auto const itemSize = desiredSize.min(item.maximum_size());
+            auto itemPosition = aPosition + internal_spacing().top_left();
+            if (itemSize.cx < desiredSize.cx)
+                itemPosition.x += ((desiredSize.cx - itemSize.cx) / 2.0);
+            if (itemSize.cy < desiredSize.cy)
+                itemPosition.y += ((desiredSize.cy - itemSize.cy) / 2.0);
+            item.layout_as(itemPosition, itemSize);
         }
         if (has_parent_widget())
             parent_widget().layout_items_completed();
