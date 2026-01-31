@@ -232,7 +232,7 @@ namespace neogfx
         virtual void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) = 0;
         virtual void clear_depth_buffer() = 0;
         virtual void clear_stencil_buffer() = 0;
-        virtual void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect) = 0;
+        virtual void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) = 0;
         virtual void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) = 0;
         // gradient
     public:
@@ -738,9 +738,10 @@ namespace neogfx
     class scoped_filter
     {
     public:
-        scoped_filter(i_rendering_context& aRc, Filter const& aFilter) :
+        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, blending_mode aBlendingMode = blending_mode::Blit) :
             iRc{ aRc },
             iFilter{ aFilter },
+            iBlendingMode{ aBlendingMode },
             iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
             iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents())) },
             iRenderTarget{ front_buffer() }
@@ -755,7 +756,7 @@ namespace neogfx
                 back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
             iRenderTarget = {};
             rect const drawRect{ iFilter.region.top_left() - point{ iFilter.radius, iFilter.radius }, iBufferRect.extents() };
-            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect);
+            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, iBlendingMode);
         }
     public:
         i_graphics_context& front_buffer() const
@@ -769,6 +770,7 @@ namespace neogfx
     private:
         i_rendering_context& iRc;
         Filter iFilter;
+        blending_mode iBlendingMode;
         rect iBufferRect;
         ping_pong_buffers iBuffers;
         std::optional<scoped_render_target> iRenderTarget;

@@ -233,7 +233,7 @@ namespace neogfx
         void set_origin(const point& aOrigin);
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
-        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect) override;
+        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode) override;
         bool gradient_set() const override;
         void apply_gradient(i_gradient_shader& aShader) override;
     public:

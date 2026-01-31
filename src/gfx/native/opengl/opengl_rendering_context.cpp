@@ -438,9 +438,9 @@ namespace neogfx
         return !!iGradient;
     }
 
-    void opengl_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect)
+    void opengl_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
-        scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
+        scoped_blending_mode sbm{ *this, aBlendingMode };
         draw_texture(aDestinationRect, aTexture, aSourceRect);
     }
 
@@ -2069,7 +2069,7 @@ namespace neogfx
 
                         if (!filter)
                             filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian,
-                                drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() });
+                                drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() }, neogfx::blending_mode::Default);
 
                         filter->front_buffer().draw_glyph(
                             drawOp.point.as<scalar>() + drawOp.appearance->effect()->offset(),

@@ -352,9 +352,9 @@ namespace neogfx
         throw not_implemented();
     }
 
-    void graphics_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect)
+    void graphics_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
-        scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
+        scoped_blending_mode sbm{ *this, aBlendingMode };
         draw_texture(aDestinationRect, aTexture, aSourceRect);
     }
 
@@ -1075,9 +1075,9 @@ namespace neogfx
         rendering_context().enqueue(graphics_operation::clear_stencil_buffer{});
     }
 
-    void graphics_context::blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect)
+    void graphics_context::blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
-        scoped_blending_mode sbm{ *this, neogfx::blending_mode::Blit };
+        scoped_blending_mode sbm{ *this, aBlendingMode };
         draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
     }
 

@@ -55,7 +55,7 @@ namespace neogfx
         neogfx::logical_coordinates logical_coordinates() const final;
         vec2 offset() const final;
         void set_offset(const optional_vec2& aOffset) final;
-        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect) final;
+        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) final;
         bool gradient_set() const final;
         void apply_gradient(i_gradient_shader& aShader) final;
         // units
@@ -125,7 +125,7 @@ namespace neogfx
         void clear(color const& aColor, std::optional<scalar> const& aZpos = std::optional<scalar>{}) final;
         void clear_depth_buffer() final;
         void clear_stencil_buffer() final;
-        void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect) final;
+        void blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode = neogfx::blending_mode::Blit) final;
         void blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm = blurring_algorithm::Gaussian, scalar aParameter1 = 5, scalar aParameter2 = 1.0) final;
         void clear_gradient() final;
         void set_gradient(gradient const& aGradient, rect const& aBoundingBox) final;
