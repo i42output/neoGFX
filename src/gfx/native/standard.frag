@@ -12,6 +12,16 @@
 #define SHAPE_EllipseRect 0x0A
 #define SHAPE_Polygon 0x0B
 #define SHAPE_Checkerboard 0x0C
+#define SHADER_EFFECT_None 0
+#define SHADER_EFFECT_Colorize 1
+#define SHADER_EFFECT_ColorizeAverage 1
+#define SHADER_EFFECT_ColorizeMaximum 2
+#define SHADER_EFFECT_ColorizeSpot 3
+#define SHADER_EFFECT_ColorizeAlpha 4
+#define SHADER_EFFECT_Monochrome 5
+#define SHADER_EFFECT_MultiplyAlpha 10
+#define SHADER_EFFECT_Filter 20
+#define SHADER_EFFECT_Ignore 99
 
 vec4 mix3(vec4 a, vec4 b, vec4 c, float t)
 {

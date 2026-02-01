@@ -352,10 +352,13 @@ namespace neogfx
         throw not_implemented();
     }
 
-    void graphics_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
+    void graphics_context::blit(rect const& aDestinationRect, i_texture const& aTexture, rect const& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
         scoped_blending_mode sbm{ *this, aBlendingMode };
-        draw_texture(aDestinationRect, aTexture, aSourceRect);
+        auto shaderEffect = shader_effect::None;
+        if (aBlendingMode == neogfx::blending_mode::FilterFinish)
+            shaderEffect = shader_effect::MultiplyAlpha;
+        draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
     }
 
     bool graphics_context::gradient_set() const
@@ -1077,8 +1080,7 @@ namespace neogfx
 
     void graphics_context::blit(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
-        scoped_blending_mode sbm{ *this, aBlendingMode };
-        draw_texture(aDestinationRect, aSource.render_target().target_texture(), aSourceRect);
+        blit(aDestinationRect, aSource.render_target().target_texture(), aSourceRect, aBlendingMode);
     }
 
     void blur(i_graphics_context& aDestination, rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)

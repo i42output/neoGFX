@@ -441,7 +441,10 @@ namespace neogfx
     void opengl_rendering_context::blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
         scoped_blending_mode sbm{ *this, aBlendingMode };
-        draw_texture(aDestinationRect, aTexture, aSourceRect);
+        auto shaderEffect = shader_effect::None;
+        if (aBlendingMode == neogfx::blending_mode::FilterFinish)
+            shaderEffect = shader_effect::MultiplyAlpha;
+        draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
     }
 
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
@@ -830,6 +833,11 @@ namespace neogfx
                 glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 break;
+            case neogfx::blending_mode::Sprite:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
+                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+                break;
             case neogfx::blending_mode::Blit:
                 glCheck(glEnable(GL_BLEND));
                 glCheck(glBlendEquation(GL_FUNC_ADD));
@@ -839,6 +847,11 @@ namespace neogfx
                 glCheck(glEnable(GL_BLEND));
                 glCheck(glBlendEquation(GL_FUNC_ADD));
                 glCheck(glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA));
+                break;
+            case neogfx::blending_mode::FilterFinish:
+                glCheck(glEnable(GL_BLEND));
+                glCheck(glBlendEquation(GL_FUNC_ADD));
+                glCheck(glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
                 break;
             }
         }

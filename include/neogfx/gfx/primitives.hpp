@@ -53,9 +53,11 @@ namespace neogfx
     enum class blending_mode : std::uint32_t
     {
         None,
-        Default, // todo
+        Default,
+        Sprite,
         Blit,
-        Filter
+        Filter,
+        FilterFinish
     };
 
     enum class smoothing_mode : std::uint32_t
@@ -79,7 +81,8 @@ namespace neogfx
         ColorizeSpot    = 3,
         ColorizeAlpha   = 4,
         Monochrome      = 5,
-        Filter          = 10,
+        MultiplyAlpha   = 10,
+        Filter          = 20,
         Ignore          = 99
     };
 

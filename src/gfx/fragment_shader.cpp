@@ -129,8 +129,6 @@ namespace neogfx
     void standard_texture_shader::set_effect(shader_effect aEffect)
     {
         uTextureEffect = aEffect;
-        if (aEffect == shader_effect::Ignore)
-            uTextureEnabled = false;
     }
 
     standard_filter_shader::standard_filter_shader(std::string const& aName) :

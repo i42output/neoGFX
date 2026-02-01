@@ -755,7 +755,7 @@ namespace neogfx
                 back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
             iRenderTarget = {};
             rect const drawRect{ iFilter.region.top_left() - point{ iFilter.radius, iFilter.radius }, iBufferRect.extents() };
-            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, blending_mode::Default);
+            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
         }
     public:
         i_graphics_context& front_buffer() const
