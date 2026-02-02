@@ -1270,6 +1270,8 @@ namespace neogfx
 
         if (effectively_hidden())
             return;
+        if (opacity() == 0.0)
+            return;
         if (!requires_update())
             return;
 
