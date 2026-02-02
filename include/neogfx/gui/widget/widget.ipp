@@ -623,13 +623,7 @@ namespace neogfx
             iLayout->set_parent_widget(this);
             if (aMoveExistingItems)
             {
-                if (oldLayout == nullptr)
-                {
-                    for (auto& child : iChildren)
-                        if (child->has_parent_layout() && &child->parent_layout() == nullptr)
-                            iLayout->add(child);
-                }
-                else
+                if (oldLayout != nullptr)
                     oldLayout->move_all_to(*iLayout);
             }
         }
