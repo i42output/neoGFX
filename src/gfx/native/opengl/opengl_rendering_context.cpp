@@ -2187,6 +2187,7 @@ namespace neogfx
                                             shader_effect::Ignore
                                         },
                                         {},
+                                        true,
                                         0,
                                         {}, subpixelRender });
                             }
@@ -2217,6 +2218,7 @@ namespace neogfx
                                     shader_effect::Ignore
                                 },
                                 {},
+                                true,
                                 0,
                                 {}, subpixelRender });
                     }
@@ -2305,11 +2307,13 @@ namespace neogfx
 
     void opengl_rendering_context::draw_mesh(const game::mesh& aMesh, const game::material& aMaterial, const mat44& aTransformation, const std::optional<game::filter>& aFilter)
     {
-        draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, 0, aFilter }, aTransformation);
+        draw_mesh(game::mesh_filter{ { &aMesh }, {}, {} }, game::mesh_renderer{ aMaterial, {}, true, 0, aFilter }, aTransformation);
     }
     
     void opengl_rendering_context::draw_mesh(const game::mesh_filter& aMeshFilter, const game::mesh_renderer& aMeshRenderer, const mat44& aTransformation)
     {
+        if (!aMeshRenderer.render)
+            return;
         mesh_drawable drawable
         {
             aMeshFilter,
@@ -2335,6 +2339,8 @@ namespace neogfx
         {
             auto& meshDrawable = *md;
             auto& meshRenderer = *meshDrawable.renderer;
+            if (!meshRenderer.render)
+                continue;
             auto& meshFilter = *meshDrawable.filter;
             bool const cached = meshDrawable.entity != null_entity &&
                 game::is_render_cache_valid_no_lock(*cache, meshDrawable.entity);
@@ -2374,8 +2380,10 @@ namespace neogfx
         for (auto md = aFirst; md != aLast; ++md)
         {
             auto& meshDrawable = *md;
-            auto& meshFilter = *meshDrawable.filter;
             auto& meshRenderer = *meshDrawable.renderer;
+            if (!meshRenderer.render)
+                continue;
+            auto& meshFilter = *meshDrawable.filter;
             thread_local game::mesh_render_cache ignore;
             ignore = {};
             auto const& meshRenderCache = (meshDrawable.entity != null_entity ? cache->entity_record_no_lock(meshDrawable.entity, true) : ignore);

@@ -36,9 +36,10 @@ namespace neogfx::game
     {
         material material;
         patches patches;
-        i32 layer;
+        bool render = true;
+        i32 layer = 0;
         std::optional<game::filter> filter;
-        bool barrier;
+        bool barrier = false;
 
         struct meta : i_component_data::meta
         {
@@ -54,7 +55,7 @@ namespace neogfx::game
             }
             static std::uint32_t field_count()
             {
-                return 4;
+                return 6;
             }
             static component_data_field_type field_type(std::uint32_t aFieldIndex)
             {
@@ -65,10 +66,12 @@ namespace neogfx::game
                 case 1:
                     return component_data_field_type::ComponentData | component_data_field_type::Array;
                 case 2:
-                    return component_data_field_type::Int32;
+                    return component_data_field_type::Bool;
                 case 3:
-                    return component_data_field_type::ComponentData | component_data_field_type::Optional;
+                    return component_data_field_type::Int32;
                 case 4:
+                    return component_data_field_type::ComponentData | component_data_field_type::Optional;
+                case 5:
                     return component_data_field_type::Bool;
                 default:
                     throw invalid_field_index();
@@ -85,8 +88,10 @@ namespace neogfx::game
                 case 2:
                     return neolib::uuid{};
                 case 3:
-                    return filter::meta::id();
+                    return neolib::uuid{};
                 case 4:
+                    return filter::meta::id();
+                case 5:
                     return neolib::uuid{};
                 default:
                     throw invalid_field_index();
@@ -98,6 +103,7 @@ namespace neogfx::game
                 {
                     "Material",
                     "Patches",
+                    "Render",
                     "Layer",
                     "Filter",
                     "Barrier"
