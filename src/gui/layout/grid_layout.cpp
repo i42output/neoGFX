@@ -486,8 +486,13 @@ namespace neogfx
                                         fromPos = colPos2;
                                     if (row2 == s.second.y && col2 == s.second.x)
                                     {
+                                        // todo: alignment
                                         toPos = colPos2 + size{ maxColWidth[col2], maxRowHeight[row2] };
-                                        i->second->layout_as(fromPos, size{ toPos - fromPos });
+                                        auto const spanExtents = size{ toPos - fromPos };
+                                        auto const itemExtents = spanExtents.min(i->second->maximum_size(spanExtents));
+                                        i->second->layout_as(fromPos.
+                                            with_x(fromPos.x + (spanExtents.cx - itemExtents.cx) / 2.0).
+                                            with_y(fromPos.y + (spanExtents.cy - itemExtents.cy) / 2.0), itemExtents);
                                         foundSpan = true;
                                     }
                                     colPos2.x += maxColWidth[col2];
@@ -499,7 +504,14 @@ namespace neogfx
                         }
                     }
                     if (!foundSpan)
-                        i->second->layout_as(colPos, size{maxColWidth[col], maxRowHeight[row]});
+                    {
+                        // todo: alignment
+                        auto const cellExtents = size{ maxColWidth[col], maxRowHeight[row] };
+                        auto const itemExtents = cellExtents.min(i->second->maximum_size(cellExtents));
+                        i->second->layout_as(colPos.
+                            with_x(colPos.x + (cellExtents.cx - itemExtents.cx) / 2.0).
+                            with_y(colPos.y + (cellExtents.cy - itemExtents.cy) / 2.0), itemExtents);
+                    }
                 }
                 colPos.x += maxColWidth[col];
                 colPos.x += spacing().cx;
