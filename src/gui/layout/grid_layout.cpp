@@ -560,7 +560,8 @@ namespace neogfx
             for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
             {
                 auto i = iCells.find(cell_coordinates{col, row});
-                if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cy != 0.0)
+                if (i != iCells.end() && i->second->visible() && 
+                    (i->second->minimum_size().cy != 0.0 || i->second->size_policy().vertical_constraint() == size_constraint::Expanding))
                 {
                     ++result;
                     break;
@@ -574,7 +575,8 @@ namespace neogfx
         for (cell_coordinate col = 0; col < iDimensions.cx; ++col)
         {
             auto i = iCells.find(cell_coordinates{col, aRow});
-            if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cy != 0.0)
+            if (i != iCells.end() && i->second->visible() && 
+                (i->second->minimum_size().cy != 0.0 || i->second->size_policy().vertical_constraint() == size_constraint::Expanding))
                 return true;
         }
         return false;
@@ -587,7 +589,8 @@ namespace neogfx
             for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
             {
                 auto i = iCells.find(cell_coordinates{col, row});
-                if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cx != 0.0)
+                if (i != iCells.end() && i->second->visible() && 
+                    (i->second->minimum_size().cy != 0.0 || i->second->size_policy().horizontal_constraint() == size_constraint::Expanding))
                 {
                     ++result;
                     break;
@@ -601,7 +604,8 @@ namespace neogfx
         for (cell_coordinate row = 0; row < iDimensions.cy; ++row)
         {
             auto i = iCells.find(cell_coordinates{aColumn, row});
-            if (i != iCells.end() && i->second->visible() && i->second->minimum_size().cx != 0.0)
+            if (i != iCells.end() && i->second->visible() && 
+                (i->second->minimum_size().cx != 0.0 || i->second->size_policy().horizontal_constraint() == size_constraint::Expanding))
                 return true;
         }
         return false;

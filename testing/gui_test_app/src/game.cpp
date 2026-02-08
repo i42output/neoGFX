@@ -112,7 +112,7 @@ ng::game::i_ecs& create_game(ng::i_layout& aLayout)
                     1.0,
                     ng::texture_sampling::Nearest
                 })
-            }, {}, 2
+            }, {}, true, 2
         },
         ng::game::rigid_body
         {
