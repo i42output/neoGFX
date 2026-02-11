@@ -177,9 +177,9 @@ namespace neogfx
     public:
         virtual bool process_events() = 0;
     public:
-        virtual void register_frame_counter(i_widget& aWidget, std::uint32_t aDuration) = 0;
-        virtual void unregister_frame_counter(i_widget& aWidget, std::uint32_t aDuration) = 0;
-        virtual std::uint32_t frame_counter(std::uint32_t aDuration) const = 0;
+        virtual void register_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration) = 0;
+        virtual void unregister_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration) = 0;
+        virtual std::uint32_t frame_counter(std::chrono::milliseconds const& aDuration) const = 0;
     public:
         static uuid const& iid() { static uuid const sIid{ 0x692d5ef5, 0xe7b0, 0x497c, 0xaea6, { 0x3f, 0x39, 0xc9, 0xec, 0xef, 0xb4 } }; return sIid; }
     };

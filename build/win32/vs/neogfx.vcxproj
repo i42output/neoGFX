@@ -440,6 +440,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\default_skin.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\dockable.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\flashing_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\font_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\framed_widget.ipp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_editor.hpp" />

@@ -45,13 +45,13 @@
 
 namespace neogfx
 {
-    frame_counter::frame_counter(std::uint32_t aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
+    frame_counter::frame_counter(std::chrono::milliseconds const& aDuration) : iTimer{ service<i_async_task>(), [this](neolib::callback_timer& aTimer)
         {
             aTimer.again();
             ++iCounter;
             for (auto w : iWidgets)
                 w->update();
-        }, std::chrono::milliseconds{ aDuration } }, iCounter{ 0 }
+        }, aDuration }, iCounter{ 0 }
     {
     }
 
@@ -382,7 +382,7 @@ namespace neogfx
         return didSome;
     }
 
-    void opengl_renderer::register_frame_counter(i_widget& aWidget, std::uint32_t aDuration)
+    void opengl_renderer::register_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration)
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter == iFrameCounters.end())
@@ -390,14 +390,14 @@ namespace neogfx
         iterFrameCounter->second.add(aWidget);
     }
 
-    void opengl_renderer::unregister_frame_counter(i_widget& aWidget, std::uint32_t aDuration)
+    void opengl_renderer::unregister_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration)
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter != iFrameCounters.end())
             iterFrameCounter->second.remove(aWidget);
     }
 
-    std::uint32_t opengl_renderer::frame_counter(std::uint32_t aDuration) const
+    std::uint32_t opengl_renderer::frame_counter(std::chrono::milliseconds const& aDuration) const
     {
         auto iterFrameCounter = iFrameCounters.find(aDuration);
         if (iterFrameCounter != iFrameCounters.end())

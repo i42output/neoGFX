@@ -37,7 +37,7 @@ namespace neogfx
     class frame_counter
     {
     public:
-        frame_counter(std::uint32_t aDuration);
+        frame_counter(std::chrono::milliseconds const& aDuration);
     public:
         std::uint32_t counter() const;
     public:
@@ -160,9 +160,9 @@ namespace neogfx
     public:
         bool process_events() override;
     public:
-        void register_frame_counter(i_widget& aWidget, std::uint32_t aDuration) override;
-        void unregister_frame_counter(i_widget& aWidget, std::uint32_t aDuration) override;
-        std::uint32_t frame_counter(std::uint32_t aDuration) const override;
+        void register_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration) override;
+        void unregister_frame_counter(i_widget& aWidget, std::chrono::milliseconds const& aDuration) override;
+        std::uint32_t frame_counter(std::chrono::milliseconds const& aDuration) const override;
         i_ping_pong_buffer& create_ping_pong_buffer(ping_pong_buffers_t& aBufferList, const size& aExtents, size& aPreviousExtents, texture_sampling aSampling);
     private:
         neogfx::renderer iRenderer;
@@ -175,7 +175,7 @@ namespace neogfx
         typedef std::unordered_map<i_vertex_provider*, opengl_vertex_buffer<>> vertex_buffers_map;
         mutable vertex_buffers_map iVertexBuffers;
         mutable std::optional<vertex_buffers_map::iterator> iLastVertexBufferUsed;
-        std::map<std::uint32_t, neogfx::frame_counter> iFrameCounters;
+        std::map<std::chrono::milliseconds, neogfx::frame_counter> iFrameCounters;
         mutable std::optional<ping_pong_buffers_t> iPingPongBuffer1s;
         mutable std::optional<ping_pong_buffers_t> iPingPongBuffer2s;
         ref_ptr<i_standard_shader_program> iDefaultShaderProgram;
