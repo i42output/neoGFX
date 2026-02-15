@@ -109,7 +109,7 @@ namespace neogfx
         }
     }
 
-    void native_font::create_face(font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
+    void native_font::create_face(font_style aStyle, font::point_size aSize, stroke aOutline, bool aHinting, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
         std::multimap<matching_bits_t, style_map::value_type*> matches;
         for (auto& s : iStyleMap)
@@ -118,10 +118,10 @@ namespace neogfx
             throw no_matching_style_found();
         font_style const faceStyle = (matches.rbegin()->second->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline | font_style::Emulated)));
         FT_Long const faceIndex = matches.rbegin()->second->second;
-        aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aDevice);
+        aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aHinting, aDevice);
     }
 
-    void native_font::create_face(font_style aStyle, i_string const& aStyleName, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
+    void native_font::create_face(font_style aStyle, i_string const& aStyleName, font::point_size aSize, stroke aOutline, bool aHinting, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
         style_map::value_type* foundStyle = 0;
         for (auto& s : iStyleMap)
@@ -132,25 +132,25 @@ namespace neogfx
             }
         if (foundStyle == nullptr)
         {
-            create_face(aStyle, aSize, aOutline, aDevice, aResult);
+            create_face(aStyle, aSize, aOutline, aHinting, aDevice, aResult);
             return;
         }
         font_style const faceStyle = foundStyle->first.first | (aStyle & (font_style::Superscript | font_style::Subscript | font_style::BelowAscenderLine | font_style::AboveBaseline));
         if ((aStyle & font_style::BoldItalic) != font_style::Invalid && (aStyle & font_style::BoldItalic) != (faceStyle & font_style::BoldItalic))
         {
-            create_face(aStyle, aSize, aOutline, aDevice, aResult);
+            create_face(aStyle, aSize, aOutline, aHinting, aDevice, aResult);
             return;
         }
         FT_Long const faceIndex = foundStyle->second;
-        aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aDevice);
+        aResult = create_face(faceIndex, faceStyle, aSize, aOutline, aHinting, aDevice);
     }
 
     void native_font::create_face(font_info const& aFontInfo, i_device_resolution const& aDevice, i_ref_ptr<i_native_font_face>& aResult)
     {
         if (aFontInfo.style_name_available())
-            return create_face(aFontInfo.style_maybe(), aFontInfo.style_name(), aFontInfo.size(), aFontInfo.outline(), aDevice, aResult);
+            return create_face(aFontInfo.style_maybe(), aFontInfo.style_name(), aFontInfo.size(), aFontInfo.outline(), aFontInfo.hinting(), aDevice, aResult);
         else
-            return create_face(aFontInfo.style(), aFontInfo.size(), aFontInfo.outline(), aDevice, aResult);
+            return create_face(aFontInfo.style(), aFontInfo.size(), aFontInfo.outline(), aFontInfo.hinting(), aDevice, aResult);
     }
 
     native_font::style_map::const_iterator native_font::find_style(font_style aStyle) const
@@ -264,17 +264,17 @@ namespace neogfx
         FT_Done_Face(aFace);
     }
 
-    ref_ptr<i_native_font_face> native_font::create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, stroke aOutline, i_device_resolution const& aDevice)
+    ref_ptr<i_native_font_face> native_font::create_face(FT_Long aFaceIndex, font_style aStyle, font::point_size aSize, stroke aOutline, bool aHinting, i_device_resolution const& aDevice)
     {
-        auto existingFace = iFaces.find(std::make_tuple(aFaceIndex, aStyle, aSize, aOutline, size{ aDevice.horizontal_dpi(), aDevice.vertical_dpi() }));
+        auto existingFace = iFaces.find(std::make_tuple(aFaceIndex, aStyle, aSize, aOutline, aHinting, size{ aDevice.horizontal_dpi(), aDevice.vertical_dpi() }));
         if (existingFace != iFaces.end())
             return existingFace->second;
         auto const& newFaceHandles = open_face(aFaceIndex);
         try
         {
             auto newFontId = service<i_font_manager>().allocate_font_id();
-            auto newFace = make_ref<native_font_face>(iFontLib, newFontId, *this, aStyle, aSize, aOutline, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFaceHandles.first, newFaceHandles.second);
-            iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aStyle, aSize, aOutline, size{ aDevice.horizontal_dpi(), aDevice.vertical_dpi() }), newFace)).first;
+            auto newFace = make_ref<native_font_face>(iFontLib, newFontId, *this, aStyle, aSize, aOutline, aHinting, size(aDevice.horizontal_dpi(), aDevice.vertical_dpi()), newFaceHandles.first, newFaceHandles.second);
+            iFaces.insert(std::make_pair(std::make_tuple(aFaceIndex, aStyle, aSize, aOutline, aHinting, size{ aDevice.horizontal_dpi(), aDevice.vertical_dpi() }), newFace)).first;
             return newFace;
         }
         catch (...)

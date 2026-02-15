@@ -1636,6 +1636,9 @@
     <ClCompile Include="..\..\..\src\hid\surface_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\gfx\image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\include\neogfx\gfx\path.inl">

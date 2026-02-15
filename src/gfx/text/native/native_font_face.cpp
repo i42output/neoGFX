@@ -68,10 +68,12 @@ namespace neogfx
     }
 
     native_font_face::native_font_face(
-        FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, stroke aOutline, 
+        FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, stroke aOutline, bool aHinting,
         neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
         iFontLib{ aFontLib }, iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, 
-        iOutline{ aOutline }, iPixelDensityDpi {aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace }, 
+        iOutline{ aOutline }, iHinting{ aHinting }, iPixelDensityDpi {
+        aDpiResolution
+    }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace },
         iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         switch (aStyle)
@@ -135,6 +137,11 @@ namespace neogfx
     stroke native_font_face::outline() const
     {
         return iOutline;
+    }
+
+    bool native_font_face::hinting() const
+    {
+        return iHinting;
     }
 
     dimension native_font_face::horizontal_dpi() const
@@ -367,11 +374,13 @@ namespace neogfx
             {
                 if (useSubpixelFiltering)
                 {
-                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, 
+                        (hinting() ? FT_LOAD_FORCE_AUTOHINT : FT_LOAD_NO_HINTING) | FT_LOAD_TARGET_LCD | FT_LOAD_NO_BITMAP));
                 }
                 else
                 {
-                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
+                    freetypeCheck(FT_Load_Glyph(iHandle.freetypeFace, aGlyphChar.value, 
+                        (hinting() ? FT_LOAD_FORCE_AUTOHINT : FT_LOAD_NO_HINTING) | FT_LOAD_TARGET_NORMAL | FT_LOAD_NO_BITMAP));
                 }
             }
             catch (freetype_error fe)

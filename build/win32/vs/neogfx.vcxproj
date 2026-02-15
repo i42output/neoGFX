@@ -665,6 +665,7 @@
     <ClCompile Include="..\..\..\src\gfx\graphics_operations.cpp" />
     <ClCompile Include="..\..\..\src\gfx\hsl_color.cpp" />
     <ClCompile Include="..\..\..\src\gfx\hsv_color.cpp" />
+    <ClCompile Include="..\..\..\src\gfx\image.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\native_texture.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_error.cpp" />
     <ClCompile Include="..\..\..\src\gfx\native\opengl\opengl_helpers.cpp" />

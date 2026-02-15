@@ -58,6 +58,7 @@ namespace neogfx
         virtual i_string const& style_name() const = 0;
         virtual font::point_size size() const = 0;
         virtual stroke outline() const = 0;
+        virtual bool hinting() const = 0;
         virtual dimension horizontal_dpi() const = 0;
         virtual dimension vertical_dpi() const = 0;
         virtual neogfx::size em_size() const = 0;

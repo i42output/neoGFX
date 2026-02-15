@@ -195,11 +195,15 @@ namespace neogfx
         void set_underline(bool aUnderline);
         font_weight weight() const;
         point_size size() const;
+        void set_size(point_size aSize);
         stroke outline() const;
         void set_outline(stroke aOutline);
         bool kerning() const;
         void enable_kerning();
         void disable_kerning();
+        bool hinting() const;
+        void enable_hinting();
+        void disable_hinting();
     public:
         font_info with_style(font_style aStyle) const;
         font_info with_style_xor(font_style aStyle) const;
@@ -207,6 +211,7 @@ namespace neogfx
         font_info with_underline(bool aUnderline) const;
         font_info with_size(point_size aSize) const;
         font_info with_outline(stroke aOutline) const;
+        font_info with_hinting(bool aHinting) const;
     public:
         auto operator<=>(const font_info& aRhs) const = default;
     public:
@@ -221,6 +226,7 @@ namespace neogfx
         point_size iSize;
         stroke iOutline;
         bool iKerning;
+        bool iHinting;
     };
 
     using optional_font_info = optional<font_info>;
@@ -267,6 +273,7 @@ namespace neogfx
         font with_underline(bool aUnderline) const;
         font with_size(point_size aSize) const;
         font with_outline(stroke aOutline) const;
+        font with_hinting(bool aHinting) const;
     public:
         font_id id() const;
         font_info const& info() const;

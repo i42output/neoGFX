@@ -85,9 +85,6 @@
     <ClCompile Include="..\..\..\src\gui\layout\horizontal_layout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\gfx\image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\gui\widget\image_widget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

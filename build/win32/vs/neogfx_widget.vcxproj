@@ -216,7 +216,6 @@
     <ClCompile Include="..\..\..\src\core\style_sheet.cpp" />
     <ClCompile Include="..\..\..\src\core\html.cpp" />
     <ClCompile Include="..\..\..\src\gfx\gradient_manager.cpp" />
-    <ClCompile Include="..\..\..\src\gfx\image.cpp" />
     <ClCompile Include="..\..\..\src\gfx\render_target.cpp" />
     <ClCompile Include="..\..\..\src\gfx\shapes.cpp" />
     <ClCompile Include="..\..\..\src\gfx\text\emoticon_translator.cpp" />

@@ -106,7 +106,8 @@ namespace neogfx
         iUnderline{ false }, 
         iWeight{ font_weight::Normal },
         iOutline{ 0.0 },
-        iKerning{ true }
+        iKerning{ true },
+        iHinting{ true }
     {
     }
 
@@ -117,7 +118,8 @@ namespace neogfx
         iWeight{ weight_from_style(aStyle) }, 
         iSize{ aSize }, 
         iOutline{ 0.0 },
-        iKerning{ true }
+        iKerning{ true },
+        iHinting{ true }
     {
     }
 
@@ -128,7 +130,8 @@ namespace neogfx
         iWeight{ weight_from_style_name(aStyleName) }, 
         iSize{ aSize }, 
         iOutline{ 0.0 },
-        iKerning{ true }
+        iKerning{ true },
+        iHinting{ true }
     {
     }
 
@@ -140,7 +143,8 @@ namespace neogfx
         iWeight{ weight_from_style_name(aStyleName) }, 
         iSize{ aSize }, 
         iOutline{ 0.0 },
-        iKerning{ true }
+        iKerning{ true },
+        iHinting{ true }
     {
     }
 
@@ -152,7 +156,8 @@ namespace neogfx
         iWeight{ aStyleName != std::nullopt ? weight_from_style_name(*aStyleName) : aStyle != std::nullopt ? weight_from_style(*aStyle) : font_weight::Normal },
         iSize{ aSize },
         iOutline{ 0.0 },
-        iKerning{ true }
+        iKerning{ true },
+        iHinting{ true }
     {
     }
 
@@ -164,7 +169,8 @@ namespace neogfx
         iWeight{ aOther.iWeight }, 
         iSize{ aOther.iSize }, 
         iOutline{ aOther.iOutline },
-        iKerning{ aOther.iKerning }
+        iKerning{ aOther.iKerning },
+        iHinting{ aOther.iHinting }
     {
     }
 
@@ -182,6 +188,7 @@ namespace neogfx
         iSize = aOther.iSize;
         iOutline = aOther.iOutline;
         iKerning = aOther.iKerning;
+        iHinting = aOther.iHinting;
         return *this;
     }
 
@@ -244,6 +251,11 @@ namespace neogfx
         return iSize;
     }
 
+    void font_info::set_size(point_size aSize)
+    {
+        iSize = aSize;
+    }
+
     stroke font_info::outline() const
     {
         return iOutline;
@@ -267,6 +279,21 @@ namespace neogfx
     void font_info::disable_kerning()
     {
         iKerning = false;
+    }
+
+    bool font_info::hinting() const
+    {
+        return iHinting;
+    }
+
+    void font_info::enable_hinting()
+    {
+        iHinting = true;
+    }
+
+    void font_info::disable_hinting()
+    {
+        iHinting = false;
     }
 
     font_info font_info::with_style(font_style aStyle) const
@@ -304,13 +331,25 @@ namespace neogfx
 
     font_info font_info::with_size(point_size aSize) const
     {
-        return font_info(iFamilyName, iStyle, iStyleName, aSize);
+        font_info result = *this;
+        result.set_size(aSize);
+        return result;
     }
 
     font_info font_info::with_outline(stroke aOutline) const
     {
         font_info result = *this;
         result.set_outline(aOutline);
+        return result;
+    }
+
+    font_info font_info::with_hinting(bool aHinting) const
+    {
+        font_info result = *this;
+        if (aHinting)
+            result.enable_hinting();
+        else
+            result.disable_hinting();
         return result;
     }
 
@@ -514,6 +553,11 @@ namespace neogfx
     font font::with_outline(stroke aOutline) const
     {
         return info().with_outline(aOutline);
+    }
+
+    font font::with_hinting(bool aHinting) const
+    {
+        return info().with_hinting(aHinting);
     }
 
     font_id font::id() const
