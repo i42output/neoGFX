@@ -29,10 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/game/canvas.hpp>
 #include <neogfx/game/sprite.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
+#include <neogfx/gui/widget/flashing_button.hpp>
 
 #include <card_games/card.hpp>
 
-#include <video_poker/flashing_button.hpp>
 #include <video_poker/i_table.hpp>
 
 namespace video_poker
@@ -83,7 +83,7 @@ namespace video_poker
         i_table& iTable;
         ng::vertical_layout iVerticalLayout;
         card_widget iCardWidget;
-        flashing_button iHoldButton;
+        ng::flashing_button iHoldButton;
         video_poker::card* iCard;
         ng::sink iSink;
     };

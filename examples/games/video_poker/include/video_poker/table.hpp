@@ -32,12 +32,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <neogfx/gui/widget/label.hpp>
 #include <neogfx/gui/widget/push_button.hpp>
 #include <neogfx/gui/widget/text_edit.hpp>
+#include <neogfx/gui/widget/flashing_button.hpp>
 #include <neogfx/gfx/texture_atlas.hpp>
 
 #include <card_games/deck.hpp>
 #include <card_games/hand.hpp>
 
-#include <video_poker/flashing_button.hpp>
 #include <video_poker/card_space.hpp>
 #include <video_poker/i_table.hpp>
 
@@ -97,11 +97,11 @@ namespace video_poker
         ng::vertical_spacer iSpacer4;
         ng::horizontal_layout iGambleLayout;
         ng::push_button iAddCredit;
-        flashing_button iBetMinus;
-        flashing_button iBetPlus;
-        flashing_button iBetMax;
+        ng::flashing_button iBetMinus;
+        ng::flashing_button iBetPlus;
+        ng::flashing_button iBetMax;
         ng::horizontal_spacer iSpacerGamble;
-        flashing_button iDeal;
+        ng::flashing_button iDeal;
         ng::horizontal_layout iInfoBarLayout;
         ng::label iLabelCredits;
         ng::label iLabelCreditsValue;

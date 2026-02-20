@@ -29,6 +29,7 @@ namespace neogfx
         Unknown,
         Weighted,
         Unweighted,
+        UnweightedGrow,
         TooSmall,
         FixedSize
     };
@@ -329,20 +330,27 @@ namespace neogfx
 
         set_position(aPosition);
         set_extents(aSize);
+        
         auto const itemsVisible = (always_use_spacing() ? items_visible(static_cast<item_type_e>(ItemTypeWidget | ItemTypeLayout | ItemTypeSpacer)) : items_visible());
         if (itemsVisible == 0u)
             return;
+
         size availableSpace = aSize;
         availableSpace.cx -= internal_spacing().size().cx;
         availableSpace.cy -= internal_spacing().size().cy;
+        
         auto const itemsZeroSized = AxisPolicy::items_zero_sized(static_cast<typename AxisPolicy::layout_type&>(*this), availableSpace);
         if (itemsZeroSized >= itemsVisible)
             return;
+
         auto spaces = itemsVisible - itemsZeroSized - 1;
         AxisPolicy::cx(availableSpace) -= (AxisPolicy::cx(spacing()) * spaces);
         size::dimension_type leftover = AxisPolicy::cx(availableSpace);
         std::uint32_t itemsUsingLeftover = 0u;
+        size::dimension_type grow = 0.0;
+        std::uint32_t itemsUsingGrow = 0u;
         size totalExpanderWeight;
+
         for (auto const& itemRef : items())
         {
             auto const& item = *itemRef;
@@ -376,12 +384,24 @@ namespace neogfx
                 if (leftover < 0.0)
                     leftover = 0.0;
             }
+            else if (AxisPolicy::size_policy_x(itemSizePolicy) == size_constraint::Maximum)
+            {
+                disposition = layout_item_disposition::UnweightedGrow;
+                auto const itemMinSize = AxisPolicy::cx(item.transformed_minimum_size(availableSpace));
+                auto const itemMaxSize = AxisPolicy::cx(item.transformed_maximum_size(availableSpace));
+                leftover -= itemMinSize;
+                if (leftover < 0.0)
+                    leftover = 0.0;
+                grow += (itemMaxSize - itemMinSize);
+                ++itemsUsingGrow;
+            }
             else
             {
                 ++itemsUsingLeftover;
                 totalExpanderWeight += item.weight();
             }
         }
+
         bool done = false;
         while (!done && itemsUsingLeftover > 0)
         {
@@ -420,8 +440,8 @@ namespace neogfx
                 }
                 else
                 {
-                    disposition = maxSize <= weightedSize ? layout_item_disposition::TooSmall : layout_item_disposition::Unweighted;
-                    leftover -= disposition == layout_item_disposition::TooSmall ? maxSize : minSize;
+                    disposition = (maxSize <= weightedSize ? layout_item_disposition::TooSmall : layout_item_disposition::Unweighted);
+                    leftover -= (disposition == layout_item_disposition::TooSmall ? maxSize : minSize);
                     if (leftover < 0.0)
                         leftover = 0.0;
                     totalExpanderWeight -= item.weight();
@@ -431,6 +451,10 @@ namespace neogfx
                 }
             }
         }
+
+        grow = std::min(leftover, grow);
+        leftover -= grow;
+
         size::dimension_type weightedAmount = 0.0;
         if (AxisPolicy::cx(totalExpanderWeight) > 0.0)
             for (auto const& itemRef : items())
@@ -445,6 +469,7 @@ namespace neogfx
                 if (disposition == layout_item_disposition::Weighted)
                     weightedAmount += weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace);
             }
+
         std::uint32_t bitsLeft = 0;
         if (itemsUsingLeftover > 0)
             bitsLeft = static_cast<std::int32_t>(leftover - weightedAmount);
@@ -452,6 +477,7 @@ namespace neogfx
         std::uint32_t previousBit = 0;
         point nextPos = aPosition + internal_spacing().top_left();
         bool addSpace = false;
+
         for (auto& itemRef : *this)
         {
             auto& item = *itemRef;
@@ -488,6 +514,13 @@ namespace neogfx
                     bit = (bitsLeft != 0 ? bits() : 0);
                 AxisPolicy::cx(s) = weighted_size<AxisPolicy>(item, totalExpanderWeight, leftover, availableSpace) + static_cast<size::dimension_type>(bit - previousBit);
                 previousBit = bit;
+            }
+            else if (disposition == layout_item_disposition::UnweightedGrow && grow > 0.0)
+            {
+                AxisPolicy::cx(s) = std::max(AxisPolicy::cx(itemMinSize), std::min(AxisPolicy::cx(itemMaxSize), AxisPolicy::cx(itemMinSize) + grow));
+                grow -= (AxisPolicy::cx(s) - AxisPolicy::cx(itemMinSize));
+                if (grow < 0.0)
+                    grow = 0.0;
             }
             else
                 AxisPolicy::cx(s) = AxisPolicy::cx(itemMinSize);
