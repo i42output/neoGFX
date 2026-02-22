@@ -30,13 +30,14 @@ namespace neogfx
         MultiLine
     };
 
-    enum class text_widget_flags
+    enum class text_widget_flags : std::uint32_t
     {
         None                = 0x00,
         HideOnEmpty         = 0x01,
         TakesSpaceWhenEmpty = 0x02,
         CutOff              = 0x04,
-        UseEllipsis         = 0x08
+        UseEllipsis         = 0x08,
+        CacheToTexture      = 0x10
     };
 
     inline constexpr text_widget_flags operator|(text_widget_flags aLhs, text_widget_flags aRhs)

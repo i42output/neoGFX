@@ -148,10 +148,35 @@ namespace neogfx
         textPosition += size{ font().info().outline().radius };
         if (appearance.effect())
             textPosition += size{ appearance.effect()->width() };
-        if (multi_line())
-            aGc.draw_multiline_glyph_text(textPosition, std::get<multiline_glyph_text>(glyph_text()), appearance);
+
+        if (iCacheTexture)
+        {
+            aGc.draw_texture(point{}, iCacheTexture.value());
+            return;
+        }
+
+        if ((flags() & text_widget_flags::CacheToTexture) == text_widget_flags::CacheToTexture)
+            iCacheTexture.emplace(textSize, 1.0, texture_sampling::Multisample);
+
+        if (!iCacheTexture)
+        {
+            if (multi_line())
+                aGc.draw_multiline_glyph_text(textPosition, std::get<multiline_glyph_text>(glyph_text()), appearance);
+            else
+                aGc.draw_glyph_text(textPosition, std::get<neogfx::glyph_text>(glyph_text()), appearance);
+        }
         else
-            aGc.draw_glyph_text(textPosition, std::get<neogfx::glyph_text>(glyph_text()), appearance);
+        {
+            {
+                graphics_context gcCacheTexture{ iCacheTexture.value() };
+                gcCacheTexture.set_logical_coordinate_system(logical_coordinate_system::AutomaticGui);
+                if (multi_line())
+                    gcCacheTexture.draw_multiline_glyph_text(textPosition, std::get<multiline_glyph_text>(glyph_text()), appearance);
+                else
+                    gcCacheTexture.draw_glyph_text(textPosition, std::get<neogfx::glyph_text>(glyph_text()), appearance);
+            }
+            aGc.draw_texture(point{}, iCacheTexture.value());
+        }
     }
 
     void text_widget::set_font(optional_font const& aFont)
@@ -226,7 +251,12 @@ namespace neogfx
     
     void text_widget::set_flags(text_widget_flags aFlags)
     {
-        iFlags = aFlags;
+        if (iFlags != aFlags)
+        {
+            iFlags = aFlags;
+            reset_cache();
+            update_layout(true, true);
+        }
     }
 
     neogfx::alignment text_widget::alignment() const
@@ -383,5 +413,6 @@ namespace neogfx
         iTextExtent = std::nullopt;
         iSizeHintExtent = std::nullopt;
         iGlyphText = std::monostate{};
+        iCacheTexture = std::nullopt;
     }
 }
