@@ -169,7 +169,7 @@ namespace neogfx
         {
             {
                 graphics_context gcCacheTexture{ iCacheTexture.value() };
-                gcCacheTexture.set_logical_coordinate_system(logical_coordinate_system::AutomaticGui);
+                gcCacheTexture.set_logical_coordinate_system(aGc.logical_coordinate_system());
                 if (multi_line())
                     gcCacheTexture.draw_multiline_glyph_text(textPosition, std::get<multiline_glyph_text>(glyph_text()), appearance);
                 else
