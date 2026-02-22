@@ -1362,7 +1362,8 @@ int main(int argc, char* argv[])
 
             // easing function demo
             auto const d = 1000000.0;
-            auto const x = ng::ease(easingItemModel.item(window.dropListEasing.selection()), int(t / d) % 2 == 0 ? std::fmod(t, d) / d : 1.0 - std::fmod(t, d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
+            auto const x = ng::partitioned_ease(easingItemModel.item(window.dropListEasing.selection()), 
+                std::fmod(t / 2.0, d) / d) * (window.pageDrawing.extents().cx - logo.extents().cx);
             aGc.draw_texture(ng::point{ x, (window.pageDrawing.extents().cy - logo.extents().cy) / 2.0 }, logo);
 
             auto texLocation = ng::point{ (window.pageDrawing.extents().cx - 64.0_dip) / 2.0, (window.pageDrawing.extents().cy - logo.extents().cy) / 4.0 }.ceil();

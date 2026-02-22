@@ -1453,7 +1453,7 @@ namespace neogfx
         auto elapsedTime_ms = (neolib::this_process::elapsed_ms() - iCursorAnimationStartTime);
         auto const flashInterval_ms = cursor().flash_interval().count();
         auto const normalizedFrameTime = (elapsedTime_ms % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-        auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
+        auto const cursorAlpha = neolib::service<neolib::i_power>().green_mode_active() ? 1.0 : partitioned_ease(easing::InvertedInOutQuint, normalizedFrameTime);
         auto cursorColor = cursor().color();
         if (cursorColor == neolib::none)
             cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);

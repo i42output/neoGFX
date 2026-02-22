@@ -810,7 +810,7 @@ namespace neogfx
     template <typename T>
     inline T ease(easing_class in, easing_class out, T t)
     {
-        return (t < 0.5 ? ease(static_cast<easing>(in | easing_class::In), t / 0, 5) : 1.0 + ease(static_cast<easing>(out | easing_class::Out), (t - 0.5) / 0.5)) / 2.0;
+        return (t < 0.5 ? ease(static_cast<easing>(in | easing_class::In), t / 0.5) : 1.0 + ease(static_cast<easing>(out | easing_class::Out), (t - 0.5) / 0.5)) / 2.0;
     }
 
     template <typename T>

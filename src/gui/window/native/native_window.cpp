@@ -530,7 +530,7 @@ namespace neogfx
         auto const since = std::chrono::steady_clock::now() - alertInfo.startTime;
         auto const flashInterval_ms = alertInfo.interval.value_or(default_blink_time()).count() * 2;
         auto const normalizedFrameTime = ((std::chrono::duration_cast<std::chrono::milliseconds>(since).count()) % flashInterval_ms) / ((flashInterval_ms - 1) * 1.0);
-        return partitioned_ease(easing::InvertedInOutQuint, easing::InOutQuint, normalizedFrameTime);
+        return partitioned_ease(easing::InvertedInOutQuint, normalizedFrameTime);
     }
 
     void native_window::alert(window_alert aAlert, std::optional<std::chrono::milliseconds> const& aInterval, std::optional<std::uint32_t> const& aCount)
