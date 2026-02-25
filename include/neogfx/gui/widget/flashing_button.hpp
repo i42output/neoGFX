@@ -79,15 +79,22 @@ namespace neogfx
         {
             blink(false);
         }
+        void set_face_color_lightness(double aOnLightness, double aOffLightness)
+        {
+            iOnLightness = aOnLightness;
+            iOffLightness = aOffLightness;
+        }
     public:
         color face_color() const override
         {
             color faceColor = push_button::face_color();
             bool const on = effectively_enabled() && (!blinking() || push_button::is_checked() || service<i_rendering_engine>().frame_counter(DEFAULT_BLINK_INTERVAL_ms) % 2 == 1);
-            faceColor = faceColor.with_lightness(on ? 0.9 : 0.5);
+            faceColor = faceColor.with_lightness(on ? iOnLightness : iOffLightness);
             return faceColor;
         }
     private:
         bool iBlinking = false;
+        double iOnLightness = 0.9;
+        double iOffLightness = 0.5;
     };
 }

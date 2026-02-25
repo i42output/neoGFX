@@ -85,12 +85,14 @@ namespace neogfx::game
             *iPhysicalConstants.uniformGravity : vec3f{};
         bool didWork = false;
         auto currentTimestep = iWorldClock.timestep;
-        auto nextTime = iWorldClock.time + currentTimestep;
-        while (iWorldClock.time <= now)
+        auto previousTime = iWorldClock.time.load();
+        auto nextTime = previousTime + currentTimestep;
+        while ((previousTime = iWorldClock.time.load()) <= now)
         {
             didWork = true;
+            auto elapsedTime = static_cast<float>(from_step_time(nextTime - previousTime));
             this->start_update(1);
-            iGameWorld.ApplyingPhysics(iWorldClock.time);
+            iGameWorld.ApplyingPhysics(previousTime);
             this->start_update(2);
             bool useUniversalGravitation = (universal_gravitation_enabled() && iPhysicalConstants.gravitationalConstant != 0.0);
             if (useUniversalGravitation)
@@ -125,7 +127,6 @@ namespace neogfx::game
                 auto v0 = rigidBody1.velocity;
                 auto p0 = rigidBody1.position;
                 auto a0 = rigidBody1.angle;
-                auto elapsedTime = static_cast<float>(from_step_time(nextTime - iWorldClock.time));
                 rigidBody1.velocity = v0 + ((rigidBody1.mass == 0.0f ? vec3f{} : totalForce / rigidBody1.mass) + 
                     (rotation_matrix(rigidBody1.angle) * rigidBody1.acceleration)).scale(vec3f{ elapsedTime, elapsedTime, elapsedTime });
                 rigidBody1.position = rigidBody1.position + vec3f{ 1.0f, 1.0f, 1.0f }.scale(elapsedTime * (v0 + rigidBody1.velocity) / 2.0f);
@@ -138,9 +139,8 @@ namespace neogfx::game
                 iCollisionDetector.apply();
                 iTime.apply();
             }
-            iGameWorld.PhysicsApplied(iWorldClock.time);
-            scoped_shared_component_data_lock<game::clock> lockClock{ this->ecs() };
-            iWorldClock.time = nextTime;
+            iGameWorld.PhysicsApplied(previousTime);
+            iWorldClock.time.store(nextTime);
             currentTimestep = std::min(static_cast<i64>(currentTimestep * iWorldClock.timestepGrowth), 
                 std::max(iWorldClock.timestep, iWorldClock.maximumTimestep));
             nextTime += currentTimestep;
