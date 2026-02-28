@@ -93,6 +93,10 @@ namespace neogfx
     public:
         using i_layout_item::as_widget;
     public:
+        virtual neogfx::widget_flags widget_flags() const = 0;
+        virtual void set_widget_flags(neogfx::widget_flags aFlags) = 0;
+        virtual void set_widget_flags(neogfx::widget_flags aFlagsToAdd, neogfx::widget_flags aFlagsToRemove, bool aAndChildren = false) = 0;
+    public:
         virtual bool is_singular() const = 0;
         virtual void set_singular(bool aSingular) = 0;
         virtual bool is_root() const = 0;
@@ -194,6 +198,7 @@ namespace neogfx
     public:
         virtual double opacity() const = 0;
         virtual void set_opacity(double aOpacity) = 0;
+        virtual double effective_opacity() const = 0;
         virtual bool has_background_opacity() const = 0;
         virtual double background_opacity() const = 0;
         virtual void set_background_opacity(double aOpacity) = 0;

@@ -50,7 +50,38 @@ namespace neogfx
         return aLhs = static_cast<widget_type>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
     }
 
-    class i_widget; 
+    enum class widget_flags : std::uint32_t
+    {
+        None                        = 0x00,
+        OpacityIgnoresEnabledState  = 0x01,
+    };
+
+    inline constexpr widget_flags operator|(widget_flags aLhs, widget_flags aRhs)
+    {
+        return static_cast<widget_flags>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_flags operator&(widget_flags aLhs, widget_flags aRhs)
+    {
+        return static_cast<widget_flags>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_flags& operator|=(widget_flags& aLhs, widget_flags aRhs)
+    {
+        return aLhs = static_cast<widget_flags>(static_cast<std::uint32_t>(aLhs) | static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_flags& operator&=(widget_flags& aLhs, widget_flags aRhs)
+    {
+        return aLhs = static_cast<widget_flags>(static_cast<std::uint32_t>(aLhs) & static_cast<std::uint32_t>(aRhs));
+    }
+
+    inline constexpr widget_flags operator~(widget_flags aLhs)
+    {
+        return static_cast<widget_flags>(~static_cast<std::uint32_t>(aLhs));
+    }
+
+    class i_widget;
 
     struct widget_part
     {
@@ -137,6 +168,11 @@ namespace neogfx
 
     typedef optional<focus_policy> optional_focus_policy;
 }
+
+begin_declare_enum(neogfx::widget_flags)
+declare_enum_string(neogfx::widget_flags, None)
+declare_enum_string(neogfx::widget_flags, OpacityIgnoresEnabledState)
+end_declare_enum(neogfx::widget_flags)
 
 begin_declare_enum(neogfx::widget_part_e)
 declare_enum_string(neogfx::widget_part_e, Client)

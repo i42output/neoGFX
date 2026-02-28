@@ -98,6 +98,10 @@ namespace neogfx
         void property_changed(i_property& aProperty) override;
         // i_widget
     public:
+        neogfx::widget_flags widget_flags() const override;
+        void set_widget_flags(neogfx::widget_flags aFlags) override;
+        void set_widget_flags(neogfx::widget_flags aFlagsToAdd, neogfx::widget_flags aFlagsToRemove, bool aAndChildren = false) override;
+    public:
         bool is_singular() const final;
         void set_singular(bool aSingular) final;
         bool is_root() const final;
@@ -218,6 +222,7 @@ namespace neogfx
     public:
         double opacity() const override;
         void set_opacity(double aOpacity) override;
+        double effective_opacity() const override;
         bool has_background_opacity() const override;
         double background_opacity() const override;
         void set_background_opacity(double aOpacity) override;
@@ -334,6 +339,7 @@ namespace neogfx
         // state
     private:
         bool iSingular;
+        neogfx::widget_flags iFlags = neogfx::widget_flags::None;
         i_widget* iParent;
         mutable std::optional<const i_window*> iRoot;
         struct device_metrics_proxy : i_device_metrics

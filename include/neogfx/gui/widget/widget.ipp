@@ -158,6 +158,34 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
+    inline neogfx::widget_flags widget<Interface>::widget_flags() const
+    {
+        return iFlags;
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::set_widget_flags(neogfx::widget_flags aFlags)
+    {
+        auto& self = *this;
+        
+        if (iFlags != aFlags)
+        {
+            iFlags = aFlags;
+            self.update(true);
+            self.update_layout();
+        }
+    }
+
+    template <WidgetInterface Interface>
+    void widget<Interface>::set_widget_flags(neogfx::widget_flags aFlagsToAdd, neogfx::widget_flags aFlagsToRemove, bool aAndChildren)
+    {
+        set_widget_flags((widget_flags() | aFlagsToAdd) & ~aFlagsToRemove);
+        if (aAndChildren)
+            for (auto& child : children())
+                child->set_widget_flags(aFlagsToAdd, aFlagsToRemove, aAndChildren);
+    }
+
+    template <WidgetInterface Interface>
     inline bool widget<Interface>::is_singular() const
     {
         return iSingular;
@@ -1292,7 +1320,7 @@ namespace neogfx
         /// @todo Consider defaulting to back face culling once all drawing primitives use CCW winding
         scoped_face_culling cull{ aGc, face_culling::None };
 
-        scoped_opacity sc{ aGc, effectively_enabled() ? opacity() : opacity() * 0.75 };
+        scoped_opacity sc{ aGc, effective_opacity() };
 
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
@@ -1506,6 +1534,14 @@ namespace neogfx
             Opacity = aOpacity;
             update(true);
         }
+    }
+
+    template <WidgetInterface Interface>
+    inline double widget<Interface>::effective_opacity() const
+    {
+        if ((widget_flags() & neogfx::widget_flags::OpacityIgnoresEnabledState) == neogfx::widget_flags::OpacityIgnoresEnabledState)
+            return opacity();
+        return effectively_enabled() ? opacity() : opacity() * 0.75;
     }
 
     template <WidgetInterface Interface>
