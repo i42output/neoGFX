@@ -46,7 +46,7 @@ namespace neogfx
         if (l <= 0.0031308)
             return l * 12.92 * scale;
         else
-            return std::pow(l, 1 / 2.4) * 1.055 - 0.055 * scale;
+            return (std::pow(l, 1 / 2.4) * 1.055 - 0.055) * scale;
     }
 
     sRGB_color sRGB_color::from_linear(const linear_color& aLinear)
@@ -84,16 +84,38 @@ namespace neogfx
     {
         if (aTextValue.empty())
             *this = Black;
-        else if (aTextValue[0] == L'#')
+        else if (aTextValue[0] == '#')
         {
-            *this = from_argb(neolib::string_to_uint32(aTextValue.substr(1), 16));
-            if (aTextValue.size() <= 7)
-                set_alpha(0xFF);
-            else
+            std::string hexColor;
+            switch (aTextValue.size() - 1)
             {
-                auto actualAlpha = blue();
-                *this = from_argb(as_argb() >> GreenShift).with_alpha(actualAlpha);
+            case 3:
+                hexColor.push_back('F');
+                hexColor.push_back('F');
+                for (auto idx : { 1u, 1u, 2u, 2u, 3u, 3u })
+                    hexColor.push_back(aTextValue[idx]);
+                break;
+            case 4:
+                for (auto idx : { 4u, 4u, 1u, 1u, 2u, 2u, 3u, 3u })
+                    hexColor.push_back(aTextValue[idx]);
+                break;
+            case 6:
+                hexColor.push_back('F');
+                hexColor.push_back('F');
+                for (auto idx : { 1u, 2u, 3u, 4u, 5u, 6u })
+                    hexColor.push_back(aTextValue[idx]);
+                break;
+            case 8:
+                for (auto idx : { 7u, 8u, 1u, 2u, 3u, 4u, 5u, 6u })
+                    hexColor.push_back(aTextValue[idx]);
+                break;
+            default:
+                break;
             }
+            if (!hexColor.empty())
+                *this = from_argb(std::stoul(hexColor, nullptr, 16));
+            else
+                *this = Black;
         }
         else
         {
@@ -116,9 +138,9 @@ namespace neogfx
                             if (moreBits.size() == 3)
                             {
                                 *this = sRGB_color{
-                                    boost::lexical_cast<std::uint32_t>(moreBits[0]),
-                                    boost::lexical_cast<std::uint32_t>(moreBits[1]),
-                                    boost::lexical_cast<std::uint32_t>(moreBits[2]) };
+                                    std::stoul(moreBits[0]),
+                                    std::stoul(moreBits[1]),
+                                    std::stoul(moreBits[2]) };
                             }
                         }
                         else if (bits[0] == "rgba")
@@ -128,10 +150,10 @@ namespace neogfx
                             if (moreBits.size() == 4)
                             {
                                 *this = sRGB_color{
-                                    boost::lexical_cast<std::uint32_t>(moreBits[0]),
-                                    boost::lexical_cast<std::uint32_t>(moreBits[1]),
-                                    boost::lexical_cast<std::uint32_t>(moreBits[2]),
-                                    static_cast<std::uint32_t>(boost::lexical_cast<double>(moreBits[3]) * 255.0) };
+                                    std::stoul(moreBits[0]),
+                                    std::stoul(moreBits[1]),
+                                    std::stoul(moreBits[2]),
+                                    static_cast<std::uint32_t>(std::stod(moreBits[3]) * 255.0) };
                             }
                         }
                         else
@@ -187,7 +209,7 @@ namespace neogfx
 
     double sRGB_color::luma() const
     {
-        return red<double>() * 0.21 + green<double>() * 0.72 + blue<double>() * 0.07;
+        return red<double>() * 0.2126 + green<double>() * 0.7152 + blue<double>() * 0.0722;
     }
 
     const sRGB_color sRGB_color::AliceBlue = sRGB_color{ 0xF0, 0xF8, 0xFF };
@@ -929,6 +951,7 @@ namespace neogfx
                 { "cornsilk2", Cornsilk2 },
                 { "cornsilk3", Cornsilk3 },
                 { "cornsilk4", Cornsilk4 },
+                { "crimson", Crimson },
                 { "cyan", Cyan },
                 { "cyan1", Cyan1 },
                 { "cyan2", Cyan2 },

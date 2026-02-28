@@ -48,6 +48,7 @@ namespace neogfx
     public:
         i_string_view& sheet() const final;
     public:
+        bool has_value(i_string_view const& aSelector, i_string_view const& aProperty) const final;
         style_sheet_value const& value(i_string_view const& aSelector, i_string_view const& aProperty) const final;
     public:
         std::string to_string() const;

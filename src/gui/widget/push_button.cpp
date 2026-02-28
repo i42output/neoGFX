@@ -272,13 +272,11 @@ namespace neogfx
         color faceColor = effective_face_color();
         color colorStart = faceColor.lighter(0x0A);
         color colorEnd = faceColor;
-        color outerBorderColor = background_color().darker(0x10);
+        color outerBorderColor = outer_border_color();
         color innerBorderColor = border_color();    
         std::optional<line_style> lineStyle;
 
         scoped_units su{ *this, units::Pixels };
-
-        neogfx::path outlinePath = path();
 
         auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", border_radius());
         auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
@@ -318,6 +316,8 @@ namespace neogfx
         }
         else
         {
+            neogfx::path outlinePath = path();
+
             switch (iStyle)
             {
             case push_button_style::Normal:
@@ -356,7 +356,7 @@ namespace neogfx
         }
         if (has_focus())
         {
-            rect focusRect = outlinePath.bounding_rect();
+            rect focusRect = path_bounding_rect();
             focusRect.deflate(2.0, 2.0);
             aGc.draw_focus_rect(focusRect);
         }
@@ -443,11 +443,6 @@ namespace neogfx
         return false;
     }
 
-    color push_button::border_color() const
-    {
-        return effective_face_color().shaded(0x20);
-    }
-
     bool push_button::perform_hover_animation() const
     {
         return true;
@@ -462,9 +457,7 @@ namespace neogfx
     {
         if (has_face_color())
             return iFaceColor.value();
-        else if (iStyleSheetFaceColor.has_value())
-            return iStyleSheetFaceColor.value();
-        return (iStyleSheetFaceColor = style_sheet_value("." + class_name(), "background-color", base_color())).value();
+        return iStyleSheetFaceColor.value();
     }
 
     void push_button::set_face_color(const optional_color& aFaceColor)
@@ -483,7 +476,7 @@ namespace neogfx
 
     color push_button::hover_color() const
     {
-        return (has_hover_color() ? *iHoverColor : service<i_app>().current_style().palette().color(color_role::Hover));
+        return iHoverColor.value_or(service<i_app>().current_style().palette().color(color_role::Hover));
     }
 
     void push_button::set_hover_color(const optional_color& aHoverColor)
@@ -491,6 +484,46 @@ namespace neogfx
         if (iHoverColor != aHoverColor)
         {
             iHoverColor = aHoverColor;
+            update();
+        }
+    }
+
+    bool push_button::has_border_color() const
+    {
+        return iBorderColor.has_value();
+    }
+
+    color push_button::border_color() const
+    {
+        if (has_border_color())
+            return iBorderColor.value();
+        return iStyleSheetBorderColor.value();
+    }
+
+    void push_button::set_border_color(const optional_color& aBorderColor)
+    {
+        if (iBorderColor != aBorderColor)
+        {
+            iBorderColor = aBorderColor;
+            update();
+        }
+    }
+
+    bool push_button::has_outer_border_color() const
+    {
+        return iOuterBorderColor.has_value();
+    }
+
+    color push_button::outer_border_color() const
+    {
+        return iOuterBorderColor.value_or(background_color().darker(0x10));
+    }
+
+    void push_button::set_outer_border_color(const optional_color& aOuterBorderColor)
+    {
+        if (iOuterBorderColor != aOuterBorderColor)
+        {
+            iOuterBorderColor = aOuterBorderColor;
             update();
         }
     }
@@ -553,6 +586,11 @@ namespace neogfx
         return capturing() ? hover_color().shaded(0x40) : hover_color();
     }
 
+    color push_button::effective_border_color() const
+    {
+        return effective_face_color().shaded(0x20);
+    }
+
     color push_button::animation_color(std::uint32_t aAnimationFrame) const
     {
         color faceColor = face_color();
@@ -567,11 +605,11 @@ namespace neogfx
 
     void push_button::init()
     {
-        iSink += StyleSheetChanged([&](auto const&) { iPenWidth = std::nullopt; iStyleSheetFaceColor = std::nullopt; });
-        iSink += Palette.Changed([&](auto const&) { iPenWidth = std::nullopt; iStyleSheetFaceColor = std::nullopt; });
+        iSink += StyleSheetChanged([&](auto const&) { iPenWidth = std::nullopt; iStyleSheetFaceColor.reset(); iStyleSheetBorderColor.reset(); });
+        iSink += Palette.Changed([&](auto const&) { iPenWidth = std::nullopt; });
         iSink += service<i_app>().current_style_changed([&](auto const&)
             { iSink2 = service<i_app>().current_style().changed([&](auto const&)
-                { iPenWidth = std::nullopt; iStyleSheetFaceColor = std::nullopt; }); });
+                { iPenWidth = std::nullopt; }); });
 
         layout().set_padding(neogfx::padding{});
         label().set_padding(neogfx::padding{});
@@ -613,11 +651,6 @@ namespace neogfx
                     color innerBorderColor = border_color();
                     auto const& borderRadii = style_sheet_value("." + class_name(), "border-radius", std::optional<std::array<std::array<length, 2u>, 4u>>{});
                     auto const& border = style_sheet_value("." + class_name(), "border", std::tuple<std::optional<color>, std::optional<length>, std::optional<border_style>>{});
-                    if (std::get<0>(border).has_value())
-                    {
-                        outerBorderColor = std::get<0>(border).value();
-                        innerBorderColor = outerBorderColor;
-                    }
                     if (std::get<1>(border).has_value())
                         iPenWidth = std::get<1>(border).value();
                     else if (borderRadii.has_value())

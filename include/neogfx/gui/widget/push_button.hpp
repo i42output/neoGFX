@@ -71,27 +71,34 @@ namespace neogfx
         // i_push_button
     public:
         push_button_style style() const override;
+        // push_button
+    public:
+        std::optional<border_radii> const& border_radius() const;
+        void set_border_radius(std::optional<border_radii> const& aBorderRadii = {});
+        void set_border_radius(length const& aBorderRadius);
+    public:
         virtual bool has_face_color() const;
         virtual color face_color() const;
         virtual void set_face_color(const optional_color& aFaceColor = {});
         virtual bool has_hover_color() const;
         virtual color hover_color() const;
         virtual void set_hover_color(const optional_color& aHoverColor = {});
-        // push_button
-    public:
-        std::optional<border_radii> const& border_radius() const;
-        void set_border_radius(std::optional<border_radii> const& aBorderRadii = {});
-        void set_border_radius(length const& aBorderRadius);
+        virtual bool has_border_color() const;
+        virtual color border_color() const;
+        virtual void set_border_color(const optional_color& aBorderColor = {});
+        virtual bool has_outer_border_color() const;
+        virtual color outer_border_color() const;
+        virtual void set_outer_border_color(const optional_color& aOuterBorderColor = {});
     protected:
         virtual rect path_bounding_rect() const;
         virtual neogfx::path path() const;
         virtual bool spot_color() const;
-        virtual color border_color() const;
         virtual bool perform_hover_animation() const;
         virtual void animate();
         virtual bool finished_animation() const;
         virtual color effective_face_color() const;
         virtual color effective_hover_color() const;
+        virtual color effective_border_color() const;
         virtual color animation_color(std::uint32_t aAnimationFrame) const;
     private:
         void init();
@@ -101,8 +108,11 @@ namespace neogfx
         std::uint32_t iAnimationFrame;
         push_button_style iStyle;
         optional_color iFaceColor;
-        mutable optional_color iStyleSheetFaceColor;
+        optional_color iBorderColor;
+        optional_color iOuterBorderColor;
         optional_color iHoverColor;
+        define_style_sheet_value(iStyleSheetFaceColor, color, "background-color", base_color())
+        define_style_sheet_value(iStyleSheetBorderColor, color, "border-color", effective_border_color())
         std::optional<border_radii> iBorderRadii;
         mutable std::optional<std::pair<neogfx::font, size>> iStandardButtonWidth;
         mutable std::optional<dimension> iPenWidth;

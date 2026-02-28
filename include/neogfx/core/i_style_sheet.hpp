@@ -41,6 +41,7 @@ namespace neogfx
     public:
         virtual i_string_view& sheet() const = 0;
     public:
+        virtual bool has_value(i_string_view const& aSelector, i_string_view const& aProperty) const = 0;
         virtual i_style_sheet_value const& value(i_string_view const& aSelector, i_string_view const& aProperty) const = 0;
     public:
         template <typename T>

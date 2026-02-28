@@ -326,6 +326,12 @@ namespace neogfx
         return iSheetView.value();
     }
 
+    bool style_sheet::has_value(i_string_view const& aSelector, i_string_view const& aProperty) const
+    {
+        auto const& result = value(aSelector, aProperty);
+        return !result.empty();
+    }
+
     style_sheet_value const& style_sheet::value(i_string_view const& aSelector, i_string_view const& aProperty) const
     {
         static style_sheet_value const tNoResult;

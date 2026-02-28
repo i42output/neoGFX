@@ -46,6 +46,7 @@ namespace neogfx
     struct layout_item_not_found : std::logic_error { layout_item_not_found() : std::logic_error{ "neogfx::layout_item_not_found" } {} };
     struct ancestor_layout_type_not_found : std::logic_error { ancestor_layout_type_not_found() : std::logic_error{ "neogfx::ancestor_layout_type_not_found" } {} };
     struct cannot_fix_weightings : std::logic_error { cannot_fix_weightings() : std::logic_error{ "neogfx::cannot_fix_weightings" } {} };
+    struct no_style_sheet_value : std::logic_error { no_style_sheet_value() : std::logic_error{ "neogfx::no_style_sheet_value" } {} };
 
     class i_item_layout : public i_service
     {
@@ -217,6 +218,27 @@ namespace neogfx
             return has_parent_widget() && aOther.has_parent_widget() && &parent_widget() == &aOther.parent_widget();
         }
     public:
+        bool has_style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty) const
+        {
+            return (has_style_sheet() && style_sheet().has_value(string_view{ aSelector }, string_view{ aProperty })) ||
+                service<i_app>().current_style().style_sheet().has_value(string_view{ aSelector }, string_view{ aProperty });
+        }
+        template <typename T>
+        std::optional<T> style_sheet_value_maybe(std::string_view const& aSelector, std::string_view const& aProperty) const
+        {
+            auto result = style_sheet().evaluate<T>(aSelector, aProperty, service<i_app>().current_style().style_sheet());
+            if (result != nullptr)
+                return std::make_optional(*result);
+            return std::nullopt;
+        }
+        template <typename T>
+        T const& style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty) const
+        {
+            auto result = style_sheet().evaluate<T>(aSelector, aProperty, service<i_app>().current_style().style_sheet());
+            if (result != nullptr)
+                return *result;
+            throw no_style_sheet_value();
+        }
         template <typename T>
         T const& style_sheet_value(std::string_view const& aSelector, std::string_view const& aProperty, T const& aDefault) const
         {
@@ -232,9 +254,71 @@ namespace neogfx
             if (result != nullptr)
                 return *result;
             thread_local std::optional<T> tResult;
-            return (tResult.emplace(std::move(aDefault)));
+            return tResult.emplace(std::move(aDefault));
         }
     };
+
+    template <typename T>
+    class cached_style_sheet_value
+    {
+    public:
+        using value_type = T;
+        struct unknown {};
+        struct none {};
+        using cache_value_type = std::variant<unknown, none, value_type>;
+        using default_value_type = std::variant<std::monostate, value_type, std::function<value_type(void)>>;
+    public:
+        cached_style_sheet_value(i_layout_item& aLayoutItem, std::string_view const& aSelector, std::string_view const& aProperty, default_value_type const& aDefaultValue = std::monostate{}) :
+            iLayoutItem{ aLayoutItem },
+            iSelector{ aSelector },
+            iProperty{ aProperty },
+            iDefaultValue{ aDefaultValue }
+        {
+        }
+    public:
+        value_type const& value() const
+        {
+            if (std::holds_alternative<unknown>(iValue))
+            {
+                if (iLayoutItem.has_style_sheet_value(iSelector, iProperty))
+                    iValue = iLayoutItem.template style_sheet_value<value_type>(iSelector, iProperty);
+                else
+                    iValue = none{};
+            }
+            if (std::holds_alternative<value_type>(iValue))
+                return std::get<value_type>(iValue);
+            else
+                return std::visit([&](auto const& arg) -> value_type const&
+                    {
+                        using arg_type = std::decay_t<decltype(arg)>;
+                        if constexpr (std::is_same_v<std::monostate, arg_type>)
+                            throw std::logic_error("neogfx::cached_style_sheet_value: no default value");
+                        else if constexpr (std::is_same_v<value_type, arg_type>)
+                            return arg;
+                        else
+                        {
+                            thread_local std::optional<value_type> tResult;
+                            return tResult.emplace(arg());
+                        }
+                    }, iDefaultValue);
+        }
+        void set_default_value(default_value_type const& aDefaultValue)
+        {
+            iDefaultValue = aDefaultValue;
+        }
+        void reset()
+        {
+            iValue = unknown{};
+        }
+    private:
+        i_layout_item& iLayoutItem;
+        std::string iSelector;
+        std::string iProperty;
+        mutable cache_value_type iValue = unknown{};
+        default_value_type iDefaultValue;
+    };
+
+    #define define_style_sheet_value( name, type, property, default_value ) cached_style_sheet_value<type> name = { *this, "." + class_name(), property, [&](){ return default_value; } };
 
     template <typename LayoutItemType, layout_item_category ParentItemCategory = layout_item_category::Unspecified>
     class size_policy_of_parent : public LayoutItemType
