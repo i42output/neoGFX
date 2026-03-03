@@ -67,10 +67,18 @@ namespace neogfx
 
         struct scissor_on
         {
-            rect rect;
         };
 
         struct scissor_off
+        {
+        };
+
+        struct push_scissor
+        {
+            rect rect;
+        };
+
+        struct pop_scissor
         {
         };
 
@@ -312,6 +320,8 @@ namespace neogfx
             set_view_transformation,
             scissor_on,
             scissor_off,
+            push_scissor,
+            pop_scissor,
             snap_to_pixel_on,
             snap_to_pixel_off,
             set_front_face,
@@ -360,6 +370,8 @@ namespace neogfx
             SetViewTransformation,
             ScissorOn,
             ScissorOff,
+            PushScissor,
+            PopScissor,
             SnapToPixelOn,
             SnapToPixelOff,
             SetFrontFace,

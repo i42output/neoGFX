@@ -249,16 +249,16 @@ namespace neogfx
             return false;
         }
 
-        template <typename ColorContainer, typename T>
-        inline vec4f to_function(ColorContainer const& aColor, T const& aValue)
+        template <typename ColorContainer>
+        inline vec4f to_function(i_rendering_context& aContext, ColorContainer const& aColor, rect const& aBoundingRect)
         {
             if (std::holds_alternative<gradient>(aColor))
             {
                 auto const& value = static_variant_cast<const gradient&>(aColor).bounding_box();
                 if (value != std::nullopt)
-                    return value->as<float>().to_vec4();
+                    return (*value + aContext.origin()).as<float>().to_vec4();
             }
-            return aValue.template as<float>().to_vec4();
+            return (aBoundingRect + aContext.origin()).template as<float>().to_vec4();
         }
     }
 
@@ -444,7 +444,7 @@ namespace neogfx
         auto shaderEffect = shader_effect::None;
         if (aBlendingMode == neogfx::blending_mode::FilterFinish)
             shaderEffect = shader_effect::MultiplyAlpha;
-        draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
+        draw_texture(aDestinationRect + iOrigin, aTexture, aSourceRect, {}, shaderEffect);
     }
 
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
@@ -518,14 +518,20 @@ namespace neogfx
                 }
                 break;
             case graphics_operation::operation_type::ScissorOn:
-                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
-                    scissor_on(static_variant_cast<const graphics_operation::scissor_on&>(*op).rect);
+                scissor_on();
                 break;
             case graphics_operation::operation_type::ScissorOff:
+                scissor_off();
+                break;
+            case graphics_operation::operation_type::PushScissor:
+                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
+                    push_scissor(static_variant_cast<const graphics_operation::push_scissor&>(*op).rect);
+                break;
+            case graphics_operation::operation_type::PopScissor:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     (void)op;
-                    scissor_off();
+                    pop_scissor();
                 }
                 break;
             case graphics_operation::operation_type::SnapToPixelOn:
@@ -633,7 +639,7 @@ namespace neogfx
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                 {
                     auto const& args = static_variant_cast<const graphics_operation::draw_cubic_bezier&>(*op);
-                    draw_cubic_bezier(args.p0, args.p1, args.p2, args.p3, args.pen);
+                    draw_cubic_bezier(args.p0 + iOrigin, args.p1 + iOrigin, args.p2 + iOrigin, args.p3 + iOrigin, args.pen);
                 }
                 break;
             case graphics_operation::operation_type::DrawPath:
@@ -669,14 +675,28 @@ namespace neogfx
         queue().clear();
     }
 
-    void opengl_rendering_context::scissor_on(const rect& aRect)
+    void opengl_rendering_context::scissor_on()
     {
-        iScissorRects.push_back(aRect);
+        if (!applying_scissor())
+            ++iScissorCounter;
+        glCheck((iScissorCounter >= 0 ? glEnable(GL_SCISSOR_TEST) : glDisable(GL_SCISSOR_TEST)));
+    }
+    
+    void opengl_rendering_context::scissor_off()
+    {
+        if (!applying_scissor())
+            --iScissorCounter;
+        glCheck(glDisable(GL_SCISSOR_TEST));
+    }
+
+    void opengl_rendering_context::push_scissor(const rect& aRect)
+    {
+        iScissorRects.push_back(aRect + iOrigin);
         iScissorRect = std::nullopt;
         apply_scissor();
     }
 
-    void opengl_rendering_context::scissor_off()
+    void opengl_rendering_context::pop_scissor()
     {
         if (!iScissorRects.empty())
             iScissorRects.pop_back();
@@ -697,12 +717,18 @@ namespace neogfx
         return iScissorRect;
     }
 
+    bool opengl_rendering_context::applying_scissor() const
+    {
+        return iApplyingScissor;
+    }
+
     void opengl_rendering_context::apply_scissor()
     {
+        neolib::scoped_flag sf{ iApplyingScissor };
         auto sr = scissor_rect();
         if (sr != std::nullopt)
         {
-            glCheck(glEnable(GL_SCISSOR_TEST));
+            scissor_on();
             GLint x = static_cast<GLint>(std::ceil(sr->x));
             GLint y = static_cast<GLint>(logical_coordinates().is_gui_orientation() ? std::ceil(rendering_area(false).cy - sr->cy - sr->y) : sr->y);
             GLsizei cx = static_cast<GLsizei>(std::ceil(sr->cx));
@@ -710,9 +736,7 @@ namespace neogfx
             glCheck(glScissor(x, y, cx, cy));
         }
         else
-        {
-            glCheck(glDisable(GL_SCISSOR_TEST));
-        }
+            scissor_off();
     }
 
     bool opengl_rendering_context::multisample() const
@@ -984,12 +1008,12 @@ namespace neogfx
     {
         /* todo: faster alternative to this... */
         disable_anti_alias daa{ *this };
-        draw_pixel(aPoint, aColor.with_alpha(1.0));
+        draw_pixel(aPoint + iOrigin, aColor.with_alpha(1.0));
     }
 
     void opengl_rendering_context::draw_pixel(const point& aPoint, const color& aColor)
     {
-        graphics_operation::operation op{ graphics_operation::draw_pixel{ aPoint, aColor } };
+        graphics_operation::operation op{ graphics_operation::draw_pixel{ aPoint + iOrigin, aColor } };
         draw_pixels(graphics_operation::batch{ &op, &op + 1 });
     }
 
@@ -1007,7 +1031,7 @@ namespace neogfx
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pixel&>(*op);
-                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point, size{1.0, 1.0} }, mesh_type::Triangles);
+                auto rectVertices = rect_vertices<vec3f>(rect{ drawOp.point + iOrigin, size{1.0, 1.0} }, mesh_type::Triangles);
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
                             vec4f{{
@@ -1021,7 +1045,7 @@ namespace neogfx
 
     void opengl_rendering_context::draw_line(const point& aFrom, const point& aTo, const pen& aPen)
     {
-        graphics_operation::operation op{ graphics_operation::draw_line{ aFrom, aTo, aPen } };
+        graphics_operation::operation op{ graphics_operation::draw_line{ aFrom + iOrigin, aTo + iOrigin, aPen } };
         draw_lines(graphics_operation::batch{ &op, &op + 1 });
     }
 
@@ -1037,9 +1061,11 @@ namespace neogfx
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_line&>(*op);
-                auto boundingRect = rect{ drawOp.from.min(drawOp.to), drawOp.from.max(drawOp.to) }.inflated(drawOp.pen.width());
+                auto const& from = drawOp.from + iOrigin;
+                auto const& to = drawOp.to + iOrigin;
+                auto boundingRect = rect{ from.min(to), from.max(to) }.inflated(drawOp.pen.width());
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.pen.color(), boundingRect);
+                auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1048,7 +1074,7 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.pen.color()) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ drawOp.from.x, drawOp.from.y, drawOp.to.x, drawOp.to.y }.as<float>(),
+                        vec4{ from.x, from.y, to.x, to.y }.as<float>(),
                         vec4{},
                         vec4{ 
                             0.0,
@@ -1083,9 +1109,12 @@ namespace neogfx
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_triangle&>(*op);
-                auto boundingRect = rect{ drawOp.p0.min(drawOp.p1.min(drawOp.p2)), drawOp.p0.max(drawOp.p1.max(drawOp.p2)) }.inflated(drawOp.pen.width());
+                auto const& p0 = drawOp.p0 + iOrigin;
+                auto const& p1 = drawOp.p1 + iOrigin;
+                auto const& p2 = drawOp.p2 + iOrigin;
+                auto boundingRect = rect{ p0.min(p1.min(p2)) + iOrigin, p0.max(p1.max(p2)) + iOrigin }.inflated(drawOp.pen.width());
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.pen.color(), boundingRect);
+                auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1094,8 +1123,8 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ drawOp.p0.x, drawOp.p0.y, drawOp.p1.x, drawOp.p1.y }.as<float>(),
-                        vec4{ drawOp.p2.x, drawOp.p2.y }.as<float>(),
+                        vec4{ p0.x, p0.y, p1.x, p1.y }.as<float>(),
+                        vec4{ p2.x, p2.y }.as<float>(),
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                             !logical_operation_active() ?
@@ -1127,8 +1156,9 @@ namespace neogfx
             for (auto op = aDrawRectOps.cbegin(); op != aDrawRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rect&>(*op);
+                auto const& rc = drawOp.rect + iOrigin;
 
-                if (drawOp.rect.top_left().z == 0.0 && drawOp.rect.bottom_right().z == 0.0 &&
+                if (rc.top_left().z == 0.0 && rc.bottom_right().z == 0.0 &&
                     ((std::holds_alternative<color>(drawOp.fill) && 
                         static_variant_cast<color>(drawOp.fill).alpha() == 0xFF) ||
                         std::holds_alternative<std::monostate>(drawOp.fill)))
@@ -1141,8 +1171,8 @@ namespace neogfx
                             optimise = true;
                         else if (scissor_rect() != std::nullopt)
                         {
-                            auto const& tl = scissor_rect().value().top_left() - drawOp.rect.top_left();
-                            auto const& br = drawOp.rect.bottom_right() - scissor_rect().value().bottom_right();
+                            auto const& tl = scissor_rect().value().top_left() - rc.top_left();
+                            auto const& br = rc.bottom_right() - scissor_rect().value().bottom_right();
                             if (tl.x > penWidth && tl.y > penWidth && br.x > penWidth && br.y > penWidth)
                                 optimise = true;
                         }
@@ -1151,9 +1181,9 @@ namespace neogfx
                     {
                         if (std::holds_alternative<color>(drawOp.fill))
                         {
-                            scissor_on(drawOp.rect);
+                            push_scissor(drawOp.rect);
                             clear(static_variant_cast<color>(drawOp.fill));
-                            scissor_off();
+                            pop_scissor();
                         }
                         continue;
                     }
@@ -1178,10 +1208,10 @@ namespace neogfx
 
                 auto& vertexArrays = maybeVertexArrays.value();
 
-                auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
-                auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
+                auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
+                auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.fill, boundingRect);
+                auto const function = to_function(*this, drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1229,10 +1259,11 @@ namespace neogfx
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_rounded_rect&>(*op);
-                auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
-                auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
+                auto const& rc = drawOp.rect + iOrigin;
+                auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
+                auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.fill, boundingRect);
+                auto const function = to_function(*this, drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1280,10 +1311,11 @@ namespace neogfx
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse_rect&>(*op);
-                auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
-                auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
+                auto const& rc = drawOp.rect + iOrigin;
+                auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
+                auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
                 auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.fill, boundingRect);
+                auto const function = to_function(*this, drawOp.fill, boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1327,6 +1359,7 @@ namespace neogfx
                     snap.emplace(iSnapToPixelUsesOffset, false);
 
                     auto& drawOp = static_variant_cast<const graphics_operation::draw_checkerboard&>(*op);
+                    auto const& rc = drawOp.rect + iOrigin;
                     auto& fill = (pass == 0u ? drawOp.fill1 : drawOp.fill2);
 
                     if (std::holds_alternative<gradient>(fill))
@@ -1340,10 +1373,10 @@ namespace neogfx
 
                     auto& vertexArrays = maybeVertexArrays.value();
 
-                    auto const sdfRect = snap_to_pixel() ? drawOp.rect.deflated(drawOp.pen.width() / 2.0) : drawOp.rect;
-                    auto const boundingRect = drawOp.rect.inflated(drawOp.pen.width() / 2.0);
+                    auto const sdfRect = snap_to_pixel() ? rc.deflated(drawOp.pen.width() / 2.0) : rc;
+                    auto const boundingRect = rc.inflated(drawOp.pen.width() / 2.0);
                     auto const vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                    auto const function = to_function(fill, boundingRect);
+                    auto const function = to_function(*this, fill, boundingRect);
 
                     for (auto const& v : vertices)
                         vertexArrays.push_back({ v,
@@ -1395,9 +1428,10 @@ namespace neogfx
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_ellipse&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
+                auto const& center = drawOp.center + iOrigin;
+                auto boundingRect = rect{ center - point{ std::max(drawOp.radiusA, drawOp.radiusB), std::max(drawOp.radiusA, drawOp.radiusB) }, size{ std::max(drawOp.radiusA, drawOp.radiusB) * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.pen.color(), boundingRect);
+                auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1406,7 +1440,7 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
+                        vec4{ center.x, center.y, drawOp.radiusA, drawOp.radiusB }.as<float>(),
                         {},
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
@@ -1445,9 +1479,10 @@ namespace neogfx
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_circle&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
+                auto const& center = drawOp.center + iOrigin;
+                auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.pen.color(), boundingRect);
+                auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1456,7 +1491,7 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius }.as<float>(),
+                        vec4{ center.x, center.y, drawOp.radius }.as<float>(),
                         {},
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
@@ -1495,9 +1530,10 @@ namespace neogfx
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_pie&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
+                auto const& center = drawOp.center + iOrigin;
+                auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.pen.color(), boundingRect);
+                auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1506,7 +1542,7 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ center.x, center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
                         vec4{ drawOp.endAngle }.as<float>(),
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
@@ -1545,9 +1581,10 @@ namespace neogfx
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
                 auto& drawOp = static_variant_cast<const graphics_operation::draw_arc&>(*op);
-                auto boundingRect = rect{ drawOp.center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
+                auto const& center = drawOp.center + iOrigin;
+                auto boundingRect = rect{ center - point{ drawOp.radius, drawOp.radius }, size{ drawOp.radius * 2.0 } }.inflated(drawOp.pen.width() / 2.0);
                 auto vertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                auto const function = to_function(drawOp.pen.color(), boundingRect);
+                auto const function = to_function(*this, drawOp.pen.color(), boundingRect);
 
                 for (auto const& v : vertices)
                     vertexArrays.push_back({ v,
@@ -1556,7 +1593,7 @@ namespace neogfx
                             vec4f{ 0.0f, 0.0f, 0.0f, std::holds_alternative<std::monostate>(drawOp.fill) ? 0.0f : 1.0f },
                         {},
                         function,
-                        vec4{ drawOp.center.x, drawOp.center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
+                        vec4{ center.x, center.y, drawOp.radius, drawOp.startAngle }.as<float>(),
                         vec4{ drawOp.endAngle }.as<float>(),
                         vec4{
                             drawOp.pen.width() ? drawOp.pen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
@@ -1589,9 +1626,9 @@ namespace neogfx
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
 
-            auto r = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
-            auto const function = to_function(aPen.color(), r);
-            auto rectVertices = rect_vertices<vec3f>(r, mesh_type::Triangles);
+            auto boundingRect = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
+            auto const function = to_function(*this, aPen.color(), boundingRect);
+            auto rectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
             if (aPen.width())
                 for (auto const& v : rectVertices)
                     vertexArrays.push_back({ v,
@@ -1628,9 +1665,9 @@ namespace neogfx
                 {
                     use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
 
-                    auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0);
+                    auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + iOrigin;
                     auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
-                    auto const function = to_function(aPen.color(), boundingRect);
+                    auto const function = to_function(*this, aPen.color(), boundingRect);
 
                     for (auto const& v : boundingRectVertices)
                         vertexArrays.push_back({ v,
@@ -1640,7 +1677,7 @@ namespace neogfx
                             {},
                             function,
                             vec4u32{ aPath.first, aPath.last }.as<float>(),
-                            vec4f{},
+                            vec4{ iOrigin.to_vec3() }.as<float>(),
                             vec4{
                                 aPen.width() ? aPen.secondary_color().has_value() ? 2.0 : 1.0 : 0.0,
                                 !logical_operation_active() ?
@@ -1693,10 +1730,12 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
-        auto const function = to_function(aPen.color(), bounding_rect(aMesh));
+        auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh));
+
+        auto const& pos = aPosition.as<float>() + iOrigin.to_vec3().as<float>();
 
         for (auto const& v : triangles)
-            vertexArrays.push_back({ v + aPosition.as<float>(),
+            vertexArrays.push_back({ v + pos,
                 std::holds_alternative<color>(aPen.color()) ? 
                     static_variant_cast<color>(aPen.color()).as<float>() : 
                     vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
@@ -1809,6 +1848,7 @@ namespace neogfx
         {
             use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES };
 
+            auto const& pos = (aPosition + iOrigin.to_vec3()).as<float>();
             auto const& vertices = aMesh.vertices;
             auto const& uv = aMesh.uv;
             vec3f min, max;
@@ -1818,13 +1858,13 @@ namespace neogfx
                 max = min;
                 for (auto const& v : vertices)
                 {
-                    min.x = std::min(min.x, v.x + aPosition.as<float>().x);
-                    max.x = std::max(max.x, v.x + aPosition.as<float>().x);
-                    min.y = std::min(min.y, v.y + aPosition.as<float>().y);
-                    max.y = std::max(max.y, v.y + aPosition.as<float>().y);
+                    min.x = std::min(min.x, v.x + pos.x);
+                    max.x = std::max(max.x, v.x + pos.x);
+                    min.y = std::min(min.y, v.y + pos.y);
+                    max.y = std::max(max.y, v.y + pos.y);
                 }
             }
-            auto const function = to_function(aFill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
+            auto const function = to_function(*this, aFill, rect{ point{ min.x, min.y }, size{ max.x - min.x, max.y - min.y } });
             if (!vertexArrays.room_for(aMesh.faces.size() * 3u))
                 vertexArrays.draw_and_execute();
             for (auto const& f : aMesh.faces)
@@ -1833,7 +1873,7 @@ namespace neogfx
                 {
                     auto const& v = vertices[vi];
                     vertexArrays.push_back({
-                        v + aPosition.as<float>(),
+                        v + pos,
                         std::holds_alternative<color>(aFill) ? 
                             static_variant_cast<color>(aFill).as<float>() : 
                             vec4f{ 0.0f, 0.0f, 0.0f, 1.0f },
@@ -1938,7 +1978,7 @@ namespace neogfx
                 // todo: union of AABB of cell and shape quads(, and transform?)
                 auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
                 rect glyphRect{ aabb };
-                glyphRect.translate(point{ drawOp.point });
+                glyphRect.translate(point{ drawOp.point } + iOrigin);
                 if (result == std::nullopt)
                     result = glyphRect;
                 else
@@ -2051,7 +2091,7 @@ namespace neogfx
                         
                     if (drawOp.appearance->paper() != std::nullopt && !drawOp.appearance->being_filtered())
                     {
-                        auto const& mesh = to_ecs_component(drawOp.point.as<float>() + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
+                        auto const& mesh = to_ecs_component(drawOp.point + iOrigin.to_vec3().as<float>() + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
 
                         tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         tMeshRenderers.push_back(
@@ -2231,6 +2271,7 @@ namespace neogfx
                         auto& glyphText = *drawOp.glyphText;
                         auto& glyphChar = *drawOp.glyphChar;
                         auto const baseline = static_cast<float>(glyphText.baseline());
+                        auto const& pos = drawOp.point + iOrigin.to_vec3().as<float>();
 
                         if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                         {
@@ -2266,8 +2307,8 @@ namespace neogfx
                                 }
                                 if (lineSegments.empty())
                                     draw_line(
-                                        drawOp.point + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
-                                        drawOp.point + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
+                                        pos + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
+                                        pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                         pen{ ink, cyUnderline });
                                 else
                                 {
@@ -2275,15 +2316,15 @@ namespace neogfx
                                     for (float x = glyphChar.cell[0].x; lineSegment != lineSegments.end() && x < glyphChar.cell[1].x;)
                                     {
                                         draw_line(
-                                            drawOp.point + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
-                                            drawOp.point + vec3f{ static_cast<float>(lineSegment->v1.x), glyphChar.cell[1].y + baseline - yUnderline },
+                                            pos + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
+                                            pos + vec3f{ static_cast<float>(lineSegment->v1.x), glyphChar.cell[1].y + baseline - yUnderline },
                                             pen{ ink, cyUnderline });
                                         x = static_cast<float>(lineSegment->v2.x);
                                         if (++lineSegment == lineSegments.end())
                                         {
                                             draw_line(
-                                                drawOp.point + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
-                                                drawOp.point + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
+                                                pos + vec3f{ x, glyphChar.cell[0].y + baseline - yUnderline },
+                                                pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                                 pen{ ink, cyUnderline });
                                         }
                                     }
@@ -2292,8 +2333,8 @@ namespace neogfx
                             else
                             {
                                 draw_line(
-                                    drawOp.point + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
-                                    drawOp.point + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
+                                    pos + vec3f{ glyphChar.cell[0].x, glyphChar.cell[0].y + baseline - yUnderline },
+                                    pos + vec3f{ glyphChar.cell[1].x, glyphChar.cell[1].y + baseline - yUnderline },
                                     pen{ ink, cyUnderline });
                             }
                         }
@@ -2499,7 +2540,8 @@ namespace neogfx
         use_shader_program usp{ *this, rendering_engine().default_shader_program(), iOpacity };
         neolib::scoped_flag snap{ iSnapToPixel, false };
 
-        auto const transformation = aTransformation.as<float>();
+        auto transformation = aTransformation.as<float>();
+        apply_translation(transformation, iOrigin.to_vec3().as<float>());
 
         std::optional<use_vertex_arrays> vertexArrayUsage;
 

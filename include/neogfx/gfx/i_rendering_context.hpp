@@ -44,14 +44,16 @@ namespace neogfx
         virtual const i_render_target& render_target() const = 0;
         virtual rect rendering_area(bool aConsiderScissor = true) const = 0;
         virtual graphics_operation::queue& queue() const = 0;
-        virtual void enqueue(const graphics_operation::operation& aOperation) = 0;
+        virtual void enqueue(graphics_operation::operation const& aOperation) = 0;
         virtual void flush() = 0;
     public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
+        virtual point origin() const = 0;
+        virtual void set_origin(point const& aOrigin) = 0;
         virtual vec2 offset() const = 0;
-        virtual void set_offset(const optional_vec2& aOffset) = 0;
-        virtual void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, blending_mode aBlendingMode = blending_mode::Blit) = 0;
+        virtual void set_offset(optional_vec2 const& aOffset) = 0;
+        virtual void blit(rect const& aDestinationRect, i_texture const& aTexture, rect const& aSourceRect, blending_mode aBlendingMode = blending_mode::Blit) = 0;
         virtual bool gradient_set() const = 0;
         virtual void apply_gradient(i_gradient_shader& aShader) = 0;
     public:

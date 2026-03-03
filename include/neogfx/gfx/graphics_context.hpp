@@ -86,14 +86,16 @@ namespace neogfx
         // viewport
     public:
         void set_extents(size const& aExtents) final;
-        void set_origin(point const& aOrigin) final;
         point origin() const final;
+        void set_origin(point const& aOrigin) final;
         void set_viewport(optional_rect const& aViewport = {}) final;
         void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) final;
         // clipping
     public:
-        void scissor_on(rect const& aRect) final;
+        void scissor_on() final;
         void scissor_off() final;
+        void push_scissor(rect const& aRect) final;
+        void pop_scissor() final;
         // rendering
     public:
         neogfx::front_face front_face() const final;

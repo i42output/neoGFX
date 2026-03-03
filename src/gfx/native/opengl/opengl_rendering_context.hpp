@@ -229,8 +229,8 @@ namespace neogfx
         void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
         neogfx::logical_coordinates logical_coordinates() const override;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates);
-        point origin() const;
-        void set_origin(const point& aOrigin);
+        point origin() const override;
+        void set_origin(const point& aOrigin) override;
         vec2 offset() const override;
         void set_offset(const optional_vec2& aOffset) override;
         void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode) override;
@@ -239,8 +239,10 @@ namespace neogfx
     public:
         bool snap_to_pixel() const;
         void set_snap_to_pixel(bool aSnapToPixel);
-        void scissor_on(const rect& aRect);
+        void scissor_on();
         void scissor_off();
+        void push_scissor(const rect& aRect);
+        void pop_scissor();
         const optional_rect& scissor_rect() const;
         bool multisample() const;
         void set_multisample(bool aMultisample);
@@ -298,6 +300,7 @@ namespace neogfx
     public:
         neogfx::subpixel_format subpixel_format() const override;
     private:
+        bool applying_scissor() const;
         void apply_scissor();
         void apply_logical_operation();
     private:
@@ -324,8 +327,10 @@ namespace neogfx
         bool iSubpixelRendering;
         std::vector<logical_operation> iLogicalOperationStack;
         std::list<use_shader_program> iShaderProgramStack;
+        std::int32_t iScissorCounter = 0;
         std::vector<rect> iScissorRects;
         mutable optional_rect iScissorRect;
+        bool iApplyingScissor = false;
         GLint iPreviousTexture;
         font iLastDrawGlyphFallbackFont;
         std::optional<std::uint8_t> iLastDrawGlyphFallbackFontIndex;

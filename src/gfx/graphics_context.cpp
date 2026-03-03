@@ -386,6 +386,11 @@ namespace neogfx
         iExtents = aExtents;
     }
 
+    point graphics_context::origin() const
+    {
+        return from_device_units(iOrigin);
+    }
+
     void graphics_context::set_origin(point const& aOrigin)
     {
         if (iOrigin != to_device_units(aOrigin))
@@ -395,11 +400,6 @@ namespace neogfx
         }
     }
 
-    point graphics_context::origin() const
-    {
-        return from_device_units(iOrigin);
-    }
-
     void graphics_context::clear_gradient()
     {
         rendering_context().enqueue(graphics_operation::clear_gradient{});
@@ -407,38 +407,38 @@ namespace neogfx
 
     void graphics_context::set_gradient(gradient const& aGradient, rect const& aBoundingBox)
     {
-        rendering_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox) + iOrigin) });
+        rendering_context().enqueue(graphics_operation::set_gradient{ aGradient.with_bounding_box(to_device_units(aBoundingBox)) });
     }
 
     void graphics_context::set_pixel(point const& aPoint, color const& aColor)
     {
-        rendering_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint) + iOrigin, aColor });
+        rendering_context().enqueue(graphics_operation::set_pixel{ to_device_units(aPoint), aColor });
     }
 
     void graphics_context::draw_pixel(point const& aPoint, color const& aColor)
     {
-        rendering_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint) + iOrigin, aColor });
+        rendering_context().enqueue(graphics_operation::draw_pixel{ to_device_units(aPoint), aColor });
     }
 
     void graphics_context::draw_line(point const& aFrom, point const& aTo, pen const& aPen)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom) + iOrigin, to_device_units(aTo) + iOrigin, aPen });
+        rendering_context().enqueue(graphics_operation::draw_line{ to_device_units(aFrom), to_device_units(aTo), aPen });
     }
 
     void graphics_context::draw_triangle(point const& aP0, point const& aP1, point const& aP2, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_triangle{ to_device_units(aP0), to_device_units(aP1), to_device_units(aP2), aPen, aFill });
     }
 
     void graphics_context::draw_rect(rect const& aRect, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect) + iOrigin, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_rect{ to_device_units(aRect), aPen, aFill });
     }
 
     void graphics_context::draw_rounded_rect(rect const& aRect, vec4 const& aRadius, pen const& aPen, brush const& aFill)
@@ -446,56 +446,56 @@ namespace neogfx
         std::optional<scoped_stipple> st;
         if (aPen.style() == line_style::CustomDash)
             st.emplace(*this, aPen.custom_dash());
-        rendering_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect) + iOrigin, aRadius, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_rounded_rect{ to_device_units(aRect), aRadius, aPen, aFill });
     }
 
     void graphics_context::draw_ellipse_rect(rect const& aRect, vec4 const& aRadiusX, vec4 const& aRadiusY, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect) + iOrigin, aRadiusX, aRadiusY, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_ellipse_rect{ to_device_units(aRect), aRadiusX, aRadiusY, aPen, aFill });
     }
 
     void graphics_context::draw_checkerboard(rect const& aRect, size const& aSquareSize, pen const& aPen, brush const& aFill1, brush const& aFill2)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_checkerboard{ to_device_units(aRect) + iOrigin, to_device_units(aSquareSize), aPen, aFill1, aFill2 });
+        rendering_context().enqueue(graphics_operation::draw_checkerboard{ to_device_units(aRect), to_device_units(aSquareSize), aPen, aFill1, aFill2 });
     }
 
     void graphics_context::draw_circle(point const& aCenter, dimension aRadius, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter) + iOrigin, aRadius, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_circle{ to_device_units(aCenter), aRadius, aPen, aFill });
     }
 
     void graphics_context::draw_ellipse(point const& aCenter, dimension aRadiusA, dimension aRadiusB, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter) + iOrigin, aRadiusA, aRadiusB, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_ellipse{ to_device_units(aCenter), aRadiusA, aRadiusB, aPen, aFill });
     }
 
     void graphics_context::draw_pie(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_pie{ to_device_units(aCenter), aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
     void graphics_context::draw_arc(point const& aCenter, dimension aRadius, angle aStartAngle, angle aEndAngle, pen const& aPen, brush const& aFill)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter) + iOrigin, aRadius, aStartAngle, aEndAngle, aPen, aFill });
+        rendering_context().enqueue(graphics_operation::draw_arc{ to_device_units(aCenter), aRadius, aStartAngle, aEndAngle, aPen, aFill });
     }
 
     void graphics_context::draw_cubic_bezier(point const& aP0, point const& aP1, point const& aP2, point const& aP3, pen const& aPen)
     {
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
-        rendering_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0) + iOrigin, to_device_units(aP1) + iOrigin, to_device_units(aP2) + iOrigin, to_device_units(aP3) + iOrigin, aPen });
+        rendering_context().enqueue(graphics_operation::draw_cubic_bezier{ to_device_units(aP0), to_device_units(aP1), to_device_units(aP2), to_device_units(aP3), aPen });
     }
 
     void graphics_context::draw_path(path const& aPath, pen const& aPen, brush const& aFill)
@@ -503,7 +503,7 @@ namespace neogfx
         std::optional<scoped_stipple> st;
         apply_stipple(*this, aPen, st);
         path path = to_device_units(aPath);
-        path.set_position(path.position() + iOrigin);
+        path.set_position(path.position());
         for (auto const& subPath : aPath.sub_paths())
         {
             ssbo_range vertices = path_to_vertices(path, subPath);
@@ -528,7 +528,7 @@ namespace neogfx
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 },
-                    { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * aShape,
+                    { 0.0, 0.0, 0.0, 1.0 } } * aShape,
                 aPosition,
                 aPen,
                 aFill
@@ -546,7 +546,7 @@ namespace neogfx
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 },
-                    { iOrigin.x, iOrigin.y, 0.0, 1.0 } }
+                    { 0.0, 0.0, 0.0, 1.0 } }
             });
     }
 
@@ -789,7 +789,7 @@ namespace neogfx
     {
         if (aTextBegin == aTextEnd)
             return;
-        auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+        auto adjustedPos = (to_device_units(point{ aPoint })).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
         rendering_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, aTextBegin, aTextEnd, text_format_span{ 0, aTextEnd - aTextBegin, aTextFormat }, mnemonics_shown() });
     }
 
@@ -912,14 +912,24 @@ namespace neogfx
             rendering_context().enqueue(graphics_operation::set_view_transformation{});
     }
 
-    void graphics_context::scissor_on(rect const& aRect)
+    void graphics_context::scissor_on()
     {
-        rendering_context().enqueue(graphics_operation::scissor_on{ to_device_units(aRect) + iOrigin });
+        rendering_context().enqueue(graphics_operation::scissor_on{});
     }
 
     void graphics_context::scissor_off()
     {
         rendering_context().enqueue(graphics_operation::scissor_off{});
+    }
+
+    void graphics_context::push_scissor(rect const& aRect)
+    {
+        rendering_context().enqueue(graphics_operation::push_scissor{ to_device_units(aRect) });
+    }
+
+    void graphics_context::pop_scissor()
+    {
+        rendering_context().enqueue(graphics_operation::pop_scissor{});
     }
 
     bool graphics_context::snap_to_pixel() const
@@ -1368,7 +1378,7 @@ namespace neogfx
 
     void graphics_context::draw_glyph(vec3 const& aPoint, glyph_text const& aText, glyph_char const& aGlyphChar, text_format const& aTextFormat)
     {
-        auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+        auto adjustedPos = (to_device_units(point{ aPoint })).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
         rendering_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, &aGlyphChar, std::next(&aGlyphChar), text_format_span{ 0, 1, aTextFormat }, mnemonics_shown() });
     }
 
@@ -1379,7 +1389,7 @@ namespace neogfx
 
     void graphics_context::draw_glyphs(vec3 const& aPoint, glyph_text const& aText, text_format_spans const& aSpans)
     {
-        auto adjustedPos = (to_device_units(point{ aPoint }) + iOrigin).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
+        auto adjustedPos = (to_device_units(point{ aPoint })).to_vec3() + vec3{ 0.0, 0.0, aPoint.z };
         rendering_context().enqueue(graphics_operation::draw_glyphs{ adjustedPos, aText, std::to_address(aText.begin()), std::to_address(aText.end()), aSpans, mnemonics_shown()});
     }
 
@@ -1496,7 +1506,7 @@ namespace neogfx
                     { toDeviceUnits.x, 0.0, 0.0, 0.0 },
                     { 0.0, toDeviceUnits.y, 0.0, 0.0 },
                     { 0.0, 0.0, 1.0, 0.0 },
-                    { iOrigin.x, iOrigin.y, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity()),
+                    { 0.0, 0.0, 0.0, 1.0 } } * (aTransformation != std::nullopt ? *aTransformation : mat44::identity()),
                 aFilter
             });
     }

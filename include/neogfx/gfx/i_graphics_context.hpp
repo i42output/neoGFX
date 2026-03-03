@@ -191,14 +191,14 @@ namespace neogfx
         // viewport
     public:
         virtual void set_extents(size const& aExtents) = 0;
-        virtual void set_origin(point const& aOrigin) = 0;
-        virtual point origin() const = 0;
         virtual void set_viewport(optional_rect const& aViewport = {}) = 0;
         virtual void set_view_transforamtion(optional_mat33 const& aViewTransforamtion = {}) = 0;
         // clipping
     public:
-        virtual void scissor_on(rect const& aRect) = 0;
+        virtual void scissor_on() = 0;
         virtual void scissor_off() = 0;
+        virtual void push_scissor(rect const& aRect) = 0;
+        virtual void pop_scissor() = 0;
         // rendering
     public:
         virtual neogfx::front_face front_face() const = 0;
@@ -612,6 +612,23 @@ namespace neogfx
         neogfx::logical_coordinates iPreviousCoordinates;
     };
 
+    class scoped_origin
+    {
+    public:
+        scoped_origin(i_graphics_context& aGc, point const& aOrigin) :
+            iGc{ aGc }, iPreviousOrigin{ aGc.origin() }
+        {
+            iGc.set_origin(aOrigin);
+        }
+        ~scoped_origin()
+        {
+            iGc.set_origin(iPreviousOrigin);
+        }
+    private:
+        i_graphics_context& iGc;
+        point iPreviousOrigin;
+    };
+
     class scoped_snap_to_pixel
     {
     public:
@@ -680,17 +697,33 @@ namespace neogfx
         neogfx::blending_mode iPreviousBlendingMode;
     };
 
+    class scoped_scissor_suppression
+    {
+    public:
+        scoped_scissor_suppression(i_graphics_context& aGc) :
+            iGc{ aGc }
+        {
+            iGc.scissor_off();
+        }
+        ~scoped_scissor_suppression()
+        {
+            iGc.scissor_on();
+        }
+    private:
+        i_graphics_context& iGc;
+    };
+
     class scoped_scissor
     {
     public:
         scoped_scissor(i_graphics_context& aGc, rect const& aScissorRect) :
             iGc{ aGc }
         {
-            iGc.scissor_on(aScissorRect);
+            iGc.push_scissor(aScissorRect);
         }
         ~scoped_scissor()
         {
-            iGc.scissor_off();
+            iGc.pop_scissor();
         }
     private:
         i_graphics_context& iGc;
