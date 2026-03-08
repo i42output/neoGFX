@@ -227,6 +227,32 @@ namespace neogfx
         rendering_context().enqueue(aOperation);
     }
 
+    void graphics_context::flush()
+    {
+        if (attached() && active())
+            rendering_context().flush();
+    }
+
+    bool graphics_context::redirecting() const
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
+    point graphics_context::redirect_origin() const
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
+    void graphics_context::begin_redirect(i_rendering_context& aRc)
+    {
+        /// @todo Implement
+    }
+
+    void graphics_context::end_redirect()
+    {
+        /// @todo Implement
+    }
+
     delta graphics_context::to_device_units(delta const& aValue) const
     {
         return units_converter{ *this }.to_device_units(aValue);
@@ -884,12 +910,6 @@ namespace neogfx
             return *iRenderingContext;
         }
         throw unattached();
-    }
-
-    void graphics_context::flush()
-    {
-        if (attached() && active())
-            rendering_context().flush();
     }
 
     void graphics_context::set_viewport(optional_rect const& aViewport)

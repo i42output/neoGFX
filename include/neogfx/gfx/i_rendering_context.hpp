@@ -47,6 +47,11 @@ namespace neogfx
         virtual void enqueue(graphics_operation::operation const& aOperation) = 0;
         virtual void flush() = 0;
     public:
+        virtual bool redirecting() const = 0;
+        virtual point redirect_origin() const = 0;
+        virtual void begin_redirect(i_rendering_context& aRc) = 0;
+        virtual void end_redirect() = 0;
+    public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
         virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;

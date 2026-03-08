@@ -683,6 +683,26 @@ namespace neogfx
         queue().clear();
     }
 
+    bool opengl_rendering_context::redirecting() const
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
+    point opengl_rendering_context::redirect_origin() const
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
+    void opengl_rendering_context::begin_redirect(i_rendering_context& aRc)
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
+    void opengl_rendering_context::end_redirect()
+    {
+        throw std::logic_error("not yet implemented");
+    }
+
     void opengl_rendering_context::scissor_on()
     {
         if (!applying_scissor())

@@ -800,9 +800,11 @@ namespace neogfx
             iSubtractRadius{ aSubtractRadius }
         {
             front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
+            front_buffer().begin_redirect(aRc);
         }
         ~scoped_filter()
         {
+            front_buffer().end_redirect();
             front_buffer().set_origin({});
             iRenderTarget.emplace(back_buffer());
             if constexpr (std::is_same_v<Filter, blur_filter>)

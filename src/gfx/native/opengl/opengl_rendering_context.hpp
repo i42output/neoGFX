@@ -50,15 +50,15 @@ namespace neogfx
                 static auto& sVertexBuffer = service<i_rendering_engine>().allocate_vertex_buffer(*this);
             }
         public:
-            bool cacheable() const override
+            bool cacheable() const final
             {
                 return false;
             }
-            const game::component<game::mesh_render_cache>& cache() const override
+            const game::component<game::mesh_render_cache>& cache() const final
             {
                 throw not_cacheable();
             }
-            game::component<game::mesh_render_cache>& cache() override
+            game::component<game::mesh_render_cache>& cache() final
             {
                 throw not_cacheable();
             }
@@ -215,27 +215,32 @@ namespace neogfx
         opengl_rendering_context(const opengl_rendering_context& aOther);
         ~opengl_rendering_context();
     public:
-        std::unique_ptr<i_rendering_context> clone() const override;
+        std::unique_ptr<i_rendering_context> clone() const final;
     public:
-        i_rendering_engine& rendering_engine() const override;
-        const i_render_target& render_target() const override;
-        rect rendering_area(bool aConsiderScissor = true) const override;
+        i_rendering_engine& rendering_engine() const final;
+        const i_render_target& render_target() const final;
+        rect rendering_area(bool aConsiderScissor = true) const final;
     public:
-        graphics_operation::queue& queue() const override;
-        void enqueue(const graphics_operation::operation& aOperation) override;
-        void flush() override;
+        graphics_operation::queue& queue() const final;
+        void enqueue(const graphics_operation::operation& aOperation) final;
+        void flush() final;
     public:
-        neogfx::logical_coordinate_system logical_coordinate_system() const override;
+        bool redirecting() const final;
+        point redirect_origin() const final;
+        void begin_redirect(i_rendering_context& aRc) final;
+        void end_redirect() final;
+    public:
+        neogfx::logical_coordinate_system logical_coordinate_system() const final;
         void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem);
-        neogfx::logical_coordinates logical_coordinates() const override;
+        neogfx::logical_coordinates logical_coordinates() const final;
         void set_logical_coordinates(const neogfx::logical_coordinates& aCoordinates);
-        point origin() const override;
-        void set_origin(const point& aOrigin) override;
-        vec2 offset() const override;
-        void set_offset(const optional_vec2& aOffset) override;
-        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode) override;
-        bool gradient_set() const override;
-        void apply_gradient(i_gradient_shader& aShader) override;
+        point origin() const final;
+        void set_origin(const point& aOrigin) final;
+        vec2 offset() const final;
+        void set_offset(const optional_vec2& aOffset) final;
+        void blit(const rect& aDestinationRect, const i_texture& aTexture, const rect& aSourceRect, neogfx::blending_mode aBlendingMode) final;
+        bool gradient_set() const final;
+        void apply_gradient(i_gradient_shader& aShader) final;
     public:
         bool snap_to_pixel() const;
         void set_snap_to_pixel(bool aSnapToPixel);
@@ -298,7 +303,7 @@ namespace neogfx
         void draw_patch(patch_drawable& aPatch, const mat44& aTransformation);
         void draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor = {}, shader_effect aShaderEffect = shader_effect::None);
     public:
-        neogfx::subpixel_format subpixel_format() const override;
+        neogfx::subpixel_format subpixel_format() const final;
     private:
         bool applying_scissor() const;
         void apply_scissor();

@@ -50,6 +50,13 @@ namespace neogfx
         rect rendering_area(bool aConsiderScissor = true) const final;
         graphics_operation::queue& queue() const final;
         void enqueue(graphics_operation::operation const& aOperation) final;
+        void flush() final;
+        // i_rendering_context
+    public:
+        bool redirecting() const final;
+        point redirect_origin() const final;
+        void begin_redirect(i_rendering_context& aRc) final;
+        void end_redirect() final;
         // i_rendering_context
     public:
         neogfx::logical_coordinates logical_coordinates() const final;
@@ -71,9 +78,6 @@ namespace neogfx
         point from_device_units(point const& aValue) const final;
         rect from_device_units(rect const& aValue) const final;
         path from_device_units(const path& aValue) const final;
-        // state
-    public:
-        void flush() final;
         // layers
     public:
         layer_t layer() const final;

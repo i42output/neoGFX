@@ -44,10 +44,19 @@ namespace neogfx
     scoped_render_target::scoped_render_target(const i_rendering_context& aRenderingContext) :
         scoped_render_target{ aRenderingContext.render_target() }
     {
+        iContext = &aRenderingContext;
+    }
+
+    scoped_render_target::scoped_render_target(i_rendering_context& aRenderingContext) :
+        scoped_render_target{ aRenderingContext.render_target() }
+    {
+        iContext = &aRenderingContext;
     }
 
     scoped_render_target::~scoped_render_target()
     {
+        if (std::holds_alternative<i_rendering_context*>(iContext))
+            std::get<i_rendering_context*>(iContext)->flush();
         if (iRenderTarget && iPreviouslyActivatedTarget != iRenderTarget)
         {
             if (iRenderTarget->target_active())
