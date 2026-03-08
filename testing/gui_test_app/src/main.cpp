@@ -417,7 +417,7 @@ int main(int argc, char* argv[])
         window.editGlow.checked([&]()
         {
             window.effectWidthSlider.set_value(5);
-            window.effectAux1Slider.set_value(1);
+            window.effectAux1Slider.set_value(5);
             auto s = window.textEdit.default_style();
             s.character().set_text_effect(ng::text_effect{ ng::text_effect_type::Glow, ng::color::Orange, window.effectWidthSlider.value(), {}, window.effectAux1Slider.value() });
             window.textEdit.set_default_style(s);

@@ -962,6 +962,7 @@ namespace neogfx
         neolib::scoped_flag sf{ iResizing };
 
         update(true);
+
         self.set_extents(aSize);
     }
 
@@ -1356,13 +1357,13 @@ namespace neogfx
 
             scoped_scissor scissor(aGc, clipRect);
 
-            scoped_coordinate_system scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
+            scoped_coordinate_system_ex scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
             Painting(aGc);
 
             paint(aGc);
 
-            scoped_coordinate_system scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
+            scoped_coordinate_system_ex scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
             PaintingChildren(aGc);
 
@@ -1402,7 +1403,7 @@ namespace neogfx
             aGc.set_extents(client_rect().extents());
             aGc.set_origin(self.origin());
 
-            scoped_coordinate_system scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
+            scoped_coordinate_system_ex scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
 
             Painted(aGc);
         }

@@ -539,12 +539,12 @@ namespace neogfx
                 break;
             case alignment::VCenter:
             case alignment::Center:
-                AxisPolicy::y(alignmentAdjust) = std::floor((AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s)) / 2.0);
+                AxisPolicy::y(alignmentAdjust) = std::ceil((AxisPolicy::cy(availableSpace) - AxisPolicy::cy(s)) / 2.0);
                 break;
             }
             if (AxisPolicy::y(alignmentAdjust) < 0.0)
                 AxisPolicy::y(alignmentAdjust) = 0.0;
-            item.layout_as(nextPos + alignmentAdjust, s);
+            item.layout_as((nextPos + alignmentAdjust).ceil(), s.ceil());
             if (!item.is_spacer() && (AxisPolicy::cx(s) == 0.0 || AxisPolicy::cy(s) == 0.0))
                 continue;
             AxisPolicy::x(nextPos) += AxisPolicy::cx(s);
@@ -570,7 +570,7 @@ namespace neogfx
                 break;
             case alignment::Center:
             case alignment::VCenter:
-                AxisPolicy::cx(adjust) = std::floor((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
+                AxisPolicy::cx(adjust) = std::ceil((AxisPolicy::x(lastPos) - AxisPolicy::x(nextPos)) / 2.0);
                 break;
             }
             if (adjust != size{})
@@ -580,7 +580,7 @@ namespace neogfx
                     auto& item = *itemRef;
                     if (!item_effectively_visible_for_layout(*this, item))
                         continue;
-                    item.layout_as(item.position() + adjust, item.extents());
+                    item.layout_as((item.position() + adjust).ceil(), item.extents().ceil());
                 }
             }
         }

@@ -3386,19 +3386,20 @@ namespace neogfx
         auto cursorColor = cursor().color();
         if (cursorColor == neolib::none)
             cursorColor = service<i_app>().current_style().palette().default_text_color_for_widget(*this);
+        auto const cursorRect = cursor_rect();
         if (cursor().style() == cursor_style::Xor)
         {
             aGc.push_logical_operation(logical_operation::Xor);
-            aGc.fill_rect(cursor_rect(), (cursorAlpha >= 0.5 ? color::White : color::Black));
+            aGc.fill_rect(cursorRect, (cursorAlpha >= 0.5 ? color::White : color::Black));
             aGc.pop_logical_operation();
         }
         else if (std::holds_alternative<color>(cursorColor))
         {
-            aGc.fill_rect(cursor_rect(), static_variant_cast<const color&>(cursorColor).with_combined_alpha(cursorAlpha));
+            aGc.fill_rect(cursorRect, static_variant_cast<const color&>(cursorColor).with_combined_alpha(cursorAlpha));
         }
         else if (std::holds_alternative<gradient>(cursorColor))
         {
-            aGc.fill_rect(cursor_rect(), static_variant_cast<const gradient&>(cursorColor).with_combined_alpha(cursorAlpha));
+            aGc.fill_rect(cursorRect, static_variant_cast<const gradient&>(cursorColor).with_combined_alpha(cursorAlpha));
         }
     }
 

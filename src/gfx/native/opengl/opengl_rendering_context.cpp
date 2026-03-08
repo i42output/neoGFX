@@ -258,7 +258,7 @@ namespace neogfx
                 if (value != std::nullopt)
                     return (*value + aContext.origin()).as<float>().to_vec4();
             }
-            return (aBoundingRect + aContext.origin()).template as<float>().to_vec4();
+            return aBoundingRect.as<float>().to_vec4();
         }
     }
 
@@ -401,7 +401,8 @@ namespace neogfx
                     std::swap(result.bottomLeft.y, result.topRight.y);
                 break;
             case neogfx::logical_coordinate_system::AutomaticGui:
-                std::swap(result.bottomLeft.y, result.topRight.y);
+                if (render_target().logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
+                    std::swap(result.bottomLeft.y, result.topRight.y);
                 break;
             }
         }
@@ -444,7 +445,7 @@ namespace neogfx
         auto shaderEffect = shader_effect::None;
         if (aBlendingMode == neogfx::blending_mode::FilterFinish)
             shaderEffect = shader_effect::MultiplyAlpha;
-        draw_texture(aDestinationRect + iOrigin, aTexture, aSourceRect, {}, shaderEffect);
+        draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
     }
 
     void opengl_rendering_context::apply_gradient(i_gradient_shader& aShader)
@@ -601,6 +602,13 @@ namespace neogfx
             case graphics_operation::operation_type::SetPixel:
                 for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
                     set_pixel(static_variant_cast<const graphics_operation::set_pixel&>(*op).point, static_variant_cast<const graphics_operation::set_pixel&>(*op).color);
+                break;
+            case graphics_operation::operation_type::Blit:
+                for (auto op = opBatch.cbegin(); op != opBatch.cend(); ++op)
+                {
+                    auto const& args = static_variant_cast<const graphics_operation::blit&>(*op);
+                    blit(args.destinationRect, args.texture, args.sourceRect, args.blendingMode);
+                }
                 break;
             case graphics_operation::operation_type::DrawPixel:
                 draw_pixels(opBatch);
@@ -1730,7 +1738,7 @@ namespace neogfx
 
         use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
 
-        auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh));
+        auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh) + iOrigin);
 
         auto const& pos = aPosition.as<float>() + iOrigin.to_vec3().as<float>();
 
@@ -1978,7 +1986,7 @@ namespace neogfx
                 // todo: union of AABB of cell and shape quads(, and transform?)
                 auto const aabb = to_aabb_2d(glyphChar.cell.begin(), glyphChar.cell.end());
                 rect glyphRect{ aabb };
-                glyphRect.translate(point{ drawOp.point } + iOrigin);
+                glyphRect.translate(point{ drawOp.point });
                 if (result == std::nullopt)
                     result = glyphRect;
                 else
@@ -2086,12 +2094,12 @@ namespace neogfx
                         (drawOp.appearance->effect()->type() == text_effect_type::Glow || drawOp.appearance->effect()->type() == text_effect_type::Shadow))
                     {
                         if (filterRegion == std::nullopt)
-                            filterRegion = bounding_rect();
+                            filterRegion = bounding_rect().value();
                     }
                         
                     if (drawOp.appearance->paper() != std::nullopt && !drawOp.appearance->being_filtered())
                     {
-                        auto const& mesh = to_ecs_component(drawOp.point + iOrigin.to_vec3().as<float>() + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
+                        auto const& mesh = to_ecs_component(drawOp.point + quadf{glyphChar.cell[0], glyphChar.cell[1], glyphChar.cell[2], glyphChar.cell[3]}, mesh_type::Triangles);
 
                         tMeshFilters.push_back(game::mesh_filter{ {}, mesh });
                         tMeshRenderers.push_back(
@@ -2129,11 +2137,13 @@ namespace neogfx
                             filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian,
                                 drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() });
 
+                        filter->front_buffer().flush(); ///< @todo delete
                         filter->front_buffer().draw_glyph(
                             drawOp.point.as<scalar>() + drawOp.appearance->effect()->offset(),
                             glyphText,
                             glyphChar,
                             drawOp.appearance->as_being_filtered());
+                        filter->front_buffer().flush(); ///< @todo delete
                     }
                 }
                 break;
@@ -2271,7 +2281,7 @@ namespace neogfx
                         auto& glyphText = *drawOp.glyphText;
                         auto& glyphChar = *drawOp.glyphChar;
                         auto const baseline = static_cast<float>(glyphText.baseline());
-                        auto const& pos = drawOp.point + iOrigin.to_vec3().as<float>();
+                        auto const& pos = drawOp.point;
 
                         if (underline(glyphChar) || (drawOp.showMnemonics && neogfx::mnemonic(glyphChar)))
                         {
@@ -2673,7 +2683,8 @@ namespace neogfx
 
     void opengl_rendering_context::draw_texture(const rect& aRect, const i_texture& aTexture, const rect& aTextureRect, const optional_color& aColor, shader_effect aShaderEffect)
     {
-        auto mesh = to_ecs_component(aRect);
+        auto mesh = logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui ? 
+            to_ecs_component(aRect) : to_ecs_component(game_rect{ aRect });
         for (auto& uv : mesh.uv)
             uv = (aTextureRect.top_left() / aTexture.extents()).to_vec2().as<float>() + uv.scale((aTextureRect.extents() / aTexture.extents()).to_vec2().as<float>());
         draw_mesh(

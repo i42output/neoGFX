@@ -289,7 +289,6 @@ namespace neogfx
     {
         set_margin(neogfx::margin{});
         set_padding(neogfx::padding{});
-        set_background_color(color::White);
 
         CefWindowInfo window_info;
 #ifdef _WIN32

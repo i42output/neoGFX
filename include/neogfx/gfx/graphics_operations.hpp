@@ -169,6 +169,14 @@ namespace neogfx
             color color;
         };
 
+        struct blit
+        {
+            rect destinationRect;
+            i_texture const& texture;
+            rect sourceRect;
+            blending_mode blendingMode;
+        };
+
         struct draw_pixel
         {
             point point;
@@ -341,6 +349,7 @@ namespace neogfx
             clear_gradient,
             set_gradient,
             set_pixel,
+            blit,
             draw_pixel,
             draw_line,
             draw_triangle,
@@ -391,6 +400,7 @@ namespace neogfx
             ClearGradient,
             SetGradient,
             SetPixel,
+            Blit,
             DrawPixel,
             DrawLine,
             DrawTriangle,

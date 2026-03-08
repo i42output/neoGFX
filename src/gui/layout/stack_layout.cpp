@@ -148,7 +148,7 @@ namespace neogfx
                 itemPosition.x += ((desiredSize.cx - itemSize.cx) / 2.0);
             if (itemSize.cy < desiredSize.cy)
                 itemPosition.y += ((desiredSize.cy - itemSize.cy) / 2.0);
-            item.layout_as(itemPosition, itemSize);
+            item.layout_as(itemPosition.ceil(), itemSize.ceil());
         }
         if (has_parent_widget())
             parent_widget().layout_items_completed();

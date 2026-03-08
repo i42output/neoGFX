@@ -492,7 +492,7 @@ namespace neogfx
                                         auto const itemExtents = spanExtents.min(i->second->maximum_size(spanExtents));
                                         i->second->layout_as(fromPos.
                                             with_x(fromPos.x + (spanExtents.cx - itemExtents.cx) / 2.0).
-                                            with_y(fromPos.y + (spanExtents.cy - itemExtents.cy) / 2.0), itemExtents);
+                                            with_y(fromPos.y + (spanExtents.cy - itemExtents.cy) / 2.0).ceil(), itemExtents.ceil());
                                         foundSpan = true;
                                     }
                                     colPos2.x += maxColWidth[col2];
@@ -510,7 +510,7 @@ namespace neogfx
                         auto const itemExtents = cellExtents.min(i->second->maximum_size(cellExtents));
                         i->second->layout_as(colPos.
                             with_x(colPos.x + (cellExtents.cx - itemExtents.cx) / 2.0).
-                            with_y(colPos.y + (cellExtents.cy - itemExtents.cy) / 2.0), itemExtents);
+                            with_y(colPos.y + (cellExtents.cy - itemExtents.cy) / 2.0).ceil(), itemExtents.ceil());
                     }
                 }
                 colPos.x += maxColWidth[col];

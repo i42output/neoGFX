@@ -182,12 +182,6 @@ namespace neogfx
     public:
         virtual layer_t layer() const = 0;
         virtual void set_layer(layer_t aLayer) = 0;
-        // coordinate system
-    public:
-        virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
-        virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
-        virtual neogfx::logical_coordinates logical_coordinates() const = 0;
-        virtual void set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) = 0;
         // viewport
     public:
         virtual void set_extents(size const& aExtents) = 0;
@@ -561,55 +555,81 @@ namespace neogfx
     class scoped_coordinate_system
     {
     public:
-        scoped_coordinate_system(i_graphics_context& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
-            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+        scoped_coordinate_system(i_rendering_context& aRc, logical_coordinate_system aCoordinateSystem) :
+            iContext(&aRc), iPreviousCoordinateSystem(aRc.logical_coordinate_system())
         {
-            iGc.set_logical_coordinate_system(aCoordinateSystem);
-            apply_origin(aOrigin, aExtents);
+            aRc.set_logical_coordinate_system(aCoordinateSystem);
         }
-        scoped_coordinate_system(i_graphics_context& aGc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
-            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
+        scoped_coordinate_system(i_render_target& aRt, logical_coordinate_system aCoordinateSystem) :
+            iContext(&aRt), iPreviousCoordinateSystem(aRt.logical_coordinate_system())
         {
-            iGc.set_logical_coordinate_system(aCoordinateSystem);
-            iGc.set_logical_coordinates(aCoordinates);
-            apply_origin(aOrigin, aExtents);
-        }
-        scoped_coordinate_system(i_graphics_context& aGc, i_graphics_context& aSource) :
-            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
-        {
-            iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
-            iGc.set_logical_coordinates(aSource.logical_coordinates());
-            iGc.set_origin(aSource.origin());
-        }
-        scoped_coordinate_system(i_graphics_context& aGc, i_rendering_context const& aSource) :
-            iGc(aGc), iPreviousOrigin{ aGc.origin() }, iPreviousCoordinateSystem(aGc.logical_coordinate_system()), iPreviousCoordinates(aGc.logical_coordinates())
-        {
-            iGc.set_logical_coordinate_system(aSource.logical_coordinate_system());
-            iGc.set_logical_coordinates(aSource.logical_coordinates());
-            iGc.set_origin({});
+            aRt.set_logical_coordinate_system(aCoordinateSystem);
         }
         ~scoped_coordinate_system()
         {
-            if (iGc.logical_coordinate_system() != iPreviousCoordinateSystem)
-                iGc.set_logical_coordinate_system(iPreviousCoordinateSystem);
-            if (iGc.logical_coordinates() != iPreviousCoordinates)
-                iGc.set_logical_coordinates(iPreviousCoordinates);
-            if (iGc.origin() != iPreviousOrigin)
-                iGc.set_origin(iPreviousOrigin);
+            std::visit([&](auto& aContext)
+                {
+                    if (aContext->logical_coordinate_system() != iPreviousCoordinateSystem)
+                        aContext->set_logical_coordinate_system(iPreviousCoordinateSystem);
+                }, iContext);
+        }
+    private:
+        std::variant<i_rendering_context*, i_render_target*> iContext;
+        logical_coordinate_system iPreviousCoordinateSystem;
+    };
+    
+    class scoped_coordinate_system_ex
+    {
+    public:
+        scoped_coordinate_system_ex(i_rendering_context& aRc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem) :
+            iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
+        {
+            iRc.set_logical_coordinate_system(aCoordinateSystem);
+            apply_origin(aOrigin, aExtents);
+        }
+        scoped_coordinate_system_ex(i_rendering_context& aRc, point const& aOrigin, const size& aExtents, logical_coordinate_system aCoordinateSystem, const neogfx::logical_coordinates& aCoordinates) :
+            iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
+        {
+            iRc.set_logical_coordinate_system(aCoordinateSystem);
+            iRc.set_logical_coordinates(aCoordinates);
+            apply_origin(aOrigin, aExtents);
+        }
+        scoped_coordinate_system_ex(i_rendering_context& aRc, i_rendering_context& aSource) :
+            iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
+        {
+            iRc.set_logical_coordinate_system(aSource.logical_coordinate_system());
+            iRc.set_logical_coordinates(aSource.logical_coordinates());
+            iRc.set_origin(aSource.origin());
+        }
+        scoped_coordinate_system_ex(i_rendering_context& aRc, i_rendering_context const& aSource) :
+            iRc(aRc), iPreviousOrigin{ aRc.origin() }, iPreviousCoordinateSystem(aRc.logical_coordinate_system()), iPreviousCoordinates(aRc.logical_coordinates())
+        {
+            iRc.set_logical_coordinate_system(aSource.logical_coordinate_system());
+            iRc.set_logical_coordinates(aSource.logical_coordinates());
+            iRc.set_origin({});
+        }
+        ~scoped_coordinate_system_ex()
+        {
+            if (iRc.logical_coordinate_system() != iPreviousCoordinateSystem)
+                iRc.set_logical_coordinate_system(iPreviousCoordinateSystem);
+            if (iRc.logical_coordinates() != iPreviousCoordinates)
+                iRc.set_logical_coordinates(iPreviousCoordinates);
+            if (iRc.origin() != iPreviousOrigin)
+                iRc.set_origin(iPreviousOrigin);
         }
     private:
         void apply_origin(point const& aOrigin, const size& aExtents)
         {
-            if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
-                iGc.set_origin(aOrigin);
-            else if (iGc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
-                iGc.set_origin(point{ aOrigin.x, iGc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
+            if (iRc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGui)
+                iRc.set_origin(aOrigin);
+            else if (iRc.logical_coordinate_system() == neogfx::logical_coordinate_system::AutomaticGame)
+                iRc.set_origin(point{ aOrigin.x, iRc.render_target().extents().cy - (aOrigin.y + aExtents.cy) });
         }
     private:
-        i_graphics_context& iGc;
+        i_rendering_context& iRc;
         point iPreviousOrigin;
         logical_coordinate_system iPreviousCoordinateSystem;
-        neogfx::logical_coordinates iPreviousCoordinates;
+        logical_coordinates iPreviousCoordinates;
     };
 
     class scoped_origin
@@ -771,12 +791,13 @@ namespace neogfx
     class scoped_filter
     {
     public:
-        scoped_filter(i_rendering_context& aRc, Filter const& aFilter) :
+        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius = true) :
             iRc{ aRc },
             iFilter{ aFilter },
             iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
             iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents())) },
-            iRenderTarget{ front_buffer() }
+            iRenderTarget{ front_buffer() },
+            iSubtractRadius{ aSubtractRadius }
         {
             front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
         }
@@ -787,7 +808,7 @@ namespace neogfx
             if constexpr (std::is_same_v<Filter, blur_filter>)
                 back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
             iRenderTarget = {};
-            rect const drawRect{ iFilter.region.top_left() - point{ iFilter.radius, iFilter.radius }, iBufferRect.extents() };
+            rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
             iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
         }
     public:
@@ -805,6 +826,7 @@ namespace neogfx
         rect iBufferRect;
         ping_pong_buffers iBuffers;
         std::optional<scoped_render_target> iRenderTarget;
+        bool iSubtractRadius;
     };
 
     template <typename ValueType = double, std::uint32_t W = 5>

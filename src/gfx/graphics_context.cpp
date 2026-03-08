@@ -43,7 +43,6 @@ namespace neogfx
         size previousExtents;
         auto& pingPongBuffer1 = service<i_rendering_engine>().ping_pong_buffer1(aExtents, previousExtents, aSampling);
         auto buffer1 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer1, std::make_unique<graphics_context>(pingPongBuffer1.texture()));
-        pingPongBuffer1.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
         auto& gcBuffer1 = buffer1->gc();
         {
             gcBuffer1.set_origin({});
@@ -58,7 +57,6 @@ namespace neogfx
         }
         auto& pingPongBuffer2 = service<i_rendering_engine>().ping_pong_buffer2(aExtents, previousExtents, aSampling);
         auto buffer2 = std::make_unique<ping_pong_buffers::attachment>(pingPongBuffer2, std::make_unique<graphics_context>(pingPongBuffer2.texture()));
-        pingPongBuffer2.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
         auto& gcBuffer2 = buffer2->gc();
         {
             gcBuffer2.set_origin({});
@@ -71,6 +69,8 @@ namespace neogfx
                 gcBuffer2.clear_stencil_buffer();
             }
         }
+        pingPongBuffer1.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
+        pingPongBuffer2.texture().as_render_target().set_logical_coordinate_system(aContext.logical_coordinate_system());
         return ping_pong_buffers{ {}, std::move(buffer1), std::move(buffer2) };
     }
 
@@ -354,11 +354,7 @@ namespace neogfx
 
     void graphics_context::blit(rect const& aDestinationRect, i_texture const& aTexture, rect const& aSourceRect, neogfx::blending_mode aBlendingMode)
     {
-        scoped_blending_mode sbm{ *this, aBlendingMode };
-        auto shaderEffect = shader_effect::None;
-        if (aBlendingMode == neogfx::blending_mode::FilterFinish)
-            shaderEffect = shader_effect::MultiplyAlpha;
-        draw_texture(aDestinationRect, aTexture, aSourceRect, {}, shaderEffect);
+        rendering_context().enqueue(graphics_operation::blit{ to_device_units(aDestinationRect), aTexture, to_device_units(aSourceRect), aBlendingMode });
     }
 
     bool graphics_context::gradient_set() const
@@ -1101,7 +1097,6 @@ namespace neogfx
         auto const& source = aSource.render_target();
         for (auto& uv : mesh.uv)
             uv = (aSourceRect.top_left() / source.extents()).to_vec2().as<float>() + uv.scale((aSourceRect.extents() / source.extents()).to_vec2().as<float>());
-        aDestination.flush();
         aDestination.draw_mesh(
             mesh,
             game::material
@@ -1114,11 +1109,10 @@ namespace neogfx
             },
             optional_mat44{},
             to_ecs_component(aAlgorithm, aParameter1, aParameter2));
-        aDestination.flush();
     }
 
     void graphics_context::blur(rect const& aDestinationRect, i_graphics_context& aSource, rect const& aSourceRect, dimension aRadius, blurring_algorithm aAlgorithm, scalar aParameter1, scalar aParameter2)
-    {
+    {   
         aSource.flush();
         scoped_render_target srt1{ *this };
         scoped_blending_mode sbm1{ *this, neogfx::blending_mode::Filter };

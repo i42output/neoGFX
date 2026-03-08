@@ -48,7 +48,10 @@ namespace neogfx
         virtual void flush() = 0;
     public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;
+        virtual void set_logical_coordinate_system(neogfx::logical_coordinate_system aSystem) = 0;
         virtual neogfx::logical_coordinates logical_coordinates() const = 0;
+        virtual void set_logical_coordinates(neogfx::logical_coordinates const& aCoordinates) = 0;
+    public:
         virtual point origin() const = 0;
         virtual void set_origin(point const& aOrigin) = 0;
         virtual vec2 offset() const = 0;
