@@ -819,7 +819,7 @@ namespace neogfx
     template <typename T>
     void opengl_texture<T>::target_release() const
     {
-        if (--iTargetUseCount)
+        if (--iTargetUseCount == 0)
             unbind();
     }
 
