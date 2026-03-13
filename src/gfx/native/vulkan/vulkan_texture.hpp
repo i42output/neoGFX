@@ -86,6 +86,7 @@ namespace neogfx
         std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const final;
         graphics_operation::i_queue& vulkan_texture<T>::graphics_operation_queue() const final;
     public:
+        void bind() const final;
         void bind(std::uint32_t aTextureUnit) const final;
         void unbind() const final;
     public:
@@ -111,6 +112,9 @@ namespace neogfx
         bool target_active() const final;
         void activate_target() const final;
         void deactivate_target() const final;
+        bool target_in_use() const final;
+        void target_add_ref() const final;
+        void target_release() const final;
     public:
         neogfx::color_space color_space() const final;
         color read_pixel(const point& aPosition) const final;
@@ -131,5 +135,6 @@ namespace neogfx
         vk::ImageView iImageView;
         vk::Sampler iSampler;
         vk::DeviceMemory iDeviceMemory;
+        mutable std::uint32_t iTargetUseCount = 0u;
     };
 }

@@ -229,18 +229,25 @@ namespace neogfx
         return native_texture().intersection(aLine, aBoundingBox, aSampleSize, aTolerance);
     }
 
+    void texture::bind() const
+    {
+        if (is_empty())
+            throw texture_empty();
+        native_texture().bind();
+    }
+
     void texture::bind(std::uint32_t aTextureUnit) const
     {
         if (is_empty())
             throw texture_empty();
-        return native_texture().bind(aTextureUnit);
+        native_texture().bind(aTextureUnit);
     }
 
     void texture::unbind() const
     {
         if (is_empty())
             throw texture_empty();
-        return native_texture().unbind();
+        native_texture().unbind();
     }
 
     intptr_t texture::native_handle() const

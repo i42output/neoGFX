@@ -49,7 +49,7 @@ namespace neogfx
     public:
         virtual bool redirecting() const = 0;
         virtual point redirect_origin() const = 0;
-        virtual void begin_redirect(i_rendering_context& aRc) = 0;
+        virtual void begin_redirect(i_rendering_context& aRcBase, point const& aOrigin) = 0;
         virtual void end_redirect() = 0;
     public:
         virtual neogfx::logical_coordinate_system logical_coordinate_system() const = 0;

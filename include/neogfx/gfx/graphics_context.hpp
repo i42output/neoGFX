@@ -55,7 +55,7 @@ namespace neogfx
     public:
         bool redirecting() const final;
         point redirect_origin() const final;
-        void begin_redirect(i_rendering_context& aRc) final;
+        void begin_redirect(i_rendering_context& aRcBase, point const& aOrigin) final;
         void end_redirect() final;
         // i_rendering_context
     public:
@@ -280,26 +280,26 @@ namespace neogfx
     private:
         type iType;
         const i_render_target& iRenderTarget;
-        mutable std::optional<scoped_render_target> iSrt;
         mutable std::unique_ptr<i_rendering_context> iRenderingContext;
-        mutable font iDefaultFont;
-        mutable point iOrigin;
-        mutable size iExtents;
-        mutable std::int32_t iLayer;
-        mutable std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
-        mutable std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
-        mutable bool iSnapToPixel;
-        mutable neogfx::front_face iFrontFace;
-        mutable neogfx::face_culling iCulling;
-        mutable double iOpacity;
-        mutable neogfx::blending_mode iBlendingMode;
-        mutable neogfx::smoothing_mode iSmoothingMode;
-        mutable bool iSubpixelRendering;
-        mutable std::optional<stipple> iLineStipple;
-        mutable std::optional<neogfx::tab_stops> iTabStops;
-        mutable std::optional<std::pair<bool, char>> iMnemonic;
+        font iDefaultFont;
+        std::optional<point> iOrigin;
+        std::optional<point> iRedirectOrigin;
+        size iExtents;
+        std::int32_t iLayer;
+        std::optional<neogfx::logical_coordinate_system> iLogicalCoordinateSystem;
+        std::optional<neogfx::logical_coordinates> iLogicalCoordinates;
+        bool iSnapToPixel;
+        neogfx::front_face iFrontFace;
+        neogfx::face_culling iCulling;
+        double iOpacity;
+        neogfx::blending_mode iBlendingMode;
+        neogfx::smoothing_mode iSmoothingMode;
+        bool iSubpixelRendering;
+        std::optional<stipple> iLineStipple;
+        std::optional<neogfx::tab_stops> iTabStops;
+        std::optional<std::pair<bool, char>> iMnemonic;
         mutable std::optional<string> iPassword;
-        mutable std::optional<size> iPreviousPingPongBufferSize;
-        mutable std::vector<ssbo_range> iSsboRanges;
+        std::optional<size> iPreviousPingPongBufferSize;
+        std::vector<ssbo_range> iSsboRanges;
     };
 }

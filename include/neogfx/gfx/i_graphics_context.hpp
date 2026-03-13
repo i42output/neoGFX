@@ -89,7 +89,7 @@ namespace neogfx
         std::unique_ptr<attachment> buffer2;
     };
         
-    ping_pong_buffers create_ping_pong_buffers(i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{ vec4{0.0, 0.0, 0.0, 0.0} });
+    ping_pong_buffers create_ping_pong_buffers(i_rendering_context& aContext, const size& aExtents, texture_sampling aSampling = texture_sampling::Multisample, const optional_color& aClearColor = color{}, scalar aClearance = 1.0);
 
     struct tab_stop
     {
@@ -778,6 +778,30 @@ namespace neogfx
         aGc.fill_checkerboard(aRect, size{ aAlphaPatternSize }, color{ 160, 160, 160 }, color{ 255, 255, 255 });
     }
 
+    class scoped_render_redirect
+    {
+    public:
+        scoped_render_redirect(i_rendering_context& aRcRedirect, i_rendering_context& aRcBase, point const& aOrigin) :
+            iRcRedirect{ aRcRedirect },
+            iRcBase{ aRcBase }
+        {
+            iRcRedirect.begin_redirect(aRcBase, aOrigin);
+        }
+        scoped_render_redirect(i_rendering_context& aRcRedirect, i_rendering_context& aRcBase) :
+            iRcRedirect{ aRcRedirect },
+            iRcBase{ aRcBase }
+        {
+            iRcRedirect.begin_redirect(aRcBase, aRcBase.origin());
+        }
+        ~scoped_render_redirect()
+        {
+            iRcRedirect.end_redirect();
+        }
+    private:
+        i_rendering_context& iRcRedirect;
+        i_rendering_context& iRcBase;
+    };
+
     struct blur_filter
     {
         rect region;
@@ -791,37 +815,11 @@ namespace neogfx
     class scoped_filter
     {
     public:
-        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius = true) :
-            iRc{ aRc },
-            iFilter{ aFilter },
-            iBufferRect{ point{}, aFilter.region.extents() + size{ aFilter.radius * 2.0 } },
-            iBuffers{ std::move(create_ping_pong_buffers(aRc, iBufferRect.extents())) },
-            iRenderTarget{ front_buffer() },
-            iSubtractRadius{ aSubtractRadius }
-        {
-            front_buffer().set_origin(-aFilter.region.top_left() + point{ aFilter.radius, aFilter.radius });
-            front_buffer().begin_redirect(aRc);
-        }
-        ~scoped_filter()
-        {
-            front_buffer().end_redirect();
-            front_buffer().set_origin({});
-            iRenderTarget.emplace(back_buffer());
-            if constexpr (std::is_same_v<Filter, blur_filter>)
-                back_buffer().blur(iBufferRect, front_buffer(), iBufferRect, iFilter.radius, iFilter.algorithm, iFilter.parameter1, iFilter.parameter2);
-            iRenderTarget = {};
-            rect const drawRect{ iFilter.region.top_left() - (iSubtractRadius ? point{ iFilter.radius, iFilter.radius } : point{}), iBufferRect.extents() };
-            iRc.blit(drawRect, back_buffer().render_target().target_texture(), iBufferRect, blending_mode::FilterFinish);
-        }
+        scoped_filter(i_rendering_context& aRc, Filter const& aFilter, bool aSubtractRadius = true);
+        ~scoped_filter();
     public:
-        i_graphics_context& front_buffer() const
-        {
-            return iBuffers.buffer1->gc();
-        }
-        i_graphics_context& back_buffer() const
-        {
-            return iBuffers.buffer2->gc();
-        }
+        i_graphics_context& front_buffer() const;
+        i_graphics_context& back_buffer() const;
     private:
         i_rendering_context& iRc;
         Filter iFilter;

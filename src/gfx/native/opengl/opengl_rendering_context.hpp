@@ -227,7 +227,7 @@ namespace neogfx
     public:
         bool redirecting() const final;
         point redirect_origin() const final;
-        void begin_redirect(i_rendering_context& aRc) final;
+        void begin_redirect(i_rendering_context& aRcBase, point const& aOrigin) final;
         void end_redirect() final;
     public:
         neogfx::logical_coordinate_system logical_coordinate_system() const final;

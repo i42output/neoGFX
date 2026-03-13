@@ -138,14 +138,27 @@ namespace neogfx
 
     void native_surface::deactivate_target() const
     {
-        if (target_active())
-        {
-            TargetDeactivating();
-            rendering_engine().deactivate_context();
-            TargetDeactivated();
+        if (!target_active())
             return;
-        }
-//        throw not_active();
+
+        TargetDeactivating();
+        rendering_engine().deactivate_context();
+        TargetDeactivated();
+    }
+
+    bool native_surface::target_in_use() const
+    {
+        return iTargetUseCount != 0u;
+    }
+
+    void native_surface::target_add_ref() const
+    {
+        ++iTargetUseCount;
+    }
+
+    void native_surface::target_release() const
+    {
+        --iTargetUseCount;
     }
 
     pixel_format_t native_surface::pixel_format() const

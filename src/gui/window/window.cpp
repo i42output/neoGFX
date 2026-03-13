@@ -632,7 +632,7 @@ namespace neogfx
         return true;
     }
 
-    void window::render(i_graphics_context& aGc) const
+    void window::render_ex(i_graphics_context& aGc) const
     {
         aGc.set_extents(extents());
         aGc.set_origin(origin());
@@ -649,7 +649,7 @@ namespace neogfx
         }
         aGc.set_extents(extents());
         aGc.set_origin(origin());
-        base_type::render(aGc);
+        base_type::render_ex(aGc);
         PaintOverlay(aGc);
     }
 

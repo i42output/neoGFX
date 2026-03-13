@@ -215,10 +215,18 @@ namespace neogfx
         rect update_rect() const override;
         rect default_clip_rect(bool aIncludeNonClient = false) const override;
         bool ready_to_render() const override;
+        void render_ex(i_graphics_context& aGc) const override;
+        // i_widget
+    public:
+        void render_non_client(i_graphics_context& aGc) const override;
         void render(i_graphics_context& aGc) const override;
+        void render_non_client_after(i_graphics_context& aGc) const override;
+        // i_widget
+    public:
         void paint_non_client(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;
         void paint_non_client_after(i_graphics_context& aGc) const override;
+        // i_widget
     public:
         double opacity() const override;
         void set_opacity(double aOpacity) override;
@@ -239,6 +247,7 @@ namespace neogfx
         bool has_font() const override;
         const neogfx::font& font() const override;
         void set_font(optional_font const& aFont) override;
+        // i_widget
     public:
         bool visible() const override;
         bool effectively_visible() const override;
@@ -271,6 +280,7 @@ namespace neogfx
         bool release_focus(focus_reason aFocusReason = focus_reason::Other) override;
         void focus_gained(focus_reason aFocusReason) override;
         void focus_lost(focus_reason aFocusReason) override;
+        // i_widget
     public:
         bool consider_ancestors_for_mouse_events() const override;
         void set_consider_ancestors_for_mouse_events(bool aConsiderAncestors = true) override;
@@ -290,11 +300,13 @@ namespace neogfx
         void mouse_left() override;
         point mouse_position() const override;
         neogfx::mouse_cursor mouse_cursor() const override;
+        // i_keyboard_handler
     public:
         bool key_pressed(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool key_released(scan_code_e aScanCode, key_code_e aKeyCode, key_modifier aKeyModifier) override;
         bool text_input(i_string const& aText) override;
         bool sys_text_input(i_string const& aText) override;
+        // i_widget
     public:
         const i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) const override;
         i_widget& widget_for_mouse_event(const point& aPosition, bool aForHitTest = false) override;
@@ -336,6 +348,7 @@ namespace neogfx
         using base_type::has_alternate_base_color;
         using base_type::alternate_base_color;
         using base_type::set_alternate_base_color;
+
         // state
     private:
         bool iSingular;

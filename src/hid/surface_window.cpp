@@ -551,7 +551,7 @@ namespace neogfx
     void surface_window::native_window_render(const rect& aInvalidatedArea) const
     {
         graphics_context gc{ *this };
-        as_widget().render(gc);
+        as_widget().render_ex(gc);
     }
 
     void surface_window::native_window_dismiss_children()

@@ -502,6 +502,12 @@ namespace neogfx
     }
 
     template <typename T>
+    void vulkan_texture<T>::bind() const
+    {
+        TODO;
+    }
+
+    template <typename T>
     void vulkan_texture<T>::bind(std::uint32_t aTextureUnit) const
     {
         TODO;
@@ -653,6 +659,25 @@ namespace neogfx
             return;
         }
         throw not_active();
+    }
+
+    template <typename T>
+    bool vulkan_texture<T>::target_in_use() const
+    {
+        return iTargetUseCount != 0u;
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::target_add_ref() const
+    {
+        ++iTargetUseCount;
+    }
+
+    template <typename T>
+    void vulkan_texture<T>::target_release() const
+    {
+        if (--iTargetUseCount)
+            unbind();
     }
 
     template <typename T>

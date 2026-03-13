@@ -246,18 +246,25 @@ namespace neogfx
         return result;
     }
 
+    void sub_texture::bind() const
+    {
+        if (is_empty())
+            throw texture_empty();
+        native_texture().bind();
+    }
+
     void sub_texture::bind(std::uint32_t aTextureUnit) const
     {
         if (is_empty())
             throw texture_empty();
-        return native_texture().bind(aTextureUnit);
+        native_texture().bind(aTextureUnit);
     }
 
     void sub_texture::unbind() const
     {
         if (is_empty())
             throw texture_empty();
-        return native_texture().unbind();
+        native_texture().unbind();
     }
 
     intptr_t sub_texture::native_handle() const

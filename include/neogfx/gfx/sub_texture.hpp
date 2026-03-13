@@ -69,6 +69,7 @@ namespace neogfx
         color get_pixel(point const& aPosition) const final;
         i_vector<texture_line_segment> const& intersection(texture_line_segment const& aLine, rect const& aBoundingBox, vec2 const& aSampleSize = { 1.0, 1.0 }, scalar aTolerance = 0.0) const final;
     public:
+        void bind() const final;
         void bind(std::uint32_t aTextureUnit) const final;
         void unbind() const final;
     public:

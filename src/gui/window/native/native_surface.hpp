@@ -76,6 +76,9 @@ namespace neogfx
         bool target_active() const override;
         void activate_target() const override;
         void deactivate_target() const override;
+        bool target_in_use() const override;
+        void target_add_ref() const override;
+        void target_release() const override;
     public:
         neogfx::color_space color_space() const override;
     public:
@@ -117,5 +120,6 @@ namespace neogfx
         std::uint32_t iPaused;
         bool iRendering;
         bool iDebug;
+        mutable std::uint32_t iTargetUseCount = 0u;
     };
 }

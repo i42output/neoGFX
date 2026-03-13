@@ -123,7 +123,7 @@ namespace neogfx
     public:
         using widget::update;
         bool update(const rect& aUpdateRect) override;
-        void render(i_graphics_context& aGc) const override;
+        void render_ex(i_graphics_context& aGc) const override;
         void paint(i_graphics_context& aGc) const override;
     public:
         color palette_color(color_role aColorRole) const override;

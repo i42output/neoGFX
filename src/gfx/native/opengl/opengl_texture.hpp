@@ -31,6 +31,18 @@ namespace neogfx
 {
     class i_texture_manager;
 
+    struct texture_binding_pool
+    {
+        std::vector<std::uint32_t> unbound = { 20u, 21u, 22u, 23u, 24u, 25u, 26u, 27u, 28u, 29u };
+        std::vector<std::uint32_t> bound;
+    };
+
+    inline texture_binding_pool& texture_bindings()
+    {
+        static texture_binding_pool sPool;
+        return sPool;
+    }
+
     template <typename T>
     class opengl_texture : public native_texture
     {
@@ -86,6 +98,7 @@ namespace neogfx
         std::unique_ptr<i_rendering_context> create_rendering_context(blending_mode aBlendingMode = blending_mode::Default) const final;
         graphics_operation::i_queue& opengl_texture<T>::graphics_operation_queue() const final;
     public:
+        void bind() const final;
         void bind(std::uint32_t aTextureUnit) const final;
         void unbind() const final;
     public:
@@ -111,6 +124,9 @@ namespace neogfx
         bool target_active() const final;
         void activate_target() const final;
         void deactivate_target() const final;
+        bool target_in_use() const final;
+        void target_add_ref() const final;
+        void target_release() const final;
     public:
         neogfx::color_space color_space() const final;
         color read_pixel(const point& aPosition) const final;
@@ -134,5 +150,6 @@ namespace neogfx
         mutable GLuint iDepthStencilBuffer;
         mutable std::vector<T> iPixelData;
         mutable std::unique_ptr<graphics_operation::i_queue> iQueue;
+        mutable std::uint32_t iTargetUseCount = 0u;
     };
 }

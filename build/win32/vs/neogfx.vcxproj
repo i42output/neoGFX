@@ -339,6 +339,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gfx\gradient.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\gradient_manager.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_context.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gfx\i_graphics_context.ipp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\graphics_operations.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\hsl_color.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gfx\hsv_color.hpp" />

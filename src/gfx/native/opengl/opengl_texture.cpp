@@ -110,7 +110,7 @@ namespace neogfx
         try
         {
             glCheck(glGenTextures(1, &iHandle));
-            bind(1);
+            bind();
             glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
             glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
             switch(sampling())
@@ -204,9 +204,8 @@ namespace neogfx
     {
         try
         {
-            
             glCheck(glGenTextures(1, &iHandle));
-            bind(1);
+            bind();
             switch(sampling())
             {
             case texture_sampling::Normal:
@@ -422,7 +421,7 @@ namespace neogfx
         auto const adjustedRect = aRect + (sampling() != texture_sampling::Data ? point{ 1.0, 1.0 } : point{ 0.0, 0.0 });
         if (sampling() != texture_sampling::Multisample)
         {
-            bind(1);
+            bind();
             GLint previousPackAlignment;
             GLint previousPackRowLength;
             glCheck(glGetIntegerv(GL_UNPACK_ALIGNMENT, &previousPackAlignment));
@@ -557,12 +556,28 @@ namespace neogfx
     }
 
     template <typename T>
+    void opengl_texture<T>::bind() const
+    {
+        if (iBoundTextureUnit.has_value())
+        {
+            glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
+            return;
+        }
+        if (texture_bindings().unbound.empty())
+            throw std::logic_error("neogfx::opengl_texture::bind: texture bindings pool exhausted");
+        bind(texture_bindings().unbound.front());
+    }
+
+    template <typename T>
     void opengl_texture<T>::bind(std::uint32_t aTextureUnit) const
     {
         if (iBoundTextureUnit.has_value())
         {
             if (iBoundTextureUnit.value() == aTextureUnit)
+            {
+                glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
                 return;
+            }
             unbind();
         }
         glCheck(glActiveTexture(GL_TEXTURE0 + aTextureUnit));
@@ -571,6 +586,10 @@ namespace neogfx
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle()))));
         iBoundTextureUnit = aTextureUnit;
         iPreviouslyBoundTexture = previousTexture;
+        auto existingPoolEntry = std::find(texture_bindings().unbound.begin(), texture_bindings().unbound.end(), iBoundTextureUnit.value());
+        if (existingPoolEntry != texture_bindings().unbound.end())
+            texture_bindings().unbound.erase(existingPoolEntry);
+        texture_bindings().bound.push_back(iBoundTextureUnit.value());
     }
 
     template <typename T>
@@ -580,6 +599,10 @@ namespace neogfx
             return;
         glCheck(glActiveTexture(GL_TEXTURE0 + iBoundTextureUnit.value()));
         glCheck(glBindTexture(to_gl_enum(sampling()), static_cast<GLuint>(iPreviouslyBoundTexture.value())));
+        auto existingPoolEntry = std::find(texture_bindings().bound.begin(), texture_bindings().bound.end(), iBoundTextureUnit.value());
+        if (existingPoolEntry != texture_bindings().bound.end())
+            texture_bindings().bound.erase(existingPoolEntry);
+        texture_bindings().unbound.push_back(iBoundTextureUnit.value());
         iBoundTextureUnit = std::nullopt;
         iPreviouslyBoundTexture = std::nullopt;
     }
@@ -704,7 +727,7 @@ namespace neogfx
             TargetActivating();
             service<i_rendering_engine>().activate_context(*this);
         }
-        bind(10);
+        bind();
         if (iFrameBuffer == 0)
         {
             glCheck(glEnable(GL_MULTISAMPLE));
@@ -713,7 +736,7 @@ namespace neogfx
             glCheck(glDepthFunc(GL_LEQUAL));
             glCheck(glGenFramebuffers(1, &iFrameBuffer));
             glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
-            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
+            glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
             glCheck(glGenRenderbuffers(1, &iDepthStencilBuffer));
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
             if (sampling() != texture_sampling::Multisample)
@@ -737,24 +760,24 @@ namespace neogfx
                 glCheck(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, iFrameBuffer));
             }
             GLint queryResult = 0;
-            glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &queryResult));
+            glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &queryResult));
             if (queryResult == GL_TEXTURE)
             {
-                glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &queryResult));
+                glCheck(glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &queryResult));
             }
             else
                 queryResult = 0;
             if (queryResult != static_cast<GLint>(reinterpret_cast<std::intptr_t>(handle())))
             {
-                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
+                glCheck(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, to_gl_enum(sampling()), static_cast<GLuint>(reinterpret_cast<std::intptr_t>(handle())), 0));
             }
             glCheck(glBindRenderbuffer(GL_RENDERBUFFER, iDepthStencilBuffer));
         }
         GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-        if (status != GL_NO_ERROR && status != GL_FRAMEBUFFER_COMPLETE)
+        if (status != GL_FRAMEBUFFER_COMPLETE)
             throw failed_to_create_framebuffer(glErrorString(status));
         set_viewport(rect_i32{ point_i32{ 1, 1 }, extents().as<std::int32_t>() });
-        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT1 };
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
         glCheck(glDrawBuffers(sizeof(drawBuffers) / sizeof(drawBuffers[0]), drawBuffers));
         if (!alreadyActive)
             TargetActivated();
@@ -773,10 +796,31 @@ namespace neogfx
         {
             TargetDeactivating();
             service<i_rendering_engine>().deactivate_context();
+            if (!target_in_use())
+                unbind();
             TargetDeactivated();
             return;
         }
         throw not_active();
+    }
+
+    template <typename T>
+    bool opengl_texture<T>::target_in_use() const
+    {
+        return iTargetUseCount != 0u;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::target_add_ref() const
+    {
+        ++iTargetUseCount;
+    }
+
+    template <typename T>
+    void opengl_texture<T>::target_release() const
+    {
+        if (--iTargetUseCount)
+            unbind();
     }
 
     template <typename T>
@@ -808,7 +852,7 @@ namespace neogfx
                 if (iPixelData.empty())
                 {
                     iPixelData.resize(static_cast<std::size_t>(storage_extents().cx) * static_cast<std::size_t>(storage_extents().cy));
-                    bind(1);
+                    bind();
                     glCheck(glGetTexImage(to_gl_enum(sampling()), 0, format, type, iPixelData.data()));
                 }
                 pixel = iPixelData[static_cast<std::size_t>(pos.y * storage_extents().cx + pos.x)];

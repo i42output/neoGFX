@@ -181,6 +181,21 @@ namespace neogfx
         parent().deactivate_target();
     }
 
+    bool virtual_surface::target_in_use() const
+    {
+        return parent().target_in_use();
+    }
+
+    void virtual_surface::target_add_ref() const
+    {
+        parent().target_add_ref();
+    }
+
+    void virtual_surface::target_release() const
+    {
+        parent().target_release();
+    }
+
     color_space virtual_surface::color_space() const
     {
         return service<i_surface_manager>().display(iWindow).color_space();

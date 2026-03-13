@@ -693,7 +693,7 @@ namespace neogfx
         throw std::logic_error("not yet implemented");
     }
 
-    void opengl_rendering_context::begin_redirect(i_rendering_context& aRc)
+    void opengl_rendering_context::begin_redirect(i_rendering_context& aRcBase, point const& aOrigin)
     {
         throw std::logic_error("not yet implemented");
     }
@@ -2157,13 +2157,11 @@ namespace neogfx
                             filter.emplace(*this, blur_filter{ *filterRegion, drawOp.appearance->effect()->width(), blurring_algorithm::Gaussian,
                                 drawOp.appearance->effect()->aux1(), drawOp.appearance->effect()->aux2() });
 
-                        filter->front_buffer().flush(); ///< @todo delete
                         filter->front_buffer().draw_glyph(
                             drawOp.point.as<scalar>() + drawOp.appearance->effect()->offset(),
                             glyphText,
                             glyphChar,
                             drawOp.appearance->as_being_filtered());
-                        filter->front_buffer().flush(); ///< @todo delete
                     }
                 }
                 break;

@@ -71,6 +71,9 @@ namespace neogfx
         virtual bool target_active() const = 0;
         virtual void activate_target() const = 0;
         virtual void deactivate_target() const = 0;
+        virtual bool target_in_use() const = 0;
+        virtual void target_add_ref() const = 0;
+        virtual void target_release() const = 0;
     public:
         virtual neogfx::color_space color_space() const = 0;
         virtual color read_pixel(const point& aPosition) const = 0;

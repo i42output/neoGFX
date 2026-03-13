@@ -77,6 +77,9 @@ namespace neogfx
         bool target_active() const final;
         void activate_target() const final;
         void deactivate_target() const final;
+        bool target_in_use() const final;
+        void target_add_ref() const final;
+        void target_release() const final;
     public:
         neogfx::color_space color_space() const final;
         color read_pixel(const point& aPosition) const final;

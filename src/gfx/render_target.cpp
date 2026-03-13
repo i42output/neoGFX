@@ -38,6 +38,7 @@ namespace neogfx
             if (iPreviouslyActivatedTarget)
                 iPreviouslyActivatedTarget->deactivate_target();
             iRenderTarget->activate_target();
+            iRenderTarget->target_add_ref();
         }
     }
 
@@ -60,7 +61,10 @@ namespace neogfx
         if (iRenderTarget && iPreviouslyActivatedTarget != iRenderTarget)
         {
             if (iRenderTarget->target_active())
+            {
+                iRenderTarget->target_release();
                 iRenderTarget->deactivate_target();
+            }
             if (iPreviouslyActivatedTarget)
                 iPreviouslyActivatedTarget->activate_target();
         }

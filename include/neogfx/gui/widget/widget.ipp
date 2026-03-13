@@ -1282,13 +1282,13 @@ namespace neogfx
     }
 
     template <WidgetInterface Interface>
-    inline void widget<Interface>::render(i_graphics_context& aGc) const
+    inline void widget<Interface>::render_ex(i_graphics_context& aGc) const
     {
         auto& self = *this;
 
 #ifdef NEOGFX_DEBUG
         if (service<i_debug>().render_item() == this)
-            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...)" << std::endl;
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render_ex(...)" << std::endl;
 #endif // NEOGFX_DEBUG
 
         if (effectively_hidden())
@@ -1311,9 +1311,6 @@ namespace neogfx
             service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...), updateRect: " << updateRect << ", nonClientClipRect: " << nonClientClipRect << std::endl;
 #endif // NEOGFX_DEBUG
 
-        aGc.set_extents(self.extents());
-        aGc.set_origin(self.origin());
-
         aGc.set_default_font(font());
 
         scoped_snap_to_pixel snap{ aGc };
@@ -1323,93 +1320,122 @@ namespace neogfx
 
         scoped_opacity sc{ aGc, effective_opacity() };
 
-        {
-            scoped_scissor scissor(aGc, nonClientClipRect);
+        aGc.set_extents(self.extents());
+        aGc.set_origin(self.origin());
 
-            PaintingNonClient(aGc);
+        render_non_client(aGc);
 
-            paint_non_client(aGc);
+        aGc.set_extents(client_rect().extents());
+        aGc.set_origin(self.origin());
 
-            for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
-            {
-                auto const& childWidget = **iterChild;
-                if ((childWidget.widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
-                    continue;
-                rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - self.origin());
-                if (intersection.empty() && !childWidget.is_root())
-                    continue;
-                childWidget.render(aGc);
-            }
-
-            PaintedNonClient(aGc);
-        }
-
-        {
-            const rect clipRect = default_clip_rect().intersection(updateRect);
-
-            aGc.set_extents(client_rect().extents());
-            aGc.set_origin(self.origin());
-
-#ifdef NEOGFX_DEBUG
-            if (service<i_debug>().render_item() == this)
-                service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << self.origin() << std::endl;
-#endif // NEOGFX_DEBUG
-
-            scoped_scissor scissor(aGc, clipRect);
-
-            scoped_coordinate_system_ex scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
-
-            Painting(aGc);
-
-            paint(aGc);
-
-            scoped_coordinate_system_ex scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
-
-            PaintingChildren(aGc);
-
-            typedef std::map<std::int32_t, std::vector<i_widget const*>> widget_layers_t;
-            shared_thread_local(std::vector<std::unique_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
-
-            shared_thread_local(std::size_t, neogfx::widget::render, stack);
-            neolib::scoped_counter<std::size_t> stackCounter{ stack };
-            if (widgetLayersStack.size() < stack)
-                widgetLayersStack.push_back(std::make_unique<widget_layers_t>());
-
-            widget_layers_t& widgetLayers = *widgetLayersStack[stack - 1];
-
-            for (auto& layer : widgetLayers)
-                layer.second.clear();
-
-            for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
-            {
-                auto const& childWidget = **iterChild;
-                if ((childWidget.widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient)
-                    continue;
-                rect intersection = clipRect.intersection(to_client_coordinates(childWidget.non_client_rect()));
-                if (intersection.empty() && !childWidget.is_root())
-                    continue;
-                widgetLayers[childWidget.render_layer()].push_back(&childWidget);
-            }
-                
-            for (auto const& layer : widgetLayers)
-            {
-                for (auto const& childWidgetPtr : layer.second)
-                {
-                    auto const& childWidget = *childWidgetPtr;
-                    childWidget.render(aGc);
-                }
-            }
-
-            aGc.set_extents(client_rect().extents());
-            aGc.set_origin(self.origin());
-
-            scoped_coordinate_system_ex scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
-
-            Painted(aGc);
-        }
+        render(aGc);
 
         aGc.set_extents(self.extents());
         aGc.set_origin(self.origin());
+
+        render_non_client_after(aGc);
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::render_non_client(i_graphics_context& aGc) const
+    {
+        auto& self = *this;
+
+        const rect updateRect = update_rect();
+        const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
+
+        scoped_scissor scissor(aGc, nonClientClipRect);
+
+        PaintingNonClient(aGc);
+
+        paint_non_client(aGc);
+
+        for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
+        {
+            auto const& childWidget = **iterChild;
+            if ((childWidget.widget_type() & neogfx::widget_type::Client) == neogfx::widget_type::Client)
+                continue;
+            rect intersection = nonClientClipRect.intersection(childWidget.non_client_rect() - self.origin());
+            if (intersection.empty() && !childWidget.is_root())
+                continue;
+            childWidget.render_ex(aGc);
+        }
+
+        PaintedNonClient(aGc);
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::render(i_graphics_context& aGc) const
+    {
+        auto& self = *this;
+
+        const rect updateRect = update_rect();
+        const rect clipRect = default_clip_rect().intersection(updateRect);
+
+#ifdef NEOGFX_DEBUG
+        if (service<i_debug>().render_item() == this)
+            service<debug::logger>() << neolib::logger::severity::Debug << typeid(*this).name() << "::render(...): client_rect: " << client_rect() << ", origin: " << self.origin() << std::endl;
+#endif // NEOGFX_DEBUG
+
+        scoped_scissor scissor(aGc, clipRect);
+
+        scoped_coordinate_system_ex scs1(aGc, self.origin(), self.extents(), logical_coordinate_system());
+
+        Painting(aGc);
+
+        paint(aGc);
+
+        scoped_coordinate_system_ex scs2(aGc, self.origin(), self.extents(), logical_coordinate_system());
+
+        PaintingChildren(aGc);
+
+        typedef std::map<std::int32_t, std::vector<i_widget const*>> widget_layers_t;
+        shared_thread_local(std::vector<std::unique_ptr<widget_layers_t>>, neogfx::widget::render, widgetLayersStack);
+
+        shared_thread_local(std::size_t, neogfx::widget::render, stack);
+        neolib::scoped_counter<std::size_t> stackCounter{ stack };
+        if (widgetLayersStack.size() < stack)
+            widgetLayersStack.push_back(std::make_unique<widget_layers_t>());
+
+        widget_layers_t& widgetLayers = *widgetLayersStack[stack - 1];
+
+        for (auto& layer : widgetLayers)
+            layer.second.clear();
+
+        for (auto iterChild = iChildren.rbegin(); iterChild != iChildren.rend(); ++iterChild)
+        {
+            auto const& childWidget = **iterChild;
+            if ((childWidget.widget_type() & neogfx::widget_type::NonClient) == neogfx::widget_type::NonClient)
+                continue;
+            rect intersection = clipRect.intersection(to_client_coordinates(childWidget.non_client_rect()));
+            if (intersection.empty() && !childWidget.is_root())
+                continue;
+            widgetLayers[childWidget.render_layer()].push_back(&childWidget);
+        }
+
+        for (auto const& layer : widgetLayers)
+        {
+            for (auto const& childWidgetPtr : layer.second)
+            {
+                auto const& childWidget = *childWidgetPtr;
+                childWidget.render_ex(aGc);
+            }
+        }
+
+        aGc.set_extents(client_rect().extents());
+        aGc.set_origin(self.origin());
+
+        scoped_coordinate_system_ex scs3(aGc, self.origin(), self.extents(), logical_coordinate_system());
+
+        Painted(aGc);
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::render_non_client_after(i_graphics_context& aGc) const
+    {
+        const rect updateRect = update_rect();
+        const rect nonClientClipRect = default_clip_rect(true).intersection(updateRect);
+
         {
             scoped_scissor scissor(aGc, nonClientClipRect);
             paint_non_client_after(aGc);
@@ -1439,6 +1465,12 @@ namespace neogfx
                 aGc.fill_rect(updateRect, backgroundColor);
             }
         }
+    }
+
+    template <WidgetInterface Interface>
+    inline void widget<Interface>::paint(i_graphics_context& aGc) const
+    {
+        // do nothing
     }
 
     template <WidgetInterface Interface>
@@ -1513,12 +1545,6 @@ namespace neogfx
             }
         }
 #endif // NEOGFX_DEBUG
-    }
-
-    template <WidgetInterface Interface>
-    inline void widget<Interface>::paint(i_graphics_context& aGc) const
-    {
-        // do nothing
     }
 
     template <WidgetInterface Interface>
