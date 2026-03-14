@@ -1,7 +1,7 @@
 // native_font_face.cpp
 /*
   neogfx C++ App/Game Engine
-  Copyright (c) 2015, 2020 Leigh Johnston.  All Rights Reserved.
+  Copyright (c) 2015-2026 Leigh Johnston.  All Rights Reserved.
   
   This program is free software: you can redistribute it and / or modify
   it under the terms of the GNU General Public License as published by
@@ -71,9 +71,7 @@ namespace neogfx
         FT_Library aFontLib, font_id aId, i_native_font& aFont, font_style aStyle, font::point_size aSize, stroke aOutline, bool aHinting,
         neogfx::size aDpiResolution, FT_Face aFreetypeFace, hb_face_t* aHarfbuzzFace) :
         iFontLib{ aFontLib }, iId{ aId }, iFont{ aFont }, iStyle{ aStyle }, iStyleName{ aFreetypeFace->style_name }, iSize{ aSize }, 
-        iOutline{ aOutline }, iHinting{ aHinting }, iPixelDensityDpi {
-        aDpiResolution
-    }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace },
+        iOutline{ aOutline }, iHinting{ aHinting }, iPixelDensityDpi { aDpiResolution }, iHandle{ *this, aFreetypeFace, aHarfbuzzFace },
         iHasKerning{ !!FT_HAS_KERNING(iHandle.freetypeFace) }
     {
         switch (aStyle)
@@ -181,26 +179,30 @@ namespace neogfx
 
     dimension native_font_face::underline_position() const
     {
-        auto result = 0.0;
-#if 0 // todo: get this to work properly
-        if (FT_IS_SCALABLE(iHandle))
-            result = iHandle->underline_position / 64.0;
-        else
-#endif
-            result = -1.0 - underline_thickness();
-        return std::floor(result);
+        if (!FT_IS_SCALABLE(iHandle.freetypeFace))
+            return 0.0;
+
+        FT_Pos position26_6 =
+            FT_MulFix(iHandle.freetypeFace->underline_position,
+                iHandle.freetypeFace->size->metrics.y_scale);
+
+        double const position_px = position26_6 / 64.0;
+        return std::min(position_px, -underline_thickness());
     }
 
     dimension native_font_face::underline_thickness() const
     {
-        auto result = 1.0;
-        if (FT_IS_SCALABLE(iHandle.freetypeFace))
-            result = iHandle.freetypeFace->underline_thickness / 64.0;
-        else
-            result = static_cast<dimension>(font_info::weight_from_style_name(iStyleName)) / static_cast<dimension>(font_weight::Normal);
-        if (result < 1.0 || (result > 1.0 && size() < 20.0))
-            result = 1.0;
-        return std::floor(result);
+        double const minThickness_px = 1.0 / STANDARD_DPI_PPI * iPixelDensityDpi.cy;
+
+        if (!FT_IS_SCALABLE(iHandle.freetypeFace))
+            return minThickness_px;
+
+        FT_Pos thickness26_6 =
+            FT_MulFix(iHandle.freetypeFace->underline_thickness,
+                iHandle.freetypeFace->size->metrics.y_scale);
+
+        double const thickness_px = thickness26_6 / 64.0;
+        return std::max(thickness_px, minThickness_px);
     }
 
     dimension native_font_face::line_spacing() const
