@@ -542,7 +542,7 @@ namespace neogfx
             }
         }
         else
-            return base_type::frame_color().with_alpha(is_effectively_active() ? 1.0 : 0.25);
+            return base_type::frame_color();
     }
 
     void window::set_parent(i_widget& aParent)
