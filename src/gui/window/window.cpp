@@ -522,29 +522,24 @@ namespace neogfx
 
     color window::frame_color() const
     {
+        color result;
+
         if (base_type::has_frame_color())
-            return base_type::frame_color();
+            result = base_type::frame_color();
         else if (effectively_enabled() && is_effectively_active())
         {
             if (!is_nested())
-            {
-                if (!has_native_window() || !native_window().alert_active())
-                    return service<i_app>().current_style().palette().color(color_role::Selection);
-                else
-                    return mix(service<i_app>().current_style().palette().color(color_role::Selection),
-                        color::Orange, native_window().alert_easing());
-            }
+                result = service<i_app>().current_style().palette().color(color_role::Selection);
             else
-            {
-                if (!has_native_window() || !native_window().alert_active())
-                    return service<i_app>().current_style().palette().color(color_role::AlternateSelection);
-                else
-                    return mix(service<i_app>().current_style().palette().color(color_role::AlternateSelection),
-                        color::Yellow, native_window().alert_easing());
-            }
+                result = service<i_app>().current_style().palette().color(color_role::AlternateSelection);
         }
         else
-            return service<i_app>().current_style().palette().color(color_role::Theme).shaded(0x1C);
+            result = service<i_app>().current_style().palette().color(color_role::Theme).shaded(0x1C);
+
+        if (!has_native_window() || !native_window().alert_active())
+            return result;
+        else
+            return mix(result, !is_nested() ? color::Orange : color::Yellow, native_window().alert_easing());
     }
 
     void window::set_parent(i_widget& aParent)
