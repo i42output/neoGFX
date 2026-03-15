@@ -522,7 +522,9 @@ namespace neogfx
 
     color window::frame_color() const
     {
-        if (effectively_enabled() && !base_type::has_frame_color() && is_effectively_active())
+        if (base_type::has_frame_color())
+            return base_type::frame_color();
+        else if (effectively_enabled() && is_effectively_active())
         {
             if (!is_nested())
             {
@@ -542,7 +544,7 @@ namespace neogfx
             }
         }
         else
-            return base_type::frame_color();
+            return service<i_app>().current_style().palette().color(color_role::Theme).shaded(0x1C);
     }
 
     void window::set_parent(i_widget& aParent)
