@@ -39,6 +39,6 @@ namespace neogames
             virtual const ng::i_texture& face_texture(const card_type& aCard) const = 0;
         };
 
-        typedef i_basic_card_textures<default_game_traits> i_card_textures;
+        using i_card_textures = i_basic_card_textures<default_game_traits>;
     }
 }

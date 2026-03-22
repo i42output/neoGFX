@@ -27,6 +27,7 @@
 
 namespace neogfx
 {
+    /// @todo i_pen
     class pen
     {
     public:
