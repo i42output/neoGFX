@@ -605,5 +605,11 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\window\window.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_graph_widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\graph_widget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -333,6 +333,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\flashing_button.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\font_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\gradient_widget.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\graph_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\group_box.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\header_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\image_widget.hpp" />
@@ -344,6 +345,7 @@
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\item_view.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dock.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_dockable.hpp" />
+    <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_graph_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_image_widget.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_model.hpp" />
     <ClInclude Include="..\..\..\include\neogfx\gui\widget\i_item_presentation_model.hpp" />

@@ -60,5 +60,7 @@ namespace neogfx
 
         neolib::static_vector<scalar, 16> pattern = { 1.0, 0.0 };
         scalar position = 0.0;
+
+        auto operator<=>(const stipple&) const = default;
     };
 }

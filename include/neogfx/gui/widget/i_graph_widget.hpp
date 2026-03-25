@@ -20,7 +20,7 @@
 
 #include <neogfx/neogfx.hpp>
 
-#include "i_widget.hpp"
+#include <neogfx/gui/widget/i_widget.hpp>
 
 namespace neogfx
 {
@@ -50,49 +50,83 @@ namespace neogfx
     }
 
     template <typename X = double, typename Y = double>
-    class i_basic_graph_widget : public i_widget
+    class i_graph_datum
     {
     public:
-        using abstract_type = i_basic_graph_widget;
+        using abstract_type = i_graph_datum;
     public:
         using x_type = X;
         using y_type = Y;
-        struct i_datum
+    public:
+        [[nodiscard]] virtual x_type const& x() const = 0;
+        [[nodiscard]] virtual y_type const& y() const = 0;
+        virtual void set_x(x_type const& aX) = 0;
+        virtual void set_y(y_type const& aY) = 0;
+    public:
+        virtual ~i_graph_datum() = default;
+    };
+
+    template <typename X = double, typename Y = double>
+    class i_graph_series
+    {
+    public:
+        using abstract_type = i_graph_series;
+    public:
+        using x_type = X;
+        using y_type = Y;
+        using i_datum = i_graph_datum<X, Y>;
+        using index_type = typename i_vector<i_datum>::size_type;
+    public:
+        [[nodiscard]] virtual i_vector<i_datum> const& data() const = 0;
+        virtual void set_data(i_vector<i_datum> const& aData) = 0;
+        virtual void push_back(i_datum const& aDatum) = 0;
+        virtual void insert(index_type aIndex, i_datum const& aDatum) = 0;
+        virtual void erase(index_type aIndex) = 0;
+    public:
+        [[nodiscard]] virtual i_optional<i_string> const& name() const = 0;
+        virtual void set_name(i_optional<i_string> const& aName) = 0;
+    public:
+        [[nodiscard]] virtual bool visible() const = 0;
+        virtual void set_visible(bool aVisible) = 0;
+    public:
+        [[nodiscard]] virtual optional_pen const& pen() const = 0;
+        virtual void set_line(optional_pen const& aPen) = 0;
+        [[nodiscard]] virtual optional_color_or_gradient const& fill() const = 0;
+        virtual void set_fill(optional_color_or_gradient const& aFill) = 0;
+    public:
+        virtual void start_update() = 0;
+        virtual void end_update() = 0;
+    public:
+        virtual ~i_graph_series() = default;
+    };
+
+    template <typename X, typename Y>
+    class scoped_graph_series_update
+    {
+    public:
+        scoped_graph_series_update(i_graph_series<X, Y>& aSeries) :
+            iSeries{ aSeries }
         {
-            using abstract_type = i_datum;
-
-            [[nodiscard]] virtual x_type const& x() const = 0;
-            [[nodiscard]] virtual y_type const& y() const = 0;
-
-            virtual void set_x(x_type const& aX) = 0;
-            virtual void set_y(y_type const& aY) = 0;
-
-            virtual ~i_datum() = default;
-        };
-        struct i_series
+            iSeries.start_update();
+        }
+        ~scoped_graph_series_update()
         {
-            using abstract_type = i_series;
-            using index_type = typename i_vector<i_datum>::size_type;
+            iSeries.end_update();
+        }
+    private:
+        i_graph_series<X, Y>& iSeries;
+    };
 
-            [[nodiscard]] virtual i_vector<i_datum> const& data() const = 0;
-            virtual void set_data(i_vector<i_datum> const& aData) = 0;
-            virtual void push_back(i_datum const& aDatum) = 0;
-            virtual void insert(index_type aIndex, i_datum const& aDatum) = 0;
-            virtual void erase(index_type aIndex) = 0;
-
-            [[nodiscard]] virtual i_optional<i_string> const& name() const = 0;
-            virtual void set_name(i_optional<i_string> const& aName) = 0;
-
-            [[nodiscard]] virtual bool visible() const = 0;
-            virtual void set_visible(bool aVisible) = 0;
-
-            [[nodiscard]] virtual optional_pen const& line() const = 0;
-            virtual void set_line(optional_pen const& aLine) = 0;
-            [[nodiscard]] virtual optional_color_or_gradient const& fill() const = 0;
-            virtual void set_fill(optional_color_or_gradient const& aFill) = 0;
-
-            virtual ~i_series() = default;
-        };
+    template <typename X = double, typename Y = double>
+    class i_graph_widget : public i_widget
+    {
+    public:
+        using abstract_type = i_graph_widget;
+    public:
+        using x_type = X;
+        using y_type = Y;
+        using i_datum = i_graph_datum<X, Y>;
+        using i_series = i_graph_series<X, Y>;
         using series_array = i_vector<i_series>;
         using series_index = typename series_array::size_type;
     public:
@@ -124,7 +158,8 @@ namespace neogfx
         [[nodiscard]] virtual series_index add_series(i_optional<i_string> const& aName) = 0;
         virtual void erase_series(series_index aIndex) = 0;
     public:
-        [[nodiscard]] mat33 view_transform_to_px() const = 0;
+        [[nodiscard]] virtual bool has_view_transform_to_px() const = 0;
+        [[nodiscard]] virtual mat33 view_transform_to_px() const = 0;
         virtual void set_view_transform_to_px(mat33 const& aTransform) = 0;
         virtual void clear_view_transform_to_px() = 0;
         virtual void get_view(x_type& xMin, x_type& xMax, y_type& yMin, y_type& yMax) const = 0;
@@ -159,6 +194,4 @@ namespace neogfx
             set_view_transform_to_px(transform);
         }
     };
-
-    using i_graph_widget = i_basic_graph_widget<>;
 }

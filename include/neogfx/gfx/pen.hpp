@@ -146,6 +146,8 @@ namespace neogfx
             iAntiAliased = aAntiAliased;
             return *this;
         }
+    public:
+        bool operator==(pen const&) const = default;
     private:
         color_or_gradient iColor;
         dimension iWidth;
