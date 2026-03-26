@@ -91,7 +91,11 @@ namespace neogfx
         {
         }
         graph_series(abstract_type const& aOther) : 
-            iData{ aOther.data() }
+            iData{ aOther.data() },
+            iName{ aOther.name() },
+            iVisible{ aOther.visible() },
+            iPen{ aOther.pen() },
+            iFill{ aOther.fill() }
         {
         }
     public:
@@ -154,7 +158,7 @@ namespace neogfx
         {
             return iPen;
         }
-        void set_line(optional_pen const& aPen) final
+        void set_pen(optional_pen const& aPen) final
         {
             if (iPen != aPen)
             {

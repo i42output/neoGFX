@@ -90,7 +90,7 @@ namespace neogfx
         virtual void set_visible(bool aVisible) = 0;
     public:
         [[nodiscard]] virtual optional_pen const& pen() const = 0;
-        virtual void set_line(optional_pen const& aPen) = 0;
+        virtual void set_pen(optional_pen const& aPen) = 0;
         [[nodiscard]] virtual optional_color_or_gradient const& fill() const = 0;
         virtual void set_fill(optional_color_or_gradient const& aFill) = 0;
     public:
