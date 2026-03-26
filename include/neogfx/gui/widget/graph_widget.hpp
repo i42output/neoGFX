@@ -21,6 +21,7 @@
 #include <neogfx/neogfx.hpp>
 
 #include <neogfx/gui/widget/widget.hpp>
+#include <neogfx/gui/widget/widget.ipp>
 #include <neogfx/gui/widget/i_graph_widget.hpp>
 
 namespace neogfx
@@ -80,7 +81,6 @@ namespace neogfx
     public:
         using abstract_type = i_graph_series<abstract_t<X>, abstract_t<Y>>;
     public:
-    public:
         using x_type = X;
         using y_type = Y;
         using i_datum = i_graph_datum<X, Y>;
@@ -98,9 +98,7 @@ namespace neogfx
         graph_series(abstract_type const& aOther) : 
             iData{ aOther.data() },
             iName{ aOther.name() },
-            iVisible{ aOther.visible() },
-            iPen{ aOther.pen() },
-            iFill{ aOther.fill() }
+            iVisible{ aOther.visible() }
         {
         }
     public:
@@ -228,31 +226,6 @@ namespace neogfx
             }
         }
     public:
-        [[nodiscard]] optional_pen const& pen() const final
-        {
-            return iPen;
-        }
-        void set_pen(optional_pen const& aPen) final
-        {
-            if (iPen != aPen)
-            {
-                iPen = aPen;
-                AppearanceChanged();
-            }
-        }
-        [[nodiscard]] optional_color_or_gradient const& fill() const final
-        {
-            return iFill;
-        }
-        void set_fill(optional_color_or_gradient const& aFill) final
-        {
-            if (iFill != aFill)
-            {
-                iFill = aFill;
-                AppearanceChanged();
-            }
-        }
-    public:
         void start_update() final
         {
             iUpdating = true;
@@ -277,8 +250,6 @@ namespace neogfx
         vector<datum> iData;
         optional<string> iName;
         bool iVisible = true;
-        optional_pen iPen;
-        optional_color_or_gradient iFill;
         mutable x_type const* iXMin = nullptr;
         mutable x_type const* iXMax = nullptr;
         mutable y_type const* iYMin = nullptr;
@@ -304,14 +275,17 @@ namespace neogfx
         graph_widget(graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{}, iType{ aType }, iFlags{ aFlags }
         {
+            init();
         }
         graph_widget(i_widget& aParent, graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{ aParent }, iType{ aType }, iFlags{ aFlags }
         {
+            init();
         }
         graph_widget(i_layout& aLayout, graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{ aLayout }, iType{ aType }, iFlags{ aFlags }
         {
+            init();
         }
     public:
         [[nodiscard]] graph_widget_type type() const final
@@ -448,7 +422,7 @@ namespace neogfx
         {
             return *iSeries.at(aIndex);
         }
-        series_type& add_series(i_optional<i_string> const& aName = optional<string>{}) final
+        series_type& add_series(i_optional<i_string> const& aName = optional<string>{}, i_ref_ptr<i_graph_series_appearance> const& aAppearance = ref_ptr<graph_series_appearance>{}) final
         {
             iSeries.push_back(make_ref<series_type>(aName));
             auto& newSeries = *iSeries.back();
@@ -466,72 +440,21 @@ namespace neogfx
                 {
                     this->update();
                 });
+            if (aAppearance && iSeriesAppearances.find(aAppearance) == iSeriesAppearances.end())
+            {
+                iSeriesAppearances.insert(aAppearance);
+                iSink += aAppearance->changed([&]()
+                    {
+                        this->update();
+                    });
+            }
+            iSeriesAppearanceMap[newSeries] = aAppearance;
             return newSeries;
         }
         void erase_series(series_index aIndex) final
         {
             iSeries.as_std_vector().erase(std::next(iSeries.as_std_vector().begin(), aIndex));
             invalidate_cache();
-            this->update();
-        }
-    public:
-        [[nodiscard]] bool has_view_transform_to_px() const final
-        {
-            return iViewTransformToPx.has_value();
-        }
-        [[nodiscard]] mat33 view_transform_to_px() const final
-        {
-            return iViewTransformToPx.value();
-        }
-        void set_view_transform_to_px(mat33 const& aTransform) final
-        {
-            iViewTransformToPx = aTransform;
-            this->update();
-        }
-        void clear_view_transform_to_px() final
-        {
-            iViewTransformToPx = std::nullopt;
-            this->update();
-        }
-        void get_view(x_type& xMin, x_type& xMax, y_type& yMin, y_type& yMax) const final
-        {
-            if (std::holds_alternative<std::monostate>(iView))
-            {
-                xMin = x_min();
-                xMax = x_max();
-                yMin = y_min();
-                yMax = y_max();
-            }
-            else if (std::holds_alternative<view_min_max>(iView))
-            {
-                auto const& viewMinMax = std::get<view_min_max>(iView);
-                xMin = viewMinMax.xMin;
-                xMax = viewMinMax.xMax; 
-                yMin = viewMinMax.yMin;
-                yMax = viewMinMax.yMax;
-            }
-            else if (std::holds_alternative<ref_ptr<series_type>>(iView))
-            {
-                auto const& viewSeries = *(std::get<ref_ptr<series_type>>(iView));
-                xMin = viewSeries.x_min();
-                xMax = viewSeries.x_max();
-                yMin = viewSeries.y_min();
-                yMax = viewSeries.y_max();
-            }
-        }
-        void set_default_view() final
-        {
-            iView = std::monostate{};
-            this->update();
-        }
-        void set_view(series_index aIndex) final
-        {
-            iView = iSeries.at(aIndex);
-            this->update();
-        }
-        void set_view(x_type const& xMin, x_type const& xMax, y_type const& yMin, y_type const& yMax) final
-        {
-            iView = view_min_max{ xMin, xMax, yMin, yMax };
             this->update();
         }
     public:
@@ -615,7 +538,90 @@ namespace neogfx
         {
             return series(aIndex).y_max();
         }
+    public:
+        [[nodiscard]] bool has_view_transform_to_px() const final
+        {
+            return iViewTransformToPx.has_value();
+        }
+        [[nodiscard]] mat33 view_transform_to_px() const final
+        {
+            return iViewTransformToPx.value();
+        }
+        void set_view_transform_to_px(mat33 const& aTransform) final
+        {
+            iViewTransformToPx = aTransform;
+            this->update();
+        }
+        void clear_view_transform_to_px() final
+        {
+            iViewTransformToPx = std::nullopt;
+            this->update();
+        }
+        void get_view(x_type& xMin, x_type& xMax, y_type& yMin, y_type& yMax) const final
+        {
+            if (std::holds_alternative<std::monostate>(iView))
+            {
+                xMin = x_min();
+                xMax = x_max();
+                yMin = y_min();
+                yMax = y_max();
+            }
+            else if (std::holds_alternative<view_min_max>(iView))
+            {
+                auto const& viewMinMax = std::get<view_min_max>(iView);
+                xMin = viewMinMax.xMin;
+                xMax = viewMinMax.xMax; 
+                yMin = viewMinMax.yMin;
+                yMax = viewMinMax.yMax;
+            }
+            else if (std::holds_alternative<ref_ptr<series_type>>(iView))
+            {
+                auto const& viewSeries = *(std::get<ref_ptr<series_type>>(iView));
+                xMin = viewSeries.x_min();
+                xMax = viewSeries.x_max();
+                yMin = viewSeries.y_min();
+                yMax = viewSeries.y_max();
+            }
+        }
+        void set_default_view() final
+        {
+            iView = std::monostate{};
+            this->update();
+        }
+        void set_view(series_index aIndex) final
+        {
+            iView = iSeries.at(aIndex);
+            this->update();
+        }
+        void set_view(x_type const& xMin, x_type const& xMax, y_type const& yMin, y_type const& yMax) final
+        {
+            iView = view_min_max{ xMin, xMax, yMin, yMax };
+            this->update();
+        }
+    public:
+        [[nodiscard]] graph_series_appearance const& default_series_appearance() const final
+        {
+            if (iDefaultSeriesAppearance.has_value())
+                return iDefaultSeriesAppearance.value();
+            if (iStyleBasedSeriesAppearance.has_value())
+                return iStyleBasedSeriesAppearance.value();
+            iStyleBasedSeriesAppearance.emplace(pen{ this->palette_color(color_role::Text), 1.0_dip }, std::nullopt);
+            return iStyleBasedSeriesAppearance.value();
+        }
+        void set_default_series_appearance(i_optional<i_graph_series_appearance> const& aSeriesAppearance = optional<graph_series_appearance>{}) final
+        {
+            iDefaultSeriesAppearance = aSeriesAppearance;
+            this->update();
+        }
     private:
+        void init()
+        {
+            iSink += service<i_app>().current_style_changed([&](style_aspect aAspect)
+                {
+                    iStyleBasedSeriesAppearance = std::nullopt;
+                    this->update();
+                });
+        }
         void invalidate_cache()
         {
             iXMin = std::nullopt;
@@ -626,16 +632,20 @@ namespace neogfx
     private:
         graph_widget_type iType;
         graph_widget_flags iFlags;
-        std::optional<x_type> iMinorXTick;
-        std::optional<x_type> iMajorXTick;
-        std::optional<y_type> iMinorYTick;
-        std::optional<y_type> iMajorYTick;
-        std::optional<mat33> iViewTransformToPx;
         series_container iSeries;
         mutable std::optional<x_type> iXMin;
         mutable std::optional<x_type> iXMax;
         mutable std::optional<y_type> iYMin;
         mutable std::optional<y_type> iYMax;
+        std::optional<x_type> iMinorXTick;
+        std::optional<x_type> iMajorXTick;
+        std::optional<y_type> iMinorYTick;
+        std::optional<y_type> iMajorYTick;
+        std::optional<mat33> iViewTransformToPx;
+        mutable optional<graph_series_appearance> iStyleBasedSeriesAppearance;
+        mutable optional<graph_series_appearance> iDefaultSeriesAppearance;
+        std::set<ref_ptr<graph_series_appearance>> iSeriesAppearances;
+        std::map<ref_ptr<series_type>, ref_ptr<graph_series_appearance>> iSeriesAppearanceMap;
         struct view_min_max
         {
             x_type xMin;

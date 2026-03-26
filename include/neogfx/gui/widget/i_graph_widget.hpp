@@ -99,11 +99,6 @@ namespace neogfx
         [[nodiscard]] virtual bool visible() const = 0;
         virtual void set_visible(bool aVisible) = 0;
     public:
-        [[nodiscard]] virtual optional_pen const& pen() const = 0;
-        virtual void set_pen(optional_pen const& aPen) = 0;
-        [[nodiscard]] virtual optional_color_or_gradient const& fill() const = 0;
-        virtual void set_fill(optional_color_or_gradient const& aFill) = 0;
-    public:
         virtual void start_update() = 0;
         virtual void end_update() = 0;
     public:
@@ -125,6 +120,64 @@ namespace neogfx
         }
     private:
         i_graph_series<X, Y>& iSeries;
+    };
+
+    class i_graph_series_appearance : public i_reference_counted
+    {
+    public:
+        using abstract_type = i_graph_series_appearance;
+    public:
+        declare_event(changed);
+    public:
+        [[nodiscard]] virtual optional_pen const& pen() const = 0;
+        virtual void set_pen(optional_pen const& aPen) = 0;
+        [[nodiscard]] virtual optional_color_or_gradient const& fill() const = 0;
+        virtual void set_fill(optional_color_or_gradient const& aFill) = 0;
+    };
+
+    class graph_series_appearance : public reference_counted<i_graph_series_appearance>
+    {
+    public:
+        using abstract_type = i_graph_series_appearance;
+    public:
+        define_declared_event(Changed, changed);
+    public:
+        graph_series_appearance(i_graph_series_appearance const& aOther) :
+            iPen{ aOther.pen() }, iFill{ aOther.fill() }
+        {
+        }
+        graph_series_appearance(optional_pen const& aPen = {}, optional_color_or_gradient const& aFill = {}) :
+            iPen{ aPen }, iFill{ aFill }
+        {
+        }
+    public:
+        [[nodiscard]] optional_pen const& pen() const final
+        {
+            return iPen;
+        }
+        void set_pen(optional_pen const& aPen) final
+        {
+            if (iPen != aPen)
+            {
+                iPen = aPen;
+                Changed();
+            }
+        }
+        [[nodiscard]] optional_color_or_gradient const& fill() const final
+        {
+            return iFill;
+        }
+        void set_fill(optional_color_or_gradient const& aFill) final
+        {
+            if (iFill != aFill)
+            {
+                iFill = aFill;
+                Changed();
+            }
+        }
+    private:
+        optional_pen iPen;
+        optional_color_or_gradient iFill;
     };
 
     template <typename X = double, typename Y = double>
@@ -165,8 +218,17 @@ namespace neogfx
         [[nodiscard]] virtual series_index series_count() const = 0;
         [[nodiscard]] virtual i_series const& series(series_index aIndex) const = 0;
         [[nodiscard]] virtual i_series& series(series_index aIndex) = 0;
-        virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}) = 0;
+        virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}, i_ref_ptr<i_graph_series_appearance> const& aAppearance = ref_ptr<graph_series_appearance>{}) = 0;
         virtual void erase_series(series_index aIndex) = 0;
+    public:
+        [[nodiscard]] virtual x_type const& x_min() const = 0;
+        [[nodiscard]] virtual x_type const& x_max() const = 0;
+        [[nodiscard]] virtual y_type const& y_min() const = 0;
+        [[nodiscard]] virtual y_type const& y_max() const = 0;
+        [[nodiscard]] virtual x_type const& x_min(series_index aIndex) const = 0;
+        [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
+        [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
+        [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
     public:
         [[nodiscard]] virtual bool has_view_transform_to_px() const = 0;
         [[nodiscard]] virtual mat33 view_transform_to_px() const = 0;
@@ -177,14 +239,8 @@ namespace neogfx
         virtual void set_view(series_index aIndex) = 0;
         virtual void set_view(x_type const& xMin, x_type const& xMax, y_type const& yMin, y_type const& yMax) = 0;
     public:
-        [[nodiscard]] virtual x_type const& x_min() const = 0;
-        [[nodiscard]] virtual x_type const& x_max() const = 0;
-        [[nodiscard]] virtual y_type const& y_min() const = 0;
-        [[nodiscard]] virtual y_type const& y_max() const = 0;
-        [[nodiscard]] virtual x_type const& x_min(series_index aIndex) const = 0;
-        [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
-        [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
-        [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
+        [[nodiscard]] virtual i_graph_series_appearance const& default_series_appearance() const = 0;
+        virtual void set_default_series_appearance(i_optional<i_graph_series_appearance> const& aSeriesAppearance = optional<graph_series_appearance>{}) = 0;
         // helpers
     public:
         [[nodiscard]] i_series& add_series(std::string const& aName)
