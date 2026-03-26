@@ -72,11 +72,14 @@ namespace neogfx
         y_type iY;
     };
 
+    struct no_graph_series_data : std::logic_error { no_graph_series_data() : std::logic_error{"neogfx::no_graph_series_data"} {} };
+
     template <typename X = double, typename Y = double>
     class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>>>
     {
     public:
         using abstract_type = i_graph_series<abstract_t<X>, abstract_t<Y>>;
+    public:
     public:
         using x_type = X;
         using y_type = Y;
@@ -85,6 +88,7 @@ namespace neogfx
         using index_type = typename vector<datum>::size_type;
     public:
         define_declared_event(DataChanged, data_changed);
+        define_declared_event(VisibilityChanged, visibility_changed);
         define_declared_event(AppearanceChanged, appearance_changed);
     public:
         graph_series(i_optional<i_string> const& aName = optional<string>{}) : 
@@ -100,6 +104,10 @@ namespace neogfx
         {
         }
     public:
+        [[nodiscard]] bool no_data() const final
+        {
+            return iData.empty();
+        }
         [[nodiscard]] vector<datum> const& data() const final
         {
             return iData;
@@ -143,8 +151,8 @@ namespace neogfx
     public:
         [[nodiscard]] x_type const& x_min() const final
         {
-            if (iData.empty())
-                return {};
+            if (no_data())
+                throw no_graph_series_data();
             if (iXMin != nullptr)
                 return *iXMin;
             x_type const* min = &iData.front().x();
@@ -156,8 +164,8 @@ namespace neogfx
         }
         [[nodiscard]] x_type const& x_max() const final
         {
-            if (iData.empty())
-                return {};
+            if (no_data())
+                throw no_graph_series_data();
             if (iXMax != nullptr)
                 return *iXMax;
             x_type const* max = &iData.front().x();
@@ -169,8 +177,8 @@ namespace neogfx
         }
         [[nodiscard]] y_type const& y_min() const final
         {
-            if (iData.empty())
-                return {};
+            if (no_data())
+                throw no_graph_series_data();
             if (iYMin != nullptr)
                 return *iYMin;
             y_type const* min = &iData.front().y();
@@ -182,8 +190,8 @@ namespace neogfx
         }
         [[nodiscard]] y_type const& y_max() const final
         {
-            if (iData.empty())
-                return {};
+            if (no_data())
+                throw no_graph_series_data();
             if (iYMax != nullptr)
                 return *iYMax;
             y_type const* max = &iData.front().y();
@@ -216,7 +224,7 @@ namespace neogfx
             if (iVisible != aVisible)
             {
                 iVisible = aVisible;
-                AppearanceChanged();
+                VisibilityChanged();
             }
         }
     public:
@@ -449,6 +457,11 @@ namespace neogfx
                     invalidate_cache();
                     this->update();
                 });
+            newSeries.visibility_changed([&]()
+                {
+                    invalidate_cache();
+                    this->update();
+                });
             newSeries.appearance_changed([&]()
                 {
                     this->update();
@@ -473,10 +486,12 @@ namespace neogfx
         void set_view_transform_to_px(mat33 const& aTransform) final
         {
             iViewTransformToPx = aTransform;
+            this->update();
         }
         void clear_view_transform_to_px() final
         {
             iViewTransformToPx = std::nullopt;
+            this->update();
         }
         void get_view(x_type& xMin, x_type& xMax, y_type& yMin, y_type& yMax) const final
         {
@@ -526,6 +541,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (!s->visible())
+                        continue;
                     if (!iXMin.has_value())
                         iXMin = s->x_min();
                     else
@@ -540,6 +557,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (!s->visible())
+                        continue;
                     if (!iXMax.has_value())
                         iXMax = s->x_max();
                     else
@@ -554,6 +573,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (!s->visible())
+                        continue;
                     if (!iYMin.has_value())
                         iYMin = s->y_min();
                     else
@@ -568,6 +589,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (!s->visible())
+                        continue;
                     if (!iYMax.has_value())
                         iYMax = s->y_max();
                     else
