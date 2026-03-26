@@ -446,10 +446,7 @@ namespace neogfx
             auto& newSeries = *iSeries.back();
             newSeries.data_changed([&]()
                 {
-                    iXMin = std::nullopt;
-                    iYMin = std::nullopt;
-                    iXMax = std::nullopt;
-                    iYMax = std::nullopt;
+                    invalidate_cache();
                     this->update();
                 });
             newSeries.appearance_changed([&]()
@@ -461,6 +458,8 @@ namespace neogfx
         void erase_series(series_index aIndex) final
         {
             iSeries.as_std_vector().erase(std::next(iSeries.as_std_vector().begin(), aIndex));
+            invalidate_cache();
+            this->update();
         }
     public:
         [[nodiscard]] bool has_view_transform_to_px() const final
@@ -592,6 +591,14 @@ namespace neogfx
         [[nodiscard]] y_type const& y_max(series_index aIndex) const final
         {
             return series(aIndex).y_max();
+        }
+    private:
+        void invalidate_cache()
+        {
+            iXMin = std::nullopt;
+            iYMin = std::nullopt;
+            iXMax = std::nullopt;
+            iYMax = std::nullopt;
         }
     private:
         graph_widget_type iType;
