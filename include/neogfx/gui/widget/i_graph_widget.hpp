@@ -185,11 +185,7 @@ namespace neogfx
         [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
         // helpers
     public:
-        [[nodiscard]] series_index add_series()
-        {
-            return add_series(optional<string>{});
-        }
-        [[nodiscard]] series_index add_series(std::string const& aName)
+        [[nodiscard]] i_series& add_series(std::string const& aName)
         {
             return add_series(optional<string>{ aName });
         }

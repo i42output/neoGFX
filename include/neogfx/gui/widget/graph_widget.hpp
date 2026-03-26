@@ -271,10 +271,10 @@ namespace neogfx
         bool iVisible = true;
         optional_pen iPen;
         optional_color_or_gradient iFill;
-        mutable x_type const* iXMin;
-        mutable x_type const* iXMax;
-        mutable y_type const* iYMin;
-        mutable y_type const* iYMax;
+        mutable x_type const* iXMin = nullptr;
+        mutable x_type const* iXMax = nullptr;
+        mutable y_type const* iYMin = nullptr;
+        mutable y_type const* iYMax = nullptr;
     };
 
     template <typename X = double, typename Y = double>
@@ -492,9 +492,9 @@ namespace neogfx
             {
                 auto const& viewMinMax = std::get<view_min_max>(iView);
                 xMin = viewMinMax.xMin;
-                xMax = viewMinMax.xMax;
+                xMax = viewMinMax.xMax; 
                 yMin = viewMinMax.yMin;
-                yMax = viewMinMax.xMax;
+                yMax = viewMinMax.yMax;
             }
             else if (std::holds_alternative<ref_ptr<series_type>>(iView))
             {
