@@ -73,7 +73,7 @@ namespace neogfx
     };
 
     template <typename X = double, typename Y = double>
-    class graph_series : public i_graph_series<abstract_t<X>, abstract_t<Y>>
+    class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>>>
     {
     public:
         using abstract_type = i_graph_series<abstract_t<X>, abstract_t<Y>>;
@@ -87,7 +87,8 @@ namespace neogfx
         define_declared_event(DataChanged, data_changed);
         define_declared_event(AppearanceChanged, appearance_changed);
     public:
-        graph_series()
+        graph_series(i_optional<i_string> const& aName = optional<string>{}) : 
+            iName{ aName }
         {
         }
         graph_series(abstract_type const& aOther) : 
@@ -107,25 +108,90 @@ namespace neogfx
         {
             iData = aData;
             if (!iUpdating)
+            {
+                invalidate_cache();
                 DataChanged();
+            }
         }
         void push_back(i_datum const& aDatum) final
         {
             iData.as_std_vector().push_back(aDatum);
             if (!iUpdating)
+            {
+                invalidate_cache();
                 DataChanged();
+            }
         }
         void insert(index_type aIndex, i_datum const& aDatum) final
         {
             iData.as_std_vector().insert(std::next(iData.as_std_vector().begin(), aIndex), aDatum);
             if (!iUpdating)
+            {
+                invalidate_cache();
                 DataChanged();
+            }
         }
         void erase(index_type aIndex) final
         {
             iData.as_std_vector().erase(std::next(iData.as_std_vector().begin(), aIndex));
             if (!iUpdating)
+            {
+                invalidate_cache();
                 DataChanged();
+            }
+        }
+    public:
+        [[nodiscard]] x_type const& x_min() const final
+        {
+            if (iData.empty())
+                return {};
+            if (iXMin != nullptr)
+                return *iXMin;
+            x_type const* min = &iData.front().x();
+            for (auto const& d : iData)
+                if (d.x() < *min)
+                    min = &d.x();
+            iXMin = min;
+            return *iXMin;
+        }
+        [[nodiscard]] x_type const& x_max() const final
+        {
+            if (iData.empty())
+                return {};
+            if (iXMax != nullptr)
+                return *iXMax;
+            x_type const* max = &iData.front().x();
+            for (auto const& d : iData)
+                if (d.x() >= *max)
+                    max = &d.x();
+            iXMax = max;
+            return *iXMax;
+        }
+        [[nodiscard]] y_type const& y_min() const final
+        {
+            if (iData.empty())
+                return {};
+            if (iYMin != nullptr)
+                return *iYMin;
+            y_type const* min = &iData.front().y();
+            for (auto const& d : iData)
+                if (d.y() < *min)
+                    min = &d.y();
+            iYMin = min;
+            return *iYMin;
+        }
+        [[nodiscard]] y_type const& y_max() const final
+        {
+            if (iData.empty())
+                return {};
+            if (iYMax != nullptr)
+                return *iYMax;
+            y_type const* max = &iData.front().y();
+            for (auto const& d : iData)
+                if (d.y() >= *max)
+                    max = &d.y();
+            iYMax = max;
+            return *iYMax;
         }
     public:
         [[nodiscard]] i_optional<i_string> const& name() const final
@@ -182,11 +248,21 @@ namespace neogfx
         void start_update() final
         {
             iUpdating = true;
+            invalidate_cache();
         }
         void end_update() final
         {
             iUpdating = false;
+            invalidate_cache();
             DataChanged();
+        }
+    private:
+        void invalidate_cache()
+        {
+            iXMin = nullptr;
+            iYMin = nullptr;
+            iXMax = nullptr;
+            iYMax = nullptr;
         }
     private:
         bool iUpdating = false;
@@ -195,11 +271,16 @@ namespace neogfx
         bool iVisible = true;
         optional_pen iPen;
         optional_color_or_gradient iFill;
+        mutable x_type const* iXMin;
+        mutable x_type const* iXMax;
+        mutable y_type const* iYMin;
+        mutable y_type const* iYMax;
     };
 
     template <typename X = double, typename Y = double>
     class graph_widget : public widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>
     {
+        using base_type = widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>;
     public:
         using abstract_type = i_graph_widget<abstract_t<X>, abstract_t<Y>>;
     public:
@@ -209,176 +290,329 @@ namespace neogfx
         using i_series = typename abstract_type::i_series;
         using datum_type = graph_datum<X, Y>;
         using series_type = graph_series<X, Y>;
-        using series_container = vector<series_type>;
+        using series_container = vector<ref_ptr<series_type>>;
         using series_index = typename series_container::size_type;
+    public:
+        graph_widget(graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
+            base_type{}, iType{ aType }, iFlags{ aFlags }
+        {
+        }
+        graph_widget(i_widget& aParent, graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
+            base_type{ aParent }, iType{ aType }, iFlags{ aFlags }
+        {
+        }
+        graph_widget(i_layout& aLayout, graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
+            base_type{ aLayout }, iType{ aType }, iFlags{ aFlags }
+        {
+        }
     public:
         [[nodiscard]] graph_widget_type type() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iType;
         }
         void set_type(graph_widget_type aType) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iType != aType)
+            {
+                iType = aType;
+                this->update();
+            }
         }
         [[nodiscard]] graph_widget_flags flags() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iFlags;
         }
         void set_flags(graph_widget_flags aFlags) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iFlags != aFlags)
+            {
+                iFlags = aFlags;
+                this->update();
+            }
         }
     public:
         [[nodiscard]] bool has_minor_x_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMinorXTick.has_value();
         }
         [[nodiscard]] bool has_major_x_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMajorXTick.has_value();
         }
         [[nodiscard]] x_type const& minor_x_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMinorXTick.value();
         }
         [[nodiscard]] x_type const& major_x_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMajorXTick.value();
         }
         void set_minor_x_tick(x_type const& aTick) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMinorXTick != aTick)
+            {
+                iMinorXTick = aTick;
+                this->update();
+            }
         }
         void set_major_x_tick(x_type const& aTick) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMajorXTick != aTick)
+            {
+                iMajorXTick = aTick;
+                this->update();
+            }
         }
         void clear_minor_x_tick() final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMinorXTick != std::nullopt)
+            {
+                iMinorXTick = std::nullopt;
+                this->update();
+            }
         }
         void clear_major_x_tick() final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMajorXTick != std::nullopt)
+            {
+                iMajorXTick = std::nullopt;
+                this->update();
+            }
         }
         [[nodiscard]] bool has_minor_y_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMinorYTick.has_value();
         }
         [[nodiscard]] bool has_major_y_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMajorYTick.has_value();
         }
         [[nodiscard]] y_type const& minor_y_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMinorYTick.value();
         }
         [[nodiscard]] y_type const& major_y_tick() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iMajorYTick.value();
         }
         void set_minor_y_tick(y_type const& aTick) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMinorYTick != aTick)
+            {
+                iMinorYTick = aTick;
+                this->update();
+            }
         }
         void set_major_y_tick(y_type const& aTick) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMajorYTick != aTick)
+            {
+                iMajorYTick = aTick;
+                this->update();
+            }
         }
         void clear_minor_y_tick() final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMinorYTick != std::nullopt)
+            {
+                iMinorYTick = std::nullopt;
+                this->update();
+            }
         }
         void clear_major_y_tick() final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (iMajorYTick != std::nullopt)
+            {
+                iMajorYTick = std::nullopt;
+                this->update();
+            }
         }
     public:
         [[nodiscard]] series_index series_count() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iSeries.size();
         }
         [[nodiscard]] series_type const& series(series_index aIndex) const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return *iSeries.at(aIndex);
         }
         [[nodiscard]] series_type& series(series_index aIndex) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return *iSeries.at(aIndex);
         }
-        [[nodiscard]] series_index add_series(i_optional<i_string> const& aName) final
+        series_type& add_series(i_optional<i_string> const& aName = optional<string>{}) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iSeries.push_back(make_ref<series_type>(aName));
+            auto& newSeries = *iSeries.back();
+            newSeries.data_changed([&]()
+                {
+                    iXMin = std::nullopt;
+                    iYMin = std::nullopt;
+                    iXMax = std::nullopt;
+                    iYMax = std::nullopt;
+                    this->update();
+                });
+            newSeries.appearance_changed([&]()
+                {
+                    this->update();
+                });
+            return newSeries;
         }
         void erase_series(series_index aIndex) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iSeries.as_std_vector().erase(std::next(iSeries.as_std_vector().begin(), aIndex));
         }
     public:
         [[nodiscard]] bool has_view_transform_to_px() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iViewTransformToPx.has_value();
         }
         [[nodiscard]] mat33 view_transform_to_px() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return iViewTransformToPx.value();
         }
         void set_view_transform_to_px(mat33 const& aTransform) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iViewTransformToPx = aTransform;
         }
         void clear_view_transform_to_px() final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iViewTransformToPx = std::nullopt;
         }
         void get_view(x_type& xMin, x_type& xMax, y_type& yMin, y_type& yMax) const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (std::holds_alternative<std::monostate>(iView))
+            {
+                xMin = x_min();
+                xMax = x_max();
+                yMin = y_min();
+                yMax = y_max();
+            }
+            else if (std::holds_alternative<view_min_max>(iView))
+            {
+                auto const& viewMinMax = std::get<view_min_max>(iView);
+                xMin = viewMinMax.xMin;
+                xMax = viewMinMax.xMax;
+                yMin = viewMinMax.yMin;
+                yMax = viewMinMax.xMax;
+            }
+            else if (std::holds_alternative<ref_ptr<series_type>>(iView))
+            {
+                auto const& viewSeries = *(std::get<ref_ptr<series_type>>(iView));
+                xMin = viewSeries.x_min();
+                xMax = viewSeries.x_max();
+                yMin = viewSeries.y_min();
+                yMax = viewSeries.y_max();
+            }
         }
         void set_default_view() final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iView = std::monostate{};
+            this->update();
         }
         void set_view(series_index aIndex) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iView = iSeries.at(aIndex);
+            this->update();
         }
         void set_view(x_type const& xMin, x_type const& xMax, y_type const& yMin, y_type const& yMax) final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            iView = view_min_max{ xMin, xMax, yMin, yMax };
+            this->update();
         }
     public:
-        [[nodiscard]] x_type const& min_x() const final
+        [[nodiscard]] x_type const& x_min() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (!iXMin.has_value())
+            {
+                for (auto const& s : iSeries)
+                {
+                    if (!iXMin.has_value())
+                        iXMin = s->x_min();
+                    else
+                        iXMin = std::min(iXMin.value(), s->x_min());
+                }
+            }
+            return iXMin.value();
         }
-        [[nodiscard]] x_type const& max_x() const final
+        [[nodiscard]] x_type const& x_max() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (!iXMax.has_value())
+            {
+                for (auto const& s : iSeries)
+                {
+                    if (!iXMax.has_value())
+                        iXMax = s->x_max();
+                    else
+                        iXMax = std::max(iXMax.value(), s->x_max());
+                }
+            }
+            return iXMax.value();
         }
-        [[nodiscard]] y_type const& min_y() const final
+        [[nodiscard]] y_type const& y_min() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (!iYMin.has_value())
+            {
+                for (auto const& s : iSeries)
+                {
+                    if (!iYMin.has_value())
+                        iYMin = s->y_min();
+                    else
+                        iYMin = std::min(iYMin.value(), s->y_min());
+                }
+            }
+            return iYMin.value();
         }
-        [[nodiscard]] y_type const& max_y() const final
+        [[nodiscard]] y_type const& y_max() const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            if (!iYMax.has_value())
+            {
+                for (auto const& s : iSeries)
+                {
+                    if (!iYMax.has_value())
+                        iYMax = s->y_max();
+                    else
+                        iYMax = std::max(iYMax.value(), s->y_max());
+                }
+            }
+            return iYMax.value();
         }
-        [[nodiscard]] x_type const& min_x(series_index aIndex) const final
+        [[nodiscard]] x_type const& x_min(series_index aIndex) const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return series(aIndex).x_min();
         }
-        [[nodiscard]] x_type const& max_x(series_index aIndex) const final
+        [[nodiscard]] x_type const& x_max(series_index aIndex) const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return series(aIndex).x_max();
         }
-        [[nodiscard]] y_type const& min_y(series_index aIndex) const final
+        [[nodiscard]] y_type const& y_min(series_index aIndex) const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return series(aIndex).y_min();
         }
-        [[nodiscard]] y_type const& max_y(series_index aIndex) const final
+        [[nodiscard]] y_type const& y_max(series_index aIndex) const final
         {
-            throw std::logic_error("neogfx::graph_widget: not yet implemented");
+            return series(aIndex).y_max();
         }
+    private:
+        graph_widget_type iType;
+        graph_widget_flags iFlags;
+        std::optional<x_type> iMinorXTick;
+        std::optional<x_type> iMajorXTick;
+        std::optional<y_type> iMinorYTick;
+        std::optional<y_type> iMajorYTick;
+        std::optional<mat33> iViewTransformToPx;
+        series_container iSeries;
+        mutable std::optional<x_type> iXMin;
+        mutable std::optional<x_type> iXMax;
+        mutable std::optional<y_type> iYMin;
+        mutable std::optional<y_type> iYMax;
+        struct view_min_max
+        {
+            x_type xMin;
+            x_type xMax;
+            y_type yMin;
+            y_type yMax;
+        };
+        std::variant<std::monostate, view_min_max, ref_ptr<series_type>> iView;
     };
 }

@@ -67,7 +67,7 @@ namespace neogfx
     };
 
     template <typename X = double, typename Y = double>
-    class i_graph_series
+    class i_graph_series : public i_reference_counted
     {
     public:
         using abstract_type = i_graph_series;
@@ -85,6 +85,11 @@ namespace neogfx
         virtual void push_back(i_datum const& aDatum) = 0;
         virtual void insert(index_type aIndex, i_datum const& aDatum) = 0;
         virtual void erase(index_type aIndex) = 0;
+    public:
+        [[nodiscard]] virtual x_type const& x_min() const = 0;
+        [[nodiscard]] virtual x_type const& x_max() const = 0;
+        [[nodiscard]] virtual y_type const& y_min() const = 0;
+        [[nodiscard]] virtual y_type const& y_max() const = 0;
     public:
         [[nodiscard]] virtual i_optional<i_string> const& name() const = 0;
         virtual void set_name(i_optional<i_string> const& aName) = 0;
@@ -130,7 +135,7 @@ namespace neogfx
         using y_type = Y;
         using i_datum = i_graph_datum<X, Y>;
         using i_series = i_graph_series<X, Y>;
-        using series_array = i_vector<i_series>;
+        using series_array = i_vector<i_ref_ptr<i_series>>;
         using series_index = typename series_array::size_type;
     public:
         [[nodiscard]] virtual graph_widget_type type() const = 0;
@@ -158,7 +163,7 @@ namespace neogfx
         [[nodiscard]] virtual series_index series_count() const = 0;
         [[nodiscard]] virtual i_series const& series(series_index aIndex) const = 0;
         [[nodiscard]] virtual i_series& series(series_index aIndex) = 0;
-        [[nodiscard]] virtual series_index add_series(i_optional<i_string> const& aName) = 0;
+        virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}) = 0;
         virtual void erase_series(series_index aIndex) = 0;
     public:
         [[nodiscard]] virtual bool has_view_transform_to_px() const = 0;
@@ -170,14 +175,14 @@ namespace neogfx
         virtual void set_view(series_index aIndex) = 0;
         virtual void set_view(x_type const& xMin, x_type const& xMax, y_type const& yMin, y_type const& yMax) = 0;
     public:
-        [[nodiscard]] virtual x_type const& min_x() const = 0;
-        [[nodiscard]] virtual x_type const& max_x() const = 0;
-        [[nodiscard]] virtual y_type const& min_y() const = 0;
-        [[nodiscard]] virtual y_type const& max_y() const = 0;
-        [[nodiscard]] virtual x_type const& min_x(series_index aIndex) const = 0;
-        [[nodiscard]] virtual x_type const& max_x(series_index aIndex) const = 0;
-        [[nodiscard]] virtual y_type const& min_y(series_index aIndex) const = 0;
-        [[nodiscard]] virtual y_type const& max_y(series_index aIndex) const = 0;
+        [[nodiscard]] virtual x_type const& x_min() const = 0;
+        [[nodiscard]] virtual x_type const& x_max() const = 0;
+        [[nodiscard]] virtual y_type const& y_min() const = 0;
+        [[nodiscard]] virtual y_type const& y_max() const = 0;
+        [[nodiscard]] virtual x_type const& x_min(series_index aIndex) const = 0;
+        [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
+        [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
+        [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
         // helpers
     public:
         [[nodiscard]] series_index add_series()
