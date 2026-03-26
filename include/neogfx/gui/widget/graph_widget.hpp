@@ -452,17 +452,17 @@ namespace neogfx
         {
             iSeries.push_back(make_ref<series_type>(aName));
             auto& newSeries = *iSeries.back();
-            newSeries.data_changed([&]()
+            iSink += newSeries.data_changed([&]()
                 {
                     invalidate_cache();
                     this->update();
                 });
-            newSeries.visibility_changed([&]()
+            iSink += newSeries.visibility_changed([&]()
                 {
                     invalidate_cache();
                     this->update();
                 });
-            newSeries.appearance_changed([&]()
+            iSink += newSeries.appearance_changed([&]()
                 {
                     this->update();
                 });
@@ -644,5 +644,6 @@ namespace neogfx
             y_type yMax;
         };
         std::variant<std::monostate, view_min_max, ref_ptr<series_type>> iView;
+        sink iSink;
     };
 }
