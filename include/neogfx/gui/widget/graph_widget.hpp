@@ -84,8 +84,8 @@ namespace neogfx
         using datum = graph_datum<X, Y>;
         using index_type = typename vector<datum>::size_type;
     public:
-        define_event(DataChanged, data_changed);
-        define_event(AppearanceChanged, appearance_changed);
+        define_declared_event(DataChanged, data_changed);
+        define_declared_event(AppearanceChanged, appearance_changed);
     public:
         graph_series()
         {
@@ -107,25 +107,25 @@ namespace neogfx
         {
             iData = aData;
             if (!iUpdating)
-                data_changed();
+                DataChanged();
         }
         void push_back(i_datum const& aDatum) final
         {
             iData.as_std_vector().push_back(aDatum);
             if (!iUpdating)
-                data_changed();
+                DataChanged();
         }
         void insert(index_type aIndex, i_datum const& aDatum) final
         {
             iData.as_std_vector().insert(std::next(iData.as_std_vector().begin(), aIndex), aDatum);
             if (!iUpdating)
-                data_changed();
+                DataChanged();
         }
         void erase(index_type aIndex) final
         {
             iData.as_std_vector().erase(std::next(iData.as_std_vector().begin(), aIndex));
             if (!iUpdating)
-                data_changed();
+                DataChanged();
         }
     public:
         [[nodiscard]] i_optional<i_string> const& name() const final
@@ -137,7 +137,7 @@ namespace neogfx
             if (iName != aName)
             {
                 iName = aName;
-                appearance_changed();
+                AppearanceChanged();
             }
         }
     public:
@@ -150,7 +150,7 @@ namespace neogfx
             if (iVisible != aVisible)
             {
                 iVisible = aVisible;
-                appearance_changed();
+                AppearanceChanged();
             }
         }
     public:
@@ -163,7 +163,7 @@ namespace neogfx
             if (iPen != aPen)
             {
                 iPen = aPen;
-                appearance_changed();
+                AppearanceChanged();
             }
         }
         [[nodiscard]] optional_color_or_gradient const& fill() const final
@@ -175,7 +175,7 @@ namespace neogfx
             if (iFill != aFill)
             {
                 iFill = aFill;
-                appearance_changed();
+                AppearanceChanged();
             }
         }
     public:
@@ -186,7 +186,7 @@ namespace neogfx
         void end_update() final
         {
             iUpdating = false;
-            data_changed();
+            DataChanged();
         }
     private:
         bool iUpdating = false;

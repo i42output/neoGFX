@@ -77,6 +77,9 @@ namespace neogfx
         using i_datum = i_graph_datum<X, Y>;
         using index_type = typename i_vector<i_datum>::size_type;
     public:
+        declare_event(data_changed);
+        declare_event(appearance_changed);
+    public:
         [[nodiscard]] virtual i_vector<i_datum> const& data() const = 0;
         virtual void set_data(i_vector<i_datum> const& aData) = 0;
         virtual void push_back(i_datum const& aDatum) = 0;
