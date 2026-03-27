@@ -203,6 +203,32 @@ namespace neogfx
         virtual void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const = 0;
     };
 
+    template <typename T = double>
+    class i_graph_axis : public i_reference_counted
+    {
+    public:
+        using abstract_type = i_graph_axis;
+    public:
+        using datum_component_type = T;
+    public:
+        declare_event(changed);
+    public:
+        [[nodiscard]] virtual i_string const& label() const = 0;
+        virtual void set_label(i_string const& aLabel = string{}) = 0;
+    public:
+        [[nodiscard]] virtual bool has_minor_tick() const = 0;
+        [[nodiscard]] virtual bool has_major_tick() const = 0;
+        [[nodiscard]] virtual datum_component_type const& minor_tick() const = 0;
+        [[nodiscard]] virtual datum_component_type const& major_tick() const = 0;
+        virtual void set_minor_tick(datum_component_type const& aTick) = 0;
+        virtual void set_major_tick(datum_component_type const& aTick) = 0;
+        virtual void clear_minor_tick() = 0;
+        virtual void clear_major_tick() = 0;
+    public:
+        [[nodiscard]] virtual neogfx::font const& font() const = 0;
+        virtual void set_font(optional_font const& aFont = {}) = 0;
+    };
+
     template <typename X, typename Y>
     class i_graph_widget : public i_widget
     {
@@ -237,30 +263,14 @@ namespace neogfx
         [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
         [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
     public:
-        [[nodiscard]] virtual bool has_minor_x_tick() const = 0;
-        [[nodiscard]] virtual bool has_major_x_tick() const = 0;
-        [[nodiscard]] virtual x_type const& minor_x_tick() const = 0;
-        [[nodiscard]] virtual x_type const& major_x_tick() const = 0;
-        virtual void set_minor_x_tick(x_type const& aTick) = 0;
-        virtual void set_major_x_tick(x_type const& aTick) = 0;
-        virtual void clear_minor_x_tick() = 0;
-        virtual void clear_major_x_tick() = 0;
-        [[nodiscard]] virtual bool has_minor_y_tick() const = 0;
-        [[nodiscard]] virtual bool has_major_y_tick() const = 0;
-        [[nodiscard]] virtual y_type const& minor_y_tick() const = 0;
-        [[nodiscard]] virtual y_type const& major_y_tick() const = 0;
-        virtual void set_minor_y_tick(y_type const& aTick) = 0;
-        virtual void set_major_y_tick(y_type const& aTick) = 0;
-        virtual void clear_minor_y_tick() = 0;
-        virtual void clear_major_y_tick() = 0;
+        [[nodiscard]] virtual i_graph_axis<x_type>& x_axis() const = 0;
+        virtual void set_x_axis(i_ref_ptr<i_graph_axis<x_type>> const& aAxis = ref_ptr<i_graph_axis<x_type>>{}) = 0;
+        [[nodiscard]] virtual i_graph_axis<y_type>& y_axis() const = 0;
+        virtual void set_y_axis(i_ref_ptr<i_graph_axis<y_type>> const& aAxis = ref_ptr<i_graph_axis<y_type>>{}) = 0;
     public:
         [[nodiscard]] virtual i_renderer const& renderer() const = 0;
         virtual void set_renderer(i_renderer& aRenderer) = 0;
         virtual void set_default_renderer() = 0;
-        [[nodiscard]] virtual neogfx::font const& x_axis_font() const = 0;
-        virtual void set_x_axis_font(optional_font const& aFont = {}) = 0;
-        [[nodiscard]] virtual neogfx::font const& y_axis_font() const = 0;
-        virtual void set_y_axis_font(optional_font const& aFont = {}) = 0;
     public:
         [[nodiscard]] virtual bool has_view_transform_to_px() const = 0;
         [[nodiscard]] virtual mat33 view_transform_to_px() const = 0;

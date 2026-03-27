@@ -26,6 +26,10 @@
 
 namespace neogfx
 {
+    struct no_graph_series_data : std::logic_error { no_graph_series_data() : std::logic_error{ "neogfx::no_graph_series_data" } {} };
+    struct unknown_graph_datum_type : std::logic_error { unknown_graph_datum_type() : std::logic_error{ "neogfx::unknown_graph_datum_type" } {} };
+    struct graph_axis_undefined : std::logic_error { graph_axis_undefined() : std::logic_error{ "neogfx::graph_axis_undefined" } {} };
+
     template <typename X = double, typename Y = double>
     class graph_datum : public i_graph_datum<abstract_t<X>, abstract_t<Y>>
     {
@@ -74,9 +78,6 @@ namespace neogfx
         x_type iX;
         y_type iY;
     };
-
-    struct no_graph_series_data : std::logic_error { no_graph_series_data() : std::logic_error{"neogfx::no_graph_series_data"} {} };
-    struct unknown_graph_datum_type : std::logic_error { unknown_graph_datum_type() : std::logic_error{ "neogfx::unknown_graph_datum_type" } {} };
 
     template <typename X = double, typename Y = double>
     class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>>>
@@ -261,6 +262,100 @@ namespace neogfx
         mutable y_type const* iYMax = nullptr;
     };
 
+    template <typename T = double>
+    class graph_axis : public reference_counted<i_graph_axis<abstract_t<T>>>
+    {
+    public:
+        using abstract_datum_component_type = abstract_t<T>;
+        using abstract_type = i_graph_axis<abstract_t<T>>;
+    public:
+        using datum_component_type = T;
+    public:
+        define_declared_event(Changed, changed);
+    public:
+        [[nodiscard]] string const& label() const final
+        {
+            return iLabel;
+        }
+        void set_label(i_string const& aLabel = string{}) final
+        {
+            if (iLabel != aLabel)
+            {
+                iLabel = aLabel;
+                Changed();
+            }
+        }
+    public:
+        [[nodiscard]] bool has_minor_tick() const final
+        {
+            return iMinorTick.has_value();
+        }
+        [[nodiscard]] bool has_major_tick() const final
+        {
+            return iMajorTick.has_value();
+        }
+        [[nodiscard]] datum_component_type const& minor_tick() const final
+        {
+            return iMinorTick.value();
+        }
+        [[nodiscard]] datum_component_type const& major_tick() const final
+        {
+            return iMajorTick.value();
+        }
+        void set_minor_tick(abstract_datum_component_type const& aTick) final
+        {
+            if (iMinorTick != aTick)
+            {
+                iMinorTick = aTick;
+                Changed();
+            }
+        }
+        void set_major_tick(abstract_datum_component_type const& aTick) final
+        {
+            if (iMajorTick != aTick)
+            {
+                iMajorTick = aTick;
+                Changed();
+            }
+        }
+        void clear_minor_tick() final
+        {
+            if (iMinorTick != std::nullopt)
+            {
+                iMinorTick = std::nullopt;
+                Changed();
+            }
+        }
+        void clear_major_tick() final
+        {
+            if (iMajorTick != std::nullopt)
+            {
+                iMajorTick = std::nullopt;
+                Changed();
+            }
+        }
+    public:
+        [[nodiscard]] neogfx::font const& font() const final
+        {
+            if (iFont)
+                return iFont.value();
+            return service<i_app>().current_style().font(font_role::Widget);
+        }
+        void set_font(optional_font const& aFont = {}) final
+        {
+            if (iFont != aFont)
+            {
+                iFont = aFont;
+                Changed();
+            }
+        }
+    private:
+        string iLabel;
+        std::optional<datum_component_type> iMinorTick;
+        std::optional<datum_component_type> iMajorTick;
+        optional_font iFont;
+    };
+
     template <typename X = double, typename Y = double>
     class graph_renderer : public reference_counted<i_graph_renderer<abstract_t<X>, abstract_t<Y>>>
     {
@@ -318,7 +413,7 @@ namespace neogfx
                 {
                     std::ostringstream oss;
                     oss << aX;
-                    return aGc.text_extent(oss.str(), aWidget.x_axis_font());
+                    return aGc.text_extent(oss.str(), aWidget.x_axis().font());
                 }
                 else
                     throw unknown_graph_datum_type();
@@ -336,7 +431,7 @@ namespace neogfx
                 {
                     std::ostringstream oss;
                     oss << aY;
-                    return aGc.text_extent(oss.str(), aWidget.y_axis_font());
+                    return aGc.text_extent(oss.str(), aWidget.y_axis().font());
                 }
                 else
                     throw unknown_graph_datum_type();
@@ -558,101 +653,33 @@ namespace neogfx
             return series(aIndex).y_max();
         }
     public:
-        [[nodiscard]] bool has_minor_x_tick() const final
+        [[nodiscard]] i_graph_axis<x_type>& x_axis() const final
         {
-            return iMinorXTick.has_value();
+            if (!iXAxis)
+                throw graph_axis_undefined();
+            return *iXAxis;
         }
-        [[nodiscard]] bool has_major_x_tick() const final
+        void set_x_axis(i_ref_ptr<i_graph_axis<x_type>> const& aAxis = ref_ptr<i_graph_axis<x_type>>{}) final
         {
-            return iMajorXTick.has_value();
+            iXAxis = aAxis;
+            iSink += iXAxis->changed([&]()
+                {
+                    this->update();
+                });
         }
-        [[nodiscard]] x_type const& minor_x_tick() const final
+        [[nodiscard]] i_graph_axis<y_type>& y_axis() const final
         {
-            return iMinorXTick.value();
+            if (!iYAxis)
+                throw graph_axis_undefined();
+            return *iYAxis;
         }
-        [[nodiscard]] x_type const& major_x_tick() const final
+        void set_y_axis(i_ref_ptr<i_graph_axis<y_type>> const& aAxis = ref_ptr<i_graph_axis<y_type>>{}) final
         {
-            return iMajorXTick.value();
-        }
-        void set_minor_x_tick(x_abstract_type const& aTick) final
-        {
-            if (iMinorXTick != aTick)
-            {
-                iMinorXTick = aTick;
-                this->update();
-            }
-        }
-        void set_major_x_tick(x_abstract_type const& aTick) final
-        {
-            if (iMajorXTick != aTick)
-            {
-                iMajorXTick = aTick;
-                this->update();
-            }
-        }
-        void clear_minor_x_tick() final
-        {
-            if (iMinorXTick != std::nullopt)
-            {
-                iMinorXTick = std::nullopt;
-                this->update();
-            }
-        }
-        void clear_major_x_tick() final
-        {
-            if (iMajorXTick != std::nullopt)
-            {
-                iMajorXTick = std::nullopt;
-                this->update();
-            }
-        }
-        [[nodiscard]] bool has_minor_y_tick() const final
-        {
-            return iMinorYTick.has_value();
-        }
-        [[nodiscard]] bool has_major_y_tick() const final
-        {
-            return iMajorYTick.has_value();
-        }
-        [[nodiscard]] y_type const& minor_y_tick() const final
-        {
-            return iMinorYTick.value();
-        }
-        [[nodiscard]] y_type const& major_y_tick() const final
-        {
-            return iMajorYTick.value();
-        }
-        void set_minor_y_tick(y_abstract_type const& aTick) final
-        {
-            if (iMinorYTick != aTick)
-            {
-                iMinorYTick = aTick;
-                this->update();
-            }
-        }
-        void set_major_y_tick(y_abstract_type const& aTick) final
-        {
-            if (iMajorYTick != aTick)
-            {
-                iMajorYTick = aTick;
-                this->update();
-            }
-        }
-        void clear_minor_y_tick() final
-        {
-            if (iMinorYTick != std::nullopt)
-            {
-                iMinorYTick = std::nullopt;
-                this->update();
-            }
-        }
-        void clear_major_y_tick() final
-        {
-            if (iMajorYTick != std::nullopt)
-            {
-                iMajorYTick = std::nullopt;
-                this->update();
-            }
+            iYAxis = aAxis;
+            iSink += iYAxis->changed([&]()
+                {
+                    this->update();
+                });
         }
     public:
         [[nodiscard]] i_renderer const& renderer() const final
@@ -666,26 +693,6 @@ namespace neogfx
         void set_default_renderer() final
         {
             iRenderer = make_ref<renderer_type>();
-        }
-        [[nodiscard]] neogfx::font const& x_axis_font() const final
-        {
-            if (iXAxisFont)
-                return iXAxisFont.value();
-            return this->font();
-        }
-        void set_x_axis_font(optional_font const& aFont = {}) final
-        {
-            iXAxisFont = aFont;
-        }
-        [[nodiscard]] neogfx::font const& y_axis_font() const final
-        {
-            if (iYAxisFont)
-                return iYAxisFont.value();
-            return this->font();
-        }
-        void set_y_axis_font(optional_font const& aFont = {}) final
-        {
-            iYAxisFont = aFont;
         }
     public:
         [[nodiscard]] bool has_view_transform_to_px() const final
@@ -767,6 +774,9 @@ namespace neogfx
         {
             set_default_renderer();
 
+            set_x_axis(make_ref<graph_axis<x_type>>());
+            set_y_axis(make_ref<graph_axis<y_type>>());
+
             iSink += service<i_app>().current_style_changed([&](style_aspect aAspect)
                 {
                     iStyleBasedSeriesAppearance = std::nullopt;
@@ -788,13 +798,9 @@ namespace neogfx
         mutable std::optional<x_type> iXMax;
         mutable std::optional<y_type> iYMin;
         mutable std::optional<y_type> iYMax;
-        std::optional<x_type> iMinorXTick;
-        std::optional<x_type> iMajorXTick;
-        std::optional<y_type> iMinorYTick;
-        std::optional<y_type> iMajorYTick;
+        ref_ptr<i_graph_axis<x_type>> iXAxis;
+        ref_ptr<i_graph_axis<y_type>> iYAxis;
         ref_ptr<i_renderer> iRenderer;
-        optional_font iXAxisFont;
-        optional_font iYAxisFont;
         std::optional<mat33> iViewTransformToPx;
         mutable optional<graph_series_appearance> iStyleBasedSeriesAppearance;
         mutable optional<graph_series_appearance> iDefaultSeriesAppearance;
