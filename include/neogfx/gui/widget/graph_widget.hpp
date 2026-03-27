@@ -76,6 +76,7 @@ namespace neogfx
     };
 
     struct no_graph_series_data : std::logic_error { no_graph_series_data() : std::logic_error{"neogfx::no_graph_series_data"} {} };
+    struct unknown_graph_datum_type : std::logic_error { unknown_graph_datum_type() : std::logic_error{ "neogfx::unknown_graph_datum_type" } {} };
 
     template <typename X = double, typename Y = double>
     class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>>>
@@ -271,6 +272,13 @@ namespace neogfx
         using x_type = X;
         using y_type = Y;
         using i_series = i_graph_series<X, Y>;
+    private:
+        template <typename T, typename = void>
+        struct is_text_like : std::false_type {};
+        template <typename T>
+        struct is_text_like<T, std::void_t<decltype(std::declval<std::ostringstream&>() << std::declval<const T&>())>> : std::true_type {};
+        template <typename T>
+        static constexpr bool is_text_like_v = is_text_like<T>::value;
     public:
         graph_renderer(
             std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> const& aRenderFunc = {},
@@ -304,8 +312,16 @@ namespace neogfx
                 return iXExtentsFunc(aGc, aWidget, aX);
             else
             {
-                // todo
-                return {};
+                if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
+                    return aGc.text_extent(aX, aWidget.x_axis_font());
+                else if constexpr (is_text_like_v<x_type>)
+                {
+                    std::ostringstream oss;
+                    oss << aX;
+                    return aGc.text_extent(oss.str(), aWidget.x_axis_font());
+                }
+                else
+                    throw unknown_graph_datum_type();
             }
         }
         [[nodiscard]] size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_abstract_type const& aY) const final
@@ -314,8 +330,16 @@ namespace neogfx
                 return iYExtentsFunc(aGc, aWidget, aY);
             else
             {
-                // todo
-                return {};
+                if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
+                    return aGc.text_extent(aY, aWidget.y_axis_font());
+                else if constexpr (is_text_like_v<y_type>)
+                {
+                    std::ostringstream oss;
+                    oss << aY;
+                    return aGc.text_extent(oss.str(), aWidget.y_axis_font());
+                }
+                else
+                    throw unknown_graph_datum_type();
             }
         }
         void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_abstract_type const& aX) const final
@@ -401,103 +425,6 @@ namespace neogfx
             if (iFlags != aFlags)
             {
                 iFlags = aFlags;
-                this->update();
-            }
-        }
-    public:
-        [[nodiscard]] bool has_minor_x_tick() const final
-        {
-            return iMinorXTick.has_value();
-        }
-        [[nodiscard]] bool has_major_x_tick() const final
-        {
-            return iMajorXTick.has_value();
-        }
-        [[nodiscard]] x_type const& minor_x_tick() const final
-        {
-            return iMinorXTick.value();
-        }
-        [[nodiscard]] x_type const& major_x_tick() const final
-        {
-            return iMajorXTick.value();
-        }
-        void set_minor_x_tick(x_abstract_type const& aTick) final
-        {
-            if (iMinorXTick != aTick)
-            {
-                iMinorXTick = aTick;
-                this->update();
-            }
-        }
-        void set_major_x_tick(x_abstract_type const& aTick) final
-        {
-            if (iMajorXTick != aTick)
-            {
-                iMajorXTick = aTick;
-                this->update();
-            }
-        }
-        void clear_minor_x_tick() final
-        {
-            if (iMinorXTick != std::nullopt)
-            {
-                iMinorXTick = std::nullopt;
-                this->update();
-            }
-        }
-        void clear_major_x_tick() final
-        {
-            if (iMajorXTick != std::nullopt)
-            {
-                iMajorXTick = std::nullopt;
-                this->update();
-            }
-        }
-        [[nodiscard]] bool has_minor_y_tick() const final
-        {
-            return iMinorYTick.has_value();
-        }
-        [[nodiscard]] bool has_major_y_tick() const final
-        {
-            return iMajorYTick.has_value();
-        }
-        [[nodiscard]] y_type const& minor_y_tick() const final
-        {
-            return iMinorYTick.value();
-        }
-        [[nodiscard]] y_type const& major_y_tick() const final
-        {
-            return iMajorYTick.value();
-        }
-        void set_minor_y_tick(y_abstract_type const& aTick) final
-        {
-            if (iMinorYTick != aTick)
-            {
-                iMinorYTick = aTick;
-                this->update();
-            }
-        }
-        void set_major_y_tick(y_abstract_type const& aTick) final
-        {
-            if (iMajorYTick != aTick)
-            {
-                iMajorYTick = aTick;
-                this->update();
-            }
-        }
-        void clear_minor_y_tick() final
-        {
-            if (iMinorYTick != std::nullopt)
-            {
-                iMinorYTick = std::nullopt;
-                this->update();
-            }
-        }
-        void clear_major_y_tick() final
-        {
-            if (iMajorYTick != std::nullopt)
-            {
-                iMajorYTick = std::nullopt;
                 this->update();
             }
         }
@@ -631,6 +558,103 @@ namespace neogfx
             return series(aIndex).y_max();
         }
     public:
+        [[nodiscard]] bool has_minor_x_tick() const final
+        {
+            return iMinorXTick.has_value();
+        }
+        [[nodiscard]] bool has_major_x_tick() const final
+        {
+            return iMajorXTick.has_value();
+        }
+        [[nodiscard]] x_type const& minor_x_tick() const final
+        {
+            return iMinorXTick.value();
+        }
+        [[nodiscard]] x_type const& major_x_tick() const final
+        {
+            return iMajorXTick.value();
+        }
+        void set_minor_x_tick(x_abstract_type const& aTick) final
+        {
+            if (iMinorXTick != aTick)
+            {
+                iMinorXTick = aTick;
+                this->update();
+            }
+        }
+        void set_major_x_tick(x_abstract_type const& aTick) final
+        {
+            if (iMajorXTick != aTick)
+            {
+                iMajorXTick = aTick;
+                this->update();
+            }
+        }
+        void clear_minor_x_tick() final
+        {
+            if (iMinorXTick != std::nullopt)
+            {
+                iMinorXTick = std::nullopt;
+                this->update();
+            }
+        }
+        void clear_major_x_tick() final
+        {
+            if (iMajorXTick != std::nullopt)
+            {
+                iMajorXTick = std::nullopt;
+                this->update();
+            }
+        }
+        [[nodiscard]] bool has_minor_y_tick() const final
+        {
+            return iMinorYTick.has_value();
+        }
+        [[nodiscard]] bool has_major_y_tick() const final
+        {
+            return iMajorYTick.has_value();
+        }
+        [[nodiscard]] y_type const& minor_y_tick() const final
+        {
+            return iMinorYTick.value();
+        }
+        [[nodiscard]] y_type const& major_y_tick() const final
+        {
+            return iMajorYTick.value();
+        }
+        void set_minor_y_tick(y_abstract_type const& aTick) final
+        {
+            if (iMinorYTick != aTick)
+            {
+                iMinorYTick = aTick;
+                this->update();
+            }
+        }
+        void set_major_y_tick(y_abstract_type const& aTick) final
+        {
+            if (iMajorYTick != aTick)
+            {
+                iMajorYTick = aTick;
+                this->update();
+            }
+        }
+        void clear_minor_y_tick() final
+        {
+            if (iMinorYTick != std::nullopt)
+            {
+                iMinorYTick = std::nullopt;
+                this->update();
+            }
+        }
+        void clear_major_y_tick() final
+        {
+            if (iMajorYTick != std::nullopt)
+            {
+                iMajorYTick = std::nullopt;
+                this->update();
+            }
+        }
+    public:
         [[nodiscard]] i_renderer const& renderer() const final
         {
             return *iRenderer;
@@ -642,6 +666,26 @@ namespace neogfx
         void set_default_renderer() final
         {
             iRenderer = make_ref<renderer_type>();
+        }
+        [[nodiscard]] neogfx::font const& x_axis_font() const final
+        {
+            if (iXAxisFont)
+                return iXAxisFont.value();
+            return this->font();
+        }
+        void set_x_axis_font(optional_font const& aFont = {}) final
+        {
+            iXAxisFont = aFont;
+        }
+        [[nodiscard]] neogfx::font const& y_axis_font() const final
+        {
+            if (iYAxisFont)
+                return iYAxisFont.value();
+            return this->font();
+        }
+        void set_y_axis_font(optional_font const& aFont = {}) final
+        {
+            iYAxisFont = aFont;
         }
     public:
         [[nodiscard]] bool has_view_transform_to_px() const final
@@ -749,6 +793,8 @@ namespace neogfx
         std::optional<y_type> iMinorYTick;
         std::optional<y_type> iMajorYTick;
         ref_ptr<i_renderer> iRenderer;
+        optional_font iXAxisFont;
+        optional_font iYAxisFont;
         std::optional<mat33> iViewTransformToPx;
         mutable optional<graph_series_appearance> iStyleBasedSeriesAppearance;
         mutable optional<graph_series_appearance> iDefaultSeriesAppearance;

@@ -222,6 +222,21 @@ namespace neogfx
         [[nodiscard]] virtual graph_widget_flags flags() const = 0;
         virtual void set_flags(graph_widget_flags aFlags) = 0;
     public:
+        [[nodiscard]] virtual series_index series_count() const = 0;
+        [[nodiscard]] virtual i_series const& series(series_index aIndex) const = 0;
+        [[nodiscard]] virtual i_series& series(series_index aIndex) = 0;
+        virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}, i_ref_ptr<i_graph_series_appearance> const& aAppearance = ref_ptr<graph_series_appearance>{}) = 0;
+        virtual void erase_series(series_index aIndex) = 0;
+    public:
+        [[nodiscard]] virtual x_type const& x_min() const = 0;
+        [[nodiscard]] virtual x_type const& x_max() const = 0;
+        [[nodiscard]] virtual y_type const& y_min() const = 0;
+        [[nodiscard]] virtual y_type const& y_max() const = 0;
+        [[nodiscard]] virtual x_type const& x_min(series_index aIndex) const = 0;
+        [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
+        [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
+        [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
+    public:
         [[nodiscard]] virtual bool has_minor_x_tick() const = 0;
         [[nodiscard]] virtual bool has_major_x_tick() const = 0;
         [[nodiscard]] virtual x_type const& minor_x_tick() const = 0;
@@ -239,24 +254,13 @@ namespace neogfx
         virtual void clear_minor_y_tick() = 0;
         virtual void clear_major_y_tick() = 0;
     public:
-        [[nodiscard]] virtual series_index series_count() const = 0;
-        [[nodiscard]] virtual i_series const& series(series_index aIndex) const = 0;
-        [[nodiscard]] virtual i_series& series(series_index aIndex) = 0;
-        virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}, i_ref_ptr<i_graph_series_appearance> const& aAppearance = ref_ptr<graph_series_appearance>{}) = 0;
-        virtual void erase_series(series_index aIndex) = 0;
-    public:
-        [[nodiscard]] virtual x_type const& x_min() const = 0;
-        [[nodiscard]] virtual x_type const& x_max() const = 0;
-        [[nodiscard]] virtual y_type const& y_min() const = 0;
-        [[nodiscard]] virtual y_type const& y_max() const = 0;
-        [[nodiscard]] virtual x_type const& x_min(series_index aIndex) const = 0;
-        [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
-        [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
-        [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
-    public:
         [[nodiscard]] virtual i_renderer const& renderer() const = 0;
         virtual void set_renderer(i_renderer& aRenderer) = 0;
         virtual void set_default_renderer() = 0;
+        [[nodiscard]] virtual neogfx::font const& x_axis_font() const = 0;
+        virtual void set_x_axis_font(optional_font const& aFont = {}) = 0;
+        [[nodiscard]] virtual neogfx::font const& y_axis_font() const = 0;
+        virtual void set_y_axis_font(optional_font const& aFont = {}) = 0;
     public:
         [[nodiscard]] virtual bool has_view_transform_to_px() const = 0;
         [[nodiscard]] virtual mat33 view_transform_to_px() const = 0;
