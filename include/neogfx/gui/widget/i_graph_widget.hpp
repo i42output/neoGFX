@@ -181,6 +181,29 @@ namespace neogfx
     };
 
     template <typename X = double, typename Y = double>
+    class i_graph_widget;
+        
+    template <typename X = double, typename Y = double>
+    class i_graph_renderer : public i_reference_counted
+    {
+    public:
+        using abstract_type = i_graph_renderer;
+    public:
+        using x_type = X;
+        using y_type = Y;
+        using i_series = i_graph_series<X, Y>;
+        // series
+    public:
+        virtual void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const = 0;
+        // axis labels, datum hover
+    public:
+        [[nodiscard]] virtual size x_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const = 0;
+        [[nodiscard]] virtual size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const = 0;
+        virtual void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const = 0;
+        virtual void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const = 0;
+    };
+
+    template <typename X, typename Y>
     class i_graph_widget : public i_widget
     {
     public:
@@ -192,6 +215,7 @@ namespace neogfx
         using i_series = i_graph_series<X, Y>;
         using series_array = i_vector<i_ref_ptr<i_series>>;
         using series_index = typename series_array::size_type;
+        using i_renderer = i_graph_renderer<X, Y>;
     public:
         [[nodiscard]] virtual graph_widget_type type() const = 0;
         virtual void set_type(graph_widget_type aType) = 0;
@@ -229,6 +253,10 @@ namespace neogfx
         [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
         [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;
         [[nodiscard]] virtual y_type const& y_max(series_index aIndex) const = 0;
+    public:
+        [[nodiscard]] virtual i_renderer const& renderer() const = 0;
+        virtual void set_renderer(i_renderer& aRenderer) = 0;
+        virtual void set_default_renderer() = 0;
     public:
         [[nodiscard]] virtual bool has_view_transform_to_px() const = 0;
         [[nodiscard]] virtual mat33 view_transform_to_px() const = 0;

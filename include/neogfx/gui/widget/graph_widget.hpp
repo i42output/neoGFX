@@ -257,6 +257,88 @@ namespace neogfx
     };
 
     template <typename X = double, typename Y = double>
+    class graph_renderer : public reference_counted<i_graph_renderer<X, Y>>
+    {
+    public:
+        using abstract_type = i_graph_renderer<X, Y>;
+    public:
+        using x_type = X;
+        using y_type = Y;
+        using i_series = i_graph_series<X, Y>;
+    public:
+        graph_renderer(
+            std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> const& aRenderFunc = {},
+            std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> const& aXExtentsFunc = {},
+            std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> const& aYExtentsFunc = {},
+            std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> const& aXRenderFunc = {},
+            std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> const& aYRenderFunc = {}) :
+            iRenderFunc{ iRenderFunc },
+            iXExtentsFunc{ iXExtentsFunc },
+            iYExtentsFunc{ iYExtentsFunc },
+            iXRenderFunc{ iXRenderFunc },
+            iYRenderFunc{ iYRenderFunc }
+        {
+        }
+            // series
+    public:
+        void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const final
+        {
+            if (iRenderFunc)
+                iRenderFunc(aGc, aWidget, aSeries);
+            else
+            {
+                // todo
+            }
+        }
+        // axis labels, datum hover
+    public:
+        [[nodiscard]] size x_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const final
+        {
+            if (iXExtentsFunc)
+                return iXExtentsFunc(aGc, aWidget, aX);
+            else
+            {
+                // todo
+                return {};
+            }
+        }
+        [[nodiscard]] size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const final
+        {
+            if (iYExtentsFunc)
+                return iYExtentsFunc(aGc, aWidget, aY);
+            else
+            {
+                // todo
+                return {};
+            }
+        }
+        void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const final
+        {
+            if (iXRenderFunc)
+                iXRenderFunc(aGc, aWidget, aX);
+            else
+            {
+                // todo
+            }
+        }
+        void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const final
+        {
+            if (iYRenderFunc)
+                iYRenderFunc(aGc, aWidget, aY);
+            else
+            {
+                // todo
+            }
+        }
+    private:
+        std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> iRenderFunc;
+        std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> iXExtentsFunc;
+        std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> iYExtentsFunc;
+        std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> iXRenderFunc;
+        std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> iYRenderFunc;
+    };
+
+    template <typename X = double, typename Y = double>
     class graph_widget : public widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>
     {
         using base_type = widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>;
@@ -271,6 +353,8 @@ namespace neogfx
         using series_type = graph_series<X, Y>;
         using series_container = vector<ref_ptr<series_type>>;
         using series_index = typename series_container::size_type;
+        using i_renderer = typename abstract_type::i_renderer;
+        using renderer_type = graph_renderer<X, Y>;
     public:
         graph_widget(graph_widget_type aType = graph_widget_type::Line, graph_widget_flags aFlags = graph_widget_flags::None) :
             base_type{}, iType{ aType }, iFlags{ aFlags }
@@ -539,6 +623,19 @@ namespace neogfx
             return series(aIndex).y_max();
         }
     public:
+        [[nodiscard]] i_renderer const& renderer() const final
+        {
+            return *iRenderer;
+        }
+        void set_renderer(i_renderer& aRenderer) final
+        {
+            iRenderer = aRenderer;
+        }
+        void set_default_renderer() final
+        {
+            iRenderer = make_ref<renderer_type>();
+        }
+    public:
         [[nodiscard]] bool has_view_transform_to_px() const final
         {
             return iViewTransformToPx.has_value();
@@ -616,6 +713,8 @@ namespace neogfx
     private:
         void init()
         {
+            set_default_renderer();
+
             iSink += service<i_app>().current_style_changed([&](style_aspect aAspect)
                 {
                     iStyleBasedSeriesAppearance = std::nullopt;
@@ -641,6 +740,7 @@ namespace neogfx
         std::optional<x_type> iMajorXTick;
         std::optional<y_type> iMinorYTick;
         std::optional<y_type> iMajorYTick;
+        ref_ptr<i_renderer> iRenderer;
         std::optional<mat33> iViewTransformToPx;
         mutable optional<graph_series_appearance> iStyleBasedSeriesAppearance;
         mutable optional<graph_series_appearance> iDefaultSeriesAppearance;
