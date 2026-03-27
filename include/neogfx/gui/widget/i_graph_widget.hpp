@@ -232,8 +232,8 @@ namespace neogfx
     public:
         [[nodiscard]] virtual size x_label_extents(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
         [[nodiscard]] virtual size y_label_extents(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
-        virtual void x_render_label(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
-        virtual void y_render_label(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        virtual void render_x_label(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        virtual void render_y_label(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
     };
 
     template <typename X, typename Y>

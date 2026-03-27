@@ -375,92 +375,52 @@ namespace neogfx
         template <typename T>
         static constexpr bool is_text_like_v = is_text_like<T>::value;
     public:
-        graph_renderer(
-            std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> const& aRenderFunc = {},
-            std::function<size(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> const& aXLabelExtentsFunc = {},
-            std::function<size(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> const& aYLabelExtentsFunc = {},
-            std::function<void(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const& aLabelOrigin, graph_rendering_element)> const& aXRenderLabelFunc = {},
-            std::function<void(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const& aLabelOrigin, graph_rendering_element)> const& aYRenderLabelFunc = {}) :
-            iRenderFunc{ aRenderFunc },
-            iXLabelExtentsFunc{ aXLabelExtentsFunc },
-            iYLabelExtentsFunc{ aYLabelExtentsFunc },
-            iXRenderLabelFunc{ aXRenderLabelFunc },
-            iYRenderLabelFunc{ aYRenderLabelFunc }
+        graph_renderer()
         {
         }
         // series
     public:
-        void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const final
+        void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const override
         {
-            if (iRenderFunc)
-                iRenderFunc(aGc, aWidget, aSeries);
-            else
-            {
-                // todo
-            }
+            // todo
         }
         // axis labels, datum hover
     public:
-        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const final
+        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
-            if (iXLabelExtentsFunc)
-                return iXLabelExtentsFunc(aX, aWidget, aGc, aElement);
-            else
+            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
+                return aGc.text_extent(aX, aWidget.x_axis_font());
+            else if constexpr (is_text_like_v<x_type>)
             {
-                if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
-                    return aGc.text_extent(aX, aWidget.x_axis_font());
-                else if constexpr (is_text_like_v<x_type>)
-                {
-                    std::ostringstream oss;
-                    oss << aX;
-                    return aGc.text_extent(oss.str(), aWidget.x_axis().font());
-                }
-                else
-                    throw unknown_graph_datum_type();
+                std::ostringstream oss;
+                oss << aX;
+                return aGc.text_extent(oss.str(), aWidget.x_axis().font());
             }
+            else
+                throw unknown_graph_datum_type();
         }
-        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const final
+        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
-            if (iYLabelExtentsFunc)
-                return iYLabelExtentsFunc(aY, aWidget, aGc, aElement);
-            else
+            if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
+                return aGc.text_extent(aY, aWidget.y_axis_font());
+            else if constexpr (is_text_like_v<y_type>)
             {
-                if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
-                    return aGc.text_extent(aY, aWidget.y_axis_font());
-                else if constexpr (is_text_like_v<y_type>)
-                {
-                    std::ostringstream oss;
-                    oss << aY;
-                    return aGc.text_extent(oss.str(), aWidget.y_axis().font());
-                }
-                else
-                    throw unknown_graph_datum_type();
+                std::ostringstream oss;
+                oss << aY;
+                return aGc.text_extent(oss.str(), aWidget.y_axis().font());
             }
+            else
+                throw unknown_graph_datum_type();
         }
-        void x_render_label(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const final
+        void render_x_label(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            if (iXRenderLabelFunc)
-                iXRenderLabelFunc(aX, aWidget, aGc, aLabelOrigin, aElement);
-            else
-            {
-                // todo
-            }
+            // todo
         }
-        void y_render_label(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const final
+        void render_y_label(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            if (iYRenderLabelFunc)
-                iYRenderLabelFunc(aY, aWidget, aGc, aLabelOrigin, aElement);
-            else
-            {
-                // todo
-            }
+            // todo
         }
     private:
-        std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> iRenderFunc;
-        std::function<size(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> iXLabelExtentsFunc;
-        std::function<size(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> iYLabelExtentsFunc;
-        std::function<void(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const&, graph_rendering_element)> iXRenderLabelFunc;
-        std::function<void(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const&, graph_rendering_element)> iYRenderLabelFunc;
     };
 
     template <typename X = double, typename Y = double>
