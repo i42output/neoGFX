@@ -269,10 +269,10 @@ namespace neogfx
         virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}, i_ref_ptr<i_graph_series_appearance> const& aAppearance = ref_ptr<graph_series_appearance>{}) = 0;
         virtual void erase_series(series_index aIndex) = 0;
     public:
-        [[nodiscard]] virtual x_type const& x_min() const = 0;
-        [[nodiscard]] virtual x_type const& x_max() const = 0;
-        [[nodiscard]] virtual y_type const& y_min() const = 0;
-        [[nodiscard]] virtual y_type const& y_max() const = 0;
+        [[nodiscard]] virtual x_type const& x_min(bool aIgnoreVisibility = false) const = 0;
+        [[nodiscard]] virtual x_type const& x_max(bool aIgnoreVisibility = false) const = 0;
+        [[nodiscard]] virtual y_type const& y_min(bool aIgnoreVisibility = false) const = 0;
+        [[nodiscard]] virtual y_type const& y_max(bool aIgnoreVisibility = false) const = 0;
         [[nodiscard]] virtual x_type const& x_min(series_index aIndex) const = 0;
         [[nodiscard]] virtual x_type const& x_max(series_index aIndex) const = 0;
         [[nodiscard]] virtual y_type const& y_min(series_index aIndex) const = 0;

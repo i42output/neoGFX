@@ -578,13 +578,13 @@ namespace neogfx
             this->update();
         }
     public:
-        [[nodiscard]] x_type const& x_min() const final
+        [[nodiscard]] x_type const& x_min(bool aIgnoreVisibility = false) const final
         {
             if (!iXMin.has_value())
             {
                 for (auto const& s : iSeries)
                 {
-                    if (!s->visible())
+                    if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iXMin.has_value())
                         iXMin = s->x_min();
@@ -592,15 +592,17 @@ namespace neogfx
                         iXMin = std::min(iXMin.value(), s->x_min());
                 }
             }
+            if (!iXMin.has_value() && !aIgnoreVisibility)
+                return x_min(true);
             return iXMin.value();
         }
-        [[nodiscard]] x_type const& x_max() const final
+        [[nodiscard]] x_type const& x_max(bool aIgnoreVisibility = false) const final
         {
             if (!iXMax.has_value())
             {
                 for (auto const& s : iSeries)
                 {
-                    if (!s->visible())
+                    if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iXMax.has_value())
                         iXMax = s->x_max();
@@ -608,15 +610,17 @@ namespace neogfx
                         iXMax = std::max(iXMax.value(), s->x_max());
                 }
             }
+            if (!iXMax.has_value() && !aIgnoreVisibility)
+                return x_max(true);
             return iXMax.value();
         }
-        [[nodiscard]] y_type const& y_min() const final
+        [[nodiscard]] y_type const& y_min(bool aIgnoreVisibility = false) const final
         {
             if (!iYMin.has_value())
             {
                 for (auto const& s : iSeries)
                 {
-                    if (!s->visible())
+                    if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iYMin.has_value())
                         iYMin = s->y_min();
@@ -624,15 +628,17 @@ namespace neogfx
                         iYMin = std::min(iYMin.value(), s->y_min());
                 }
             }
+            if (!iYMin.has_value() && !aIgnoreVisibility)
+                return y_min(true);
             return iYMin.value();
         }
-        [[nodiscard]] y_type const& y_max() const final
+        [[nodiscard]] y_type const& y_max(bool aIgnoreVisibility = false) const final
         {
             if (!iYMax.has_value())
             {
                 for (auto const& s : iSeries)
                 {
-                    if (!s->visible())
+                    if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iYMax.has_value())
                         iYMax = s->y_max();
@@ -640,6 +646,8 @@ namespace neogfx
                         iYMax = std::max(iYMax.value(), s->y_max());
                 }
             }
+            if (!iYMax.has_value() && !aIgnoreVisibility)
+                return y_max(true);
             return iYMax.value();
         }
         [[nodiscard]] x_type const& x_min(series_index aIndex) const final
