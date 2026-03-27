@@ -225,15 +225,22 @@ namespace neogfx
         using x_type = X;
         using y_type = Y;
         using i_series = i_graph_series<X, Y>;
-        // series
+        // render
     public:
-        virtual void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const = 0;
-        // axis labels, datum hover
-    public:
-        [[nodiscard]] virtual size x_label_extents(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
-        [[nodiscard]] virtual size y_label_extents(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
+        virtual void render(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_plot(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_series(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const = 0;
+        virtual void render_x_axis(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
+        virtual void render_y_axis(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
         virtual void render_x_label(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
         virtual void render_y_label(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        // metrics
+    public:
+        [[nodiscard]] virtual rect plot_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
+        [[nodiscard]] virtual rect x_axis_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
+        [[nodiscard]] virtual rect y_axis_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const = 0;
+        [[nodiscard]] virtual size x_label_extents(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
+        [[nodiscard]] virtual size y_label_extents(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
     };
 
     template <typename X, typename Y>
@@ -246,8 +253,8 @@ namespace neogfx
         using y_type = Y;
         using i_datum = i_graph_datum<X, Y>;
         using i_series = i_graph_series<X, Y>;
-        using series_array = i_vector<i_ref_ptr<i_series>>;
-        using series_index = typename series_array::size_type;
+        using series_container = i_vector<i_ref_ptr<i_series>>;
+        using series_index = typename series_container::size_type;
         using i_renderer = i_graph_renderer<X, Y>;
     public:
         [[nodiscard]] virtual graph_widget_type type() const = 0;
@@ -256,6 +263,7 @@ namespace neogfx
         virtual void set_flags(graph_widget_flags aFlags) = 0;
     public:
         [[nodiscard]] virtual series_index series_count() const = 0;
+        [[nodiscard]] virtual series_container const& series() const = 0;
         [[nodiscard]] virtual i_series const& series(series_index aIndex) const = 0;
         [[nodiscard]] virtual i_series& series(series_index aIndex) = 0;
         virtual i_series& add_series(i_optional<i_string> const& aName = optional<string>{}, i_ref_ptr<i_graph_series_appearance> const& aAppearance = ref_ptr<graph_series_appearance>{}) = 0;

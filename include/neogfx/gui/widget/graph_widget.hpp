@@ -378,31 +378,30 @@ namespace neogfx
         graph_renderer()
         {
         }
-        // series
+        // render
     public:
-        void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const override
+        void render(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        {
+            render_plot(aWidget, aGc);
+            render_x_axis(aWidget, aGc);
+            render_y_axis(aWidget, aGc);
+        }
+        void render_plot(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        {
+            for (auto const& s : aWidget.series())
+                render_series(aWidget, aGc, *s);
+        }
+        void render_series(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
         {
             // todo
         }
-        // axis labels, datum hover
-    public:
-        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        void render_x_axis(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
         {
-            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
-                return aGc.text_extent(aX, aWidget.x_axis_font());
-            else if constexpr (is_text_like_v<x_type>)
-                return aGc.text_extent(to_string(aX), aWidget.x_axis().font());
-            else
-                throw unknown_graph_datum_type();
+            // todo
         }
-        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        void render_y_axis(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
         {
-            if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
-                return aGc.text_extent(aY, aWidget.y_axis_font());
-            else if constexpr (is_text_like_v<y_type>)
-                return aGc.text_extent(to_string(aY), aWidget.y_axis().font());
-            else
-                throw unknown_graph_datum_type();
+            // todo
         }
         void render_x_label(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
@@ -419,6 +418,41 @@ namespace neogfx
                 aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, aY, aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
             else if constexpr (is_text_like_v<y_type>)
                 aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, to_string(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
+            else
+                throw unknown_graph_datum_type();
+        }
+        // metrics
+    public:
+        [[nodiscard]] rect plot_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        {
+            // todo
+            return rect{};
+        }
+        [[nodiscard]] rect x_axis_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        {
+            // todo
+            return rect{};
+        }
+        [[nodiscard]] rect y_axis_area(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
+        {
+            // todo
+            return rect{};
+        }
+        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        {
+            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
+                return aGc.text_extent(aX, aWidget.x_axis_font());
+            else if constexpr (is_text_like_v<x_type>)
+                return aGc.text_extent(to_string(aX), aWidget.x_axis().font());
+            else
+                throw unknown_graph_datum_type();
+        }
+        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
+        {
+            if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
+                return aGc.text_extent(aY, aWidget.y_axis_font());
+            else if constexpr (is_text_like_v<y_type>)
+                return aGc.text_extent(to_string(aY), aWidget.y_axis().font());
             else
                 throw unknown_graph_datum_type();
         }
@@ -489,6 +523,10 @@ namespace neogfx
         [[nodiscard]] series_index series_count() const final
         {
             return iSeries.size();
+        }
+        [[nodiscard]] series_container const& series() const final
+        {
+            return iSeries;
         }
         [[nodiscard]] series_type const& series(series_index aIndex) const final
         {
