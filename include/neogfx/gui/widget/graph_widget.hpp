@@ -273,15 +273,15 @@ namespace neogfx
     public:
         define_declared_event(Changed, changed);
     public:
-        [[nodiscard]] string const& label() const final
+        [[nodiscard]] string const& title() const final
         {
-            return iLabel;
+            return iTitle;
         }
-        void set_label(i_string const& aLabel = string{}) final
+        void set_title(i_string const& aTitle = string{}) final
         {
-            if (iLabel != aLabel)
+            if (iTitle != aTitle)
             {
-                iLabel = aLabel;
+                iTitle = aTitle;
                 Changed();
             }
         }
@@ -350,7 +350,7 @@ namespace neogfx
             }
         }
     private:
-        string iLabel;
+        string iTitle;
         std::optional<datum_component_type> iMinorTick;
         std::optional<datum_component_type> iMajorTick;
         optional_font iFont;
@@ -377,15 +377,15 @@ namespace neogfx
     public:
         graph_renderer(
             std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> const& aRenderFunc = {},
-            std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> const& aXExtentsFunc = {},
-            std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> const& aYExtentsFunc = {},
-            std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> const& aXRenderFunc = {},
-            std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> const& aYRenderFunc = {}) :
+            std::function<size(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> const& aXLabelExtentsFunc = {},
+            std::function<size(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> const& aYLabelExtentsFunc = {},
+            std::function<void(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const& aLabelOrigin, graph_rendering_element)> const& aXRenderLabelFunc = {},
+            std::function<void(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const& aLabelOrigin, graph_rendering_element)> const& aYRenderLabelFunc = {}) :
             iRenderFunc{ aRenderFunc },
-            iXExtentsFunc{ aXExtentsFunc },
-            iYExtentsFunc{ aYExtentsFunc },
-            iXRenderFunc{ aXRenderFunc },
-            iYRenderFunc{ aYRenderFunc }
+            iXLabelExtentsFunc{ aXLabelExtentsFunc },
+            iYLabelExtentsFunc{ aYLabelExtentsFunc },
+            iXRenderLabelFunc{ aXRenderLabelFunc },
+            iYRenderLabelFunc{ aYRenderLabelFunc }
         {
         }
         // series
@@ -401,10 +401,10 @@ namespace neogfx
         }
         // axis labels, datum hover
     public:
-        [[nodiscard]] size x_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_abstract_type const& aX) const final
+        [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const final
         {
-            if (iXExtentsFunc)
-                return iXExtentsFunc(aGc, aWidget, aX);
+            if (iXLabelExtentsFunc)
+                return iXLabelExtentsFunc(aX, aWidget, aGc, aElement);
             else
             {
                 if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
@@ -419,10 +419,10 @@ namespace neogfx
                     throw unknown_graph_datum_type();
             }
         }
-        [[nodiscard]] size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_abstract_type const& aY) const final
+        [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const final
         {
-            if (iYExtentsFunc)
-                return iYExtentsFunc(aGc, aWidget, aY);
+            if (iYLabelExtentsFunc)
+                return iYLabelExtentsFunc(aY, aWidget, aGc, aElement);
             else
             {
                 if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
@@ -437,19 +437,19 @@ namespace neogfx
                     throw unknown_graph_datum_type();
             }
         }
-        void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_abstract_type const& aX) const final
+        void x_render_label(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const final
         {
-            if (iXRenderFunc)
-                iXRenderFunc(aGc, aWidget, aX);
+            if (iXRenderLabelFunc)
+                iXRenderLabelFunc(aX, aWidget, aGc, aLabelOrigin, aElement);
             else
             {
                 // todo
             }
         }
-        void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_abstract_type const& aY) const final
+        void y_render_label(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const final
         {
-            if (iYRenderFunc)
-                iYRenderFunc(aGc, aWidget, aY);
+            if (iYRenderLabelFunc)
+                iYRenderLabelFunc(aY, aWidget, aGc, aLabelOrigin, aElement);
             else
             {
                 // todo
@@ -457,10 +457,10 @@ namespace neogfx
         }
     private:
         std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, i_series const&)> iRenderFunc;
-        std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> iXExtentsFunc;
-        std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> iYExtentsFunc;
-        std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> iXRenderFunc;
-        std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> iYRenderFunc;
+        std::function<size(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> iXLabelExtentsFunc;
+        std::function<size(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, graph_rendering_element)> iYLabelExtentsFunc;
+        std::function<void(x_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const&, graph_rendering_element)> iXRenderLabelFunc;
+        std::function<void(y_type const&, i_graph_widget<X, Y> const&, i_graphics_context&, point const&, graph_rendering_element)> iYRenderLabelFunc;
     };
 
     template <typename X = double, typename Y = double>

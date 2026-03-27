@@ -180,9 +180,42 @@ namespace neogfx
         optional_color_or_gradient iFill;
     };
 
+    template <typename T = double>
+    class i_graph_axis : public i_reference_counted
+    {
+    public:
+        using abstract_type = i_graph_axis;
+    public:
+        using datum_component_type = T;
+    public:
+        declare_event(changed);
+    public:
+        [[nodiscard]] virtual i_string const& title() const = 0;
+        virtual void set_title(i_string const& aTitle = string{}) = 0;
+    public:
+        [[nodiscard]] virtual bool has_minor_tick() const = 0;
+        [[nodiscard]] virtual bool has_major_tick() const = 0;
+        [[nodiscard]] virtual datum_component_type const& minor_tick() const = 0;
+        [[nodiscard]] virtual datum_component_type const& major_tick() const = 0;
+        virtual void set_minor_tick(datum_component_type const& aTick) = 0;
+        virtual void set_major_tick(datum_component_type const& aTick) = 0;
+        virtual void clear_minor_tick() = 0;
+        virtual void clear_major_tick() = 0;
+    public:
+        [[nodiscard]] virtual neogfx::font const& font() const = 0;
+        virtual void set_font(optional_font const& aFont = {}) = 0;
+    };
+
     template <typename X = double, typename Y = double>
     class i_graph_widget;
         
+    enum class graph_rendering_element
+    {
+        AxisLabel,
+        DatumLabel,
+        DatumHoverLabel
+    };
+
     template <typename X = double, typename Y = double>
     class i_graph_renderer : public i_reference_counted
     {
@@ -197,36 +230,10 @@ namespace neogfx
         virtual void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const = 0;
         // axis labels, datum hover
     public:
-        [[nodiscard]] virtual size x_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const = 0;
-        [[nodiscard]] virtual size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const = 0;
-        virtual void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const = 0;
-        virtual void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const = 0;
-    };
-
-    template <typename T = double>
-    class i_graph_axis : public i_reference_counted
-    {
-    public:
-        using abstract_type = i_graph_axis;
-    public:
-        using datum_component_type = T;
-    public:
-        declare_event(changed);
-    public:
-        [[nodiscard]] virtual i_string const& label() const = 0;
-        virtual void set_label(i_string const& aLabel = string{}) = 0;
-    public:
-        [[nodiscard]] virtual bool has_minor_tick() const = 0;
-        [[nodiscard]] virtual bool has_major_tick() const = 0;
-        [[nodiscard]] virtual datum_component_type const& minor_tick() const = 0;
-        [[nodiscard]] virtual datum_component_type const& major_tick() const = 0;
-        virtual void set_minor_tick(datum_component_type const& aTick) = 0;
-        virtual void set_major_tick(datum_component_type const& aTick) = 0;
-        virtual void clear_minor_tick() = 0;
-        virtual void clear_major_tick() = 0;
-    public:
-        [[nodiscard]] virtual neogfx::font const& font() const = 0;
-        virtual void set_font(optional_font const& aFont = {}) = 0;
+        [[nodiscard]] virtual size x_label_extents(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
+        [[nodiscard]] virtual size y_label_extents(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, graph_rendering_element) const = 0;
+        virtual void x_render_label(x_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        virtual void y_render_label(y_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
     };
 
     template <typename X, typename Y>
