@@ -30,7 +30,9 @@ namespace neogfx
     class graph_datum : public i_graph_datum<abstract_t<X>, abstract_t<Y>>
     {
     public:
-        using abstract_type = i_graph_datum<abstract_t<X>, abstract_t<Y>>;
+        using x_abstract_type = abstract_t<X>;
+        using y_abstract_type = abstract_t<Y>;
+        using abstract_type = i_graph_datum<x_abstract_type, y_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
@@ -60,11 +62,11 @@ namespace neogfx
         {
             return iY;
         }
-        void set_x(x_type const& aX) final
+        void set_x(x_abstract_type const& aX) final
         {
             iX = aX;
         }
-        void set_y(y_type const& aY) final
+        void set_y(y_abstract_type const& aY) final
         {
             iY = aY;
         }
@@ -79,7 +81,9 @@ namespace neogfx
     class graph_series : public reference_counted<i_graph_series<abstract_t<X>, abstract_t<Y>>>
     {
     public:
-        using abstract_type = i_graph_series<abstract_t<X>, abstract_t<Y>>;
+        using x_abstract_type = abstract_t<X>;
+        using y_abstract_type = abstract_t<Y>;
+        using abstract_type = i_graph_series<x_abstract_type, y_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
@@ -257,10 +261,12 @@ namespace neogfx
     };
 
     template <typename X = double, typename Y = double>
-    class graph_renderer : public reference_counted<i_graph_renderer<X, Y>>
+    class graph_renderer : public reference_counted<i_graph_renderer<abstract_t<X>, abstract_t<Y>>>
     {
     public:
-        using abstract_type = i_graph_renderer<X, Y>;
+        using x_abstract_type = abstract_t<X>;
+        using y_abstract_type = abstract_t<Y>;
+        using abstract_type = i_graph_renderer<x_abstract_type, y_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
@@ -279,7 +285,7 @@ namespace neogfx
             iYRenderFunc{ aYRenderFunc }
         {
         }
-            // series
+        // series
     public:
         void render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, i_series const& aSeries) const final
         {
@@ -292,7 +298,7 @@ namespace neogfx
         }
         // axis labels, datum hover
     public:
-        [[nodiscard]] size x_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const final
+        [[nodiscard]] size x_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_abstract_type const& aX) const final
         {
             if (iXExtentsFunc)
                 return iXExtentsFunc(aGc, aWidget, aX);
@@ -302,7 +308,7 @@ namespace neogfx
                 return {};
             }
         }
-        [[nodiscard]] size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const final
+        [[nodiscard]] size y_extents(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_abstract_type const& aY) const final
         {
             if (iYExtentsFunc)
                 return iYExtentsFunc(aGc, aWidget, aY);
@@ -312,7 +318,7 @@ namespace neogfx
                 return {};
             }
         }
-        void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_type const& aX) const final
+        void x_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, x_abstract_type const& aX) const final
         {
             if (iXRenderFunc)
                 iXRenderFunc(aGc, aWidget, aX);
@@ -321,7 +327,7 @@ namespace neogfx
                 // todo
             }
         }
-        void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_type const& aY) const final
+        void y_render(i_graphics_context& aGc, i_graph_widget<X, Y> const& aWidget, y_abstract_type const& aY) const final
         {
             if (iYRenderFunc)
                 iYRenderFunc(aGc, aWidget, aY);
@@ -343,7 +349,9 @@ namespace neogfx
     {
         using base_type = widget<i_graph_widget<abstract_t<X>, abstract_t<Y>>>;
     public:
-        using abstract_type = i_graph_widget<abstract_t<X>, abstract_t<Y>>;
+        using x_abstract_type = abstract_t<X>;
+        using y_abstract_type = abstract_t<Y>;
+        using abstract_type = i_graph_widget<x_abstract_type, y_abstract_type>;
     public:
         using x_type = X;
         using y_type = Y;
@@ -413,7 +421,7 @@ namespace neogfx
         {
             return iMajorXTick.value();
         }
-        void set_minor_x_tick(x_type const& aTick) final
+        void set_minor_x_tick(x_abstract_type const& aTick) final
         {
             if (iMinorXTick != aTick)
             {
@@ -421,7 +429,7 @@ namespace neogfx
                 this->update();
             }
         }
-        void set_major_x_tick(x_type const& aTick) final
+        void set_major_x_tick(x_abstract_type const& aTick) final
         {
             if (iMajorXTick != aTick)
             {
@@ -461,7 +469,7 @@ namespace neogfx
         {
             return iMajorYTick.value();
         }
-        void set_minor_y_tick(y_type const& aTick) final
+        void set_minor_y_tick(y_abstract_type const& aTick) final
         {
             if (iMinorYTick != aTick)
             {
@@ -469,7 +477,7 @@ namespace neogfx
                 this->update();
             }
         }
-        void set_major_y_tick(y_type const& aTick) final
+        void set_major_y_tick(y_abstract_type const& aTick) final
         {
             if (iMajorYTick != aTick)
             {
@@ -654,7 +662,7 @@ namespace neogfx
             iViewTransformToPx = std::nullopt;
             this->update();
         }
-        void get_view(x_type& xMin, x_type& xMax, y_type& yMin, y_type& yMax) const final
+        void get_view(x_abstract_type& xMin, x_abstract_type& xMax, y_abstract_type& yMin, y_abstract_type& yMax) const final
         {
             if (std::holds_alternative<std::monostate>(iView))
             {
@@ -690,7 +698,7 @@ namespace neogfx
             iView = iSeries.at(aIndex);
             this->update();
         }
-        void set_view(x_type const& xMin, x_type const& xMax, y_type const& yMin, y_type const& yMax) final
+        void set_view(x_abstract_type const& xMin, x_abstract_type const& xMax, y_abstract_type const& yMin, y_abstract_type const& yMax) final
         {
             iView = view_min_max{ xMin, xMax, yMin, yMax };
             this->update();
