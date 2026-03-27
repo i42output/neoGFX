@@ -371,7 +371,7 @@ namespace neogfx
         template <typename T, typename = void>
         struct is_text_like : std::false_type {};
         template <typename T>
-        struct is_text_like<T, std::void_t<decltype(std::declval<std::ostringstream&>() << std::declval<const T&>())>> : std::true_type {};
+        struct is_text_like<T, std::void_t<decltype(std::declval<to_string(std::declval<const T&>())>)>> : std::true_type {};
         template <typename T>
         static constexpr bool is_text_like_v = is_text_like<T>::value;
     public:
@@ -391,11 +391,7 @@ namespace neogfx
             if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
                 return aGc.text_extent(aX, aWidget.x_axis_font());
             else if constexpr (is_text_like_v<x_type>)
-            {
-                std::ostringstream oss;
-                oss << aX;
-                return aGc.text_extent(oss.str(), aWidget.x_axis().font());
-            }
+                return aGc.text_extent(to_string(aX), aWidget.x_axis().font());
             else
                 throw unknown_graph_datum_type();
         }
@@ -404,21 +400,27 @@ namespace neogfx
             if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
                 return aGc.text_extent(aY, aWidget.y_axis_font());
             else if constexpr (is_text_like_v<y_type>)
-            {
-                std::ostringstream oss;
-                oss << aY;
-                return aGc.text_extent(oss.str(), aWidget.y_axis().font());
-            }
+                return aGc.text_extent(to_string(aY), aWidget.y_axis().font());
             else
                 throw unknown_graph_datum_type();
         }
         void render_x_label(x_abstract_type const& aX, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            // todo
+            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
+                aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, aX, aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
+            else if constexpr (is_text_like_v<x_type>)
+                aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, to_string(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
+            else
+                throw unknown_graph_datum_type();
         }
         void render_y_label(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            // todo
+            if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
+                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, aY, aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
+            else if constexpr (is_text_like_v<x_type>)
+                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, to_string(aY), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
+            else
+                throw unknown_graph_datum_type();
         }
     private:
     };
