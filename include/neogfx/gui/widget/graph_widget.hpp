@@ -389,7 +389,8 @@ namespace neogfx
         void render_plot(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc) const override
         {
             for (auto const& s : aWidget.series())
-                render_series(aWidget, aGc, *s);
+                if (s->visible())
+                    render_series(aWidget, aGc, *s);
         }
         void render_series(i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, i_series const& aSeries) const override
         {
@@ -493,6 +494,11 @@ namespace neogfx
             base_type{ aLayout }, iType{ aType }, iFlags{ aFlags }
         {
             init();
+        }
+    public:
+        void paint(i_graphics_context& aGc) const override
+        {
+            renderer().render(*this, aGc);
         }
     public:
         [[nodiscard]] graph_widget_type type() const final
