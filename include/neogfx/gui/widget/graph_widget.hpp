@@ -586,6 +586,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (s->no_data())
+                        continue;
                     if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iXMin.has_value())
@@ -596,6 +598,8 @@ namespace neogfx
             }
             if (!iXMin.has_value() && !aIgnoreVisibility)
                 return x_min(true);
+            if (!iXMin.has_value())
+                throw no_graph_series_data();
             return iXMin.value();
         }
         [[nodiscard]] x_type const& x_max(bool aIgnoreVisibility = false) const final
@@ -606,6 +610,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (s->no_data())
+                        continue;
                     if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iXMax.has_value())
@@ -616,6 +622,8 @@ namespace neogfx
             }
             if (!iXMax.has_value() && !aIgnoreVisibility)
                 return x_max(true);
+            if (!iXMax.has_value())
+                throw no_graph_series_data();
             return iXMax.value();
         }
         [[nodiscard]] y_type const& y_min(bool aIgnoreVisibility = false) const final
@@ -626,6 +634,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (s->no_data())
+                        continue;
                     if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iYMin.has_value())
@@ -636,6 +646,8 @@ namespace neogfx
             }
             if (!iYMin.has_value() && !aIgnoreVisibility)
                 return y_min(true);
+            if (!iYMin.has_value())
+                throw no_graph_series_data();
             return iYMin.value();
         }
         [[nodiscard]] y_type const& y_max(bool aIgnoreVisibility = false) const final
@@ -646,6 +658,8 @@ namespace neogfx
             {
                 for (auto const& s : iSeries)
                 {
+                    if (s->no_data())
+                        continue;
                     if (!s->visible() && !aIgnoreVisibility)
                         continue;
                     if (!iYMax.has_value())
@@ -656,6 +670,8 @@ namespace neogfx
             }
             if (!iYMax.has_value() && !aIgnoreVisibility)
                 return y_max(true);
+            if (!iYMax.has_value())
+                throw no_graph_series_data();
             return iYMax.value();
         }
         [[nodiscard]] x_type const& x_min(series_index aIndex) const final
