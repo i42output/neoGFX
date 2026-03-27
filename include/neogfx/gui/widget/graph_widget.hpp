@@ -416,9 +416,9 @@ namespace neogfx
         void render_y_label(y_abstract_type const& aY, i_graph_widget<X, Y> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
             if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
-                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, aY, aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
-            else if constexpr (is_text_like_v<x_type>)
-                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, to_string(aY), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
+                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, aY, aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
+            else if constexpr (is_text_like_v<y_type>)
+                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, to_string(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
             else
                 throw unknown_graph_datum_type();
         }
