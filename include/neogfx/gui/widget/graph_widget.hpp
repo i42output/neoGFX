@@ -272,11 +272,11 @@ namespace neogfx
             std::function<size(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> const& aYExtentsFunc = {},
             std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, x_type const&)> const& aXRenderFunc = {},
             std::function<void(i_graphics_context&, i_graph_widget<X, Y> const&, y_type const&)> const& aYRenderFunc = {}) :
-            iRenderFunc{ iRenderFunc },
-            iXExtentsFunc{ iXExtentsFunc },
-            iYExtentsFunc{ iYExtentsFunc },
-            iXRenderFunc{ iXRenderFunc },
-            iYRenderFunc{ iYRenderFunc }
+            iRenderFunc{ aRenderFunc },
+            iXExtentsFunc{ aXExtentsFunc },
+            iYExtentsFunc{ aYExtentsFunc },
+            iXRenderFunc{ aXRenderFunc },
+            iYRenderFunc{ aYRenderFunc }
         {
         }
             // series
