@@ -171,53 +171,6 @@ namespace neogfx
             }
         }
 
-        inline GLenum path_shape_to_gl_mode(path_shape aShape)
-        {
-            switch (aShape)
-            {
-            case path_shape::Quads:
-                return GL_QUADS;
-            case path_shape::Lines:
-                return GL_LINES;
-            case path_shape::LineLoop:
-                return GL_LINE_LOOP;
-            case path_shape::LineStrip:
-                return GL_LINE_STRIP;
-            case path_shape::ConvexPolygon:
-                return GL_TRIANGLE_FAN;
-            default:
-                return GL_POINTS;
-            }
-        }
-
-        inline game::vertices path_vertices(const path& aPath, const path::sub_path_type& aSubPath, float aLineWidth, GLenum& aMode)
-        {
-            aMode = path_shape_to_gl_mode(aPath.shape());
-            thread_local neogfx::game::vertices vertices;
-            aPath.to_vertices(aSubPath, vertices);
-            if (aMode == GL_LINE_LOOP)
-            {
-                aMode = GL_LINES;
-                vertices = line_loop_to_lines(vertices);
-            }
-            else if (aMode == GL_LINE_STRIP)
-            {
-                aMode = GL_LINES;
-                vertices = line_strip_to_lines(vertices);
-            }
-            if (aMode == GL_LINES)
-            {
-                aMode = GL_QUADS;
-                lines_to_quads(neogfx::game::vertices{ std::move(vertices) }, aLineWidth, vertices);
-            }
-            if (aMode == GL_QUADS)
-            {
-                aMode = GL_TRIANGLES;
-                quads_to_triangles(neogfx::game::vertices{ std::move(vertices) }, vertices);
-            }
-            return vertices;
-        }
-
         bool emit_any_stipple(i_rendering_context& aContext, use_vertex_arrays& aInstance, bool aLoop = false)
         {
             // assumes vertices are quads (as two triangles) created with quads_to_triangles above.
@@ -1059,7 +1012,7 @@ namespace neogfx
         disable_multisample disableMultisample{ *this };
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u * (aDrawPixelOps.cend() - aDrawPixelOps.cbegin()))};
 
             for (auto op = aDrawPixelOps.cbegin(); op != aDrawPixelOps.cend(); ++op)
             {
@@ -1089,7 +1042,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Line);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawLineOps.cend() - aDrawLineOps.cbegin())) };
 
             for (auto op = aDrawLineOps.cbegin(); op != aDrawLineOps.cend(); ++op)
             {
@@ -1138,7 +1091,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Triangle);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawTriangleOps.cend() - aDrawTriangleOps.cbegin()))};
 
             for (auto op = aDrawTriangleOps.cbegin(); op != aDrawTriangleOps.cend(); ++op)
             {
@@ -1233,7 +1186,7 @@ namespace neogfx
 
                     rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Rect);
 
-                    maybeVertexArrays.emplace(as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
+                    maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRectOps.cend() - aDrawRectOps.cbegin())));
                 }
 
                 auto& vertexArrays = maybeVertexArrays.value();
@@ -1284,7 +1237,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::RoundedRect);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawRoundedRectOps.cend() - aDrawRoundedRectOps.cbegin()))};
 
             for (auto op = aDrawRoundedRectOps.cbegin(); op != aDrawRoundedRectOps.cend(); ++op)
             {
@@ -1336,7 +1289,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::EllipseRect);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllpseRectOps.cend() - aDrawEllpseRectOps.cbegin())) };
 
             for (auto op = aDrawEllpseRectOps.cbegin(); op != aDrawEllpseRectOps.cend(); ++op)
             {
@@ -1399,7 +1352,7 @@ namespace neogfx
 
                     rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Checkerboard);
 
-                    maybeVertexArrays.emplace(as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u));
+                    maybeVertexArrays.emplace(as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u));
 
                     auto& vertexArrays = maybeVertexArrays.value();
 
@@ -1453,7 +1406,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Ellipse);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawEllipseOps.cend() - aDrawEllipseOps.cbegin()))};
 
             for (auto op = aDrawEllipseOps.cbegin(); op != aDrawEllipseOps.cend(); ++op)
             {
@@ -1504,7 +1457,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Circle);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawCircleOps.cend() - aDrawCircleOps.cbegin()))};
 
             for (auto op = aDrawCircleOps.cbegin(); op != aDrawCircleOps.cend(); ++op)
             {
@@ -1555,7 +1508,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Pie);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawPieOps.cend() - aDrawPieOps.cbegin()))};
 
             for (auto op = aDrawPieOps.cbegin(); op != aDrawPieOps.cend(); ++op)
             {
@@ -1606,7 +1559,7 @@ namespace neogfx
         rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Arc);
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 2u * 3u * (aDrawArcOps.cend() - aDrawArcOps.cbegin()))};
 
             for (auto op = aDrawArcOps.cbegin(); op != aDrawArcOps.cend(); ++op)
             {
@@ -1654,7 +1607,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aPen.color()));
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
 
             auto boundingRect = rect{ aP0.min(aP1.min(aP2.min(aP3))), aP0.max(aP1.max(aP2.max(aP3))) }.inflated(aPen.width());
             auto const function = to_function(*this, aPen.color(), boundingRect);
@@ -1681,7 +1634,7 @@ namespace neogfx
 
         switch (aPathShape)
         {
-        case path_shape::ConvexPolygon:
+        case path_shape::Polygon:
             {
                 if (std::holds_alternative<gradient>(aFill))
                     rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
@@ -1691,7 +1644,7 @@ namespace neogfx
                 rendering_engine().default_shader_program().shape_shader().set_shape(shader_shape::Polygon);
 
                 {
-                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, static_cast<std::size_t>(2u * 3u) };
+                    use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, static_cast<std::size_t>(2u * 3u) };
 
                     auto boundingRect = aBoundingRect.inflated(aPen.width() * 2.0) + origin();
                     auto boundingRectVertices = rect_vertices<vec3f>(boundingRect, mesh_type::Triangles);
@@ -1756,7 +1709,7 @@ namespace neogfx
         triangles.clear();
         quads_to_triangles(quads, triangles);
 
-        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES, triangles.size() };
+        use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, triangles.size() };
 
         auto const function = to_function(*this, aPen.color(), bounding_rect(aMesh) + origin());
 
@@ -1874,7 +1827,7 @@ namespace neogfx
             rendering_engine().default_shader_program().gradient_shader().set_gradient(*this, static_variant_cast<const gradient&>(aFill));
 
         {
-            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this, GL_TRIANGLES };
+            use_vertex_arrays vertexArrays{ as_vertex_provider(), *this };
 
             auto const& pos = (aPosition + origin().to_vec3()).as<float>();
             auto const& vertices = aMesh.vertices;
@@ -2664,7 +2617,7 @@ namespace neogfx
                     enable_sample_shading(1.0);
 
                 if (vertexArrayUsage == std::nullopt || !vertexArrayUsage->with_textures())
-                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, transformation, with_textures, 0, batchRenderer.barrier);
+                    vertexArrayUsage.emplace(*aPatch.provider, *this, transformation, with_textures, 0, batchRenderer.barrier);
 
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&
@@ -2679,7 +2632,7 @@ namespace neogfx
                 rendering_engine().default_shader_program().texture_shader().clear_texture();
 
                 if (vertexArrayUsage == std::nullopt || vertexArrayUsage->with_textures())
-                    vertexArrayUsage.emplace(*aPatch.provider, *this, GL_TRIANGLES, transformation, 0, batchRenderer.barrier);
+                    vertexArrayUsage.emplace(*aPatch.provider, *this, transformation, 0, batchRenderer.barrier);
 
 #if defined(NEOGFX_DEBUG) && !defined(NDEBUG)
                 if (item->meshDrawable->entity != game::null_entity &&

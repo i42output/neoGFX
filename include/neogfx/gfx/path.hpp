@@ -32,7 +32,7 @@ namespace neogfx
         Lines,
         LineLoop,
         LineStrip,
-        ConvexPolygon
+        Polygon
     };
 
     template <typename PointType>
@@ -84,11 +84,11 @@ namespace neogfx
         typedef std::vector<intersect> intersect_list;
         // construction
     public:
-        basic_path(path_shape aShape = path_shape::ConvexPolygon, sub_paths_size_type aPathCountHint = 0) : iShape(aShape)
+        basic_path(path_shape aShape = path_shape::Polygon, sub_paths_size_type aPathCountHint = 0) : iShape(aShape)
         {
             iSubPaths.reserve(aPathCountHint);
         }
-        basic_path(const mesh_type& aRect, path_shape aShape = path_shape::ConvexPolygon) : iShape(aShape)
+        basic_path(const mesh_type& aRect, path_shape aShape = path_shape::Polygon) : iShape(aShape)
         {
             move_to(aRect.top_left());
             line_to(aRect.top_right());
@@ -143,7 +143,7 @@ namespace neogfx
                             aResult.push_back(xyz{ (vi + 1)->x + position().x, (vi + 1)->y + position().y });
                         }
                         break;
-                    case path_shape::ConvexPolygon:
+                    case path_shape::Polygon:
                     case path_shape::LineLoop:
                         if (vi != std::prev(aPath.end()) || aPath[0] != aPath[aPath.size() - 1])
                             aResult.push_back(xyz{ vi->x + position().x, vi->y + position().y });

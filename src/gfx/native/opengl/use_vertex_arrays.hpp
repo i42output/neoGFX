@@ -40,11 +40,10 @@ namespace neogfx
             typedef opengl_vertex_buffer<>::vertex_array::const_iterator const_iterator;
             typedef opengl_vertex_buffer<>::vertex_array::iterator iterator;
         public:
-            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iProvider{ aProvider },
                 iParent{ aParent }, 
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
-                iMode{ aMode }, 
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(vertices().size()) }, 
                 iUseBarrier{ aUseBarrier },
@@ -58,11 +57,10 @@ namespace neogfx
                 if (!room_for(aNeed) && !need(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iProvider{ aProvider },
                 iParent{ aParent },
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
-                iMode{ aMode },
                 iWithTextures{ false }, 
                 iStart{ static_cast<GLint>(vertices().size()) },
                 iUseBarrier{ aUseBarrier },
@@ -80,7 +78,6 @@ namespace neogfx
                 iProvider{ aProvider },
                 iParent{ aParent },
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
-                iMode{ aMode },
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(vertices().size()) },
                 iUseBarrier{ aUseBarrier },
@@ -94,11 +91,10 @@ namespace neogfx
                 if (!room_for(aNeed) && !need(aNeed))
                     throw not_enough_room();
             }
-            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, GLenum aMode, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
+            use_vertex_arrays(i_vertex_provider& aProvider, i_rendering_context& aParent, const optional_mat44& aTransformation, with_textures_t, std::size_t aNeed = 0u, bool aUseBarrier = false) :
                 iProvider{ aProvider },
                 iParent{ aParent },
                 iUse{ static_cast<opengl_vertex_buffer<>&>(aParent.rendering_engine().vertex_buffer(aProvider)) },
-                iMode{ aMode },
                 iWithTextures{ true }, 
                 iStart{ static_cast<GLint>(vertices().size()) },
                 iUseBarrier{ aUseBarrier },
@@ -124,23 +120,7 @@ namespace neogfx
             }
             std::size_t primitive_vertex_count() const
             {
-                switch (mode())
-                {
-                case GL_TRIANGLES:
-                    return 3;
-                case GL_QUADS: // two triangles
-                    return 6;
-                case GL_LINES:
-                    return 2;
-                case GL_POINTS:
-                    return 1;
-                case GL_TRIANGLE_FAN:
-                case GL_LINE_LOOP:
-                case GL_LINE_STRIP:
-                case GL_TRIANGLE_STRIP:
-                default:
-                    return 0;
-                }
+                return 3; // triangle
             }
             bool with_textures() const
             {
@@ -263,9 +243,9 @@ namespace neogfx
                 if (static_cast<std::size_t>(iStart) == vertexCount)
                     return;
                 iParent.rendering_engine().vertex_buffer(iProvider).attach_shader(iParent, iParent.rendering_engine().active_shader_program());
-                if (!iUseBarrier && mode() == translated_mode())
+                if (!iUseBarrier)
                 {
-                    glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(aCount)));
+                    glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(aCount)));
                     iStart += static_cast<GLint>(aCount);
                 }
                 else
@@ -279,7 +259,7 @@ namespace neogfx
                     while (aCount > 0)
                     {
                         auto amount = std::min(chunk, aCount);
-                        glCheck(glDrawArrays(translated_mode(), iStart, static_cast<GLsizei>(amount)));
+                        glCheck(glDrawArrays(GL_TRIANGLES, iStart, static_cast<GLsizei>(amount)));
                         iStart += static_cast<GLint>(amount);
                         aCount -= amount;
                         if (iUseBarrier)
@@ -310,25 +290,10 @@ namespace neogfx
             {
                 return iUse.vertices();
             }
-            GLenum translated_mode() const
-            {
-                switch (iMode)
-                {
-                case GL_QUADS:
-                    return GL_TRIANGLES;
-                default:
-                    return iMode;
-                }
-            }
-            GLenum mode() const
-            {
-                return iMode;
-            }
         private:
             i_vertex_provider& iProvider;
             i_rendering_context& iParent;
             opengl_vertex_buffer<>::use iUse;
-            GLenum iMode;
             bool iWithTextures;
             GLint iStart;
             bool iUseBarrier;
