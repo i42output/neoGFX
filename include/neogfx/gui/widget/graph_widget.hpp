@@ -406,19 +406,31 @@ namespace neogfx
         }
         void render_x_label(x_abstract_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
-            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
-                aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, aX, aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
-            else if constexpr (is_text_like_v<x_type>)
-                aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, to_string(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
-            else
-                throw unknown_graph_datum_type();
+            aGc.draw_text(aLabelOrigin - x_label_extents(aX, aWidget, aGc, aElement) / 2.0, x_to_text(aX), aWidget.x_axis().font(), aWidget.palette_color(color_role::Text));
         }
         void render_y_label(y_abstract_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element aElement) const override
         {
+            aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, y_to_text(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
+        }
+        // text
+    public:
+        using abstract_type::x_to_text;
+        void x_to_text(x_type const& aX, i_string& aText) const override
+        {
+            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
+                aText = aX;
+            else if constexpr (is_text_like_v<x_type>)
+                aText = to_string(aX);
+            else
+                throw unknown_graph_datum_type();
+        }
+        using abstract_type::y_to_text;
+        void y_to_text(y_type const& aY, i_string& aText) const override
+        {
             if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
-                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, aY, aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
+                aText = aY;
             else if constexpr (is_text_like_v<y_type>)
-                aGc.draw_text(aLabelOrigin - y_label_extents(aY, aWidget, aGc, aElement) / 2.0, to_string(aY), aWidget.y_axis().font(), aWidget.palette_color(color_role::Text));
+                aText = to_string(aY);
             else
                 throw unknown_graph_datum_type();
         }
@@ -434,16 +446,16 @@ namespace neogfx
         [[nodiscard]] rect x_axis_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
-            x_type xMin;
-            x_type xMax;
-            y_type ignore;
-            aWidget.get_view(xMin, xMax, ignore, ignore);
             size extents;
             if (aWidget.x_axis().has_major_tick())
             {
-                auto const& majorTick = aWidget.x_axis().major_tick();
                 if constexpr (std::is_arithmetic_v<x_type>)
                 {
+                    x_type xMin;
+                    x_type xMax;
+                    y_type ignore;
+                    aWidget.get_view(xMin, xMax, ignore, ignore);
+                    auto const& majorTick = aWidget.x_axis().major_tick();
                     using calc_type = std::conditional_t<std::is_floating_point_v<x_type>, x_type, double>;
                     auto tick = static_cast<x_type>(std::ceil(static_cast<calc_type>(xMin) / static_cast<calc_type>(majorTick)) * static_cast<calc_type>(majorTick));
                     while (tick >= xMin && tick <= xMax)
@@ -452,6 +464,12 @@ namespace neogfx
                         tick += majorTick;
                     }
                 }
+                else
+                {
+                    for (auto const& s : aWidget.series())
+                        for (auto const& d : s.data())
+                            extents.cy = std::max(extents.cy, x_label_extents(d.x(), aWidget, aGc, graph_rendering_element::AxisLabel).cy);
+                }
             }
             extents.cy += x_tick_length_px(aWidget);
             return cr.with_cy(extents.cy).with_y(cr.bottom() - extents.cy);
@@ -459,16 +477,16 @@ namespace neogfx
         [[nodiscard]] rect y_axis_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const override
         {
             auto const& cr = aWidget.client_rect(false);
-            y_type yMin;
-            y_type yMax;
-            x_type ignore;
-            aWidget.get_view(ignore, ignore, yMin, yMax);
             size extents;
             if (aWidget.y_axis().has_major_tick())
             {
-                auto const& majorTick = aWidget.y_axis().major_tick();
                 if constexpr (std::is_arithmetic_v<y_type>)
                 {
+                    y_type yMin;
+                    y_type yMax;
+                    x_type ignore;
+                    aWidget.get_view(ignore, ignore, yMin, yMax);
+                    auto const& majorTick = aWidget.y_axis().major_tick();
                     using calc_type = std::conditional_t<std::is_floating_point_v<y_type>, y_type, double>;
                     auto tick = static_cast<y_type>(std::ceil(static_cast<calc_type>(yMin) / static_cast<calc_type>(majorTick)) * static_cast<calc_type>(majorTick));
                     while (tick >= yMin && tick <= yMax)
@@ -477,27 +495,23 @@ namespace neogfx
                         tick += majorTick;
                     }
                 }
+                else
+                {
+                    for (auto const& s : aWidget.series())
+                        for (auto const& d : s.data())
+                            extents.cx = std::max(extents.cx, y_label_extents(d.y(), aWidget, aGc, graph_rendering_element::AxisLabel).cx);
+                }
             }
             extents.cx += y_tick_length_px(aWidget);
             return cr.with_cx(extents.cx);
         }
         [[nodiscard]] size x_label_extents(x_abstract_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
-            if constexpr (std::is_same_v<x_type, std::string> || std::is_same_v<x_type, string>)
-                return aGc.text_extent(aX, aWidget.x_axis_font());
-            else if constexpr (is_text_like_v<x_type>)
-                return aGc.text_extent(to_string(aX), aWidget.x_axis().font());
-            else
-                throw unknown_graph_datum_type();
+            return aGc.text_extent(x_to_text(aX), aWidget.x_axis().font());
         }
         [[nodiscard]] size y_label_extents(y_abstract_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, graph_rendering_element aElement) const override
         {
-            if constexpr (std::is_same_v<y_type, std::string> || std::is_same_v<y_type, string>)
-                return aGc.text_extent(aY, aWidget.y_axis_font());
-            else if constexpr (is_text_like_v<y_type>)
-                return aGc.text_extent(to_string(aY), aWidget.y_axis().font());
-            else
-                throw unknown_graph_datum_type();
+            return aGc.text_extent(y_to_text(aY), aWidget.y_axis().font());
         }
         [[nodiscard]] scalar x_tick_length_px(i_graph_widget<x_type, y_type> const& aWidget) const override
         {

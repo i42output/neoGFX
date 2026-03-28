@@ -234,6 +234,10 @@ namespace neogfx
         virtual void render_y_axis(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const = 0;
         virtual void render_x_label(x_type const& aX, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
         virtual void render_y_label(y_type const& aY, i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc, point const& aLabelOrigin, graph_rendering_element) const = 0;
+        // text
+    public:
+        virtual void x_to_text(x_type const& aX, i_string& aText) const = 0;
+        virtual void y_to_text(y_type const& aY, i_string& aText) const = 0;
         // metrics
     public:
         [[nodiscard]] virtual rect plot_area(i_graph_widget<x_type, y_type> const& aWidget, i_graphics_context& aGc) const = 0;
@@ -247,6 +251,18 @@ namespace neogfx
         [[nodiscard]] virtual scalar y_tick_length_px(i_graph_widget<x_type, y_type> const& aWidget) const = 0;
         virtual void set_y_tick_length_px(scalar aLength_px) = 0;
         virtual void clear_y_tick_length_px() = 0;
+        // helpers
+    public:
+        string x_to_text(x_type const& aX) const
+        {
+            string result;
+            x_to_text(aX, result);
+        }
+        string y_to_text(y_type const& aY) const
+        {
+            string result;
+            y_to_text(aY, result);
+        }
     };
 
     template <typename X, typename Y>
